@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/course_item"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/box_background"
+    android:paddingStart="8dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="8dp">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/course_title"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/course_name"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/location_container"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/location"
+        app:icon="@drawable/location"
+        app:layout_constraintBottom_toTopOf="@id/time_container"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/course_title" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/time_container"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/time"
+        app:icon="@drawable/time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/location_container"/>
+    <com.google.android.material.button.MaterialButton
+    android:id="@+id/course"
+    style="@style/Widget.Material3.Button.TextButton.Icon"
+    android:layout_width="wrap_content"
+    android:layout_height="0dp"
+    android:text="@string/time"
+    app:icon="@drawable/calendar"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/time_container"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/teacher"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/time"
+        app:icon="@drawable/account"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/course"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

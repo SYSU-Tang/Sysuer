@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">中大儿</string>
+    <string name="menu_account">我的</string>
+    <string name="menu_service">服务</string>
+    <string name="menu_activity">活动</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="service_box_title">服务标题</string>
+    <string name="today_courses">课程</string>
+    <string name="location">位置</string>
+    <string name="time">时间</string>
+    <string name="course_name">课程名称</string>
+    <string name="exam">考试</string>
+    <string name="todo">待办</string>
+    <string name="classroom_query">自习室/研讨室查询</string>
+    <string name="school">校区</string>
+    <string name="office">教学楼</string>
+    <string name="classroom">教室</string>
+    <string name="date">日期</string>
+    <string name="query">查询</string>
+    <string name="clear">重置</string>
+    <string name="classroom_type">教室类型</string>
+    <string name="large_text" />
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="agenda">课程表</string>
+    <string name="evaluation">评教</string>
+    <string name="teacher">教师</string>
+    <string name="selectAll">反选</string>
+    <string name="selfStudyRoom">自习室</string>
+    <string name="term">学期</string>
+    <string name="week">第一周</string>
+    <string name="login">登录</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="username">账户\n</string>
+    <string name="password">密码</string>
+    <string name="captcha">验证码</string>
+    <string name="today">今天</string>
+    <string name="tomorrow">明天\n</string>
+    <string name="noClass">😁今天没课😁</string>
+    <string name="noExam">😁没有考试😁</string>
+    <string name="noTodo">😒没有待办😒</string>
+    <string name="classTime">节次</string>
+    <string name="name">名称</string>
+
+</resources>

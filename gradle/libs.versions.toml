@@ -1,0 +1,56 @@
+[versions]
+agp = "8.8.2"
+fastjson2 = "2.0.54"
+glide = "4.11.0"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+appcompat = "1.6.1"
+material = "1.10.0"
+constraintlayout = "2.1.4"
+lifecycleLivedataKtx = "2.6.1"
+lifecycleViewmodelKtx = "2.6.1"
+navigationFragment = "2.6.0"
+navigationUi = "2.6.0"
+legacySupportV4 = "1.0.0"
+activity = "1.8.0"
+okhttp = "4.12.0"
+annotation = "1.6.0"
+kotlin = "2.0.0"
+lifecycleRuntimeKtx = "2.6.1"
+activityCompose = "1.8.0"
+composeBom = "2024.04.01"
+
+[libraries]
+fastjson2 = { module = "com.alibaba.fastjson2:fastjson2", version.ref = "fastjson2" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
+navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
+legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
+activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+ui = { group = "androidx.compose.ui", name = "ui" }
+ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+material3 = { group = "androidx.compose.material3", name = "material3" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+

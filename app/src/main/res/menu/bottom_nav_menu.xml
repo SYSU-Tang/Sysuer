@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_activity"
+        android:icon="@drawable/forum"
+        android:title="@string/menu_activity" />
+
+    <item
+        android:id="@+id/navigation_service"
+        android:icon="@drawable/dashboard"
+        android:title="@string/menu_service" />
+
+    <item
+        android:id="@+id/navigation_account"
+        android:icon="@drawable/account"
+        android:title="@string/menu_account" />
+
+</menu>
