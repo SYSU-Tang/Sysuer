@@ -38,14 +38,7 @@ android {
     sourceSets {
         getByName("main") {
             java {
-                srcDirs("src\\main\\java",
-                    "src\\main\\java\\com\\sysu\\edu\\ui\\activity",
-                    "src\\main\\java",
-                    "src\\main\\java\\com\\sysu\\edu\\ui\\service",
-                    "src\\main\\java",
-                    "src\\main\\java\\com\\sysu\\edu\\ui\\account",
-                    "src\\main\\java",
-                    "src\\main\\java\\com\\sysu\\edu\\activity"
+                srcDirs("src\\main\\java"
                 )
             }
         }
@@ -74,6 +67,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation(libs.preference)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

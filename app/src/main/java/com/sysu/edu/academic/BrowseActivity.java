@@ -1,4 +1,4 @@
-package com.sysu.edu.activity;
+package com.sysu.edu.academic;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;

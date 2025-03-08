@@ -1,8 +1,7 @@
-package com.sysu.edu.activity;
+package com.sysu.edu.academic;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
@@ -35,12 +34,11 @@ public class Evaluation extends AppCompatActivity {
             @NonNull
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new Holder(getLayoutInflater().inflate(R.layout.evaluation_item, parent,false));
+                return new RecyclerView.ViewHolder(getLayoutInflater().inflate(R.layout.evaluation_item, parent,false)){};
             }
 
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-
             }
 
             @Override
@@ -58,9 +56,4 @@ public class Evaluation extends AppCompatActivity {
     }
 
 
-}
-class Holder extends RecyclerView.ViewHolder{
-    public Holder(View itemView){
-        super(itemView);
-    }
 }

@@ -1,3 +1,5 @@
+package com.sysu.edu.ui.service;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,12 +20,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
-
 import com.sysu.edu.R;
-import com.sysu.edu.activity.AgendaActivity;
-import com.sysu.edu.activity.BrowseActivity;
-import com.sysu.edu.activity.ClassroomQueryActivity;
-import com.sysu.edu.activity.Evaluation;
+import com.sysu.edu.academic.AgendaActivity;
+import com.sysu.edu.academic.BrowseActivity;
+import com.sysu.edu.academic.ClassroomQueryActivity;
+import com.sysu.edu.academic.Evaluation;
 
 public class ServiceFragment extends Fragment {
     LinearLayout service_container;

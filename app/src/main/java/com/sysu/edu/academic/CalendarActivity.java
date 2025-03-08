@@ -1,4 +1,4 @@
-package com.sysu.edu.activity;
+package com.sysu.edu.academic;
 
 import android.os.Bundle;
 

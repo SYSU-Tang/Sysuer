@@ -15,24 +15,31 @@
         android:theme="@style/Theme.中大儿"
         tools:targetApi="31">
         <activity
-            android:name=".activity.Login"
+            android:name=".more.Setting"
+            android:exported="false"
+            android:label="@string/title_activity_setting" />
+        <activity
+            android:name=".onlineClass.OnlineClassActivity"
+            android:exported="false" />
+        <activity
+            android:name=".academic.Login"
             android:exported="false"
             android:label="@string/title_activity_login"
             android:theme="@style/Theme.中大儿" />
         <activity
-            android:name=".activity.CalendarActivity"
+            android:name=".academic.CalendarActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.Evaluation"
+            android:name=".academic.Evaluation"
             android:exported="false" />
         <activity
-            android:name=".activity.AgendaActivity"
+            android:name=".academic.AgendaActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.BrowseActivity"
+            android:name=".academic.BrowseActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.ClassroomQueryActivity"
+            android:name=".academic.ClassroomQueryActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

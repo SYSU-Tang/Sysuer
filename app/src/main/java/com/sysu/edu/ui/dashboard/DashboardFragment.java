@@ -1,3 +1,5 @@
+package com.sysu.edu.ui.dashboard;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -8,8 +10,6 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.PopupMenu;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -28,7 +28,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
-import com.sysu.edu.activity.Login;
+import com.sysu.edu.academic.Login;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -45,7 +45,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 
-public class ActivityFragment extends Fragment {
+public class DashboardFragment extends Fragment {
     Handler handler;
     String cookie;
     ArrayList<HashMap<String,String>> todayCourse=new ArrayList<>();
@@ -61,7 +61,7 @@ public class ActivityFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
          if(fragment==null){
-        fragment= inflater.inflate(R.layout.fragment_activity,container,false);
+        fragment= inflater.inflate(R.layout.fragment_dashboard,container,false);
         list = fragment.findViewById(R.id.course_list);
         time=fragment.findViewById(R.id.time);
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<>() {

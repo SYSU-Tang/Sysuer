@@ -3,40 +3,17 @@ package com.sysu.edu;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.widget.LinearLayout;
 import android.view.View;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.sysu.edu.activity.Login;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.sysu.edu.databinding.ActivityMainBinding;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import com.sysu.edu.more.Setting;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         navController.setGraph(R.navigation.mobile_navigation);
         //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-
+startActivity(new Intent(this, Setting.class));
         //getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main).setArguments();
     //setSupportActionBar(findViewById(R.id.toolbar));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

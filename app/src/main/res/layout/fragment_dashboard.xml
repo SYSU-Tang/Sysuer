@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="ActivityFragment">
+    tools:context="com.sysu.edu.ui.dashboard.DashboardFragment">
     <GridLayout
         android:id="@+id/activity_container"
         android:layout_width="match_parent"
@@ -27,15 +27,13 @@
                 style="@style/TextAppearance.Material3.TitleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                />
+                android:layout_margin="8dp"/>
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/time"
                     style="@style/TextAppearance.Material3.BodyMedium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    />
+                    android:layout_margin="8dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
         <TableRow

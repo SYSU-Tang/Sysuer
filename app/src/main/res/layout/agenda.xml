@@ -58,9 +58,10 @@
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/month"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:gravity="center"
+                android:background="?attr/colorSurfaceDim"
                 android:textAppearance="?attr/textAppearanceTitleMedium" />
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -70,7 +71,7 @@
         android:layout_height="match_parent"
         android:background="?attr/colorSurfaceContainerHighest"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".activity.AgendaActivity">
+        tools:context=".academic.AgendaActivity">
 
         <GridLayout
             android:id="@+id/day"

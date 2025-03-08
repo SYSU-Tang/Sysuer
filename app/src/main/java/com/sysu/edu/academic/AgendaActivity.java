@@ -1,4 +1,4 @@
-package com.sysu.edu.activity;
+package com.sysu.edu.academic;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +16,6 @@ import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -27,20 +24,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.AgendaBinding;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -79,18 +76,19 @@ public class AgendaActivity extends AppCompatActivity {
             LinearLayout row_item = (LinearLayout) getLayoutInflater().inflate(R.layout.duration, binding.day, false);
             ((MaterialTextView)row_item.findViewById(R.id.course_order)).setText(String.valueOf(i+1));
             ((MaterialTextView)row_item.findViewById(R.id.course_duration)).setText(duration[i].replace("~","\n"));
+            if(i==10){
+                row_item.measure(View.MEASURED_SIZE_MASK,View.MEASURED_SIZE_MASK);
+                binding.month.getLayoutParams().width=row_item.getMeasuredWidth();}
             GridLayout.LayoutParams gl = (GridLayout.LayoutParams) row_item.getLayoutParams();
             gl.rowSpec=GridLayout.spec(i,1.0f);
             binding.day.addView(row_item);
         }
         binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(new Date()));
-        View v=binding.day.getChildAt(0);
-        v.measure(View.MEASURED_SIZE_MASK,View.MEASURED_SIZE_MASK);
+
         DisplayMetrics metrics = new DisplayMetrics();
         ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
-        binding.month.getLayoutParams().width= metrics.widthPixels/8;
         int weekday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-        if(weekday==1){weekday=8;};
+        if(weekday==1){weekday=8;}
         binding.last.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,7 +97,7 @@ public class AgendaActivity extends AppCompatActivity {
         });
         binding.next.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 changeWeek(currentWeekIndex+1);
             }
         });
@@ -219,6 +217,7 @@ public class AgendaActivity extends AppCompatActivity {
                                 Calendar c = Calendar.getInstance();
                                 Date date = new SimpleDateFormat("yyyy-MM-dd").parse(from);
                                 c.setTime(date);
+                                binding.month.setText(new SimpleDateFormat("M 月").format(date.getTime()));
                                 for(int i=0;i<7;i++){
                                     ((MaterialTextView)((LinearLayout)binding.week.getChildAt(i+1)).findViewById(R.id.course_date)).setText(new SimpleDateFormat("dd日").format(c.getTime()));
                                     c.add(Calendar.DATE,1);
@@ -243,7 +242,7 @@ public class AgendaActivity extends AppCompatActivity {
                         }
                     }
                 }else{
-                launch.launch(new Intent(AgendaActivity.this,Login.class));
+                launch.launch(new Intent(AgendaActivity.this, Login.class));
             }
             }
         };
@@ -363,9 +362,7 @@ public void getTerm(){
             .addHeader("Cookie",cookie).build()).enqueue(new Callback() {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
         }
-
         @Override
         public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
             if (response.body() != null) {
@@ -380,7 +377,15 @@ public void getTerm(){
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add("今天").setShowAsAction(1);
+        MenuItem today_menu = menu.add("今天");
+        today_menu.setShowAsAction(1);
+        today_menu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
+                getTerm();
+                return true;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
