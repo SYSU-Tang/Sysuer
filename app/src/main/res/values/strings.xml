@@ -43,7 +43,7 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-    <string name="username">账户\n</string>
+    <string name="username">用户名</string>
     <string name="password">密码</string>
     <string name="captcha">验证码</string>
     <string name="today">今天</string>
@@ -69,5 +69,9 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="college">学院</string>
+    <string name="grade">年级</string>
+    <string name="profession">专业</string>
+    <string name="type">类型</string>
 
 </resources>

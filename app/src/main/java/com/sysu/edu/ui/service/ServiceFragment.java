@@ -25,6 +25,7 @@ import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.academic.BrowseActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
 import com.sysu.edu.academic.Evaluation;
+import com.sysu.edu.academic.TrainingSchedule;
 
 public class ServiceFragment extends Fragment {
     LinearLayout service_container;
@@ -38,7 +39,7 @@ public class ServiceFragment extends Fragment {
         String[][] items = new String[][]{{"学工系统","教务系统","中山大学统一门户","大学服务中心","财务信息系统"},
                 {"中山大学官网","本科招生","研究生招生","人才招聘","百年校庆","公务电子邮件系统","博物馆","图书馆","校友会"},
                 {"逸仙码","企业微信","中大招生","wps教育版"},
-                {"评教","选课","课程表","考试","校历","自习室/研讨室","成绩","课程详情"},
+                {"评教","选课","课程表","考试","校历","自习室","成绩","课程","培养方案"},
                 {"SeeLight","雨课堂","课堂派","在线教学平台","中国大学（慕课）"},
                 {"校园地图","校车","出行证","校医院"},
                 {"宿舍报修","缴纳水电费"},
@@ -47,7 +48,7 @@ public class ServiceFragment extends Fragment {
         View.OnClickListener[][] actions = new View.OnClickListener[][]{
                 {
                         browse("https://xgxt-443.webvpn.sysu.edu.cn/main/#/index"),
-                        browse("https://jwxt.sysu.edu.cn/jwxt/#/student"),
+                        browse("https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home"),
                         browse("https://portal.sysu.edu.cn/newClient/#/newPortal/index"),
                         browse("https://usc.sysu.edu.cn/taskcenter-v4/workflow/index"),
                         browse("https://cwxt-443.webvpn.sysu.edu.cn/#/home/index"),
@@ -85,6 +86,7 @@ null,
                         null,
                         null,
                         newActivity(ClassroomQueryActivity.class),
+                        null,null,newActivity(TrainingSchedule.class),
                 },//教务
                 {
 
@@ -132,8 +134,8 @@ null,
             item.setText(items[i]);
             item.measure(View.MEASURED_SIZE_MASK,View.MEASURED_SIZE_MASK);
             RelativeLayout.LayoutParams lp= (RelativeLayout.LayoutParams) item.getLayoutParams();
-            length+=item.getMeasuredWidth()+24;
-            if (length-12<metrics.widthPixels)
+            length=length+item.getMeasuredWidth()+24;
+            if (length+24<metrics.widthPixels)
             {
                 lp.addRule(RelativeLayout.RIGHT_OF,i);
                 lp.addRule(RelativeLayout.ALIGN_TOP,i);

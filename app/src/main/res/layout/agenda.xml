@@ -8,9 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurfaceContainer"
-        android:fitsSystemWindows="true"
-        android:orientation="vertical"
-        app:elevation="4dp">
+        android:fitsSystemWindows="true">
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"

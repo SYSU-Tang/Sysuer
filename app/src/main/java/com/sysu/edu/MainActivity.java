@@ -1,6 +1,5 @@
 package com.sysu.edu;
 
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +12,6 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.sysu.edu.databinding.ActivityMainBinding;
-import com.sysu.edu.more.Setting;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         navController.setGraph(R.navigation.mobile_navigation);
         //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-startActivity(new Intent(this, Setting.class));
+        //startActivity(new Intent(this, Setting.class));
         //getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main).setArguments();
     //setSupportActionBar(findViewById(R.id.toolbar));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

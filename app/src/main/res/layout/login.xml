@@ -6,27 +6,30 @@
     android:layout_height="match_parent">
 <com.google.android.material.appbar.AppBarLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:layout_scrollFlags="scroll|exitUntilCollapsed">
+    android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+    android:background="?attr/colorSurface">
     <com.google.android.material.appbar.CollapsingToolbarLayout
-        style="@style/Widget.Material3.CollapsingToolbar.Large"
         android:layout_width="match_parent"
-        android:layout_height="?attr/collapsingToolbarLayoutLargeSize">
+        style="?attr/collapsingToolbarLayoutMediumStyle"
+        android:layout_height="match_parent"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_scrollFlags="scroll|exitUntilCollapsed">
         <com.google.android.material.appbar.MaterialToolbar
-            android:layout_width="wrap_content"
-            android:layout_height="?actionBarSize"
-            app:layout_collapseMode="pin"
-            app:navigationIcon="?attr/homeAsUpIndicator"
-            app:title="@string/login"/>
+        android:id="@+id/tool"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        app:layout_collapseMode="pin"
+        app:navigationIcon="?homeAsUpIndicator"
+        app:title="@string/login"/>
     </com.google.android.material.appbar.CollapsingToolbarLayout>
 </com.google.android.material.appbar.AppBarLayout>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-        <LinearLayout
-            android:id="@+id/m"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <TableLayout
             android:layout_width="match_parent"
+            android:id="@+id/m"
             android:layout_height="match_parent"
             android:orientation="vertical">
             <com.google.android.material.textfield.TextInputLayout
@@ -36,6 +39,7 @@
                 android:hint="@string/username">
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
+                    android:id="@+id/username"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
@@ -50,29 +54,37 @@
                     android:layout_height="wrap_content"
                     android:inputType="textWebPassword"/>
             </com.google.android.material.textfield.TextInputLayout>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_margin="16dp"
+                android:gravity="center">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/cac"
+                android:layout_gravity="fill"
+                android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
                 android:hint="@string/captcha"
-                app:endIconDrawable="@drawable/exam"
                 app:endIconMode="custom">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/captcha"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ca"
-                    android:layout_width="wrap_content"
+                    android:inputType="textVisiblePassword"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ca"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                app:shapeAppearance="@drawable/box_background"/>
+        </TableRow>
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/login_button"
+                android:id="@+id/loginButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:text="@string/login"/>
-        </LinearLayout>
+        </TableLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

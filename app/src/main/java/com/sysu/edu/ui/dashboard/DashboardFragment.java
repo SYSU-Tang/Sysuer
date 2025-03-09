@@ -73,8 +73,6 @@ public class DashboardFragment extends Fragment {
                 }
             }
         });
-
-
         ((MaterialTextView)fragment.findViewById(R.id.date)).setText(String.format("%s 星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), (new String[]{"日","一","二","三","四","五","六"})[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]));
         toggle=fragment.findViewById(R.id.toggle);
              LinearLayoutManager lm = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);

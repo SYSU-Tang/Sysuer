@@ -1,17 +1,14 @@
 package com.sysu.edu.academic;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -53,6 +50,7 @@ public class AgendaActivity extends AppCompatActivity {
     ArrayList<Integer> weeks=new ArrayList<>();
     ActivityResultLauncher<Intent> launch;
     PopupMenu termPop;
+    OkHttpClient http = new OkHttpClient.Builder().build();
     PopupMenu weekPop;
     String currentTerm="";
     int currentWeekIndex =-1;
@@ -79,14 +77,11 @@ public class AgendaActivity extends AppCompatActivity {
             if(i==10){
                 row_item.measure(View.MEASURED_SIZE_MASK,View.MEASURED_SIZE_MASK);
                 binding.month.getLayoutParams().width=row_item.getMeasuredWidth();}
-            GridLayout.LayoutParams gl = (GridLayout.LayoutParams) row_item.getLayoutParams();
-            gl.rowSpec=GridLayout.spec(i,1.0f);
-            binding.day.addView(row_item);
+                GridLayout.LayoutParams gl = (GridLayout.LayoutParams) row_item.getLayoutParams();
+                gl.rowSpec=GridLayout.spec(i,1.0f);
+                binding.day.addView(row_item);
         }
         binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(new Date()));
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
         int weekday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         if(weekday==1){weekday=8;}
         binding.last.setOnClickListener(new View.OnClickListener() {
@@ -250,7 +245,7 @@ public class AgendaActivity extends AppCompatActivity {
         getAvailableTerms();
     }
 public void getAvailableWeeks(String academicYear){
-    new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender/weekly?academicYear="+academicYear)
+    http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender/weekly?academicYear="+academicYear)
             .header("Referer","https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/")
             .header("Cookie",cookie).build()).enqueue(new Callback() {
         @Override
@@ -269,7 +264,7 @@ public void getAvailableWeeks(String academicYear){
     });
 }
     public  void  getAvailableTerms(){
-        new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/findAcadyeartermNamesBox")
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/findAcadyeartermNamesBox")
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/")
                 .addHeader("Cookie",cookie).build()).enqueue(new Callback() {
             @Override
@@ -303,7 +298,7 @@ public void getAvailableWeeks(String academicYear){
     }
     void getRange(String academicYear,int week)
     {
-        new OkHttpClient.Builder().build().newCall(new Request.Builder().url(String.format("https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender?academicYear=%s&weekly=%d",academicYear,week))
+        http.newCall(new Request.Builder().url(String.format("https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender?academicYear=%s&weekly=%d",academicYear,week))
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/")
                 .addHeader("Cookie",cookie).build()).enqueue(new Callback() {
             @Override
@@ -339,7 +334,7 @@ public void getAvailableWeeks(String academicYear){
     }
 public void getTable(String academicYear,int week){
     if(academicYear.isEmpty()||week<0){return;}
-    new OkHttpClient.Builder().build().newCall(new Request.Builder().url(String.format("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d",academicYear,week)).addHeader("Cookie",cookie).build()).enqueue(new Callback() {
+    http.newCall(new Request.Builder().url(String.format("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d",academicYear,week)).addHeader("Cookie",cookie).build()).enqueue(new Callback() {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
 
@@ -356,7 +351,7 @@ public void getTable(String academicYear,int week){
     });
 }
 public void getTerm(){
-    new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist")
+    http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist")
                     .header("Referer","https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/")
 
             .addHeader("Cookie",cookie).build()).enqueue(new Callback() {
