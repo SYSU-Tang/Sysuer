@@ -1,5 +1,6 @@
 package com.sysu.edu.academic;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -13,13 +14,10 @@ import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -35,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -64,10 +63,9 @@ public class AgendaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = AgendaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        Toolbar toolbar = binding.toolbar;
         cookie=getSharedPreferences("privacy",MODE_PRIVATE).getString("Cookie","");
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(binding.toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         String[] duration = getResources().getStringArray(R.array.duration);
         for (int i=0;i<11;i++)
         {
@@ -84,18 +82,8 @@ public class AgendaActivity extends AppCompatActivity {
         binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(new Date()));
         int weekday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         if(weekday==1){weekday=8;}
-        binding.last.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeWeek(currentWeekIndex-1);
-            }
-        });
-        binding.next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                changeWeek(currentWeekIndex+1);
-            }
-        });
+        binding.last.setOnClickListener(v -> changeWeek(currentWeekIndex-1));
+        binding.next.setOnClickListener(view -> changeWeek(currentWeekIndex+1));
 //        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
         String[] ws = getResources().getStringArray(R.array.weeks);
         for(int i=0;i<7;i++){
@@ -116,51 +104,37 @@ public class AgendaActivity extends AppCompatActivity {
             }
             binding.week.addView(column_item);
         }
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult o) {
-                if(o.getResultCode()==RESULT_OK){
-                    cookie=getSharedPreferences("privacy",0).getString("Cookie","");
-                    if(currentTerm!=null){getTable(currentTerm,currentWeek);}
-                    else{getTerm();getAvailableTerms();}
-                }
+        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+            if(o.getResultCode()==RESULT_OK){
+                cookie=getSharedPreferences("privacy",0).getString("Cookie","");
+                if(currentTerm!=null){getTable(currentTerm,currentWeek);}
+                else{getTerm();getAvailableTerms();}
             }
         });
-        binding.term.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(termPop==null){
-                    termPop = new PopupMenu(v.getContext(), v,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-                    terms.forEach(e->termPop.getMenu().add("第"+e+"学期").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(@NonNull MenuItem item) {
-                            changeTerm(e);
-                            return true;
-                        }
-                    }));
-                }
-                termPop.show();
+        binding.term.setOnClickListener(v -> {
+            if(termPop==null){
+                termPop = new PopupMenu(v.getContext(), v,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
+                terms.forEach(e->termPop.getMenu().add("第"+e+"学期").setOnMenuItemClickListener(item -> {
+                    changeTerm(e);
+                    return true;
+                }));
             }
+            termPop.show();
         });
-        binding.weekTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(weekPop==null){
-                    weekPop = new PopupMenu(v.getContext(), v,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-                    weeks.forEach(e->weekPop.getMenu().add("第"+e+"周").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(@NonNull MenuItem item) {
-                            changeWeek(weeks.indexOf(e));
-                            return true;
-                        }
-                    }));
-                }
-                weekPop.show();
+        binding.weekTime.setOnClickListener(v -> {
+            if(weekPop==null){
+                weekPop = new PopupMenu(v.getContext(), v,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
+                weeks.forEach(e->weekPop.getMenu().add("第"+e+"周").setOnMenuItemClickListener(item -> {
+                    changeWeek(weeks.indexOf(e));
+                    return true;
+                }));
             }
+            weekPop.show();
         });
         detailDialog=new BottomSheetDialog(this);
         detailDialog.setContentView(R.layout.detail);
         handler=new Handler(Looper.getMainLooper()){
+            @SuppressLint("DefaultLocale")
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
@@ -183,14 +157,11 @@ public class AgendaActivity extends AppCompatActivity {
                                     String teachingBuildingName = detail.getString("teachingBuildingName");
                                     String classroomNum = detail.getString("classroomNum");
                                     View item = getLayoutInflater().inflate(R.layout.agenda_item, binding.day, false);
-                                    if(!isStop.equalsIgnoreCase("0")){item.setEnabled(false);item.setBackgroundColor(getColor(R.color.teal_700));}
+                                    if(isStop!=null&&!isStop.equals("0")){item.setEnabled(false);item.setBackgroundColor(getColor(R.color.teal_700));}
                                     views.add(item);
-                                    item.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            setDetail(course,(campus == null ? "" : campus)+"-"+(teachingBuildingName == null ? "" : teachingBuildingName)+"-"+(classroomNum == null ? "" : classroomNum),teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
-                                            detailDialog.show();
-                                        }
+                                    item.setOnClickListener(v -> {
+                                        setDetail(course,(campus == null ? "" : campus)+"-"+(teachingBuildingName == null ? "" : teachingBuildingName)+"-"+(classroomNum == null ? "" : classroomNum),teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
+                                        detailDialog.show();
                                     });
                                     ((MaterialTextView) item.findViewById(R.id.content)).setText(String.format("%s/%s-%s", course, teachingBuildingName == null ? "" : teachingBuildingName, classroomNum == null ? "" : classroomNum));
                                     GridLayout.LayoutParams gl = (GridLayout.LayoutParams) item.getLayoutParams();
@@ -210,11 +181,12 @@ public class AgendaActivity extends AppCompatActivity {
                             String from = response.getJSONObject("data").getString("startTime");
                             try {
                                 Calendar c = Calendar.getInstance();
-                                Date date = new SimpleDateFormat("yyyy-MM-dd").parse(from);
-                                c.setTime(date);
-                                binding.month.setText(new SimpleDateFormat("M 月").format(date.getTime()));
+                                Date date = new SimpleDateFormat("yyyy-MM-dd",Locale.CHINESE).parse(from);
+                                if(date!=null){c.setTime(date);
+                                binding.month.setText(new SimpleDateFormat("M 月",Locale.CHINESE).format(date.getTime()));
+                                }
                                 for(int i=0;i<7;i++){
-                                    ((MaterialTextView)((LinearLayout)binding.week.getChildAt(i+1)).findViewById(R.id.course_date)).setText(new SimpleDateFormat("dd日").format(c.getTime()));
+                                    ((MaterialTextView) binding.week.getChildAt(i+1).findViewById(R.id.course_date)).setText(new SimpleDateFormat("dd日",Locale.CHINESE).format(c.getTime()));
                                     c.add(Calendar.DATE,1);
                                 }
                             } catch (ParseException e) {
@@ -232,7 +204,6 @@ public class AgendaActivity extends AppCompatActivity {
                             currentWeekIndex = weeks.indexOf(currentWeek);
                             binding.weekTime.setText(String.format("第%d周", currentWeek));
                             getTable(currentTerm, currentWeek);
-                            System.out.println(response);
                             break;
                         }
                     }
@@ -317,10 +288,10 @@ public void getAvailableWeeks(String academicYear){
         });
     }
     void setDetail(String course,String location,String teacher,String classTime){
-        ((MaterialTextView)detailDialog.findViewById(R.id.course)).setText(course);
-        ((MaterialTextView)detailDialog.findViewById(R.id.location)).setText(location);
-        ((MaterialTextView)detailDialog.findViewById(R.id.teacher)).setText(teacher);
-        ((MaterialTextView)detailDialog.findViewById(R.id.classTime)).setText(classTime);
+        ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.course))).setText(course);
+        ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.location))).setText(location);
+        ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.teacher))).setText(teacher);
+        ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.classTime))).setText(classTime);
     }
     void changeWeek(int newWeek){
         if(newWeek>=0){
@@ -374,21 +345,17 @@ public void getTerm(){
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuItem today_menu = menu.add("今天");
         today_menu.setShowAsAction(1);
-        today_menu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem item) {
-                getTerm();
-                return true;
-            }
+        today_menu.setOnMenuItemClickListener(item -> {
+            getTerm();
+            return true;
         });
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId())
-        {
-            case android.R.id.home:finishAfterTransition();
+        if (item.getItemId() == android.R.id.home) {
+            finishAfterTransition();
         }
         return super.onOptionsItemSelected(item);
     }

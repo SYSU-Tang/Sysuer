@@ -73,5 +73,6 @@
     <string name="grade">年级</string>
     <string name="profession">专业</string>
     <string name="type">类型</string>
+    <string name="reset">重置</string>
 
 </resources>
