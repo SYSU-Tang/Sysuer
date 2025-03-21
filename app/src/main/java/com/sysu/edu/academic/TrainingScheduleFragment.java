@@ -8,11 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import androidx.transition.TransitionInflater;
+import androidx.navigation.fragment.FragmentNavigator;
+import androidx.transition.AutoTransition;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.chip.Chip;
@@ -20,6 +20,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.databinding.FragmentTrainingScheduleBinding;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -61,10 +62,8 @@ public class TrainingScheduleFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setSharedElementEnterTransition(TransitionInflater.from(requireContext())
-                .inflateTransition(R.transition.shared_image));
-        setSharedElementReturnTransition(TransitionInflater.from(requireContext())
-                .inflateTransition(R.transition.shared_image));
+        setSharedElementEnterTransition(new AutoTransition());
+        setSharedElementReturnTransition(new AutoTransition());
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -114,7 +113,7 @@ public class TrainingScheduleFragment extends Fragment {
                 public void onClick(View v) {
                     Navigation.findNavController(requireActivity(),R.id.fragment).navigate(R.id.confirmationAction,
                            // new FragmentNavigator.Extras(Map.of(v,"result"))
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),v,"result").toBundle()
+                           null,null,new FragmentNavigator.Extras(Map.of(v,"result"))
                     );
                 }
             });
@@ -156,7 +155,7 @@ public class TrainingScheduleFragment extends Fragment {
                     list.add(((JSONObject)e).getString("name"));
                 });
                 binding.profession.setSimpleItems(list.toArray(new String[]{}));
-                if(binding.profession.hasFocus()){binding.profession.showDropDown();};
+                if(binding.profession.hasFocus()){binding.profession.showDropDown();}
                 break;
             }
         }

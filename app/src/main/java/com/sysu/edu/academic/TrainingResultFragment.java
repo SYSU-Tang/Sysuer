@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
+import androidx.transition.AutoTransition;
 
 import com.sysu.edu.R;
 
@@ -52,6 +53,8 @@ public class TrainingResultFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setSharedElementEnterTransition(new AutoTransition());
+        setSharedElementReturnTransition(new AutoTransition());
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);

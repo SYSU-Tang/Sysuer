@@ -10,7 +10,7 @@
         tools:layout="@layout/fragment_training_schedule">
         <action
             android:id="@+id/confirmationAction"
-            app:destination="@id/result" />
+            app:destination="@id/result"/>
     </fragment>
     <fragment
         android:id="@+id/result"
