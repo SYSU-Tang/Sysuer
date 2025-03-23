@@ -16,15 +16,14 @@
             android:minHeight="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
             <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/classroomquery_toolbar"
+            android:id="@+id/classroom_query_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
+            app:layout_collapseMode="pin"
             android:transitionName="miniapp"
-                app:layout_collapseMode="pin"
-                app:navigationIcon="?homeAsUpIndicator"
+            app:navigationIcon="?homeAsUpIndicator"
             app:title="@string/classroom_query"/>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
-
 </com.google.android.material.appbar.AppBarLayout>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

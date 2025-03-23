@@ -64,6 +64,7 @@ public class AgendaActivity extends AppCompatActivity {
         binding = AgendaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         cookie=getSharedPreferences("privacy",MODE_PRIVATE).getString("Cookie","");
+        binding.toolbar.getChildAt(0).setTransitionName("miniapp");
         setSupportActionBar(binding.toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         String[] duration = getResources().getStringArray(R.array.duration);
@@ -144,6 +145,7 @@ public class AgendaActivity extends AppCompatActivity {
                         case 1: {
                                 views.forEach(e->binding.day.removeView(e));
                                 views.clear();
+                                System.out.println(response);
                                 response.getJSONArray("data").forEach(e -> {
                                     String week = ((JSONObject) e).getString("week");
                                     String startClassTimes = ((JSONObject) e).getString("startClassTimes");
@@ -196,7 +198,7 @@ public class AgendaActivity extends AppCompatActivity {
                         } case 4:{
                             terms.clear();
                             response.getJSONArray("data").forEach(e->terms.add(((JSONObject)e).getString("acadYearSemester")));
-                             break;
+                            break;
                         }case 5:{
                             weeks.clear();
                             currentWeek = Integer.parseInt(response.getJSONObject("data").getString("nowWeekly"));
@@ -304,7 +306,8 @@ public void getAvailableWeeks(String academicYear){
 
     }
 public void getTable(String academicYear,int week){
-    if(academicYear.isEmpty()||week<0){return;}
+    if(academicYear.isEmpty()||week<1){return;}
+    System.out.println(academicYear+week);
     http.newCall(new Request.Builder().url(String.format("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d",academicYear,week)).addHeader("Cookie",cookie).build()).enqueue(new Callback() {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {

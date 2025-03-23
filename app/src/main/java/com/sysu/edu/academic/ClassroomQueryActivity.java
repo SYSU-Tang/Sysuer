@@ -29,6 +29,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
@@ -98,6 +99,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.classroom_query);
+       // findViewById(R.id.toolbar).getChildAt(0).setTransitionName("miniapp");
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -123,7 +125,8 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         });
         cookie=getSharedPreferences("privacy",0).getString("Cookie","");
         http=getHttp();
-        setSupportActionBar(findViewById(R.id.classroomquery_toolbar));
+        MaterialToolbar tool= findViewById(R.id.classroom_query_toolbar);
+        setSupportActionBar(tool);
         dateDialog.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<>() {
             @Override
             public void onPositiveButtonClick(Long selection) {
