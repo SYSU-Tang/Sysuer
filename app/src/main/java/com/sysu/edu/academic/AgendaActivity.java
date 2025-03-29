@@ -145,7 +145,6 @@ public class AgendaActivity extends AppCompatActivity {
                         case 1: {
                                 views.forEach(e->binding.day.removeView(e));
                                 views.clear();
-                                System.out.println(response);
                                 response.getJSONArray("data").forEach(e -> {
                                     String week = ((JSONObject) e).getString("week");
                                     String startClassTimes = ((JSONObject) e).getString("startClassTimes");
@@ -185,7 +184,7 @@ public class AgendaActivity extends AppCompatActivity {
                                 Calendar c = Calendar.getInstance();
                                 Date date = new SimpleDateFormat("yyyy-MM-dd",Locale.CHINESE).parse(from);
                                 if(date!=null){c.setTime(date);
-                                binding.month.setText(new SimpleDateFormat("M 月",Locale.CHINESE).format(date.getTime()));
+                                binding.month.setText(new SimpleDateFormat("M月",Locale.CHINESE).format(date.getTime()));
                                 }
                                 for(int i=0;i<7;i++){
                                     ((MaterialTextView) binding.week.getChildAt(i+1).findViewById(R.id.course_date)).setText(new SimpleDateFormat("dd日",Locale.CHINESE).format(c.getTime()));
