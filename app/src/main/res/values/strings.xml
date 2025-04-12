@@ -77,5 +77,7 @@
     <string name="last_week">上周</string>
     <string name="next_week">下周</string>
     <string name="news">资讯</string>
+    <string name="campus">校区</string>
+    <string name="field">场地</string>
 
 </resources>

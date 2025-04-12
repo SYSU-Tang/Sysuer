@@ -65,7 +65,7 @@ public class NewFragment extends Fragment {
             view = LayoutInflater.from(requireActivity()).inflate(R.layout.news_page, container, false);
             RecyclerView list = view.findViewById(R.id.news_page);
 
-            list.addOnScrollListener(new             class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+             class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 ArrayList<HashMap<String, String>> data = new ArrayList<>();
 
                 public Adp() {
@@ -85,8 +85,9 @@ public class NewFragment extends Fragment {
                     MaterialTextView content = holder.itemView.findViewById(R.id.content);
                     AppCompatImageView image = holder.itemView.findViewById(R.id.image);
                     holder.itemView.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
-                    title.setText(data.get(position).get("title"));
-                    content.setText(data.get(position).getOrDefault("source","")+data.get(position).getOrDefault("time",""));
+                    title.setText(data.get(position).getOrDefault("title",""));
+                    String info = data.get(position).getOrDefault("source", "") + data.get(position).getOrDefault("time", "");
+                    content.setText(info);
                     String img = data.get(position).get("image");
                     if (img != null && !img.isEmpty()) {
                         Glide.with(requireContext()).load(new GlideUrl(img, new LazyHeaders.Builder().addHeader("Cookie", cookie).addHeader("User-Agent", "Wework").build()))
@@ -96,7 +97,6 @@ public class NewFragment extends Fragment {
                                 .into(image);
                     }
                 }
-
                 void add(String title, String image, String url,String time,String source) {
                     data.add(new HashMap<>(Map.of("title", title, "image", image, "url", url,"time",time,"source",source)));
                     notifyItemInserted(getItemCount() - 1);
@@ -106,9 +106,9 @@ public class NewFragment extends Fragment {
                 public int getItemCount() {
                     return data.size();
                 }
-            });
+            }
             list.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
-RecyclerView.OnScrollListener() {
+            list.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     if(recyclerView.canScrollVertically(1)&&position!=0){
@@ -116,18 +116,22 @@ RecyclerView.OnScrollListener() {
                     }
                     super.onScrolled(recyclerView, dx, dy);
                 }
-            }
+            });
             Adp adp = new Adp();
             list.setAdapter(adp);
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
+                    Bundle rdata = msg.getData();
+                    boolean isJson = !rdata.getBoolean("isJson");
+                    String json = rdata.getString("data");
+                    JSONObject data;
+                    if(isJson){return;}else{data = JSON.parseObject(json);}
                     switch (msg.what) {
                         case 1:
                             //System.out.println(msg.obj);
                             break;
                         case 2:
-                            JSONObject data = JSON.parseObject((String) msg.obj);
                             Integer code = data.getInteger("code");
                             if (code == 10000) {
                                 data.getJSONObject("data").getJSONArray("records").forEach(e -> {
@@ -146,10 +150,9 @@ RecyclerView.OnScrollListener() {
                             }//公众号
                             break;
                         case 3:
-                            JSONObject data2 = JSON.parseObject((String) msg.obj);
-                            Integer code2 = data2.getInteger("code");
+                            Integer code2 = data.getInteger("code");
                             if (code2 == 10000) {
-                                data2.getJSONArray("data").forEach(e -> {
+                                data.getJSONArray("data").forEach(e -> {
                                     String title = ((JSONObject) e).getString("title");
                                     JSONArray cover = ((JSONObject) e).getJSONArray("coversPicList");
                                     String image = "";
@@ -163,17 +166,13 @@ RecyclerView.OnScrollListener() {
                                     String time = ((JSONObject) e).getString("createTime");
                                     String source = ((JSONObject) e).getJSONObject("source").getString("seedName");
                                     adp.add(title, image, url,time,source);
-                                    //String title = ((JSONObject) e).getString("title");
-                                    // String title = ((JSONObject) e).getString("title");
                                 });
-
                             }//资讯
                             break;
                         case 4:
-                            JSONObject data3 = JSON.parseObject((String) msg.obj);
-                            Integer code3 = data3.getInteger("code");
+                            Integer code3 = data.getInteger("code");
                             if (code3 == 10000) {
-                                data3.getJSONObject("data").getJSONArray("records").forEach(e -> {
+                                data.getJSONObject("data").getJSONArray("records").forEach(e -> {
                                    String title = ((JSONObject) e).getString("title");
                                     JSONArray cover = ((JSONObject) e).getJSONArray("coversPicList");
                                     String image = "";
@@ -189,7 +188,7 @@ RecyclerView.OnScrollListener() {
                             //通知
                             break;
                             case 5:
-                            JSONObject data4 = JSON.parseObject((String) msg.obj);
+                            JSONObject data4 = JSON.parseObject(json);
                             Integer code4= data4.getInteger("code");
                             if (code4 == 10000) {
                                 data4.getJSONObject("data").getJSONArray("records").forEach(e -> {
@@ -213,32 +212,9 @@ RecyclerView.OnScrollListener() {
             };
 
         }
-        run=new Runnable() {
-            @Override
-            public void run() {
-                List.of(new Runnable() {
-                    @Override
-                    public void run() {
-                        getNews();
-                    }
-                }, new Runnable() {
-                    @Override
-                    public void run() {
-                        getSubscription();
-                    }
-                }, new Runnable() {
-                    @Override
-                    public void run() {
-                        getNotice();
-                    }
-                }, new Runnable() {
-                    @Override
-                    public void run() {
-                        getDailyNews();
-                    }
-                }).get(position).run();
-                page+=1;
-            }
+        run= () -> {
+            List.of(this::getNews, this::getSubscription, this::getNotice, (Runnable) this::getDailyNews).get(position).run();
+            page+=1;
         };
         run.run();
         //getAuthorization();
@@ -263,7 +239,10 @@ RecyclerView.OnScrollListener() {
                 if (response.body() != null) {
                     Message msg = new Message();
                     msg.what = 3;
-                    msg.obj = response.body().string();
+                    Bundle data = new Bundle();
+                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
+                    data.putString("data",response.body().string());
+                    msg.setData(data);
                     handler.sendMessage(msg);
                 }
             }
@@ -287,7 +266,10 @@ RecyclerView.OnScrollListener() {
                 if (response.body() != null) {
                     Message msg = new Message();
                     msg.what = 2;
-                    msg.obj = response.body().string();
+                    Bundle data = new Bundle();
+                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
+                    data.putString("data",response.body().string());
+                    msg.setData(data);
                     handler.sendMessage(msg);
                 }
             }
@@ -301,15 +283,18 @@ RecyclerView.OnScrollListener() {
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response){
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what = 1;
-                msg.obj = response.header("Location");
-                System.out.println(response.code());
+                Bundle data = new Bundle();
+                data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
+                if (response.body() != null) {
+                    data.putString("data",response.body().string());
+                }
+                msg.setData(data);
                 handler.sendMessage(msg);
             }
         });
@@ -330,7 +315,10 @@ RecyclerView.OnScrollListener() {
                 if (response.body() != null) {
                     Message msg = new Message();
                     msg.what = 4;
-                    msg.obj = response.body().string();
+                    Bundle data = new Bundle();
+                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
+                    data.putString("data",response.body().string());
+                    msg.setData(data);
                     handler.sendMessage(msg);
                 }
             }
@@ -351,7 +339,10 @@ RecyclerView.OnScrollListener() {
                 if (response.body() != null) {
                     Message msg = new Message();
                     msg.what = 5;
-                    msg.obj = response.body().string();
+                    Bundle data = new Bundle();
+                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
+                    data.putString("data",response.body().string());
+                    msg.setData(data);
                     handler.sendMessage(msg);
                 }
             }
