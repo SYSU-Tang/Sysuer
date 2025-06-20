@@ -10,6 +10,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.material.navigation.NavigationBarView;
 import com.sysu.edu.databinding.ActivityMainBinding;
 
 import java.util.Objects;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         navController.setGraph(R.navigation.mobile_navigation);
 
         //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.navView, navController);
+        NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
         //startActivity(new Intent(this, Setting.class));
         //getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main).setArguments();
     //setSupportActionBar(findViewById(R.id.toolbar));

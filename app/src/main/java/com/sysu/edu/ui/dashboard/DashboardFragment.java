@@ -11,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -23,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -36,12 +35,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
@@ -50,50 +53,63 @@ public class DashboardFragment extends Fragment {
     String cookie;
     ArrayList<HashMap<String,String>> todayCourse=new ArrayList<>();
     ArrayList<HashMap<String,String>> tomorrowCourse=new ArrayList<>();
+    LinkedList<JSONObject> thisWeekExams=new LinkedList<>();
+    LinkedList<JSONObject> nextWeekExams=new LinkedList<>();
     View fragment;
     private ActivityResultLauncher<Intent> launch;
     private Adp adp;
     private MaterialButtonToggleGroup toggle;
-    private RecyclerView list;
     private MaterialTextView time;
+    RecyclerView examList;
+    ExamAdp examAdp;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
          if(fragment==null){
-        fragment= inflater.inflate(R.layout.fragment_dashboard,container,false);
-        list = fragment.findViewById(R.id.course_list);
-        time=fragment.findViewById(R.id.time);
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<>() {
-            @Override
-            public void onActivityResult(ActivityResult o) {
+             fragment= inflater.inflate(R.layout.fragment_dashboard,container,false);
+             RecyclerView list = fragment.findViewById(R.id.course_list);
+             examList = fragment.findViewById(R.id.exam_list);
+            time=fragment.findViewById(R.id.time);
+            launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
                 if(o.getResultCode()== Activity.RESULT_OK){
-                    cookie=getActivity().getSharedPreferences("privacy",0).getString("Cookie","");
-                    getTodayCourses();
+                    cookie= requireActivity().getSharedPreferences("privacy",0).getString("Cookie","");
+                    getTodayCourses();getExams();
                 }
-            }
-        });
-        ((MaterialTextView)fragment.findViewById(R.id.date)).setText(String.format("%s 星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), (new String[]{"日","一","二","三","四","五","六"})[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]));
-        toggle=fragment.findViewById(R.id.toggle);
-             LinearLayoutManager lm = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
-             list.addItemDecoration(new DividerItemDecoration(this.requireContext(),0));
-             list.setLayoutManager(lm);
-             new Handler().post(new Runnable() {
+            });
+            ((MaterialTextView)fragment.findViewById(R.id.date)).setText(String.format("%s 星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), (new String[]{"日","一","二","三","四","五","六"})[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]));
+            toggle=fragment.findViewById(R.id.toggle);
+            MaterialButtonToggleGroup toggle2 = fragment.findViewById(R.id.toggle2);
+            LinearLayoutManager lm2 = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
+            LinearLayoutManager lm = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
+            list.addItemDecoration(new DividerItemDecoration(this.requireContext(),0));
+            list.setLayoutManager(lm);
+            examList.addItemDecoration(new DividerItemDecoration(this.requireContext(),0));
+            examList.setLayoutManager(lm2);
+            new Handler().post(new Runnable() {
                  @Override
                  public void run() {
-                     time.setText(new SimpleDateFormat("hh:mm:ss").format(new Date()));
+                     time.setText(new SimpleDateFormat("hh:mm:ss",Locale.CHINESE).format(new Date()));
                      handler.postDelayed(this,1000);
                  }
              });
              cookie=requireActivity().getSharedPreferences("privacy",0).getString("Cookie","");
-             getTodayCourses();
+             getTodayCourses();getExams();
              adp=new Adp(this.requireActivity());
              list.setAdapter(adp);
+             examAdp=new ExamAdp(this.requireActivity());
+             examList.setAdapter(examAdp);
              toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
                  if(group.getCheckedButtonId()==checkedId){
                  adp.set(checkedId==R.id.today?todayCourse:tomorrowCourse);
                  fragment.findViewById(R.id.noClass).setVisibility(adp.getItemCount()==0?View.VISIBLE:View.GONE);
-                     }
+                 }
+             });
+             toggle2.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                 if(group.getCheckedButtonId()==checkedId){
+                     examAdp.set(checkedId==R.id.this_week?thisWeekExams:nextWeekExams);
+                     fragment.findViewById(R.id.no_exam).setVisibility(examAdp.getItemCount()==0?View.VISIBLE:View.GONE);
+                 }
              });
              handler=new Handler(Looper.getMainLooper()){
                  @Override
@@ -110,6 +126,47 @@ public class DashboardFragment extends Fragment {
                          } else {
                              launch.launch(new Intent(getContext(), Login.class));
                          }
+                     }
+                     else if(msg.what==2){
+                         JSONObject data = JSON.parseObject((String) msg.obj);
+                         if (data.get("code").equals(200)) {
+                             int k = 0;
+                             for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").entrySet()) {
+                                 String key = entry.getKey();
+                                 Object value = entry.getValue();
+                                 if (k == 0) {
+                                     k = Integer.parseInt(key);
+                                 }
+                                 if (Integer.parseInt(key) < k) {
+                                     k = Integer.parseInt(key);
+                                     if (value != null) {
+                                         ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
+                                     }
+                                 } else {
+                                     if (value != null) {
+                                         ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
+                                     }
+                                 }
+                             }
+                             for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").entrySet()) {
+                                 String a = entry.getKey();
+                                 Object b = entry.getValue();
+                                 if (Integer.parseInt(a) < k) {
+                                     k = Integer.parseInt(a);
+                                     if (b != null) {
+                                         ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
+                                     }
+                                 } else {
+                                     if (b != null) {
+                                         ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
+                                     }
+                                 }
+                             }
+                             toggle2.check(R.id.this_week);
+                         } else {
+                             launch.launch(new Intent(getContext(), Login.class));
+                         }
+
                      }
                  }
              };
@@ -150,6 +207,28 @@ public class DashboardFragment extends Fragment {
         map.put("flag",flag);
         data.add(map);
     }
+    public void getExams(){
+        new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck")
+                .addHeader("Cookie",cookie)
+                .addHeader("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/")
+                .post(RequestBody.create("{\"acadYear\":\"2024-2\",\"examWeekId\":\"1864116471884476417\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", MediaType.parse("application/json")))
+                .build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message msg = new Message();
+                msg.what=2;
+                if (response.body() != null) {
+                    msg.obj=response.body().string();
+                }
+                handler.sendMessage(msg);
+            }
+        });
+    }
 }
 class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
@@ -158,17 +237,6 @@ class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         super();
         this.context=context;
     }
-//    public void addCourse(String name,String location,String time,String course,String teacher,String flag){
-//        HashMap<String, String> map = new HashMap<>();
-//        map.put("courseName",name);
-//        map.put("location",location);
-//        map.put("time",time);
-//        map.put("course",course);
-//        map.put("teacher",teacher);
-//        map.put("flag",flag);
-//        data.add(map);
-//        notifyItemInserted(getItemCount()-1);
-//    }
     public void set(ArrayList<HashMap<String,String>> mdata){
         clear();
         data.addAll(mdata);
@@ -187,11 +255,7 @@ class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
+            holder.itemView.setOnClickListener(v -> {
             });
             ((MaterialTextView)holder.itemView.findViewById(R.id.course_title)).setText(data.get(position).get("courseName"));
             ((MaterialButton)holder.itemView.findViewById(R.id.location_container)).setText(data.get(position).get("location"));
@@ -203,4 +267,47 @@ class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public int getItemCount() {
             return data.size();
         }
+}
+class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    Context context;
+    LinkedList<JSONObject> data=new LinkedList<>();
+    public ExamAdp(Context context){
+        super();
+        this.context=context;
+    }
+    public void set(LinkedList<JSONObject> examData){
+        clear();
+        data.addAll(examData);
+        notifyItemRangeInserted(0,getItemCount());
+    }
+    public void clear(){
+        int temp = getItemCount();
+        data.clear();
+        notifyItemRangeRemoved(0,temp);
+    }
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.exam_item, parent, false)){};
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        holder.itemView.setOnClickListener(v -> {
+        });
+        int startClassTimes = data.get(position).getIntValue("startClassTimes");
+        int endClassTimes = data.get(position).getIntValue("endClassTimes");
+        ((MaterialTextView)holder.itemView.findViewById(R.id.exam_name)).setText(data.get(position).getString("examSubjectName"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_location)).setText(data.get(position).getString("classroomNumber"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_date)).setText(data.get(position).getString("examDate"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_duration)).setText(String.format("%s分钟", data.get(position).getString("duration")));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_time)).setText(data.get(position).getString("durationTime"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_class_time)).setText(String.format("第%d~%d节", startClassTimes, endClassTimes));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_mode)).setText(String.format("考核方式：%s", data.get(position).getString("examMode")));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_stage)).setText(String.format("考试阶段：%s", data.get(position).getString("examStage")));
+    }
+    @Override
+    public int getItemCount() {
+        return data.size();
+    }
 }

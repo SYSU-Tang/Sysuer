@@ -5,6 +5,18 @@
     android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <com.google.android.material.navigationrail.NavigationRailView
+        android:id="@+id/nav_view"
+        style="@style/Widget.MaterialComponents.NavigationRailView.Colored.Compact"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:background="?android:attr/windowBackground"
+        app:itemIconTint="@color/purple_500"
+        app:itemTextColor="@color/purple_500"
+        app:labelVisibilityMode="selected"
+        app:menu="@menu/bottom_nav_menu"
+        app:menuGravity="center" />
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -28,18 +40,5 @@
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         tools:layout="@layout/fragment_dashboard"/>
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/nav_view"
-        style="@style/Widget.MaterialComponents.BottomNavigationView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="?android:attr/windowBackground"
-        app:itemIconTint="@color/purple_500"
-        app:itemTextColor="@color/purple_500"
-        app:labelVisibilityMode="selected"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-        app:menu="@menu/bottom_nav_menu" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </LinearLayout>

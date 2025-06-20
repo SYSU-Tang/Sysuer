@@ -47,7 +47,7 @@
     <string name="password">密码</string>
     <string name="captcha">验证码</string>
     <string name="today">今天</string>
-    <string name="tomorrow">明天\n</string>
+    <string name="tomorrow">明天</string>
     <string name="noClass">😁今天没课😁</string>
     <string name="noExam">😁没有考试😁</string>
     <string name="noTodo">😒没有待办😒</string>
@@ -80,5 +80,14 @@
     <string name="campus">校区</string>
     <string name="field">场地</string>
     <string name="preservation">预约</string>
+    <string name="this_week">本周</string>
+    <string name="exam_name">考试科目</string>
+    <string name="exam_location">考试地点</string>
+    <string name="exam_time">考试时间</string>
+    <string name="exam_duration">考试时长</string>
+    <string name="exam_class">考试课时</string>
+    <string name="exam_mode">考核方式</string>
+    <string name="exam_stage">考试阶段</string>
+    <string name="exam_date">考试日期</string>
 
 </resources>
