@@ -84,7 +84,6 @@
                     android:padding="8dp"/>
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/noClass"
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -133,7 +132,6 @@
             android:layout_marginTop="0dp">
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/no_exam"
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"

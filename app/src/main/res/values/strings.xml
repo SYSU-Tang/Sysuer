@@ -89,5 +89,8 @@
     <string name="exam_mode">考核方式</string>
     <string name="exam_stage">考试阶段</string>
     <string name="exam_date">考试日期</string>
+    <string name="total_evaluation">总评数</string>
+    <string name="total_for_evaluation">待评数</string>
+    <string name="open">打开</string>
 
 </resources>
