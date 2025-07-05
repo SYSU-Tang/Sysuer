@@ -6,53 +6,54 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".academic.Grade">
-<com.google.android.material.appbar.AppBarLayout
-    android:id="@+id/tool"
-    style="@style/Widget.Material3.AppBarLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="4dp"
-    app:elevation="4dp">
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        style="@style/Widget.Material3.Toolbar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/tool"
+        style="@style/Widget.Material3.AppBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:transitionName="mini"
-        app:layout_scrollFlags="enterAlways|scroll"
-        app:navigationIcon="?homeAsUpIndicator"
-        app:title="@string/score"/>
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/year"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_marginBottom="4dp"
+        app:elevation="4dp">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            style="@style/Widget.Material3.Toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:transitionName="mini"
+            app:layout_scrollFlags="enterAlways|scroll"
+            app:navigationIcon="?homeAsUpIndicator"
+            app:title="@string/score"/>
+        <HorizontalScrollView
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/year"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/term"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/term"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/type"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/trainType"/>
-        </LinearLayout>
+                android:layout_height="match_parent">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/year"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/year"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/term"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/term"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/type"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/trainType"/>
+            </LinearLayout>
 
-    </HorizontalScrollView>
-</com.google.android.material.appbar.AppBarLayout>
+        </HorizontalScrollView>
+    </com.google.android.material.appbar.AppBarLayout>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -66,11 +67,27 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 app:contentPadding="16dp">
-                <TextView
-                    android:id="@+id/detail"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="?android:attr/listDivider" />
+                    <TextView
+                        android:id="@+id/detail2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <View

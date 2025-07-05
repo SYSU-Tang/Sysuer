@@ -7,8 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,43 +75,21 @@ public class Grade extends AppCompatActivity {
         for (int i = 0; i < terms.length; i++) {
             String s = terms[i];
             int finalI = i+1;
-            termPop.getMenu().add(s).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
-                    if(finalI!=term){
+            termPop.getMenu().add(s).setOnMenuItemClickListener(menuItem -> {
+                if(finalI!=term){
                     setNow(year, finalI , type);
-                        }
-                    return false;
                 }
+                return false;
             });
         }
+        binding.tabs.setHorizontalScrollBarEnabled(false);
         yearPop = new PopupMenu(this, binding.year,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
         typePop = new PopupMenu(this, binding.type,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-        binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishAfterTransition();
-            }
-        });
+        binding.toolbar.setNavigationOnClickListener(view -> finishAfterTransition());
         binding.scores.setLayoutManager(new GridLayoutManager(this,(dm.widthPixels<1980)?1:3));
-        binding.term.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                termPop.show();
-            }
-        });
-        binding.year.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                yearPop.show();
-            }
-        });
-        binding.type.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                typePop.show();
-            }
-        });
+        binding.term.setOnClickListener(view -> termPop.show());
+        binding.year.setOnClickListener(view -> yearPop.show());
+        binding.type.setOnClickListener(view -> typePop.show());
         adp = new ScoreAdp(this);
         binding.scores.setAdapter(adp);
         cookie=getSharedPreferences("privacy",0).getString("Cookie","");
@@ -142,12 +118,8 @@ public class Grade extends AppCompatActivity {
                     else if(msg.what==2){
                         JSONObject pull = dataString.getJSONObject("data");
                         //pull.getJSONArray("selectTermPull").forEach(a->termPop.getMenu().add(a));
-                        pull.getJSONArray("selectTrainType").forEach(a->{
-                            typePop.getMenu().add(((JSONObject)a).getString("dataName"));
-                        });
-                        pull.getJSONArray("selectYearPull").forEach(a->{
-                            yearPop.getMenu().add(((JSONObject)a).getString("dataName"));
-                        });;
+                        pull.getJSONArray("selectTrainType").forEach(a-> typePop.getMenu().add(((JSONObject)a).getString("dataName")));
+                        pull.getJSONArray("selectYearPull").forEach(a-> yearPop.getMenu().add(((JSONObject)a).getString("dataName")));
                     } else if(msg.what==3){
                         JSONObject pull = dataString.getJSONObject("data");
                         setNow(pull.getString("acadYear"),pull.getInteger("acadSemester"),pull.getString("sequence"));
@@ -159,9 +131,10 @@ public class Grade extends AppCompatActivity {
                         String rank=pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
                         String point=pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("vegPoint");
                         String total =pull.getString("stuTotal");
-                         binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s",totalRank,total,totalCredit,totalPoint));
-                       // pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
-                       // setNow(pull.getString("acadYear"),pull.getInteger("acadSemester"),pull.getString("sequence"));
+                        binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s",totalRank,total,totalCredit,totalPoint));
+                        binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s",rank,total,point));
+                        // pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
+                        // setNow(pull.getString("acadYear"),pull.getInteger("acadSemester"),pull.getString("sequence"));
                     }
                 }
                 else {
@@ -301,11 +274,8 @@ class ScoreAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        holder.itemView.setOnClickListener(view -> {
 
-            }
         });
         JSONObject info = data.get(position);
         String grade = "";
