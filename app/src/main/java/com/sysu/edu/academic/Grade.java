@@ -133,9 +133,7 @@ public class Grade extends AppCompatActivity {
                         String total =pull.getString("stuTotal");
                         binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s",totalRank,total,totalCredit,totalPoint));
                         binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s",rank,total,point));
-                        // pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
-                        // setNow(pull.getString("acadYear"),pull.getInteger("acadSemester"),pull.getString("sequence"));
-                    }
+                        }
                 }
                 else {
                     Toast.makeText(Grade.this,"请先登录",Toast.LENGTH_LONG).show();
