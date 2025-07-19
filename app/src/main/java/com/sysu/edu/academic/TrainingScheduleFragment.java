@@ -21,52 +21,22 @@ import com.sysu.edu.databinding.FragmentTrainingScheduleBinding;
 import java.util.ArrayList;
 import java.util.Map;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TrainingScheduleFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TrainingScheduleFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     FragmentTrainingScheduleBinding binding;
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private View view;
 
     public TrainingScheduleFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TrainingScheduleFragment.
-     */
-    public static TrainingScheduleFragment newInstance(String param1, String param2) {
-        TrainingScheduleFragment fragment = new TrainingScheduleFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setSharedElementReturnTransition(TransitionInflater.from(requireContext())
                 .inflateTransition(android.R.transition.move));
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -106,20 +76,15 @@ public class TrainingScheduleFragment extends Fragment {
 
                 }
             });
-             binding.query.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Navigation.findNavController(requireActivity(),R.id.fragment).navigate(R.id.confirmationAction,
-                           // new FragmentNavigator.Extras(Map.of(v,"result"))
-                           null,null
+             binding.query.setOnClickListener(v -> Navigation.findNavController(requireActivity(),R.id.fragment).navigate(R.id.confirmationAction,
+                    // new FragmentNavigator.Extras(Map.of(v,"result"))
+                    null,null
 //                            new NavOptions.Builder().setEnterAnim(android.R.anim.fade_in)
 //                                    .setExitAnim(android.R.anim.fade_out)
 //                                    .setPopEnterAnim(android.R.anim.fade_in)
 //                                    .setPopExitAnim(android.R.anim.fade_out).build()
-                            ,new FragmentNavigator.Extras(Map.of(v,"result"))
-                    );
-                }
-            });
+                     ,new FragmentNavigator.Extras(Map.of(v,"result"))
+             ));
         }
         // Inflate the layout for this fragment
         return view;
@@ -128,11 +93,9 @@ public class TrainingScheduleFragment extends Fragment {
         switch (what){
             case 1:{
                 ArrayList<String> list = new ArrayList<>();
-                data.getJSONArray("data").forEach(e->{
-                    list.add(((JSONObject)e).getString("departmentName"));
-                });
+                data.getJSONArray("data").forEach(e-> list.add(((JSONObject)e).getString("departmentName")));
                 binding.college.setSimpleItems(list.toArray(new String[]{}));
-                if(binding.college.hasFocus()){binding.college.showDropDown();};
+                if(binding.college.hasFocus()){binding.college.showDropDown();}
                 break;
             }
             case 2:{ArrayList<String> list = new ArrayList<>();
@@ -140,7 +103,7 @@ public class TrainingScheduleFragment extends Fragment {
                 binding.gradePicker.setMinValue(1);
                 binding.gradePicker.setMaxValue(list.size());
                 binding.gradePicker.setValue(list.size());
-                binding.gradePicker.setDisplayedValues(list.toArray(new String[list.size()]));
+                binding.gradePicker.setDisplayedValues(list.toArray(new String[0]));
                 break;
             }
             //binding.college.setSimpleItems(list.toArray(new String[]{}));}
@@ -154,9 +117,7 @@ public class TrainingScheduleFragment extends Fragment {
                 break;
             }
             case 4:{ArrayList<String> list = new ArrayList<>();
-                data.getJSONArray("data").forEach(e->{
-                    list.add(((JSONObject)e).getString("name"));
-                });
+                data.getJSONArray("data").forEach(e-> list.add(((JSONObject)e).getString("name")));
                 binding.profession.setSimpleItems(list.toArray(new String[]{}));
                 if(binding.profession.hasFocus()){binding.profession.showDropDown();}
                 break;

@@ -88,12 +88,9 @@ public class PEPreservation extends AppCompatActivity {
                                         Objects.requireNonNull(fields.get(((JSONObject) e).getString("Identity"))).forEach(e1 ->{
                                             Chip field= (Chip) getLayoutInflater().inflate(R.layout.chip,binding.field,false);
                                             field.setText(Objects.requireNonNull(fieldsInfo.get(e1)).get("name"));
-                                            field.setOnCheckedChangeListener((buttonView1, isChecked1) -> {
-                                                if(isChecked1){
-
-                                                    //fieldsInfo.get(e1).get("");
-                                                }
-                                            });
+//                                            field.setOnCheckedChangeListener((buttonView1, isChecked1) -> {
+//                                                //fieldsInfo.get(e1).get("");
+//                                            });
                                             items.add(field);
                                             binding.field.addView(field);
                                         });
@@ -126,21 +123,21 @@ public class PEPreservation extends AppCompatActivity {
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                System.out.println("失败");
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 1;
-                    Bundle data = new Bundle();
-                    String datas = response.body().string();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",datas);
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 1;
+                Bundle data = new Bundle();
+                String dataString = response.body().string();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",dataString);
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }
@@ -151,20 +148,20 @@ public class PEPreservation extends AppCompatActivity {
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                System.out.println("失败");
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 2;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 2;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }
@@ -189,7 +186,7 @@ class DateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ((MaterialTextView)holder.itemView.findViewById(R.id.date)).setText(getDate(position));
-        ((MaterialTextView)holder.itemView.findViewById(R.id.week)).setText("星期"+getWeek(position));
+        ((MaterialTextView)holder.itemView.findViewById(R.id.week)).setText(String.format("星期%s", getWeek(position)));
     }
 
     @Override

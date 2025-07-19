@@ -170,10 +170,9 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 if(msg.what==0)
                 {
                     Toast.makeText(ClassroomQueryActivity.this,(String)msg.obj,Toast.LENGTH_LONG).show();
-
                     return;
                 }
-                if (msg.what==4){
+                if (msg.what==-1){
                     Toast.makeText(ClassroomQueryActivity.this,"网络状态不佳",Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -192,7 +191,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                             String time = (String) ((JSONObject) classroom).get("classTimes");
                             String type = (String) ((JSONObject) classroom).get("classRoomTag");
                             adp.add(name, pic, office, type, time, floor, seat);
-                            }
+                        }
                     } else {
                         for (Object campusInfo : dataString.getJSONArray("data").toArray()) {
                             if (msg.what == 1) {
@@ -233,50 +232,46 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId()==android.R.id.home)
         {
-          supportFinishAfterTransition();
+            supportFinishAfterTransition();
         }
         return true;
     }
     public void getCampus(){
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox").build()).enqueue(
-                  new  Callback(){
-                      @Override
-                      public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                          if (response.body() != null) {
-                              Message message = new Message();
-                              message.what=1;
-                              message.obj=response.body().string();
-                              handler.sendMessage(message);
-                          }
-                      }
-                      @Override
-                      public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                          Message message = new Message();
-                          message.what=4;
-                          handler.sendMessage(message);
-                      }
-                  }
-            );
+                new  Callback(){
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        Message message = new Message();
+                        message.what=1;
+                        message.obj=response.body().string();
+                        handler.sendMessage(message);
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        Message message = new Message();
+                        message.what=-1;
+                        handler.sendMessage(message);
+                    }
+                }
+        );
     }
     public void getOffice(String c){
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull").post(RequestBody.create("{\"campusIdList\":[\""+c+"\"]}",MediaType.parse("application/json"))).build()).enqueue(
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.body() != null) {
-                            Message message = new Message();
-                            message.what=2;
-                            Bundle data=new Bundle();
-                            data.putString("campus",c);
-                            message.setData(data);
-                            message.obj=response.body().string();
-                            handler.sendMessage(message);
-                        }
+                        Message message = new Message();
+                        message.what=2;
+                        Bundle data=new Bundle();
+                        data.putString("campus",c);
+                        message.setData(data);
+                        message.obj=response.body().string();
+                        handler.sendMessage(message);
                     }
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Message message = new Message();
-                        message.what=4;
+                        message.what=-1;
                         handler.sendMessage(message);
                     }
                 }
@@ -301,17 +296,15 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.body() != null) {
-                            Message message = new Message();
-                            message.what=3;
-                            message.obj=response.body().string();
-                            handler.sendMessage(message);
-                        }
+                        Message message = new Message();
+                        message.what=3;
+                        message.obj=response.body().string();
+                        handler.sendMessage(message);
                     }
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Message message = new Message();
-                        message.what=4;
+                        message.what=-1;
                         handler.sendMessage(message);
                     }
                 }
@@ -363,13 +356,13 @@ class RoomAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         ((MaterialTextView)holder.itemView.findViewById(R.id.name)).setText(data.get(position).get("name"));
 
-         Glide.with(context)
+        Glide.with(context)
                 .load(new GlideUrl("https://jwxt.sysu.edu.cn/jwxt/base-info/classroom/classRoomView?fileName=jspic.png&filePath="+data.get(position).get("pic"),new LazyHeaders.Builder()
-                .addHeader("Accept-Language","zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
-                .addHeader("Cookie", ((ClassroomQueryActivity)context).cookie)
-                .addHeader("Referer","https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
-                .build()))
-                 .placeholder(R.drawable.logo)
+                        .addHeader("Accept-Language","zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                        .addHeader("Cookie", ((ClassroomQueryActivity)context).cookie)
+                        .addHeader("Referer","https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
+                        .build()))
+                .placeholder(R.drawable.logo)
                 .override(127*3, 116*3)
                 .fitCenter()
                 .into((ShapeableImageView)holder.itemView.findViewById(R.id.pic));

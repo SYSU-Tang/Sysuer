@@ -37,7 +37,6 @@ public class TrainingSchedule extends AppCompatActivity {
     String cookie="";
     Handler handler;
     ActivityResultLauncher<Intent> launch;
-    int page = 1;
     TrainingScheduleFragment schedule;
 
     @Override
@@ -53,7 +52,7 @@ public class TrainingSchedule extends AppCompatActivity {
         });
         cookie=getSharedPreferences("privacy",0).getString("Cookie","");
         setSupportActionBar(binding.tool);
-        schedule = (TrainingScheduleFragment) (getSupportFragmentManager().findFragmentById(R.id.fragment)).getChildFragmentManager().getFragments().get(0);
+        schedule = (TrainingScheduleFragment) (Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getChildFragmentManager().getFragments().get(0);
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
             if (o.getResultCode() == RESULT_OK) {
                 cookie = getSharedPreferences("privacy", 0).getString("Cookie", "");
@@ -95,9 +94,7 @@ public class TrainingSchedule extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what=4;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
@@ -114,9 +111,7 @@ public class TrainingSchedule extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what=3;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
@@ -139,9 +134,7 @@ public class TrainingSchedule extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what=1;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
@@ -156,27 +149,25 @@ public class TrainingSchedule extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what=2;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
     }
-    void getInfo(int page,String college,String grade,String profession,int trainCode,String trainName){
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/training-programe/training-programe/undergradute/profession-info").post(RequestBody.create(String.format("{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"manageUnitNum\":\"%s\",\"grade\":\"%s\",\"professionCode\":\"%s\",\"trainTypeCode\":\"%01d\",\"trainingSchemeCategoryName\":\"%s\"}}",page,college,grade,profession,trainCode,trainName),MediaType.parse("application/json"))).header("Cookie",cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-            }
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Message msg = new Message();
-                msg.what=5;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
-                handler.sendMessage(msg);
-            }
-        });
-    }
+//    void getInfo(int page,String college,String grade,String profession,int trainCode,String trainName){
+//        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/training-programe/training-programe/undergradute/profession-info").post(RequestBody.create(String.format("{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"manageUnitNum\":\"%s\",\"grade\":\"%s\",\"professionCode\":\"%s\",\"trainTypeCode\":\"%01d\",\"trainingSchemeCategoryName\":\"%s\"}}",page,college,grade,profession,trainCode,trainName),MediaType.parse("application/json"))).header("Cookie",cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//            }
+//            @Override
+//            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                Message msg = new Message();
+//                msg.what=5;
+//                if (response.body() != null) {
+//                    msg.obj=response.body().string();
+//                }
+//                handler.sendMessage(msg);
+//            }
+//        });
+//    }
 }

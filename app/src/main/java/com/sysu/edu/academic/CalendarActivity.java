@@ -83,7 +83,7 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 switch(msg.what){
-                    case 0:
+                    case -1:
                         Toast.makeText(CalendarActivity.this,"请检查网络",Toast.LENGTH_LONG).show();
                         break;
                     case 1:
@@ -108,21 +108,19 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=0;
+                msg.what=-1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what=1;
-                    Matcher matcher1 = Pattern.compile("block-region-left.+?>([\\s\\S]+?)<.+?block-region-left-below").matcher(response.body().string());//
-                    // .usePattern()
-                    if(matcher1.find()){
-                        msg.obj= Pattern.compile("</?(?!img|strong).+?>|\\s+").matcher(Objects.requireNonNull(matcher1.group(1))).replaceAll("");
-                        handler.sendMessage(msg);
-                    }
+                Message msg = new Message();
+                msg.what=1;
+                Matcher matcher1 = Pattern.compile("block-region-left.+?>([\\s\\S]+?)<.+?block-region-left-below").matcher(response.body().string());//
+                // .usePattern()
+                if(matcher1.find()){
+                    msg.obj= Pattern.compile("</?(?!img|strong).+?>|\\s+").matcher(Objects.requireNonNull(matcher1.group(1))).replaceAll("");
+                    handler.sendMessage(msg);
                 }
             }
         });

@@ -13,9 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.chip.Chip;
@@ -25,7 +23,6 @@ import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.academic.BrowseActivity;
 import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
-import com.sysu.edu.academic.Evaluation;
 import com.sysu.edu.academic.Grade;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.news.News;
@@ -42,7 +39,8 @@ public class ServiceFragment extends Fragment {
         View fragment=inflater.inflate(R.layout.fragment_service,container,false);
         service_container=fragment.findViewById(R.id.service_container);
         String[] titles = new String[]{"讯息","系统", "官网", "官媒","教务","学习", "出行", "宿舍"};
-        String[][] items = new String[][]{{"资讯门户","学校活动","校园集市"},
+        String[][] items = new String[][]{{"资讯门户"//,"学校活动","校园集市"
+        },
                 {"体育场馆预定系统","学工系统","教务系统","中山大学统一门户","大学服务中心","财务信息系统"},
                 {"中山大学官网","本科招生","研究生招生","人才招聘","百年校庆","公务电子邮件系统","博物馆","图书馆","校友会"},
                 {"逸仙码","企业微信","中大招生","wps教育版"},
@@ -79,7 +77,8 @@ public class ServiceFragment extends Fragment {
                         v -> startActivity(Objects.requireNonNull(requireActivity().getPackageManager().getLaunchIntentForPackage("com.tencent.wework")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)),
                         v -> startActivity(Objects.requireNonNull(requireActivity().getPackageManager().getLaunchIntentForPackage("com.tencent.wework")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)),
                 },//官媒
-                {newActivity(Evaluation.class),
+                {//newActivity(Evaluation.class),
+                    null,
                         null,
                         newActivity(AgendaActivity.class),
                         null,
@@ -119,7 +118,7 @@ public class ServiceFragment extends Fragment {
         ChipGroup items_container=box.findViewById(R.id.service_box_items);
         title.setText(box_title);
         ViewCompat.setOnApplyWindowInsetsListener(box, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(48, 24, 48, 24);
             return insets;
         });

@@ -10,6 +10,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -79,6 +80,9 @@ public class Evaluation extends AppCompatActivity {
                     else {
                         launch.launch(new Intent(Evaluation.this, Login.class));
                     }
+                } else if (msg.what==-1) {
+                    Toast.makeText(Evaluation.this,"网络状态不佳",Toast.LENGTH_LONG).show();
+                    return;
                 }
             }
         };
@@ -97,17 +101,16 @@ public class Evaluation extends AppCompatActivity {
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
-                System.out.println("失败");
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what=1;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
+                msg.obj = response.body().string();
                 System.out.println(msg.obj);
                 handler.sendMessage(msg);
             }

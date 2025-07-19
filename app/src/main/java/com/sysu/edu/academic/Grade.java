@@ -105,44 +105,51 @@ public class Grade extends AppCompatActivity {
         handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if(msg.what==0){
+                if(msg.what==-1){
                     Toast.makeText(Grade.this,(String)msg.obj,Toast.LENGTH_LONG).show();
                     return;
                 }
                 JSONObject dataString = JSON.parseObject((String) msg.obj);
                 if(dataString.getInteger("code") == 200){
-                    if (msg.what==1) {
-                        adp.clear();
-                        dataString.getJSONArray("data").forEach(a->adp.add((JSONObject) a));
-                    }
-                    else if(msg.what==2){
-                        JSONObject pull = dataString.getJSONObject("data");
-                        //pull.getJSONArray("selectTermPull").forEach(a->termPop.getMenu().add(a));
-                        pull.getJSONArray("selectTrainType").forEach(a-> typePop.getMenu().add(((JSONObject)a).getString("dataName")));
-                        pull.getJSONArray("selectYearPull").forEach(a-> yearPop.getMenu().add(((JSONObject)a).getString("dataName")));
-                    } else if(msg.what==3){
-                        JSONObject pull = dataString.getJSONObject("data");
-                        setNow(pull.getString("acadYear"),pull.getInteger("acadSemester"),pull.getString("sequence"));
-                    }else if(msg.what==4){
-                        JSONObject pull = dataString.getJSONObject("data");
-                        String totalRank = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("rank");
-                        String totalPoint=pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("vegPoint");
-                        String totalCredit=pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("totalCredit");
-                        String rank=pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
-                        String point=pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("vegPoint");
-                        String total =pull.getString("stuTotal");
-                        JSONObject stuCredit = pull.getJSONObject("stuCredit");
-                        binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s",totalRank,total,totalCredit,totalPoint));
-                        binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s",rank,total,point));
-                        binding.detail3.setText(String.format("学期学分：%s\n公必学分：%s\n公选学分：%s\n专必学分：%s\n专选学分：%s\n荣誉学分：%s",
-                                stuCredit.getString("allGetCredit"),
-                                stuCredit.getString("publicGetCredit"),
-                                stuCredit.getString("publicSelectGetCredit"),
-                                stuCredit.getString("majorGetCredit"),
-                                stuCredit.getString("majorSelectGetCredit"),
-                                stuCredit.getString("honorCourseGetCredit")
-                        ));
+                    switch (msg.what) {
+                        case 1:
+                            adp.clear();
+                            dataString.getJSONArray("data").forEach(a -> adp.add((JSONObject) a));
+                            break;
+                        case 2: {
+                            JSONObject pull = dataString.getJSONObject("data");
+                            //pull.getJSONArray("selectTermPull").forEach(a->termPop.getMenu().add(a));
+                            pull.getJSONArray("selectTrainType").forEach(a -> typePop.getMenu().add(((JSONObject) a).getString("dataName")));
+                            pull.getJSONArray("selectYearPull").forEach(a -> yearPop.getMenu().add(((JSONObject) a).getString("dataName")));
+                            break;
                         }
+                        case 3: {
+                            JSONObject pull = dataString.getJSONObject("data");
+                            setNow(pull.getString("acadYear"), pull.getInteger("acadSemester"), pull.getString("sequence"));
+                            break;
+                        }
+                        case 4: {
+                            JSONObject pull = dataString.getJSONObject("data");
+                            String totalRank = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("rank");
+                            String totalPoint = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("vegPoint");
+                            String totalCredit = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("totalCredit");
+                            String rank = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
+                            String point = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("vegPoint");
+                            String total = pull.getString("stuTotal");
+                            JSONObject stuCredit = pull.getJSONObject("stuCredit");
+                            binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s", totalRank, total, totalCredit, totalPoint));
+                            binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s", rank, total, point));
+                            binding.detail3.setText(String.format("学期学分：%s\n公必学分：%s\n公选学分：%s\n专必学分：%s\n专选学分：%s\n荣誉学分：%s",
+                                    stuCredit.getString("allGetCredit"),
+                                    stuCredit.getString("publicGetCredit"),
+                                    stuCredit.getString("publicSelectGetCredit"),
+                                    stuCredit.getString("majorGetCredit"),
+                                    stuCredit.getString("majorSelectGetCredit"),
+                                    stuCredit.getString("honorCourseGetCredit")
+                            ));
+                            break;
+                        }
+                    }
                 }
                 else {
                     Toast.makeText(Grade.this,"请先登录",Toast.LENGTH_LONG).show();
@@ -184,17 +191,15 @@ public class Grade extends AppCompatActivity {
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.body() != null) {
-                            Message message = new Message();
-                            message.what=3;
-                            message.obj=response.body().string();
-                            handler.sendMessage(message);
-                        }
+                        Message message = new Message();
+                        message.what=3;
+                        message.obj=response.body().string();
+                        handler.sendMessage(message);
                     }
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Message message = new Message();
-                        message.what=0;
+                        message.what=-1;
                         handler.sendMessage(message);
                     }
                 }
@@ -205,17 +210,15 @@ public class Grade extends AppCompatActivity {
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.body() != null) {
-                            Message message = new Message();
-                            message.what=1;
-                            message.obj=response.body().string();
-                            handler.sendMessage(message);
-                        }
+                        Message message = new Message();
+                        message.what=1;
+                        message.obj=response.body().string();
+                        handler.sendMessage(message);
                     }
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Message message = new Message();
-                        message.what=0;
+                        message.what=-1;
                         handler.sendMessage(message);
                     }
                 }
@@ -226,17 +229,15 @@ public class Grade extends AppCompatActivity {
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.body() != null) {
-                            Message message = new Message();
-                            message.what=4;
-                            message.obj=response.body().string();
-                            handler.sendMessage(message);
-                        }
+                        Message message = new Message();
+                        message.what=4;
+                        message.obj=response.body().string();
+                        handler.sendMessage(message);
                     }
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Message message = new Message();
-                        message.what=0;
+                        message.what=-1;
                         handler.sendMessage(message);
                     }
                 }
@@ -247,17 +248,15 @@ public class Grade extends AppCompatActivity {
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.body() != null) {
-                            Message message = new Message();
-                            message.what=2;
-                            message.obj=response.body().string();
-                            handler.sendMessage(message);
-                        }
+                        Message message = new Message();
+                        message.what=2;
+                        message.obj=response.body().string();
+                        handler.sendMessage(message);
                     }
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         Message message = new Message();
-                        message.what=0;
+                        message.what=-1;
                         handler.sendMessage(message);
                     }
                 }

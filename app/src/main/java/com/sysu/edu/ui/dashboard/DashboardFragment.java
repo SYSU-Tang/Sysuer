@@ -10,6 +10,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -114,59 +115,66 @@ public class DashboardFragment extends Fragment {
              handler=new Handler(Looper.getMainLooper()){
                  @Override
                  public void handleMessage(@NonNull Message msg) {
-                     if (msg.what == 1) {
-                         JSONObject data = JSON.parseObject((String) msg.obj);
-                         if (data.get("code").equals(200)) {
-                             data.getJSONArray("data").forEach(e -> {
-                                 String flag = (String) ((JSONObject) e).get("useflag");
-                                 addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
-                                         , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
-                             });
-                             toggle.check(R.id.today);
-                         } else {
-                             launch.launch(new Intent(getContext(), Login.class));
-                         }
-                     }
-                     else if(msg.what==2){
-                         JSONObject data = JSON.parseObject((String) msg.obj);
-                         if (data.get("code").equals(200)) {
-                             int k = 0;
-                             for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").entrySet()) {
-                                 String key = entry.getKey();
-                                 Object value = entry.getValue();
-                                 if (k == 0) {
-                                     k = Integer.parseInt(key);
-                                 }
-                                 if (Integer.parseInt(key) < k) {
-                                     k = Integer.parseInt(key);
-                                     if (value != null) {
-                                         ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
-                                     }
-                                 } else {
-                                     if (value != null) {
-                                         ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
-                                     }
-                                 }
+                     switch (msg.what) {
+                         case 1: {
+                             JSONObject data = JSON.parseObject((String) msg.obj);
+                             if (data.get("code").equals(200)) {
+                                 data.getJSONArray("data").forEach(e -> {
+                                     String flag = (String) ((JSONObject) e).get("useflag");
+                                     addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
+                                             , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
+                                 });
+                                 toggle.check(R.id.today);
+                             } else {
+                                 launch.launch(new Intent(getContext(), Login.class));
                              }
-                             for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").entrySet()) {
-                                 String a = entry.getKey();
-                                 Object b = entry.getValue();
-                                 if (Integer.parseInt(a) < k) {
-                                     k = Integer.parseInt(a);
-                                     if (b != null) {
-                                         ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
+                             break;
+                         }
+                         case 2: {
+                             JSONObject data = JSON.parseObject((String) msg.obj);
+                             if (data.get("code").equals(200)) {
+                                 int k = 0;
+                                 for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").entrySet()) {
+                                     String key = entry.getKey();
+                                     Object value = entry.getValue();
+                                     if (k == 0) {
+                                         k = Integer.parseInt(key);
                                      }
-                                 } else {
-                                     if (b != null) {
-                                         ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
+                                     if (Integer.parseInt(key) < k) {
+                                         k = Integer.parseInt(key);
+                                         if (value != null) {
+                                             ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
+                                         }
+                                     } else {
+                                         if (value != null) {
+                                             ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
+                                         }
                                      }
                                  }
+                                 for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").entrySet()) {
+                                     String a = entry.getKey();
+                                     Object b = entry.getValue();
+                                     if (Integer.parseInt(a) < k) {
+                                         k = Integer.parseInt(a);
+                                         if (b != null) {
+                                             ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
+                                         }
+                                     } else {
+                                         if (b != null) {
+                                             ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
+                                         }
+                                     }
+                                 }
+                                 toggle2.check(R.id.this_week);
+                             } else {
+                                 launch.launch(new Intent(getContext(), Login.class));
                              }
-                             toggle2.check(R.id.this_week);
-                         } else {
-                             launch.launch(new Intent(getContext(), Login.class));
+                             break;
                          }
-
+                         case -1:{
+                             Toast.makeText(requireActivity(),"网络状态不佳",Toast.LENGTH_LONG).show();
+                             break;
+                         }
                      }
                  }
              };
@@ -175,21 +183,21 @@ public class DashboardFragment extends Fragment {
     }
     public void getTodayCourses(){
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=2024-2")
-                .addHeader("Cookie",cookie)
+                .header("Cookie",cookie)
 
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what=1;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
@@ -215,16 +223,16 @@ public class DashboardFragment extends Fragment {
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what=2;
-                if (response.body() != null) {
-                    msg.obj=response.body().string();
-                }
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
@@ -302,7 +310,7 @@ class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_date)).setText(data.get(position).getString("examDate"));
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_duration)).setText(String.format("%s分钟", data.get(position).getString("duration")));
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_time)).setText(data.get(position).getString("durationTime"));
-        ((MaterialButton)holder.itemView.findViewById(R.id.exam_class_time)).setText(String.format("第%d~%d节", startClassTimes, endClassTimes));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_class_time)).setText(String.format(Locale.CHINA,"第%d~%d节", startClassTimes, endClassTimes));
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_mode)).setText(String.format("考核方式：%s", data.get(position).getString("examMode")));
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_stage)).setText(String.format("考试阶段：%s", data.get(position).getString("examStage")));
     }

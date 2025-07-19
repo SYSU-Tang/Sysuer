@@ -85,9 +85,9 @@ public class News extends AppCompatActivity {
             public int getItemCount() {
                 return 4;
             }
-            public NewFragment getItem(int i){
-                return fs.get(i);
-            }
+//            public NewFragment getItem(int i){
+//                return fs.get(i);
+//            }
         }
         Adapter adapter = new Adapter(this);
         binding.pager.setAdapter(adapter);
@@ -100,42 +100,7 @@ public class News extends AppCompatActivity {
             }
         };
         binding.tabLayout.addOnTabSelectedListener(new
-        class SugAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-            final FragmentActivity context;
-            ArrayList<String> data = new ArrayList<>();
-            public SugAdp(FragmentActivity context){
-                super();
-                this.context=context;
-            }
-            public void add(String a){
-                int tmp=getItemCount();
-                System.out.println(a);
-                data.add(a);
-                notifyItemInserted(tmp);
-            }
-            public void clear(){
-                int tmp=getItemCount();
-                data.clear();
-                notifyItemRangeRemoved(0,tmp);
-            }
-            @NonNull
-            @Override
-            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                TextView view = (TextView) LayoutInflater.from(context).inflate(R.layout.sug_item, parent, false);
-                return new RecyclerView.ViewHolder(view) {
-                };
-            }
-            @Override
-            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-                ((TextView)holder.itemView).setText(data.get(position));
-                holder.itemView.setOnClickListener(v->{startActivity(new Intent(context, BrowseActivity.class).setData(Uri.parse(String.format("https://iportal.sysu.edu.cn/searchWeb/#/index?searchWord=%s&module=default&size=10&current=1&sortType=score&searchType=3",data.get(position)))), ActivityOptionsCompat.makeSceneTransitionAnimation(context,v,"miniapp").toBundle());});
-            }
 
-            @Override
-            public int getItemCount() {
-                return data.size();
-            }
-        });
 TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -151,7 +116,7 @@ TabLayout.OnTabSelectedListener() {
             public void onTabReselected(TabLayout.Tab tab) {
                 //adapter.getItem(binding.pager.getCurrentItem()).run.run();
             }
-        }
+        });
         SugAdp sug = new SugAdp(this);
         binding.sugs.setAdapter(sug);
         binding.sugs.setLayoutManager(new GridLayoutManager(this,1));
@@ -165,7 +130,7 @@ TabLayout.OnTabSelectedListener() {
                 if(isJson){return;}else{data = JSON.parseObject(json);}
                 if (data != null) {return;}
                 if (msg.what == 1) {
-                    Object code = null;
+                    Object code;
                     code = data.get("code");
                     System.out.println();
                     if (Objects.equals(code, "0000")) {
@@ -214,17 +179,51 @@ TabLayout.OnTabSelectedListener() {
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 1;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 1;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }
 }
 
+class SugAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+    final FragmentActivity context;
+    ArrayList<String> data = new ArrayList<>();
+    public SugAdp(FragmentActivity context){
+        super();
+        this.context=context;
+    }
+    public void add(String a){
+        int tmp=getItemCount();
+        System.out.println(a);
+        data.add(a);
+        notifyItemInserted(tmp);
+    }
+    public void clear(){
+        int tmp=getItemCount();
+        data.clear();
+        notifyItemRangeRemoved(0,tmp);
+    }
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        TextView view = (TextView) LayoutInflater.from(context).inflate(R.layout.sug_item, parent, false);
+        return new RecyclerView.ViewHolder(view) {
+        };
+    }
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        ((TextView)holder.itemView).setText(data.get(position));
+        holder.itemView.setOnClickListener(v-> context.startActivity(new Intent(context, BrowseActivity.class).setData(Uri.parse(String.format("https://iportal.sysu.edu.cn/searchWeb/#/index?searchWord=%s&module=default&size=10&current=1&sortType=score&searchType=3",data.get(position)))), ActivityOptionsCompat.makeSceneTransitionAnimation(context,v,"miniapp").toBundle()));
+    }
+
+    @Override
+    public int getItemCount() {
+        return data.size();
+    }
+    }

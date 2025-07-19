@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -87,9 +88,14 @@ public class NewFragment extends Fragment {
                     String json = rdata.getString("data");
                     JSONObject data;
                     if(isJson){return;}else{data = JSON.parseObject(json);}
+                    if (data==null){
+                        return;
+                    }
                     switch (msg.what) {
+                        case -1:
+                            Toast.makeText(requireContext(),"网络状态不佳", Toast.LENGTH_LONG).show();
+                            return;
                         case 1:
-                            //System.out.println(msg.obj);
                             break;
                         case 2:
                             Integer code = data.getInteger("code");
@@ -190,20 +196,20 @@ public class NewFragment extends Fragment {
                 .header("Cookie", cookie).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 3;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 3;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }
@@ -217,31 +223,34 @@ public class NewFragment extends Fragment {
                 .header("Cookie", cookie).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 2;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 2;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }
 
-    public void getAuthorization() {
+    void getAuthorization() {
         http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/auth-center/account/zscasLogin?clientid=zssearch_100050;zsshow")
                 .header("Cookie", cookie)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0")
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
 
             @Override
@@ -249,10 +258,8 @@ public class NewFragment extends Fragment {
                 Message msg = new Message();
                 msg.what = 1;
                 Bundle data = new Bundle();
-                data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                if (response.body() != null) {
-                    data.putString("data",response.body().string());
-                }
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data", response.body().string());
                 msg.setData(data);
                 handler.sendMessage(msg);
             }
@@ -266,18 +273,19 @@ public class NewFragment extends Fragment {
                 .header("Cookie", cookie).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 4;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 4;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }
@@ -288,18 +296,19 @@ public class NewFragment extends Fragment {
                 .header("Cookie", cookie).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 5;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 5;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }
@@ -310,18 +319,19 @@ public class NewFragment extends Fragment {
                 .header("Cookie", cookie).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what=-1;
+                handler.sendMessage(message);
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 5;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 5;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
             }
         });
     }

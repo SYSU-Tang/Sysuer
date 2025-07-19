@@ -172,7 +172,7 @@ public class AgendaActivity extends AppCompatActivity {
                                     String location = (campus == null ? "" : campus) + "-" + (teachingBuildingName == null ? "" : teachingBuildingName) + "-" + (classroomNum == null ? "" : classroomNum);
                                     setDialogDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
                                     detailDialog.show();
-                                    setDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
+                                    //setDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
                                 });
                                 ((MaterialTextView) item.findViewById(R.id.content)).setText(String.format("%s/%s-%s", course, teachingBuildingName == null ? "" : teachingBuildingName, classroomNum == null ? "" : classroomNum));
                                 GridLayout.LayoutParams gl = (GridLayout.LayoutParams) item.getLayoutParams();
@@ -217,7 +217,7 @@ public class AgendaActivity extends AppCompatActivity {
                             binding.weekTime.setText(String.format("第%d周", currentWeek));
                             getTable(currentTerm, currentWeek);
                             break;
-                        } case 0:{
+                        } case -1:{
                             Toast.makeText(AgendaActivity.this,"请检查网络",Toast.LENGTH_LONG).show();
                         }
                     }
@@ -237,18 +237,16 @@ public class AgendaActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=0;
+                msg.what=-1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what=5;
-                    msg.obj=response.body().string();
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what=5;
+                msg.obj=response.body().string();
+                handler.sendMessage(msg);
             }
         });
     }
@@ -259,18 +257,16 @@ public class AgendaActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=0;
+                msg.what=-1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what=4;
-                    msg.obj=response.body().string();
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what=4;
+                msg.obj=response.body().string();
+                handler.sendMessage(msg);
             }
         });
     }
@@ -295,17 +291,15 @@ public class AgendaActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=0;
+                msg.what=-1;
                 handler.sendMessage(msg);
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what=3;
-                    msg.obj=response.body().string();
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what=3;
+                msg.obj=response.body().string();
+                handler.sendMessage(msg);
             }
         });
     }
@@ -315,12 +309,12 @@ public class AgendaActivity extends AppCompatActivity {
         ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.teacher))).setText(teacher);
         ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.classTime))).setText(classTime);
     }
-    void setDetail(String course,String location,String teacher,String classTime){
-//        ((MaterialTextView) findViewById(R.id.course)).setText(course);
-//        ((MaterialTextView) findViewById(R.id.location)).setText(location);
-//        ((MaterialTextView) findViewById(R.id.teacher)).setText(teacher);
-//        ((MaterialTextView) findViewById(R.id.classTime)).setText(classTime);
-    }
+//    void setDetail(String course,String location,String teacher,String classTime){
+////        ((MaterialTextView) findViewById(R.id.course)).setText(course);
+////        ((MaterialTextView) findViewById(R.id.location)).setText(location);
+////        ((MaterialTextView) findViewById(R.id.teacher)).setText(teacher);
+////        ((MaterialTextView) findViewById(R.id.classTime)).setText(classTime);
+//    }
     void changeWeek(int newWeek){
         if(newWeek>=0){
             int currentWeek = weeks.get(newWeek);
@@ -338,17 +332,15 @@ public class AgendaActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=0;
+                msg.what=-1;
                 handler.sendMessage(msg);
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what=1;
-                    msg.obj=response.body().string();
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what=1;
+                msg.obj=response.body().string();
+                handler.sendMessage(msg);
             }
         });
     }
@@ -359,17 +351,15 @@ public class AgendaActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=0;
+                msg.what=-1;
                 handler.sendMessage(msg);
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what=2;
-                    msg.obj=response.body().string();
-                    handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what=2;
+                msg.obj=response.body().string();
+                handler.sendMessage(msg);
             }
         });
     }
