@@ -29,6 +29,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.Login;
+import com.sysu.edu.databinding.FragmentDashboardBinding;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -60,27 +61,25 @@ public class DashboardFragment extends Fragment {
     private ActivityResultLauncher<Intent> launch;
     private Adp adp;
     private MaterialButtonToggleGroup toggle;
-    private MaterialTextView time;
     RecyclerView examList;
     ExamAdp examAdp;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-         if(fragment==null){
-             fragment= inflater.inflate(R.layout.fragment_dashboard,container,false);
-             RecyclerView list = fragment.findViewById(R.id.course_list);
-             examList = fragment.findViewById(R.id.exam_list);
-            time=fragment.findViewById(R.id.time);
+        if(fragment==null){
+            FragmentDashboardBinding binding = FragmentDashboardBinding.inflate(inflater);
+            fragment= binding.getRoot();
+            RecyclerView list = binding.courseList;
+            examList = binding.examList;
             launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
                 if(o.getResultCode()== Activity.RESULT_OK){
                     cookie= requireActivity().getSharedPreferences("privacy",0).getString("Cookie","");
                     getTodayCourses();getExams();
                 }
             });
-            ((MaterialTextView)fragment.findViewById(R.id.date)).setText(String.format("%s 星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), (new String[]{"日","一","二","三","四","五","六"})[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]));
-            toggle=fragment.findViewById(R.id.toggle);
-            MaterialButtonToggleGroup toggle2 = fragment.findViewById(R.id.toggle2);
+            (binding.date).setText(String.format("%s 星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), (new String[]{"日","一","二","三","四","五","六"})[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]));
+            toggle=binding.toggle;
             LinearLayoutManager lm2 = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
             LinearLayoutManager lm = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
             list.addItemDecoration(new DividerItemDecoration(this.requireContext(),0));
@@ -88,96 +87,96 @@ public class DashboardFragment extends Fragment {
             examList.addItemDecoration(new DividerItemDecoration(this.requireContext(),0));
             examList.setLayoutManager(lm2);
             new Handler().post(new Runnable() {
-                 @Override
-                 public void run() {
-                     time.setText(new SimpleDateFormat("hh:mm:ss",Locale.CHINESE).format(new Date()));
-                     handler.postDelayed(this,1000);
-                 }
-             });
-             cookie=requireActivity().getSharedPreferences("privacy",0).getString("Cookie","");
-             getTodayCourses();getExams();
-             adp=new Adp(this.requireActivity());
-             list.setAdapter(adp);
-             examAdp=new ExamAdp(this.requireActivity());
-             examList.setAdapter(examAdp);
-             toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-                 if(group.getCheckedButtonId()==checkedId){
-                 adp.set(checkedId==R.id.today?todayCourse:tomorrowCourse);
-                 fragment.findViewById(R.id.noClass).setVisibility(adp.getItemCount()==0?View.VISIBLE:View.GONE);
-                 }
-             });
-             toggle2.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-                 if(group.getCheckedButtonId()==checkedId){
-                     examAdp.set(checkedId==R.id.this_week?thisWeekExams:nextWeekExams);
-                     fragment.findViewById(R.id.no_exam).setVisibility(examAdp.getItemCount()==0?View.VISIBLE:View.GONE);
-                 }
-             });
-             handler=new Handler(Looper.getMainLooper()){
-                 @Override
-                 public void handleMessage(@NonNull Message msg) {
-                     switch (msg.what) {
-                         case 1: {
-                             JSONObject data = JSON.parseObject((String) msg.obj);
-                             if (data.get("code").equals(200)) {
-                                 data.getJSONArray("data").forEach(e -> {
-                                     String flag = (String) ((JSONObject) e).get("useflag");
-                                     addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
-                                             , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
-                                 });
-                                 toggle.check(R.id.today);
-                             } else {
-                                 launch.launch(new Intent(getContext(), Login.class));
-                             }
-                             break;
-                         }
-                         case 2: {
-                             JSONObject data = JSON.parseObject((String) msg.obj);
-                             if (data.get("code").equals(200)) {
-                                 int k = 0;
-                                 for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").entrySet()) {
-                                     String key = entry.getKey();
-                                     Object value = entry.getValue();
-                                     if (k == 0) {
-                                         k = Integer.parseInt(key);
-                                     }
-                                     if (Integer.parseInt(key) < k) {
-                                         k = Integer.parseInt(key);
-                                         if (value != null) {
-                                             ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
-                                         }
-                                     } else {
-                                         if (value != null) {
-                                             ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
-                                         }
-                                     }
-                                 }
-                                 for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").entrySet()) {
-                                     String a = entry.getKey();
-                                     Object b = entry.getValue();
-                                     if (Integer.parseInt(a) < k) {
-                                         k = Integer.parseInt(a);
-                                         if (b != null) {
-                                             ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
-                                         }
-                                     } else {
-                                         if (b != null) {
-                                             ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
-                                         }
-                                     }
-                                 }
-                                 toggle2.check(R.id.this_week);
-                             } else {
-                                 launch.launch(new Intent(getContext(), Login.class));
-                             }
-                             break;
-                         }
-                         case -1:{
-                             Toast.makeText(requireActivity(),"网络状态不佳",Toast.LENGTH_LONG).show();
-                             break;
-                         }
-                     }
-                 }
-             };
+                @Override
+                public void run() {
+                    binding.time.setText(new SimpleDateFormat("hh:mm:ss",Locale.CHINESE).format(new Date()));
+                    handler.postDelayed(this,1000);
+                }
+            });
+            cookie=requireActivity().getSharedPreferences("privacy",0).getString("Cookie","");
+            getTodayCourses();getExams();
+            adp=new Adp(this.requireActivity());
+            list.setAdapter(adp);
+            examAdp=new ExamAdp(this.requireActivity());
+            examList.setAdapter(examAdp);
+            toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                if(group.getCheckedButtonId()==checkedId){
+                    adp.set(checkedId==R.id.today?todayCourse:tomorrowCourse);
+                    fragment.findViewById(R.id.noClass).setVisibility(adp.getItemCount()==0?View.VISIBLE:View.GONE);
+                }
+            });
+            binding.toggle2.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                if(group.getCheckedButtonId()==checkedId){
+                    examAdp.set(checkedId==R.id.this_week?thisWeekExams:nextWeekExams);
+                    fragment.findViewById(R.id.no_exam).setVisibility(examAdp.getItemCount()==0?View.VISIBLE:View.GONE);
+                }
+            });
+            handler=new Handler(Looper.getMainLooper()){
+                @Override
+                public void handleMessage(@NonNull Message msg) {
+                    switch (msg.what) {
+                        case 1: {
+                            JSONObject data = JSON.parseObject((String) msg.obj);
+                            if (data.get("code").equals(200)) {
+                                data.getJSONArray("data").forEach(e -> {
+                                    String flag = (String) ((JSONObject) e).get("useflag");
+                                    addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
+                                            , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
+                                });
+                                toggle.check(R.id.today);
+                            } else {
+                                launch.launch(new Intent(getContext(), Login.class));
+                            }
+                            break;
+                        }
+                        case 2: {
+                            JSONObject data = JSON.parseObject((String) msg.obj);
+                            if (data.get("code").equals(200)) {
+                                int k = 0;
+                                for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").entrySet()) {
+                                    String key = entry.getKey();
+                                    Object value = entry.getValue();
+                                    if (k == 0) {
+                                        k = Integer.parseInt(key);
+                                    }
+                                    if (Integer.parseInt(key) < k) {
+                                        k = Integer.parseInt(key);
+                                        if (value != null) {
+                                            ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
+                                        }
+                                    } else {
+                                        if (value != null) {
+                                            ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
+                                        }
+                                    }
+                                }
+                                for (Map.Entry<String, Object> entry : data.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").entrySet()) {
+                                    String a = entry.getKey();
+                                    Object b = entry.getValue();
+                                    if (Integer.parseInt(a) < k) {
+                                        k = Integer.parseInt(a);
+                                        if (b != null) {
+                                            ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
+                                        }
+                                    } else {
+                                        if (b != null) {
+                                            ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
+                                        }
+                                    }
+                                }
+                                binding.toggle2.check(R.id.this_week);
+                            } else {
+                                launch.launch(new Intent(getContext(), Login.class));
+                            }
+                            break;
+                        }
+                        case -1:{
+                            Toast.makeText(requireActivity(),"网络状态不佳",Toast.LENGTH_LONG).show();
+                            break;
+                        }
+                    }
+                }
+            };
         }
         return fragment;
     }
@@ -255,26 +254,26 @@ class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         data.clear();
         notifyItemRangeRemoved(0,temp);
     }
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.course_item, parent, false)){};
-        }
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.course_item, parent, false)){};
+    }
 
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            holder.itemView.setOnClickListener(v -> {
-            });
-            ((MaterialTextView)holder.itemView.findViewById(R.id.course_title)).setText(data.get(position).get("courseName"));
-            ((MaterialButton)holder.itemView.findViewById(R.id.location_container)).setText(data.get(position).get("location"));
-            ((MaterialButton)holder.itemView.findViewById(R.id.time_container)).setText(data.get(position).get("time"));
-            ((MaterialButton)holder.itemView.findViewById(R.id.teacher)).setText(data.get(position).get("teacher"));
-            ((MaterialButton)holder.itemView.findViewById(R.id.course)).setText(data.get(position).get("course"));
-        }
-        @Override
-        public int getItemCount() {
-            return data.size();
-        }
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        holder.itemView.setOnClickListener(v -> {
+        });
+        ((MaterialTextView)holder.itemView.findViewById(R.id.course_title)).setText(data.get(position).get("courseName"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.location_container)).setText(data.get(position).get("location"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.time_container)).setText(data.get(position).get("time"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.teacher)).setText(data.get(position).get("teacher"));
+        ((MaterialButton)holder.itemView.findViewById(R.id.course)).setText(data.get(position).get("course"));
+    }
+    @Override
+    public int getItemCount() {
+        return data.size();
+    }
 }
 class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;

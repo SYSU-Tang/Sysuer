@@ -25,12 +25,9 @@ public class TrainingScheduleFragment extends Fragment {
 
     FragmentTrainingScheduleBinding binding;
     private View view;
-
     public TrainingScheduleFragment() {
         // Required empty public constructor
     }
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +44,6 @@ public class TrainingScheduleFragment extends Fragment {
             binding.college.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
                 }
 
                 @Override

@@ -23,6 +23,9 @@
         android:theme="@style/Theme.中大儿"
         tools:targetApi="36">
         <activity
+            android:name=".extra.SettingActivity"
+            android:exported="false" />
+        <activity
             android:name=".extra.InfoActivity"
             android:exported="true" />
         <activity
@@ -37,9 +40,6 @@
         <activity
             android:name=".academic.TrainingSchedule"
             android:exported="false" />
-        <activity
-            android:name=".more.Setting"
-            android:exported="false"/>
         <activity
             android:name=".onlineClass.OnlineClassActivity"
             android:exported="false" />
@@ -68,6 +68,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

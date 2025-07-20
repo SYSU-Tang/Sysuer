@@ -25,6 +25,8 @@ import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
 import com.sysu.edu.academic.Grade;
 import com.sysu.edu.academic.TrainingSchedule;
+import com.sysu.edu.databinding.FragmentServiceBinding;
+import com.sysu.edu.databinding.ServiceBoxBinding;
 import com.sysu.edu.news.News;
 import com.sysu.edu.system.PEPreservation;
 
@@ -36,8 +38,9 @@ public class ServiceFragment extends Fragment {
     @Override
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View fragment=inflater.inflate(R.layout.fragment_service,container,false);
-        service_container=fragment.findViewById(R.id.service_container);
+        FragmentServiceBinding binding = FragmentServiceBinding.inflate(inflater);
+        View fragment=binding.getRoot();
+        service_container=binding.serviceContainer;
         String[] titles = new String[]{"讯息","系统", "官网", "官媒","教务","学习", "出行", "宿舍"};
         String[][] items = new String[][]{{"资讯门户"//,"学校活动","校园集市"
         },
@@ -113,9 +116,10 @@ public class ServiceFragment extends Fragment {
     }
     public void initBox(LayoutInflater inflater, String box_title, String[] items, View.OnClickListener[] actions)
     {
-        LinearLayout box= (LinearLayout) inflater.inflate(R.layout.service_box,service_container,false);
-        TextView title=box.findViewById(R.id.service_box_title);
-        ChipGroup items_container=box.findViewById(R.id.service_box_items);
+        ServiceBoxBinding b=ServiceBoxBinding.inflate(inflater);
+        LinearLayout box= b.getRoot();
+        TextView title=b.serviceBoxTitle;
+        ChipGroup items_container=b.serviceBoxItems;
         title.setText(box_title);
         ViewCompat.setOnApplyWindowInsetsListener(box, (v, insets) -> {
             // Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

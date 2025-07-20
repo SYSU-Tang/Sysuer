@@ -1,12 +1,18 @@
 <resources>
     <!-- Reply Preference -->
-    <string-array name="reply_entries">
-        <item>Reply</item>
-        <item>Reply to all</item>
+    <string-array name="theme" >
+        <item>明亮</item>
+        <item>黑暗</item>
+        <item>跟随系统</item>
     </string-array>
-
-    <string-array name="reply_values">
-        <item>reply</item>
-        <item>reply_all</item>
+    <string-array name="language" >
+        <item>中文</item>
+        <item>English</item>
+        <item>跟随系统</item>
+    </string-array>
+    <string-array name="home" >
+        <item>活动</item>
+        <item>服务</item>
+        <item>我的</item>
     </string-array>
 </resources>
