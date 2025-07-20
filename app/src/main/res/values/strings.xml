@@ -97,5 +97,8 @@
     <string name="year">学年</string>
     <string name="trainType">培养类型</string>
     <string name="calendar">校历</string>
+    <string name="week17">17周</string>
+    <string name="week18">18周</string>
+    <string name="last">最近</string>
 
 </resources>

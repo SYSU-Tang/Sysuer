@@ -1,7 +1,6 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
-
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory app:title="我的">
-
         <Preference
             app:icon="@drawable/account"
             app:title="个人中心"/>
@@ -15,7 +14,13 @@
             app:title="设置" />
         <Preference
             app:icon="@drawable/info"
-            app:title="关于"/>
+            app:title="关于">
+            <intent android:action="android.intent.action.VIEW"
+                android:targetClass="com.sysu.edu.extra.InfoActivity"
+                android:targetPackage="com.sysu.edu">
+            </intent>
+
+        </Preference>
         <Preference
             app:icon="@drawable/help"
             app:title="帮助"/>

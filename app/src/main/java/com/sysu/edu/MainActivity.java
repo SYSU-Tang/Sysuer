@@ -1,6 +1,5 @@
 package com.sysu.edu;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
@@ -46,9 +45,7 @@ public class MainActivity extends AppCompatActivity {
         //startActivity(new Intent(this, Setting.class));
         //getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main).setArguments();
     //setSupportActionBar(findViewById(R.id.toolbar));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
     }
 

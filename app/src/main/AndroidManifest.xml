@@ -4,6 +4,14 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <queries>
+        <package android:name="com.tencent.wework" />
+
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,8 +23,11 @@
         android:theme="@style/Theme.中大儿"
         tools:targetApi="36">
         <activity
-            android:name=".academic.Grade"
+            android:name=".extra.InfoActivity"
             android:exported="true" />
+        <activity
+            android:name=".academic.Grade"
+            android:exported="false" />
         <activity
             android:name=".system.PEPreservation"
             android:exported="false" />
@@ -63,10 +74,5 @@
             </intent-filter>
         </activity>
     </application>
-<queries>
-    <package android:name="com.tencent.wework"/>
-    <intent>
-        <action android:name="android.intent.action.MAIN"/>
-    </intent>
-</queries>
+
 </manifest>

@@ -20,6 +20,5 @@
     <fragment
         android:id="@+id/navigation_account"
         android:name="com.sysu.edu.ui.account.AccountFragment"
-        android:label="@string/menu_account"
-        tools:layout="@layout/fragment_account" />
+        android:label="@string/menu_account"/>
 </navigation>
