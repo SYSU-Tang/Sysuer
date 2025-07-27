@@ -1,21 +1,24 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory app:title="外观">
-        <DropDownPreference
+        <com.sysu.edu.preference.Preference
             app:entries="@array/theme"
-            app:entryValues="@array/theme"
+            app:entryValues="@array/value"
             app:icon="@drawable/theme"
+            app:key="theme"
             app:summary="跟随系统"
             app:title="主题"/>
-        <DropDownPreference
+        <com.sysu.edu.preference.Preference
             app:entries="@array/language"
-            app:entryValues="@array/language"
+            app:entryValues="@array/value"
+            app:key="language"
             app:icon="@drawable/language"
             app:summary="跟随系统"
             app:title="语言"/>
-        <DropDownPreference
+        <com.sysu.edu.preference.Preference
+            app:entryValues="@array/value"
             app:entries="@array/home"
-            app:entryValues="@array/home"
+            app:key="home"
             app:icon="@drawable/home"
             app:summary="活动"
             app:title="首页"/>

@@ -20,11 +20,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".Application"
         android:theme="@style/Theme.中大儿"
         tools:targetApi="36">
         <activity
+            android:name=".extra.Privacy"
+            android:exported="true" />
+        <activity
             android:name=".extra.SettingActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".extra.InfoActivity"
             android:exported="true" />
@@ -44,7 +48,7 @@
             android:name=".onlineClass.OnlineClassActivity"
             android:exported="false" />
         <activity
-            android:name=".academic.Login"
+            android:name=".academic.LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.中大儿" />
         <activity
@@ -64,7 +68,7 @@
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize"
+            android:configChanges="orientation|screenSize|uiMode"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

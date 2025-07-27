@@ -23,7 +23,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.sysu.edu.databinding.LoginBinding;
 
-public class Login extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     String sessionId;
     Handler handler;
@@ -61,7 +61,7 @@ public class Login extends AppCompatActivity {
                 // CookieManager.getInstance().getCookie(url);
                 sessionId=CookieManager.getInstance().getCookie(url);
                 if (url.startsWith("https://jwxt.sysu.edu.cn")){
-                    if(!isEmpty()){
+                    if(isEmpty()){
                         setResult(RESULT_OK);
                         SharedPreferences.Editor edit = privacy.edit();
                         edit.putString("Cookie",sessionId).apply();
@@ -73,7 +73,7 @@ public class Login extends AppCompatActivity {
                 }
                 else if(getSharedPreferences("privacy",MODE_PRIVATE).getString("Cookie","").isEmpty()||url.startsWith("https://cas.sysu.edu.cn/cas/login")){
                     binding.loginButton.setEnabled(true);
-                    Glide.with(Login.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).override(92*3,34*3).into(binding.ca);
+                    Glide.with(LoginActivity.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).override(92*3,34*3).into(binding.ca);
                 }
 
 //                web.evaluateJavascript("(function(){return document.cookie;})()", new ValueCallback<String>() {
@@ -97,7 +97,7 @@ public class Login extends AppCompatActivity {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         //web.getSettings().
         // captcha=(TextInputEditText) findViewById(R.id.captcha);
-        binding.ca.setOnClickListener(v -> {binding.loginButton.setEnabled(true);Glide.with(Login.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into((ImageView)v);});
+        binding.ca.setOnClickListener(v -> {binding.loginButton.setEnabled(true);Glide.with(LoginActivity.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into((ImageView)v);});
         handler=new Handler(getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -135,7 +135,7 @@ public class Login extends AppCompatActivity {
 //            }
 //        });
         binding.loginButton.setOnClickListener(v -> {
-            if(!isEmpty()){
+            if(isEmpty()){
                 binding.loginButton.setEnabled(false);
                 web.evaluateJavascript("(function(){document.querySelector(\"#username\").value=\""+username+"\";document.querySelector(\"#password\").value=\""+password+"\";document.querySelector(\"#captcha\").value=\""+ binding.captcha.getText() +"\";var sub=document.querySelector(\".btn-submit\");sub.removeAttribute(\"disabled\");sub.click();"+"})()", null);}
 //                FormBody form = new FormBody.Builder().add("username", "tangxb6").add("password", "Tang@1245").add("captcha", String.valueOf(captcha.getText()))
@@ -182,6 +182,6 @@ public class Login extends AppCompatActivity {
     boolean isEmpty(){
         username = String.valueOf(binding.username.getText());
         password = String.valueOf(binding.password.getText());
-        return username.isEmpty()||password.isEmpty();
+        return !username.isEmpty() && !password.isEmpty();
     }
 }

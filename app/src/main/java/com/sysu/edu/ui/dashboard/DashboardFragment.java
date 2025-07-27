@@ -28,7 +28,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
-import com.sysu.edu.academic.Login;
+import com.sysu.edu.academic.LoginActivity;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
 
 import java.io.IOException;
@@ -125,7 +125,7 @@ public class DashboardFragment extends Fragment {
                                 });
                                 toggle.check(R.id.today);
                             } else {
-                                launch.launch(new Intent(getContext(), Login.class));
+                                launch.launch(new Intent(getContext(), LoginActivity.class));
                             }
                             break;
                         }
@@ -166,7 +166,7 @@ public class DashboardFragment extends Fragment {
                                 }
                                 binding.toggle2.check(R.id.this_week);
                             } else {
-                                launch.launch(new Intent(getContext(), Login.class));
+                                launch.launch(new Intent(getContext(), LoginActivity.class));
                             }
                             break;
                         }

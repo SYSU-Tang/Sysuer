@@ -3,7 +3,10 @@
     <PreferenceCategory app:title="我的">
         <Preference
             app:icon="@drawable/account"
-            app:title="个人中心"/>
+            app:title="个人中心">
+            <intent android:targetClass="com.sysu.edu.extra.Privacy"
+                android:targetPackage="com.sysu.edu"/>
+        </Preference>
         <Preference
             app:isPreferenceVisible="false"
             app:title="数据"/>
@@ -11,9 +14,10 @@
     <PreferenceCategory app:title="软件">
         <Preference
             app:icon="@drawable/setting"
+            android:persistent="false"
+            app:key="setting"
             app:title="设置" >
-            <intent android:targetClass="com.sysu.edu.extra.SettingActivity"
-                android:targetPackage="com.sysu.edu"/>
+
         </Preference>
         <Preference
             app:icon="@drawable/info"

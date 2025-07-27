@@ -153,7 +153,7 @@ public class Grade extends AppCompatActivity {
                 }
                 else {
                     Toast.makeText(Grade.this,"请先登录",Toast.LENGTH_LONG).show();
-                    launch.launch(new Intent(Grade.this, Login.class));
+                    launch.launch(new Intent(Grade.this, LoginActivity.class));
                 }
             }
         };

@@ -78,11 +78,11 @@ public class Evaluation extends AppCompatActivity {
                         adp.set(evals);
                     }
                     else {
-                        launch.launch(new Intent(Evaluation.this, Login.class));
+                        launch.launch(new Intent(Evaluation.this, LoginActivity.class));
                     }
                 } else if (msg.what==-1) {
                     Toast.makeText(Evaluation.this,"网络状态不佳",Toast.LENGTH_LONG).show();
-                    return;
+
                 }
             }
         };

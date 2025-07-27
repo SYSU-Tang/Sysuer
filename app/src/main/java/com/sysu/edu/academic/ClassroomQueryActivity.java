@@ -222,7 +222,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     }
                 }else {
                     Toast.makeText(ClassroomQueryActivity.this,"请先登录",Toast.LENGTH_LONG).show();
-                    launch.launch(new Intent(ClassroomQueryActivity.this, Login.class));
+                    launch.launch(new Intent(ClassroomQueryActivity.this, LoginActivity.class));
                 }
             }
         };

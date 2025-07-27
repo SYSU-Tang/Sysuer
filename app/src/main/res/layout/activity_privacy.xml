@@ -20,12 +20,12 @@
                 app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_collapseMode="pin"
                 app:navigationIcon="?homeAsUpIndicator"
-                app:title="@string/setting"/>
+                app:title="@string/privacy"/>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment"
-        android:name="com.sysu.edu.extra.ui.SettingFragment"
+        android:name="com.sysu.edu.extra.ui.PrivacyFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>

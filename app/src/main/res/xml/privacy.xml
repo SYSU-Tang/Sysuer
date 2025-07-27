@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+        <Preference
+            app:icon="@drawable/account"
+            app:key="name"
+            app:summary="Name"
+            app:title="姓名">
+        </Preference>
+        <Preference
+            app:icon="@drawable/account"
+            app:key="netid"
+            app:summary="NetID"
+            app:title="NetID">
+        </Preference>
+        <Preference
+            app:icon="@drawable/account"
+            app:key="account"
+            app:summary="Account"
+            app:title="学工号">
+        </Preference>
+</androidx.preference.PreferenceScreen>

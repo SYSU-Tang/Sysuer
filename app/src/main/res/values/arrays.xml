@@ -5,6 +5,11 @@
         <item>黑暗</item>
         <item>跟随系统</item>
     </string-array>
+    <string-array name="value" >
+    <item>0</item>
+    <item>1</item>
+    <item>2</item>
+</string-array>
     <string-array name="language" >
         <item>中文</item>
         <item>English</item>

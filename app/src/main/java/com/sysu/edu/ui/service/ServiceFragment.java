@@ -13,7 +13,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.chip.Chip;
@@ -121,11 +120,11 @@ public class ServiceFragment extends Fragment {
         TextView title=b.serviceBoxTitle;
         ChipGroup items_container=b.serviceBoxItems;
         title.setText(box_title);
-        ViewCompat.setOnApplyWindowInsetsListener(box, (v, insets) -> {
-            // Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(48, 24, 48, 24);
-            return insets;
-        });
+//        ViewCompat.setOnApplyWindowInsetsListener(box, (v, insets) -> {
+//            // Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(48, 24, 48, 24);
+//            return insets;
+//        });
         for(int i=0;i<items.length;i++){
             Chip item = (Chip) inflater.inflate(R.layout.service_item,items_container,false);
             item.setOnClickListener(

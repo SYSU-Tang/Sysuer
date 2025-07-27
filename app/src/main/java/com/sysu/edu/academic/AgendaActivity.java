@@ -223,7 +223,7 @@ public class AgendaActivity extends AppCompatActivity {
                     }
                 }else{
                     Toast.makeText(AgendaActivity.this,"请登录",Toast.LENGTH_LONG).show();
-                    launch.launch(new Intent(AgendaActivity.this, Login.class));
+                    launch.launch(new Intent(AgendaActivity.this, LoginActivity.class));
                 }
             }
         };

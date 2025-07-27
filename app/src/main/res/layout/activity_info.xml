@@ -8,6 +8,7 @@
     tools:context=".extra.InfoActivity">
 <com.google.android.material.appbar.AppBarLayout
     android:layout_width="match_parent"
+    android:id="@+id/appbar"
     android:layout_height="wrap_content">
     <com.google.android.material.appbar.CollapsingToolbarLayout
         style="@style/Widget.Material3.CollapsingToolbar.Medium"
@@ -19,6 +20,7 @@
             android:layout_width="160dp"
             android:layout_height="160dp"
             android:layout_gravity="center"
+            android:contentDescription="A ICON OF SYSU"
             android:padding="20dp"
             android:scaleType="centerCrop"
             android:src="@mipmap/ic_launcher"

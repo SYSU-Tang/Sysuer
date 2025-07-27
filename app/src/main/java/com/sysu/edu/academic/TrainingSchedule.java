@@ -73,7 +73,7 @@ public class TrainingSchedule extends AppCompatActivity {
                 if(data.getInteger("code")==200){
                     schedule.deal(msg.what,data);
                 }else {
-                    launch.launch(new Intent(TrainingSchedule.this, Login.class));
+                    launch.launch(new Intent(TrainingSchedule.this, LoginActivity.class));
                 }
                 super.handleMessage(msg);
             }

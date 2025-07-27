@@ -1,6 +1,15 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
-    <style name="Theme.中大儿" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Theme.中大儿" parent="@style/Theme.SYSUER.Light">
+        <item name="dropdownPreferenceStyle">
+            @style/preference
+        </item>
+        <item name="android:windowAnimationStyle">@style/fade</item>
+    </style>
+    <style name="Theme.SYSUER.Light" parent="Theme.Material3.Light.NoActionBar">
+        <!--        <item name="preferenceFragmentStyle">-->
+        <!--            @style/PF-->
+        <!--        </item>-->
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -13,7 +22,28 @@
         <item name="android:statusBarColor">@color/white</item>
         <!-- Customize your theme here. -->
     </style>
+    <style name="preference" parent="@style/Preference.DropDown.Material">
 
+    </style>
+    <style name="spinner" parent="Widget.AppCompat.TextView">
+        <item name="android:textColor">
+
+        </item>
+    </style>
+    <style name="fade">
+        <item name="android:activityOpenEnterAnimation">
+            @android:anim/fade_in
+        </item>
+        <item name="android:activityCloseEnterAnimation">
+            @android:anim/fade_in
+        </item>
+        <item name="android:activityOpenExitAnimation">
+            @android:anim/fade_out
+        </item>
+        <item name="android:activityCloseExitAnimation">
+            @android:anim/fade_out
+        </item>
+    </style>
     <style name="Theme.中大儿.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -22,7 +52,7 @@
     <style name="Theme.中大儿.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.中大儿.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-  <!-- Base application theme. -->
+    <!-- Base application theme. -->
     <style name="Base.Theme.中大儿" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
