@@ -2,6 +2,7 @@ package com.sysu.edu;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.sysu.edu.preference.Language;
 import com.sysu.edu.preference.ThemeHelper;
 
 public class Application extends android.app.Application {
@@ -11,6 +12,6 @@ public class Application extends android.app.Application {
         super.onCreate();
         ThemeHelper th = new ThemeHelper(this);
         AppCompatDelegate.setDefaultNightMode(th.getThemeMode());
-        LanguageUtil.setLanguage(this);
+        Language.setLanguage(this);
     }
 }

@@ -3,7 +3,7 @@
     <string name="menu_account">我的</string>
     <string name="menu_service">服务</string>
     <string name="menu_activity">活动</string>
-    <string name="today_courses">课程</string>
+    <string name="course">课程</string>
     <string name="location">位置</string>
     <string name="time">时间</string>
     <string name="course_name">课程名称</string>

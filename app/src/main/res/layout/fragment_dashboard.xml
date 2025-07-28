@@ -51,7 +51,7 @@
                 android:layout_weight="1"
                 android:drawablePadding="8dp"
                 android:tag="card_title"
-                android:text="@string/today_courses"
+                android:text="@string/course"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 app:drawableLeftCompat="@drawable/course"/>
             <com.google.android.material.button.MaterialButtonToggleGroup

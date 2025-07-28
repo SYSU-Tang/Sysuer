@@ -15,6 +15,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationBarView;
 import com.sysu.edu.databinding.ActivityMainBinding;
+import com.sysu.edu.preference.Language;
 
 import java.util.Objects;
 
@@ -46,6 +47,6 @@ public class MainActivity extends AppCompatActivity {
     //setSupportActionBar(findViewById(R.id.toolbar));
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         if(savedInstanceState==null){navController.navigate(new int[]{R.id.navigation_activity,R.id.navigation_service,R.id.navigation_account}[Integer.parseInt(getPreferences(Context.MODE_PRIVATE).getString("home","0"))]);}
-        LanguageUtil.setLanguage(this);
+        Language.setLanguage(this);
     }
 }
