@@ -97,7 +97,6 @@ public class CalendarActivity extends AppCompatActivity {
                                 Glide.with(CalendarActivity.this).load("https://jwb.sysu.edu.cn/"+n.group(1)).skipMemoryCache(false).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(image);
                                 binding.content.addView(image);
                             }
-                            System.out.println(top);
                             binding.progressBar.setVisibility(View.GONE);
                         }
                         break;

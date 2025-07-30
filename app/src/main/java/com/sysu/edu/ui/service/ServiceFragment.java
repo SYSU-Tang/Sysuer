@@ -23,6 +23,7 @@ import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.academic.BrowseActivity;
 import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
+import com.sysu.edu.academic.CourseSelection;
 import com.sysu.edu.academic.Grade;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
@@ -50,7 +51,7 @@ public class ServiceFragment extends Fragment {
                 {"体育场馆预定系统","学工系统","教务系统","中山大学统一门户","大学服务中心","财务信息系统"},
                 {"中山大学官网","本科招生","研究生招生","人才招聘","百年校庆","公务电子邮件系统","博物馆","图书馆","校友会"},
                 {"逸仙码","企业微信","中大招生"},
-                {a(R.string.evaluation),"选课",a(R.string.agenda),a(R.string.exam),a(R.string.calendar),a(R.string.selfStudyRoom),a(R.string.score),a(R.string.course),a(R.string.trainType)},
+                {a(R.string.evaluation),a(R.string.course_selection),a(R.string.agenda),a(R.string.exam),a(R.string.calendar),a(R.string.selfStudyRoom),a(R.string.score),a(R.string.course),a(R.string.trainType)},
                 {"SeeLight","雨课堂","课堂派","在线教学平台","中国大学（慕课）"},
                 {"校园地图","校车","出行证","校医院"},
                 {"宿舍报修","缴纳水电费"},
@@ -85,7 +86,7 @@ public class ServiceFragment extends Fragment {
                 },//官媒
                 {//newActivity(Evaluation.class),
                     null,
-                        null,
+                        newActivity(CourseSelection.class),
                         newActivity(AgendaActivity.class),
                         null,
                         newActivity(CalendarActivity.class),

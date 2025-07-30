@@ -30,7 +30,6 @@ public class Preference extends androidx.preference.DropDownPreference {
     }
     @Override
     protected boolean persistString(String value) {
-        System.out.println(value);
         setSummary(getEntries()[Integer.parseInt(value)]);
         return super.persistString(value);
     }

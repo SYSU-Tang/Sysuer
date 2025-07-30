@@ -111,7 +111,6 @@ public class Evaluation extends AppCompatActivity {
                 Message msg = new Message();
                 msg.what=1;
                 msg.obj = response.body().string();
-                System.out.println(msg.obj);
                 handler.sendMessage(msg);
             }
         });

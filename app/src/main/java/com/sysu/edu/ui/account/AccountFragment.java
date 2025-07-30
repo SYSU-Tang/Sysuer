@@ -20,7 +20,6 @@ public class AccountFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.account, rootKey);
         ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            System.out.println(o.getResultCode());
             if (o.getResultCode() == Activity.RESULT_OK) {
                 requireActivity().recreate();
             }

@@ -158,7 +158,6 @@ public class NewFragment extends Fragment {
                             Integer code4= data4.getInteger("code");
                             if (code4 == 10000) {
                                 data4.getJSONObject("data").getJSONArray("records").forEach(e -> {
-                                    System.out.println(e);
                                     String title = ((JSONObject) e).getString("title");
                                     JSONArray cover = ((JSONObject) e).getJSONArray("coversPicList");
                                     String image = "";

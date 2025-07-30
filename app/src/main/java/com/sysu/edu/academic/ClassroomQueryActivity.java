@@ -16,9 +16,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.fastjson2.JSON;
@@ -100,19 +97,13 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ClassroomQueryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
-            binding.tool.setPadding(0,systemBars.top,0,0);
-            return insets;
-        });
-        findViewById(R.id.campus_select_all).setOnClickListener(v -> {
+        binding.campusSelectAll.setOnClickListener(v -> {
             for(int i=1;i<((ChipGroup)v.getParent()).getChildCount();i++){
                 Chip chip=(Chip)((ChipGroup)v.getParent()).getChildAt(i);
                 chip.setChecked(!chip.isChecked());
             }
         });
-        findViewById(R.id.office_select_all).setOnClickListener(v -> {
+        binding.officeSelectAll.setOnClickListener(v -> {
             for(int i=1;i<((ChipGroup)v.getParent()).getChildCount();i++){
                 Chip chip=(Chip)((ChipGroup)v.getParent()).getChildAt(i);
                 chip.setChecked(!chip.isChecked());
@@ -120,26 +111,26 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         });
         cookie=getSharedPreferences("privacy",0).getString("Cookie","");
         http=getHttp();
-        MaterialToolbar tool= findViewById(R.id.classroom_query_toolbar);
+        MaterialToolbar tool= binding.classroomQueryToolbar;
         setSupportActionBar(tool);
         dateDialog.addOnPositiveButtonClickListener(selection -> {
             dateStr = new SimpleDateFormat("yyyy-MM-dd",Locale.CHINESE).format(new Date(selection));
             dateText.setText(new SimpleDateFormat("yyyy年MM月dd日",Locale.CHINESE).format(new Date(selection)));
         });
-        campusGroup=findViewById(R.id.campusGroup);
-        officeGroup=findViewById(R.id.officeGroup);
-        typeGroup=findViewById(R.id.typeGroup);
+        campusGroup=binding.campusGroup;
+        officeGroup=binding.officeGroup;
+        typeGroup=binding.typeGroup;
         adp = new RoomAdp(this);
-        result=findViewById(R.id.result);
+        result=binding.result;
         result.setAdapter(adp);
         //BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_COLLAPSED);
-        findViewById(R.id.date).setOnClickListener(v -> dateDialog.show(getSupportFragmentManager(),null));
+        binding.date.setOnClickListener(v -> dateDialog.show(getSupportFragmentManager(),null));
         ((RangeSlider)findViewById(R.id.timeSlider)).addOnChangeListener((slider, value, fromUser) -> {
             startClassTime=String.format(Locale.CHINA,"%.0f",slider.getValues().get(0));
             endClassTime=String.format(Locale.CHINA,"%.0f",slider.getValues().get(1));
-            ((MaterialTextView)findViewById(R.id.time)).setText(String.format("第%s节到第%s节", startClassTime,endClassTime));
+            ((MaterialTextView)findViewById(R.id.time)).setText(String.format(getString(R.string.section_range_x), startClassTime,endClassTime));
         });
-        findViewById(R.id.query).setOnClickListener(v -> {
+        binding.query.setOnClickListener(v -> {
             adp.clear();
             page=1;
             getRoom();
@@ -161,7 +152,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-        dateText= findViewById(R.id.dateText);
+        dateText= binding.dateText;
         dateStr=new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE).format(new Date(System.currentTimeMillis()));
         dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.CHINESE).format(new Date(System.currentTimeMillis())));
         handler = new Handler(getMainLooper()) {
@@ -353,7 +344,6 @@ class RoomAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         ((Chip)holder.itemView.findViewById(R.id.floor)).setText(data.get(position).get("floor"));
         ((Chip)holder.itemView.findViewById(R.id.seat)).setText(data.get(position).get("seat"));
         ((MaterialButton)holder.itemView.findViewById(R.id.type)).setText(data.get(position).get("type"));
-
         ((MaterialTextView)holder.itemView.findViewById(R.id.name)).setText(data.get(position).get("name"));
 
         Glide.with(context)

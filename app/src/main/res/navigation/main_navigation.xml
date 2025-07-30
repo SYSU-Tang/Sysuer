@@ -3,14 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_activity">
+    app:startDestination="@id/navigation_activity">
 
     <fragment
         android:id="@+id/navigation_activity"
         android:name="com.sysu.edu.ui.dashboard.DashboardFragment"
         android:label="@string/menu_activity"
-        tools:layout="@layout/fragment_dashboard" />
-
+        tools:layout="@layout/fragment_dashboard"/>
     <fragment
         android:id="@+id/navigation_service"
         android:name="com.sysu.edu.ui.service.ServiceFragment"

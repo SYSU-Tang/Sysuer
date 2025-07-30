@@ -7,7 +7,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.sysu.edu.R;
 import com.sysu.edu.preference.Preference;
-import com.sysu.edu.preference.ThemeHelper;
+import com.sysu.edu.preference.Theme;
 
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ public class SettingFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.setting, rootKey);
-        ThemeHelper th = new ThemeHelper(requireActivity());
+        Theme th = new Theme(requireActivity());
         th.setTheme();
         ((Preference) Objects.requireNonNull(findPreference("theme"))).setOnPreferenceChangeListener((preference, newValue) -> {
             // initTheme((String)((DropDownPreference) Objects.requireNonNull(findPreference("theme"))).getValue());
@@ -25,8 +25,7 @@ public class SettingFragment extends PreferenceFragmentCompat {
             return true;
         });
         ((Preference) Objects.requireNonNull(findPreference("language"))).setOnPreferenceChangeListener((preference, v) -> {
-           // ((DropDownPreference)preference).setValue((new String[]{"zh-CN", "en", ""})[Integer.parseInt((String) v)]);
-                   // requireActivity().setResult(Activity.RESULT_OK);
+                    //Language.setLanguage(requireActivity());
                     requireActivity().recreate();
                     return true;
                 }

@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.sysu.edu.databinding.ActivitySettingBinding;
+import com.sysu.edu.preference.Language;
 
 public class SettingActivity extends AppCompatActivity {
 
@@ -27,6 +28,7 @@ public class SettingActivity extends AppCompatActivity {
             binding.appbar.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        Language.setLanguage(this);
         binding.tool.setNavigationOnClickListener(v-> finishAfterTransition());
     }
 

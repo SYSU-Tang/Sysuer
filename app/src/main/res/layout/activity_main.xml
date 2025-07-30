@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/parent"
-    android:fitsSystemWindows="true"
+    tools:context=".MainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -13,15 +13,14 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:id="@+id/appbar"
-        style="@style/Widget.Material3.AppBarLayout"
-        app:elevation="4dp"
+        android:fitsSystemWindows="true"
         android:layout_height="wrap_content">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             style="@style/Widget.Material3.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
-            app:layout_scrollFlags="enterAlways"
+            app:layout_scrollFlags="noScroll"
             app:title="@string/app_name"
             app:titleTextColor="@color/purple_500"/>
     </com.google.android.material.appbar.AppBarLayout>
@@ -30,7 +29,8 @@
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        app:defaultNavHost="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:layout="@layout/fragment_dashboard"/>
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_view"
@@ -42,8 +42,7 @@
         app:itemIconTint="@color/purple_500"
         app:itemTextColor="@color/purple_500"
         app:labelVisibilityMode="selected"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+        app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior"
         app:menu="@menu/bottom_nav_menu" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </LinearLayout>

@@ -80,11 +80,11 @@ public class DashboardFragment extends Fragment {
             });
             (binding.date).setText(String.format("%s 星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), (new String[]{"日","一","二","三","四","五","六"})[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]));
             toggle=binding.toggle;
-            LinearLayoutManager lm2 = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
-            LinearLayoutManager lm = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
-            list.addItemDecoration(new DividerItemDecoration(this.requireContext(),0));
+            LinearLayoutManager lm2 = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
+            LinearLayoutManager lm = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
+            list.addItemDecoration(new DividerItemDecoration(requireContext(),0));
             list.setLayoutManager(lm);
-            examList.addItemDecoration(new DividerItemDecoration(this.requireContext(),0));
+            examList.addItemDecoration(new DividerItemDecoration(requireContext(),0));
             examList.setLayoutManager(lm2);
             new Handler().post(new Runnable() {
                 @Override
@@ -183,7 +183,6 @@ public class DashboardFragment extends Fragment {
     public void getTodayCourses(){
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=2024-2")
                 .header("Cookie",cookie)
-
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -307,11 +306,12 @@ class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ((MaterialTextView)holder.itemView.findViewById(R.id.exam_name)).setText(data.get(position).getString("examSubjectName"));
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_location)).setText(data.get(position).getString("classroomNumber"));
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_date)).setText(data.get(position).getString("examDate"));
-        ((MaterialButton)holder.itemView.findViewById(R.id.exam_duration)).setText(String.format("%s分钟", data.get(position).getString("duration")));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_duration)).setText(String.format("%s%s", data.get(position).getString("duration"),context.getString(R.string.minute)));
         ((MaterialButton)holder.itemView.findViewById(R.id.exam_time)).setText(data.get(position).getString("durationTime"));
-        ((MaterialButton)holder.itemView.findViewById(R.id.exam_class_time)).setText(String.format(Locale.CHINA,"第%d~%d节", startClassTimes, endClassTimes));
-        ((MaterialButton)holder.itemView.findViewById(R.id.exam_mode)).setText(String.format("考核方式：%s", data.get(position).getString("examMode")));
-        ((MaterialButton)holder.itemView.findViewById(R.id.exam_stage)).setText(String.format("考试阶段：%s", data.get(position).getString("examStage")));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_class_time)).setText(String.format(context.getString(R.string.section_range), startClassTimes, endClassTimes));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_mode)).setText(String.format("%s：%s",context.getString(R.string.exam_mode), data.get(position).getString("examMode")));
+        ((MaterialButton)holder.itemView.findViewById(R.id.exam_stage)).setText(String.format("%s：%s",context.getString(R.string.exam_stage), data.get(position).getString("examStage")));
+
     }
     @Override
     public int getItemCount() {

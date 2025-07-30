@@ -53,7 +53,7 @@ public class PEPreservation {
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                System.out.println("失败");
+
             }
 
             @Override

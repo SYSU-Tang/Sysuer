@@ -5,10 +5,10 @@ import android.content.Context;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
-public class ThemeHelper
+public class Theme
 {
     Context context;
-    public ThemeHelper(Context c){
+    public Theme(Context c){
        //context.getSharedPreferences("setting", Context.MODE_PRIVATE).getString("theme","0");
         this.context=c;
     }

@@ -90,7 +90,7 @@ public class AgendaActivity extends AppCompatActivity {
             gl.rowSpec=GridLayout.spec(i);
             binding.day.addView(row_item);
         }
-        binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(new Date()));
+        binding.month.setText(new SimpleDateFormat("M月", Locale.ENGLISH).format(new Date()));
         int weekday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         weekday=(weekday==1)?weekday:8;
         binding.last.setOnClickListener(v -> changeWeek(currentWeekIndex-1));
@@ -124,7 +124,7 @@ public class AgendaActivity extends AppCompatActivity {
         binding.term.setOnClickListener(v -> {
             if(termPop==null){
                 termPop = new PopupMenu(v.getContext(), v,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-                terms.forEach(e->termPop.getMenu().add("第"+e+"学期").setOnMenuItemClickListener(item -> {
+                terms.forEach(e->termPop.getMenu().add(String.format(a(R.string.term_x), e)).setOnMenuItemClickListener(item -> {
                     changeTerm(e);
                     return true;
                 }));
@@ -134,7 +134,7 @@ public class AgendaActivity extends AppCompatActivity {
         binding.weekTime.setOnClickListener(v -> {
             if(weekPop==null){
                 weekPop = new PopupMenu(v.getContext(), v,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-                weeks.forEach(e->weekPop.getMenu().add("第"+e+"周").setOnMenuItemClickListener(item -> {
+                weeks.forEach(e->weekPop.getMenu().add(String.format(a(R.string.week_x), e)).setOnMenuItemClickListener(item -> {
                     changeWeek(weeks.indexOf(e));
                     return true;
                 }));
@@ -214,15 +214,15 @@ public class AgendaActivity extends AppCompatActivity {
                             if(nowWeekly!=null){currentWeek = Integer.parseInt(nowWeekly);}
                             response.getJSONObject("data").getJSONArray("weeklyList").forEach(e->weeks.add(((JSONObject)e).getInteger("weekly")));
                             currentWeekIndex = weeks.indexOf(currentWeek);
-                            binding.weekTime.setText(String.format(Locale.CHINA,"第%d周", currentWeek));
+                            binding.weekTime.setText(String.format(a(R.string.week_x), currentWeek));
                             getTable(currentTerm, currentWeek);
                             break;
                         } case -1:{
-                            Toast.makeText(AgendaActivity.this,"请检查网络",Toast.LENGTH_LONG).show();
+                            Toast.makeText(AgendaActivity.this,a(R.string.no_wifi_warning),Toast.LENGTH_LONG).show();
                         }
                     }
                 }else{
-                    Toast.makeText(AgendaActivity.this,"请登录",Toast.LENGTH_LONG).show();
+                    Toast.makeText(AgendaActivity.this,a(R.string.login_warning),Toast.LENGTH_LONG).show();
                     launch.launch(new Intent(AgendaActivity.this, LoginActivity.class));
                 }
             }
@@ -303,6 +303,7 @@ public class AgendaActivity extends AppCompatActivity {
             }
         });
     }
+    String a(int i){return getString(i);}
     void setDialogDetail(String course,String location,String teacher,String classTime){
         ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.course))).setText(course);
         ((MaterialTextView) Objects.requireNonNull(detailDialog.findViewById(R.id.location))).setText(location);
@@ -319,7 +320,7 @@ public class AgendaActivity extends AppCompatActivity {
         if(newWeek>=0){
             int currentWeek = weeks.get(newWeek);
             currentWeekIndex =newWeek;
-            binding.weekTime.setText(String.format(Locale.CHINA,"第%d周",currentWeek));
+            binding.weekTime.setText(String.format(a(R.string.week_x),currentWeek));
             getTable(currentTerm,currentWeek);
             getRange(currentTerm,currentWeek);
         }
@@ -327,7 +328,6 @@ public class AgendaActivity extends AppCompatActivity {
     }
     public void getTable(String academicYear,int week){
         if(academicYear.isEmpty()||week<1){return;}
-        System.out.println(academicYear+week);
         http.newCall(new Request.Builder().url(String.format(Locale.CHINA,"https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d",academicYear,week)).addHeader("Cookie",cookie).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -366,7 +366,7 @@ public class AgendaActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItem today_menu = menu.add("今天");
+        MenuItem today_menu = menu.add(a(R.string.today));
         today_menu.setShowAsAction(1);
         today_menu.setOnMenuItemClickListener(item -> {
             getTerm();

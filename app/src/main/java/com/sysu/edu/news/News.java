@@ -70,7 +70,7 @@ public class News extends AppCompatActivity {
 
         class Adapter extends FragmentStateAdapter{
             //  final List<NewFragment> pages = List.of(new NewFragment(cookie,0),new NewFragment(cookie,1));
-            ArrayList<NewFragment> fs=new ArrayList<>();
+            final ArrayList<NewFragment> fs=new ArrayList<>();
             public Adapter(@NonNull FragmentActivity fragmentActivity) {
                 super(fragmentActivity);
             }
@@ -132,7 +132,6 @@ TabLayout.OnTabSelectedListener() {
                 if (msg.what == 1) {
                     Object code;
                     code = data.get("code");
-                    System.out.println();
                     if (Objects.equals(code, "0000")) {
                         sug.clear();
                         data.getJSONObject("data").getJSONArray("suggests").forEach(e -> sug.add((String) e));
@@ -145,7 +144,6 @@ TabLayout.OnTabSelectedListener() {
         };
         EditText edit = binding.searchView.getEditText();
         edit.setOnEditorActionListener((textView, i, keyEvent) -> {
-            System.out.println(textView.getText());
             binding.searchView.hide();
             return false;
         });
@@ -200,7 +198,6 @@ class SugAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
     public void add(String a){
         int tmp=getItemCount();
-        System.out.println(a);
         data.add(a);
         notifyItemInserted(tmp);
     }

@@ -40,7 +40,7 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     //msg.what
-                    System.out.println((String) msg.obj);
+
                     JSONObject info = JSONArray.parse((String) msg.obj).getJSONObject(0);
                      String[] keys = new String[]{"UserId", "HostKey", "Name"};
                     for(int i=0;i< keys.length;i++){

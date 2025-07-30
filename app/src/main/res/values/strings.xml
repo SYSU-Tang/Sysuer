@@ -86,5 +86,34 @@
     <string name="appearance">外观</string>
     <string name="develop">开发</string>
     <string name="open_source">开源</string>
+    <string name="week_x">第%d周</string>
+    <string name="no_wifi_warning">请检查网络！</string>
+    <string name="login_warning">请登录！</string>
+    <string name="term_x">第%s学期</string>
+    <string name="minute">分钟</string>
+    <string name="section_range">第%d~%d节</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="course_selection">选课</string>
+    <string name="seminar_room">研讨室</string>
+    <string name="default_class">第1节到第11节</string>
+    <string name="section_range_x">第%s节到第%s节</string>
+    <string name="my_major">本专业</string>
+    <string name="public_selection">校级公选</string>
+    <string name="transdisciplinary">跨专业</string>
+    <string name="category">类别</string>
+    <string name="major_compulsory">专必</string>
+    <string name="major_selective">专选</string>
+    <string name="pe">体育</string>
+    <string name="en">大英</string>
+    <string name="public_compulsory">公必</string>
+    <string name="honor">荣誉课程</string>
+    <string name="filter">过滤</string>
+    <string name="filter_by_vacancy">按剩余空位排序</string>
+    <string name="hide_vacancy">隐藏无空位</string>
+    <string name="hide_selected">隐藏已选</string>
+    <string name="like">收藏</string>
+    <string name="select">选课</string>
+    <string name="school_public_selective">院内公选</string>
 
 </resources>
