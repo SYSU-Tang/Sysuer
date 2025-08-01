@@ -67,7 +67,7 @@
             android:name=".academic.AgendaActivity"
             android:exported="false" />
         <activity
-            android:name=".academic.BrowseActivity"
+            android:name=".academic.BrowserActivity"
             android:exported="false" />
         <activity
             android:name=".academic.ClassroomQueryActivity"

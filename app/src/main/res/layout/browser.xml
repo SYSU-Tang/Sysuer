@@ -20,6 +20,7 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         style="@style/Widget.Design.BottomNavigationView"
         android:layout_width="match_parent"
+        android:id="@+id/tool"
         android:layout_height="?attr/actionBarSize"
         app:labelVisibilityMode="unlabeled"
         app:menu="@menu/browser" />

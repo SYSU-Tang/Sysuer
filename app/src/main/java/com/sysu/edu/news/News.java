@@ -32,7 +32,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
-import com.sysu.edu.academic.BrowseActivity;
+import com.sysu.edu.academic.BrowserActivity;
 import com.sysu.edu.databinding.NewsBinding;
 
 import java.io.IOException;
@@ -216,7 +216,7 @@ class SugAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ((TextView)holder.itemView).setText(data.get(position));
-        holder.itemView.setOnClickListener(v-> context.startActivity(new Intent(context, BrowseActivity.class).setData(Uri.parse(String.format("https://iportal.sysu.edu.cn/searchWeb/#/index?searchWord=%s&module=default&size=10&current=1&sortType=score&searchType=3",data.get(position)))), ActivityOptionsCompat.makeSceneTransitionAnimation(context,v,"miniapp").toBundle()));
+        holder.itemView.setOnClickListener(v-> context.startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(String.format("https://iportal.sysu.edu.cn/searchWeb/#/index?searchWord=%s&module=default&size=10&current=1&sortType=score&searchType=3",data.get(position)))), ActivityOptionsCompat.makeSceneTransitionAnimation(context,v,"miniapp").toBundle()));
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
-import com.sysu.edu.academic.BrowseActivity;
+import com.sysu.edu.academic.BrowserActivity;
 import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
 import com.sysu.edu.academic.CourseSelection;
@@ -29,7 +29,6 @@ import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ServiceBoxBinding;
 import com.sysu.edu.news.News;
-import com.sysu.edu.system.PEPreservation;
 
 import java.util.Objects;
 
@@ -60,7 +59,8 @@ public class ServiceFragment extends Fragment {
                 {
                         newActivity(News.class),
                 },//信息
-                {newActivity(PEPreservation.class),
+                {//newActivity(PEPreservation.class),
+                        browse("https://gym-443.webvpn.sysu.edu.cn/#/"),
                         browse("https://xgxt-443.webvpn.sysu.edu.cn/main/#/index"),
                         browse("https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home"),
                         browse("https://portal.sysu.edu.cn/newClient/#/newPortal/index"),
@@ -141,7 +141,7 @@ public class ServiceFragment extends Fragment {
         service_container.addView(box);
     }
     public View.OnClickListener browse(String url){
-        return view -> startActivity(new Intent(view.getContext(), BrowseActivity.class).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),view,"miniapp").toBundle());
+        return view -> startActivity(new Intent(view.getContext(), BrowserActivity.class).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),view,"miniapp").toBundle());
     }
     public View.OnClickListener newActivity(Class activity_class){
         return view -> startActivity(new Intent(view.getContext(),activity_class),ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),view,"miniapp").toBundle());

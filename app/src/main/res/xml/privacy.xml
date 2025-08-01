@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<!--        <Preference-->
+<!--            app:icon="@drawable/account"-->
+<!--            app:key="name"-->
+<!--            app:summary="Name"-->
+<!--            app:title="@string/name"/>-->
         <Preference
             app:icon="@drawable/account"
-            app:key="name"
-            app:summary="Name"
-            app:title="@string/name">
-        </Preference>
-        <Preference
-            app:icon="@drawable/account"
-            app:key="netid"
+            app:key="netId"
             app:summary="NetID"
-            app:title="NetID">
-        </Preference>
+            app:title="NetID"/>
+<!--        <Preference-->
+<!--            app:icon="@drawable/account"-->
+<!--            app:key="num"-->
+<!--            app:summary="Account"-->
+<!--            app:title="@string/number"/>-->
         <Preference
-            app:icon="@drawable/account"
-            app:key="account"
-            app:summary="Account"
-            app:title="@string/number">
-        </Preference>
+            app:icon="@drawable/password"
+            app:key="password"
+            app:title="@string/password"/>
 </androidx.preference.PreferenceScreen>

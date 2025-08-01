@@ -28,7 +28,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
-import com.sysu.edu.academic.BrowseActivity;
+import com.sysu.edu.academic.BrowserActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -357,7 +357,7 @@ class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         MaterialTextView title = holder.itemView.findViewById(R.id.title);
         MaterialTextView content = holder.itemView.findViewById(R.id.content);
         AppCompatImageView image = holder.itemView.findViewById(R.id.image);
-        holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context,BrowseActivity.class).setData(Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context,v,"miniapp").toBundle())
+        holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context,v,"miniapp").toBundle())
                 //context.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context, v, "miniapp").toBundle())
         );
         title.setText(data.get(position).getOrDefault("title",""));

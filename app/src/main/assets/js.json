@@ -1,0 +1,5 @@
+{
+  "lms.sysu.edu.cn/mod/fsresource/view.php":"viewTotalTime=videoDuration*1000;ajaxOrder();",
+"www.sysu.edu.cn": "document.querySelector('.ftb').style.visibility = 'hidden';",
+  ".": "var script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};"
+}

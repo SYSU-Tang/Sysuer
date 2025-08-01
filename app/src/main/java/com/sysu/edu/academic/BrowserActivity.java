@@ -2,11 +2,10 @@ package com.sysu.edu.academic;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
@@ -15,7 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -23,35 +22,56 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.BrowserBinding;
+import com.sysu.edu.extra.JavaScript;
 
-public class BrowseActivity extends AppCompatActivity {
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+
+public class BrowserActivity extends AppCompatActivity {
     WebView web;
     private CookieManager c;
-BrowserBinding binding;
+    BrowserBinding binding;
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        binding=BrowserBinding.inflate(getLayoutInflater());
+        binding = BrowserBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finishAfterTransition();
-            }
-        });
+        binding.toolbar.setNavigationOnClickListener(v -> finishAfterTransition());
 
+        SharedPreferences privacy = getSharedPreferences("privacy", 0);
+        String username = privacy.getString("username", "");
+        String password = privacy.getString("password", "");
+        StringBuilder result;
+        try {
+            InputStreamReader input = new InputStreamReader(getAssets().open("js.json"));
+            //input = new InputStreamReader(BufferedInputStream);
+            BufferedReader buffer = new BufferedReader(input);
+            String line;
+            result = new StringBuilder();
+            while ((line = buffer.readLine()) != null) {
+                result.append(line);
+            }
+            input.close();
+            buffer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        JavaScript js = new JavaScript(result.toString());
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        c=CookieManager.getInstance();
+        c = CookieManager.getInstance();
         c.setAcceptCookie(true);
         web = findViewById(R.id.web);
-        c.setAcceptThirdPartyCookies(web,true);
-        web.setWebViewClient(new WebViewClient(){
+        c.setAcceptThirdPartyCookies(web, true);
+        web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 //view.loadUrl(String.valueOf(request.getUrl()));
@@ -60,18 +80,42 @@ BrowserBinding binding;
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                 super.onPageFinished(view, url);
+                //System.out.println(url);
+                Pattern pattern = Pattern.compile("//cas.+.sysu.edu.cn");
+                if(pattern.matcher(url).find()){
+                    web.evaluateJavascript(String.format("document.querySelector('#username').value='%s';document.querySelector('#password').value='%s';",username,password), s -> {
+                    });
+                }
+
+                super.onPageFinished(view, url);
             }
+        });
+        binding.tool.setOnItemSelectedListener(menuItem -> {
+            if(menuItem.getItemId()==R.id.js){
+                ArrayList<String> j = js.searchJS(web.getUrl());
+                new AlertDialog.Builder(BrowserActivity.this).setTitle("脚本").setItems(j.toArray(new String[]{}), (dialogInterface, i) -> {
+
+                        web.evaluateJavascript(j.get(i), s -> {
+
+                });
+                System.out.println(i);}).create().show();
+            }
+            return false;
         });
         String url = getIntent().getDataString() != null ? getIntent().getDataString() : "https://www.sysu.edu.cn/";
         //c.setCookie(url,"LYSESSIONID=1e1f3aaf-9f78-43e6-a017-9afa4c283aba;user=eyJ1c2VyVHlwZSI6IjEiLCJ1c2VyTmFtZSI6IjI0MzA4MTUyIiwibmFtZSI6IuWUkOi0pOaghyIsImxvZ2luUGF0dGVybiI6InN0dWRlbnQtbG9naW4iLCJzc28iOnRydWV9; ssoUsername=gDzeK9sUezH5IwnImtM2c3WnwW+qqkUKoujpcC19UUx+fD0kp79drFFVWIf8U4tcsWp1ornU9tjcfn4QpsnQILtb8/HoXwSEy041MvQ71V/2YzeG4n6RHnZaVDxzLy4pxxsZauutoE+4UL7SZy+tHCafNPRHltjOgkwRf4TRAqo=;user=eyJ1c2VyVHlwZSI6IjEiLCJ1c2VyTmFtZSI6IjI0MzA4MTUyIiwibmFtZSI6IuWUkOi0pOaghyIsImxvZ2luUGF0dGVybiI6InN0dWRlbnQtbG9naW4iLCJzc28iOnRydWV9");
-       // c.flush();
-        binding.toolbar.getMenu().add("在浏览器中打开").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)));
-                return false;
-            }
+        // c.flush();
+        binding.toolbar.getMenu().add("在浏览器中打开").setOnMenuItemClickListener(menuItem -> {
+            startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)));
+            return false;
+        });
+        binding.toolbar.getMenu().add("刷新").setOnMenuItemClickListener(menuItem -> {
+            web.reload();
+            return false;
+        });
+        binding.toolbar.getMenu().add("退出").setOnMenuItemClickListener(menuItem -> {
+            finishAfterTransition();
+            return false;
         });
         WebSettings webSettings = web.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -92,6 +136,9 @@ BrowserBinding binding;
        /* web.setWebChromeClient(new WebChromeClient() {
         });*/
         web.loadUrl(url);
+        web.evaluateJavascript("", s -> {
+
+        });
     }
 
     @Override

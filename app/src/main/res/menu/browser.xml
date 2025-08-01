@@ -5,7 +5,7 @@
         android:icon="@drawable/window"
         android:title="窗口"/>
     <item
-        android:id="@+id/menu"
+        android:id="@+id/js"
         android:icon="@drawable/menu"
         android:title="菜单"/>
 </menu>
