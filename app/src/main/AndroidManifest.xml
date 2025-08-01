@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -20,7 +20,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.中大儿"
-        tools:targetApi="36">
+        tools:targetApi="36" >
+        <activity
+            android:name=".academic.CourseDetail"
+            android:exported="true"
+            android:theme="@style/Theme.中大儿" />
         <activity
             android:name=".academic.CourseSelection"
             android:exported="true"
@@ -71,7 +75,7 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|uiMode"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

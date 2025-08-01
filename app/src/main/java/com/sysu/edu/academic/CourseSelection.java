@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -23,23 +24,13 @@ public class CourseSelection extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = ActivityCourseSelectionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setHomeButtonEnabled(true);
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_course_selection);
+        NavController navController =((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_course_selection))).getNavController();
+        //NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_course_selection);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-//        binding.fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAnchorView(R.id.fab)
-//                        .setAction("Action", null).show();
-//            }
-//        });
     }
 
     @Override

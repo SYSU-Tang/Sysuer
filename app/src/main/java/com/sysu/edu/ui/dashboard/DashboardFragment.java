@@ -75,7 +75,7 @@ public class DashboardFragment extends Fragment {
             launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
                 if(o.getResultCode()== Activity.RESULT_OK){
                     cookie= requireActivity().getSharedPreferences("privacy",0).getString("Cookie","");
-                    getTodayCourses();getExams();
+                    getTodayCourses();
                 }
             });
             (binding.date).setText(String.format("%s 星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), (new String[]{"日","一","二","三","四","五","六"})[Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1]));
@@ -94,7 +94,7 @@ public class DashboardFragment extends Fragment {
                 }
             });
             cookie=requireActivity().getSharedPreferences("privacy",0).getString("Cookie","");
-            getTodayCourses();getExams();
+            getTodayCourses();
             adp=new Adp(this.requireActivity());
             list.setAdapter(adp);
             examAdp=new ExamAdp(this.requireActivity());
@@ -124,6 +124,7 @@ public class DashboardFragment extends Fragment {
                                             , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
                                 });
                                 toggle.check(R.id.today);
+                                getExams();
                             } else {
                                 launch.launch(new Intent(getContext(), LoginActivity.class));
                             }

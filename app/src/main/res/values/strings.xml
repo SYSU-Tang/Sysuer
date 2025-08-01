@@ -115,5 +115,13 @@
     <string name="like">收藏</string>
     <string name="select">选课</string>
     <string name="school_public_selective">院内公选</string>
+    <string name="course_detail">课程详情</string>
+    <string name="course_draft">课程大纲</string>
+    <string name="course_intro">课程内容简介</string>
+    <string name="course_goal">课程目标</string>
+    <string name="course_resource">课程资源</string>
+    <string name="course_method">教学方法</string>
+    <string name="course_score">成绩评定方式</string>
+    <string name="course_reference">主要参考书目</string>
 
 </resources>

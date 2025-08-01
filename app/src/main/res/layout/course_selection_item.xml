@@ -11,11 +11,12 @@
         android:layout_height="wrap_content">
         <TextView
             android:id="@+id/course_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -60,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/open"
+            app:icon="@drawable/info"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/like"
             app:layout_constraintRight_toRightOf="parent"
@@ -69,6 +71,7 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:icon="@drawable/favorite"
             android:text="@string/like"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/select"
@@ -79,6 +82,8 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:icon="@drawable/select"
+
             android:text="@string/select"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/select"
