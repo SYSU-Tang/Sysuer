@@ -22,6 +22,9 @@
         android:theme="@style/Theme.中大儿"
         tools:targetApi="36">
         <activity
+            android:name=".academic.SchoolRoll"
+            android:exported="true" />
+        <activity
             android:name=".academic.CourseQuery"
             android:exported="false"
             android:theme="@style/Theme.中大儿" />
@@ -58,7 +61,7 @@
             android:name=".onlineClass.OnlineClassActivity"
             android:exported="false" />
         <activity
-            android:name=".academic.LoginActivity"
+            android:name=".extra.LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.中大儿" />
         <activity

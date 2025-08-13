@@ -33,8 +33,10 @@ import java.util.regex.Pattern;
 
 public class BrowserActivity extends AppCompatActivity {
     WebView web;
-    private CookieManager c;
     BrowserBinding binding;
+    WebSettings webSettings;
+    CookieManager cookie;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,15 +69,18 @@ public class BrowserActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        c = CookieManager.getInstance();
-        c.setAcceptCookie(true);
-        web = findViewById(R.id.web);
-        c.setAcceptThirdPartyCookies(web, true);
+//        c = CookieManager.getInstance();
+//        c.setAcceptCookie(true);
+        web = binding.web;
+
+        //c.setAcceptThirdPartyCookies(web, true);
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                //view.loadUrl(String.valueOf(request.getUrl()));
-                return false;
+                 System.out.println(request.getUrl());
+                 webSettings.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0");
+                // view.loadUrl(String.valueOf(request.getUrl()));
+                return true;
             }
 
             @Override
@@ -89,6 +94,10 @@ public class BrowserActivity extends AppCompatActivity {
 
                 super.onPageFinished(view, url);
             }
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
+            }
         });
         binding.tool.setOnItemSelectedListener(menuItem -> {
             if(menuItem.getItemId()==R.id.js){
@@ -101,7 +110,7 @@ public class BrowserActivity extends AppCompatActivity {
             return false;
         });
         String url = getIntent().getDataString() != null ? getIntent().getDataString() : "https://www.sysu.edu.cn/";
-
+        cookie = CookieManager.getInstance();
         binding.toolbar.getMenu().add("在浏览器中打开").setOnMenuItemClickListener(menuItem -> {
             startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)));
             return false;
@@ -110,11 +119,18 @@ public class BrowserActivity extends AppCompatActivity {
             web.reload();
             return false;
         });
+        binding.toolbar.getMenu().add("清除Cookie").setOnMenuItemClickListener(menuItem -> {
+            cookie.removeAllCookies(aBoolean -> {
+
+            });
+            cookie.flush();
+            return false;
+        });
         binding.toolbar.getMenu().add("退出").setOnMenuItemClickListener(menuItem -> {
             finishAfterTransition();
             return false;
         });
-        WebSettings webSettings = web.getSettings();
+        webSettings = web.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setSupportMultipleWindows(true);
         webSettings.setUseWideViewPort(true);
@@ -133,9 +149,7 @@ public class BrowserActivity extends AppCompatActivity {
        /* web.setWebChromeClient(new WebChromeClient() {
         });*/
         web.loadUrl(url);
-        web.evaluateJavascript("", s -> {
 
-        });
     }
 
     @Override

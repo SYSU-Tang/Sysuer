@@ -133,5 +133,6 @@
     <string name="school">学院</string>
     <string name="submit">确定</string>
     <string name="only_collection">只显示收藏</string>
+    <string name="school_roll">学籍</string>
 
 </resources>

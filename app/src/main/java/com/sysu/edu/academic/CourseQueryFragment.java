@@ -28,6 +28,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.CourseQueryFragmentBinding;
+import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,15 +81,7 @@ public class CourseQueryFragment extends Fragment {
                     getData(0);
                 }
             });
-            filterName = vm.getFilter();
-            binding.campuses.setText(filterName.get("campus"));
-            binding.course.setText(filterName.get("course"));
-            binding.days.setText(filterName.get("day"));
-            binding.sections.setText(filterName.get("section"));
-            binding.languages.setText(filterName.get("language"));
-            binding.special.setText(filterName.get("special"));
-            binding.school.setText(filterName.get("school"));
-            binding.teacher.setText(filterName.get("teacher"));
+            reset();
             cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
@@ -140,7 +133,23 @@ public class CourseQueryFragment extends Fragment {
         return binding.getRoot();
     }
 
+    void reset() {
+        filterName = vm.getFilter();
+        binding.campuses.setText(filterName.get("campus"));
+        binding.course.setText(filterName.get("course"));
+        binding.days.setText(filterName.get("day"));
+        binding.sections.setText(filterName.get("section"));
+        binding.languages.setText(filterName.get("language"));
+        binding.special.setText(filterName.get("special"));
+        binding.school.setText(filterName.get("school"));
+        binding.teacher.setText(filterName.get("teacher"));
+    }
+
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        binding.reset.setOnClickListener(view1 -> {
+            vm.setFilter(new HashMap<>());
+            reset();
+        });
         binding.submit.setOnClickListener(v-> {
             super.onViewCreated(view, savedInstanceState);
 //            Bundle arg = new Bundle();

@@ -19,6 +19,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.TrainingScheduleBinding;
+import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
 import java.util.Objects;

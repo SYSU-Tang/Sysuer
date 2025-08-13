@@ -32,5 +32,12 @@ public class CourseSelection extends AppCompatActivity {
         AppBarConfiguration appBarConfiguration =
                 new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> false).build();
         NavigationUI.setupWithNavController(binding.toolbar, navController, appBarConfiguration);
+        binding.toolbar.setNavigationOnClickListener(view -> {
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId()==R.id.selection_fragment) {
+                supportFinishAfterTransition();
+            }else{
+                navController.navigateUp();
+            }
+        });
     }
 }

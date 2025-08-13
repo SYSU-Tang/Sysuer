@@ -28,8 +28,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
-import com.sysu.edu.academic.LoginActivity;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
+import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

@@ -29,6 +29,7 @@ import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Http;
 import com.sysu.edu.databinding.AgendaBinding;
+import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
 import java.text.ParseException;

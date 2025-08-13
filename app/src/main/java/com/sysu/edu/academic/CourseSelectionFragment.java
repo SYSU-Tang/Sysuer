@@ -42,6 +42,7 @@ import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.CourseSelectionBinding;
 import com.sysu.edu.databinding.CourseSelectionItemBinding;
+import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public class CourseSelectionFragment extends Fragment{
             getInfo();
             binding.course.setLayoutManager(new GridLayoutManager(requireContext(), params.getColumn()));
             binding.course.addItemDecoration(new SpacesItemDecoration(params.dpToPx(8)));
-            binding.filter.setOnCheckedStateChangeListener((chipGroup, list) -> {});
+            binding.filter.setOnCheckedStateChangeListener((chipGroup, list) -> {adp.clear();totals.put(key, -1);getInfo();});
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
@@ -199,7 +200,7 @@ public class CourseSelectionFragment extends Fragment{
                     super.onScrolled(v, dx, dy);
                 }
             });
-            getInfo();
+           // getInfo();
         }
         return binding.getRoot();
     }
@@ -253,12 +254,18 @@ public class CourseSelectionFragment extends Fragment{
         super.onDestroyView();
         //binding = null;
     }
+    int boolean2int(boolean b){
+        return b?1:0;
+    }
     void getCourseList(){
         page++;
+        String body = String.format(Locale.CHINA, "{\"pageNo\":%d,\"pageSize\":10,\"param\":{\"semesterYear\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"hiddenConflictStatus\":\"0\",\"hiddenSelectedStatus\":\"%d\",\"hiddenEmptyStatus\":\"%d\",\"vacancySortStatus\":\"%d\",\"collectionStatus\":\"%d\"%s}}", page, term, selectedType, selectedCate,
+                boolean2int(binding.hideSelected.isChecked()), boolean2int(binding.hideVacancy.isChecked()), boolean2int(binding.vacancy.isChecked()), boolean2int(binding.onlyCollection.isChecked()),
+                filterText);
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list")
                 .header("Cookie",cookie)
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE")
-                .post(RequestBody.create(String.format("{\"pageNo\":%d,\"pageSize\":10,\"param\":{\"semesterYear\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"hiddenConflictStatus\":\"0\",\"hiddenSelectedStatus\":\"0\",\"hiddenEmptyStatus\":\"0\",\"vacancySortStatus\":\"0\",\"collectionStatus\":\"0\"%s}}",page,term,selectedType,selectedCate,filterText), MediaType.get("application/json"))).build()).enqueue(new Callback() {
+                .post(RequestBody.create(body, MediaType.get("application/json"))).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
@@ -288,7 +295,6 @@ public class CourseSelectionFragment extends Fragment{
                 msg.what=-1;
                 handler.sendMessage(msg);
             }
-
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
@@ -393,7 +399,7 @@ public class CourseSelectionFragment extends Fragment{
 //    }
 }
 class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-    String[] info = new String[]{"teachingTimePlace","courseUnitName", "credit",  "examFormName", "courseNum", "clazzNum","baseReceiveNum","filterSelectedNum","courseSelectedNum"};
+    String[] info = new String[]{"courseUnitName", "credit",  "examFormName", "courseNum", "clazzNum"};
     Context context;
     CourseSelectionFragment c;
     ArrayList<JSONObject> data = new ArrayList<>();
@@ -454,9 +460,15 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         });
         open.setOnClickListener(v-> context.startActivity(new Intent(context, CourseDetail.class).putExtra("code",convert(position,"courseNum")).putExtra("id",convert(position,"courseId")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context,v,"miniapp").toBundle()));
         ((TextView)holder.itemView.findViewById(R.id.course_name)).setText(convert(position,"courseName"));
+        ((TextView)holder.itemView.findViewById(R.id.head)).setText(convert(position,"teachingTimePlace").replace(";"," | ").replace(",","\n"));
         for(int i = 0; i< info.length; i++){
             String content = convert(position,info[i]);
-            ((Chip)((ChipGroup)holder.itemView.findViewById(R.id.course_info)).getChildAt(i)).setText(String.format("%s：%s",(new String[]{"教学","开设部门","学分","考查形式","课程代码","班级代码","剩余空位","待筛选人数","选上人数"})[i],content));
+            ((Chip)((ChipGroup)holder.itemView.findViewById(R.id.course_info)).getChildAt(i)).setText(String.format("%s：%s",(new String[]{"开设部门","学分","考查形式","课程代码","班级代码","剩余空位","待筛选人数","选上人数"})[i],content));
+        }
+        String[] seats = new String[]{"baseReceiveNum", "filterSelectedNum", "courseSelectedNum"};
+        for(int i = 0; i< seats.length; i++){
+            String content = convert(position,seats[i]);
+            ((MaterialButton)holder.itemView.findViewById(new int[]{R.id.left,R.id.filtering,R.id.selected}[i])).setText(String.format("%s\n%s",(new String[]{"剩余","待筛选","选上"})[i],content));
         }
     }
 
