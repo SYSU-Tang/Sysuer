@@ -1,0 +1,134 @@
+package com.sysu.edu.academic;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.alibaba.fastjson2.JSONObject;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.R;
+import com.sysu.edu.api.Params;
+import com.sysu.edu.databinding.ActivityMajorInfoBinding;
+import com.sysu.edu.extra.LoginActivity;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class MajorInfo extends AppCompatActivity {
+
+    ActivityMajorInfoBinding binding;
+    String cookie;
+    Handler handler;
+    OkHttpClient http = new OkHttpClient.Builder().build();
+    ArrayList<String> categories;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityMajorInfoBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
+        Params params = new Params(this);
+        cookie  = params.getCookie();
+        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+            if (o.getResultCode() == Activity.RESULT_OK) {
+                cookie = params.getCookie();
+                getCategory();
+            }
+        });
+        PagerAdapter adp = new PagerAdapter(this);
+        binding.pager.setAdapter(adp);
+        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(categories.get(position))).attach();
+        handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                if (msg.what == -1) {
+                    Toast.makeText(MajorInfo.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                }else {
+                    JSONObject response = JSONObject.parseObject((String) msg.obj);
+                    if (response != null && response.getInteger("code").equals(200)) {
+                        if (response.get("data") != null) {
+                            switch (msg.what){
+                                case 0: categories = new ArrayList<>();
+                                    response.getJSONArray("data").forEach(a->{
+                                        categories.add(((JSONObject)a).getString("dataName"));
+                                        Bundle args = new Bundle();
+                                        args.putString("code",((JSONObject)a).getString("dataNumber"));
+                                        adp.add(MajorInfoFragment.newInstance(args));
+                                    });
+                                break;
+                                case 1:
+
+                                    break;
+                            }
+                        }
+                    }
+                    else {
+                        Toast.makeText(MajorInfo.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
+                        launch.launch(new Intent(MajorInfo.this, LoginActivity.class));
+                    }
+                }
+            }
+        };
+        getCategory();
+    }
+
+    void getCategory(){
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=135")
+                .header("Cookie",cookie)
+                .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
+                .build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message msg = new Message();
+                msg.what=-1;
+                handler.sendMessage(msg);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message msg = new Message();
+                msg.what= 0;
+                msg.obj=response.body().string();
+                handler.sendMessage(msg);
+            }
+        });
+    }
+}
+//class PagerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+//
+//    ArrayList<JSONObject> data = new ArrayList<>();
+//    @NonNull
+//    @Override
+//    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+//        RecyclerViewBinding binding = RecyclerViewBinding.inflate(LayoutInflater.from(context), parent, false);
+//        binding.getRoot().setAdapter(new ItemAdapter());
+//
+//        return new RecyclerView.ViewHolder(binding.getRoot()) {
+//        };
+//    }
+//
+//    @Override
+//    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+//
+//    }
+//
+//    @Override
+//    public int getItemCount() {
+//        return 0;
+//    }
+//}

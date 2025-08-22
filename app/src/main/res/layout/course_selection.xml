@@ -153,7 +153,7 @@
         android:paddingBottom="16dp"
         app:fastScrollEnabled="false"
         app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
-        app:fastScrollHorizontalTrackDrawable="@drawable/scrollbar"
+        app:fastScrollHorizontalTrackDrawable="@drawable/track"
         app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
-        app:fastScrollVerticalTrackDrawable="@drawable/scrollbar" />
+        app:fastScrollVerticalTrackDrawable="@drawable/track" />
 </LinearLayout>

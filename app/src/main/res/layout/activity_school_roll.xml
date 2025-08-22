@@ -24,6 +24,7 @@
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
+            app:tabUnboundedRipple="true"
             android:layout_height="wrap_content"
             android:background="@macro/m3_comp_app_bar_container_color"
             android:elevation="0dp"

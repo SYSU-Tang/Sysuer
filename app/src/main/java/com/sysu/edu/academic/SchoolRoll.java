@@ -276,7 +276,7 @@ public class SchoolRoll extends AppCompatActivity {
                                     ArrayList<String> values = new ArrayList<>();
                                     int key = List.of("个人基本信息", "学籍信息", "联系方式").indexOf(title);
                                     keys.get(key).forEach(c -> values.add(d.getString(c)));
-                                    ((StaggeredFragment) pagerAdapter.getItem(0)).add(title, keyName, values);
+                                    ((StaggeredFragment) pagerAdapter.getItem(0)).add(title,null, keyName, values);
                                 });
                                 getNextPage(msg.what+1);
                             } else {

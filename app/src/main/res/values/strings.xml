@@ -138,5 +138,7 @@
     <string name="base_info">基本信息</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="register_info">注册信息查看</string>
+    <string name="major_info">本科专业查询</string>
 
 </resources>

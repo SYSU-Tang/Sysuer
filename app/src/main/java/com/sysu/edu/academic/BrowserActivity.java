@@ -91,7 +91,6 @@ public class BrowserActivity extends AppCompatActivity {
                     web.evaluateJavascript(String.format("document.querySelector('#username').value='%s';document.querySelector('#password').value='%s';",username,password), s -> {
                     });
                 }
-
                 super.onPageFinished(view, url);
             }
             @Override

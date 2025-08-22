@@ -68,15 +68,15 @@ public class News extends AppCompatActivity {
         });
 
         class Adapter extends FragmentStateAdapter{
-            //  final List<NewFragment> pages = List.of(new NewFragment(cookie,0),new NewFragment(cookie,1));
-            final ArrayList<NewFragment> fs=new ArrayList<>();
+            //  final List<NewsFragment> pages = List.of(new NewsFragment(cookie,0),new NewsFragment(cookie,1));
+            final ArrayList<NewsFragment> fs=new ArrayList<>();
             public Adapter(@NonNull FragmentActivity fragmentActivity) {
                 super(fragmentActivity);
             }
             @NonNull
             @Override
             public Fragment createFragment(int position) {
-                NewFragment fragment = new NewFragment(cookie, position);
+                NewsFragment fragment = new NewsFragment(cookie, position);
                 fs.add(fragment);
                 return fragment;
             }
@@ -84,7 +84,7 @@ public class News extends AppCompatActivity {
             public int getItemCount() {
                 return 4;
             }
-//            public NewFragment getItem(int i){
+//            public NewsFragment getItem(int i){
 //                return fs.get(i);
 //            }
         }

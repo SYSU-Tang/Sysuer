@@ -28,6 +28,8 @@ import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
 import com.sysu.edu.academic.CourseSelection;
 import com.sysu.edu.academic.Grade;
+import com.sysu.edu.academic.MajorInfo;
+import com.sysu.edu.academic.RegisterInfo;
 import com.sysu.edu.academic.SchoolRoll;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
@@ -52,13 +54,13 @@ public class ServiceFragment extends Fragment {
             service_container=binding.serviceContainer;
             String[] titles = new String[]{"查看",a(R.string.news),a(R.string.system), a(R.string.official_website), a(R.string.official_media),a(R.string.academy),a(R.string.study), a(R.string.traffic), a(R.string.dorm)};
             String[][] items = new String[][]{
-                    {"学籍","四六级"},
+                    {"学籍","四六级","报到注册信息"},
                     {"资讯门户"//,"学校活动","校园集市"
                     },
                     {"体育场馆预定系统","学工系统","本科教务系统","中山大学统一门户","大学服务中心","财务信息系统"},
                     {"中山大学官网","本科招生","研究生招生","人才招聘","百年校庆","博物馆","图书馆","校友会","公务电子邮件系统"},
                     {"逸仙码","企业微信","中大招生"},
-                    {a(R.string.evaluation),a(R.string.course_selection),a(R.string.agenda),a(R.string.exam),a(R.string.calendar),a(R.string.selfStudyRoom),a(R.string.score),a(R.string.course),"个人培养方案",a(R.string.trainType)},
+                    {a(R.string.evaluation),a(R.string.course_selection),a(R.string.agenda),a(R.string.exam),a(R.string.calendar),a(R.string.selfStudyRoom),a(R.string.score),a(R.string.course),"个人培养方案",a(R.string.trainType),"本科专业"},
                     {"SeeLight","雨课堂","课堂派","在线教学平台","中国大学（慕课）"},
                     {"校园地图","校车","出行证","校医院"},
                     {"宿舍报修","缴纳水电费"},
@@ -67,7 +69,7 @@ public class ServiceFragment extends Fragment {
                     {
                             newActivity(SchoolRoll.class),
                             newActivity(CET.class),
-
+                            newActivity(RegisterInfo.class)
                     },
                     {
                             newActivity(News.class),
@@ -109,6 +111,7 @@ public class ServiceFragment extends Fragment {
                             null,
                             browse("https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView"),
                             newActivity(TrainingSchedule.class),
+                            newActivity(MajorInfo.class)
                     },//教务
                     {
 

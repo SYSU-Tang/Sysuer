@@ -42,7 +42,6 @@ public class CET extends AppCompatActivity {
     OkHttpClient http = new OkHttpClient.Builder().build();
 
     int page = 1;
-    StaggeredFragment fr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +50,7 @@ public class CET extends AppCompatActivity {
         setContentView(binding.getRoot());
         params = new Params(this);
         cookie = params.getCookie();
-        fr = binding.list.getFragment();
+        StaggeredFragment fr = binding.list.getFragment();
         ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
@@ -77,7 +76,7 @@ public class CET extends AppCompatActivity {
                                 for(int i=0;i<keyName.length;i++){
                                     values.add(((JSONObject)a).getString(new String[]{"examYear","thePastOrNextHalfYearName","languageLevel","stuNum","stuName","writtenExaminationTime","writtenExaminationNumber","writtenExaminationTotalScore","hearingScore","readingScore","comprehensiveScore","writingScore","oralExamTime","oralExamNumber","oralExamAchievement","schoolName","collegeName","professionName","grade","stuClassName","writtenExaminationSubject","writtenExaminationApplyNumber","writtenExaminationApplySchool","writtenExaminationApplyCampus","whetherMissingTest","whetherViolation","violationType","whetherHearingObstacle","oralExamSubject","oralExamApplyNumber","oralExamApplySchool","oralExamApplyCampus"}[i]));
                                 }
-                                fr.add(CET.this,String.valueOf(order), List.of(keyName), values);
+                                fr.add(CET.this,String.valueOf(order),List.of(keyName), values);
                             });
                             if(total/10>page-1){
                                 page++;

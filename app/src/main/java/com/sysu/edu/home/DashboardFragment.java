@@ -57,19 +57,17 @@ public class DashboardFragment extends Fragment {
     ArrayList<HashMap<String,String>> tomorrowCourse=new ArrayList<>();
     LinkedList<JSONObject> thisWeekExams=new LinkedList<>();
     LinkedList<JSONObject> nextWeekExams=new LinkedList<>();
-    View fragment;
     private ActivityResultLauncher<Intent> launch;
     private Adp adp;
     private MaterialButtonToggleGroup toggle;
     RecyclerView examList;
     ExamAdp examAdp;
-
+    FragmentDashboardBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if(fragment==null){
-            FragmentDashboardBinding binding = FragmentDashboardBinding.inflate(inflater);
-            fragment= binding.getRoot();
+        if(savedInstanceState==null){
+            binding = FragmentDashboardBinding.inflate(inflater);
             RecyclerView list = binding.courseList;
             examList = binding.examList;
             launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
@@ -102,13 +100,13 @@ public class DashboardFragment extends Fragment {
             toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
                 if(group.getCheckedButtonId()==checkedId){
                     adp.set(checkedId==R.id.today?todayCourse:tomorrowCourse);
-                    fragment.findViewById(R.id.noClass).setVisibility(adp.getItemCount()==0?View.VISIBLE:View.GONE);
+                    binding.noClass.setVisibility(adp.getItemCount()==0?View.VISIBLE:View.GONE);
                 }
             });
             binding.toggle2.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
                 if(group.getCheckedButtonId()==checkedId){
                     examAdp.set(checkedId==R.id.this_week?thisWeekExams:nextWeekExams);
-                    fragment.findViewById(R.id.no_exam).setVisibility(examAdp.getItemCount()==0?View.VISIBLE:View.GONE);
+                    binding.noExam.setVisibility(examAdp.getItemCount()==0?View.VISIBLE:View.GONE);
                 }
             });
             handler=new Handler(Looper.getMainLooper()){
@@ -179,7 +177,7 @@ public class DashboardFragment extends Fragment {
                 }
             };
         }
-        return fragment;
+        return binding.getRoot();
     }
     public void getTodayCourses(){
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=2024-2")
