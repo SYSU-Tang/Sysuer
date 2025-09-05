@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.widget.Toast;
 
 import com.sysu.edu.academic.BrowserActivity;
@@ -95,9 +96,8 @@ public class Params {
         context.getWindowManager().getDefaultDisplay().getRealMetrics(dm);
         return dm.widthPixels;
     }
-
     public int getColumn() {
-        return (getWidth() < 1830) ? 1 : (getWidth() < 3050) ? 2 : 3;
+        return (getWidth() < dpToPx(540)) ? 1 : (getWidth() < dpToPx(900)) ? 2 : 3;
     }
 
     public String getCookie() {
@@ -108,13 +108,16 @@ public class Params {
         return context.getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("token", "");
     }
 
-    public Runnable browse(String url) {
-        return () -> context.startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(url)));
+    public View.OnClickListener browse(String url) {
+        return (View v) -> v.getContext().startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(url)));
     }
 
     public void copy(String a,String b) {
         ClipboardManager clip = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         clip.setPrimaryClip(ClipData.newPlainText(a, b));
+    }
+    public void toast(int resource){
+        toast(context.getString(resource));
     }
 
     public void toast(String toast){

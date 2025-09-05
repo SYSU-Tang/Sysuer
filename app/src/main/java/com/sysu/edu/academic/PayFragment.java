@@ -71,31 +71,13 @@ public class PayFragment extends StaggeredFragment {
                 PayNeedFragmentBinding b0 = PayNeedFragmentBinding.inflate(inflater);
                 b0.getRoot().addView(view);
                 b0.pay.setOnClickListener(a-> params.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
-                binding.recyclerView.addOnScrollListener(new                 class DateManager{
-                    final Calendar c = Calendar.getInstance();
-                    public Date fromDate;
-                    public Date toDate;
-                    public DateManager(){}
-
-                    public String getFromDateString(){
-                        return Params.toDate(fromDate);
+                binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        b0.chips.setElevation(recyclerView.canScrollVertically(-1) ? 6 : 0);
+                        super.onScrolled(recyclerView, dx, dy);
                     }
-                    public String getToDateString(){
-                        return Params.toDate(toDate);
-                    }
-                    public long getFromDateTimeMillis(){
-                        c.setTime(fromDate);
-                        return c.getTimeInMillis();
-                    }
-                    public long getToDateTimeMillis(){
-                        c.setTime(toDate);
-                        return c.getTimeInMillis();
-                    }
-                    public void getData(){
-                        getPaymentList(Params.getDateTime(fromDate),Params.getDateTime(toDate));
-                    }
-                })
-
+                });
                 this.view = b0.getRoot();
                 view = b0.getRoot();
                 break;
@@ -108,29 +90,23 @@ public class PayFragment extends StaggeredFragment {
                 }
                 PaySituationFragmentBinding b1 = PaySituationFragmentBinding.inflate(getLayoutInflater());
                 b1.getRoot().addView(view);
+                binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        b1.p.setElevation(recyclerView.canScrollVertically(-1) ? 6 : 0);
+                        super.onScrolled(recyclerView, dx, dy);
+                    }
+                });
                 b1.spinner.setText(String.valueOf(Params.getYear()));
                 b1.spinner.setSimpleItems(years.toArray(new String[]{}));
                 b1.spinner.setOnItemClickListener((adapterView, view1, i, l) -> {
                     clear();
                     getFeeList(String.valueOf(yearCodes.get(i)));
                 });
-                binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                        b0.chips.setElevation(recyclerView.canScrollVertically(-1) ? 6 : 0);
-                        super.onScrolled(recyclerView, dx, dy);
-                    }
-                });
                 view = b1.getRoot();
                 break;
             case 3:
-RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                        b1.p.setElevation(recyclerView.canScrollVertically(-1) ? 6 : 0);
-                        super.onScrolled(recyclerView, dx, dy);
-                    }
-                }
+
                 DateManager dm = new DateManager();
                 dm.fromDate = Params.getFirstOfMonth().getTime();
                 dm.toDate = Params.getEndOfMonth().getTime();
@@ -310,5 +286,28 @@ RecyclerView.OnScrollListener() {
                 handler.sendMessage(msg);
             }
         });
+    }
+    class DateManager{
+        final Calendar c = Calendar.getInstance();
+        public Date fromDate;
+        public Date toDate;
+        public DateManager(){}
+        public String getFromDateString(){
+            return Params.toDate(fromDate);
+        }
+        public String getToDateString(){
+            return Params.toDate(toDate);
+        }
+        public long getFromDateTimeMillis(){
+            c.setTime(fromDate);
+            return c.getTimeInMillis();
+        }
+        public long getToDateTimeMillis(){
+            c.setTime(toDate);
+            return c.getTimeInMillis();
+        }
+        public void getData(){
+            getPaymentList(Params.getDateTime(fromDate),Params.getDateTime(toDate));
+        }
     }
 }

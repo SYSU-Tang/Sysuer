@@ -26,6 +26,7 @@ import com.sysu.edu.academic.BrowserActivity;
 import com.sysu.edu.academic.CET;
 import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
+import com.sysu.edu.academic.CourseCompletion;
 import com.sysu.edu.academic.CourseSelection;
 import com.sysu.edu.academic.Grade;
 import com.sysu.edu.academic.MajorInfo;
@@ -57,7 +58,7 @@ public class ServiceFragment extends Fragment {
             service_container = binding.serviceContainer;
             String[] titles = new String[]{"查看", a(R.string.news), a(R.string.system), a(R.string.official_website), a(R.string.official_media), a(R.string.academy), a(R.string.study), a(R.string.life), "AI"};
             String[][] items = new String[][]{
-                    {a(R.string.school_roll), a(R.string.cet), a(R.string.register_info), a(R.string.school_work_warning)},
+                    {a(R.string.school_roll), a(R.string.cet), a(R.string.register_info), a(R.string.school_work_warning),a(R.string.course_completion)},
                     {"资讯门户", "校园集市"//,"学校活动"
                     },
                     {"体育场馆预定系统", "学工系统", "本科教务系统", "中山大学统一门户", "大学服务中心", "财务信息系统"},
@@ -73,7 +74,8 @@ public class ServiceFragment extends Fragment {
                             newActivity(SchoolRoll.class),
                             newActivity(CET.class),
                             newActivity(RegisterInfo.class),
-                            newActivity(SchoolWorkWarning.class)
+                            newActivity(SchoolWorkWarning.class),
+                            newActivity(CourseCompletion.class)
                     },
                     {
                             newActivity(News.class),

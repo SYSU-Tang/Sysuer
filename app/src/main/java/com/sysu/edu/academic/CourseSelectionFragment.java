@@ -166,7 +166,6 @@ public class CourseSelectionFragment extends Fragment{
                                 break;
                             case 2:
                                 //Toast.makeText(requireContext(),response.getString("data"),Toast.LENGTH_LONG).show();
-
                                 //Toast.makeText(requireContext(),"",Toast.LENGTH_LONG).show();
                                 break;
                             case 3:
