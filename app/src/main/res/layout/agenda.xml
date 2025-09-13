@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:fitsSystemWindows="true"
     android:layout_height="match_parent">
     <com.google.android.material.appbar.AppBarLayout
+        style="@style/SYSU.AppBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        app:statusBarForeground="@macro/m3_comp_app_bar_container_color"
         android:background="?attr/colorSurfaceContainer">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -73,69 +71,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/colorSurfaceContainerHighest"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".academic.AgendaActivity">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <GridLayout
             android:id="@+id/day"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:columnCount="8"
             android:orientation="vertical"
             android:rowCount="11">
-
-            <View
-                android:id="@+id/c1"
-                android:layout_width="0dp"
-                android:layout_row="0"
-                android:layout_rowSpan="11"
-                android:layout_column="1"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill" />
-            <View
-                android:layout_width="0dp"
-                android:layout_row="0"
-                android:id="@+id/c2"
-                android:layout_column="2"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill" />
-            <View
-                android:layout_width="0dp"
-                android:layout_row="0"
-                android:id="@+id/c3"
-                android:layout_column="3"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill" />
-            <View
-                android:layout_width="0dp"
-                android:layout_row="0"
-                android:layout_column="4"
-                android:id="@+id/c4"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill" />
-            <View
-                android:layout_width="0dp"
-                android:layout_row="0"
-                android:id="@+id/c5"
-                android:layout_column="5"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill" />
-            <View
-                android:layout_width="0dp"
-                android:layout_row="0"
-                android:layout_column="6"
-
-                android:id="@+id/c6"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill" />
-            <View
-                android:layout_width="0dp"
-                android:layout_row="0"
-
-                android:id="@+id/c7"
-                android:layout_column="7"
-                android:layout_columnWeight="1"
-                android:layout_gravity="fill" />
+<!--            <View-->
+<!--                android:id="@+id/c1"-->
+<!--                android:layout_row="0"-->
+<!--                android:layout_rowSpan="11"-->
+<!--                android:layout_column="1"-->
+<!--                android:layout_columnWeight="1"-->
+<!--                android:layout_gravity="fill" />-->
         </GridLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

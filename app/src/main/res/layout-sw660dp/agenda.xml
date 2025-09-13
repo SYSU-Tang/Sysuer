@@ -86,43 +86,9 @@
                 <View
                     android:layout_width="0dp"
                     android:layout_row="0"
+                    android:id="@+id/c1"
+                    android:layout_columnSpan="11"
                     android:layout_column="1"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_row="0"
-                    android:layout_column="2"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_row="0"
-                    android:layout_column="3"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_row="0"
-                    android:layout_column="4"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_row="0"
-                    android:layout_column="5"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_row="0"
-                    android:layout_column="6"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill" />
-                <View
-                    android:layout_width="0dp"
-                    android:layout_row="0"
-                    android:layout_column="7"
                     android:layout_columnWeight="1"
                     android:layout_gravity="fill" />
             </GridLayout>

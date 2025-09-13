@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -119,7 +120,13 @@ public class Grade extends AppCompatActivity {
                             JSONObject pull = dataString.getJSONObject("data");
                             //pull.getJSONArray("selectTermPull").forEach(a->termPop.getMenu().add(a));
                             pull.getJSONArray("selectTrainType").forEach(a -> typePop.getMenu().add(((JSONObject) a).getString("dataName")));
-                            pull.getJSONArray("selectYearPull").forEach(a -> yearPop.getMenu().add(((JSONObject) a).getString("dataName")));
+                            pull.getJSONArray("selectYearPull").forEach(a -> yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
+                                    setNow(((JSONObject) a).getString("dataName"),term,type);
+                                    return false;
+                                }
+                            }));
                             break;
                         }
                         case 3: {
@@ -132,9 +139,14 @@ public class Grade extends AppCompatActivity {
                             String totalRank = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("rank");
                             String totalPoint = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("vegPoint");
                             String totalCredit = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("totalCredit");
-                            String rank = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
-                            String point = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("vegPoint");
-                            String total = pull.getString("stuTotal");
+                            String rank = "";
+                            String point = "";
+                            String total = "";
+                            if (!pull.getJSONArray("compulsorySelectList").isEmpty()) {
+                                rank = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
+                                point = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("vegPoint");
+                                total = pull.getString("stuTotal");
+                            }
                             JSONObject stuCredit = pull.getJSONObject("stuCredit");
                             binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s", totalRank, total, totalCredit, totalPoint));
                             binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s", rank, total, point));
@@ -173,7 +185,6 @@ public class Grade extends AppCompatActivity {
                         .build());
             }
         }).build();
-
     }
     public void setNow(String year,int term,String type){
         this.term=term;

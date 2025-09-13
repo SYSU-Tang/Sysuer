@@ -7,18 +7,14 @@
     android:fitsSystemWindows="true"
     tools:context=".academic.CourseDetail">
     <com.google.android.material.appbar.AppBarLayout
-        style="@style/Widget.Material3.AppBarLayout"
-        android:layout_width="match_parent"
+        style="@style/SYSU.AppBarLayout.Solid"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurfaceContainer"
-        android:fitsSystemWindows="true"
-        app:liftOnScrollTargetViewId="@id/tabs"
-        app:statusBarForeground="?attr/colorSurfaceContainer">
+        android:layout_width="match_parent"
+        android:background="?attr/colorSurfaceContainer">
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorSurfaceContainer"
             android:transitionName="miniapp"
             app:layout_scrollFlags="scroll|enterAlways"
             app:navigationIcon="?homeAsUpIndicator"

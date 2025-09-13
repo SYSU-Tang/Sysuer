@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 import okhttp3.Call;
@@ -313,7 +314,7 @@ class RoomAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     public void add(HashMap<String, String> map) {
         data.add(map);
-        notifyItemRangeInserted(getItemCount()-2,1);
+        notifyItemInserted(getItemCount());
     }
     public void clear(){
         int temp=getItemCount();
@@ -321,15 +322,7 @@ class RoomAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         notifyItemRangeRemoved(0,temp);
     }
     public void add(String roomName, String pic, String office, String tag, String time, String floor, String seat) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("name", roomName);
-        map.put("pic", pic);
-        map.put("office", office);
-        map.put("type", tag);
-        map.put("time", time);
-        map.put("floor", floor);
-        map.put("seat", seat);
-        add(map);
+        add(new HashMap<>(Map.of("name", roomName,"pic", pic,"office", office,"type", tag,"time", time,"floor", floor,"seat", seat)));
     }
 
     @NonNull

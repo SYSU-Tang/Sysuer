@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridLayout;
@@ -74,19 +75,6 @@ public class AgendaActivity extends AppCompatActivity {
         cookie=params.getCookie();
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
         String[] duration = getResources().getStringArray(R.array.duration);
-        for (int i=0;i<duration.length;i++)
-        {
-            DurationBinding durationBinding = DurationBinding.inflate(getLayoutInflater(),binding.day,false);
-            durationBinding.courseDuration.setText(duration[i].replace("~","\n"));
-            durationBinding.courseOrder.setText(String.valueOf(i+1));
-            if(i==10){
-                durationBinding.getRoot().measure(View.MEASURED_SIZE_MASK,View.MEASURED_SIZE_MASK);
-                binding.month.getLayoutParams().width=durationBinding.getRoot().getMeasuredWidth();
-            }
-            GridLayout.LayoutParams gl = (GridLayout.LayoutParams) durationBinding.getRoot().getLayoutParams();
-            gl.rowSpec=GridLayout.spec(i);
-            binding.day.addView(durationBinding.getRoot());
-        }
         binding.toolbar.getMenu().add(R.string.today).setOnMenuItemClickListener(menuItem -> {
             getTable(currentTerm, currentWeek);
             getRange(currentTerm,currentWeek);
@@ -98,23 +86,53 @@ public class AgendaActivity extends AppCompatActivity {
         binding.last.setOnClickListener(v -> changeWeek(currentWeekIndex-1));
         binding.next.setOnClickListener(v -> changeWeek(currentWeekIndex+1));
         String[] ws = getResources().getStringArray(R.array.weeks);
+
+        for (int i=0;i<duration.length;i++)
+        {
+            DurationBinding durationBinding = DurationBinding.inflate(getLayoutInflater(),binding.day,false);
+            durationBinding.courseDuration.setText(duration[i].replace("~","\n"));
+            durationBinding.courseOrder.setText(String.valueOf(i+1));
+            if(i==10){
+                durationBinding.getRoot().measure(View.MEASURED_SIZE_MASK,View.MEASURED_SIZE_MASK);
+                binding.month.getLayoutParams().width=durationBinding.getRoot().getMeasuredWidth();
+            }GridLayout.LayoutParams gl = new GridLayout.LayoutParams();
+            //GridLayout.LayoutParams gl = new GridLayout.LayoutParams(GridLayout.spec(i,1.0f),GridLayout.spec(0,1.0f));
+            //GridLayout.LayoutParams) durationBinding.getRoot().getLayoutParams();
+//            gl.width=0;
+//            gl.height=-2;
+//            gl.setGravity(Gravity.FILL);
+//            gl.columnSpec=GridLayout.spec(0);
+            durationBinding.getRoot().setLayoutParams(gl);
+            binding.day.addView(durationBinding.getRoot());
+        }
         for(int i=0;i<7;i++){
             WeekdayBinding itemBinding = WeekdayBinding.inflate(getLayoutInflater(),binding.week,false);
             itemBinding.courseWeek.setText(ws[i]);
             itemBinding.courseDate.setText(getOldDate(i-weekday+2));
+//            new View[]{
+//                    ,binding.c2,binding.c3,binding.c4,binding.c5,binding.c6,binding.c7
+//            }[i]
+
+            View column = new View(this);
             if(i+2==weekday){
                 TypedValue typedValue = new TypedValue();
                 getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurfaceDim, typedValue, true);
-                itemBinding.courseDate.setTextColor(typedValue.data);//cs.getColor(0, 0));
-                new View[]{
-                        binding.c1,binding.c2,binding.c3,binding.c4,binding.c5,binding.c6,binding.c7
-                }[i].setBackground(new ColorDrawable(typedValue.data));
-                getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurfaceContainerHighest, typedValue, true);
+                itemBinding.courseDate.setTextColor(typedValue.data);
+               // ((GridLayout.LayoutParams)binding.c1.getLayoutParams()).columnSpec=GridLayout.spec(i+1,1.0f);
+               // binding.c1.setBackground(new ColorDrawable(typedValue.data));
                 itemBinding.courseWeek.setTextColor(typedValue.data);
                 itemBinding.getRoot().setBackgroundResource(R.drawable.weekday);
+                column.setBackground(new ColorDrawable(typedValue.data));
             }
+            GridLayout.LayoutParams lp = new GridLayout.LayoutParams(GridLayout.spec(0,11,1.0f),GridLayout.spec(i+1,1.0f));
+            lp.height=0;
+            lp.width=0;
+            lp.setGravity(Gravity.FILL);
+            column.setLayoutParams(lp);
+            binding.day.addView(column);
             binding.week.addView(itemBinding.getRoot());
         }
+
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
             if(o.getResultCode()==RESULT_OK){
                 cookie=params.getCookie();
@@ -177,9 +195,14 @@ public class AgendaActivity extends AppCompatActivity {
                                     //setDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
                                 });
                                 agendaItemBinding.content.setText(String.format("%s/%s-%s", course, teachingBuildingName == null ? "" : teachingBuildingName, classroomNum == null ? "" : classroomNum));
-                                GridLayout.LayoutParams gl = (GridLayout.LayoutParams) item.getLayoutParams();
-                                gl.columnSpec = GridLayout.spec(Integer.parseInt(week), 1.0f);
-                                gl.rowSpec = GridLayout.spec(Integer.parseInt(startClassTimes) - 1, Integer.parseInt(endClassTimes) - Integer.parseInt(startClassTimes) + 1, 1.0f);
+                                GridLayout.LayoutParams gl = new GridLayout.LayoutParams();
+                                gl.columnSpec = GridLayout.spec(Integer.parseInt(week),1.0f);
+                                gl.width=0;
+                                gl.height=0;
+                                gl.setGravity(Gravity.FILL);
+                                gl.rowSpec = GridLayout.spec(Integer.parseInt(startClassTimes) - 1, Integer.parseInt(endClassTimes) - Integer.parseInt(startClassTimes) + 1,1.0f);
+                                //gl.rowSpec = GridLayout.spec(0,4,1.0f);
+                                item.setLayoutParams(gl);
                                 binding.day.addView(item);
                             });
                             break;

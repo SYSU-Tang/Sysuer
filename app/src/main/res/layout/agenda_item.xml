@@ -2,8 +2,7 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
     android:layout_height="0dp"
-    android:layout_gravity="fill"
-    android:background="@color/purple_500">
+    android:layout_gravity="fill">
 <com.google.android.material.textview.MaterialTextView
     android:id="@+id/content"
     android:layout_width="match_parent"

@@ -148,6 +148,7 @@ public class CourseSelectionFragment extends Fragment{
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
+                    System.out.println(response);
                     if (response != null && response.getInteger("code").equals(200)) {
                         switch (msg.what) {
                             case -1:
@@ -187,7 +188,7 @@ public class CourseSelectionFragment extends Fragment{
                     if (v.canScrollVertically(1) && total / 10 + 1 >= page) {
                         getCourseList();
                     }
-                    binding.head.setElevation(v.canScrollVertically(-1) ? 12 : 0);
+                    binding.head.setElevation(v.canScrollVertically(-1) ? params.dpToPx(2) : 0);
                     super.onScrolled(v, dx, dy);
                 }
             });
@@ -235,7 +236,7 @@ public class CourseSelectionFragment extends Fragment{
             totals.put(key, -1);
         }
         binding.course.setAdapter(adp);
-        if(adp.getItemCount()!=total) {
+        if(!Objects.equals(adp.getItemCount(), total)) {
             getCourseList();
         }
     }
