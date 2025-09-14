@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,9 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +28,7 @@ import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import okhttp3.Call;
@@ -64,12 +61,6 @@ public class Grade extends AppCompatActivity {
         binding= GradeBinding.inflate(getLayoutInflater());
         EdgeToEdge.enable(this);
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
-            //((AppBarLayout.LayoutParams)binding.statusBar.getLayoutParams()).height=systemBars.top;
-            return insets;
-        });
         termPop = new PopupMenu(Grade.this, binding.term,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
         terms = new String[]{"第一学期", "第二学期", "第三学期"};
         for (int i = 0; i < terms.length; i++) {
@@ -85,23 +76,25 @@ public class Grade extends AppCompatActivity {
         binding.tabs.setHorizontalScrollBarEnabled(false);
         yearPop = new PopupMenu(this, binding.year,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
         typePop = new PopupMenu(this, binding.type,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-        binding.toolbar.setNavigationOnClickListener(view -> finishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         binding.scores.setLayoutManager(new GridLayoutManager(this,new Params(this).getColumn()));
         binding.term.setOnClickListener(view -> termPop.show());
         binding.year.setOnClickListener(view -> yearPop.show());
         binding.type.setOnClickListener(view -> typePop.show());
         adp = new ScoreAdp(this);
         binding.scores.setAdapter(adp);
-        cookie=getSharedPreferences("privacy",0).getString("Cookie","");
+        Params params = new Params(this);
+        cookie=params.getCookie();
         http=getHttp();
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
             if(o.getResultCode()==RESULT_OK){
-                cookie=getSharedPreferences("privacy",0).getString("Cookie","");
+                cookie=params.getCookie();
                 http=getHttp();
                 getPull();
-                getNow();
             }
         });
+        StaggeredFragment header = binding.header.getFragment();
+        header.setNested(false);
         handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -118,46 +111,57 @@ public class Grade extends AppCompatActivity {
                             break;
                         case 2: {
                             JSONObject pull = dataString.getJSONObject("data");
-                            //pull.getJSONArray("selectTermPull").forEach(a->termPop.getMenu().add(a));
                             pull.getJSONArray("selectTrainType").forEach(a -> typePop.getMenu().add(((JSONObject) a).getString("dataName")));
-                            pull.getJSONArray("selectYearPull").forEach(a -> yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                                @Override
-                                public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
-                                    setNow(((JSONObject) a).getString("dataName"),term,type);
+                            pull.getJSONArray("selectYearPull").forEach(a ->
+                                yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
+                                    setNow(((JSONObject) a).getString("dataName"), term, type);
                                     return false;
-                                }
-                            }));
+                                }));
+                            getNow();
                             break;
                         }
                         case 3: {
                             JSONObject pull = dataString.getJSONObject("data");
                             setNow(pull.getString("acadYear"), pull.getInteger("acadSemester"), pull.getString("sequence"));
+                            yearPop.getMenu().add(pull.getString("acadYear")).setOnMenuItemClickListener(menuItem -> {
+                                setNow(pull.getString("acadYear"),term,type);
+                                return false;
+                            });
                             break;
                         }
                         case 4: {
                             JSONObject pull = dataString.getJSONObject("data");
+                            System.out.println(pull);
                             String totalRank = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("rank");
                             String totalPoint = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("vegPoint");
                             String totalCredit = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("totalCredit");
                             String rank = "";
                             String point = "";
-                            String total = "";
                             if (!pull.getJSONArray("compulsorySelectList").isEmpty()) {
                                 rank = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("rank");
                                 point = pull.getJSONArray("compulsorySelectList").getJSONObject(0).getString("vegPoint");
-                                total = pull.getString("stuTotal");
+
                             }
+                            String total = pull.getString("stuTotal");
                             JSONObject stuCredit = pull.getJSONObject("stuCredit");
-                            binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s", totalRank, total, totalCredit, totalPoint));
-                            binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s", rank, total, point));
-                            binding.detail3.setText(String.format("学期学分：%s\n公必学分：%s\n公选学分：%s\n专必学分：%s\n专选学分：%s\n荣誉学分：%s",
-                                    stuCredit.getString("allGetCredit"),
-                                    stuCredit.getString("publicGetCredit"),
-                                    stuCredit.getString("publicSelectGetCredit"),
-                                    stuCredit.getString("majorGetCredit"),
-                                    stuCredit.getString("majorSelectGetCredit"),
-                                    stuCredit.getString("honorCourseGetCredit")
-                            ));
+//                            binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s", totalRank, total, totalCredit, totalPoint));
+//                            binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s", rank, total, point));
+//                            binding.detail3.setText(String.format("学期学分：%s\n公必学分：%s\n公选学分：%s\n专必学分：%s\n专选学分：%s\n荣誉学分：%s",
+//                                    stuCredit.getString("allGetCredit"),
+//                                    stuCredit.getString("publicGetCredit"),
+//                                    stuCredit.getString("publicSelectGetCredit"),
+//                                    stuCredit.getString("majorGetCredit"),
+//                                    stuCredit.getString("majorSelectGetCredit"),
+//                                    stuCredit.getString("honorCourseGetCredit")
+//                            ));
+                            ArrayList<String> values = new ArrayList<>();
+                            for (String key : new String[]{"allGetCredit","publicGetCredit","publicSelectGetCredit","majorGetCredit","majorSelectGetCredit","honorCourseGetCredit"}){
+                                values.add(stuCredit.getString(key));
+                            }
+                            header.clear();
+                            header.add("总学年", List.of("总排名","总学分","总绩点"),List.of(String.format("%s/%s",totalRank,total),totalCredit, totalPoint));
+                            header.add(String.format("%s学期",term), List.of("当前排名","当前绩点"),List.of(String.format("%s/%s",rank,total), point));
+                            header.add("学分", List.of("学期学分","公必学分","公选学分","专必学分","专选学分","荣誉学分"),values);
                             break;
                         }
                     }
@@ -168,7 +172,6 @@ public class Grade extends AppCompatActivity {
                 }
             }
         };
-        getNow();
         getPull();
     }
     public OkHttpClient getHttp(){

@@ -37,6 +37,8 @@ public class StaggeredFragment extends Fragment {
     int position;
     StaggeredAdapter staggeredAdapter;
     StaggeredGridLayoutManager lm;
+    int orientation=StaggeredGridLayoutManager.VERTICAL;
+    boolean nested;
 
     public static StaggeredFragment newInstance(int position){
         StaggeredFragment s=new StaggeredFragment();
@@ -48,14 +50,27 @@ public class StaggeredFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         params = new Params(requireActivity());
         binding = RecyclerViewScrollBinding.inflate(inflater);
-        lm  = new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL);
+        lm  = new StaggeredGridLayoutManager(params.getColumn(), orientation);
         binding.recyclerView.setLayoutManager(lm);
         if(staggeredAdapter==null){
             staggeredAdapter = new StaggeredAdapter(requireContext());
         }
         binding.recyclerView.setAdapter(staggeredAdapter);
+        binding.recyclerView.setNestedScrollingEnabled(nested);
         //binding.recyclerView
         return binding.getRoot();
+    }
+    public void setOrientation(int o){
+        this.orientation = o;
+        if(lm!=null){
+            lm.setOrientation(orientation);
+        }
+    }
+    public void setNested(boolean nested){
+        this.nested = nested;
+        if(binding!=null){
+            binding.recyclerView.setNestedScrollingEnabled(nested);
+        }
     }
     public void setHideNull(boolean hide){
         staggeredAdapter.setHideNull(hide);

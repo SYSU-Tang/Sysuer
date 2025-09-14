@@ -32,6 +32,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingBottom="12dp"
             android:orientation="vertical">
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.AppCompat.Title"
@@ -42,12 +43,16 @@
                 android:text="@string/campus"/>
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/campusGroup"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp">
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:chipSpacingVertical="0dp">
                 <com.google.android.material.chip.Chip
                     android:id="@+id/campus_select_all"
-                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/selectAll" />
@@ -61,12 +66,17 @@
                 android:text="@string/office"/>
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/officeGroup"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:chipSpacingVertical="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp">
                 <com.google.android.material.chip.Chip
                     android:id="@+id/office_select_all"
-                    style="@style/Widget.Material3.Chip.Assist.Elevated"
+                    style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/selectAll" />
@@ -80,7 +90,12 @@
                 android:text="@string/classroom_type"/>
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/typeGroup"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:chipSpacingVertical="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 app:selectionRequired="true">
@@ -105,17 +120,17 @@
                 android:background="?android:attr/listDivider" />
             <TableLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="2">
+                android:layout_height="wrap_content">
                 <TableRow
                     android:id="@+id/date"
+                    android:padding="4dp"
                     android:background="?android:selectableItemBackground">
                     <com.google.android.material.textview.MaterialTextView
                         style="@style/TextAppearance.AppCompat.Title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
                         android:layout_weight="1"
+                        android:layout_margin="8dp"
                         android:text="@string/date"/>
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/dateText"
@@ -125,7 +140,8 @@
                         android:layout_margin="8dp"
                         android:text="@string/date"/>
                 </TableRow>
-                <TableRow>
+                <TableRow
+                    android:padding="4dp">
                     <com.google.android.material.textview.MaterialTextView
                         style="@style/TextAppearance.AppCompat.Title"
                         android:layout_width="wrap_content"
@@ -146,6 +162,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:stepSize="1"
+                    android:layout_marginTop="4dp"
                     android:text="@string/date"
                     android:valueFrom="1"
                     android:valueTo="11"
@@ -159,20 +176,21 @@
                 <TableRow>
                     <com.google.android.material.button.MaterialButton
                         style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/reset"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
-                        android:layout_weight="0.5"
+                        android:layout_weight="1"
                         android:text="@string/reset"/>
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/query"
                         style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
-                        android:layout_weight="0.5"
+                        android:layout_weight="1"
                         android:text="@string/query"/>
                 </TableRow>
             </TableLayout>
@@ -180,6 +198,7 @@
     </androidx.core.widget.NestedScrollView>
     <LinearLayout
         android:id="@+id/result_sheet"
+        android:fitsSystemWindows="true"
         style="@style/Widget.MaterialComponents.BottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -195,7 +214,6 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/result"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+            android:layout_height="match_parent"/>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

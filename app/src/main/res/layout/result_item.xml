@@ -75,9 +75,10 @@
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="start"
+        android:gravity="start|bottom"
         android:textAppearance="?textAppearanceTitleLarge"
         app:layout_constraintBottom_toTopOf="@id/divider"
+        app:layout_constraintBottom_toBottomOf="@id/c"
         app:layout_constraintLeft_toLeftOf="@id/pic"
         app:layout_constraintRight_toRightOf="@id/pic"
         app:layout_constraintTop_toBottomOf="@id/pic"/>
