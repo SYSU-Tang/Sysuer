@@ -5,9 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/box_background"
-    android:paddingStart="8dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="8dp">
+    android:padding="8dp">
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/exam_name"
         android:layout_width="wrap_content"

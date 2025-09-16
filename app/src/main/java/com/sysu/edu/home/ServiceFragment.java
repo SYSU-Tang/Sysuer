@@ -38,6 +38,7 @@ import com.sysu.edu.academic.SchoolWorkWarning;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ServiceBoxBinding;
+import com.sysu.edu.life.SchoolBus;
 import com.sysu.edu.news.News;
 
 import java.util.Objects;
@@ -130,7 +131,7 @@ public class ServiceFragment extends Fragment {
                             browse("https://www.icourse163.org/"),
                     },//学习
                     {null,
-                            null,
+                            newActivity(SchoolBus.class),
                             null,
                             null,
                             null,

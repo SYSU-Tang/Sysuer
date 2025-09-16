@@ -23,11 +23,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-//        new AppBarConfiguration.Builder(
-//                R.id.navigation_activity, R.id.navigation_service, R.id.navigation_account)
-//                .build();
         NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main))).getNavController();
-        //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         NavGraph g = new NavInflater(this,navController.getNavigatorProvider()).inflate(R.navigation.main_navigation);
         if(savedInstanceState==null){
             g.setStartDestination(new int[]{R.id.navigation_activity,R.id.navigation_service,R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home","0"))]);
@@ -35,6 +31,6 @@ public class MainActivity extends AppCompatActivity {
         navController.setGraph(g);
         NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
         Language.setLanguage(this);
-        //new Theme(this).setTheme();
+        //WorkManager.getInstance(this).enqueue(new PeriodicWorkRequest.Builder(ClassIsland.class, 1,TimeUnit.SECONDS).build());
     }
 }

@@ -38,7 +38,7 @@ public class StaggeredFragment extends Fragment {
     StaggeredAdapter staggeredAdapter;
     StaggeredGridLayoutManager lm;
     int orientation=StaggeredGridLayoutManager.VERTICAL;
-    boolean nested;
+    boolean nested = true;
 
     public static StaggeredFragment newInstance(int position){
         StaggeredFragment s=new StaggeredFragment();

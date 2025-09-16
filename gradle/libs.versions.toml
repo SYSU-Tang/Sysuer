@@ -21,10 +21,11 @@ lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
 composeBom = "2024.04.01"
 preference = "1.2.0"
+workRuntime = "2.10.4"
 
 [libraries]
 fastjson2 = { module = "com.alibaba.fastjson2:fastjson2", version = "2.0.58.android8" }
-glide = { module = "com.github.bumptech.glide:glide", version = "4.16.0" }
+glide = { module = "com.github.bumptech.glide:glide", version = "5.0.5" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -50,6 +51,7 @@ ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", v
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
 preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
+work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "workRuntime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

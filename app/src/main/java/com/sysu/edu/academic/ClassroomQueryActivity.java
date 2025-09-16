@@ -115,7 +115,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         binding.classroomQueryToolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         binding.result.setAdapter(adp);
         binding.result.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
-        //BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_COLLAPSED);
+        BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_HIDDEN);
         binding.date.setOnClickListener(v -> dateDialog.show(getSupportFragmentManager(),null));
         binding.timeSlider.addOnChangeListener((slider, value, fromUser) -> {
             startClassTime=String.format(Locale.CHINA,"%.0f",slider.getValues().get(0));
@@ -170,9 +170,9 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 JSONObject dataString = JSON.parseObject((String) msg.obj);
                 if (dataString.getInteger("code") == 200) {
                     if (msg.what == 3) {
-                        BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_EXPANDED);
                         JSONObject data = dataString.getJSONObject("data");
                         total = data.getInteger("total");page++;data.getJSONArray("rows").forEach(a->adp.add((JSONObject) a));
+                        BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_EXPANDED);
                     } else {binding.timeSlider.setValueFrom(1);
                         dataString.getJSONArray("data").forEach(campusInfo -> {
                             switch (msg.what) {

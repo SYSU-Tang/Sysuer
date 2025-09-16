@@ -3,10 +3,13 @@ package com.sysu.edu.home;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,14 +38,14 @@ import com.sysu.edu.databinding.FragmentDashboardBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import okhttp3.Call;
@@ -57,8 +60,8 @@ import okhttp3.Response;
 public class DashboardFragment extends Fragment {
     Handler handler;
     String cookie;
-    ArrayList<HashMap<String,String>> todayCourse=new ArrayList<>();
-    ArrayList<HashMap<String,String>> tomorrowCourse=new ArrayList<>();
+    ArrayList<JSONObject> todayCourse=new ArrayList<>();
+    ArrayList<JSONObject> tomorrowCourse=new ArrayList<>();
     LinkedList<JSONObject> thisWeekExams=new LinkedList<>();
     LinkedList<JSONObject> nextWeekExams=new LinkedList<>();
     private ActivityResultLauncher<Intent> launch;
@@ -113,52 +116,58 @@ public class DashboardFragment extends Fragment {
             handler=new Handler(Looper.getMainLooper()){
                 @Override
                 public void handleMessage(@NonNull Message msg) {
-                     JSONObject response = JSON.parseObject((String) msg.obj);
+                    JSONObject response = JSON.parseObject((String) msg.obj);
                     if (response.get("code").equals(200)) {
                         switch (msg.what) {
                             case 1:
                                 response.getJSONArray("data").forEach(e -> {
+                                    ((JSONObject) e).put("status",getTimePosition(((JSONObject) e).getString("teachingDate") + " " +((JSONObject) e).getString("startTime"),((JSONObject) e).getString("teachingDate")  + " " + ((JSONObject) e).getString("endTime")));
+                                    ((JSONObject) e).put("time",((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime"));
+                                    ((JSONObject) e).put("course","第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课");
                                     String flag = (String) ((JSONObject) e).get("useflag");
-                                    addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
-                                            , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
+                                    (flag.equals("TD") ? todayCourse : tomorrowCourse).add((JSONObject) e);
+//                                    addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
+//                                            , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
                                 });
                                 binding.toggle.check(R.id.today);
                                 break;
                             case 2:
-                                    int k = 0;
-                                    if(response.getJSONArray("data").isEmpty()){break;}
-                                    for (Map.Entry<String, Object> entry : response.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").entrySet()) {
-                                        String key = entry.getKey();
-                                        Object value = entry.getValue();
-                                        if (k == 0) {
-                                            k = Integer.parseInt(key);
+                                class k{
+                                    public int k;
+                                    public k(int k){
+                                        this.k = k;
+                                    }
+                                }
+                                final k k = new k(0);
+                                if(response.getJSONArray("data").isEmpty()){break;}
+                                response.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").forEach((key,value)->{
+                                    if (k.k == 0) {
+                                        k.k = Integer.parseInt(key);
+                                    }
+                                    if (Integer.parseInt(key) < k.k) {
+                                        k.k = Integer.parseInt(key);
+                                        if (value != null) {
+                                            ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
                                         }
-                                        if (Integer.parseInt(key) < k) {
-                                            k = Integer.parseInt(key);
-                                            if (value != null) {
-                                                ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
-                                            }
-                                        } else {
-                                            if (value != null) {
-                                                ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
-                                            }
+                                    } else {
+                                        if (value != null) {
+                                            ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
                                         }
                                     }
-                                    for (Map.Entry<String, Object> entry : response.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").entrySet()) {
-                                        String a = entry.getKey();
-                                        Object b = entry.getValue();
-                                        if (Integer.parseInt(a) < k) {
-                                            k = Integer.parseInt(a);
-                                            if (b != null) {
-                                                ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
-                                            }
-                                        } else {
-                                            if (b != null) {
-                                                ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
-                                            }
-                                        }
-                                    }
-                                    binding.toggle2.check(R.id.this_week);
+                                });
+                                response.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").forEach((a,b)->{
+                                      if (Integer.parseInt(a) < k.k) {
+                                          k.k = Integer.parseInt(a);
+                                          if (b != null) {
+                                              ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
+                                          }
+                                      } else {
+                                          if (b != null) {
+                                              ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
+                                          }
+                                      }
+                                  });
+                                binding.toggle2.check(R.id.this_week);
                                 break;
                             case 3:
                                 String term = response.getJSONObject("data").getString("acadYearSemester");
@@ -221,15 +230,15 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    public void addCourse(ArrayList<HashMap<String,String>> data, String name, String location, String time, String course, String teacher, String flag){
-        HashMap<String, String> map = new HashMap<>();
-        map.put("courseName",name);
-        map.put("location",location);
-        map.put("time",time);
-        map.put("course",course);
-        map.put("teacher",teacher);
-        map.put("flag",flag);
-        data.add(map);
+    public String getTimePosition(String from,String to){
+        Date now = new Date();
+        try {
+            Date fromDate = new SimpleDateFormat("yy-MM-dd hh:mm", Locale.CHINA).parse(from);
+            Date toDate = new SimpleDateFormat("yy-MM-dd hh:mm", Locale.CHINA).parse(to);
+            return now.before(fromDate)?"after":now.after(toDate)?"before":"in";
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
     public void getExams(String term){
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck")
@@ -256,12 +265,12 @@ public class DashboardFragment extends Fragment {
 }
 class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
-    ArrayList<HashMap<String,String>> data=new ArrayList<>();
+    ArrayList<JSONObject> data=new ArrayList<>();
     public CourseAdp(Context context){
         super();
         this.context=context;
     }
-    public void set(ArrayList<HashMap<String,String>> d){
+    public void set(ArrayList<JSONObject> d){
         clear();
         data.addAll(d);
         notifyItemRangeInserted(0,getItemCount());
@@ -279,15 +288,21 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        BiConsumer<Integer,String> a = (id, s)-> {
-            ((TextView)holder.itemView.findViewById(id)).setText(data.get(position).get(s));
-        };
+        BiConsumer<Integer,String> a = (id, s)-> ((TextView)holder.itemView.findViewById(id)).setText(data.get(position).getString(s));
         holder.itemView.setOnClickListener(v -> {});
         a.accept(R.id.course_title,"courseName");
-        a.accept(R.id.location_container,"location");
+        a.accept(R.id.location_container,"teachingPlace");
         a.accept(R.id.time_container,"time");
-        a.accept(R.id.teacher,"teacher");
+        a.accept(R.id.teacher,"teacherName");
         a.accept(R.id.course,"course");
+        //TypedArray arrt = new TypedArray();
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurfaceDim, typedValue, true);
+        ((TextView)holder.itemView.findViewById(R.id.course_title)).setTextAppearance(!Objects.equals(data.get(position).getString("status"), "before") ?com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized:com.google.android.material.R.style.TextAppearance_Material3_BodyMedium);
+        ((GradientDrawable)((RippleDrawable)holder.itemView.getBackground()).getDrawable(1)).setColor(Objects.equals(data.get(position).getString("status"), "in") ?typedValue.data:Objects.equals(data.get(position).getString("status"), "before") ?0x00000000:0xffffffff);
+//        addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
+//                , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
+//    });
     }
     @Override
     public int getItemCount() {
