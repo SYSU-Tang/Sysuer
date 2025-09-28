@@ -14,9 +14,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -37,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     String password="";
     SharedPreferences privacy;
     LoginBinding binding;
+    Pattern pattern = Pattern.compile("//cas.+?\\.sysu.edu\\.cn");
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,52 +47,47 @@ public class LoginActivity extends AppCompatActivity {
         binding.username.setText(username);
         binding.password.setText(password);
         binding.tool.setNavigationOnClickListener(v->finishAfterTransition());
-        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
-            binding.appbar.setPadding(0,systemBars.top,0,0);
-            return insets;
-        });
+//        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
+//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
+//            binding.appbar.setPadding(0,systemBars.top,0,0);
+//            return insets;
+//        });
         web=new WebView(this);
         binding.m.addView(web);
         String url = getIntent().getStringExtra("url");
         if(url==null){url="https://cas.sysu.edu.cn/cas/login?service=https%3A%2F%2Fjwxt.sysu.edu.cn%2Fjwxt%2Fapi%2Fsso%2Fcas%2Flogin%3Fpattern%3Dstudent-login";}
         web.loadUrl(url);
         web.setWebViewClient(new WebViewClient(){
-
             @Override
             public void onPageFinished(WebView view, String url) {
                 sessionId=CookieManager.getInstance().getCookie(url);
-                Pattern pattern = Pattern.compile("//cas.+?\\.sysu.edu\\.cn");
                 if(!pattern.matcher(url).find()){
                     if(isEmpty()){
-                        setResult(RESULT_OK);
                         SharedPreferences.Editor edit = privacy.edit();
                         edit.putString("Cookie",sessionId);
                         edit.putString("token",getToken(sessionId));
                         edit.putString("username", username);
                         edit.putString("password", password);
                         edit.apply();
+                        setResult(RESULT_OK);
                        finishAfterTransition();
                     }
                 }
-                else if(getSharedPreferences("privacy",MODE_PRIVATE).getString("Cookie","").isEmpty()||pattern.matcher(url).find()){
+                else if(pattern.matcher(url).find()||privacy.getString("Cookie","").isEmpty()){
                     binding.loginButton.setEnabled(true);
                     Glide.with(LoginActivity.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).override(92*3,34*3).into(binding.ca);
                 }
-                web.evaluateJavascript("var script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
+                //web.evaluateJavascript("var script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
             }
             @Override
             public void onLoadResource(WebView view, String url) {
                 view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
             }
         });
-        binding.tool.getMenu().add("确认").setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
-                web.loadUrl("https://portal.sysu.edu.cn/newClient/#/newPortal/index");
-                return false;
-            }
+        binding.tool.getMenu().add("确认").setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
+            web.loadUrl("https://portal.sysu.edu.cn/newClient/#/newPortal/index");
+            return false;
         });
         WebSettings webSettings = web.getSettings();
         webSettings.setDomStorageEnabled(true);

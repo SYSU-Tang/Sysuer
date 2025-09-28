@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
-    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 <com.google.android.material.appbar.AppBarLayout
     android:layout_width="match_parent"
-    android:id="@+id/appbar"
+    android:fitsSystemWindows="true"
     android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
     android:background="?attr/colorSurface">
     <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -65,8 +63,7 @@
                 android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/captcha"
-                app:endIconMode="custom">
+                android:hint="@string/captcha">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/captcha"
                     android:layout_width="match_parent"

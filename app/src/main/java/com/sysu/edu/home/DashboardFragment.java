@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.Html;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,7 +68,7 @@ public class DashboardFragment extends Fragment {
     ArrayList<JSONObject> tomorrowCourse = new ArrayList<>();
     LinkedList<JSONObject> thisWeekExams = new LinkedList<>();
     LinkedList<JSONObject> nextWeekExams = new LinkedList<>();
-    private ActivityResultLauncher<Intent> launch;
+    ActivityResultLauncher<Intent> launch;
     Params params;
     RecyclerView examList;
     ExamAdp examAdp;
@@ -117,6 +118,8 @@ public class DashboardFragment extends Fragment {
                     binding.noExam.setVisibility(examAdp.getItemCount() == 0 ? View.VISIBLE : View.GONE);
                 }
             });
+            binding.date.setText(String.format("%s/星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), new String[]{"日", "一", "二", "三", "四", "五", "六"}[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]));
+
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
@@ -124,21 +127,28 @@ public class DashboardFragment extends Fragment {
                     if (response.get("code").equals(200)) {
                         switch (msg.what) {
                             case 1:
+                                ArrayList<JSONObject> beforeArray = new ArrayList<>();
+                                ArrayList<JSONObject> afterArray = new ArrayList<>();
                                 response.getJSONArray("data").forEach(e -> {
-                                    ((JSONObject) e).put("status", getTimePosition(((JSONObject) e).getString("teachingDate") + " " + ((JSONObject) e).getString("startTime"), ((JSONObject) e).getString("teachingDate") + " " + ((JSONObject) e).getString("endTime")));
+                                    String status = getTimePosition(((JSONObject) e).getString("teachingDate") + " " + ((JSONObject) e).getString("startTime"), ((JSONObject) e).getString("teachingDate") + " " + ((JSONObject) e).getString("endTime"));
+                                    ((JSONObject) e).put("status", status);
                                     ((JSONObject) e).put("time", ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime"));
                                     ((JSONObject) e).put("course", "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课");
                                     String flag = (String) ((JSONObject) e).get("useflag");
                                     (flag.equals("TD") ? todayCourse : tomorrowCourse).add((JSONObject) e);
+                                    (Objects.equals(status,"before") ? beforeArray : afterArray).add((JSONObject) e);
 //                                    addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
 //                                            , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
                                 });
+                                binding.progress.setMax(todayCourse.size());
+                                binding.progress.setProgress(beforeArray.size());
+                                binding.courseList.scrollToPosition(beforeArray.size());
+                                binding.nextClass.setText(Html.fromHtml(String.format("<h4><font color=\"#6750a4\">%s</font></h4>地点：<b>%s</b><br/>时间：<b>%s</b><br/>日期：<b>%s</b>",afterArray.isEmpty()?"今天没有课程了":todayCourse.get(beforeArray.size()).getString("courseName"),afterArray.isEmpty()?"反正不是教学楼":todayCourse.get(beforeArray.size()).getString("teachingPlace"),afterArray.isEmpty()?"不是今天":todayCourse.get(beforeArray.size()).getString("time"),afterArray.isEmpty()?"不是今天":todayCourse.get(beforeArray.size()).getString("teachingDate")),Html.FROM_HTML_MODE_COMPACT));
                                 binding.toggle.check(R.id.today);
                                 break;
                             case 2:
                                 class k {
                                     public int k;
-
                                     public k(int k) {
                                         this.k = k;
                                     }
@@ -178,7 +188,7 @@ public class DashboardFragment extends Fragment {
                                 break;
                             case 3:
                                 String term = response.getJSONObject("data").getString("acadYearSemester");
-                                binding.date.setText(String.format("%s/星期%s/第%s学期", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), new String[]{"日", "一", "二", "三", "四", "五", "六"}[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1], term));
+                                binding.date.setText(String.format("第%s学期\n%s\n星期%s", term, new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), new String[]{"日", "一", "二", "三", "四", "五", "六"}[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]));
                                 getTodayCourses(term);
                                 getExams(term);
                                 break;
@@ -276,7 +286,7 @@ public class DashboardFragment extends Fragment {
 }
 
 class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private final ActivityResultLauncher<Intent> launch;
+    final ActivityResultLauncher<Intent> launch;
     Context context;
     ArrayList<JSONObject> data = new ArrayList<>();
 
@@ -284,10 +294,12 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         super();
         this.context = context;
         launch = ((AppCompatActivity) context).registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-
         });
     }
-
+//    public int getBeforeSize(){
+//
+//        return 0;
+//    }
     public void set(ArrayList<JSONObject> d) {
         clear();
         data.addAll(d);
@@ -335,7 +347,6 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
     LinkedList<JSONObject> data = new LinkedList<>();
-
     public ExamAdp(Context context) {
         super();
         this.context = context;
