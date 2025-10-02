@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".extra.InfoActivity">
+    tools:context=".extra.AboutActivity">
 <com.google.android.material.appbar.AppBarLayout
     android:layout_width="match_parent"
     android:id="@+id/appbar"
@@ -39,7 +39,7 @@
 </com.google.android.material.appbar.AppBarLayout>
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragment"
-            android:name="com.sysu.edu.extra.ui.InfoFragment"
+            android:name="com.sysu.edu.extra.ui.AboutFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>

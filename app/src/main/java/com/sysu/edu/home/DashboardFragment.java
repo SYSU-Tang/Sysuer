@@ -21,7 +21,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -33,6 +32,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
+import com.sysu.edu.MainActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.CourseDetail;
 import com.sysu.edu.api.Params;
@@ -289,15 +289,12 @@ public class DashboardFragment extends Fragment {
 }
 
 class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final ActivityResultLauncher<Intent> launch;
     Context context;
     ArrayList<JSONObject> data = new ArrayList<>();
 
     public CourseAdp(Context context) {
         super();
         this.context = context;
-        launch = ((AppCompatActivity) context).registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-        });
     }
     public void set(ArrayList<JSONObject> d) {
         clear();
@@ -321,7 +318,7 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         BiConsumer<Integer, String> a = (id, s) -> ((TextView) holder.itemView.findViewById(id)).setText(data.get(position).getString(s));
-        holder.itemView.setOnClickListener(v -> launch.launch(new Intent(context, CourseDetail.class).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, holder.itemView, "miniapp")));
+        holder.itemView.setOnClickListener(v -> ((MainActivity) context).launch().launch(new Intent(context, CourseDetail.class).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, holder.itemView, "miniapp")));
         a.accept(R.id.course_title, "courseName");
         a.accept(R.id.location_container, "teachingPlace");
         a.accept(R.id.time_container, "time");

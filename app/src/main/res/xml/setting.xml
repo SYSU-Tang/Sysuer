@@ -24,11 +24,17 @@
             app:title="@string/home"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/app">
+        <rikka.material.preference.MaterialSwitchPreference
+            android:summary="应用启动时自动检测更新"
+            app:defaultValue="true"
+            app:icon="@drawable/refresh"
+            app:key="update"
+            app:title="@string/launch_update"/>
         <Preference
             app:icon="@drawable/info"
             app:title="@string/about">
             <intent android:action="android.intent.action.VIEW"
-                android:targetClass="com.sysu.edu.extra.InfoActivity"
+                android:targetClass="com.sysu.edu.extra.AboutActivity"
                 android:targetPackage="com.sysu.edu">
             </intent>
         </Preference>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory app:title="@string/version">
+        <Preference
+            android:key="version"
+            app:icon="@drawable/submit"
+            app:title="当前版本"/>
+        <Preference
+            android:key="downloadLink"
+            android:summary="https://github.com/SYSU-Tang/Sysuer/releases"
+            app:icon="@drawable/down"
+            app:title="下载地址">
+            <intent android:data="https://github.com/SYSU-Tang/Sysuer/releases"/>
+        </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/project">
+        <Preference
+            app:icon="@drawable/account"
+            app:summary="https://github.com/SYSU-Tang"
+            app:title="SYSU—Tang">
+            <intent android:data="https://github.com/SYSU-Tang"/>
+        </Preference>
+        <Preference
+            app:icon="@drawable/account"
+            app:summary="https://github.com/SYSU-Tang/Sysuer/"
+            app:title="@string/app_name">
+            <intent android:data="https://github.com/SYSU-Tang/Sysuer/"/>
+        </Preference>
+        <Preference
+            app:icon="@drawable/account"
+            app:summary="1063579244"
+            app:title="@string/qq_group">
+            <intent android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3Di4M0YfNzHskNiXgiYTAvA1EAWZh7HNQx"/>
+        </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/feedback">
+        <Preference
+            android:summary="https://github.com/SYSU-Tang/Sysuer/issues"
+            app:icon="@drawable/question"
+            app:title="提交Issues">
+            <intent android:data="https://github.com/SYSU-Tang/Sysuer/issues"/>
+        </Preference>
+        <rikka.preference.SimpleMenuPreference
+            app:entries="@array/sponsors"
+            app:entryValues="@array/sponsor_values"
+            app:icon="@drawable/money"
+            app:key="sponsor"
+            app:persistent="false"
+            app:summary="每一次捐赠都是开发的动力"
+            app:title="捐赠"/>
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/permission">
+        <rikka.material.preference.MaterialSwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/book"
+            app:key="privacyPolicy"
+            app:persistent="false"
+            app:summary="点击撤回"
+            app:title="隐私政策"/>
+        <rikka.material.preference.MaterialSwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/book"
+            app:key="userAgreement"
+            app:persistent="false"
+            app:summary="点击撤回"
+            app:title="用户协议"/>
+        <Preference
+            app:icon="@drawable/book"
+            app:key="permissionDescription"
+            app:persistent="false"
+            app:title="权限说明"/>
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/open_source">
+        <Preference
+            app:icon="@drawable/version"
+            app:summary="https://github.com/alibaba/fastjson2"
+            app:title="fastjson2" >
+            <intent android:data="https://github.com/alibaba/fastjson2"/>
+        </Preference>
+        <Preference
+            app:icon="@drawable/version"
+            app:summary="https://github.com/square/okhttp"
+            app:title="okhttp">
+            <intent android:data="https://github.com/square/okhttp"/>
+        </Preference>
+        <Preference
+            app:icon="@drawable/version"
+            app:summary="https://github.com/androidx/androidx"
+            app:title="androidx">
+            <intent android:data="https://github.com/androidx/androidx"/>
+        </Preference>
+        <Preference
+            app:icon="@drawable/version"
+            app:summary="https://github.com/material-components/material-components-android"
+            app:title="material3">
+            <intent android:data="https://github.com/material-components/material-components-android"/>
+        </Preference>
+        <Preference
+            app:icon="@drawable/version"
+            app:summary="https://github.com/JetBrains/kotlin"
+            app:title="kotlin">
+            <intent android:data="https://github.com/JetBrains/kotlin"/>
+        </Preference>
+    </PreferenceCategory>
+</androidx.preference.PreferenceScreen>

@@ -1,37 +1,35 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.中大儿" parent="@style/Theme.SYSUER.Light">
-        <item name="dropdownPreferenceStyle">
-            @style/preference
-        </item>
-        <item name="android:windowAnimationStyle">@style/fade</item>
     </style>
-
-    <style name="Theme.SYSUER.Light" parent="Theme.Material3.Light.NoActionBar">
-        <!--        <item name="preferenceFragmentStyle">-->
-        <!--            @style/PF-->
-        <!--        </item>-->
+    <style name="Theme.SYSUER.Light" parent="Theme.SYSUER.Base">
+    </style>
+    <style name="Theme.SYSUER.Base" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/white</item>
+<!--        <item name="colorPrimary">@color/purple_500</item>-->
+<!--        <item name="colorPrimaryVariant">@color/purple_700</item>-->
+<!--        <item name="colorOnPrimary">@color/white</item>-->
+<!--        &lt;!&ndash; Secondary brand color. &ndash;&gt;-->
+<!--        <item name="colorSecondary">@color/teal_200</item>-->
+<!--        <item name="colorSecondaryVariant">@color/teal_700</item>-->
+<!--        <item name="colorOnSecondary">@color/black</item>-->
+<!--        &lt;!&ndash; Status bar color. &ndash;&gt;-->
+<!--        <item name="android:statusBarColor">@color/white</item>-->
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+        <item name="simpleMenuPreferenceStyle">@style/Preference.Rikka.SimpleMenuPreference.Material3</item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+<!--        <item name="switchPreferenceStyle">-->
+<!--            @style/Preference.Rikka.MateriaSwitchPreference-->
+<!--        </item>-->
+<!--        <item name="preferenceStyle">@style/preference</item>-->
         <!-- Customize your theme here. -->
-    </style>
-
-    <style name="preference" parent="@style/Preference.DropDown.Material">
-
-    </style>
-
-    <style name="spinner" parent="Widget.AppCompat.TextView">
-        <item name="android:textColor">
-
-        </item>
+        <item name="android:windowAnimationStyle">@style/fade</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="fade">
@@ -49,19 +47,13 @@
         </item>
     </style>
 
-    <style name="Theme.中大儿.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="Theme.中大儿.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.中大儿.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-    <!-- Base application theme. -->
-    <style name="Base.Theme.中大儿" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+<!--    <style name="Theme.中大儿.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />-->
+<!--    <style ame="Theme.中大儿.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />-->
+<!--    &lt;!&ndash; Base application theme. &ndash;&gt;-->
+<!--    <style name="Base.Theme.中大儿" parent="Theme.Material3.DayNight.NoActionBar">-->
+<!--        &lt;!&ndash; Customize your light theme here. &ndash;&gt;-->
+<!--        &lt;!&ndash; <item name="colorPrimary">@color/my_light_primary</item> &ndash;&gt;-->
+<!--    </style>-->
     <style name="SYSU.AppBarLayout" parent="Widget.Material3.AppBarLayout">
         <item name="android:fitsSystemWindows">true</item>
         <item name="statusBarForeground">@macro/m3_comp_app_bar_container_color</item>
@@ -78,4 +70,8 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">4dp</item>
     </style>
+<!--    <style name="spinner" parent="Widget.AppCompat.TextView">-->
+<!--        <item name="android:textColor"/>-->
+<!--    </style>-->
+
 </resources>

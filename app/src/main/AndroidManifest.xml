@@ -82,7 +82,7 @@
             android:name=".extra.SettingActivity"
             android:exported="true" />
         <activity
-            android:name=".extra.InfoActivity"
+            android:name=".extra.AboutActivity"
             android:exported="true" />
         <activity
             android:name=".academic.Grade"
@@ -127,6 +127,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.sysu.edu.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

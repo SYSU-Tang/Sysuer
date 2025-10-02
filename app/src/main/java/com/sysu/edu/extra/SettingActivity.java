@@ -30,6 +30,5 @@ public class SettingActivity extends AppCompatActivity {
         });
         Language.setLanguage(this);
         binding.tool.setNavigationOnClickListener(v-> finishAfterTransition());
-    }
-
+        }
 }

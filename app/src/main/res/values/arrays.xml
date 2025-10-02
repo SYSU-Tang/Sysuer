@@ -20,4 +20,15 @@
         <item>@string/menu_service</item>
         <item>@string/menu_account</item>
     </string-array>
+    <string-array name="sponsors">
+        <item>支付宝</item>
+        <item>微信支付</item>
+        <item>QQ钱包</item>
+    </string-array>
+
+    <string-array name="sponsor_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 </resources>

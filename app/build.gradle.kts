@@ -12,9 +12,8 @@ android {
         applicationId = "com.sysu.edu"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
-
+        versionCode = 1924
+        versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -69,6 +68,13 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.preference)
     implementation(libs.work.runtime)
+    implementation(libs.material.preference){
+        exclude("dev.rikka.rikkax.appcompat","appcompat")
+    }
+    implementation(libs.dev.material){
+        exclude("dev.rikka.rikkax.appcompat","appcompat")
+    }
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

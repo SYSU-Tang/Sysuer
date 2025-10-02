@@ -1,4 +1,4 @@
-package com.sysu.edu;
+package com.sysu.edu.extra;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -14,28 +14,22 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.NavGraph;
-import androidx.navigation.NavInflater;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
-import androidx.preference.PreferenceManager;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.navigation.NavigationBarView;
+import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.ActivityMainBinding;
-import com.sysu.edu.preference.Language;
+import com.sysu.edu.databinding.ActivityInfoBinding;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -43,29 +37,26 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
-    Handler handler;
-    long downloadId;
+public class AboutActivity extends AppCompatActivity {
+
+    Params params;
     File file;
-    ActivityResultLauncher<Intent> detialLauncher;
+    long downloadId;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        EdgeToEdge.enable(this);
+        ActivityInfoBinding binding = ActivityInfoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.dashboard_scroll))).getNavController();
-        NavGraph g = new NavInflater(this,navController.getNavigatorProvider()).inflate(R.navigation.main_navigation);
-        if(savedInstanceState==null){
-            g.setStartDestination(new int[]{R.id.navigation_activity,R.id.navigation_service,R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home","0"))]);
-        }
-        navController.setGraph(g);
-        NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
-        Language.setLanguage(this);
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("update",true)) {
-            checkUpdate();
-        }
-        Params params = new Params(this);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            binding.appbar.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+        params = new Params(this);
+        binding.tool.setNavigationOnClickListener(view -> finishAfterTransition());
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -78,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         int version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
                         if(version<response.getInteger("version")){
-                            new MaterialAlertDialogBuilder(MainActivity.this).setMessage(response.getString("description")).setTitle("发现新版本").setPositiveButton("更新", (dialogInterface, i) -> {
+                            new MaterialAlertDialogBuilder(AboutActivity.this).setMessage(response.getString("description")).setTitle("发现新版本").setPositiveButton("更新", (dialogInterface, i) -> {
                                 file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "sysuer.apk");
                                 downloadId = ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).enqueue(new DownloadManager.Request(Uri.parse(response.getString("link"))).setDestinationUri(Uri.fromFile(file)).setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED));
 //                                DownloadManager.Query query = new DownloadManager.Query();
@@ -120,14 +111,8 @@ public class MainActivity extends AppCompatActivity {
         }else{
             registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         }
-        detialLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-        });
-        //WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(ClassIsland.class).build());
     }
-    public ActivityResultLauncher<Intent> launch(){
-        return detialLauncher;
-    }
-    void checkUpdate(){
+    public void checkUpdate(){
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://sysu-tang.github.io/latest.json").build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -146,3 +131,5 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 }
+
+

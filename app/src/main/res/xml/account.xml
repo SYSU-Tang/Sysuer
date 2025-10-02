@@ -23,7 +23,7 @@
             app:icon="@drawable/info"
             app:title="@string/about">
             <intent android:action="android.intent.action.VIEW"
-                android:targetClass="com.sysu.edu.extra.InfoActivity"
+                android:targetClass="com.sysu.edu.extra.AboutActivity"
                 android:targetPackage="com.sysu.edu">
             </intent>
 

@@ -1,28 +1,19 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.中大儿" parent="@style/Theme.SYSUER.Night">
-        <item name="android:windowAnimationStyle">@style/fade</item>
-        <item name="dropdownPreferenceStyle">
-            @style/preference
-        </item>
-    </style>
-    <!-- Base application theme. -->
-    <style name="Base.Theme.中大儿" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
 
-    <style name="Theme.SYSUER.Night" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.SYSUER.Night" parent="Theme.SYSUER.Base">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
+        <!--<item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
+        &lt;!&ndash; Secondary brand color. &ndash;&gt;
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorSecondaryVariant">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        &lt;!&ndash; Status bar color. &ndash;&gt;--><!--
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>-->
         <!-- Customize your theme here. -->
     </style>
 </resources>

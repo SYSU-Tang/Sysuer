@@ -6,7 +6,9 @@ import android.util.AttributeSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class Preference extends androidx.preference.DropDownPreference {
+import rikka.preference.SimpleMenuPreference;
+
+public class Preference extends SimpleMenuPreference {
     public Preference(@NonNull Context context) {
         super(context);
     }

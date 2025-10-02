@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.util.DisplayMetrics;
@@ -18,11 +19,14 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Params {
+    final SharedPreferences sharedPreferences;
     Activity context;
 
     static Calendar c=Calendar.getInstance();
     public Params(Activity context) {
+
         this.context = context;
+        sharedPreferences = context.getSharedPreferences("privacy", Context.MODE_PRIVATE);
     }
 
     public static int getYear(){
@@ -101,11 +105,17 @@ public class Params {
     }
 
     public String getCookie() {
-        return context.getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
+        return sharedPreferences.getString("Cookie", "");
     }
 
+    public boolean isFirstLaunch() {
+        return sharedPreferences.getBoolean("isFirstLaunch", true);
+    }
+    public void setIsFirstLaunch(boolean i) {
+         sharedPreferences.edit().putBoolean("isFirstLaunch", i).apply();
+    }
     public String getToken() {
-        return context.getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("token", "");
+        return sharedPreferences.getString("token", "");
     }
 
     public View.OnClickListener browse(String url) {
