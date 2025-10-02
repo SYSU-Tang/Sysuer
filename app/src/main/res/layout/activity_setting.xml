@@ -6,16 +6,19 @@
     android:fitsSystemWindows="true">
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_height="?attr/collapsingToolbarLayoutMediumSize"
+        android:fitsSystemWindows="false">
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="128dp"
+            style="?attr/collapsingToolbarLayoutMediumStyle"
+            android:layout_height="match_parent"
+            android:minHeight="?actionBarSize"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/tool"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="?actionBarSize"
                 android:transitionName="miniapp"
                 app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_collapseMode="pin"
