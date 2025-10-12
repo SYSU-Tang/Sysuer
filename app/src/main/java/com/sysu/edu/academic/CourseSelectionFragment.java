@@ -40,8 +40,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.CourseSelectionBinding;
-import com.sysu.edu.databinding.CourseSelectionItemBinding;
+import com.sysu.edu.databinding.FragmentCourseSelectionBinding;
+import com.sysu.edu.databinding.ItemCourseSelectionBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -61,7 +61,7 @@ import okhttp3.Response;
 
 public class CourseSelectionFragment extends Fragment{
 
-    CourseSelectionBinding binding;
+    FragmentCourseSelectionBinding binding;
     OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     String cookie;
@@ -91,7 +91,7 @@ public class CourseSelectionFragment extends Fragment{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         if(savedInstanceState==null) {
-            binding = CourseSelectionBinding.inflate(inflater, container, false);
+            binding = FragmentCourseSelectionBinding.inflate(inflater, container, false);
             Params params = new Params(requireActivity());
             binding.type.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 int cid = chipGroup.getCheckedChipId();
@@ -407,9 +407,9 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        @NonNull CourseSelectionItemBinding binding = CourseSelectionItemBinding.inflate(LayoutInflater.from(context));
+        @NonNull ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context));
         for(int i = 0; i< info.length; i++) {
-            Chip chip = (Chip) LayoutInflater.from(context).inflate(R.layout.service_item, binding.courseInfo, false);
+            Chip chip = (Chip) LayoutInflater.from(context).inflate(R.layout.item_action_chip, binding.courseInfo, false);
             chip.setOnLongClickListener(a -> {((ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("",((Chip)a).getText()));return false;});
             chip.setOnClickListener(a-> Snackbar.make(context,chip,((Chip)a).getText(),Snackbar.LENGTH_LONG).show());
             binding.courseInfo.addView(chip);

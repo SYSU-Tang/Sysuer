@@ -6,10 +6,10 @@
         <item>@string/follow_system</item>
     </string-array>
     <string-array name="value" >
-    <item>0</item>
-    <item>1</item>
-    <item>2</item>
-</string-array>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
     <string-array name="language" >
         <item>中文</item>
         <item>English</item>
@@ -26,9 +26,64 @@
         <item>QQ钱包</item>
     </string-array>
 
-    <string-array name="sponsor_values">
+    <integer-array name="sponsor_values">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+    </integer-array>
+    <string-array name="schools">
+        <item>南校园</item>
+        <item>东校园</item>
+        <item>北校园</item>
+        <item>深圳校区</item>
+        <item>珠海校区</item>
+    </string-array>
+    <string-array name="offices">
+        <item>全部教学楼</item>
+        <item>第一教学楼</item>
+        <item>第二教学楼</item>
+        <item>第四教学楼（丰盛堂）</item>
+        <item>第五教学楼（逸夫楼）</item>
+        <item>第六教学楼（392栋）</item>
+    </string-array>
+    <string-array name="weeks">
+        <item>一</item>
+        <item>二</item>
+        <item>三</item>
+        <item>四</item>
+        <item>五</item>
+        <item>六</item>
+        <item>日</item>
+    </string-array>
+    <string-array name="duration">
+        <item>08:00~08:45</item>
+        <item>08:55~09:40</item>
+        <item>10:10~10:55</item>
+        <item>11:05~11:55</item>
+        <item>14:20~15:05</item>
+        <item>15:15~16:00</item>
+        <item>16:30~17:15</item>
+        <item>17:25~18:10</item>
+        <item>19:00~19:45</item>
+        <item>19:55~20:40</item>
+        <item>20:50~21:35</item>
+    </string-array>
+    <string-array name="number">
+        <item>1</item>
+        <item>11</item>
+    </string-array>
+    <string-array name="font_size">
+        <item>默认</item>
+        <item>小</item>
+        <item>较小</item>
+        <item>较大</item>
+        <item>大</item>
+    </string-array>
+    <string-array name="font_value">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
     </string-array>
 </resources>

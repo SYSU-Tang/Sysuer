@@ -1,6 +1,8 @@
 package com.sysu.edu.home;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
@@ -34,11 +36,12 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.MainActivity;
 import com.sysu.edu.R;
+import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.academic.CourseDetail;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.CourseItemBinding;
-import com.sysu.edu.databinding.ExamItemBinding;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
+import com.sysu.edu.databinding.ItemCourseBinding;
+import com.sysu.edu.databinding.ItemExamBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -88,6 +91,46 @@ public class DashboardFragment extends Fragment {
                     getTerm();
                 }
             });
+            binding.scan.setOnClickListener(v->{
+                try{
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI"));
+                    intent.putExtra("LauncherUI.From.Scaner.Shortcut", true);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setAction("android.intent.action.VIEW");
+                    startActivity(intent);
+//                startActivity(new Intent(Intent.ACTION_VIEW).setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI"))
+//                        .putExtra("LauncherUI.From.Scaner.Shortcut", true)
+//                        .setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
+//                        .setAction("android.intent.action.VIEW"));
+                }
+                catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
+            binding.qrcode.setOnClickListener(v-> {
+                try {
+//                Intent intent = new Intent(Intent.ACTION_VIEW);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                intent.setData(Uri.parse("weixin://dl/chat?username=filehelper"));
+//                intent.setPackage("com.tencent.mm");
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    //ComponentName cmp = new ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI");
+                    //intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    //intent.setComponent(cmp);
+                    intent.setPackage("com.tencent.mm");
+                    Bundle bundle = new Bundle();
+                    bundle.putString("appId","wxc0770b8040166307");
+                    bundle.putString("pages","");
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                }
+                // startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("weixin://dl/scan")));
+            });
+            binding.agenda.setOnClickListener(view -> startActivity(new Intent(getContext(), AgendaActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
             binding.courseList.addItemDecoration(new DividerItemDecoration(requireContext(), 0));
             binding.courseList.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
             examList.addItemDecoration(new DividerItemDecoration(requireContext(), 0));
@@ -310,7 +353,7 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(CourseItemBinding.inflate(LayoutInflater.from(context)).getRoot()) {
+        return new RecyclerView.ViewHolder(ItemCourseBinding.inflate(LayoutInflater.from(context)).getRoot()) {
         };
     }
 
@@ -362,7 +405,7 @@ class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(ExamItemBinding.inflate(LayoutInflater.from(context)).getRoot()) {
+        return new RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(context)).getRoot()) {
         };
     }
 

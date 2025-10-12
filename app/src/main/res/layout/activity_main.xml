@@ -45,5 +45,5 @@
         app:itemTextColor="?colorPrimary"
         app:labelVisibilityMode="selected"
         app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior"
-        app:menu="@menu/bottom_nav_menu"/>
+        app:menu="@menu/home"/>
 </LinearLayout>

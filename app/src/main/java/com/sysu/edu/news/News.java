@@ -29,7 +29,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.BrowserActivity;
-import com.sysu.edu.databinding.NewsBinding;
+import com.sysu.edu.databinding.ActivityNewsBinding;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class News extends AppCompatActivity {
-    NewsBinding binding;
+    ActivityNewsBinding binding;
     OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     String cookie = "login_token_ec583190dcd12bca757dd13df10f59c3=ad6e129cb0c2e7ad6d842afa0e0ebf31; username_ec583190dcd12bca757dd13df10f59c3=tangxb6; login_sn_ec583190dcd12bca757dd13df10f59c3=0c3845934e6ec207f5b898ed0d3dd86f;";//cookie + ";_webvpn_key=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidGFuZ3hiNiIsImdyb3VwcyI6WzNdLCJpYXQiOjE3NDM5Mjg1OTUsImV4cCI6MTc0NDAxNDk5NX0.luGDbfa_19Ye5TBVpwo3gaZPXldD7gsnSqGkX6IJHb0;";
@@ -53,7 +53,7 @@ public class News extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding=NewsBinding.inflate(getLayoutInflater());
+        binding=ActivityNewsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         class Adapter extends FragmentStateAdapter{
@@ -194,7 +194,7 @@ class SugAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        TextView view = (TextView) LayoutInflater.from(context).inflate(R.layout.sug_item, parent, false);
+        TextView view = (TextView) LayoutInflater.from(context).inflate(R.layout.item_sug, parent, false);
         return new RecyclerView.ViewHolder(view) {
         };
     }

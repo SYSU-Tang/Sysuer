@@ -14,8 +14,33 @@
             style="@style/Widget.Material3.LinearProgressIndicator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"/>
+        <com.google.android.material.button.MaterialButtonGroup
+            style="@style/Widget.Material3.MaterialButtonGroup.Connected"
+            android:layout_gravity="center"
+            android:layout_margin="8dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/scan"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/scan"
+                app:icon="@drawable/scan"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/qrcode"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/qrcode"
+                app:icon="@drawable/qrcode"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/agenda"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/agenda"
+                app:icon="@drawable/book"/>
+        </com.google.android.material.button.MaterialButtonGroup>
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

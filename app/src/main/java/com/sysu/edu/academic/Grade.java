@@ -23,7 +23,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.GradeBinding;
+import com.sysu.edu.databinding.ActivityGradeBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ import okhttp3.Response;
 
 public class Grade extends AppCompatActivity {
 
-    GradeBinding binding;
+    ActivityGradeBinding binding;
     Handler handler;
     String cookie="";
     OkHttpClient http;
@@ -58,7 +58,7 @@ public class Grade extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding= GradeBinding.inflate(getLayoutInflater());
+        binding= ActivityGradeBinding.inflate(getLayoutInflater());
         EdgeToEdge.enable(this);
         setContentView(binding.getRoot());
         termPop = new PopupMenu(Grade.this, binding.term,0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
@@ -287,7 +287,7 @@ class ScoreAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.score_item,parent,false)) {
+        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_score,parent,false)) {
         };
     }
 

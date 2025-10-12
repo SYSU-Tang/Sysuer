@@ -15,18 +15,18 @@ import androidx.fragment.app.Fragment;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.snackbar.Snackbar;
-import com.sysu.edu.databinding.CourseDetailFragmentBinding;
-import com.sysu.edu.databinding.ServiceItemBinding;
+import com.sysu.edu.databinding.FragmentCourseDetailBinding;
+import com.sysu.edu.databinding.ItemActionChipBinding;
 
 public class CourseDetailFragment extends Fragment {
 
 
-    CourseDetailFragmentBinding binding;
+    FragmentCourseDetailBinding binding;
     JSONObject data;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = CourseDetailFragmentBinding.inflate(inflater);
+        binding = FragmentCourseDetailBinding.inflate(inflater);
         return binding.getRoot();
     }
 
@@ -51,7 +51,7 @@ public class CourseDetailFragment extends Fragment {
                         for (int i = 0; i < info.length; i++) {
                             String content = (i==9|i==10?data0:data).getString(info[i]);
                             if (content == null) {content = "";}
-                            Chip chip = ServiceItemBinding.inflate(getLayoutInflater()).getRoot();
+                            Chip chip = ItemActionChipBinding.inflate(getLayoutInflater()).getRoot();
                             chip.setText(String.format("%s：%s", (new String[]{"课程名称","面向专业","课程类别", "课程编码","课程id" ,"课程细类", "艺术教育板块", "课本","学分", "总学时", "理论学时", "实践(含实验)学时", "周学时","总学时备注", "授课语种", "开课单位", "接收人数", "主讲教师", "意向开课学期", "意向线下上课校区", "是否有意向开设跨校园同步课程"})[i], content));
                             chip.setOnLongClickListener(a -> {
                                 ((ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("", ((Chip) a).getText()));

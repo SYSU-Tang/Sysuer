@@ -2,6 +2,7 @@ package com.sysu.edu;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -31,6 +32,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationBarView;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityMainBinding;
+import com.sysu.edu.extra.SettingActivity;
 import com.sysu.edu.preference.Language;
 
 import java.io.File;
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     Handler handler;
     long downloadId;
     File file;
-    ActivityResultLauncher<Intent> detialLauncher;
+    ActivityResultLauncher<Intent> detailLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,12 +122,14 @@ public class MainActivity extends AppCompatActivity {
         }else{
             registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         }
-        detialLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        detailLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
         });
+        PackageManager pm = getPackageManager();
+        pm.setComponentEnabledSetting(new ComponentName(this, SettingActivity.class),PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         //WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(ClassIsland.class).build());
     }
     public ActivityResultLauncher<Intent> launch(){
-        return detialLauncher;
+        return detailLauncher;
     }
     void checkUpdate(){
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://sysu-tang.github.io/latest.json").build()).enqueue(new Callback() {

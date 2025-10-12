@@ -6,15 +6,29 @@
             app:entryValues="@array/value"
             app:icon="@drawable/theme"
             app:key="theme"
-            app:summary="跟随系统"
+            app:summary="@string/follow_system"
             app:title="@string/theme"/>
+        <com.sysu.edu.preference.Preference
+            app:entries="@array/theme"
+            app:entryValues="@array/value"
+            app:icon="@drawable/color"
+            app:key="icon_theme"
+            app:summary="@string/follow_system"
+            app:title="@string/icon_theme"/>
         <com.sysu.edu.preference.Preference
             app:entries="@array/language"
             app:entryValues="@array/value"
             app:key="language"
             app:icon="@drawable/language"
-            app:summary="跟随系统"
+            app:summary="@string/follow_system"
             app:title="@string/language"/>
+        <com.sysu.edu.preference.Preference
+            app:entries="@array/font_size"
+            app:entryValues="@array/font_value"
+            app:icon="@drawable/font"
+            app:key="fontSize"
+            app:summary="@string/follow_system"
+            app:title="@string/font_size"/>
         <com.sysu.edu.preference.Preference
             app:entryValues="@array/value"
             app:entries="@array/home"

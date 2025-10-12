@@ -4,21 +4,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.MenuItem;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.databinding.TrainingScheduleBinding;
+import com.sysu.edu.api.Params;
+import com.sysu.edu.databinding.ActivityTrainingScheduleBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -33,7 +29,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class TrainingSchedule extends AppCompatActivity {
-    TrainingScheduleBinding binding;
+    ActivityTrainingScheduleBinding binding;
     OkHttpClient http = new OkHttpClient.Builder().build();
     String cookie="";
     Handler handler;
@@ -43,20 +39,15 @@ public class TrainingSchedule extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        binding=TrainingScheduleBinding.inflate(getLayoutInflater());
+        binding=ActivityTrainingScheduleBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        cookie=getSharedPreferences("privacy",0).getString("Cookie","");
-        setSupportActionBar(binding.tool);
+        Params params = new Params(this);
+        cookie=params.getCookie();
+        binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         schedule = (TrainingScheduleFragment) (Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getChildFragmentManager().getFragments().get(0);
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
             if (o.getResultCode() == RESULT_OK) {
-                cookie = getSharedPreferences("privacy", 0).getString("Cookie", "");
+                cookie = params.getCookie();
                 getColleges("");
                 getGrades();
                 getTypes();
@@ -66,8 +57,7 @@ public class TrainingSchedule extends AppCompatActivity {
 
        // System.out.println(getSupportFragmentManager().findFragmentById(R.id.fragment));
       //  NavController navController = ((NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment)).getNavController();
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        handler=new Handler(getMainLooper()){
+         handler=new Handler(getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg) {
                 JSONObject data = JSON.parseObject((String) msg.obj);
@@ -116,14 +106,6 @@ public class TrainingSchedule extends AppCompatActivity {
                 handler.sendMessage(msg);
             }
         });
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId()==android.R.id.home){
-            finishAfterTransition();
-        }
-        return super.onOptionsItemSelected(item);
     }
     void getColleges(String keyword){
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/department/recruitUnitPull").post(RequestBody.create("{\"departmentName\":\""+keyword+"\",\"subordinateDepartmentNumber\":null,\"id\":null}",MediaType.parse("application/json"))).header("Cookie",cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {

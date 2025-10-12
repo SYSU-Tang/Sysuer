@@ -28,10 +28,10 @@ import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.ChipBinding;
-import com.sysu.edu.databinding.PayNeedFragmentBinding;
-import com.sysu.edu.databinding.PayRecordFragmentBinding;
-import com.sysu.edu.databinding.PaySituationFragmentBinding;
+import com.sysu.edu.databinding.FragmentPayNeedBinding;
+import com.sysu.edu.databinding.FragmentPayRecordBinding;
+import com.sysu.edu.databinding.FragmentPaySituationBinding;
+import com.sysu.edu.databinding.ItemFilterChipBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class PayFragment extends StaggeredFragment {
         token = params.getToken();
         switch (position) {
             case 0:
-                PayNeedFragmentBinding b0 = PayNeedFragmentBinding.inflate(inflater);
+                FragmentPayNeedBinding b0 = FragmentPayNeedBinding.inflate(inflater);
                 b0.getRoot().addView(view);
                 b0.pay.setOnClickListener(a-> params.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
                 binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -88,7 +88,7 @@ public class PayFragment extends StaggeredFragment {
                     years.add(Params.getYear() + 1 - i + "年");
                     yearCodes.add(String.valueOf(Params.getYear() + 1 - i));
                 }
-                PaySituationFragmentBinding b1 = PaySituationFragmentBinding.inflate(getLayoutInflater());
+                FragmentPaySituationBinding b1 = FragmentPaySituationBinding.inflate(getLayoutInflater());
                 b1.getRoot().addView(view);
                 binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
@@ -110,7 +110,7 @@ public class PayFragment extends StaggeredFragment {
                 DateManager dm = new DateManager();
                 dm.fromDate = Params.getFirstOfMonth().getTime();
                 dm.toDate = Params.getEndOfMonth().getTime();
-                PayRecordFragmentBinding b2 = PayRecordFragmentBinding.inflate(inflater);
+                FragmentPayRecordBinding b2 = FragmentPayRecordBinding.inflate(inflater);
                 b2.getRoot().addView(view);
                 view = b2.getRoot();
                 b2.from.setText(dm.getFromDateString());
@@ -226,7 +226,7 @@ public class PayFragment extends StaggeredFragment {
         super.add(title, icon, keys, values);
         if (position==0){
             ChipGroup chips = view.findViewById(R.id.chips);
-            Chip chip = ChipBinding.inflate(getLayoutInflater(), chips, false).getRoot();
+            Chip chip = ItemFilterChipBinding.inflate(getLayoutInflater(), chips, false).getRoot();
             chip.setText(title);
             chips.addView(chip,chips.getChildCount()-1);
         }

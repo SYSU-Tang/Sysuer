@@ -378,7 +378,7 @@ class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.news_item, parent, false)) {
+        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_news, parent, false)) {
         };
     }
 

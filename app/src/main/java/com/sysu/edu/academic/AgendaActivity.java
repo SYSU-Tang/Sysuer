@@ -24,11 +24,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.AgendaBinding;
-import com.sysu.edu.databinding.AgendaItemBinding;
-import com.sysu.edu.databinding.DetailBinding;
-import com.sysu.edu.databinding.DurationBinding;
-import com.sysu.edu.databinding.WeekdayBinding;
+import com.sysu.edu.databinding.ActivityAgendaBinding;
+import com.sysu.edu.databinding.ItemDetailBinding;
+import com.sysu.edu.databinding.ItemDurationBinding;
+import com.sysu.edu.databinding.ItemAgendaBinding;
+import com.sysu.edu.databinding.ItemWeekdayBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -60,14 +60,14 @@ public class AgendaActivity extends AppCompatActivity {
     ArrayList<View> views = new ArrayList<>();
     int currentWeek;
     BottomSheetDialog detailDialog;
-    AgendaBinding binding;
+    ActivityAgendaBinding binding;
     Params params;
-    DetailBinding detailBinding;
+    ItemDetailBinding detailBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = AgendaBinding.inflate(getLayoutInflater());
+        binding = ActivityAgendaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         params = new Params(this);
         cookie = params.getCookie();
@@ -87,7 +87,7 @@ public class AgendaActivity extends AppCompatActivity {
         binding.next.setOnClickListener(v -> changeWeek(currentWeekIndex + 1));
         String[] weeks = getResources().getStringArray(R.array.weeks);
         for (int i = 0; i < duration.length; i++) {
-            DurationBinding durationBinding = DurationBinding.inflate(getLayoutInflater(), binding.day, false);
+            ItemDurationBinding durationBinding = ItemDurationBinding.inflate(getLayoutInflater(), binding.day, false);
             durationBinding.courseDuration.setText(duration[i].replace("~", "\n"));
             durationBinding.courseOrder.setText(String.valueOf(i + 1));
             if (i == 10) {
@@ -98,7 +98,7 @@ public class AgendaActivity extends AppCompatActivity {
             binding.day.addView(durationBinding.getRoot());
         }
         for (int i = 0; i < 7; i++) {
-            WeekdayBinding itemBinding = WeekdayBinding.inflate(getLayoutInflater(), binding.week, false);
+            ItemWeekdayBinding itemBinding = ItemWeekdayBinding.inflate(getLayoutInflater(), binding.week, false);
             itemBinding.courseWeek.setText(weeks[i]);
             itemBinding.courseDate.setText(getOldDate(i+2- weekday));
             View column = new View(this);
@@ -151,7 +151,7 @@ public class AgendaActivity extends AppCompatActivity {
             weekPop.show();
         });
         detailDialog = new BottomSheetDialog(this);
-        detailBinding = DetailBinding.inflate(getLayoutInflater());
+        detailBinding = ItemDetailBinding.inflate(getLayoutInflater());
         detailDialog.setContentView(detailBinding.getRoot());
         handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -175,8 +175,8 @@ public class AgendaActivity extends AppCompatActivity {
                                 String isStop = detail.getString("whetherStopClass");
                                 String teachingBuildingName = detail.getString("teachingBuildingName");
                                 String classroomNum = detail.getString("classroomNum");
-                                AgendaItemBinding agendaItemBinding = AgendaItemBinding.inflate(getLayoutInflater(), binding.day, false);
-                                View item = agendaItemBinding.getRoot();
+                                ItemAgendaBinding itemAgendaBinding = ItemAgendaBinding.inflate(getLayoutInflater(), binding.day, false);
+                                View item = itemAgendaBinding.getRoot();
                                 if (isStop != null && !isStop.equals("0")) {
                                     item.setEnabled(false);
                                     item.setBackgroundColor(getColor(R.color.teal_700));
@@ -188,7 +188,7 @@ public class AgendaActivity extends AppCompatActivity {
                                     detailDialog.show();
                                     //setDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
                                 });
-                                agendaItemBinding.content.setText(String.format("%s/%s-%s", course, teachingBuildingName == null ? "" : teachingBuildingName, classroomNum == null ? "" : classroomNum));
+                                itemAgendaBinding.content.setText(String.format("%s/%s-%s", course, teachingBuildingName == null ? "" : teachingBuildingName, classroomNum == null ? "" : classroomNum));
                                 GridLayout.LayoutParams gl = new GridLayout.LayoutParams();
                                 gl.columnSpec = GridLayout.spec(Integer.parseInt(week), 1.0f);
                                 gl.width = 0;

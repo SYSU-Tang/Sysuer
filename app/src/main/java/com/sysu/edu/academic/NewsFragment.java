@@ -17,7 +17,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.NewsItemBinding;
+import com.sysu.edu.databinding.ItemNewsBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
 
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public class NewsFragment extends Fragment {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(NewsItemBinding.inflate(LayoutInflater.from(context)).getRoot()) {
+            return new RecyclerView.ViewHolder(ItemNewsBinding.inflate(LayoutInflater.from(context)).getRoot()) {
             };
         }
 

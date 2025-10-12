@@ -153,5 +153,11 @@
     <string name="feedback">反馈</string>
     <string name="launch_update">检测更新</string>
     <string name="permission">权限</string>
+    <string name="scan">扫码</string>
+    <string name="qrcode">逸仙码</string>
+    <string name="icon_theme">图标</string>
+    <string name="password_login">密码登录</string>
+    <string name="web_login">网页登录</string>
+    <string name="font_size">字体大小</string>
 
 </resources>

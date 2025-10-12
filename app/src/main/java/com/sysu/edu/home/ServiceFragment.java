@@ -37,7 +37,7 @@ import com.sysu.edu.academic.SchoolRoll;
 import com.sysu.edu.academic.SchoolWorkWarning;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
-import com.sysu.edu.databinding.ServiceBoxBinding;
+import com.sysu.edu.databinding.ItemServiceBoxBinding;
 import com.sysu.edu.life.SchoolBus;
 import com.sysu.edu.news.News;
 
@@ -157,13 +157,13 @@ public class ServiceFragment extends Fragment {
     }
 
     public void initBox(LayoutInflater inflater, String box_title, String[] items, View.OnClickListener[] actions) {
-        ServiceBoxBinding b = ServiceBoxBinding.inflate(inflater);
+        ItemServiceBoxBinding b = ItemServiceBoxBinding.inflate(inflater);
         LinearLayout box = b.getRoot();
         TextView title = b.serviceBoxTitle;
         ChipGroup items_container = b.serviceBoxItems;
         title.setText(box_title);
         for (int i = 0; i < items.length; i++) {
-            Chip item = (Chip) inflater.inflate(R.layout.service_item, items_container, false);
+            Chip item = (Chip) inflater.inflate(R.layout.item_action_chip, items_container, false);
             item.setOnClickListener(
                     (i < actions.length && actions[i] != null) ? actions[i] : v -> Toast.makeText(v.getContext(), "未开发", Toast.LENGTH_LONG).show()
             );

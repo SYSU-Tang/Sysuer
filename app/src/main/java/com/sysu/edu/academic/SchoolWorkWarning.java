@@ -64,6 +64,7 @@ public class SchoolWorkWarning extends AppCompatActivity {
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
+                System.out.println(msg.obj);
                 if (msg.what == -1) {
                     Toast.makeText(SchoolWorkWarning.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
                 }else {
@@ -75,9 +76,9 @@ public class SchoolWorkWarning extends AppCompatActivity {
                             d.getJSONArray("rows").forEach(a->{
                                 order++;
                                 ArrayList<String> values = new ArrayList<>();
-                                String[] keyName = new String[]{"预警结果","预警操作学期","预警学期","生成预警档案时间","操作"};
+                                String[] keyName = new String[]{"预警结果","预警操作学期","预警学期","生成预警档案时间","档案ID","警告程度"};
                                 for(int i=0;i<keyName.length;i++){
-                                    values.add(((JSONObject)a).getString(new String[]{"alarmResultName","alarmOperationTerm","alarmTerm","createTime","action"}[i]));
+                                    values.add(((JSONObject)a).getString(new String[]{"alarmResultName","alarmOperationTerm","alarmTerm","createTime","archivceID","alarmResult"}[i]));
                                 }
                                 fr.add(SchoolWorkWarning.this,String.valueOf(order), List.of(keyName), values);
                             });
@@ -119,7 +120,7 @@ public class SchoolWorkWarning extends AppCompatActivity {
         });
     }
     String getTerm(String s){
-        if(s!=null&&s.isEmpty()){
+        if(s == null || s.isEmpty()){
             return "";
         }else {
             return String.format(",\"alarmOperationTerm\":\"%s\"",s);

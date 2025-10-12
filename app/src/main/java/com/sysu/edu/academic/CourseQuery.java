@@ -9,18 +9,18 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.databinding.CourseQueryBinding;
+import com.sysu.edu.databinding.ActivityCourseQueryBinding;
 
 import java.util.Objects;
 
 public class CourseQuery extends AppCompatActivity {
 
-    CourseQueryBinding binding;
+    ActivityCourseQueryBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = CourseQueryBinding.inflate(getLayoutInflater());
+        binding = ActivityCourseQueryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
         binding.toolbar.getMenu().add(getString(R.string.reset)).setIcon(R.drawable.reset).setOnMenuItemClickListener(menuItem -> {

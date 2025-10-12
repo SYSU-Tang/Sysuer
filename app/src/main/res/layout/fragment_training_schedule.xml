@@ -14,7 +14,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
                 android:text="@string/college"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -29,7 +29,7 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="6dp"
                 android:text="@string/grade"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
             <NumberPicker
                 android:id="@+id/grade_picker"/>
             <com.google.android.material.textview.MaterialTextView
@@ -38,7 +38,7 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="6dp"
                 android:text="@string/profession"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -55,11 +55,10 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="6dp"
                 android:text="@string/type"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/types"
-                app:singleSelection="true">
-            </com.google.android.material.chip.ChipGroup>
+                app:singleSelection="true"/>
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

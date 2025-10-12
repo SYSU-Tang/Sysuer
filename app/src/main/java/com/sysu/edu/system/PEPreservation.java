@@ -23,7 +23,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
-import com.sysu.edu.databinding.PePreservationBinding;
+import com.sysu.edu.databinding.ActivityPePreservationBinding;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -41,7 +41,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class PEPreservation extends AppCompatActivity {
-    PePreservationBinding binding;
+    @NonNull ActivityPePreservationBinding binding;
     Handler handler;
     HashMap<String, ArrayList<String>> fields = new HashMap<>();
     HashMap<String,ArrayList<Chip>> fields_items=new HashMap<>();
@@ -52,7 +52,7 @@ public class PEPreservation extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding=PePreservationBinding.inflate(getLayoutInflater());
+        binding= ActivityPePreservationBinding.inflate(getLayoutInflater());
         EdgeToEdge.enable(this);
         setContentView(binding.getRoot());
         binding.tool.setNavigationOnClickListener(v -> finishAfterTransition());
@@ -79,14 +79,14 @@ public class PEPreservation extends AppCompatActivity {
                             data.forEach(e-> {
                                 String id = ((JSONObject) e).getString("Identity");
                                 fields.put(id,new ArrayList<>());
-                                Chip chip= (Chip) getLayoutInflater().inflate(R.layout.chip,binding.campus,false);
+                                Chip chip= (Chip) getLayoutInflater().inflate(R.layout.item_filter_chip,binding.campus,false);
                                 chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
                                     if(isChecked){
                                         for(int i=0;i<binding.field.getChildCount();i++){binding.field.getChildAt(i).setVisibility(View.GONE);}
                                         if(fields_items.containsKey(id)){Objects.requireNonNull(fields_items.get(id)).forEach(f->f.setVisibility(View.VISIBLE));}else{
                                         ArrayList<Chip> items = new ArrayList<>();
                                         Objects.requireNonNull(fields.get(((JSONObject) e).getString("Identity"))).forEach(e1 ->{
-                                            Chip field= (Chip) getLayoutInflater().inflate(R.layout.chip,binding.field,false);
+                                            Chip field= (Chip) getLayoutInflater().inflate(R.layout.item_filter_chip,binding.field,false);
                                             field.setText(Objects.requireNonNull(fieldsInfo.get(e1)).get("name"));
 //                                            field.setOnCheckedChangeListener((buttonView1, isChecked1) -> {
 //                                                //fieldsInfo.get(e1).get("");
@@ -177,7 +177,7 @@ class DateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View item = LayoutInflater.from(context).inflate(R.layout.date, parent, false);
+        View item = LayoutInflater.from(context).inflate(R.layout.item_date, parent, false);
 
         return new RecyclerView.ViewHolder(item) {
         };

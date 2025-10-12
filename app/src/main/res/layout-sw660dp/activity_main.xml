@@ -14,7 +14,7 @@
         app:itemIconTint="?colorPrimary"
         app:itemTextColor="?colorPrimary"
         app:labelVisibilityMode="selected"
-        app:menu="@menu/bottom_nav_menu"
+        app:menu="@menu/home"
         app:menuGravity="center" />
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"

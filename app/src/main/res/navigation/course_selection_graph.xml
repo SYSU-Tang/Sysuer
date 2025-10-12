@@ -8,7 +8,7 @@
         android:id="@+id/selection_fragment"
         android:name="com.sysu.edu.academic.CourseSelectionFragment"
         android:label="@string/course_selection"
-        tools:layout="@layout/course_selection">
+        tools:layout="@layout/fragment_course_selection">
     </fragment>
     <fragment
         android:id="@+id/filter_fragment"

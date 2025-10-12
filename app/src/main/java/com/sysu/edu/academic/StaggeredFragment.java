@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.CardItemBinding;
+import com.sysu.edu.databinding.ItemCardBinding;
 import com.sysu.edu.databinding.RecyclerViewBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
 import com.sysu.edu.databinding.TwoColumnBinding;
@@ -198,7 +198,7 @@ public class StaggeredFragment extends Fragment {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            CardItemBinding item = CardItemBinding.inflate(LayoutInflater.from(context), parent, false);
+            ItemCardBinding item = ItemCardBinding.inflate(LayoutInflater.from(context), parent, false);
             RecyclerView list = RecyclerViewBinding.inflate(LayoutInflater.from(context), item.getRoot(), false).getRoot();
             list.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
             list.setNestedScrollingEnabled(false);

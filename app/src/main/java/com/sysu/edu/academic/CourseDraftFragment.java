@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.databinding.CourseOutlineItemBinding;
+import com.sysu.edu.databinding.ItemCourseOutlineBinding;
 import com.sysu.edu.databinding.RecyclerViewBinding;
 
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ class OutlineAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        CourseOutlineItemBinding binding = CourseOutlineItemBinding.inflate(LayoutInflater.from(context));
+        ItemCourseOutlineBinding binding = ItemCourseOutlineBinding.inflate(LayoutInflater.from(context));
         return new RecyclerView.ViewHolder(binding.getRoot()) {
         };
     }

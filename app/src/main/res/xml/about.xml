@@ -7,11 +7,16 @@
             app:icon="@drawable/submit"
             app:title="当前版本"/>
         <Preference
-            android:key="downloadLink"
             android:summary="https://github.com/SYSU-Tang/Sysuer/releases"
             app:icon="@drawable/down"
             app:title="下载地址">
             <intent android:data="https://github.com/SYSU-Tang/Sysuer/releases"/>
+        </Preference>
+        <Preference
+            android:summary="https://sysu-tang.github.io/#/"
+            app:icon="@drawable/web"
+            app:title="官网">
+            <intent android:data="https://sysu-tang.github.io/#/"/>
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/project">
@@ -22,18 +27,19 @@
             <intent android:data="https://github.com/SYSU-Tang"/>
         </Preference>
         <Preference
-            app:icon="@drawable/account"
+            app:icon="@drawable/version"
             app:summary="https://github.com/SYSU-Tang/Sysuer/"
             app:title="@string/app_name">
             <intent android:data="https://github.com/SYSU-Tang/Sysuer/"/>
         </Preference>
         <Preference
-            app:icon="@drawable/account"
+            app:icon="@drawable/group"
             app:summary="1063579244"
             app:title="@string/qq_group">
             <intent android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3Di4M0YfNzHskNiXgiYTAvA1EAWZh7HNQx"/>
         </Preference>
     </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/feedback">
         <Preference
             android:summary="https://github.com/SYSU-Tang/Sysuer/issues"
@@ -51,19 +57,17 @@
             app:title="捐赠"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/permission">
-        <rikka.material.preference.MaterialSwitchPreference
+        <Preference
             app:defaultValue="true"
             app:icon="@drawable/book"
             app:key="privacyPolicy"
             app:persistent="false"
-            app:summary="点击撤回"
             app:title="隐私政策"/>
-        <rikka.material.preference.MaterialSwitchPreference
+        <Preference
             app:defaultValue="true"
             app:icon="@drawable/book"
             app:key="userAgreement"
             app:persistent="false"
-            app:summary="点击撤回"
             app:title="用户协议"/>
         <Preference
             app:icon="@drawable/book"

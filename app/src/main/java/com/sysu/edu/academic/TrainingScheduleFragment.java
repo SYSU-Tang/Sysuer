@@ -24,10 +24,8 @@ import java.util.Map;
 public class TrainingScheduleFragment extends Fragment {
 
     FragmentTrainingScheduleBinding binding;
-    private View view;
-    public TrainingScheduleFragment() {
-        // Required empty public constructor
-    }
+   View view;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,7 +103,7 @@ public class TrainingScheduleFragment extends Fragment {
             //binding.college.setSimpleItems(list.toArray(new String[]{}));}
             case 3:{
                 data.getJSONArray("data").forEach(e->{
-                    Chip chip= (Chip) getLayoutInflater().inflate(R.layout.chip,binding.types,false);
+                    Chip chip= (Chip) getLayoutInflater().inflate(R.layout.item_filter_chip,binding.types,false);
                     chip.setText(((JSONObject) e).getString("dataName"));
                     binding.types.addView(chip);
                 });

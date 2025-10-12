@@ -21,7 +21,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityPagerBinding;
-import com.sysu.edu.databinding.CardItemBinding;
+import com.sysu.edu.databinding.ItemCardBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -90,7 +90,7 @@ public class CourseCompletion extends AppCompatActivity {
                                             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
                                             lp.setMargins(params.dpToPx(12), params.dpToPx(6), params.dpToPx(12), params.dpToPx(12));
                                             progress.setLayoutParams(lp);
-                                            ((CardItemBinding) binding).getRoot().addView(progress);
+                                            ((ItemCardBinding) binding).getRoot().addView(progress);
                                         }
 
                                         @Override

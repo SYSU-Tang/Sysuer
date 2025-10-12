@@ -49,7 +49,7 @@ public class Evaluation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.evaluation);
+        setContentView(R.layout.activity_evaluation);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -138,7 +138,7 @@ class EvalAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.evaluation_item, parent,false)){};
+        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_evaluation, parent,false)){};
     }
 
     @Override

@@ -18,7 +18,6 @@ public class SettingActivity extends AppCompatActivity {
         }
         ActivitySettingBinding binding = ActivitySettingBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         Language.setLanguage(this);
         binding.tool.setNavigationOnClickListener(v-> finishAfterTransition());
         }

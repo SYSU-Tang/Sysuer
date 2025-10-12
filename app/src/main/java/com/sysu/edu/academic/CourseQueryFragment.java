@@ -27,7 +27,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.CourseQueryFragmentBinding;
+import com.sysu.edu.databinding.FragmentCourseQueryBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class CourseQueryFragment extends Fragment {
     HashMap<String,String>filter = new HashMap<>();
     HashMap<String,String>filterName = new HashMap<>();
     CourseSelectionViewModel vm;
-    private CourseQueryFragmentBinding binding;
+    private FragmentCourseQueryBinding binding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,7 +68,7 @@ public class CourseQueryFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (savedInstanceState==null)
         {
-            binding = CourseQueryFragmentBinding.inflate(inflater, container, false);
+            binding = FragmentCourseQueryBinding.inflate(inflater, container, false);
 //            getParentFragmentManager().beginTransaction()
 //                    // .setCustomAnimations()
 //                    .addSharedElement(binding.submit, "miniapp")

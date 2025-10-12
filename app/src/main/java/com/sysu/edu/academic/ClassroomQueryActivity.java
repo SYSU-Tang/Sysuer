@@ -31,9 +31,9 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.ChipBinding;
-import com.sysu.edu.databinding.ClassroomQueryBinding;
-import com.sysu.edu.databinding.ResultItemBinding;
+import com.sysu.edu.databinding.ItemFilterChipBinding;
+import com.sysu.edu.databinding.ActivityClassroomQueryBinding;
+import com.sysu.edu.databinding.ItemClassroomResultBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     int total=0;
     HashMap<Integer, String> office= new HashMap<>();
     ActivityResultLauncher<Intent> launch;
-    ClassroomQueryBinding binding;
+    ActivityClassroomQueryBinding binding;
 
     public OkHttpClient getHttp(){
         return new OkHttpClient.Builder().addInterceptor(new Interceptor() {
@@ -90,7 +90,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ClassroomQueryBinding.inflate(getLayoutInflater());
+        binding = ActivityClassroomQueryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Params params = new Params(this);
         binding.campusSelectAll.setOnClickListener(v -> {
@@ -178,7 +178,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                             switch (msg.what) {
                                 case 1: {
                                     String id = ((JSONObject) campusInfo).getString("id");
-                                    Chip chip = (Chip) getLayoutInflater().inflate(R.layout.chip, binding.campusGroup, false);
+                                    Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_filter_chip, binding.campusGroup, false);
                                     binding.campusGroup.addView(chip);
                                     chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
                                         if (isChecked) {
@@ -196,7 +196,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                                 }
                                 case 2: {
                                     classroom.computeIfAbsent(msg.getData().getString("campus"), k -> new ArrayList<>());
-                                    Chip chip = ChipBinding.inflate(getLayoutInflater(), binding.officeGroup, false).getRoot();
+                                    Chip chip = ItemFilterChipBinding.inflate(getLayoutInflater(), binding.officeGroup, false).getRoot();
                                     binding.officeGroup.addView(chip);
                                     office.put(chip.getId(), ((JSONObject) campusInfo).getString("id"));
                                     chip.setText(((JSONObject) campusInfo).getString("dataName"));
@@ -305,7 +305,7 @@ class RoomAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(ResultItemBinding.inflate(LayoutInflater.from(context),parent, false).getRoot()){};
+        return new RecyclerView.ViewHolder(ItemClassroomResultBinding.inflate(LayoutInflater.from(context),parent, false).getRoot()){};
     }
 
     @Override
