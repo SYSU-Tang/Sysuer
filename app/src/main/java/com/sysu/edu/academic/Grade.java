@@ -8,7 +8,6 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -23,6 +22,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityGradeBinding;
 import com.sysu.edu.extra.LoginActivity;
 
@@ -99,7 +99,7 @@ public class Grade extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if(msg.what==-1){
-                    Toast.makeText(Grade.this,(String)msg.obj,Toast.LENGTH_LONG).show();
+                    params.toast((String)msg.obj);
                     return;
                 }
                 JSONObject dataString = JSON.parseObject((String) msg.obj);
@@ -167,8 +167,8 @@ public class Grade extends AppCompatActivity {
                     }
                 }
                 else {
-                    Toast.makeText(Grade.this,"请先登录",Toast.LENGTH_LONG).show();
-                    launch.launch(new Intent(Grade.this, LoginActivity.class));
+                    params.toast(R.string.login_warning);
+                    launch.launch(new Intent(Grade.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                 }
             }
         };

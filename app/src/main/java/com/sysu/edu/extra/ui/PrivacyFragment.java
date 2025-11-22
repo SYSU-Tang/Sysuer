@@ -19,6 +19,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -37,6 +38,7 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
     Handler handler;
     OkHttpClient http = new OkHttpClient.Builder().build();
     String token;
+
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         if (savedInstanceState == null) {
@@ -55,24 +57,23 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                     getInfo();
                 }
             });
-            //params.browse("https://pay.sysu.edu.cn/").run();
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     if (msg.what == -1) {
-                        Toast.makeText(requireContext(), getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                        params.toast(R.string.no_wifi_warning);
                     } else {
                         JSONObject response = JSONObject.parseObject((String) msg.obj);
                         if (response != null && response.getInteger("code").equals(200)) {
                             if (response.get("data") != null) {
                                 if (msg.what == 0) {
                                     JSONObject data = response.getJSONObject("data");
-                                    String[] keyName = new String[]{"姓名", "学号", "证件类别","证件号码", "电话", "邮箱"};
+                                    String[] keyName = new String[]{"姓名", "学号", "证件类别", "证件号码", "电话", "邮箱"};
                                     for (int i = 0; i < keyName.length; i++) {
                                         Preference p = new Preference(requireContext());
                                         p.setTitle(keyName[i]);
-                                        p.setSummary(data.getString(new String[]{"userName","userCode","idTypeStr","idNum","tele","email"}[i]));
-                                        p.setIcon(new int[]{R.drawable.name,R.drawable.id,R.drawable.card,R.drawable.account,R.drawable.phone,R.drawable.email}[i]);
+                                        p.setSummary(data.getString(new String[]{"userName", "userCode", "idTypeStr", "idNum", "tele", "email"}[i]));
+                                        p.setIcon(new int[]{R.drawable.name, R.drawable.id, R.drawable.card, R.drawable.account, R.drawable.phone, R.drawable.email}[i]);
                                         p.setOnPreferenceClickListener(preference -> {
                                             params.copy((String) preference.getTitle(), (String) preference.getSummary());
                                             params.toast("已复制");
@@ -82,14 +83,14 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                                     }
                                 }
                             }
-                        }
-                        else if(response != null && response.getInteger("code").equals(1003)){
+                        } else if (response != null && response.getInteger("code").equals(1003)) {
                             params.toast(R.string.login_warning);
-                            launchLogin.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url","https://cas.sysu.edu.cn/cas/login?service=https://pay.sysu.edu.cn/sso"));
-                        }
-                        else {
-                            params.toast(R.string.login_warning);
-                            launchLogin.launch(new Intent(requireContext(), LoginActivity.class));
+                            launchLogin.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.PAY));
+                        } else {
+                            if (response != null) {
+                                params.toast(response.getString("message"));
+                            }
+                            //launchLogin.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.PAY));
                         }
                     }
                 }
@@ -97,10 +98,12 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
             getInfo();
         }
     }
-    void getInfo () {
+
+    void getInfo() {
         http.newCall(new Request.Builder().url("https://pay.sysu.edu.cn/client/api/client/person/get")
+                .header("Referer", "https://pay.sysu.edu.cn/")
                 .post(RequestBody.create("{}", MediaType.parse("application/json")))
-                .header("token",token)
+                .header("token", token)
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -118,27 +121,4 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
             }
         });
     }
-    /*void Login() {
-        http.newCall(new Request.Builder().url("https://pay.sysu.edu.cn/client/api/client/auth/netId/login")
-               // .header("Cookie", cookie)
-                        .header("token","1409200795378913280")
-                .post(RequestBody.create("{\"key\":\"https://cas.sysu.edu.cn/cas/serviceValidate?service=https://pay.sysu.edu.cn/sso&ticket=ST-6877120-lLD5AX4dayQaCxMJ0bNF-cas\"}", MediaType.parse("application/json")))
-               // .header("Referer", "https://pay.sysu.edu.cn/")
-                .build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Message msg = new Message();
-                msg.what = -1;
-                handler.sendMessage(msg);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Message msg = new Message();
-                msg.what = 1;
-                msg.obj = response.body().string();
-                handler.sendMessage(msg);
-            }
-        });
-    }*/
 }

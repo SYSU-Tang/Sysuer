@@ -31,9 +31,10 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.ItemFilterChipBinding;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityClassroomQueryBinding;
 import com.sysu.edu.databinding.ItemClassroomResultBinding;
+import com.sysu.edu.databinding.ItemFilterChipBinding;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -208,7 +209,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     }
                 }else {
                     Toast.makeText(ClassroomQueryActivity.this,getString(R.string.login_warning),Toast.LENGTH_LONG).show();
-                    launch.launch(new Intent(ClassroomQueryActivity.this, LoginActivity.class));
+                    launch.launch(new Intent(ClassroomQueryActivity.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                 }
             }
         };
@@ -322,7 +323,7 @@ class RoomAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                         .addHeader("Referer","https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
                         .build()))
                 .placeholder(R.drawable.logo)
-                .override(145*3, 132*3)
+                .override((int) (145*3.6), (int) (132*3.6))
                 .fitCenter()
                 .into((ShapeableImageView)holder.itemView.findViewById(R.id.pic));
         holder.itemView.setOnClickListener(v -> {});

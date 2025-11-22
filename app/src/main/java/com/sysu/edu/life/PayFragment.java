@@ -1,4 +1,4 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.life;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,7 +10,6 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -27,7 +26,9 @@ import com.google.android.material.datepicker.DateValidatorPointBackward;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.sysu.edu.R;
+import com.sysu.edu.academic.StaggeredFragment;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentPayNeedBinding;
 import com.sysu.edu.databinding.FragmentPayRecordBinding;
 import com.sysu.edu.databinding.FragmentPaySituationBinding;
@@ -106,7 +107,6 @@ public class PayFragment extends StaggeredFragment {
                 view = b1.getRoot();
                 break;
             case 3:
-
                 DateManager dm = new DateManager();
                 dm.fromDate = Params.getFirstOfMonth().getTime();
                 dm.toDate = Params.getEndOfMonth().getTime();
@@ -155,7 +155,7 @@ public class PayFragment extends StaggeredFragment {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    Toast.makeText(requireContext(), getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                    params.toast( getString(R.string.no_wifi_warning));
                 } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
@@ -209,10 +209,10 @@ public class PayFragment extends StaggeredFragment {
                             }
                         }
                     } else if (response != null && response.getInteger("code").equals(4002)) {
-                        Toast.makeText(requireContext(), response.getString("message"), Toast.LENGTH_LONG).show();
+                        params.toast(response.getString("message"));
                     } else {
-                        Toast.makeText(requireContext(), getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", "https://cas.sysu.edu.cn/cas/login?service=https://pay.sysu.edu.cn/sso"));
+                        params.toast(getString(R.string.login_warning));
+                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.PAY));
                     }
                 }
             }
@@ -230,7 +230,6 @@ public class PayFragment extends StaggeredFragment {
             chip.setText(title);
             chips.addView(chip,chips.getChildCount()-1);
         }
-
     }
 
     void getPage(){
@@ -241,7 +240,6 @@ public class PayFragment extends StaggeredFragment {
             case 3:getPaymentList();break;
             case 4:getRefundList();break;
         }
-
     }
     void getToPayList() {
         getList("https://pay.sysu.edu.cn/client/api/client/necessary/list","{}",0);
@@ -268,6 +266,7 @@ public class PayFragment extends StaggeredFragment {
     void getList(String url,String body,int what) {
         http.newCall(new Request.Builder().url(url)
                 .header("token", token)
+                .header("Referer", "https://pay.sysu.edu.cn/")
                 .header("Accept-language", "zh-CN")
                 .post(RequestBody.create(body, MediaType.parse("application/json")))
                 .build()).enqueue(new Callback() {

@@ -32,9 +32,9 @@ import java.util.List;
 
 public class StaggeredFragment extends Fragment {
 
-    RecyclerViewScrollBinding binding;
+    public RecyclerViewScrollBinding binding;
     Params params;
-    int position;
+    public int position;
     StaggeredAdapter staggeredAdapter;
     StaggeredGridLayoutManager lm;
     int orientation=StaggeredGridLayoutManager.VERTICAL;
@@ -101,7 +101,7 @@ public class StaggeredFragment extends Fragment {
         super.onConfigurationChanged(newConfig);
         lm.setSpanCount(params.getColumn());
     }
-    void clear(){
+     public void clear(){
         staggeredAdapter.clear();
     }
 

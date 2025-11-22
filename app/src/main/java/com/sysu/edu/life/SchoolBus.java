@@ -19,6 +19,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.academic.Pager2Adapter;
 import com.sysu.edu.academic.StaggeredFragment;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.databinding.ItemSchoolBusNoticeBinding;
 import com.sysu.edu.extra.LoginActivity;
@@ -70,7 +71,7 @@ public class SchoolBus extends AppCompatActivity {
                     params.toast(R.string.no_wifi_warning);
                 }else if(msg.what == 0){
                     params.toast(R.string.login_warning);
-                    launch.launch(new Intent(SchoolBus.this, LoginActivity.class).putExtra("url","https://cas.sysu.edu.cn/cas/login?service=https://portal.sysu.edu.cn/newClient/shiro-cas"));
+                    launch.launch(new Intent(SchoolBus.this, LoginActivity.class).putExtra("url",TargetUrl.PORTAL));
                 }
                 else{
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
@@ -100,7 +101,7 @@ public class SchoolBus extends AppCompatActivity {
                     }
                     else {
                         params.toast(getString(R.string.login_warning));
-                        launch.launch(new Intent(SchoolBus.this, LoginActivity.class));
+                        launch.launch(new Intent(SchoolBus.this, LoginActivity.class).putExtra("url", TargetUrl.PORTAL));
                     }
                 }
             }

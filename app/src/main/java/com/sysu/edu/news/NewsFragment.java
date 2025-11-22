@@ -188,7 +188,7 @@ public class NewsFragment extends Fragment {
                             }
                         } else if (code == 10003) {
                             params.toast(data.getString("message"));
-                            launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", "https://cas.sysu.edu.cn/cas/login?service=https://portal.sysu.edu.cn/newClient/shiro-cas"));
+                            launch.launch(new Intent(requireContext(), LoginActivity.class)/*.putExtra("url", "https://cas.sysu.edu.cn/cas/login?service=https://portal.sysu.edu.cn/newClient/shiro-cas")*/);
                         }
                     } //今日中大
 

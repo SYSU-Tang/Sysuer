@@ -31,13 +31,13 @@ import com.sysu.edu.academic.CourseCompletion;
 import com.sysu.edu.academic.CourseSelection;
 import com.sysu.edu.academic.Grade;
 import com.sysu.edu.academic.MajorInfo;
-import com.sysu.edu.academic.Pay;
 import com.sysu.edu.academic.RegisterInfo;
 import com.sysu.edu.academic.SchoolRoll;
 import com.sysu.edu.academic.SchoolWorkWarning;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ItemServiceBoxBinding;
+import com.sysu.edu.life.Pay;
 import com.sysu.edu.life.SchoolBus;
 import com.sysu.edu.news.News;
 

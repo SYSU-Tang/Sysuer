@@ -24,10 +24,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityAgendaBinding;
+import com.sysu.edu.databinding.ItemAgendaBinding;
 import com.sysu.edu.databinding.ItemDetailBinding;
 import com.sysu.edu.databinding.ItemDurationBinding;
-import com.sysu.edu.databinding.ItemAgendaBinding;
 import com.sysu.edu.databinding.ItemWeekdayBinding;
 import com.sysu.edu.extra.LoginActivity;
 
@@ -249,7 +250,7 @@ public class AgendaActivity extends AppCompatActivity {
                     }
                 } else {
                     params.toast(R.string.login_warning);
-                    launch.launch(new Intent(AgendaActivity.this, LoginActivity.class));
+                    launch.launch(new Intent(AgendaActivity.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                 }
             }
         };

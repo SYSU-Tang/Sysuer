@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -111,8 +112,8 @@ public class MajorInfoFragment extends StaggeredFragment {
                         }
                     }
                     else {
-                        Toast.makeText(requireContext(), getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(requireContext(), LoginActivity.class));
+                        params.toast(R.string.login_warning);
+                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }
             }

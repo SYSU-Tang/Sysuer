@@ -27,6 +27,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseQueryBinding;
 import com.sysu.edu.extra.LoginActivity;
 
@@ -121,7 +122,7 @@ public class CourseQueryFragment extends Fragment {
                             Toast.makeText(requireContext(), response.getString("message"), Toast.LENGTH_LONG).show();
                         } else if (response.getInteger("code").equals(53000007)) {
                             Toast.makeText(requireContext(), getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                            launch.launch(new Intent(requireContext(), LoginActivity.class));
+                            launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                         }
                     }
                     super.handleMessage(msg);

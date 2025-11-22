@@ -33,7 +33,7 @@
             android:configChanges="uiMode|orientation|screenSize"
             android:exported="true" />
         <activity
-            android:name=".academic.Pay"
+            android:name=".life.Pay"
             android:configChanges="uiMode|orientation|screenSize"
             android:exported="true" />
         <activity
@@ -188,7 +188,6 @@
             android:exported="true"
             android:multiprocess="false"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
-
         </application>
 
 </manifest>

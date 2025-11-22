@@ -6,14 +6,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.Html;
@@ -47,8 +45,6 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import rikka.core.BuildConfig;
-import rikka.shizuku.Shizuku;
 
 public class MainActivity extends AppCompatActivity {
     Handler handler;
@@ -66,40 +62,40 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             g.setStartDestination(new int[]{R.id.navigation_activity, R.id.navigation_service, R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home", "0"))]);
         }
-        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-            //Log.d(TAG, "Shizuku 权限已授予");
-        } else {
-            Shizuku.requestPermission(0);
-            Shizuku.addRequestPermissionResultListener((requestCode, grantResult) -> {
-                if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                    // 去连接服务（前提是Shizuku服务是正常并且已授权）
-                    Shizuku.bindUserService(new Shizuku.UserServiceArgs(new ComponentName("com.sysu.edu", UserService.class.getName()))
-                            .daemon(false)
-                            .processNameSuffix("service")
-                            .debuggable(BuildConfig.DEBUG)
-                            .version(2024), new ServiceConnection() {
-                        @Override
-                        public void onServiceConnected(ComponentName componentName, IBinder binder) {
-                            if (binder != null && binder.pingBinder()) {
-                                IUserService mUserService = IUserService.Stub.asInterface(binder);
-
-                                // executeWifiCommand();
-                            } else {
-                                //Log.i(TAG, " Shizuku binder 为 null 或者 binder.pingBinder() 有问题");
-                            }
-                        }
-
-                        @Override
-                        public void onServiceDisconnected(ComponentName componentName) {
-
-                        }
-                    });
-                    //Toast.makeText(MainActivity.this, "授权成功", Toast.LENGTH_SHORT).show();
-                } else {
-                    //Toast.makeText(MainActivity.this, "授权失败", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+//        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+//            //Log.d(TAG, "Shizuku 权限已授予");
+//        } else {
+//            Shizuku.requestPermission(0);
+//            Shizuku.addRequestPermissionResultListener((requestCode, grantResult) -> {
+//                if (grantResult == PackageManager.PERMISSION_GRANTED) {
+//                    // 去连接服务（前提是Shizuku服务是正常并且已授权）
+//                    Shizuku.bindUserService(new Shizuku.UserServiceArgs(new ComponentName("com.sysu.edu", UserService.class.getName()))
+//                            .daemon(false)
+//                            .processNameSuffix("service")
+//                            .debuggable(BuildConfig.DEBUG)
+//                            .version(2024), new ServiceConnection() {
+//                        @Override
+//                        public void onServiceConnected(ComponentName componentName, IBinder binder) {
+//                            if (binder != null && binder.pingBinder()) {
+//                                IUserService mUserService = IUserService.Stub.asInterface(binder);
+//
+//                                // executeWifiCommand();
+//                            } else {
+//                                //Log.i(TAG, " Shizuku binder 为 null 或者 binder.pingBinder() 有问题");
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onServiceDisconnected(ComponentName componentName) {
+//
+//                        }
+//                    });
+//                    //Toast.makeText(MainActivity.this, "授权成功", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    //Toast.makeText(MainActivity.this, "授权失败", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        }
         navController.setGraph(g);
         NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
         SysuerPreferenceManager spm = new SysuerPreferenceManager(this);

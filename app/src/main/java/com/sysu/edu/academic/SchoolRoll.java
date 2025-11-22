@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.extra.LoginActivity;
 
@@ -316,7 +317,7 @@ public class SchoolRoll extends AppCompatActivity {
                     }
                     else {
                         Toast.makeText(SchoolRoll.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(SchoolRoll.this, LoginActivity.class));
+                        launch.launch(new Intent(SchoolRoll.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }
             }

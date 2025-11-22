@@ -10,6 +10,7 @@ public class LoginViewModel extends ViewModel {
     MutableLiveData<Boolean> login = new MutableLiveData<>();
     MutableLiveData<String> sessionId = new MutableLiveData<>();
     MutableLiveData<String> cookie = new MutableLiveData<>();
+    MutableLiveData<String> target = new MutableLiveData<>();
     public MutableLiveData<String> getAccount(){
         return account;
     }
@@ -30,6 +31,9 @@ public class LoginViewModel extends ViewModel {
         return url;
     }
 
+    public MutableLiveData<String> getTarget(){
+        return target;
+    }
     public void setUrl(String linking){
         url.setValue(linking);
     }
@@ -56,5 +60,9 @@ public class LoginViewModel extends ViewModel {
 
     public void setSessionID(String session){
         sessionId.setValue(session);
+    }
+
+    public void setTarget(String targetLinking) {
+        target.setValue(targetLinking);
     }
 }

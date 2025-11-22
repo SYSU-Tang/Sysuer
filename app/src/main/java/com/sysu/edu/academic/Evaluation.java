@@ -10,16 +10,11 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -27,6 +22,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
+import com.sysu.edu.api.Params;
 import com.sysu.edu.extra.LoginActivity;
 
 import java.io.IOException;
@@ -43,25 +39,20 @@ public class Evaluation extends AppCompatActivity {
     Handler handler;
     String cookie;
     ArrayList<JSONObject> evals=new ArrayList<>();
-    private ActivityResultLauncher<Intent> launch;
+    Params params;
+    ActivityResultLauncher<Intent> launch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_evaluation);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
             if(o.getResultCode()== Activity.RESULT_OK){
-                cookie= getSharedPreferences("privacy",0).getString("Cookie","");
-
+                cookie= params.getCookie();
+                getEvaluation();
             }
         });
-        cookie=getSharedPreferences("privacy",0).getString("Cookie","");
+       params = new Params(this);
+        cookie=params.getCookie();
         setSupportActionBar(findViewById(R.id.toolbar));
         RecyclerView list = findViewById(R.id.evaluation_list);
         StaggeredGridLayoutManager sgm=new StaggeredGridLayoutManager(2,1);
@@ -82,8 +73,7 @@ public class Evaluation extends AppCompatActivity {
                         launch.launch(new Intent(Evaluation.this, LoginActivity.class));
                     }
                 } else if (msg.what==-1) {
-                    Toast.makeText(Evaluation.this,"网络状态不佳",Toast.LENGTH_LONG).show();
-
+                    params.toast(R.string.no_wifi_warning);
                 }
             }
         };

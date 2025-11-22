@@ -33,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.extra.LoginActivity;
 
@@ -146,7 +147,7 @@ public class AcademyNotification extends AppCompatActivity {
                         }
                     } else {
                         Toast.makeText(AcademyNotification.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(AcademyNotification.this, LoginActivity.class));
+                        launch.launch(new Intent(AcademyNotification.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }
             }

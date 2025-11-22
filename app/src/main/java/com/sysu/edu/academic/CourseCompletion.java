@@ -20,6 +20,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.databinding.ItemCardBinding;
 import com.sysu.edu.extra.LoginActivity;
@@ -111,7 +112,7 @@ public class CourseCompletion extends AppCompatActivity {
                         params.toast(response.getString("message"));
                     } else {
                         params.toast(R.string.login_warning);
-                        launch.launch(new Intent(CourseCompletion.this, LoginActivity.class));
+                        launch.launch(new Intent(CourseCompletion.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }
             }

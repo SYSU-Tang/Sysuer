@@ -40,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseSelectionBinding;
 import com.sysu.edu.databinding.ItemCourseSelectionBinding;
 import com.sysu.edu.extra.LoginActivity;
@@ -177,7 +178,7 @@ public class CourseSelectionFragment extends Fragment{
                         Toast.makeText(requireContext(), response.getString("message"), Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(requireContext(), LoginActivity.class));
+                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                     super.handleMessage(msg);
                 }

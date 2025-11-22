@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityListBinding;
 import com.sysu.edu.extra.LoginActivity;
 
@@ -89,7 +90,7 @@ public class SchoolWorkWarning extends AppCompatActivity {
                     }
                     else {
                         Toast.makeText(SchoolWorkWarning.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(SchoolWorkWarning.this, LoginActivity.class));
+                        launch.launch(new Intent(SchoolWorkWarning.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }
             }

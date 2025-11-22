@@ -38,9 +38,8 @@ public class LoginActivity extends AppCompatActivity {
         model.setPassword(privacy.getString("password",""));
         binding.pager2.setAdapter(new Pager2Adapter(this).add(new LoginWebFragment()).add(new LoginFragment()));
         binding.tool.setNavigationOnClickListener(v->finishAfterTransition());
-        String loginUrl = getIntent().getStringExtra("url");
-        if(loginUrl==null){loginUrl="https://cas.sysu.edu.cn/cas/login?service=https%3A%2F%2Fjwxt.sysu.edu.cn%2Fjwxt%2Fapi%2Fsso%2Fcas%2Flogin%3Fpattern%3Dstudent-login";}
-        model.setUrl(loginUrl);
+        model.setTarget(getIntent().getStringExtra("url")==null ?"https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home":getIntent().getStringExtra("url"));
+        model.setUrl("https://cas.sysu.edu.cn/esc-sso/login/page?isLogin=fail");
         binding.tool.getMenu().add("确认").setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
             web.loadUrl("https://portal.sysu.edu.cn/newClient/#/newPortal/index");
             return false;
@@ -55,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
                 if(match.find()) {
                     edit.putString("token", match.group(1));
                 }
-                System.out.println(cookie);
+                //System.out.println(cookie);
                 edit.putString("Cookie",cookie);
                 edit.putString("username", model.getAccount().getValue());
                 edit.putString("password", model.getPassword().getValue());

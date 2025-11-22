@@ -40,6 +40,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.academic.CourseDetail;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
 import com.sysu.edu.databinding.ItemCourseBinding;
 import com.sysu.edu.databinding.ItemExamBinding;
@@ -67,6 +68,7 @@ import okhttp3.Response;
 
 
 public class DashboardFragment extends Fragment {
+
     Handler handler;
     String cookie;
     ArrayList<JSONObject> todayCourse = new ArrayList<>();
@@ -238,7 +240,7 @@ public class DashboardFragment extends Fragment {
                             }
                         }
                     } else {
-                        launch.launch(new Intent(getContext(), LoginActivity.class));
+                        launch.launch(new Intent(getContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }
             };
