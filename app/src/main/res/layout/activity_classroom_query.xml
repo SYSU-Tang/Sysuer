@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -16,11 +15,11 @@
             android:minHeight="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/classroom_query_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 android:transitionName="miniapp"
                 app:layout_collapseMode="pin"
+                android:id="@+id/tool"
                 app:navigationIcon="?homeAsUpIndicator"
                 app:title="@string/classroom_query"/>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -51,11 +50,11 @@
                 android:layout_marginBottom="8dp"
                 app:chipSpacingVertical="0dp">
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/campus_select_all"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/selectAll" />
+                    android:id="@+id/campus_select_all"
+                    android:text="@string/select_all" />
             </com.google.android.material.chip.ChipGroup>
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.Material3.BodyMedium"
@@ -75,11 +74,11 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp">
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/office_select_all"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/selectAll" />
+                    android:id="@+id/office_select_all"
+                    android:text="@string/select_all" />
             </com.google.android.material.chip.ChipGroup>
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.Material3.BodyMedium"
@@ -104,7 +103,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="@string/selfStudyRoom" />
+                    android:text="@string/self_study_room" />
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.Material3.Chip.Filter.Elevated"
                     android:layout_width="wrap_content"

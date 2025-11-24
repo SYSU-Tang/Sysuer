@@ -6,20 +6,18 @@
     <string name="course">课程</string>
     <string name="location">位置</string>
     <string name="time">时间</string>
-    <string name="course_name">课程名称</string>
     <string name="exam">考试</string>
     <string name="todo">待办</string>
     <string name="classroom_query">自习室/研讨室查询</string>
     <string name="office">教学楼</string>
-    <string name="classroom">教室</string>
     <string name="date">日期</string>
     <string name="query">查询</string>
     <string name="classroom_type">教室类型</string>
     <string name="agenda">课程表</string>
     <string name="evaluation">评教</string>
     <string name="teacher">教师</string>
-    <string name="selectAll">反选</string>
-    <string name="selfStudyRoom">自习室</string>
+    <string name="select_all">反选</string>
+    <string name="self_study_room">自习室</string>
     <string name="term">学期</string>
     <string name="week1">第1周</string>
     <string name="login">登录</string>
@@ -27,7 +25,6 @@
     <string name="password">密码</string>
     <string name="captcha">验证码</string>
     <string name="today">今天</string>
-    <string name="tomorrow">明天</string>
     <string name="noClass">😁今天没课😁</string>
     <string name="noExam">😁没有考试😁</string>
     <string name="noTodo">😒没有待办😒</string>
@@ -38,13 +35,10 @@
     <string name="profession">专业</string>
     <string name="type">类型</string>
     <string name="reset">重置</string>
-    <string name="last_week">上周</string>
-    <string name="next_week">下周</string>
     <string name="news">资讯</string>
     <string name="campus">校区</string>
     <string name="field">场地</string>
     <string name="preservation">预约</string>
-    <string name="this_week">本周</string>
     <string name="exam_name">考试科目</string>
     <string name="exam_location">考试地点</string>
     <string name="exam_time">考试时间</string>
@@ -71,20 +65,16 @@
     <string name="official_media">官媒</string>
     <string name="academy">教务</string>
     <string name="study">学习</string>
-    <string name="traffic">出行</string>
-    <string name="dorm">宿舍</string>
     <string name="light">明亮</string>
     <string name="dark">黑暗</string>
     <string name="follow_system">跟随系统</string>
     <string name="about">关于</string>
     <string name="help">帮助</string>
-    <string name="number">学工号</string>
     <string name="app">软件</string>
     <string name="theme">主题</string>
     <string name="language">语言</string>
     <string name="home">首页</string>
     <string name="appearance">外观</string>
-    <string name="develop">开发</string>
     <string name="open_source">开源</string>
     <string name="week_x">第%d周</string>
     <string name="no_wifi_warning">请检查网络！</string>
@@ -92,8 +82,6 @@
     <string name="term_x">第%s学期</string>
     <string name="minute">分钟</string>
     <string name="section_range">第%d~%d节</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="second_fragment_label">Second Fragment</string>
     <string name="course_selection">选课</string>
     <string name="seminar_room">研讨室</string>
     <string name="default_class">第1节到第11节</string>
@@ -124,8 +112,6 @@
     <string name="course_score">成绩评定方式</string>
     <string name="course_reference">主要参考书目</string>
     <string name="add_filter">高级筛选</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="next">下一个</string>
     <string name="course_query">课程查询</string>
     <string name="week">星期</string>
     <string name="section">节次</string>
@@ -133,11 +119,8 @@
     <string name="school">学院</string>
     <string name="submit">确定</string>
     <string name="only_collection">只显示收藏</string>
-    <string name="school_roll">学籍</string>
+    <string name="school_enroll">学籍</string>
     <string name="cet">四六级</string>
-    <string name="base_info">基本信息</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="register_info">注册信息查看</string>
     <string name="major_info">本科专业查询</string>
     <string name="school_work_warning">学业预警</string>
@@ -160,8 +143,23 @@
     <string name="web_login">网页登录</string>
     <string name="font_size">字体大小</string>
     <string name="student_job">勤工俭学</string>
-    <!-- Strings used for fragments for navigation -->
-<string name="close">关闭</string>
+    <string name="close">关闭</string>
     <string name="search">查询</string>
     <string name="exam_week">考试周</string>
+    <string name="personal_development_plan">个人培养方案</string>
+    <string name="wework">企业微信</string>
+    <string name="student_affair">学工</string>
+    <string name="current_version">当前版本</string>
+    <string name="download_link">下载地址</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="user_agreement">用户协议</string>
+    <string name="permission_introduction">权限说明</string>
+    <string name="submit_issues">提交Issues</string>
+    <string name="sponsor">捐赠</string>
+    <string name="academic_affair_notice">教务通知</string>
+    <string name="campus_market">校园集市</string>
+    <string name="large">大</string>
+    <string name="small">小</string>
+    <string name="smaller">较小</string>
+    <string name="larger">更大</string>
 </resources>

@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/parent"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -13,7 +12,6 @@
         android:layout_weight="1">
         <com.google.android.material.appbar.AppBarLayout
             style="@style/SYSU.AppBarLayout"
-            android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <com.google.android.material.appbar.MaterialToolbar
@@ -36,13 +34,13 @@
             tools:layout="@layout/fragment_dashboard"/>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/nav_view"
         style="@style/Widget.MaterialComponents.BottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:itemIconTint="?colorPrimary"
         app:itemTextColor="?colorPrimary"
+        android:id="@+id/nav_view"
         app:labelVisibilityMode="selected"
         app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior"
         app:menu="@menu/home"/>

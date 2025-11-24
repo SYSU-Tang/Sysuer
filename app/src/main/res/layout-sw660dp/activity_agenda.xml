@@ -86,7 +86,6 @@
                 <View
                     android:layout_width="0dp"
                     android:layout_row="0"
-                    android:id="@+id/c1"
                     android:layout_columnSpan="11"
                     android:layout_column="1"
                     android:layout_columnWeight="1"

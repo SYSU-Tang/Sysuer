@@ -2,7 +2,6 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/course_selection_graph"
     app:startDestination="@id/selection_fragment">
     <fragment
         android:id="@+id/selection_fragment"

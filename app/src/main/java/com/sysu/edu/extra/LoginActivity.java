@@ -42,11 +42,11 @@ public class LoginActivity extends AppCompatActivity {
         binding.tool.setNavigationOnClickListener(v->finishAfterTransition());
         model.setTarget(getIntent().getStringExtra("url")==null ?"https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home":getIntent().getStringExtra("url"));
         model.setUrl(TargetUrl.LOGIN);
-        binding.tool.getMenu().add("确认").setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
+        binding.tool.getMenu().add(R.string.submit).setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
             web.loadUrl(Objects.requireNonNull(getIntent().getStringExtra("url")));
             return false;
         });
-        new TabLayoutMediator(binding.options, binding.pager2, (tab, i) -> tab.setText(new String[]{"网页登录","密码登录"}[i])).attach();
+        new TabLayoutMediator(binding.options, binding.pager2, (tab, i) -> tab.setText(new int[]{R.string.web_login,R.string.password_login}[i])).attach();
         model.getLogin().observe(this,b->{
             if(b){
                 SharedPreferences.Editor edit = privacy.edit();
@@ -68,22 +68,20 @@ public class LoginActivity extends AppCompatActivity {
         handler=new Handler(getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == 1) {
-                    //sessionId = (String) msg.obj;
-                    //Glide.with(Login.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(binding.ca);
-//                        Glide.with(Login.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(new CustomTarget<Drawable>(){
-//                            @Override
-//                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-//                                ((TextInputLayout)findViewById(R.id.cac)).setEndIconDrawable(resource);
-//                            }
-//
-//                            @Override
-//                            public void onLoadCleared(@Nullable Drawable placeholder) {
-//
-//                            }
-//                        });
-                    // ((TextInputLayout)findViewById(R.id.cac)).setEndIconDrawable(Glide.with(Login.this).asDrawable().load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).submit().get());
-                }
+                //sessionId = (String) msg.obj;
+                //Glide.with(Login.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(binding.ca);
+                //                        Glide.with(Login.this).load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).into(new CustomTarget<Drawable>(){
+                //                            @Override
+                //                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                //                                ((TextInputLayout)findViewById(R.id.cac)).setEndIconDrawable(resource);
+                //                            }
+                //
+                //                            @Override
+                //                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                //
+                //                            }
+                //                        });
+                // ((TextInputLayout)findViewById(R.id.cac)).setEndIconDrawable(Glide.with(Login.this).asDrawable().load(new GlideUrl("https://cas.sysu.edu.cn/cas/captcha.jsp",new LazyHeaders.Builder().addHeader("Cookie",sessionId).build())).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).submit().get());
             }
         };
 //        new OkHttpClient.Builder().build().newCall(new Request.Builder().loginUrl("https://cas.sysu.edu.cn/cas/login?service=https://jwxt.sysu.edu.cn/jwxt/api/sso/cas/login?pattern=student-login").build()).enqueue(new Callback() {

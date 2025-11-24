@@ -11,15 +11,15 @@
     android:layout_gravity="center"
     android:paddingBottom="8dp">
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/course_order"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/course_order"
         android:textAppearance="?attr/textAppearanceTitleMedium"
         android:textColor="?attr/colorAccent"
         android:textStyle="bold"/>
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/course_duration"
         android:layout_width="wrap_content"
+        android:id="@+id/course_duration"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium.Emphasized"/>
 </LinearLayout>

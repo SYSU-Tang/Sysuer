@@ -7,9 +7,6 @@
             <intent android:targetClass="com.sysu.edu.extra.PrivacyActivity"
                 android:targetPackage="com.sysu.edu"/>
         </Preference>
-        <Preference
-            app:isPreferenceVisible="false"
-            app:title="数据"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/app">
         <Preference

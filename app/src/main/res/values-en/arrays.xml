@@ -1,0 +1,34 @@
+<resources>
+    <string-array name="home" >
+        <item>@string/menu_activity</item>
+        <item>@string/menu_service</item>
+        <item>@string/menu_account</item>
+    </string-array>
+    <string-array name="sponsors">
+        <item>Alipay</item>
+        <item>WeChat Pay</item>
+        <item>QQ Wallet</item>
+    </string-array>
+
+    <integer-array name="sponsor_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </integer-array>
+    <string-array name="weeks">
+        <item>Mon</item>
+        <item>Thu</item>
+        <item>Wed</item>
+        <item>Tur</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="font_size">
+        <item>@string/follow_system</item>
+        <item>Small</item>
+        <item>Smaller</item>
+        <item>Large</item>
+        <item>Larger</item>
+    </string-array>
+</resources>

@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <GridLayout
-        android:id="@+id/activity_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="8dp"
@@ -52,9 +51,9 @@
             android:layout_weight="1"
             app:contentPadding="12dp">
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/next_class"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/next_class"
                 android:lineSpacingMultiplier="1.5"/>
         </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.card.MaterialCardView
@@ -112,7 +111,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/today"/>
                 <Button
-                    android:id="@+id/tomorrow"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -126,11 +124,11 @@
             android:layout_margin="8dp"
             android:layout_marginTop="0dp">
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/course_list"
                 android:layout_width="match_parent"
+                android:id="@+id/course_list"
                 android:layout_height="match_parent" />
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/noClass"
+                android:id="@+id/no_class"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -164,7 +162,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/week17"/>
                 <Button
-                    android:id="@+id/next_week"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -178,15 +175,15 @@
             android:layout_margin="8dp"
             android:layout_marginTop="0dp">
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/no_exam"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:id="@+id/no_exam"
                 android:text="@string/noExam"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/exam_list"
                 android:nestedScrollingEnabled="false"
+                android:id="@+id/exam_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </com.google.android.material.card.MaterialCardView>
@@ -209,14 +206,12 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp">
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/noTodo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:text="@string/noTodo"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/todo_list"
                 android:nestedScrollingEnabled="false"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

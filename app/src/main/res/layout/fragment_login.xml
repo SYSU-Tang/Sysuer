@@ -42,14 +42,12 @@
             android:gravity="center">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/cac"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="@string/captcha">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/captcha"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
@@ -57,7 +55,6 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/capImg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </TableRow>

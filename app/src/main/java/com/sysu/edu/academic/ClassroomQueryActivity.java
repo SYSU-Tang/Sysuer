@@ -113,7 +113,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
             binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日",Locale.CHINESE).format(new Date(selection)));
         });
         adp = new RoomAdp(this);
-        binding.classroomQueryToolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
+        binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         binding.result.setAdapter(adp);
         binding.result.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
         BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_HIDDEN);

@@ -1,6 +1,5 @@
 package com.sysu.edu.life;
 
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,10 +26,7 @@ public class Pay extends AppCompatActivity {
         }
         binding.pager.setAdapter(adp);
         //binding.appBarLayout.setElevation(0);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            //binding.appBarLayout.setOutlineAmbientShadowColor(0x00000000);
-            binding.appBarLayout.setOutlineSpotShadowColor(0x00000000);
-        }
+
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"待交费用","选交费用","交费情况","付款记录","退费记录"}[position])).attach();
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
     }

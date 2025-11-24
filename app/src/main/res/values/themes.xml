@@ -76,10 +76,6 @@
         <item name="cornerSize">4dp</item>
     </style>
     <!-- Base application theme. -->
-    <style name="Base.Theme.中大儿" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
     <!--    <style name="spinner" parent="Widget.AppCompat.TextView">-->
     <!--        <item name="android:textColor"/>-->
     <!--    </style>-->

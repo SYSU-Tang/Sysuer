@@ -46,7 +46,7 @@ import java.util.Objects;
 
 public class ServiceFragment extends Fragment {
     LinearLayout service_container;
-    private NestedScrollView fragment;
+    NestedScrollView fragment;
     ActivityResultLauncher<Intent> launcher;
 
     @Nullable
@@ -56,21 +56,20 @@ public class ServiceFragment extends Fragment {
         if (fragment == null) {
             FragmentServiceBinding binding = FragmentServiceBinding.inflate(inflater);
             fragment = binding.getRoot();
-            launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            });
+            launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {});
             service_container = binding.serviceContainer;
-            String[] titles = new String[]{"学业","学工", a(R.string.news), a(R.string.system), a(R.string.official_website), a(R.string.official_media), a(R.string.academy), a(R.string.study), a(R.string.life), "AI"};
+            String[] titles = new String[]{a(R.string.academy),a(R.string.student_affair), a(R.string.news), a(R.string.system), a(R.string.official_website), a(R.string.official_media), a(R.string.academy), a(R.string.study), a(R.string.life), "AI"};
             String[][] items = new String[][]{
-                    {a(R.string.school_roll), a(R.string.cet), a(R.string.register_info), a(R.string.school_work_warning),a(R.string.course_completion)},
-                    {"勤工俭学"},
-                    {"资讯门户", "校园集市","教务通知"//,"学校活动"
+                    {a(R.string.school_enroll), a(R.string.cet), a(R.string.register_info), a(R.string.school_work_warning),a(R.string.course_completion)},
+                    {a(R.string.student_job)},
+                    {"资讯门户", a(R.string.campus_market),a(R.string.academic_affair_notice)//,"学校活动"
                     },
                     {"体育场馆预定系统", "学工系统", "本科教务系统", "中山大学统一门户", "大学服务中心", "财务信息系统"},
                     {"中山大学官网", "本科招生", "研究生招生", "人才招聘", "百年校庆", "博物馆", "图书馆", "校友会", "公务电子邮件系统"},
-                    {"逸仙码", "企业微信", "中大招生"},
-                    {a(R.string.evaluation), a(R.string.course_selection), a(R.string.agenda), a(R.string.exam), a(R.string.calendar), a(R.string.selfStudyRoom), a(R.string.score), a(R.string.course), "个人培养方案", a(R.string.trainType), "本科专业"},
+                    {a(R.string.qrcode), a(R.string.wework), "中大招生"},
+                    {a(R.string.evaluation), a(R.string.course_selection), a(R.string.agenda), a(R.string.exam), a(R.string.calendar), a(R.string.self_study_room), a(R.string.score), a(R.string.course), a(R.string.personal_development_plan), a(R.string.trainType), a(R.string.major_info)},
                     {"SeeLight", "雨课堂", "课堂派", "在线教学平台", "中国大学（慕课）"},
-                    {"校园地图", "校车", "逸仙通行", "校医院", "宿舍报修", "水电费", "缴费大厅"},
+                    {"校园地图", a(R.string.school_bus), "逸仙通行", "校医院", "宿舍报修", "水电费", "缴费大厅"},
                     {"Deepseek", "逸闻", "学工君"}
             };
             View.OnClickListener[][] actions = new View.OnClickListener[][]{

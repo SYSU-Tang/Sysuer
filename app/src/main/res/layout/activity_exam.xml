@@ -43,14 +43,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/exam_week"
-                app:boxStrokeWidth="0dp"
                 app:placeholderText="@string/exam">
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/exam_weeks"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
-                    android:lineBreakStyle="strict"
+                    android:id="@+id/exam_weeks"
                     android:singleLine="true"
                     app:simpleItems="@array/weeks"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -58,18 +56,14 @@
                 android:id="@+id/term_filter"
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
                 android:layout_width="wrap_content"
+                app:boxStrokeWidth="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/term"
-                app:boxCornerRadiusBottomEnd="3dp"
-                app:boxCornerRadiusBottomStart="3dp"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
                 app:placeholderText="@string/term">
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/terms"
                     style="@style/ThemeOverlay.Material3.AutoCompleteTextView.FilledBox"
                     android:layout_width="wrap_content"
-
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     android:lines="1"/>

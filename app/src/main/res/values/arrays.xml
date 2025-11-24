@@ -1,5 +1,4 @@
 <resources>
-    <!-- Reply Preference -->
     <string-array name="theme" >
         <item>@string/light</item>
         <item>@string/dark</item>
@@ -31,21 +30,6 @@
         <item>1</item>
         <item>2</item>
     </integer-array>
-    <string-array name="schools">
-        <item>南校园</item>
-        <item>东校园</item>
-        <item>北校园</item>
-        <item>深圳校区</item>
-        <item>珠海校区</item>
-    </string-array>
-    <string-array name="offices">
-        <item>全部教学楼</item>
-        <item>第一教学楼</item>
-        <item>第二教学楼</item>
-        <item>第四教学楼（丰盛堂）</item>
-        <item>第五教学楼（逸夫楼）</item>
-        <item>第六教学楼（392栋）</item>
-    </string-array>
     <string-array name="weeks">
         <item>一</item>
         <item>二</item>
@@ -73,7 +57,7 @@
         <item>11</item>
     </string-array>
     <string-array name="font_size">
-        <item>默认</item>
+        <item>@string/follow_system</item>
         <item>小</item>
         <item>较小</item>
         <item>较大</item>

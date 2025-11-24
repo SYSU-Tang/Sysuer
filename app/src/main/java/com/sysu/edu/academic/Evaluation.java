@@ -38,7 +38,7 @@ public class Evaluation extends AppCompatActivity {
 
     Handler handler;
     String cookie;
-    ArrayList<JSONObject> evals=new ArrayList<>();
+    ArrayList<JSONObject> evals = new ArrayList<>();
     Params params;
     ActivityResultLauncher<Intent> launch;
 
@@ -46,21 +46,21 @@ public class Evaluation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if(o.getResultCode()== Activity.RESULT_OK){
-                cookie= params.getCookie();
+            if (o.getResultCode() == Activity.RESULT_OK) {
+                cookie = params.getCookie();
                 getEvaluation();
             }
         });
-       params = new Params(this);
-        cookie=params.getCookie();
+        params = new Params(this);
+        cookie = params.getCookie();
         setSupportActionBar(findViewById(R.id.toolbar));
-        RecyclerView list = findViewById(R.id.evaluation_list);
-        StaggeredGridLayoutManager sgm=new StaggeredGridLayoutManager(2,1);
+        RecyclerView list = findViewById(R.id.list);
+        StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(2, 1);
         list.setLayoutManager(sgm);
         EvalAdapter adp = new EvalAdapter(this);
         list.setAdapter(adp);
         getEvaluation();
-        handler=new Handler(Looper.getMainLooper()){
+        handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == 1) {
@@ -68,67 +68,73 @@ public class Evaluation extends AppCompatActivity {
                     if (data.get("code").equals("200")) {
                         data.getJSONObject("result").getJSONArray("list").forEach(e -> evals.add((JSONObject) e));
                         adp.set(evals);
-                    }
-                    else {
+                    } else {
                         launch.launch(new Intent(Evaluation.this, LoginActivity.class));
                     }
-                } else if (msg.what==-1) {
+                } else if (msg.what == -1) {
                     params.toast(R.string.no_wifi_warning);
                 }
             }
         };
     }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId()==android.R.id.home){
+        if (item.getItemId() == android.R.id.home) {
             finishAfterTransition();
         }
         return true;
     }
-    public void getEvaluation(){
+
+    public void getEvaluation() {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://pjxt.sysu.edu.cn/personnelEvaluation/listObtainPersonnelEvaluationTasks?yhdm=tangxb6&rwmc=&sfyp=0&pageNum=1&pageSize=10")
-                .addHeader("Cookie","JSESSIONID=F547A1B2729098E0B101716397DC48DC;INCO=9b1595d95278e78f17d51a5f35287020;")
-               // .post(RequestBody.create("{\"acadYear\":\"2024-2\",\"examWeekId\":\"1864116471884476417\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", MediaType.parse("application/json")))
+                .addHeader("Cookie", "JSESSIONID=F547A1B2729098E0B101716397DC48DC;INCO=9b1595d95278e78f17d51a5f35287020;")
+                // .post(RequestBody.create("{\"acadYear\":\"2024-2\",\"examWeekId\":\"1864116471884476417\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", MediaType.parse("application/json")))
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message message = new Message();
-                message.what=-1;
+                message.what = -1;
                 handler.sendMessage(message);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what=1;
+                msg.what = 1;
                 msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
     }
 }
-class EvalAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
+
+class EvalAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
-    ArrayList<JSONObject> data=new ArrayList<>();
-    public EvalAdapter(Context context)
-    {
+    ArrayList<JSONObject> data = new ArrayList<>();
+
+    public EvalAdapter(Context context) {
         super();
-        this.context=context;
+        this.context = context;
     }
-    public void set(ArrayList<JSONObject> mData){
+
+    public void set(ArrayList<JSONObject> mData) {
         clear();
         data.addAll(mData);
-        notifyItemRangeInserted(0,mData.size());
+        notifyItemRangeInserted(0, mData.size());
     }
-    public void clear(){
-        int tmp=getItemCount();
+
+    public void clear() {
+        int tmp = getItemCount();
         data.clear();
-        notifyItemMoved(0,tmp);
+        notifyItemMoved(0, tmp);
     }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_evaluation, parent,false)){};
+        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_evaluation, parent, false)) {
+        };
     }
 
     @Override
@@ -139,12 +145,12 @@ class EvalAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
         holder.itemView.setOnClickListener(v -> {
 
         });
-        ((MaterialTextView)holder.itemView.findViewById(R.id.title)).setText(data.get(position).getString("rwmc"));
-        ((MaterialTextView)holder.itemView.findViewById(R.id.start_time)).setText(String.format("起始时间：%s", data.get(position).getString("rwkssj")));
-        ((MaterialTextView)holder.itemView.findViewById(R.id.end_time)).setText(String.format("结束时间：%s",data.get(position).getString("rwjssj")));
-        ((MaterialTextView)holder.itemView.findViewById(R.id.total)).setText(String.format("总评数：%s", data.get(position).getString("pjsl")));
-        ((MaterialTextView)holder.itemView.findViewById(R.id.total_for)).setText(String.format("已评数：%s", data.get(position).getString("ypsl")));
-          }
+        ((MaterialTextView) holder.itemView.findViewById(R.id.title)).setText(data.get(position).getString("rwmc"));
+        ((MaterialTextView) holder.itemView.findViewById(R.id.start_time)).setText(String.format("起始时间：%s", data.get(position).getString("rwkssj")));
+        ((MaterialTextView) holder.itemView.findViewById(R.id.end_time)).setText(String.format("结束时间：%s", data.get(position).getString("rwjssj")));
+        ((MaterialTextView) holder.itemView.findViewById(R.id.total)).setText(String.format("总评数：%s", data.get(position).getString("pjsl")));
+        ((MaterialTextView) holder.itemView.findViewById(R.id.total_for)).setText(String.format("已评数：%s", data.get(position).getString("ypsl")));
+    }
 
     @Override
     public int getItemCount() {

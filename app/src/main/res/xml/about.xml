@@ -5,17 +5,17 @@
         <Preference
             android:key="version"
             app:icon="@drawable/submit"
-            app:title="当前版本"/>
+            app:title="@string/current_version"/>
         <Preference
             android:summary="https://github.com/SYSU-Tang/Sysuer/releases"
             app:icon="@drawable/down"
-            app:title="下载地址">
+            app:title="@string/download_link">
             <intent android:data="https://github.com/SYSU-Tang/Sysuer/releases"/>
         </Preference>
         <Preference
             android:summary="https://sysu-tang.github.io/#/"
             app:icon="@drawable/web"
-            app:title="官网">
+            app:title="@string/official_website">
             <intent android:data="https://sysu-tang.github.io/#/"/>
         </Preference>
     </PreferenceCategory>
@@ -44,7 +44,7 @@
         <Preference
             android:summary="https://github.com/SYSU-Tang/Sysuer/issues"
             app:icon="@drawable/question"
-            app:title="提交Issues">
+            app:title="@string/submit_issues">
             <intent android:data="https://github.com/SYSU-Tang/Sysuer/issues"/>
         </Preference>
         <rikka.preference.SimpleMenuPreference
@@ -53,8 +53,8 @@
             app:icon="@drawable/money"
             app:key="sponsor"
             app:persistent="false"
-            app:summary="每一次捐赠都是开发的动力"
-            app:title="捐赠"/>
+            app:summary="3Q"
+            app:title="@string/sponsor"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/permission">
         <Preference
@@ -63,7 +63,7 @@
             app:key="privacyPolicy"
             app:summary="https://sysu-tang.github.io/#/zh-cn/agreement/隐私政策"
             app:persistent="false"
-            app:title="隐私政策">
+            app:title="@string/privacy_policy">
 
         <intent android:data="https://sysu-tang.github.io/#/zh-cn/agreement/隐私政策"/>
 
@@ -74,14 +74,14 @@
             app:icon="@drawable/book"
             app:key="userAgreement"
             app:persistent="false"
-            app:title="用户协议">
+            app:title="@string/user_agreement">
             <intent android:data="https://sysu-tang.github.io/#/zh-cn/agreement/用户协议"/>
         </Preference>
         <Preference
             app:icon="@drawable/book"
             app:key="permissionDescription"
             app:persistent="false"
-            app:title="权限说明"/>
+            app:title="@string/permission_introduction"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/open_source">
         <Preference
@@ -105,14 +105,32 @@
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/material-components/material-components-android"
-            app:title="material3">
+            app:title="Material3">
             <intent android:data="https://github.com/material-components/material-components-android"/>
         </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/JetBrains/kotlin"
-            app:title="kotlin">
+            app:title="Kotlin">
             <intent android:data="https://github.com/JetBrains/kotlin"/>
+        </Preference>
+        <Preference
+            app:icon="@drawable/version"
+            app:summary="https://github.com/RikkaApps/Shizuku"
+            app:title="Shizuku">
+            <intent android:data="https://github.com/RikkaApps/Shizuku"/>
+        </Preference>
+        <Preference
+        app:icon="@drawable/version"
+        app:summary="https://github.com/bumptech/glide"
+        app:title="Glide">
+        <intent android:data="https://github.com/bumptech/glide"/>
+    </Preference>
+        <Preference
+            app:icon="@drawable/version"
+            app:summary="https://github.com/RikkaApps/RikkaX"
+            app:title="RikkaX">
+            <intent android:data="https://github.com/RikkaApps/RikkaX"/>
         </Preference>
     </PreferenceCategory>
 </androidx.preference.PreferenceScreen>
