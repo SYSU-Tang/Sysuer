@@ -154,7 +154,7 @@
     <string name="privacy_policy">隐私政策</string>
     <string name="user_agreement">用户协议</string>
     <string name="permission_introduction">权限说明</string>
-    <string name="submit_issues">提交Issues</string>
+    <string name="submit_issues">提交议题</string>
     <string name="sponsor">捐赠</string>
     <string name="academic_affair_notice">教务通知</string>
     <string name="campus_market">校园集市</string>
@@ -162,4 +162,8 @@
     <string name="small">小</string>
     <string name="smaller">较小</string>
     <string name="larger">更大</string>
+    <string name="day">日</string>
+    <string name="from_to">第%s节到第%s节</string>
+    <string name="finished">已完成</string>
+    <string name="school_affair_notice">院系通知</string>
 </resources>

@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -67,13 +66,14 @@ public class RegisterInfo extends AppCompatActivity {
                 return false;
             });
         }
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"今年注册记录","缴费信息","往年注册记录"}[position])).attach();
+        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(getResources().getStringArray(R.array.registration_info)[position])).attach();
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
+        binding.toolbar.setTitle(R.string.register_info);
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    Toast.makeText(RegisterInfo.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                    params.toast(R.string.no_wifi_warning);
                 }else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
@@ -128,7 +128,7 @@ public class RegisterInfo extends AppCompatActivity {
                         }
                     }
                     else {
-                        Toast.makeText(RegisterInfo.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
+                        params.toast(R.string.login_warning);
                         launch.launch(new Intent(RegisterInfo.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }

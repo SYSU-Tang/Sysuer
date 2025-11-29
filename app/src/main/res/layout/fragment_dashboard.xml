@@ -17,6 +17,7 @@
         <com.google.android.material.button.MaterialButtonGroup
             style="@style/Widget.Material3.MaterialButtonGroup.Connected"
             android:layout_gravity="center"
+            app:overflowMode="none"
             android:layout_margin="8dp">
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/scan"
@@ -34,6 +35,7 @@
                 app:icon="@drawable/qrcode"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/agenda"
+                android:singleLine="true"
                 style="@style/Widget.Material3Expressive.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -103,6 +105,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:selectionRequired="true"
+                app:overflowMode="menu"
                 app:singleSelection="true">
                 <Button
                     android:id="@+id/today"
@@ -191,19 +194,38 @@
             android:layout_width="match_parent"
             android:layout_margin="8dp">
         <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:layout_weight="1"
             android:layout_marginBottom="0dp"
             android:drawablePadding="8dp"
             android:text="@string/todo"
             android:textAppearance="?attr/textAppearanceTitleMedium"
             app:drawableLeftCompat="@drawable/todo"/>
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:overflowMode="menu"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+                <Button
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/todo"/>
+                <Button
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/finished"/>
+            </com.google.android.material.button.MaterialButtonToggleGroup>
         </TableRow>
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.Material3.CardView.Elevated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
             android:layout_margin="8dp">
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"

@@ -24,11 +24,31 @@
         <item>Sat</item>
         <item>Sun</item>
     </string-array>
+    <string-array name="months">
+        <item>Jan</item>
+        <item>Fre</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Sep</item>
+        <item>Oct</item>
+        <item>Nov</item>
+        <item>Dem</item>
+    </string-array>
     <string-array name="font_size">
         <item>@string/follow_system</item>
         <item>Small</item>
         <item>Smaller</item>
         <item>Large</item>
         <item>Larger</item>
+    </string-array>
+
+    <string-array name="registration_info">
+        <item>Registration Record this year</item>
+        <item>Payment</item>
+        <item>Registration Record before</item>
     </string-array>
 </resources>

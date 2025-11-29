@@ -18,7 +18,6 @@ import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -64,7 +63,7 @@ public class AcademyNotification extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityPagerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.toolbar.setTitle("教务通知");
+        binding.toolbar.setTitle(R.string.academic_affair_notice);
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
         cookie = params.getCookie();
@@ -106,14 +105,14 @@ public class AcademyNotification extends AppCompatActivity {
         adp.add(f1);
         adp.add(f2);
         binding.pager.setAdapter(adp);
-        dialog = new MaterialAlertDialogBuilder(this).setMessage("").setPositiveButton("确定", (dialogInterface, i) -> {
+        dialog = new MaterialAlertDialogBuilder(this).setMessage("").setPositiveButton(R.string.submit, (dialogInterface, i) -> {
         }).create();
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"教务公告", "院系公告"}[position])).attach();
+        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new int[]{R.string.academic_affair_notice, R.string.school_affair_notice}[position])).attach();
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    Toast.makeText(AcademyNotification.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                    params.toast(getString(R.string.no_wifi_warning));
                 } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
@@ -146,7 +145,7 @@ public class AcademyNotification extends AppCompatActivity {
                             }
                         }
                     } else {
-                        Toast.makeText(AcademyNotification.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
+                        params.toast(getString(R.string.login_warning));
                         launch.launch(new Intent(AcademyNotification.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
                     }
                 }
@@ -235,7 +234,6 @@ public class AcademyNotification extends AppCompatActivity {
                         .build()).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
                     }
 
                     @Override

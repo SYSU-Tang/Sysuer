@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -20,6 +19,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavGraph;
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     long downloadId;
     File file;
     ActivityResultLauncher<Intent> detailLauncher;
+    BroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
@@ -167,13 +168,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        }
-        detailLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-        });
+        ContextCompat.registerReceiver(this,receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_NOT_EXPORTED);
+        detailLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {});
         PackageManager pm = getPackageManager();
         pm.setComponentEnabledSetting(new ComponentName(this, SettingActivity.class), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         //WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(ClassIsland.class).build());
@@ -201,5 +197,12 @@ public class MainActivity extends AppCompatActivity {
                 handler.sendMessage(msg);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(receiver);
+        receiver=null;
+        super.onDestroy();
     }
 }

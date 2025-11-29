@@ -20,8 +20,7 @@
         android:background="#00000000"
         style="@style/Widget.Material3.TabLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </com.google.android.material.tabs.TabLayout>
+        android:layout_height="wrap_content"/>
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressBar"
         style="@style/Widget.Material3.LinearProgressIndicator"
@@ -38,8 +37,7 @@
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-        </LinearLayout>
+            android:orientation="vertical"/>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

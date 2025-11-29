@@ -49,7 +49,6 @@ public class SchoolRoll extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = ActivityPagerBinding.inflate(getLayoutInflater());
         cookie = getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
         setContentView(binding.getRoot());
@@ -256,6 +255,7 @@ public class SchoolRoll extends AppCompatActivity {
         });
         pager2Adapter = new Pager2Adapter(this);
         binding.pager.setAdapter(pager2Adapter);
+        binding.toolbar.setTitle(R.string.school_enroll);
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"基本信息", "家庭成员及社会关系", "学历及经历", "交流经历", "异动情况","双专业双学位辅修", "注册状态", "惩处"}[position])).attach();
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         handler = new Handler(Looper.getMainLooper()) {

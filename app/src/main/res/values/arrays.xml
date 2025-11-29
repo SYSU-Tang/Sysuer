@@ -56,6 +56,20 @@
         <item>1</item>
         <item>11</item>
     </string-array>
+    <string-array name="months">
+        <item>1月</item>
+        <item>2月</item>
+        <item>3月</item>
+        <item>4月</item>
+        <item>5月</item>
+        <item>6月</item>
+        <item>7月</item>
+        <item>8月</item>
+        <item>9月</item>
+        <item>10月</item>
+        <item>11月</item>
+        <item>12月</item>
+    </string-array>
     <string-array name="font_size">
         <item>@string/follow_system</item>
         <item>小</item>
@@ -69,5 +83,10 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+    </string-array>
+    <string-array name="registration_info">
+        <item>今年注册记录</item>
+        <item>缴费信息</item>
+        <item>往年注册记录</item>
     </string-array>
 </resources>

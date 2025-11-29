@@ -21,8 +21,8 @@
     <string name="self_study_room">Self Study Room</string>
     <string name="term">Term</string>
     <string name="week1">Week 1</string>
-    <string name="login">LogIn</string>
-    <string name="username">Username</string>
+    <string name="login">Login</string>
+    <string name="username">User Name</string>
     <string name="password">Password</string>
     <string name="captcha">Captcha</string>
     <string name="today">Today</string>
@@ -79,7 +79,7 @@
     <string name="open_source">Open Source</string>
     <string name="week_x">Week %d</string>
     <string name="no_wifi_warning">Please check the wifi</string>
-    <string name="login_warning">Log in please!</string>
+    <string name="login_warning">Login please!</string>
     <string name="term_x">Term %s</string>
     <string name="minute">min</string>
     <string name="section_range">Class %d~%d</string>
@@ -148,7 +148,7 @@
     <string name="course_score">Course Evaluation Method</string>
     <string name="course_reference">Major Course Reference</string>
     <string name="personal_development_plan">Personal Development Plan</string>
-    <string name="wework">Wework</string>
+    <string name="wework">WeWork</string>
     <string name="student_affair">Student Affair</string>
     <string name="current_version">Current Version</string>
     <string name="download_link">Download Link</string>
@@ -163,4 +163,8 @@
     <string name="small">Small</string>
     <string name="smaller">Smaller</string>
     <string name="larger">Larger</string>
+    <string name="day">th</string>
+    <string name="from_to">From %s to %s</string>
+    <string name="finished">Done</string>
+    <string name="school_affair_notice">School Affair Notice</string>
 </resources>

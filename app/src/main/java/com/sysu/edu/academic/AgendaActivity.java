@@ -79,14 +79,15 @@ public class AgendaActivity extends AppCompatActivity {
             getRange(currentTerm, currentWeek);
             return false;
         }).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(new Date()));
+
+        //binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(new Date()));
         Calendar calendar = Calendar.getInstance();
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
+        binding.month.setText(getResources().getStringArray(R.array.months)[calendar.get(Calendar.MONTH)-1]);
         int weekday = calendar.get(Calendar.DAY_OF_WEEK);
         weekday = (weekday == 1) ? 8 : weekday;
         binding.last.setOnClickListener(v -> changeWeek(currentWeekIndex - 1));
         binding.next.setOnClickListener(v -> changeWeek(currentWeekIndex + 1));
-        String[] weeks = getResources().getStringArray(R.array.weeks);
         for (int i = 0; i < duration.length; i++) {
             ItemDurationBinding durationBinding = ItemDurationBinding.inflate(getLayoutInflater(), binding.day, false);
             durationBinding.courseDuration.setText(duration[i].replace("~", "\n"));
@@ -100,7 +101,7 @@ public class AgendaActivity extends AppCompatActivity {
         }
         for (int i = 0; i < 7; i++) {
             ItemWeekdayBinding itemBinding = ItemWeekdayBinding.inflate(getLayoutInflater(), binding.week, false);
-            itemBinding.courseWeek.setText(weeks[i]);
+            itemBinding.courseWeek.setText(getResources().getStringArray(R.array.weeks)[i]);
             itemBinding.courseDate.setText(getOldDate(i+2- weekday));
             View column = new View(this);
             if (i + 2 == weekday) {
@@ -119,7 +120,6 @@ public class AgendaActivity extends AppCompatActivity {
             binding.day.addView(column);
             binding.week.addView(itemBinding.getRoot());
         }
-
         launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
             if (o.getResultCode() == RESULT_OK) {
                 cookie = params.getCookie();
@@ -185,7 +185,7 @@ public class AgendaActivity extends AppCompatActivity {
                                 views.add(item);
                                 item.setOnClickListener(v -> {
                                     String location = (campus == null ? "" : campus) + "-" + (teachingBuildingName == null ? "" : teachingBuildingName) + "-" + (classroomNum == null ? "" : classroomNum);
-                                    setDialogDetail(course, location, teacher, String.format("第%s节到第%s节", startClassTimes, endClassTimes));
+                                    setDialogDetail(course, location, teacher, String.format(getString(R.string.from_to), startClassTimes, endClassTimes));
                                     detailDialog.show();
                                     //setDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
                                 });
@@ -216,10 +216,12 @@ public class AgendaActivity extends AppCompatActivity {
                                 Date date = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE).parse(from);
                                 if (date != null) {
                                     c.setTime(date);
-                                    binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(date.getTime()));
+                                    //binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(date.getTime()));
+                                    calendar.setTime(date);
+                                    binding.month.setText(getResources().getStringArray(R.array.months)[calendar.get(Calendar.MONTH)-1]);
                                 }
                                 for (int i = 0; i < 7; i++) {
-                                    ((MaterialTextView) binding.week.getChildAt(i + 1).findViewById(R.id.course_date)).setText(new SimpleDateFormat("dd日", Locale.CHINESE).format(c.getTime()));
+                                    ((MaterialTextView) binding.week.getChildAt(i + 1).findViewById(R.id.course_date)).setText((new SimpleDateFormat("dd").format(c.getTime()))+getString(R.string.day));
                                     c.add(Calendar.DATE, 1);
                                 }
                             } catch (ParseException e) {
@@ -269,7 +271,7 @@ public class AgendaActivity extends AppCompatActivity {
     String getOldDate(int distanceDay) {
         Calendar date = Calendar.getInstance();
         date.add(Calendar.DATE, distanceDay);
-        return new SimpleDateFormat("dd日", Locale.CHINESE).format(date.getTime());
+        return new SimpleDateFormat("dd", Locale.CHINESE).format(date.getTime())+getString(R.string.day);
     }
 
     void changeTerm(String newTerm) {

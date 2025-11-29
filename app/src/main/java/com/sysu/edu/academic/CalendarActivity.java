@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +13,8 @@ import androidx.core.widget.NestedScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.tabs.TabLayout;
+import com.sysu.edu.R;
+import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityCalendarBinding;
 
 import java.io.IOException;
@@ -31,11 +32,14 @@ public class CalendarActivity extends AppCompatActivity {
 
     Handler handler;
     int top=0;
+    Params params;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityCalendarBinding binding = ActivityCalendarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        params = new Params(this);
         binding.tool.setNavigationOnClickListener(view -> finishAfterTransition());
         binding.scroll.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             if(top>scrollY&&binding.tabs.getSelectedTabPosition()==1&&scrollY<oldScrollY){
@@ -48,7 +52,6 @@ public class CalendarActivity extends AppCompatActivity {
         binding.tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-
                 if(binding.content.getChildCount()>2){
                     top = binding.content.getChildAt(2).getTop();}
                 switch (binding.tabs.getSelectedTabPosition()){
@@ -73,7 +76,7 @@ public class CalendarActivity extends AppCompatActivity {
             public void handleMessage(@NonNull Message msg) {
                 switch(msg.what){
                     case -1:
-                        Toast.makeText(CalendarActivity.this,"请检查网络",Toast.LENGTH_LONG).show();
+                       params.toast(R.string.no_wifi_warning);
                         break;
                     case 1:
                         Matcher matcher = Pattern.compile("(<strong>.+?)(?=<strong>)").matcher(msg.obj +"<strong>");

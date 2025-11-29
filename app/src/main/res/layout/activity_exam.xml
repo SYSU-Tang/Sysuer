@@ -40,12 +40,15 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/exam_week_filter"
                 style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:boxCornerRadiusBottomEnd="3dp"
+                app:boxCornerRadiusBottomStart="3dp"
+                app:boxStrokeWidth="0dp"
                 android:hint="@string/exam_week"
                 app:placeholderText="@string/exam">
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     android:id="@+id/exam_weeks"
@@ -59,6 +62,8 @@
                 app:boxStrokeWidth="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/term"
+                app:boxCornerRadiusBottomEnd="3dp"
+                app:boxCornerRadiusBottomStart="3dp"
                 app:placeholderText="@string/term">
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/terms"
@@ -70,6 +75,7 @@
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/date"
+                android:visibility="gone"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
