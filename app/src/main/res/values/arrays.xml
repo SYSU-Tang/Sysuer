@@ -89,4 +89,14 @@
         <item>缴费信息</item>
         <item>往年注册记录</item>
     </string-array>
+    <string-array name="todo_base_type">
+        <item>作业</item>
+        <item>考试</item>
+        <item>会议</item>
+        <item>讲座</item>
+        <item>课程</item>
+        <item>运动</item>
+        <item>志愿</item>
+        <item>其他</item>
+    </string-array>
 </resources>

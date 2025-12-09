@@ -102,7 +102,7 @@
     <string name="hide_vacancy">Hide vacancy</string>
     <string name="hide_selected">Hide Selected</string>
     <string name="like">Like</string>
-    <string name="select">Select</string>
+    <string name="select_course">Select</string>
     <string name="register_info">Registration Query</string>
     <string name="major_info">Major Query</string>
     <string name="school_work_warning">Academy Warning</string>
@@ -179,4 +179,10 @@
     <string name="other">Other</string>
     <string name="ddl">Deadline</string>
     <string name="remind">Remind</string>
+    <string name="priority">Priority</string>
+    <string name="delete">Delete</string>
+    <string name="add">Add</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="next_week">Next Week</string>
+    <string name="select">Choose</string>
 </resources>

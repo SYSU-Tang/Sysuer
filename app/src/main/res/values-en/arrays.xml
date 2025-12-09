@@ -51,4 +51,14 @@
         <item>Payment</item>
         <item>Registration Record before</item>
     </string-array>
+    <string-array name="todo_base_type">
+        <item>Homework</item>
+        <item>Exam</item>
+        <item>Meeting</item>
+        <item>Lecture</item>
+        <item>Course</item>
+        <item>Sports</item>
+        <item>Volunteer</item>
+        <item>Others</item>
+    </string-array>
 </resources>

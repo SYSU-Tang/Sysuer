@@ -101,7 +101,7 @@ public class SchoolWorkWarning extends AppCompatActivity {
         page++;
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/alarm/alarm-archives/student/archives")
                 .header("Cookie",cookie)
-                .post(RequestBody.create(String.format(Locale.CHINA,"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"publicationStatus\":\"1\"%s%s}}",page,getTerm(alarmTerm),getTerm(alarmOperationTerm)), MediaType.parse("application/json")))
+                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"publicationStatus\":\"1\"%s%s}}",page,getTerm(alarmTerm),getTerm(alarmOperationTerm)), MediaType.parse("application/json")))
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                 .build()).enqueue(new Callback() {
             @Override

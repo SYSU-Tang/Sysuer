@@ -101,7 +101,7 @@
     <string name="hide_vacancy">隐藏无空位</string>
     <string name="hide_selected">隐藏已选</string>
     <string name="like">收藏</string>
-    <string name="select">选课</string>
+    <string name="select_course">选课</string>
     <string name="school_public_selective">院内公选</string>
     <string name="course_detail">课程详情</string>
     <string name="course_draft">课程大纲</string>
@@ -178,4 +178,23 @@
     <string name="other">其他</string>
     <string name="ddl">截止日期</string>
     <string name="remind">提醒</string>
+    <string name="priority">优先级</string>
+    <string name="delete">删除</string>
+    <string name="add">添加</string>
+    <string name="tomorrow">明天</string>
+    <string name="next_week">下周</string>
+    <string name="select">选择</string>
+    <string name="morning">上午</string>
+    <string name="noon">中午</string>
+    <string name="afternoon">下午</string>
+    <string name="evening">晚上</string>
+    <string name="fiveteen_mins">15分钟</string>
+    <string name="half_hour">30分钟</string>
+    <string name="one_hour">1小时</string>
+    <string name="custom">自定义</string>
+    <string name="none">无</string>
+    <string name="on_time">准时</string>
+    <string name="one_day">1天</string>
+    <string name="five_mins">5分钟</string>
+    <string name="custom_remind_title">提前时间（分钟）</string>
 </resources>

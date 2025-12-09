@@ -219,7 +219,7 @@ public class Grade extends AppCompatActivity {
         );
     }
     public void getScore(String year,int term,String type){
-        http.newCall(new Request.Builder().url(String.format(Locale.CHINA,"https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d",year,type,term)).build()).enqueue(
+        http.newCall(new Request.Builder().url(String.format(Locale.getDefault(),"https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d",year,type,term)).build()).enqueue(
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
@@ -238,7 +238,7 @@ public class Grade extends AppCompatActivity {
         );
     }
     public void getTotalScore(String year,int term,String type){
-        http.newCall(new Request.Builder().url(String.format(Locale.CHINA,"https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d",year,type,term)).build()).enqueue(
+        http.newCall(new Request.Builder().url(String.format(Locale.getDefault(),"https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d",year,type,term)).build()).enqueue(
                 new  Callback(){
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {

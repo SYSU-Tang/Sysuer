@@ -124,7 +124,7 @@ public class MajorInfoFragment extends StaggeredFragment {
         page++;
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/profession-direction/list")
                 .header("Cookie",cookie)
-                .post(RequestBody.create(String.format(Locale.CHINA,"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"majorProfessionDircetion\":\"0\",\"disciplineCateCode\":\"%s\"}}",page,code), MediaType.parse("application/json")))
+                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"majorProfessionDircetion\":\"0\",\"disciplineCateCode\":\"%s\"}}",page,code), MediaType.parse("application/json")))
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                 .build()).enqueue(new Callback() {
             @Override

@@ -204,7 +204,7 @@ public class RegisterInfo extends AppCompatActivity {
     void getList(){
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/reports-register/stuRegistration/getSelfRegisterList")
                 .header("Cookie",cookie)
-                .post(RequestBody.create(String.format(Locale.CHINA,"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{}}",page), MediaType.parse("application/json")))
+                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{}}",page), MediaType.parse("application/json")))
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                 .build()).enqueue(new Callback() {
             @Override

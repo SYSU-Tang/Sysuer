@@ -119,8 +119,8 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_HIDDEN);
         binding.date.setOnClickListener(v -> dateDialog.show(getSupportFragmentManager(),null));
         binding.timeSlider.addOnChangeListener((slider, value, fromUser) -> {
-            startClassTime=String.format(Locale.CHINA,"%.0f",slider.getValues().get(0));
-            endClassTime=String.format(Locale.CHINA,"%.0f",slider.getValues().get(1));
+            startClassTime=String.format(Locale.getDefault(),"%.0f",slider.getValues().get(0));
+            endClassTime=String.format(Locale.getDefault(),"%.0f",slider.getValues().get(1));
             ((MaterialTextView)findViewById(R.id.time)).setText(String.format(getString(R.string.section_range_x), startClassTime,endClassTime));
         });
         binding.query.setOnClickListener(v -> {

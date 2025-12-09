@@ -2,6 +2,8 @@ package com.sysu.edu.extra;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,22 +31,24 @@ public class LoginWebFragment extends Fragment {
         WebView web = new WebView(requireContext());
         LoginViewModel model = new ViewModelProvider(requireActivity()).get(LoginViewModel.class);
         model.getUrl().observe(getViewLifecycleOwner(), web::loadUrl);
-        web.setWebViewClient(new WebViewClient(){
+        web.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 //boolean reloadCap = Objects.equals(sessionId, CookieManager.getInstance().getCookie(url));
                 model.setSessionID(CookieManager.getInstance().getCookie(url));
-                if(Pattern.compile("//cas.sysu.edu.cn/selfcare").matcher(url).find()){
-                   // model.setCookie(CookieManager.getInstance().getCookie(Objects.requireNonNull(model.getTarget().getValue())));
-                   // model.setLogin(true);
+                if (Pattern.compile("//cas.sysu.edu.cn/selfcare").matcher(url).find()) {
+                    // model.setCookie(CookieManager.getInstance().getCookie(Objects.requireNonNull(model.getTarget().getValue())));
+                    // model.setLogin(true);
                     //System.out.println(CookieManager.getInstance().getCookie(Objects.requireNonNull(model.getTarget().getValue())));
                     view.loadUrl(Objects.requireNonNull(model.getTarget().getValue()));
                 }
-                if(Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()){
-                    model.setCookie(CookieManager.getInstance().getCookie(url));
-                    model.setLogin(true);
+                if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        model.setCookie(CookieManager.getInstance().getCookie(url));
+                        model.setLogin(true);
+                    }, 1500);
                 }
-                if(Pattern.compile(TargetUrl.LOGIN).matcher(url).find()){
+                if (Pattern.compile(TargetUrl.LOGIN).matcher(url).find()) {
                     model.setLogin(false);
                 }
                 //web.evaluateJavascript("var script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});

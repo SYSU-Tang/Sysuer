@@ -284,7 +284,7 @@ public class AgendaActivity extends AppCompatActivity {
     }
 
     void getRange(String academicYear, int week) {
-        getResponse(String.format(Locale.CHINA, "https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender?academicYear=%s&weekly=%d", academicYear, week),3);
+        getResponse(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender?academicYear=%s&weekly=%d", academicYear, week),3);
     }
 
     void setDialogDetail(String course, String location, String teacher, String classTime) {
@@ -313,7 +313,7 @@ public class AgendaActivity extends AppCompatActivity {
         if (academicYear.isEmpty() || week < 1) {
             return;
         }
-        getResponse(String.format(Locale.CHINA, "https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d", academicYear, week),1);
+        getResponse(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d", academicYear, week),1);
     }
     void getTerm() {
         getResponse("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist",2);

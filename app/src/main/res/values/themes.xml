@@ -4,7 +4,7 @@
 
     <style name="Theme.SYSUER.Light" parent="Theme.SYSUER.Base" />
 
-    <style name="Theme.SYSUER.Base" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+    <style name="Theme.SYSUER.Base" parent="Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <!--        <item name="colorPrimary">@color/purple_500</item>-->
         <!--        <item name="colorPrimaryVariant">@color/purple_700</item>-->

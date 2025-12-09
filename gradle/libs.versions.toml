@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.1"
 api = "13.1.5"
 casclientAndroid = "3.4.1"
 fastjson2 = "2.0.57"

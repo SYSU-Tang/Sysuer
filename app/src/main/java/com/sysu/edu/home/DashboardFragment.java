@@ -33,8 +33,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.MainActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
@@ -54,8 +52,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 import okhttp3.Call;
@@ -110,7 +110,7 @@ public class DashboardFragment extends Fragment {
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(linking)));
                     } catch (ActivityNotFoundException e) {
-                       // Toast.makeText(requireContext(), R.string.no_app, Toast.LENGTH_LONG).show();
+                        // Toast.makeText(requireContext(), R.string.no_app, Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -172,49 +172,33 @@ public class DashboardFragment extends Fragment {
                                 binding.progress.setMax(todayCourse.size());
                                 binding.progress.setProgress(beforeArray.size());
                                 binding.courseList.scrollToPosition(beforeArray.size());
-                                //System.out.println(afterArray);
                                 binding.nextClass.setText(Html.fromHtml(afterArray.isEmpty() ? String.format("<h4><font color=\"#6750a4\">今天没课</font></h4>下一节：<b>%s</b><br/>地点：<b>自习室</b><br/>时间：<b>自主安排</b>", tomorrowCourse.get(0).getString("courseName")) : String.format("<h4><font color=\"#6750a4\">%s</font></h4>地点：<b>%s</b><br/>时间：<b>%s</b><br/>日期：<b>%s</b>", todayCourse.get(beforeArray.size()).getString("courseName"), todayCourse.get(beforeArray.size()).getString("teachingPlace"), todayCourse.get(beforeArray.size()).getString("time"), todayCourse.get(beforeArray.size()).getString("teachingDate")), Html.FROM_HTML_MODE_COMPACT));
                                 binding.toggle.check(R.id.today);
                                 break;
-                            case 2:
-                                class k {
-                                    public int k;
 
-                                    public k(int k) {
-                                        this.k = k;
-                                    }
-                                }
-                                final k k = new k(0);
+                            case 2:
                                 if (response.getJSONArray("data").isEmpty()) {
                                     break;
                                 }
-                                response.getJSONArray("data").getJSONObject(0).getJSONObject("timetable").forEach((key, value) -> {
-                                    if (k.k == 0) {
-                                        k.k = Integer.parseInt(key);
-                                    }
-                                    if (Integer.parseInt(key) < k.k) {
-                                        k.k = Integer.parseInt(key);
-                                        if (value != null) {
-                                            ((JSONArray) value).forEach(c -> thisWeekExams.addFirst((JSONObject) c));
+                                JSONArray dataArray = response.getJSONArray("data");
+                                for (int i = 0; i < dataArray.size(); i++) {
+                                    JSONObject e = dataArray.getJSONObject(i);
+                                    LinkedList<JSONObject> exams = List.of(thisWeekExams, nextWeekExams).get(i);
+                                    JSONObject timetable = e.getJSONObject("timetable");
+                                    TreeMap<Integer, JSONArray> sortedTimetable = new TreeMap<>();
+                                    timetable.forEach((s,t) -> {
+                                        if (t != null) {
+                                            sortedTimetable.put(Integer.parseInt(s), (JSONArray) t);
                                         }
-                                    } else {
-                                        if (value != null) {
-                                            ((JSONArray) value).forEach(c -> thisWeekExams.addLast((JSONObject) c));
+                                    });
+                                    sortedTimetable.forEach((key, value) -> {
+                                        if (key.equals(sortedTimetable.firstKey())) {
+                                            value.forEach(c -> exams.addFirst((JSONObject) c));
+                                        } else {
+                                            value.forEach(c -> exams.addLast((JSONObject) c));
                                         }
-                                    }
-                                });
-                                response.getJSONArray("data").getJSONObject(1).getJSONObject("timetable").forEach((a, b) -> {
-                                    if (Integer.parseInt(a) < k.k) {
-                                        k.k = Integer.parseInt(a);
-                                        if (b != null) {
-                                            ((JSONArray) b).forEach(c -> nextWeekExams.addFirst((JSONObject) c));
-                                        }
-                                    } else {
-                                        if (b != null) {
-                                            ((JSONArray) b).forEach(c -> nextWeekExams.addLast((JSONObject) c));
-                                        }
-                                    }
-                                });
+                                    });
+                                }
                                 binding.toggle2.check(R.id.this_week);
                                 break;
                             case 3:
@@ -286,8 +270,8 @@ public class DashboardFragment extends Fragment {
     public String getTimePosition(String from, String to) {
         Date now = new Date();
         try {
-            Date fromDate = new SimpleDateFormat("yy-MM-dd hh:mm", Locale.CHINA).parse(from);
-            Date toDate = new SimpleDateFormat("yy-MM-dd hh:mm", Locale.CHINA).parse(to);
+            Date fromDate = new SimpleDateFormat("yy-MM-dd hh:mm", Locale.getDefault()).parse(from);
+            Date toDate = new SimpleDateFormat("yy-MM-dd hh:mm", Locale.getDefault()).parse(to);
             return now.before(fromDate) ? "after" : now.after(toDate) ? "before" : "in";
         } catch (ParseException e) {
             throw new RuntimeException(e);
@@ -402,19 +386,21 @@ class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-
+        ItemExamBinding binding = ItemExamBinding.bind(holder.itemView);
         holder.itemView.setOnClickListener(v -> {
         });
-        int startClassTimes = data.get(position).getIntValue("startClassTimes");
-        int endClassTimes = data.get(position).getIntValue("endClassTimes");
-        ((MaterialTextView) holder.itemView.findViewById(R.id.exam_name)).setText(data.get(position).getString("examSubjectName"));
-        ((MaterialButton) holder.itemView.findViewById(R.id.exam_location)).setText(data.get(position).getString("classroomNumber"));
-        ((MaterialButton) holder.itemView.findViewById(R.id.exam_date)).setText(data.get(position).getString("examDate"));
-        ((MaterialButton) holder.itemView.findViewById(R.id.exam_duration)).setText(String.format("%s%s", data.get(position).getString("duration"), context.getString(R.string.minute)));
-        ((MaterialButton) holder.itemView.findViewById(R.id.exam_time)).setText(data.get(position).getString("durationTime"));
-        ((MaterialButton) holder.itemView.findViewById(R.id.exam_class_time)).setText(String.format(context.getString(R.string.section_range), startClassTimes, endClassTimes));
-        ((MaterialButton) holder.itemView.findViewById(R.id.exam_mode)).setText(String.format("%s：%s", context.getString(R.string.exam_mode), data.get(position).getString("examMode")));
-        ((MaterialButton) holder.itemView.findViewById(R.id.exam_stage)).setText(String.format("%s：%s", context.getString(R.string.exam_stage), data.get(position).getString("examStage")));
+        JSONObject examData = data.get(position);
+        int startClassTimes = examData.getIntValue("startClassTimes");
+        int endClassTimes = examData.getIntValue("endClassTimes");
+
+        binding.examName.setText(examData.getString("examSubjectName"));
+        binding.examLocation.setText(examData.getString("classroomNumber"));
+        binding.examDate.setText(examData.getString("examDate"));
+        binding.examDuration.setText(String.format("%s%s", examData.getString("duration"), context.getString(R.string.minute)));
+        binding.examTime.setText(examData.getString("durationTime"));
+        binding.examClassTime.setText(String.format(context.getString(R.string.section_range), startClassTimes, endClassTimes));
+        binding.examMode.setText(String.format("%s：%s", context.getString(R.string.exam_mode), examData.getString("examMode")));
+        binding.examStage.setText(String.format("%s：%s", context.getString(R.string.exam_stage), examData.getString("examStage")));
     }
 
     @Override

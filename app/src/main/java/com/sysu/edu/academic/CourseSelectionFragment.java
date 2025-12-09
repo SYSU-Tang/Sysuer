@@ -222,7 +222,7 @@ public class CourseSelectionFragment extends Fragment{
     }
 
     void init() {
-        key = String.format(Locale.CHINA,"%d%d", selectedType, selectedCate);
+        key = String.format(Locale.getDefault(),"%d%d", selectedType, selectedCate);
         if (map.getOrDefault(key,null)!=null) {
             adp = map.get(key);
         } else {
@@ -252,7 +252,7 @@ public class CourseSelectionFragment extends Fragment{
     }
     void getCourseList(){
         page++;
-        String body = String.format(Locale.CHINA, "{\"pageNo\":%d,\"pageSize\":10,\"param\":{\"semesterYear\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"hiddenConflictStatus\":\"0\",\"hiddenSelectedStatus\":\"%d\",\"hiddenEmptyStatus\":\"%d\",\"vacancySortStatus\":\"%d\",\"collectionStatus\":\"%d\"%s}}", page, term, selectedType, selectedCate,
+        String body = String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"param\":{\"semesterYear\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"hiddenConflictStatus\":\"0\",\"hiddenSelectedStatus\":\"%d\",\"hiddenEmptyStatus\":\"%d\",\"vacancySortStatus\":\"%d\",\"collectionStatus\":\"%d\"%s}}", page, term, selectedType, selectedCate,
                 boolean2int(binding.hideSelected.isChecked()), boolean2int(binding.hideVacancy.isChecked()), boolean2int(binding.vacancy.isChecked()), boolean2int(binding.onlyCollection.isChecked()),
                 filterText);
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list")
@@ -322,7 +322,7 @@ public class CourseSelectionFragment extends Fragment{
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/choose")
                 .header("Cookie",cookie)
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE")
-                .post(RequestBody.create(String.format(Locale.CHINA,"{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}",code,selectedType,selectedCate), MediaType.get("application/json")))
+                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}",code,selectedType,selectedCate), MediaType.get("application/json")))
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -345,7 +345,7 @@ public class CourseSelectionFragment extends Fragment{
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/back")
                 .header("Cookie",cookie)
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE")
-                .post(RequestBody.create(String.format(Locale.CHINA,"{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}",classId,code,selectedType), MediaType.get("application/json")))
+                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}",classId,code,selectedType), MediaType.get("application/json")))
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {

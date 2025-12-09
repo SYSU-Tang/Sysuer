@@ -149,7 +149,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:icon="@drawable/select"
-            android:text="@string/select"
+            android:text="@string/select_course"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/select"
             app:layout_constraintRight_toLeftOf="@id/like"

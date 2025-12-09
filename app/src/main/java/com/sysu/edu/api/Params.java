@@ -53,11 +53,11 @@ public class Params {
     }
 
     public static String toDate(Calendar calendar){
-        return new SimpleDateFormat("yyyy-MM-dd",Locale.CHINA).format(calendar.getTime());
+        return new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault()).format(calendar.getTime());
     }
 
     public static String toDate(Date date){
-        return new SimpleDateFormat("yyyy-MM-dd",Locale.CHINA).format(date);
+        return new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault()).format(date);
     }
 
     public static String getDateTime(Calendar calendar){
@@ -65,7 +65,7 @@ public class Params {
     }
 
     public static String getDateTime(Date date){
-        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",Locale.CHINA).format(date);
+        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",Locale.getDefault()).format(date);
     }
 
     public static Calendar getFirstOfMonth(){
