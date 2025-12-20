@@ -248,7 +248,11 @@ public class TodoActivity extends AppCompatActivity {
     }
 
     private void refresh(TodoFragment f) {
-        f.getConcatAdapter().getAdapters().forEach(adp -> f.getConcatAdapter().removeAdapter(adp));
+        f.getConcatAdapter().getAdapters().forEach(adp ->
+        {
+           //System.out.println(adp);
+           f.getConcatAdapter().removeAdapter(adp);
+        });
         // f.getConcatAdapter().
         // titleAdp.addTitle("0");
         try {
@@ -286,7 +290,7 @@ public class TodoActivity extends AppCompatActivity {
                     f.getConcatAdapter().addAdapter(todoAdapter);
                 }
                 todoAdapter.add(todoDetail);
-                f.getConcatAdapter().notifyItemRangeInserted(f.getConcatAdapter().getItemCount() - 1, 1);
+                //f.getConcatAdapter().notifyItemRangeInserted(f.getConcatAdapter().getItemCount() - 1, 1);
             }
             cursor.close();
             todoDB.close();

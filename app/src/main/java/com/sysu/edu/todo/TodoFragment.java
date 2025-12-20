@@ -20,7 +20,7 @@ public class TodoFragment extends Fragment {
     FragmentTodoBinding binding;
     TodoAdapter todoAdapter;
     TitleAdapter titleAdp;
-    ConcatAdapter concatAdapter = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(false).build());
+    ConcatAdapter concatAdapter = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,

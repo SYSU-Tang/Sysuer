@@ -81,7 +81,7 @@ public class EvaluationCourseFragment extends Fragment {
     }
 
     public void getEvaluation(String wjid, String rwid, String account) {
-        new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://pjxt.sysu.edu.cn/personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=" + account + "&wjid=" + wjid + "&pageNum=1&pageSize=20&rwid=" + rwid)
+        new OkHttpClient.Builder().build().newCall(new Request.Builder().url(String.format("https://pjxt.sysu.edu.cn/personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=1&pageSize=20", account, wjid, rwid))
                 .header("Cookie", params.getCookie())
                 //.addHeader("Cookie", "JSESSIONID=F547A1B2729098E0B101716397DC48DC;INCO=9b1595d95278e78f17d51a5f35287020;")
                 // .post(RequestBody.create("{\"acadYear\":\"2024-2\",\"examWeekId\":\"1864116471884476417\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", MediaType.parse("application/json")))

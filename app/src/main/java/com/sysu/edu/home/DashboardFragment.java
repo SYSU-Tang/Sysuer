@@ -177,7 +177,7 @@ public class DashboardFragment extends Fragment {
                                 binding.progress.setMax(todayCourse.size());
                                 binding.progress.setProgress(beforeArray.size());
                                 binding.courseList.scrollToPosition(beforeArray.size());
-                                binding.nextClass.setText(Html.fromHtml(afterArray.isEmpty() ? String.format("<h4><font color=\"#6750a4\">今天没课</font></h4>下一节：<b>%s</b><br/>地点：<b>自习室</b><br/>时间：<b>自主安排</b>", tomorrowCourse.get(0).getString("courseName")) : String.format("<h4><font color=\"#6750a4\">%s</font></h4>地点：<b>%s</b><br/>时间：<b>%s</b><br/>日期：<b>%s</b>", todayCourse.get(beforeArray.size()).getString("courseName"), todayCourse.get(beforeArray.size()).getString("teachingPlace"), todayCourse.get(beforeArray.size()).getString("time"), todayCourse.get(beforeArray.size()).getString("teachingDate")), Html.FROM_HTML_MODE_COMPACT));
+                                binding.nextClass.setText(Html.fromHtml(afterArray.isEmpty() ? String.format("<h4><font color=\"#6750a4\">今天没课</font></h4>下一节：<b>%s</b><br/>地点：<b>无</b><br/>时间：<b>无</b>", tomorrowCourse.get(0).getString("courseName")) : String.format("<h4><font color=\"#6750a4\">%s</font></h4>地点：<b>%s</b><br/>时间：<b>%s</b><br/>日期：<b>%s</b>", todayCourse.get(beforeArray.size()).getString("courseName"), todayCourse.get(beforeArray.size()).getString("teachingPlace"), todayCourse.get(beforeArray.size()).getString("time"), todayCourse.get(beforeArray.size()).getString("teachingDate")), Html.FROM_HTML_MODE_COMPACT));
                                 binding.toggle.check(R.id.today);
                                 break;
 

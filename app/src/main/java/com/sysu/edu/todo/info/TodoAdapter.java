@@ -43,14 +43,15 @@ public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             ((TodoActivity)context).initDialog(item);
             ((TodoActivity)context).showDialog();
         });
-        binding.check.setChecked(item.getStatus().getValue() != null && item.getStatus().getValue() == 1);
+        boolean isCheck = item.getStatus().getValue() != null && item.getStatus().getValue() == 1;
+        binding.check.setChecked(isCheck);
+        binding.getRoot().setAlpha(isCheck ? 0.5f : 1f);
         binding.check.setOnCheckedChangeListener((buttonView, isChecked) -> item.setStatus(isChecked ? TodoInfo.DONE : TodoInfo.TODO));
         item.getStatus().observe((TodoActivity)context, status -> {
             boolean isChecked = status != null && status.equals(TodoInfo.DONE);
             binding.check.setChecked(isChecked);
             binding.title.setPaintFlags(isChecked ? binding.title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG : binding.title.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
             binding.description.setPaintFlags(isChecked ? binding.description.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG : binding.description.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-            binding.getRoot().setAlpha(isChecked ? 0.5f : 1f);
             binding.menu.setEnabled(!isChecked);
             item.setDoneDate(isChecked ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()) : null);
             ((TodoActivity) context).updateTodo(item);
@@ -58,9 +59,9 @@ public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         //binding.dueDate.setText(item.get("due_date"));
     }
 
-    public TodoInfo getTodoInfoAt(int position){
+   /* public TodoInfo getTodoInfoAt(int position){
         return data.get(position);
-    }
+    }*/
     public void add(TodoInfo item){
         data.add(item);
         notifyItemInserted(data.size()-1);

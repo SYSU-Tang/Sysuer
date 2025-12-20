@@ -94,8 +94,8 @@ public class NewsFragment extends Fragment {
                     super.onScrolled(recyclerView, dx, dy);
                 }
             });
-            Adp adp = new Adp(requireActivity());
-            list.setAdapter(adp);
+            NewsAdp newsAdp = new NewsAdp(requireActivity());
+            list.setAdapter(newsAdp);
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
@@ -136,7 +136,7 @@ public class NewsFragment extends Fragment {
                                         String url = ((JSONObject) e).getString("url");
                                         String time = ((JSONObject) e).getString("createTime");
                                         String source = ((JSONObject) e).getJSONObject("source").getString("seedName");
-                                        adp.add(title, image, url, time, source);
+                                        newsAdp.add(title, image, url, time, source);
                                     });
                                     break;
                                 case 3:
@@ -153,7 +153,7 @@ public class NewsFragment extends Fragment {
                                         String url = ((JSONObject) e).getString("url");
                                         String time = ((JSONObject) e).getString("createTime");
                                         String source = ((JSONObject) e).getJSONObject("source").getString("seedName");
-                                        adp.add(title, image, url, time, source);
+                                        newsAdp.add(title, image, url, time, source);
                                     });
                                     break;
                                 case 4:
@@ -167,7 +167,7 @@ public class NewsFragment extends Fragment {
                                         String url = ((JSONObject) e).getString("url");
                                         String time = ((JSONObject) e).getString("createTime");
                                         String source = ((JSONObject) e).getJSONObject("source").getString("seedName");
-                                        adp.add(title, image, url, time, source);
+                                        newsAdp.add(title, image, url, time, source);
                                     });
                                     //通知
                                     break;
@@ -182,7 +182,7 @@ public class NewsFragment extends Fragment {
                                         String url = ((JSONObject) e).getString("url");
                                         String time = ((JSONObject) e).getString("createTime");
                                         String source = ((JSONObject) e).getJSONObject("source").getString("seedName");
-                                        adp.add(title, image, url, time, source);
+                                        newsAdp.add(title, image, url, time, source);
                                     });
                                     break;
                             }
@@ -364,12 +364,12 @@ public class NewsFragment extends Fragment {
 //        });
 //    }
 }
-class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ArrayList<HashMap<String, String>> data = new ArrayList<>();
     FragmentActivity context;
     //String cookie;
 
-    public Adp(FragmentActivity context) {
+    public NewsAdp(FragmentActivity context) {
         super();
         this.context=context;
     }
@@ -404,7 +404,7 @@ class Adp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         data.add(new HashMap<>(Map.of("title", title, "image", image, "url", url,"time",time,"source",source)));
         notifyItemInserted(getItemCount() - 1);
     }
-    //    Adp setCookie(String cookie)
+    //    NewsAdp setCookie(String cookie)
 //    {
 //        this.cookie=cookie;
 //        return this;
