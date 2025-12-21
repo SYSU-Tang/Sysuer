@@ -44,6 +44,9 @@ import com.sysu.edu.databinding.ItemCourseBinding;
 import com.sysu.edu.databinding.ItemExamBinding;
 import com.sysu.edu.extra.LaunchMiniProgram;
 import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.todo.InitTodo;
+import com.sysu.edu.todo.TodoFragment;
+import com.sysu.edu.todo.info.TodoInfo;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -219,6 +222,22 @@ public class DashboardFragment extends Fragment {
                 }
             };
             getTerm();
+            TodoFragment todoFragment = new TodoFragment();
+            getParentFragmentManager().beginTransaction().add(R.id.todo_list, todoFragment).commit();
+            InitTodo initTodo = new InitTodo(requireActivity(), todoFragment);
+            initTodo.filterStatus(todoFragment, TodoInfo.DONE);
+            binding.noTodo.setVisibility(initTodo.getCount() != 0 ? View.GONE : View.VISIBLE);
+            binding.noTodo.setOnClickListener(v -> {
+                initTodo.showTodoAddDialog();
+            });
+            binding.toggle3.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+
+                if (checkedId == R.id.filter_todo) {
+                    initTodo.filterStatus(todoFragment, isChecked ? TodoInfo.TODO : TodoInfo.DONE);
+                    binding.noTodo.setVisibility(initTodo.getCount() != 0 ? View.GONE : View.VISIBLE);
+                }
+            });
+            binding.toggle3.check(R.id.filter_todo);
         }
         return binding.getRoot();
     }

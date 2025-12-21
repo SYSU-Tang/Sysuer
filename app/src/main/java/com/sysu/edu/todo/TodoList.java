@@ -95,13 +95,13 @@ public class TodoList extends SQLiteOpenHelper {
         db.insert("todos", null, value);
     }*/
 
-    public void delete(String id) {
+    public void deleteTodo(String id) {
         getWritableDatabase().delete("todos", "id  = ?", new String[]{id});
         close();
     }
 
-    public void delete(TodoInfo todoInfo) {
-        delete(String.valueOf(todoInfo.getId().getValue()));
+    public void deleteTodo(TodoInfo todoInfo) {
+        deleteTodo(String.valueOf(todoInfo.getId().getValue()));
     }
 
     public void addTodo(TodoInfo todoInfo) {

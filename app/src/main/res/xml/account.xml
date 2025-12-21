@@ -14,7 +14,6 @@
             android:persistent="false"
             app:key="setting"
             app:title="@string/setting" >
-
         </Preference>
         <Preference
             app:icon="@drawable/info"
@@ -23,10 +22,11 @@
                 android:targetClass="com.sysu.edu.extra.AboutActivity"
                 android:targetPackage="com.sysu.edu">
             </intent>
-
         </Preference>
         <Preference
             app:icon="@drawable/help"
-            app:title="@string/help"/>
+            app:title="@string/help">
+            <intent android:data="https://sysu-tang.github.io/#/"/>
+        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

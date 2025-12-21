@@ -207,17 +207,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:overflowMode="menu"
+                android:id="@+id/toggle3"
                 app:selectionRequired="true"
                 app:singleSelection="true">
                 <Button
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/filter_todo"
                     android:text="@string/todo"/>
                 <Button
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/filter_done"
                     android:text="@string/finished"/>
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </TableRow>
@@ -231,13 +234,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:id="@+id/no_todo"
                 android:text="@string/noTodo"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
-            <androidx.recyclerview.widget.RecyclerView
+            <!--<androidx.recyclerview.widget.RecyclerView
                 android:nestedScrollingEnabled="false"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="8dp"/>
+                android:padding="8dp"/>-->
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/todo_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </com.google.android.material.card.MaterialCardView>
     </GridLayout>
 </androidx.core.widget.NestedScrollView>
