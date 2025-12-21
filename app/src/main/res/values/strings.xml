@@ -206,4 +206,5 @@
     <string name="submit_successfully">提交成功</string>
     <string name="submit_fail">提交失败</string>
     <string name="official">官方</string>
+    <string name="fill">填充</string>
 </resources>

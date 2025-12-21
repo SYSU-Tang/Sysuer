@@ -51,7 +51,10 @@ public class LoginWebFragment extends Fragment {
                 if (Pattern.compile(TargetUrl.LOGIN).matcher(url).find()) {
                     model.setLogin(false);
                 }
-                //web.evaluateJavascript("var script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
+                if(Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/login").matcher(url).find()){
+                    web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary.ant-btn-block').click();",null);
+                }
+                //ar script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
             }
 //            @Override
 //            public void onLoadResource(WebView view, String url) {

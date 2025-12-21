@@ -99,6 +99,7 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                             {
                                 JSONObject pjjglist = ((JSONObject) list).clone();
                                 pjjglist.remove("dtjgList");
+                                pjjglist.put("pjxxlist",new JSONArray());
                                 answers.getJSONArray("pjjglist").add(pjjglist);
                                 TitleAdapter name = new TitleAdapter(requireContext());
                                 String bprmc = ((JSONObject) list).getString("bprmc");
@@ -109,45 +110,42 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                                 }// 被评名称
                                 ((JSONObject) list).getJSONArray("dtjgList").forEach(e ->
                                 {
-                                    String pjxxlistString = String.format(
+                                    JSONObject pjxxlist = JSONObject.parse(String.format(
                                             "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
                                             ((JSONObject) list).getString("wjid"),
                                             ((JSONObject) list).getString("wjssrwid"),
                                             ((JSONObject) e).getString("tmid")
-                                    );
-                                    JSONObject pjxxlist = JSONObject.parse(pjxxlistString);
-                                    JSONArray tmxxda = ((JSONObject) e).getJSONArray("tmxxda");
-                                    pjxxlist.put("xxdalist", ((JSONObject) e).getJSONArray("tmxxda"));
-                                    answers.getJSONArray("pjjglist").getJSONObject(answers.getJSONArray("pjjglist").size() - 1).getJSONArray("pjxxlist").add(pjxxlist);
+                                    ));
+                                    JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
+                                    pjxxlist.put("xxdalist", da);
+                                    pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
 
-                                    JSONArray da = pjxxlist.getJSONArray("xxdalist");
                                     TitleAdapter title = new TitleAdapter(requireContext());
                                     title.setTitle(((JSONObject) e).getString("tgmc"));
                                     adp.addAdapter(title); // 题目标题
 
-                                    if (Objects.equals(((JSONObject) e).getString("tmlx"), "1")) {
-                                        OptionAdapter optionAdapter = new OptionAdapter(requireContext());
-                                        if (!tmxxda.isEmpty()) {
-                                            optionAdapter.setOption(tmxxda.getString(0));
+                                    switch (((JSONObject) e).getString("tmlx")) {
+                                        case "1": {
+                                            OptionAdapter optionAdapter = new OptionAdapter(requireContext());
+                                            ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
+                                            optionAdapter.setAnswer(da);
+                                            adp.addAdapter(optionAdapter);
+                                            break;
                                         }
-                                        ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
-                                        optionAdapter.updateAnswer(da);
-                                        adp.addAdapter(optionAdapter);
-                                    } else if (Objects.equals(((JSONObject) e).getString("tmlx"), "6")) {
-                                        BlanketAdapter blanketAdapter = new BlanketAdapter(requireContext());
-                                        if (!tmxxda.isEmpty()) {
-                                            blanketAdapter.setText(tmxxda.getString(0));
+                                        case "6": {
+                                            BlanketAdapter blanketAdapter = new BlanketAdapter(requireContext());
+                                            blanketAdapter.setAnswer(da);
+                                            adp.addAdapter(blanketAdapter);
+                                            break;
                                         }
-                                        blanketAdapter.updateAnswer(da);
-                                        adp.addAdapter(blanketAdapter);
-                                    } else if (Objects.equals(((JSONObject) e).getString("tmlx"), "5")) {
-                                        RankAdapter rankAdapter = new RankAdapter(requireContext());
-                                        rankAdapter.updateAnswer(da);
-                                        if (!tmxxda.isEmpty()) {
-                                            rankAdapter.setRank(Integer.parseInt(tmxxda.getString(0)));
+                                        case "5": {
+                                            RankAdapter rankAdapter = new RankAdapter(requireContext());
+                                            rankAdapter.setAnswer(da);
+                                            adp.addAdapter(rankAdapter);
+                                            break;
                                         }
-                                        //((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
-                                        adp.addAdapter(rankAdapter);
+                                        default:
+                                            break;
                                     }
                                 });
                             });
@@ -155,23 +153,23 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                     } else {
                         launch.launch(new Intent(requireContext(), LoginActivity.class));
                     }
-                } else if (msg.what==2) {
-                    System.out.println(answers);
+                } else if (msg.what == 2) {
+                   // System.out.println(answers);
                     JSONObject data = JSON.parseObject((String) msg.obj);
+                   // System.out.println(data);
                     if (data.get("code").equals("200")) {
                         params.toast(R.string.save_successfully);
                     } else {
                         params.toast(String.format("%s：%s", getString(R.string.save_fail), data.getString("msg")));
                     }
-                }else if (msg.what==3) {
+                } else if (msg.what == 3) {
                     JSONObject data = JSON.parseObject((String) msg.obj);
                     if (data.get("code").equals("200")) {
                         params.toast(R.string.submit_successfully);
                     } else {
                         params.toast(String.format("%s：%s", getString(R.string.submit_fail), data.getString("msg")));
                     }
-                }
-                else if (msg.what == -1) {
+                } else if (msg.what == -1) {
                     params.toast(R.string.no_wifi_warning);
                     Snackbar.make(binding.getRoot(), "去登录", Snackbar.LENGTH_LONG).setAction("登录", v -> launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", "https://pjxt.sysu.edu.cn"))).show();
                 }
@@ -181,11 +179,35 @@ public class EvaluationQuestionnaireFragment extends Fragment {
             saveEvaluation();
         });
         binding.submit.setOnClickListener(view -> Snackbar.make(binding.getRoot(), "提交后不可更改", Snackbar.LENGTH_LONG).setAction(R.string.confirm, v -> submitEvaluation()).show());
+        binding.reset.setOnClickListener(view -> {
+            adp.getAdapters().forEach(adapter -> {
+                if (adapter instanceof OptionAdapter) {
+                    ((OptionAdapter) adapter).clearAnswer();
+                } else if (adapter instanceof RankAdapter) {
+                    ((RankAdapter) adapter).clearAnswer();
+                } else if (adapter instanceof BlanketAdapter) {
+                    ((BlanketAdapter) adapter).clearAnswer();
+                }
+            });
+            /*answers.getJSONArray("pjjglist").forEach(o -> ((JSONObject) o).getJSONArray("pjxxlist").forEach(e -> ((JSONObject) e).put("xxdalist", new JSONArray())));
+            adp.notifyDataSetChanged();*/
+        });
+        binding.auto.setOnClickListener(v -> {
+            adp.getAdapters().forEach(adapter -> {
+                if (adapter instanceof OptionAdapter) {
+                    ((OptionAdapter) adapter).setLastOption();
+                } else if (adapter instanceof RankAdapter) {
+                    ((RankAdapter) adapter).setLastRank();
+                } else if (adapter instanceof BlanketAdapter) {
+                    ((BlanketAdapter) adapter).setLastContent();
+                }
+            });
+        });
         return binding.getRoot();
     }
 
-    public void getEvaluation(String rwid, String wjid, String sxz, String pjrdm, String bpdm, String kcdm, String rwh,String pjzt,String bpmc) {
-        new OkHttpClient.Builder().build().newCall(new Request.Builder().url(String.format("https://pjxt.sysu.edu.cn/evaluationPattern/getQuestionnaireTopic?rwid=%s&wjid=%s&sxz=%s&pjrdm=%s&bpdm=%s&kcdm=%s&rwh=%s&pjzt=%s&bpmc=%s", rwid, wjid, sxz, pjrdm, bpdm, kcdm, rwh,pjzt,bpmc))
+    public void getEvaluation(String rwid, String wjid, String sxz, String pjrdm, String bpdm, String kcdm, String rwh, String pjzt, String bpmc) {
+        new OkHttpClient.Builder().build().newCall(new Request.Builder().url(String.format("https://pjxt.sysu.edu.cn/evaluationPattern/getQuestionnaireTopic?rwid=%s&wjid=%s&sxz=%s&pjrdm=%s&bpdm=%s&kcdm=%s&rwh=%s&pjzt=%s&bpmc=%s", rwid, wjid, sxz, pjrdm, bpdm, kcdm, rwh, pjzt, bpmc))
                 .header("Cookie", params.getCookie())
                 .build()).enqueue(new Callback() {
             @Override
@@ -206,12 +228,14 @@ public class EvaluationQuestionnaireFragment extends Fragment {
     }
 
     public void saveEvaluation() {
-        postEvaluation("2",2);
+        postEvaluation("2", 2);
     }
+
     public void submitEvaluation() {
-        postEvaluation("1",3);
+        postEvaluation("1", 3);
     }
-    public void postEvaluation(String mode,int what) {
+
+    public void postEvaluation(String mode, int what) {
         answers.put("pjzt", mode);
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://pjxt.sysu.edu.cn/evaluationPattern/submitSaveEvaluation")
                 .header("Cookie", params.getCookie())
@@ -247,12 +271,31 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.context = context;
     }
 
-    public void setOption(String option) {
-        this.option = option;
+    public void setOption(int pos) {
+        if (selected != pos) {
+            int old = selected;
+            selected = pos;
+            notifyItemChanged(old);
+            notifyItemChanged(selected);
+            answer.set(0, data.get(pos).getString("tmxxid"));
+        }
     }
 
-    public void updateAnswer(JSONArray answers) {
+    public void setLastOption() {
+        setOption(data.size() - 1);
+    }
+    public void clearAnswer(){
+        answer.clear();
+        int old = selected;
+        selected = -1;
+        option = null;
+        notifyItemChanged(selected);
+    }
+
+    public void setAnswer(JSONArray answers) {
         this.answer = answers;
+        option = answers.isEmpty() ? null : answers.getString(0);
+        notifyDataSetChanged();
     }
 
     public void add(JSONObject item) {
@@ -271,15 +314,7 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         int pos = holder.getBindingAdapterPosition();
         ItemOptionBinding binding = ItemOptionBinding.bind(holder.itemView);
-        binding.getRoot().setOnClickListener(view -> {
-            if (selected != pos) {
-                int old = selected;
-                selected = pos;
-                answer.set(0, data.get(pos).getString("tmxxid"));
-                notifyItemChanged(old);
-                notifyItemChanged(selected);
-            }
-        });
+        binding.getRoot().setOnClickListener(v -> setOption(pos));
         if (selected == -1 && Objects.equals(data.get(pos).getString("tmxxid"), option)) {
             selected = pos;
         }
@@ -310,12 +345,21 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.context = context;
     }
 
-    public void setRank(int rank) {
-        this.rank = rank;
+    public void setAnswer(JSONArray answers) {
+        this.answer = answers;
+        this.rank = answers.isEmpty() ? 100 : Integer.parseInt(answers.getString(0));
+        notifyItemChanged(0);
     }
 
-    public void updateAnswer(JSONArray answers) {
-        this.answer = answers;
+    public void setLastRank() {
+        rank = 100;
+        answer.set(0, String.valueOf(rank));
+        notifyItemChanged(0);
+    }
+    public void clearAnswer(){
+        answer.clear();
+        rank = 100;
+        notifyItemChanged(0);
     }
 
     @NonNull
@@ -327,9 +371,7 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         p.setValueFrom(0);
         p.setValueTo(100);
         p.setLabelBehavior(LabelFormatter.LABEL_FLOATING);
-        p.addOnChangeListener((slider, value, fromUser) -> {
-            answer.set(0, String.valueOf((int) value));
-        });
+        p.addOnChangeListener((slider, value, fromUser) -> answer.set(0, String.valueOf((int) value)));
         return new RecyclerView.ViewHolder(p) {
         };
     }
@@ -356,8 +398,18 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.context = context;
     }
 
-    public void updateAnswer(JSONArray answers) {
+    public void setAnswer(JSONArray answers) {
         this.answer = answers;
+        this.content = answers.isEmpty() ? null : answers.getString(0);
+        notifyItemChanged(0);
+    }
+
+    public void setLastContent() {
+        content = null;
+        if (!answer.isEmpty()) {
+            answer.remove(0);
+            notifyItemChanged(0);
+        }
     }
 
     @NonNull
@@ -371,6 +423,11 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.content = text;
     }
 
+    public void clearAnswer(){
+        answer.clear();
+        content = null;
+        notifyItemChanged(0);
+    }
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         DialogEditTextBinding binding = DialogEditTextBinding.bind(holder.itemView);
@@ -381,9 +438,12 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         binding.edit.addTextChangedListener(new TextWatcher() {
             @Override
-            public void afterTextChanged(Editable editable) {}
+            public void afterTextChanged(Editable editable) {
+            }
+
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
