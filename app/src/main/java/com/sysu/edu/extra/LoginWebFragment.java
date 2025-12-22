@@ -51,8 +51,12 @@ public class LoginWebFragment extends Fragment {
                 if (Pattern.compile(TargetUrl.LOGIN).matcher(url).find()) {
                     model.setLogin(false);
                 }
-                if(Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/login").matcher(url).find()){
-                    web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary.ant-btn-block').click();",null);
+                if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/login").matcher(url).find()) {
+                    web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary.ant-btn-block').click();", null);
+                } else if (Pattern.compile("//pay.sysu.edu.cn/#/").matcher(url).find()) {
+                    web.evaluateJavascript("document.querySelector('.el-button.login_btns.btn-netIdLogin.el-button--default.is-plain').click();", null);
+                } else if (Pattern.compile("//pjxt.sysu.edu.cn/").matcher(url).find()) {
+                    web.evaluateJavascript("document.querySelector('.log-g-iddl').click();", null);
                 }
                 //ar script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
             }
@@ -60,6 +64,17 @@ public class LoginWebFragment extends Fragment {
 //            public void onLoadResource(WebView view, String url) {
 //               // view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
 //            }
+
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                super.onLoadResource(view, url);
+                /*if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/api/sso/cas/login?pattern=student-login").matcher(url).find()) {
+                    model.setCookie(CookieManager.getInstance().getCookie(url));
+                    model.setLogin(true);
+                    //web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary.ant-btn-block').click();", null);
+                }*/
+                //System.out.println(url);
+            }
         });
         WebSettings webSettings = web.getSettings();
         webSettings.setDomStorageEnabled(true);

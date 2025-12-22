@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
                 edit.putString("password", model.getPassword().getValue());
                 edit.apply();
                 setResult(RESULT_OK);
-               // finishAfterTransition();
+                finishAfterTransition();
             }
         });
         handler=new Handler(getMainLooper()){
