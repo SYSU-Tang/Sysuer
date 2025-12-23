@@ -27,6 +27,7 @@
             app:entryValues="@array/font_value"
             app:icon="@drawable/font"
             app:key="fontSize"
+            app:isPreferenceVisible="false"
             app:summary="@string/follow_system"
             app:title="@string/font_size"/>
         <com.sysu.edu.preference.Preference

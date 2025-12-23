@@ -204,4 +204,9 @@
     <string name="please_enter_content">Please enter the content</string>
     <string name="save_successfully">Save successfully</string>
     <string name="save_fail">Fail to Save</string>
+    <string name="submit_successfully">Succeed in submitting</string>
+    <string name="submit_fail">Fail to submit</string>
+    <string name="official">Official</string>
+    <string name="fill">Fill</string>
+    <string name="assistant">Assistant</string>
 </resources>

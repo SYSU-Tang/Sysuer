@@ -35,6 +35,7 @@ import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.academic.Grade;
 import com.sysu.edu.academic.MajorInfo;
 import com.sysu.edu.academic.RegisterInfo;
+import com.sysu.edu.academic.SchoolRoll;
 import com.sysu.edu.academic.SchoolWorkWarning;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
@@ -61,11 +62,11 @@ public class ServiceFragment extends Fragment {
             fragment = binding.getRoot();
             launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {});
             service_container = binding.serviceContainer;
-            String[] titles = new String[]{a(R.string.academy),a(R.string.study),a(R.string.student_affair),a(R.string.news), a(R.string.system), a(R.string.official_website), a(R.string.official), a(R.string.academy), a(R.string.study_platform), a(R.string.life), "AI"};
+            String[] titles = new String[]{a(R.string.academy),a(R.string.study),/*a(R.string.student_affair),*/a(R.string.news), a(R.string.system), a(R.string.official_website), a(R.string.official), a(R.string.academy), a(R.string.study_platform), a(R.string.life), "AI"};
             String[][] items = new String[][]{
                     {a(R.string.school_enroll), a(R.string.cet), a(R.string.register_info), a(R.string.school_work_warning),a(R.string.course_completion)},
                     {a(R.string.todo)},
-                    {a(R.string.student_job)},
+                    //{a(R.string.student_job)},
                     {"资讯门户", a(R.string.campus_market),a(R.string.academic_affair_notice)//,"学校活动"
                     },
                     {"体育场馆预定系统", "学工系统", "本科教务系统", "中山大学统一门户", "大学服务中心", "财务信息系统"},
@@ -78,6 +79,7 @@ public class ServiceFragment extends Fragment {
             };
             View.OnClickListener[][] actions = new View.OnClickListener[][]{
                     {
+                        newActivity(SchoolRoll.class),
                             newActivity(CETActivity.class),
                             newActivity(RegisterInfo.class),
                             newActivity(SchoolWorkWarning.class),
@@ -86,9 +88,9 @@ public class ServiceFragment extends Fragment {
                     {
                             newActivity(TodoActivity.class),
                     },//学习
-                    {
+                    /*{
 
-                    },//学工
+                    },//学工*/
                     {
                             newActivity(News.class),
                             v -> startActivity(Objects.requireNonNull(requireActivity().getPackageManager().getLaunchIntentForPackage("com.comingx.zanao")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)),

@@ -55,11 +55,14 @@ public class TodoList extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
         db.execSQL("CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
         db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
-        addType();
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
+        if (i <= 5){
+            addType();
+        }
     }
 
     public void addType() {

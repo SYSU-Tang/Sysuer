@@ -56,7 +56,7 @@ public class InitTodo {
 
     public InitTodo(FragmentActivity activity, TodoFragment todoFragment) {
         this.activity = activity;
-        todoDB = new TodoList(activity, 5);
+        todoDB = new TodoList(activity, 6);
         dialogBinding = DialogTodoBinding.inflate(activity.getLayoutInflater());
         dialogBinding.prioritySlider.addOnChangeListener((slider, value, fromUser) -> todoInfo.setPriority((int) value));
         DialogEditTextBinding itemEditTextBinding = DialogEditTextBinding.inflate(activity.getLayoutInflater());

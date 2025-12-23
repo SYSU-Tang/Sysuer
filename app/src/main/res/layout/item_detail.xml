@@ -69,13 +69,30 @@
         android:layout_height="wrap_content"
         android:layout_row="4"
         android:layout_column="1"
+        android:text="@string/assistant"
+        app:icon="@drawable/account"/>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/assistant"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_row="4"
+        android:layout_column="2"
+        android:layout_gravity="fill"
+        android:gravity="end|center"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+    <com.google.android.material.button.MaterialButton
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="5"
+        android:layout_column="1"
         android:text="@string/classTime"
         app:icon="@drawable/calendar"/>
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/classTime"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_row="4"
+        android:layout_row="5"
         android:layout_column="2"
         android:layout_gravity="fill"
         android:gravity="end|center"

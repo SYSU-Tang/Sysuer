@@ -289,13 +289,13 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         int old = selected;
         selected = -1;
         option = null;
-        notifyItemChanged(selected);
+        notifyItemChanged(old);
     }
 
     public void setAnswer(JSONArray answers) {
         this.answer = answers;
         option = answers.isEmpty() ? null : answers.getString(0);
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     public void add(JSONObject item) {
@@ -405,11 +405,11 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public void setLastContent() {
-        content = null;
+        /*content = null;
         if (!answer.isEmpty()) {
             answer.remove(0);
             notifyItemChanged(0);
-        }
+        }*/
     }
 
     @NonNull

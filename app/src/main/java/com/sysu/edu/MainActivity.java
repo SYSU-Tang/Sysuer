@@ -14,13 +14,23 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavGraph;
 import androidx.navigation.NavInflater;
@@ -38,6 +48,7 @@ import com.sysu.edu.extra.SettingActivity;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Objects;
 
 import okhttp3.Call;
@@ -58,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.dashboard_scroll))).getNavController();
+        NavHostFragment fragment = (NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.dashboard_scroll));
+        NavController navController = fragment.getNavController();
         NavGraph g = new NavInflater(this, navController.getNavigatorProvider()).inflate(R.navigation.main_navigation);
         if (savedInstanceState == null) {
             g.setStartDestination(new int[]{R.id.navigation_activity, R.id.navigation_service, R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home", "0"))]);
@@ -99,26 +111,44 @@ public class MainActivity extends AppCompatActivity {
 //        }
         navController.setGraph(g);
         NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
-        SysuerPreferenceManager spm = new SysuerPreferenceManager(this);
-        if (spm.getUpdate()) {
-            checkUpdate();
-        }
-        if (spm.getIsFirstLaunch()||!spm.getIsAgree()){
-            new MaterialAlertDialogBuilder(this).setTitle("用户协议和隐私政策")
-                    .setMessage(Html.fromHtml("请阅读<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E7%94%A8%E6%88%B7%E5%8D%8F%E8%AE%AE\">用户协议</a>和<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96\">隐私政策</a>",Html.FROM_HTML_MODE_LEGACY))
-                    .setPositiveButton("同意", (dialogInterface, i) -> {
-                        spm.setIsFirstLaunch(false);
-                        spm.setIsAgree(true);
-                    })
-                    .setNegativeButton("不同意", (dialogInterface, i) -> {
-                        spm.setIsFirstLaunch(false);
-                        spm.setIsAgree(false);
-                        supportFinishAfterTransition();
-                    })
-                    .create()
-                    .show();
-
-        }
+        SysuerPreferenceManager spm = new ViewModelProvider(this).get(SysuerPreferenceManager.class);
+        spm.setPM(PreferenceManager.getDefaultSharedPreferences(this));
+        spm.setIsAgreeLiveData(spm.getIsFirstLaunch() || !spm.getIsAgree());
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this).setTitle("用户协议和隐私政策")
+                .setMessage(Html.fromHtml("请阅读<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E7%94%A8%E6%88%B7%E5%8D%8F%E8%AE%AE\">用户协议</a>和<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96\">隐私政策</a>", Html.FROM_HTML_MODE_LEGACY))
+                .setPositiveButton("同意", (dialogInterface, i) -> {
+                    spm.setIsAgree(true);
+                    spm.setIsAgreeLiveData(false);
+                })
+                .setNegativeButton("不同意", (dialogInterface, i) -> {
+                    spm.setIsAgree(false);
+                    supportFinishAfterTransition();
+                })
+                .create();
+        spm.getIsAgreeLiveData().observe(this, aBoolean -> {
+            if (aBoolean) {
+                dialog.show();
+                TextView text = Objects.requireNonNull(dialog.findViewById(android.R.id.message));
+                text.setMovementMethod(LinkMovementMethod.getInstance());
+                CharSequence str = text.getText();
+                if (str instanceof Spannable) {
+                    Spannable sp = (Spannable) text.getText();
+                    SpannableStringBuilder style = new SpannableStringBuilder(str);
+                    style.clearSpans();
+                    for (URLSpan url : sp.getSpans(0, str.length(), URLSpan.class)) {
+                        try {
+                            style.setSpan(new MyClickSpan(url.getURL()), sp.getSpanStart(url), sp.getSpanEnd(url), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        } catch (MalformedURLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    text.setText(style);
+                }
+            } else if (spm.getUpdate()) {
+                checkUpdate();
+            }
+        });
+        spm.setIsFirstLaunch(false);
         Params params = new Params(this);
         handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -168,12 +198,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        ContextCompat.registerReceiver(this,receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_NOT_EXPORTED);
-        detailLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {});
+        ContextCompat.registerReceiver(this, receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_NOT_EXPORTED);
+        detailLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        });
         PackageManager pm = getPackageManager();
         pm.setComponentEnabledSetting(new ComponentName(this, SettingActivity.class), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         //WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(ClassIsland.class).build());
-        new ClassIsland(this).doWork();
+        //new ClassIsland(this).doWork();
     }
 
     public ActivityResultLauncher<Intent> launch() {
@@ -202,7 +233,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         unregisterReceiver(receiver);
-        receiver=null;
+        receiver = null;
         super.onDestroy();
+    }
+
+
+    static class MyClickSpan extends ClickableSpan {
+        String url;
+
+        public MyClickSpan(String url) throws MalformedURLException {
+            this.url = url;
+        }
+
+        @Override
+        public void updateDrawState(TextPaint ds) {
+            ds.setUnderlineText(false);
+            super.updateDrawState(ds);
+        }
+
+        @Override
+        public void onClick(@NonNull View v) {
+            v.getContext().startActivity(new Intent().setAction(Intent.ACTION_VIEW).setData(Uri.parse(url)));
+        }
     }
 }

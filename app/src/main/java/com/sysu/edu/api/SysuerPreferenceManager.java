@@ -1,11 +1,11 @@
 package com.sysu.edu.api;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.preference.PreferenceManager;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-public class SysuerPreferenceManager {
+public class SysuerPreferenceManager extends ViewModel {
     private final static String Theme = "theme";
     private final static String Home = "home";
     private final static String Language = "language";
@@ -13,10 +13,11 @@ public class SysuerPreferenceManager {
     private final static String Update = "update";
     private final static String IsFirstLaunch = "launch";
     private final static String IsAgree = "agree";
-    private final SharedPreferences pm;
+    private final MutableLiveData<Boolean> isAgreeLiveData = new MutableLiveData<>();
+    private SharedPreferences pm;
 
-    public SysuerPreferenceManager(Context context) {
-        pm = PreferenceManager.getDefaultSharedPreferences(context);
+    public void setPM(SharedPreferences oldPM) {
+        this.pm = oldPM;
     }
     public String getString(String key, String defValue) {
         return pm.getString(key, defValue);
@@ -60,6 +61,13 @@ public class SysuerPreferenceManager {
 
     public boolean getUpdate(){
         return getBoolean(Update, true);
+    }
+
+    public MutableLiveData<Boolean> getIsAgreeLiveData() {
+        return isAgreeLiveData;
+    }
+     public void setIsAgreeLiveData(boolean isAgree){
+        isAgreeLiveData.setValue(isAgree);
     }
 
 }

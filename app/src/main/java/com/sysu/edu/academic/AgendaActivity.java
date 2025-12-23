@@ -170,6 +170,7 @@ public class AgendaActivity extends AppCompatActivity {
                                 String endClassTimes = ((JSONObject) e).getString("endClassTimes");
                                 JSONArray info = ((JSONObject) e).getJSONArray("teachingInfoList");
                                 JSONObject detail = (JSONObject) info.get(0);
+                                System.out.println(e);
                                 String course = detail.getString("courseName");
                                 String teacher = detail.getString("teacherName");
                                 String campus = detail.getString("teachingCampusName");
@@ -185,7 +186,7 @@ public class AgendaActivity extends AppCompatActivity {
                                 views.add(item);
                                 item.setOnClickListener(v -> {
                                     String location = (campus == null ? "" : campus) + "-" + (teachingBuildingName == null ? "" : teachingBuildingName) + "-" + (classroomNum == null ? "" : classroomNum);
-                                    setDialogDetail(course, location, teacher, String.format(getString(R.string.from_to), startClassTimes, endClassTimes));
+                                    setDialogDetail(course, location, teacher, String.format(getString(R.string.from_to), startClassTimes, endClassTimes), detail.getString("assistantInfo"));
                                     detailDialog.show();
                                     //setDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
                                 });
@@ -221,7 +222,7 @@ public class AgendaActivity extends AppCompatActivity {
                                     binding.month.setText(getResources().getStringArray(R.array.months)[calendar.get(Calendar.MONTH)-1]);
                                 }
                                 for (int i = 0; i < 7; i++) {
-                                    ((MaterialTextView) binding.week.getChildAt(i + 1).findViewById(R.id.course_date)).setText((new SimpleDateFormat("dd").format(c.getTime()))+getString(R.string.day));
+                                    ((MaterialTextView) binding.week.getChildAt(i + 1).findViewById(R.id.course_date)).setText(String.format("%s%s", new SimpleDateFormat("dd",Locale.getDefault()).format(c.getTime()), getString(R.string.day)));
                                     c.add(Calendar.DATE, 1);
                                 }
                             } catch (ParseException e) {
@@ -287,11 +288,12 @@ public class AgendaActivity extends AppCompatActivity {
         getResponse(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender?academicYear=%s&weekly=%d", academicYear, week),3);
     }
 
-    void setDialogDetail(String course, String location, String teacher, String classTime) {
+    void setDialogDetail(String course, String location, String teacher, String classTime, String assistant) {
         detailBinding.course.setText(course);
         detailBinding.location.setText(location);
         detailBinding.teacher.setText(teacher);
         detailBinding.classTime.setText(classTime);
+        detailBinding.assistant.setText(assistant);
     }
 //    void setDetail(String course,String location,String teacher,String classTime){
 

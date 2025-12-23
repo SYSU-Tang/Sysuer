@@ -42,21 +42,21 @@ public class LoginWebFragment extends Fragment {
                     //System.out.println(CookieManager.getInstance().getCookie(Objects.requireNonNull(model.getTarget().getValue())));
                     view.loadUrl(Objects.requireNonNull(model.getTarget().getValue()));
                 }
+                if (Pattern.compile(TargetUrl.LOGIN).matcher(url).find()) {
+                    model.setLogin(false);
+                }
+                if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/").matcher(url).find()) {
+                    web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary').click();", null);
+                } else if (Pattern.compile("//pay.sysu.edu.cn/#/").matcher(url).find()) {
+                    web.evaluateJavascript("document.querySelector('.el-button.login_btns.btn-netIdLogin.el-button--default.is-plain').click();", null);
+                } else if (Pattern.compile("//pjxt.sysu.edu.cn/").matcher(url).find()) {
+                    web.evaluateJavascript("document.querySelector('.log-g-iddl').click();", null);
+                }
                 if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         model.setCookie(CookieManager.getInstance().getCookie(url));
                         model.setLogin(true);
                     }, 1500);
-                }
-                if (Pattern.compile(TargetUrl.LOGIN).matcher(url).find()) {
-                    model.setLogin(false);
-                }
-                if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/login").matcher(url).find()) {
-                    web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary.ant-btn-block').click();", null);
-                } else if (Pattern.compile("//pay.sysu.edu.cn/#/").matcher(url).find()) {
-                    web.evaluateJavascript("document.querySelector('.el-button.login_btns.btn-netIdLogin.el-button--default.is-plain').click();", null);
-                } else if (Pattern.compile("//pjxt.sysu.edu.cn/").matcher(url).find()) {
-                    web.evaluateJavascript("document.querySelector('.log-g-iddl').click();", null);
                 }
                 //ar script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
             }
@@ -68,11 +68,10 @@ public class LoginWebFragment extends Fragment {
             @Override
             public void onLoadResource(WebView view, String url) {
                 super.onLoadResource(view, url);
-                /*if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/api/sso/cas/login?pattern=student-login").matcher(url).find()) {
-                    model.setCookie(CookieManager.getInstance().getCookie(url));
+                if (Pattern.compile("/api/sso/cas/login?pattern=student-login$").matcher(url).find()) {
+                    model.setCookie(CookieManager.getInstance().getCookie(view.getUrl()));
                     model.setLogin(true);
-                    //web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary.ant-btn-block').click();", null);
-                }*/
+                }
                 //System.out.println(url);
             }
         });

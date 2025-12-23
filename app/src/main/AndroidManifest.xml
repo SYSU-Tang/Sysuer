@@ -120,7 +120,6 @@
             android:exported="false" />
         <activity
             android:name=".academic.EvaluationActivity"
-
             android:configChanges="uiMode|orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
             android:exported="true" />
@@ -140,6 +139,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|uiMode"
             android:exported="true"
+            android:enabled="false"
             android:icon="@mipmap/ic_launcher"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize|stateHidden" >

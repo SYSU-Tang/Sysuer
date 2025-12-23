@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -38,6 +39,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.academic.CourseDetail;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.SysuerPreferenceManager;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
 import com.sysu.edu.databinding.ItemCourseBinding;
@@ -85,6 +87,7 @@ public class DashboardFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         if (binding == null) {
             binding = FragmentDashboardBinding.inflate(inflater);
             ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
@@ -221,17 +224,21 @@ public class DashboardFragment extends Fragment {
                     }
                 }
             };
-            getTerm();
+            SysuerPreferenceManager spm = new ViewModelProvider(requireActivity()).get(SysuerPreferenceManager.class);
+            spm.setPM(PreferenceManager.getDefaultSharedPreferences(requireActivity()));
+            spm.getIsAgreeLiveData().observe(getViewLifecycleOwner(), aBoolean -> {
+                System.out.println(aBoolean);
+                if (!aBoolean) {
+                    getTerm();
+                }
+            });
             TodoFragment todoFragment = new TodoFragment();
             getParentFragmentManager().beginTransaction().add(R.id.todo_list, todoFragment).commit();
             InitTodo initTodo = new InitTodo(requireActivity(), todoFragment);
             initTodo.filterStatus(todoFragment, TodoInfo.DONE);
             binding.noTodo.setVisibility(initTodo.getCount() != 0 ? View.GONE : View.VISIBLE);
-            binding.noTodo.setOnClickListener(v -> {
-                initTodo.showTodoAddDialog();
-            });
+            binding.noTodo.setOnClickListener(v -> initTodo.showTodoAddDialog());
             binding.toggle3.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-
                 if (checkedId == R.id.filter_todo) {
                     initTodo.filterStatus(todoFragment, isChecked ? TodoInfo.TODO : TodoInfo.DONE);
                     binding.noTodo.setVisibility(initTodo.getCount() != 0 ? View.GONE : View.VISIBLE);
