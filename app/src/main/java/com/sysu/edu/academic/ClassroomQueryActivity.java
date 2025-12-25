@@ -35,7 +35,7 @@ import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityClassroomQueryBinding;
 import com.sysu.edu.databinding.ItemClassroomResultBinding;
 import com.sysu.edu.databinding.ItemFilterChipBinding;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

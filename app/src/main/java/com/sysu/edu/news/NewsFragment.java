@@ -32,7 +32,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.academic.BrowserActivity;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;

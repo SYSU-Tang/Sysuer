@@ -33,7 +33,7 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.DialogEditTextBinding;
 import com.sysu.edu.databinding.FragmentQuestionnaireBinding;
 import com.sysu.edu.databinding.ItemOptionBinding;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 import com.sysu.edu.todo.info.TitleAdapter;
 
 import java.io.IOException;

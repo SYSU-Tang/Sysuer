@@ -12,8 +12,8 @@ android {
         applicationId = "com.sysu.edu"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1924
-        versionName = "1.0.1"
+        versionCode = 1925
+        versionName = "1.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -38,7 +38,8 @@ android {
     sourceSets {
         getByName("main") {
             java {
-                srcDirs("src\\main\\java"
+                srcDirs(
+                    "src\\main\\java"
                 )
             }
         }
@@ -47,7 +48,7 @@ android {
 
 dependencies {
 
-    implementation (libs.glide)
+    implementation(libs.glide)
     implementation(libs.okhttp)
     implementation(libs.fastjson2)
     implementation(libs.appcompat)
@@ -69,11 +70,11 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.preference)
     implementation(libs.work.runtime)
-    implementation(libs.material.preference){
-        exclude("dev.rikka.rikkax.appcompat","appcompat")
+    implementation(libs.material.preference) {
+        exclude("dev.rikka.rikkax.appcompat", "appcompat")
     }
-    implementation(libs.dev.material){
-        exclude("dev.rikka.rikkax.appcompat","appcompat")
+    implementation(libs.dev.material) {
+        exclude("dev.rikka.rikkax.appcompat", "appcompat")
     }
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
@@ -82,7 +83,7 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
-    implementation (libs.api)
-    implementation (libs.provider)
+    implementation(libs.api)
+    implementation(libs.provider)
     api(libs.wechat.sdk.android)
 }

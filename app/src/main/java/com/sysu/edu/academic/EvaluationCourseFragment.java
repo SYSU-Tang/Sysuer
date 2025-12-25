@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,10 +30,11 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ItemEvaluationBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -96,10 +98,8 @@ public class EvaluationCourseFragment extends Fragment {
     }
 
     public void getEvaluation(String wjid, String rwid, String account, int page) {
-        new OkHttpClient.Builder().build().newCall(new Request.Builder().url(String.format("https://pjxt.sysu.edu.cn/personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", account, wjid, rwid, page))
+        new OkHttpClient.Builder().build().newCall(new Request.Builder().url(String.format(Locale.getDefault(), "https://pjxt.sysu.edu.cn/personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", account, wjid, rwid, page))
                 .header("Cookie", params.getCookie())
-                //.addHeader("Cookie", "JSESSIONID=F547A1B2729098E0B101716397DC48DC;INCO=9b1595d95278e78f17d51a5f35287020;")
-                // .post(RequestBody.create("{\"acadYear\":\"2024-2\",\"examWeekId\":\"1864116471884476417\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", MediaType.parse("application/json")))
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -118,6 +118,7 @@ public class EvaluationCourseFragment extends Fragment {
         });
     }
 }
+
 class CourseEvaluationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
     ArrayList<JSONObject> data = new ArrayList<>();
@@ -130,6 +131,7 @@ class CourseEvaluationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         super();
         this.context = context;
     }
+
     public void add(JSONObject e) {
         data.add(e);
         notifyItemInserted(data.size() - 1);
@@ -155,6 +157,7 @@ class CourseEvaluationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void setValues(String[] values) {
         this.values = values;
     }
+
     public void setParams(String[] params) {
         this.params = params;
     }
@@ -162,6 +165,7 @@ class CourseEvaluationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void setNavigation(int nav) {
         this.nav = nav;
     }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemEvaluationBinding binding = ItemEvaluationBinding.bind(holder.itemView);
@@ -169,7 +173,7 @@ class CourseEvaluationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         for (String param : params) {
             args.putString(param, data.get(position).getString(param));
         }
-        Drawable drawable = context.getDrawable(Objects.equals(data.get(position).getString("lsjgzt"), "2") ? R.drawable.submit : R.drawable.window);
+        Drawable drawable = AppCompatResources.getDrawable(context, Objects.equals(data.get(position).getString("lsjgzt"), "2") ? R.drawable.submit : R.drawable.window);
         if (drawable != null) {
             drawable.setBounds(0, 0, 72, 72);
         }
@@ -181,7 +185,7 @@ class CourseEvaluationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         binding.title.setText(String.format(values[0], data.get(position).getString(keys[0]) == null ? "" : data.get(position).getString(keys[0])));
         StringBuilder val = new StringBuilder();
         for (int i = 1; i < keys.length; i++) {
-            val.append(String.format(values[i], Objects.equals(keys[i], "lsjgzt") ? Map.of("0", "待评价", "2", "已评价", "3", "已保存").getOrDefault(data.get(position).getString(keys[i]), "未知") :data.get(position).getString(keys[i]) == null ? "" : data.get(position).getString(keys[i])));
+            val.append(String.format(values[i], Objects.equals(keys[i], "lsjgzt") ? Map.of("0", "待评价", "2", "已评价", "3", "已保存").getOrDefault(data.get(position).getString(keys[i]), "未知") : data.get(position).getString(keys[i]) == null ? "" : data.get(position).getString(keys[i])));
             val.append("\n");
         }
         binding.startTime.setText(val.toString().trim());

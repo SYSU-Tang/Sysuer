@@ -20,11 +20,12 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -106,7 +107,7 @@ public class CourseCompletionFragment extends StaggeredFragment{
         page++;
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse")
                 .header("Cookie",cookie)
-                .post(RequestBody.create(String.format("{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"cultureTypeCode\":\"01\"}}", page), MediaType.parse("application/json")))
+                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"cultureTypeCode\":\"01\"}}", page), MediaType.parse("application/json")))
                 .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/gradua/")
                 .build()).enqueue(new Callback() {
             @Override

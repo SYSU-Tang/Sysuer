@@ -1,4 +1,4 @@
-package com.sysu.edu.extra;
+package com.sysu.edu.login;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

@@ -45,7 +45,7 @@ import com.sysu.edu.databinding.FragmentDashboardBinding;
 import com.sysu.edu.databinding.ItemCourseBinding;
 import com.sysu.edu.databinding.ItemExamBinding;
 import com.sysu.edu.extra.LaunchMiniProgram;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 import com.sysu.edu.todo.InitTodo;
 import com.sysu.edu.todo.TodoFragment;
 import com.sysu.edu.todo.info.TodoInfo;

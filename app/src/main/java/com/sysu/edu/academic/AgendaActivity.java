@@ -30,7 +30,7 @@ import com.sysu.edu.databinding.ItemAgendaBinding;
 import com.sysu.edu.databinding.ItemDetailBinding;
 import com.sysu.edu.databinding.ItemDurationBinding;
 import com.sysu.edu.databinding.ItemWeekdayBinding;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.text.ParseException;

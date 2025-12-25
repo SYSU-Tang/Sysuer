@@ -1,4 +1,4 @@
-package com.sysu.edu.extra;
+package com.sysu.edu.login;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

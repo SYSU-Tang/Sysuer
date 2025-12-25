@@ -33,7 +33,7 @@ import com.sysu.edu.databinding.FragmentPayNeedBinding;
 import com.sysu.edu.databinding.FragmentPayRecordBinding;
 import com.sysu.edu.databinding.FragmentPaySituationBinding;
 import com.sysu.edu.databinding.ItemFilterChipBinding;
-import com.sysu.edu.extra.LoginActivity;
+import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;

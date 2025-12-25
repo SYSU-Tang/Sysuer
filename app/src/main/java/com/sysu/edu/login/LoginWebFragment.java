@@ -1,4 +1,4 @@
-package com.sysu.edu.extra;
+package com.sysu.edu.login;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -51,6 +51,8 @@ public class LoginWebFragment extends Fragment {
                     web.evaluateJavascript("document.querySelector('.el-button.login_btns.btn-netIdLogin.el-button--default.is-plain').click();", null);
                 } else if (Pattern.compile("//pjxt.sysu.edu.cn/").matcher(url).find()) {
                     web.evaluateJavascript("document.querySelector('.log-g-iddl').click();", null);
+                } else if (Pattern.compile("//portal.sysu.edu.cn/newClient/#/login").matcher(url).find()) {
+                    web.evaluateJavascript("document.querySelector('.ant-btn.index-submit-3jXSy.ant-btn-primary.ant-btn-lg').click();", null);
                 }
                 if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {

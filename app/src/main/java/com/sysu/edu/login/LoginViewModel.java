@@ -1,4 +1,4 @@
-package com.sysu.edu.extra;
+package com.sysu.edu.login;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
