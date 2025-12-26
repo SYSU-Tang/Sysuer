@@ -1,336 +1,337 @@
 [
   {
     "id": 1,
-    "name": "Academic",
-    "description": "Academic management and student affairs services, including student status information, examination management, academic warning and other academic-related functions",
+    "name": "学术",
+    "description": "学术管理与学生事务服务，包括学籍信息、考试管理、学业预警等学术相关功能",
     "items": [
       {
         "id": 101,
-        "name": "Student Status",
-        "description": "Student status information inquiry system, view personal student status, admission information, major class and other basic information"
+        "name": "学籍",
+        "description": "学籍信息查询系统，查看个人学籍状态、入学信息、专业班级等基本信息"
       },
       {
         "id": 102,
-        "name": "CET4 & CET6",
-        "description": "College English Test Band 4 and 6 information inquiry, including registration time, examination arrangement, score inquiry, etc."
+        "name": "四六级",
+        "description": "大学英语四六级考试信息查询，包括报名时间、考试安排、成绩查询等"
       },
       {
         "id": 103,
-        "name": "Registration",
-        "description": "Registration information management system, query and confirm student registration status every semester"
+        "name": "注册",
+        "description": "注册信息管理系统，每学期学生注册状态查询和确认"
       },
       {
         "id": 104,
-        "name": "Academic Warning",
-        "description": "Academic warning system, monitor academic performance, credit completion, and issue warning notifications in time"
+        "name": "学业预警",
+        "description": "学业预警系统，监控学习成绩、学分完成情况，及时发出预警通知"
       },
       {
         "id": 105,
-        "name": "Course Progress",
-        "description": "Course completion inquiry, view completed courses, credit statistics, graduation requirements completion progress"
+        "name": "课程进度",
+        "description": "课程完成情况查询，查看已修课程、学分统计、毕业要求完成进度"
       }
     ]
   },
   {
     "id": 2,
-    "name": "Study",
-    "description": "Learning assistance and personal management tools to help plan learning tasks and time arrangements",
+    "name": "学习",
+    "description": "学习辅助与个人管理工具，帮助规划学习任务和时间安排",
     "items": [
       {
         "id": 201,
-        "name": "To-Do",
-        "description": "To-do item management tool, record learning tasks, homework reminders, important matters arrangement"
+        "name": "待办",
+        "description": "待办事项管理工具，记录学习任务、作业提醒、重要事项安排"
       }
     ]
   },
   {
     "id": 3,
-    "name": "Information Portal",
-    "description": "Campus information and information services, providing the latest campus dynamics, notices and market information",
+    "name": "资讯门户",
+    "description": "校园资讯与信息服务，提供最新的校园动态、通知公告和市场信息",
     "items": [
       {
         "id": 301,
-        "name": "Information Portal",
-        "description": "Sun Yat-sen University information portal website, collecting campus news, academic activities, important notices and other information"
+        "name": "资讯门户",
+        "description": "中山大学资讯门户网站，汇集校园新闻、学术活动、重要通知等各类信息"
       },
       {
         "id": 302,
-        "name": "Campus Market",
-        "description": "Unofficial forum"
+        "name": "校园集市",
+        "description": "非官方论坛"
       },
       {
         "id": 303,
-        "name": "Academic Affairs Notice",
-        "description": "Academic affairs notification system,发布 course selection notifications, examination arrangements, teaching adjustments and other important information"
+        "name": "教务通知",
+        "description": "教务通知公告系统，发布选课通知、考试安排、教学调整等重要信息"
       }
     ]
   },
   {
     "id": 4,
-    "name": "Systems",
-    "description": "Campus business system integration entrance, covering sports, student affairs, academic affairs, finance and other core systems",
+    "name": "系统",
+    "description": "校园各类业务系统集成入口，涵盖体育、学工、教务、财务等核心系统",
     "items": [
       {
         "id": 401,
-        "name": "Sports Venue Reservation System",
-        "description": "Campus sports venue online reservation platform, supporting basketball courts, football fields, swimming pools and other venue reservations"
+        "name": "体育场馆预定系统",
+        "description": "校园体育场馆在线预定平台，支持篮球场、足球场、游泳池等场地预约"
       },
       {
         "id": 402,
-        "name": "Student Affairs System",
-        "description": "Student work management system, handling scholarships, grants, work-study and other student affairs"
+        "name": "学工系统",
+        "description": "学生工作管理系统，处理奖学金、助学金、勤工助学等学生事务"
       },
       {
         "id": 403,
-        "name": "Undergraduate Academic Affairs System",
-        "description": "Undergraduate teaching management system, course selection, score inquiry, teaching plan management and other core functions"
+        "name": "本科教务系统",
+        "description": "本科教学管理系统，选课、成绩查询、教学计划管理等核心功能"
       },
       {
         "id": 404,
-        "name": "Sun Yat-sen University Unified Portal",
-        "description": "Campus unified identity authentication portal, integrating single sign-on entrance for various campus application systems"
+        "name": "中山大学统一门户",
+        "description": "校园统一身份认证门户，集成各类校园应用系统的单点登录入口"
       },
       {
         "id": 405,
-        "name": "University Service Center",
-        "description": "One-stop student service center, handling various certificates, consultations, affairs processing and other services"
+        "name": "大学服务中心",
+        "description": "一站式学生服务中心，办理各类证明、咨询、事务处理等服务"
       },
       {
         "id": 406,
-        "name": "Financial Information System",
-        "description": "Campus financial management system, tuition payment, scholarship and grant distribution, financial inquiry and other functions"
+        "name": "财务信息系统",
+        "description": "校园财务管理系统，学费缴纳、奖助学金发放、财务查询等功能"
       }
     ]
   },
   {
     "id": 5,
-    "name": "Official Websites",
-    "description": "Sun Yat-sen University official website and related thematic websites, providing comprehensive school information and public services",
+    "name": "官网",
+    "description": "中山大学官方网站及相关专题网站，提供全面的学校信息和公共服务",
     "items": [
       {
         "id": 501,
-        "name": "Sun Yat-sen University Official Website",
-        "description": "Sun Yat-sen University official website, school overview, news, organizational structure, contact information, etc."
+        "name": "中山大学官网",
+        "description": "中山大学官方网站，学校概况、新闻动态、机构设置、联系方式等"
       },
       {
         "id": 502,
-        "name": "Undergraduate Admissions",
-        "description": "Undergraduate admissions information website, admission policies, major introduction, admission inquiry, freshman guide, etc."
+        "name": "本科招生",
+        "description": "本科招生信息网，招生政策、专业介绍、录取查询、新生指南等"
       },
       {
         "id": 503,
-        "name": "Graduate Admissions",
-        "description": "Graduate admissions information platform, master and doctoral admission brochures, registration system, re-examination arrangements"
+        "name": "研究生招生",
+        "description": "研究生招生信息平台，硕士博士招生简章、报名系统、复试安排"
       },
       {
         "id": 504,
-        "name": "Talent Recruitment",
-        "description": "Sun Yat-sen University talent recruitment website, teaching positions, administrative positions, scientific research positions recruitment information"
+        "name": "人才招聘",
+        "description": "中山大学人才招聘网站，教师岗位、行政岗位、科研岗位招聘信息"
       },
       {
         "id": 505,
-        "name": "Centennial Anniversary",
-        "description": "Sun Yat-sen University centennial anniversary thematic website, anniversary activities, historical review, alumni interaction, etc."
+        "name": "百年校庆",
+        "description": "中山大学百年校庆专题网站，校庆活动、历史回顾、校友互动等"
       },
       {
         "id": 506,
-        "name": "Museum",
-        "description": "Sun Yat-sen University Museum official website, exhibition information, collection introduction, visit reservation and other services"
+        "name": "博物馆",
+        "description": "中山大学博物馆官方网站，展览信息、藏品介绍、参观预约等服务"
       },
       {
         "id": 507,
-        "name": "Library",
-        "description": "Sun Yat-sen University Library system, book retrieval, electronic resources, borrowing services, academic support"
+        "name": "图书馆",
+        "description": "中山大学图书馆系统，图书检索、电子资源、借阅服务、学术支持"
       },
       {
         "id": 508,
-        "name": "Alumni Association",
-        "description": "Sun Yat-sen University Alumni Association official website, alumni services, activity notifications, donation platform, etc."
+        "name": "校友会",
+        "description": "中山大学校友会官方网站，校友服务、活动通知、捐赠平台等"
       },
       {
         "id": 509,
-        "name": "Official Email System",
-        "description": "Campus official email system, faculty office emails, notification sending and receiving, file transfer"
+        "name": "公务电子邮件系统",
+        "description": "校园公务电子邮件系统，教职工办公邮件、通知收发、文件传输"
       }
     ]
   },
   {
     "id": 6,
-    "name": "Official Media",
-    "description": "Official media and social platforms, providing campus official information release and interactive communication channels",
+    "name": "官方",
+    "description": "官方媒体与社交平台，提供校园官方信息发布和互动交流渠道",
     "items": [
       {
         "id": 601,
-        "name": "Yixian Code",
-        "description": "Campus QR code service platform, scanning payment, identity verification, information acquisition and other convenient functions"
+        "name": "逸仙码",
+        "description": "校园二维码服务平台，扫码支付、身份验证、信息获取等便捷功能"
       },
       {
         "id": 602,
-        "name": "WeChat Work",
-        "description": "WeChat Work campus version, internal communication, work arrangements, information release and other office collaboration tools"
+        "name": "企业微信",
+        "description": "企业微信校园版，内部通讯、工作安排、信息发布等办公协作工具"
       },
       {
         "id": 603,
-        "name": "SYSU Admissions",
-        "description": "Sun Yat-sen University admissions official platform, admissions consultation, policy interpretation, admission information release, etc."
+        "name": "中大招生",
+        "description": "中山大学招生官方平台，招生咨询、政策解读、录取信息发布等"
       }
     ]
   },
   {
     "id": 7,
-    "name": "Academic Affairs",
-    "description": "Academic affairs management and learning support systems, covering teaching evaluation, course selection, examination, results and other core functions",
+    "name": "教务",
+    "description": "教务管理与学习支持系统，涵盖教学评价、选课、考试、成绩等核心功能",
     "items": [
       {
         "id": 701,
-        "name": "Teaching Evaluation",
-        "description": "Teaching evaluation system, students evaluate and feedback on course teaching quality and teacher teaching effectiveness"
+        "name": "评教",
+        "description": "教学评价系统，学生对课程教学质量、教师授课效果进行评价反馈"
       },
       {
         "id": 702,
-        "name": "Course Selection",
-        "description": "Online course selection system, students independently select courses, adjust schedules, and view course selection results"
+        "name": "选课",
+        "description": "在线选课系统，学生自主选择课程、调整课表、查看选课结果"
       },
       {
         "id": 703,
-        "name": "Course Schedule",
-        "description": "Personal schedule management system, course arrangements, exam times, activity reminders and other schedule planning"
+        "name": "课程表",
+        "description": "个人日程管理系统，课程安排、考试时间、活动提醒等日程规划"
       },
       {
         "id": 704,
-        "name": "Examination",
-        "description": "Examination information inquiry system, examination time arrangements, examination room distribution, score inquiry and other functions"
+        "name": "考试",
+        "description": "考试信息查询系统，考试时间安排、考场分布、成绩查询等功能"
       },
       {
         "id": 705,
-        "name": "Academic Calendar",
-        "description": "Academic calendar inquiry system, semester arrangements, holiday arrangements, important date reminders, etc."
+        "name": "校历",
+        "description": "校历查询系统，学期安排、节假日安排、重要日期提醒等"
       },
       {
         "id": 706,
-        "name": "Study Room",
-        "description": "Study room inquiry system, library and teaching building study room vacancy inquiry and reservation services"
+        "name": "自习室",
+        "description": "自习室查询系统，图书馆、教学楼自习室空位查询和预约服务"
       },
       {
         "id": 707,
-        "name": "Grades",
-        "description": "Grades inquiry system, semester grades, GPA calculation, transcript printing and other functions"
+        "name": "成绩",
+        "description": "成绩查询系统，学期成绩、绩点计算、成绩单打印等功能"
       },
       {
         "id": 708,
-        "name": "Courses",
-        "description": "Course information management system, course syllabus, teaching resources, homework submission and other learning support"
+        "name": "课程",
+        "description": "课程信息管理系统，课程大纲、教学资源、作业提交等学习支持"
       },
       {
         "id": 709,
-        "name": "Personal Training Plan",
-        "description": "Personal training plan system, professional training programs, course planning, academic guidance, etc."
+        "name": "个人培养方案",
+        "description": "个人培养计划系统，专业培养方案、课程规划、学业指导等"
       },
       {
         "id": 710,
-        "name": "Training Programs",
-        "description": "Training program inquiry system, professional training objectives, course settings, graduation requirements, etc."
+        "name": "培养方案",
+        "description": "培养方案查询系统，各专业培养目标、课程设置、毕业要求等"
       },
       {
         "id": 711,
-        "name": "Majors",
-        "description": "Major information inquiry system, major introduction, faculty strength, employment direction and other detailed information"
+        "name": "专业",
+        "description": "专业信息查询系统，专业介绍、师资力量、就业方向等详细信息"
       }
     ]
   },
   {
     "id": 8,
-    "name": "Learning Platforms",
-    "description": "Online learning platforms and teaching tools, supporting blended teaching and autonomous learning",
+    "name": "学习平台",
+    "description": "在线学习平台与教学工具，支持混合式教学和自主学习",
     "items": [
       {
         "id": 801,
         "name": "SeeLight",
-        "description": "SeeLight online learning platform, course resources, online tests, learning progress tracking and other functions"
+        "description": "SeeLight在线学习平台，课程资源、在线测试、学习进度跟踪等功能"
       },
       {
         "id": 802,
-        "name": "Rain Classroom",
-        "description": "Rain Classroom intelligent teaching tool, classroom interaction, real-time answering, learning data analysis, etc."
+        "name": "雨课堂",
+        "description": "雨课堂智慧教学工具，课堂互动、实时答题、学习数据分析等"
       },
       {
         "id": 803,
-        "name": "Ketangpai",
-        "description": "Ketangpai teaching management platform, homework submission, classroom attendance, grade management, etc."
+        "name": "课堂派",
+        "description": "课堂派教学管理平台，作业提交、课堂考勤、成绩管理等"
       },
       {
         "id": 804,
-        "name": "Online Teaching Platform",
-        "description": "Sun Yat-sen University online teaching platform, network courses, teaching videos, online discussions, etc."
+        "name": "在线教学平台",
+        "description": "中山大学在线教学平台，网络课程、教学视频、在线讨论等"
       },
       {
         "id": 805,
-        "name": "China University (MOOC)",
-        "description": "China University MOOC platform, national quality courses, online learning, certificate certification"
+        "name": "中国大学（慕课）",
+        "description": "中国大学MOOC平台，国家级精品课程、在线学习、证书认证"
       },
       {
         "id": 806,
         "name": "WeLearn",
-        "description": "WeLearn foreign language learning platform, foreign language courses, online exercises, learning assessment and other functions"
+        "description": "WeLearn外语学习平台，外语课程、在线练习、学习测评等功能"
       }
     ]
   },
   {
     "id": 9,
-    "name": "Campus Life",
-    "description": "Campus life services and convenient facilities, covering transportation, medical care, accommodation, payment and other daily life needs",
+    "name": "生活",
+    "description": "校园生活服务与便利设施，涵盖交通、医疗、住宿、缴费等日常生活需求",
     "items": [
+
       {
         "id": 902,
-        "name": "Campus Bus",
-        "description": "Campus bus timetable inquiry system, shuttle bus times, routes, real-time location and other information for each campus"
+        "name": "校车",
+        "description": "校车时刻表查询系统，各校区班车时间、路线、实时位置等信息"
       },
       {
         "id": 903,
-        "name": "Yixian Tongxing",
-        "description": "Yixian Tongxing campus card service, access control, consumption, book borrowing and other all-in-one card functions"
+        "name": "逸仙通行",
+        "description": "逸仙通行校园卡服务，门禁、消费、图书借阅等一卡通功能"
       },
       {
         "id": 904,
-        "name": "University Hospital",
-        "description": "University hospital medical service system, appointment registration, health consultation, medical insurance reimbursement and other information"
+        "name": "校医院",
+        "description": "校医院医疗服务系统，预约挂号、健康咨询、医保报销等信息"
       },
       {
         "id": 905,
-        "name": "Dormitory Maintenance",
-        "description": "Dormitory facilities maintenance system, water and electricity maintenance, furniture maintenance, network failure and other repair services"
+        "name": "宿舍报修",
+        "description": "宿舍设施报修系统，水电维修、家具维修、网络故障等报修服务"
       },
       {
         "id": 906,
-        "name": "Water & Electricity Fees",
-        "description": "Water and electricity fee inquiry and payment system, dormitory water and electricity usage inquiry and online payment"
+        "name": "水电费",
+        "description": "水电费查询缴纳系统，宿舍水电使用情况查询和在线缴费"
       },
       {
         "id": 907,
-        "name": "Payment Hall",
-        "description": "Campus online payment platform, tuition fees, accommodation fees, miscellaneous fees and other types of fee payment"
+        "name": "缴费大厅",
+        "description": "校园在线缴费平台，学费、住宿费、杂费等各类费用缴纳"
       }
     ]
   },
   {
     "id": 10,
-    "name": "Artificial Intelligence",
-    "description": "Artificial intelligence assistants and intelligent services, providing intelligent Q&A, consulting services and personalized recommendations",
+    "name": "人工智能",
+    "description": "人工智能助手与智能服务，提供智能问答、咨询服务和个性化推荐",
     "items": [
       {
         "id": 1001,
         "name": "Deepseek",
-        "description": "Deepseek AI intelligent assistant, academic consulting, learning guidance, problem solving and other intelligent services"
+        "description": "Deepseek AI智能助手，学术咨询、学习指导、问题解答等智能服务"
       },
       {
         "id": 1002,
-        "name": "Yiwen",
-        "description": "Yiwen AI information service, intelligent campus news push, personalized information recommendation and other functions"
+        "name": "逸闻",
+        "description": "逸闻AI资讯服务，校园新闻智能推送、个性化信息推荐等功能"
       },
       {
         "id": 1003,
-        "name": "Xuegongjun",
-        "description": "Xuegongjun AI counselor, student affairs consulting, policy interpretation, problem solving and other intelligent services"
+        "name": "学工君",
+        "description": "学工君AI辅导员，学生事务咨询、政策解读、问题解决等智能服务"
       }
     ]
   }

@@ -212,4 +212,7 @@
     <string name="dashboard">Dashboard</string>
     <string name="next_class">Next Class</string>
     <string name="shortcut">Shortcut</string>
+    <string name="logining">Logining...</string>
+    <string name="login_successfully">Login Successfully</string>
+    <string name="require_netid_password">NetID and Password Required</string>
 </resources>

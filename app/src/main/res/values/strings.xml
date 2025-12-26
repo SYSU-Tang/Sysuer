@@ -211,4 +211,7 @@
     <string name="dashboard">面板</string>
     <string name="next_class">下一节课</string>
     <string name="shortcut">快捷方式</string>
+    <string name="logining">登录中...</string>
+    <string name="login_successfully">登录成功</string>
+    <string name="require_netid_password">需要提供NetID和密码</string>
 </resources>

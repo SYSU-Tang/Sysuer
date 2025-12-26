@@ -29,7 +29,6 @@ public class AboutFragment extends PreferenceFragmentCompat {
                 return false;
             });
             ((SimpleMenuPreference)Objects.requireNonNull(findPreference("sponsor"))).setOnPreferenceChangeListener((a,b) -> {
-System.out.println(b);
                 startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("alipays://platformapi/startapp?saId=10000007&amp;clientVersion=3.7.0.0718&amp;qrcode=https%3A%2F%2Fqr.alipay.com%2Ftsx11036pqmv0tkfj6lq8c5%3F_s%3Dweb-other")));
                 return false;
             });

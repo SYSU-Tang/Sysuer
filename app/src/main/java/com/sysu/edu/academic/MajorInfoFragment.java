@@ -36,8 +36,8 @@ public class MajorInfoFragment extends StaggeredFragment {
     String cookie;
     Handler handler;
     OkHttpClient http = new OkHttpClient.Builder().build();
-    int page=0;
-    int total=-1;
+    int page = 0;
+    int total = -1;
     String code;
 
     public static MajorInfoFragment newInstance(Bundle args) {
@@ -45,6 +45,7 @@ public class MajorInfoFragment extends StaggeredFragment {
         fragment.setArguments(args);
         return fragment;
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,27 +54,27 @@ public class MajorInfoFragment extends StaggeredFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if(getArguments()!=null){
+        if (getArguments() != null) {
             code = getArguments().getString("code");
         }
         View view = super.onCreateView(inflater, container, savedInstanceState);
         Params params = new Params(requireActivity());
-        params.setCallback(o -> {
+        params.setCallback(this, o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
-                page=0;
-                total=-1;
+                page = 0;
+                total = -1;
                 getList();
             }
         });
-        cookie  = params.getCookie();
+        cookie = params.getCookie();
         binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
                 if (!v.canScrollVertically(1) && total / 10 + 1 >= page) {
                     getList();
                 }
-                 super.onScrolled(v, dx, dy);
+                super.onScrolled(v, dx, dy);
             }
         });
         getList();
@@ -82,59 +83,58 @@ public class MajorInfoFragment extends StaggeredFragment {
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
                     Toast.makeText(requireContext(), getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
-                }else {
+                } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
                         if (response.get("data") != null) {
                             JSONObject data = response.getJSONObject("data");
-                            switch (msg.what){
+                            switch (msg.what) {
                                 case 0:
                                     if (total == -1) {
                                         total = data.getInteger("total");
                                     }
-                                    data.getJSONArray("rows").forEach(a->{
+                                    data.getJSONArray("rows").forEach(a -> {
                                         ArrayList<String> values = new ArrayList<>();
-                                        String[] keyName = new String[]{"专业代码","专业名称","学制","修业年限","学科门类","学位授予门类"};
-                                        for(int i=0;i<keyName.length;i++){
-                                            values.add(((JSONObject)a).getString(new String[]{"code","name","educationalSystem","maxStudyYear","disciplineCateName","degreeGrantName"}[i]));
+                                        String[] keyName = new String[]{"专业代码", "专业名称", "学制", "修业年限", "学科门类", "学位授予门类"};
+                                        for (int i = 0; i < keyName.length; i++) {
+                                            values.add(((JSONObject) a).getString(new String[]{"code", "name", "educationalSystem", "maxStudyYear", "disciplineCateName", "degreeGrantName"}[i]));
                                         }
-                                        add(values.get(1), List.of(keyName),values);
+                                        add(values.get(1), List.of(keyName), values);
                                     });
-
                                     break;
-                                    case 1:
+                                case 1:
                                     break;
                             }
                         }
-                    }
-                    else {
+                    } else {
                         params.toast(R.string.login_warning);
                         params.gotoLogin(getView(), TargetUrl.JWXT);
-                        }
+                    }
                 }
             }
         };
         return view;
     }
-    void getList(){
+
+    void getList() {
         page++;
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/profession-direction/list")
-                .header("Cookie",cookie)
-                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"majorProfessionDircetion\":\"0\",\"disciplineCateCode\":\"%s\"}}",page,code), MediaType.parse("application/json")))
-                .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
+                .header("Cookie", cookie)
+                .post(RequestBody.create(String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"majorProfessionDircetion\":\"0\",\"disciplineCateCode\":\"%s\"}}", page, code), MediaType.parse("application/json")))
+                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what= 0;
-                msg.obj=response.body().string();
+                msg.what = 0;
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });

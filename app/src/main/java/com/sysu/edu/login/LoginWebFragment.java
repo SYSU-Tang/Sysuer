@@ -15,6 +15,7 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.sysu.edu.api.TargetUrl;
@@ -24,18 +25,15 @@ import java.util.regex.Pattern;
 
 public class LoginWebFragment extends Fragment {
     @SuppressLint("SetJavaScriptEnabled")
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        WebView web = new WebView(requireContext());
-        LoginViewModel model = new ViewModelProvider(requireActivity()).get(LoginViewModel.class);
-        model.getUrl().observe(getViewLifecycleOwner(), web::loadUrl);
+    @NonNull
+    public static WebView getWebView(@NonNull FragmentActivity activity, LoginViewModel model, Runnable afterLoad) {
+        WebView web = new WebView(activity);
+        model.getUrl().observe(activity, web::loadUrl);
         web.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 //boolean reloadCap = Objects.equals(sessionId, CookieManager.getInstance().getCookie(url));
-                model.setSessionID(CookieManager.getInstance().getCookie(url));
+                //model.setSessionID(CookieManager.getInstance().getCookie(url));
                 if (Pattern.compile("//cas.sysu.edu.cn/selfcare").matcher(url).find()) {
                     // model.setCookie(CookieManager.getInstance().getCookie(Objects.requireNonNull(model.getTarget().getValue())));
                     // model.setLogin(true);
@@ -58,9 +56,13 @@ public class LoginWebFragment extends Fragment {
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         model.setCookie(CookieManager.getInstance().getCookie(url));
                         model.setLogin(true);
-                    }, 1500);
+                    }, 1000);
+                    return;
                 }
                 model.setLogin(false);
+                if (afterLoad != null) {
+                    new Handler(Looper.getMainLooper()).postDelayed(afterLoad, 500);
+                }
                 //ar script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
             }
 //            @Override
@@ -68,15 +70,14 @@ public class LoginWebFragment extends Fragment {
 //               // view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
 //            }
 
-            @Override
+            /*@Override
             public void onLoadResource(WebView view, String url) {
                 super.onLoadResource(view, url);
 //                if (Pattern.compile("/api/sso/cas/login?pattern=student-login$").matcher(url).find()) {
 //                    model.setCookie(CookieManager.getInstance().getCookie(view.getUrl()));
 //                    model.setLogin(true);
 //                }
-                //System.out.println(url);
-            }
+            }*/
         });
         WebSettings webSettings = web.getSettings();
         webSettings.setDomStorageEnabled(true);
@@ -93,5 +94,12 @@ public class LoginWebFragment extends Fragment {
         webSettings.setBuiltInZoomControls(false);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         return web;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        return getWebView(requireActivity(), new ViewModelProvider(requireActivity()).get(LoginViewModel.class), null);
     }
 }

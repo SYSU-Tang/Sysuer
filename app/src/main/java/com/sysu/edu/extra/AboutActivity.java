@@ -51,7 +51,6 @@ public class AboutActivity extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                //System.out.println(msg.obj);
                 if(msg.what==-1){
                     params.toast(R.string.no_wifi_warning);
                 }else{
@@ -78,6 +77,8 @@ public class AboutActivity extends AppCompatActivity {
                         }
                         else if(version<response.getInteger("version")){
                             params.toast("本APP已被篡改");
+                        }else{
+                            params.toast("已为最新版本");
                         }
                     } catch (PackageManager.NameNotFoundException e) {
                         throw new RuntimeException(e);

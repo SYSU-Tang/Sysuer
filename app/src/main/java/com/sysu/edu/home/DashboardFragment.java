@@ -96,8 +96,7 @@ public class DashboardFragment extends Fragment {
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setAction("android.intent.action.VIEW");
                     startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    //e.printStackTrace();
+                } catch (ActivityNotFoundException ignored) {
                 }
             });
             binding.qrcode.setOnClickListener(v -> {

@@ -3,12 +3,11 @@ package com.sysu.edu.login;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.view.MenuItem;
 import android.webkit.WebView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -25,47 +24,48 @@ public class LoginActivity extends AppCompatActivity {
 
     Handler handler;
     WebView web;
-    SharedPreferences privacy;
     ActivityLoginBinding binding;
+
+    public static void initModel(FragmentActivity activity, LoginViewModel model, String target, Runnable afterLogin) {
+        SharedPreferences privacy = activity.getSharedPreferences("privacy", 0);
+        model.getPassword().observe(activity, s -> privacy.edit().putString("password", s).apply());
+        model.getAccount().observe(activity, s -> privacy.edit().putString("username", s).apply());
+        model.setAccount(privacy.getString("username", ""));
+        model.setPassword(privacy.getString("password", ""));
+        model.setTarget(target);
+        model.setUrl(TargetUrl.LOGIN);
+        model.getLogin().observe(activity, b -> {
+            if (b) {
+                SharedPreferences.Editor edit = privacy.edit();
+                String cookie = model.getCookie().getValue();
+                Matcher match = Pattern.compile("ibps-1.0.1-token=(.+?);").matcher(cookie + ";");
+                if (match.find()) {
+                    edit.putString("token", match.group(1));
+                }
+                edit.putString("Cookie", cookie);
+                edit.apply();
+                afterLogin.run();
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding=ActivityLoginBinding.inflate(getLayoutInflater());
-        LoginViewModel model = new ViewModelProvider(this).get(LoginViewModel.class);
-        model.getPassword().observe(this, s -> privacy.edit().putString("password", s).apply());
-        model.getAccount().observe(this, s -> privacy.edit().putString("username", s).apply());
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        privacy = getSharedPreferences("privacy", 0);
-        model.setAccount(privacy.getString("username",""));
-        model.setPassword(privacy.getString("password",""));
         binding.pager2.setAdapter(new Pager2Adapter(this).add(new LoginWebFragment()).add(new LoginFragment()));
-        binding.tool.setNavigationOnClickListener(v->finishAfterTransition());
-        model.setTarget(getIntent().getStringExtra("url")==null ?"https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home":getIntent().getStringExtra("url"));
-        model.setUrl(TargetUrl.LOGIN);
+        binding.tool.setNavigationOnClickListener(v -> finishAfterTransition());
         binding.tool.getMenu().add(R.string.confirm).setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
             web.loadUrl(Objects.requireNonNull(getIntent().getStringExtra("url")));
             return false;
         });
-        new TabLayoutMediator(binding.options, binding.pager2, (tab, i) -> tab.setText(new int[]{R.string.web_login,R.string.password_login}[i])).attach();
-        model.getLogin().observe(this,b->{
-            if(b){
-                SharedPreferences.Editor edit = privacy.edit();
-                //System.out.println(sessionId);
-                String cookie = model.getCookie().getValue();
-                Matcher match = Pattern.compile("ibps-1.0.1-token=(.+?);").matcher(cookie + ";");
-                if(match.find()) {
-                    edit.putString("token", match.group(1));
-                }
-                //System.out.println(cookie);
-                edit.putString("Cookie",cookie);
-                edit.putString("username", model.getAccount().getValue());
-                edit.putString("password", model.getPassword().getValue());
-                edit.apply();
-                setResult(RESULT_OK);
-                finishAfterTransition();
-            }
+        new TabLayoutMediator(binding.options, binding.pager2, (tab, i) -> tab.setText(new int[]{R.string.web_login, R.string.password_login}[i])).attach();
+        initModel(this, new ViewModelProvider(this).get(LoginViewModel.class), getIntent().getStringExtra("url") == null ? "https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home" : getIntent().getStringExtra("url"), () -> {
+            setResult(RESULT_OK);
+            supportFinishAfterTransition();
         });
-        handler=new Handler(getMainLooper()){
+       /* handler=new Handler(getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg) {
                 //sessionId = (String) msg.obj;
@@ -100,5 +100,6 @@ public class LoginActivity extends AppCompatActivity {
 //            }
 //        });
 
+    }*/
     }
 }

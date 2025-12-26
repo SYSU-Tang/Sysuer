@@ -62,7 +62,7 @@ public class PayFragment extends StaggeredFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         params = new Params(requireActivity());
-        params.setCallback(o -> {
+        params.setCallback(this,o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 token = params.getToken();
                 getToPayList();
