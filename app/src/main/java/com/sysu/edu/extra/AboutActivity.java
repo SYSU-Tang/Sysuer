@@ -73,7 +73,7 @@ public class AboutActivity extends AppCompatActivity {
 //                                    }
 //                                }
 //                                cursor.close();
-                            }).setNegativeButton("取消", (dialogInterface, i) -> {
+                            }).setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
                             }).setCancelable(response.getBoolean("enforce")).create().show();
                         }
                         else if(version<response.getInteger("version")){

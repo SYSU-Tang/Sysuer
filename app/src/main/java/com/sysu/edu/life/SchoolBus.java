@@ -1,15 +1,12 @@
 package com.sysu.edu.life;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.View;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,7 +19,6 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.databinding.ItemSchoolBusNoticeBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,8 +46,7 @@ public class SchoolBus extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
         Params params = new Params(this);
         cookie  = params.getCookie();
-        cookie = "sid=8354ef8c-2b83-4d63-913b-24098560543a;";
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
                 getData();
@@ -71,7 +66,7 @@ public class SchoolBus extends AppCompatActivity {
                     params.toast(R.string.no_wifi_warning);
                 }else if(msg.what == 0){
                     params.toast(R.string.login_warning);
-                    launch.launch(new Intent(SchoolBus.this, LoginActivity.class).putExtra("url",TargetUrl.PORTAL));
+                    params.gotoLogin(binding.toolbar,TargetUrl.PORTAL);
                 }
                 else{
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
@@ -101,7 +96,7 @@ public class SchoolBus extends AppCompatActivity {
                     }
                     else {
                         params.toast(getString(R.string.login_warning));
-                        launch.launch(new Intent(SchoolBus.this, LoginActivity.class).putExtra("url", TargetUrl.PORTAL));
+                        params.gotoLogin(binding.toolbar,TargetUrl.PORTAL);
                     }
                 }
             }
@@ -111,8 +106,6 @@ public class SchoolBus extends AppCompatActivity {
 
     void getData(){
         http.newCall(new Request.Builder().url("https://portal.sysu.edu.cn/newClient/api/extraCard/schoolBusShuttleInfo/selectSchoolBusMap")
-                //.header("Cookie","_webvpn_key=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidGFuZ3hiNiIsImdyb3VwcyI6WzNdLCJpYXQiOjE3NTYyMTI2MDQsImV4cCI6MTc1NjI5OTAwNH0.G11ylaLHOLdtAaTp_LfR4iu24qAvPxr7hwrtEhgLKP0; webvpn_username=tangxb6%7C1756212604%7C1b647b3c1e605483a66a7cd98ea79994c09c772c; sid=edf90703-05f4-49d7-bdb2-81a8f769117c")
-                //.header("User-Agent","SYSU")
                 .header("Cookie",cookie)
                 .build()).enqueue(new Callback() {
             @Override

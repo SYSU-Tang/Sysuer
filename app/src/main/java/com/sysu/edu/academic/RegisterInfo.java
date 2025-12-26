@@ -1,14 +1,11 @@
 package com.sysu.edu.academic;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,7 +16,6 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,13 +46,13 @@ public class RegisterInfo extends AppCompatActivity {
         binding = ActivityPagerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         params = new Params(this);
-        cookie = params.getCookie();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
                 getNextPage(0);
             }
         });
+        cookie = params.getCookie();
         adp = new Pager2Adapter(this);
         binding.pager.setAdapter(adp);
         for(String i : new String[]{"2024","2025"}){
@@ -129,7 +125,7 @@ public class RegisterInfo extends AppCompatActivity {
                     }
                     else {
                         params.toast(R.string.login_warning);
-                        launch.launch(new Intent(RegisterInfo.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                        params.gotoLogin(binding.getRoot(),TargetUrl.JWXT);
                     }
                 }
             }

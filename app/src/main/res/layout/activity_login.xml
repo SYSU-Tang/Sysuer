@@ -23,6 +23,7 @@
                 android:layout_height="?actionBarSize"
                 android:fitsSystemWindows="true"
                 app:layout_collapseMode="pin"
+                android:transitionName="miniapp"
                 app:navigationIcon="?homeAsUpIndicator"
                 app:title="@string/login" />
 

@@ -18,8 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
@@ -43,7 +41,6 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseSelectionBinding;
 import com.sysu.edu.databinding.ItemCourseSelectionBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -132,12 +129,6 @@ public class CourseSelectionFragment extends Fragment{
                 }
                 init();
             });
-            ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
-                    getCourseList();
-                }
-            });
             cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
             selectedCate = 1;
             selectedType = 11;
@@ -175,11 +166,11 @@ public class CourseSelectionFragment extends Fragment{
                                 break;
                         }
                     } else if (response != null && response.getInteger("code").equals(50021000)) {
-                        Toast.makeText(requireContext(), response.getString("message"), Toast.LENGTH_LONG).show();
+                        params.toast(response.getString("message"));
                     } else {
-                        Toast.makeText(requireContext(), getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
-                    }
+                        params.toast(getString(R.string.login_warning));
+                        params.gotoLogin(getView(), TargetUrl.JWXT);
+                        }
                     super.handleMessage(msg);
                 }
             };

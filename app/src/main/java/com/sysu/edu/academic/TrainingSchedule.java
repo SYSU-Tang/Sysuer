@@ -1,12 +1,9 @@
 package com.sysu.edu.academic;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,8 +11,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityTrainingScheduleBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -33,7 +30,6 @@ public class TrainingSchedule extends AppCompatActivity {
     OkHttpClient http = new OkHttpClient.Builder().build();
     String cookie="";
     Handler handler;
-    ActivityResultLauncher<Intent> launch;
     TrainingScheduleFragment schedule;
 
     @Override
@@ -42,10 +38,7 @@ public class TrainingSchedule extends AppCompatActivity {
         binding=ActivityTrainingScheduleBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Params params = new Params(this);
-        cookie=params.getCookie();
-        binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
-        schedule = (TrainingScheduleFragment) (Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getChildFragmentManager().getFragments().get(0);
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(o -> {
             if (o.getResultCode() == RESULT_OK) {
                 cookie = params.getCookie();
                 getColleges("");
@@ -54,6 +47,9 @@ public class TrainingSchedule extends AppCompatActivity {
                 getProfessions("");
             }
         });
+        cookie=params.getCookie();
+        binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
+        schedule = (TrainingScheduleFragment) (Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getChildFragmentManager().getFragments().get(0);
 
        // System.out.println(getSupportFragmentManager().findFragmentById(R.id.fragment));
       //  NavController navController = ((NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment)).getNavController();
@@ -64,7 +60,8 @@ public class TrainingSchedule extends AppCompatActivity {
                 if(data.getInteger("code")==200){
                     schedule.deal(msg.what,data);
                 }else {
-                    launch.launch(new Intent(TrainingSchedule.this, LoginActivity.class));
+                    params.toast(R.string.login_warning);
+                    params.gotoLogin(binding.tool, TargetUrl.JWXT);
                 }
                 super.handleMessage(msg);
             }

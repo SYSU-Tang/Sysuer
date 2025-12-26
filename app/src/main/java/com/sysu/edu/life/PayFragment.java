@@ -1,7 +1,6 @@
 package com.sysu.edu.life;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,8 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,7 +30,6 @@ import com.sysu.edu.databinding.FragmentPayNeedBinding;
 import com.sysu.edu.databinding.FragmentPayRecordBinding;
 import com.sysu.edu.databinding.FragmentPaySituationBinding;
 import com.sysu.edu.databinding.ItemFilterChipBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,6 +62,12 @@ public class PayFragment extends StaggeredFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         params = new Params(requireActivity());
+        params.setCallback(o -> {
+            if (o.getResultCode() == Activity.RESULT_OK) {
+                token = params.getToken();
+                getToPayList();
+            }
+        });
         token = params.getToken();
         switch (position) {
             case 0:
@@ -145,12 +147,6 @@ public class PayFragment extends StaggeredFragment {
                 });
                 break;
         }
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                token = params.getToken();
-                getToPayList();
-            }
-        });
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -212,7 +208,7 @@ public class PayFragment extends StaggeredFragment {
                         params.toast(response.getString("message"));
                     } else {
                         params.toast(getString(R.string.login_warning));
-                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.PAY));
+                        params.gotoLogin(getView(), TargetUrl.PAY);
                     }
                 }
             }

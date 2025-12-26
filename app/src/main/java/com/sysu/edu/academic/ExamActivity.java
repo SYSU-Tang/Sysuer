@@ -1,12 +1,9 @@
 package com.sysu.edu.academic;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -19,7 +16,6 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityExamBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +41,11 @@ public class ExamActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityExamBinding binding = ActivityExamBinding.inflate(getLayoutInflater());
         params = new Params(this);
+        params.setCallback(o -> {
+            if (o.getResultCode() == RESULT_OK) {
+                getTerms();
+            }
+        });
         ExamViewModel model = new ViewModelProvider(this).get(ExamViewModel.class);
         model.getTermList().observe(this, terms -> binding.terms.setSimpleItems(terms.toArray(new String[]{})));
         model.getTerm().observe(this, term -> {
@@ -69,11 +70,6 @@ public class ExamActivity extends AppCompatActivity {
             model.setExamWeekId(Objects.requireNonNull(model.getExamWeekInfo().getValue()).get(i).getString("examWeekId"));
             binding.date.setText(String.format("%s~%s", model.getExamWeekInfo().getValue().get(i).getString("startDate"), model.getExamWeekInfo().getValue().get(i).getString("endDate")));
             model.setExamWeek(Objects.requireNonNull(model.getExamWeekList().getValue()).get(i));
-        });
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if (o.getResultCode() == RESULT_OK) {
-                getTerms();
-            }
         });
         model.getExamResult().observe(this, result -> {
             ((StaggeredFragment) binding.examFragment.getFragment()).clear();
@@ -125,7 +121,7 @@ public class ExamActivity extends AppCompatActivity {
                         }
                     } else if (response.getInteger("code").equals(53000007)) {
                         params.toast(R.string.login_warning);
-                        launch.launch(new Intent(ExamActivity.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                        params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                     }
                 }
             }

@@ -1,0 +1,337 @@
+[
+  {
+    "id": 1,
+    "name": "Academic",
+    "description": "Academic management and student affairs services, including student status information, examination management, academic warning and other academic-related functions",
+    "items": [
+      {
+        "id": 101,
+        "name": "Student Status",
+        "description": "Student status information inquiry system, view personal student status, admission information, major class and other basic information"
+      },
+      {
+        "id": 102,
+        "name": "CET4 & CET6",
+        "description": "College English Test Band 4 and 6 information inquiry, including registration time, examination arrangement, score inquiry, etc."
+      },
+      {
+        "id": 103,
+        "name": "Registration",
+        "description": "Registration information management system, query and confirm student registration status every semester"
+      },
+      {
+        "id": 104,
+        "name": "Academic Warning",
+        "description": "Academic warning system, monitor academic performance, credit completion, and issue warning notifications in time"
+      },
+      {
+        "id": 105,
+        "name": "Course Progress",
+        "description": "Course completion inquiry, view completed courses, credit statistics, graduation requirements completion progress"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Study",
+    "description": "Learning assistance and personal management tools to help plan learning tasks and time arrangements",
+    "items": [
+      {
+        "id": 201,
+        "name": "To-Do",
+        "description": "To-do item management tool, record learning tasks, homework reminders, important matters arrangement"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Information Portal",
+    "description": "Campus information and information services, providing the latest campus dynamics, notices and market information",
+    "items": [
+      {
+        "id": 301,
+        "name": "Information Portal",
+        "description": "Sun Yat-sen University information portal website, collecting campus news, academic activities, important notices and other information"
+      },
+      {
+        "id": 302,
+        "name": "Campus Market",
+        "description": "Unofficial forum"
+      },
+      {
+        "id": 303,
+        "name": "Academic Affairs Notice",
+        "description": "Academic affairs notification system,发布 course selection notifications, examination arrangements, teaching adjustments and other important information"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Systems",
+    "description": "Campus business system integration entrance, covering sports, student affairs, academic affairs, finance and other core systems",
+    "items": [
+      {
+        "id": 401,
+        "name": "Sports Venue Reservation System",
+        "description": "Campus sports venue online reservation platform, supporting basketball courts, football fields, swimming pools and other venue reservations"
+      },
+      {
+        "id": 402,
+        "name": "Student Affairs System",
+        "description": "Student work management system, handling scholarships, grants, work-study and other student affairs"
+      },
+      {
+        "id": 403,
+        "name": "Undergraduate Academic Affairs System",
+        "description": "Undergraduate teaching management system, course selection, score inquiry, teaching plan management and other core functions"
+      },
+      {
+        "id": 404,
+        "name": "Sun Yat-sen University Unified Portal",
+        "description": "Campus unified identity authentication portal, integrating single sign-on entrance for various campus application systems"
+      },
+      {
+        "id": 405,
+        "name": "University Service Center",
+        "description": "One-stop student service center, handling various certificates, consultations, affairs processing and other services"
+      },
+      {
+        "id": 406,
+        "name": "Financial Information System",
+        "description": "Campus financial management system, tuition payment, scholarship and grant distribution, financial inquiry and other functions"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Official Websites",
+    "description": "Sun Yat-sen University official website and related thematic websites, providing comprehensive school information and public services",
+    "items": [
+      {
+        "id": 501,
+        "name": "Sun Yat-sen University Official Website",
+        "description": "Sun Yat-sen University official website, school overview, news, organizational structure, contact information, etc."
+      },
+      {
+        "id": 502,
+        "name": "Undergraduate Admissions",
+        "description": "Undergraduate admissions information website, admission policies, major introduction, admission inquiry, freshman guide, etc."
+      },
+      {
+        "id": 503,
+        "name": "Graduate Admissions",
+        "description": "Graduate admissions information platform, master and doctoral admission brochures, registration system, re-examination arrangements"
+      },
+      {
+        "id": 504,
+        "name": "Talent Recruitment",
+        "description": "Sun Yat-sen University talent recruitment website, teaching positions, administrative positions, scientific research positions recruitment information"
+      },
+      {
+        "id": 505,
+        "name": "Centennial Anniversary",
+        "description": "Sun Yat-sen University centennial anniversary thematic website, anniversary activities, historical review, alumni interaction, etc."
+      },
+      {
+        "id": 506,
+        "name": "Museum",
+        "description": "Sun Yat-sen University Museum official website, exhibition information, collection introduction, visit reservation and other services"
+      },
+      {
+        "id": 507,
+        "name": "Library",
+        "description": "Sun Yat-sen University Library system, book retrieval, electronic resources, borrowing services, academic support"
+      },
+      {
+        "id": 508,
+        "name": "Alumni Association",
+        "description": "Sun Yat-sen University Alumni Association official website, alumni services, activity notifications, donation platform, etc."
+      },
+      {
+        "id": 509,
+        "name": "Official Email System",
+        "description": "Campus official email system, faculty office emails, notification sending and receiving, file transfer"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Official Media",
+    "description": "Official media and social platforms, providing campus official information release and interactive communication channels",
+    "items": [
+      {
+        "id": 601,
+        "name": "Yixian Code",
+        "description": "Campus QR code service platform, scanning payment, identity verification, information acquisition and other convenient functions"
+      },
+      {
+        "id": 602,
+        "name": "WeChat Work",
+        "description": "WeChat Work campus version, internal communication, work arrangements, information release and other office collaboration tools"
+      },
+      {
+        "id": 603,
+        "name": "SYSU Admissions",
+        "description": "Sun Yat-sen University admissions official platform, admissions consultation, policy interpretation, admission information release, etc."
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Academic Affairs",
+    "description": "Academic affairs management and learning support systems, covering teaching evaluation, course selection, examination, results and other core functions",
+    "items": [
+      {
+        "id": 701,
+        "name": "Teaching Evaluation",
+        "description": "Teaching evaluation system, students evaluate and feedback on course teaching quality and teacher teaching effectiveness"
+      },
+      {
+        "id": 702,
+        "name": "Course Selection",
+        "description": "Online course selection system, students independently select courses, adjust schedules, and view course selection results"
+      },
+      {
+        "id": 703,
+        "name": "Course Schedule",
+        "description": "Personal schedule management system, course arrangements, exam times, activity reminders and other schedule planning"
+      },
+      {
+        "id": 704,
+        "name": "Examination",
+        "description": "Examination information inquiry system, examination time arrangements, examination room distribution, score inquiry and other functions"
+      },
+      {
+        "id": 705,
+        "name": "Academic Calendar",
+        "description": "Academic calendar inquiry system, semester arrangements, holiday arrangements, important date reminders, etc."
+      },
+      {
+        "id": 706,
+        "name": "Study Room",
+        "description": "Study room inquiry system, library and teaching building study room vacancy inquiry and reservation services"
+      },
+      {
+        "id": 707,
+        "name": "Grades",
+        "description": "Grades inquiry system, semester grades, GPA calculation, transcript printing and other functions"
+      },
+      {
+        "id": 708,
+        "name": "Courses",
+        "description": "Course information management system, course syllabus, teaching resources, homework submission and other learning support"
+      },
+      {
+        "id": 709,
+        "name": "Personal Training Plan",
+        "description": "Personal training plan system, professional training programs, course planning, academic guidance, etc."
+      },
+      {
+        "id": 710,
+        "name": "Training Programs",
+        "description": "Training program inquiry system, professional training objectives, course settings, graduation requirements, etc."
+      },
+      {
+        "id": 711,
+        "name": "Majors",
+        "description": "Major information inquiry system, major introduction, faculty strength, employment direction and other detailed information"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Learning Platforms",
+    "description": "Online learning platforms and teaching tools, supporting blended teaching and autonomous learning",
+    "items": [
+      {
+        "id": 801,
+        "name": "SeeLight",
+        "description": "SeeLight online learning platform, course resources, online tests, learning progress tracking and other functions"
+      },
+      {
+        "id": 802,
+        "name": "Rain Classroom",
+        "description": "Rain Classroom intelligent teaching tool, classroom interaction, real-time answering, learning data analysis, etc."
+      },
+      {
+        "id": 803,
+        "name": "Ketangpai",
+        "description": "Ketangpai teaching management platform, homework submission, classroom attendance, grade management, etc."
+      },
+      {
+        "id": 804,
+        "name": "Online Teaching Platform",
+        "description": "Sun Yat-sen University online teaching platform, network courses, teaching videos, online discussions, etc."
+      },
+      {
+        "id": 805,
+        "name": "China University (MOOC)",
+        "description": "China University MOOC platform, national quality courses, online learning, certificate certification"
+      },
+      {
+        "id": 806,
+        "name": "WeLearn",
+        "description": "WeLearn foreign language learning platform, foreign language courses, online exercises, learning assessment and other functions"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Campus Life",
+    "description": "Campus life services and convenient facilities, covering transportation, medical care, accommodation, payment and other daily life needs",
+    "items": [
+      {
+        "id": 902,
+        "name": "Campus Bus",
+        "description": "Campus bus timetable inquiry system, shuttle bus times, routes, real-time location and other information for each campus"
+      },
+      {
+        "id": 903,
+        "name": "Yixian Tongxing",
+        "description": "Yixian Tongxing campus card service, access control, consumption, book borrowing and other all-in-one card functions"
+      },
+      {
+        "id": 904,
+        "name": "University Hospital",
+        "description": "University hospital medical service system, appointment registration, health consultation, medical insurance reimbursement and other information"
+      },
+      {
+        "id": 905,
+        "name": "Dormitory Maintenance",
+        "description": "Dormitory facilities maintenance system, water and electricity maintenance, furniture maintenance, network failure and other repair services"
+      },
+      {
+        "id": 906,
+        "name": "Water & Electricity Fees",
+        "description": "Water and electricity fee inquiry and payment system, dormitory water and electricity usage inquiry and online payment"
+      },
+      {
+        "id": 907,
+        "name": "Payment Hall",
+        "description": "Campus online payment platform, tuition fees, accommodation fees, miscellaneous fees and other types of fee payment"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Artificial Intelligence",
+    "description": "Artificial intelligence assistants and intelligent services, providing intelligent Q&A, consulting services and personalized recommendations",
+    "items": [
+      {
+        "id": 1001,
+        "name": "Deepseek",
+        "description": "Deepseek AI intelligent assistant, academic consulting, learning guidance, problem solving and other intelligent services"
+      },
+      {
+        "id": 1002,
+        "name": "Yiwen",
+        "description": "Yiwen AI information service, intelligent campus news push, personalized information recommendation and other functions"
+      },
+      {
+        "id": 1003,
+        "name": "Xuegongjun",
+        "description": "Xuegongjun AI counselor, student affairs consulting, policy interpretation, problem solving and other intelligent services"
+      }
+    ]
+  }
+]

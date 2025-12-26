@@ -59,10 +59,10 @@
     <PreferenceCategory app:title="@string/login">
         <com.sysu.edu.preference.Preference
             app:defaultValue="2"
-            app:entries="@array/login_way"
+            app:entries="@array/login_mode"
             app:entryValues="@array/login_value"
             app:icon="@drawable/account"
-            app:key="login"
+            app:key="loginMode"
             app:title="@string/login" />
     </PreferenceCategory>
 

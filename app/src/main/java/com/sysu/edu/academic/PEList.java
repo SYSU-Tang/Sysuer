@@ -1,15 +1,11 @@
 package com.sysu.edu.academic;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,7 +37,7 @@ public class PEList extends AppCompatActivity {
         setContentView(binding.getRoot());
         params = new Params(this);
         cookie = params.getCookie();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
             }
@@ -57,8 +53,8 @@ public class PEList extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    Toast.makeText(PEList.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
-                }else {
+                   params.toast(R.string.no_wifi_warning);
+                }/*else {
 //                    JSONObject response = JSONObject.parseObject((String) msg.obj);
 //                    if (response != null && response.getInteger("code").equals(200)) {
 //                        if (response.get("data") != null) {
@@ -79,14 +75,10 @@ public class PEList extends AppCompatActivity {
 //                        Toast.makeText(PEList.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
 //                        launch.launch(new Intent(PEList.this, LoginActivity.class));
 //                    }
-                }
+                }*/
             }
         };
         getTest();
-    }
-    String htmlToJSON(String text){
-       // Pattern.compile("");
-        return "";
     }
 
     void getTest(){

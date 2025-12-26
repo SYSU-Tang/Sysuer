@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -16,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -212,18 +212,18 @@ public class StaggeredFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            TextView title = holder.itemView.findViewById(R.id.title);
+            ItemCardBinding item = ItemCardBinding.bind(holder.itemView);
+            TextView title = item.title;
             title.setText(titles.get(position));
             if (icons.get(position) != null) {
-                title.setCompoundDrawablePadding(new Params((Activity) context).dpToPx(4));
+                title.setCompoundDrawablePadding(new Params((FragmentActivity) context).dpToPx(4));
                 Drawable icon = AppCompatResources.getDrawable(context, icons.get(position));
                 if (icon != null) {
-                    System.out.println(icon.getBounds());
                     icon.setBounds(0, 0, 72, 72);
                     title.setCompoundDrawables(icon, null, null, null);
                 }
             }
-            ((TextView) holder.itemView.findViewById(R.id.title)).setText(titles.get(position));
+            item.title.setText(titles.get(position));
             ColumnAdp adp = new ColumnAdp(context, keys.get(position), values.get(position), hideNull);
             ((RecyclerView) holder.itemView.findViewById(R.id.recycler_view)).setAdapter(adp);
             if (staggeredListener != null) {

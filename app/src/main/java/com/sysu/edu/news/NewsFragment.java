@@ -11,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -31,8 +29,8 @@ import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.BrowserActivity;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,13 +61,12 @@ public class NewsFragment extends Fragment {
                         .build();
             })*/.build();
     Handler handler;
-    int page=1;
+    int page = 1;
     Runnable run;
     String authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c3NlYXJjaF8xMDAwNTAiLCJ1c2VyX25hbWUiOiIyNDMwODE1MiIsInNjb3BlIjpbImFsbCJdLCJuYW1lIjoiMjQzMDgxNTIiLCJleHAiOjE3NTkzOTg1MjUsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImp0aSI6Inp5Z3RBeEhDdkx0ckFMODdnWWJuNDhxWUlyNCIsImNsaWVudF9pZCI6IjE2NzNmMDFkOTYxYTYxMGZlOTIyMGVmZjBkN2IzYmM0IiwidXNlcm5hbWUiOiIyNDMwODE1MiJ9.viBuKujwPQO9ai5orJsJtloWhwZhDThl40O_kfJFK_k";//"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c2g1XzEwMDA0MCIsInVzZXJfbmFtZSI6IjI0MzA4MTUyIiwic2NvcGUiOlsiYWxsIl0sIm5hbWUiOiIyNDMwODE1MiIsImV4cCI6MTc1MTk4OTIyNiwiYXV0aG9yaXRpZXMiOlsiQURNSU4iXSwianRpIjoiZFFqR1Q5Q25Ia1lWUDY0VmlGZFZURExCU1lNIiwiY2xpZW50X2lkIjoiMTY3M2YwMWQ5NjFhNjEwZmU5MjIwZWZmMGQ3YjNiYzQiLCJ1c2VybmFtZSI6IjI0MzA4MTUyIn0.wYTyy8gBr37xItZW2qJp81W2T-17-E9y4RQiODLj9pQ";
     Params params;
-    ActivityResultLauncher<Intent> launch;
 
-    public NewsFragment(String cookie, int pos) {
+    public NewsFragment(int pos) {
         //this.cookie = "login_token_ec583190dcd12bca757dd13df10f59c3=ad6e129cb0c2e7ad6d842afa0e0ebf31; username_ec583190dcd12bca757dd13df10f59c3=tangxb6; login_sn_ec583190dcd12bca757dd13df10f59c3=0c3845934e6ec207f5b898ed0d3dd86f;";//cookie + ";_webvpn_key=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidGFuZ3hiNiIsImdyb3VwcyI6WzNdLCJpYXQiOjE3NDM5Mjg1OTUsImV4cCI6MTc0NDAxNDk5NX0.luGDbfa_19Ye5TBVpwo3gaZPXldD7gsnSqGkX6IJHb0;";
         this.position = pos;
         //System.out.println(cookie);
@@ -78,9 +75,16 @@ public class NewsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-                if (savedInstanceState == null) {
+
+        if (savedInstanceState == null) {
             binding = RecyclerViewScrollBinding.inflate(inflater);
             params = new Params(requireActivity());
+            params.setCallback(this,o -> {
+                if (o.getResultCode() == Activity.RESULT_OK) {
+                    cookie = params.getCookie();
+                    run.run();
+                }
+            });
             cookie = params.getCookie();
             //cookie = "authorization=Bearer%20eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c3NlYXJjaF8xMDAwNTAiLCJ1c2VyX25hbWUiOiIyNDMwODE1MiIsInNjb3BlIjpbImFsbCJdLCJuYW1lIjoiMjQzMDgxNTIiLCJleHAiOjE3NTkzOTg1MjUsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImp0aSI6Inp5Z3RBeEhDdkx0ckFMODdnWWJuNDhxWUlyNCIsImNsaWVudF9pZCI6IjE2NzNmMDFkOTYxYTYxMGZlOTIyMGVmZjBkN2IzYmM0IiwidXNlcm5hbWUiOiIyNDMwODE1MiJ9.viBuKujwPQO9ai5orJsJtloWhwZhDThl40O_kfJFK_k";
             RecyclerView list = binding.recyclerView;
@@ -102,7 +106,6 @@ public class NewsFragment extends Fragment {
                     Bundle rdata = msg.getData();
                     boolean isJson = !rdata.getBoolean("isJson");
                     String json = rdata.getString("data");
-                    System.out.println(json);
                     JSONObject data;
                     if (isJson) {
                         return;
@@ -188,7 +191,7 @@ public class NewsFragment extends Fragment {
                             }
                         } else if (code == 10003) {
                             params.toast(data.getString("message"));
-                            launch.launch(new Intent(requireContext(), LoginActivity.class)/*.putExtra("url", "https://cas.sysu.edu.cn/cas/login?service=https://portal.sysu.edu.cn/newClient/shiro-cas")*/);
+                            params.gotoLogin(getView(), TargetUrl.PORTAL);
                         }
                     } //今日中大
 
@@ -200,12 +203,6 @@ public class NewsFragment extends Fragment {
             page += 1;
         };
         run.run();
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                run.run();
-            }
-        });
         //getAuthorization();
         return binding.getRoot();
     }
@@ -222,7 +219,7 @@ public class NewsFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message message = new Message();
-                message.what=-1;
+                message.what = -1;
                 handler.sendMessage(message);
             }
 
@@ -232,7 +229,7 @@ public class NewsFragment extends Fragment {
                 msg.what = 3;
                 Bundle data = new Bundle();
                 data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                data.putString("data",response.body().string());
+                data.putString("data", response.body().string());
                 msg.setData(data);
                 handler.sendMessage(msg);
             }
@@ -241,7 +238,7 @@ public class NewsFragment extends Fragment {
 
     void getSubscription() {
         http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
-                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":"+page+",\"apiCode\":\"3ytr4e6c\",\"notice\":false}", MediaType.parse("application/json")))
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"3ytr4e6c\",\"notice\":false}", MediaType.parse("application/json")))
                 //.header("Content-type", "application/json")
                 .header("Authorization", authorization)
                 //.header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
@@ -250,7 +247,7 @@ public class NewsFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message message = new Message();
-                message.what=-1;
+                message.what = -1;
                 handler.sendMessage(message);
             }
 
@@ -260,7 +257,7 @@ public class NewsFragment extends Fragment {
                 msg.what = 2;
                 Bundle data = new Bundle();
                 data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                data.putString("data",response.body().string());
+                data.putString("data", response.body().string());
                 msg.setData(data);
                 handler.sendMessage(msg);
             }
@@ -294,47 +291,50 @@ public class NewsFragment extends Fragment {
 
     void getNotice() {
         http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
-                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":"+page+",\"apiCode\":\"3ytunvv6\",\"notice\":false}", MediaType.parse("application/json")))
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"3ytunvv6\",\"notice\":false}", MediaType.parse("application/json")))
                 .header("Authorization", authorization)
                 //.header("Cookie", cookie)
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message message = new Message();
-                message.what=-1;
+                message.what = -1;
                 handler.sendMessage(message);
             }
+
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what = 4;
                 Bundle data = new Bundle();
                 data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                data.putString("data",response.body().string());
+                data.putString("data", response.body().string());
                 msg.setData(data);
                 handler.sendMessage(msg);
             }
         });
     }
+
     void getDailyNews() {
         http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
-                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":"+page+",\"apiCode\":\"4cef8rqw\",\"notice\":false}", MediaType.parse("application/json")))
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"4cef8rqw\",\"notice\":false}", MediaType.parse("application/json")))
                 .header("Authorization", authorization)
                 //.header("Cookie", cookie)
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message message = new Message();
-                message.what=-1;
+                message.what = -1;
                 handler.sendMessage(message);
             }
+
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what = 5;
                 Bundle data = new Bundle();
                 data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                data.putString("data",response.body().string());
+                data.putString("data", response.body().string());
                 msg.setData(data);
                 handler.sendMessage(msg);
             }
@@ -364,6 +364,7 @@ public class NewsFragment extends Fragment {
 //        });
 //    }
 }
+
 class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ArrayList<HashMap<String, String>> data = new ArrayList<>();
     FragmentActivity context;
@@ -371,7 +372,7 @@ class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public NewsAdp(FragmentActivity context) {
         super();
-        this.context=context;
+        this.context = context;
     }
 
     @NonNull
@@ -386,24 +387,26 @@ class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         MaterialTextView title = holder.itemView.findViewById(R.id.title);
         MaterialTextView content = holder.itemView.findViewById(R.id.content);
         AppCompatImageView image = holder.itemView.findViewById(R.id.image);
-        holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context,v,"miniapp").toBundle())
+        holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context, v, "miniapp").toBundle())
                 //context.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context, v, "miniapp").toBundle())
         );
-        title.setText(data.get(position).getOrDefault("title",""));
-        content.setText(String.format("#%s #%s",data.get(position).getOrDefault("source", "") , data.get(position).getOrDefault("time", "")));
+        title.setText(data.get(position).getOrDefault("title", ""));
+        content.setText(String.format("#%s #%s", data.get(position).getOrDefault("source", ""), data.get(position).getOrDefault("time", "")));
         String img = data.get(position).get("image");
         if (img != null && !img.isEmpty()) {
             Glide.with(context).load(img)
                     // .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
                     .placeholder(R.drawable.logo)
-                    .override(new Params(context).dpToPx(120),new Params(context).dpToPx(120)).optionalFitCenter().transform(new RoundedCorners(16))
+                    .override(new Params(context).dpToPx(120), new Params(context).dpToPx(120)).optionalFitCenter().transform(new RoundedCorners(16))
                     .into(image);
         }
     }
-    void add(String title, String image, String url,String time,String source) {
-        data.add(new HashMap<>(Map.of("title", title, "image", image, "url", url,"time",time,"source",source)));
+
+    void add(String title, String image, String url, String time, String source) {
+        data.add(new HashMap<>(Map.of("title", title, "image", image, "url", url, "time", time, "source", source)));
         notifyItemInserted(getItemCount() - 1);
     }
+
     //    NewsAdp setCookie(String cookie)
 //    {
 //        this.cookie=cookie;

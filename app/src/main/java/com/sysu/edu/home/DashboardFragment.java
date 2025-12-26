@@ -17,10 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
@@ -45,7 +42,6 @@ import com.sysu.edu.databinding.FragmentDashboardBinding;
 import com.sysu.edu.databinding.ItemCourseBinding;
 import com.sysu.edu.databinding.ItemExamBinding;
 import com.sysu.edu.extra.LaunchMiniProgram;
-import com.sysu.edu.login.LoginActivity;
 import com.sysu.edu.todo.InitTodo;
 import com.sysu.edu.todo.TodoFragment;
 import com.sysu.edu.todo.info.TodoInfo;
@@ -84,19 +80,14 @@ public class DashboardFragment extends Fragment {
     Params params;
     FragmentDashboardBinding binding;
     OkHttpClient http = new OkHttpClient.Builder().build();
+    boolean refresh = true;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if (binding == null) {
+        if (refresh) {
             binding = FragmentDashboardBinding.inflate(inflater);
-            ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    cookie = params.getCookie();
-                    getTerm();
-                }
-            });
             binding.scan.setOnClickListener(v -> {
                 try {
                     Intent intent = new Intent();
@@ -135,7 +126,12 @@ public class DashboardFragment extends Fragment {
             });
             params = new Params(requireActivity());
             cookie = params.getCookie();
-
+            params.setCallback(this, o -> {
+                if (o.getResultCode() == Activity.RESULT_OK) {
+                    cookie = params.getCookie();
+                    getTerm();
+                }
+            });
             CourseAdp courseAdp = new CourseAdp(requireActivity());
             binding.courseList.setAdapter(courseAdp);
             ExamAdp examAdp = new ExamAdp(requireActivity());
@@ -158,7 +154,7 @@ public class DashboardFragment extends Fragment {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     if (msg.what == -1) {
-                        Toast.makeText(requireActivity(), getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                        params.toast(R.string.no_wifi_warning);
                         binding.nextClass.setText(R.string.no_wifi_warning);
                         return;
                     }
@@ -218,22 +214,23 @@ public class DashboardFragment extends Fragment {
                                 binding.date.setText(String.format("第%s学期\n%s\n星期%s", term, new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), new String[]{"日", "一", "二", "三", "四", "五", "六"}[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]));
                                 getTodayCourses(term);
                                 getExams(term);
+                                refresh = false;
                                 break;
                         }
                     } else {
-                        launch.launch(new Intent(getContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                        params.gotoLogin(getView(), TargetUrl.JWXT);
                     }
                 }
             };
             SysuerPreferenceManager spm = new ViewModelProvider(requireActivity()).get(SysuerPreferenceManager.class);
             spm.setPM(PreferenceManager.getDefaultSharedPreferences(requireActivity()));
             spm.getIsAgreeLiveData().observe(getViewLifecycleOwner(), aBoolean -> {
-                System.out.println(aBoolean);
                 if (!aBoolean) {
                     getTerm();
                 }
             });
             spm.initLiveData();
+
             TodoFragment todoFragment = new TodoFragment();
             getParentFragmentManager().beginTransaction().add(R.id.todo_list, todoFragment).commit();
             InitTodo initTodo = new InitTodo(requireActivity(), todoFragment);

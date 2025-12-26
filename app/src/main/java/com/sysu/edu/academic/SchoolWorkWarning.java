@@ -1,15 +1,11 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,7 +14,6 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityListBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,20 +47,11 @@ public class SchoolWorkWarning extends AppCompatActivity {
         params = new Params(this);
         cookie = params.getCookie();
         StaggeredFragment fr = binding.list.getFragment();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                page=0;
-                fr.clear();
-                cookie = params.getCookie();
-                getWarning();
-            }
-        });
         binding.toolbar.setTitle(R.string.school_work_warning);
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                //System.out.println(msg.obj);
                 if (msg.what == -1) {
                     Toast.makeText(SchoolWorkWarning.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
                 }else {
@@ -89,8 +75,8 @@ public class SchoolWorkWarning extends AppCompatActivity {
                         }
                     }
                     else {
-                        Toast.makeText(SchoolWorkWarning.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(SchoolWorkWarning.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                        params.toast(R.string.login_warning);
+                        params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                     }
                 }
             }

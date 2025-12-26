@@ -1,7 +1,6 @@
 package com.sysu.edu.academic;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,8 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +17,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +52,7 @@ public class CourseCompletionFragment extends StaggeredFragment{
         });
         Params params = new Params(requireActivity());
         cookie  = params.getCookie();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(this,o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
                 page = 0;
@@ -91,11 +87,10 @@ public class CourseCompletionFragment extends StaggeredFragment{
                             }
                         }
                     }else if(response != null && response.getInteger("code").equals(50030000)){
-                        Toast.makeText(requireContext(), response.getString("message"), Toast.LENGTH_LONG).show();
-                    }
+                        params.toast(response.getString("message"));}
                     else {
-                        Toast.makeText(requireContext(), getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                        params.toast(R.string.login_warning);
+                        params.gotoLogin(getView(),TargetUrl.JWXT);
                     }
                 }
             }

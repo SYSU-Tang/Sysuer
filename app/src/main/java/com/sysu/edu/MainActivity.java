@@ -71,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         NavHostFragment fragment = (NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.dashboard_scroll));
         NavController navController = fragment.getNavController();
-        NavGraph g = new NavInflater(this, navController.getNavigatorProvider()).inflate(R.navigation.main_navigation);
+        NavGraph graph = new NavInflater(this, navController.getNavigatorProvider()).inflate(R.navigation.main_navigation);
         if (savedInstanceState == null) {
-            g.setStartDestination(new int[]{R.id.navigation_activity, R.id.navigation_service, R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home", "0"))]);
+            graph.setStartDestination(new int[]{R.id.navigation_activity, R.id.navigation_service, R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home", "0"))]);
         }
 //        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
 //            //Log.d(TAG, "Shizuku 权限已授予");
@@ -109,11 +109,11 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            });
 //        }
-        navController.setGraph(g);
+        navController.setGraph(graph);
         NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
         SysuerPreferenceManager spm = new ViewModelProvider(this).get(SysuerPreferenceManager.class);
         spm.setPM(PreferenceManager.getDefaultSharedPreferences(this));
-        spm.setIsAgreeLiveData(spm.getIsFirstLaunch() || spm.getIsAgree());
+        spm.initLiveData();
         AlertDialog dialog = new MaterialAlertDialogBuilder(this).setTitle("用户协议和隐私政策")
                 .setMessage(Html.fromHtml("请阅读<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E7%94%A8%E6%88%B7%E5%8D%8F%E8%AE%AE\">用户协议</a>和<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96\">隐私政策</a>", Html.FROM_HTML_MODE_LEGACY))
                 .setPositiveButton("同意", (dialogInterface, i) -> {
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 //                                    }
 //                                }
 //                                cursor.close();
-                            }).setNegativeButton("取消", (dialogInterface, i) -> {
+                            }).setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
                             }).setCancelable(response.getBoolean("enforce")).create().show();
                         } else if (version < response.getInteger("version")) {
                             params.toast("本APP已被篡改");

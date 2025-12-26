@@ -1,7 +1,7 @@
 package com.sysu.edu.academic;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,8 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,7 +33,6 @@ import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityClassroomQueryBinding;
 import com.sysu.edu.databinding.ItemClassroomResultBinding;
 import com.sysu.edu.databinding.ItemFilterChipBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -69,7 +66,6 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     int page=1;
     int total=0;
     HashMap<Integer, String> office= new HashMap<>();
-    ActivityResultLauncher<Intent> launch;
     ActivityClassroomQueryBinding binding;
 
     public OkHttpClient getHttp(){
@@ -94,6 +90,12 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         binding = ActivityClassroomQueryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Params params = new Params(this);
+        params.setCallback(o -> {
+            if (o.getResultCode() == Activity.RESULT_OK) {
+                cookie = params.getCookie();
+                getCampus();
+            }
+        });
         binding.campusSelectAll.setOnClickListener(v -> {
             for(int i=1;i<((ChipGroup)v.getParent()).getChildCount();i++){
                 Chip chip=(Chip)((ChipGroup)v.getParent()).getChildAt(i);
@@ -129,13 +131,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
             getRoom();
         });
         getCampus();
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if(o.getResultCode()==RESULT_OK){
-                cookie=params.getCookie();
-                http=getHttp();
-                getCampus();
-            }
-        });
+
         binding.result.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -209,7 +205,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     }
                 }else {
                     Toast.makeText(ClassroomQueryActivity.this,getString(R.string.login_warning),Toast.LENGTH_LONG).show();
-                    launch.launch(new Intent(ClassroomQueryActivity.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                    params.gotoLogin(binding.tool,TargetUrl.JWXT);
                 }
             }
         };

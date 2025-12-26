@@ -19,8 +19,6 @@ import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,7 +32,6 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,13 +63,13 @@ public class AcademyNotification extends AppCompatActivity {
         binding.toolbar.setTitle(R.string.academic_affair_notice);
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
-        cookie = params.getCookie();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
                 getNotices();
             }
         });
+        cookie = params.getCookie();
         Pager2Adapter adp = new Pager2Adapter(this);
         NewsFragment f1 = new NewsFragment();
         NewsFragment f2 = new NewsFragment();
@@ -146,7 +143,7 @@ public class AcademyNotification extends AppCompatActivity {
                         }
                     } else {
                         params.toast(getString(R.string.login_warning));
-                        launch.launch(new Intent(AcademyNotification.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                        params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                     }
                 }
             }

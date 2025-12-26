@@ -2,15 +2,12 @@ package com.sysu.edu.academic;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -20,8 +17,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
+import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityCourseDetailBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,20 +47,20 @@ public class CourseDetail extends AppCompatActivity {
         setContentView(binding.getRoot());
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
         Adp adp = new Adp(this);
-        binding.pager.setAdapter(adp);
-        adp.add(new CourseDetailFragment());
-        adp.add(new CourseDraftFragment());
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, i) -> tab.setText(new String[]{getString(R.string.course_detail),getString(R.string.course_draft)}[i])).attach();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        Params params = new Params(this);
+        params.setCallback(o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = this.getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie","");
                 getCourseOutline();
             }
         });
+        binding.pager.setAdapter(adp);
+        adp.add(new CourseDetailFragment());
+        adp.add(new CourseDraftFragment());
+        new TabLayoutMediator(binding.tabs, binding.pager, (tab, i) -> tab.setText(new String[]{getString(R.string.course_detail),getString(R.string.course_draft)}[i])).attach();
         code = getIntent().getStringExtra("code");
         id = getIntent().getStringExtra("id");
         classNum = getIntent().getStringExtra("class");
-        System.out.println(classNum);
         cookie = this.getSharedPreferences("privacy",Context.MODE_PRIVATE).getString("Cookie","");
         handler = new Handler(getMainLooper()){
             @Override
@@ -85,7 +83,9 @@ public class CourseDetail extends AppCompatActivity {
                                 bundle2.putString("data",data.getJSONArray("scheduleList").toJSONString());
                                 adp.getPage(1).setArguments(bundle2);
                             }
-                            id=data.getJSONObject("outlineInfo").getString("courseId");
+                            if (data != null) {
+                                id=data.getJSONObject("outlineInfo").getString("courseId");
+                            }
                             getCourseOutline2();
                             break;
                         case 2:JSONObject data2 = response.getJSONObject("data");
@@ -103,10 +103,10 @@ public class CourseDetail extends AppCompatActivity {
                     }
                 }else if (response.getInteger("code").equals(52000000)){
                     binding.pager.setVisibility(View.GONE);
-                    Toast.makeText(CourseDetail.this,response.getString("message"),Toast.LENGTH_LONG).show();
+                    params.toast(response.getString("message"));
                 }else if (response.getInteger("code").equals(53000007)){
-                    Toast.makeText(CourseDetail.this,getString(R.string.login_warning),Toast.LENGTH_LONG).show();
-                    launch.launch(new Intent(CourseDetail.this, LoginActivity.class));
+                    params.toast(R.string.login_warning);
+                    params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                 }
                 else{
                     Toast.makeText(CourseDetail.this,response.getString("message"),Toast.LENGTH_LONG).show();

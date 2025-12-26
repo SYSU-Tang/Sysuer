@@ -2,7 +2,6 @@ package com.sysu.edu.academic;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,10 +9,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -29,7 +25,6 @@ import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseQueryBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,8 +43,8 @@ public class CourseQueryFragment extends Fragment {
     OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     String cookie;
-    HashMap<String,String>filter = new HashMap<>();
-    HashMap<String,String>filterName = new HashMap<>();
+    HashMap<String, String> filter = new HashMap<>();
+    HashMap<String, String> filterName = new HashMap<>();
     CourseSelectionViewModel vm;
     private FragmentCourseQueryBinding binding;
 
@@ -67,8 +62,7 @@ public class CourseQueryFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (savedInstanceState==null)
-        {
+        if (savedInstanceState == null) {
             binding = FragmentCourseQueryBinding.inflate(inflater, container, false);
 //            getParentFragmentManager().beginTransaction()
 //                    // .setCustomAnimations()
@@ -76,23 +70,27 @@ public class CourseQueryFragment extends Fragment {
 //                    .addToBackStack(null)
 //                    .commit();
             binding.container.setColumnCount(new Params(requireActivity()).getColumn());
-            ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+            Params params = new Params(requireActivity());
+            params.setCallback(o -> {
                 if (o.getResultCode() == Activity.RESULT_OK) {
                     cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
                     getData(0);
                 }
             });
             reset();
-            cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
+            cookie = params.getCookie();
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
+                    if (msg.what == -1) {
+                        params.toast(getString(R.string.no_wifi_warning));
+                        return;
+                    }
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null) {
                         if (response.getInteger("code").equals(200)) {
                             switch (msg.what) {
                                 case -1:
-                                    Toast.makeText(requireContext(), getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
                                     break;
                                 case 1:
                                     JSONArray data = response.getJSONArray("data");
@@ -119,10 +117,10 @@ public class CourseQueryFragment extends Fragment {
                                     break;
                             }
                         } else if (response.getInteger("code").equals(50021000)) {
-                            Toast.makeText(requireContext(), response.getString("message"), Toast.LENGTH_LONG).show();
+                            params.toast(response.getString("message"));
                         } else if (response.getInteger("code").equals(53000007)) {
-                            Toast.makeText(requireContext(), getString(R.string.login_warning), Toast.LENGTH_LONG).show();
-                            launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                            params.toast(R.string.login_warning);
+                            params.gotoLogin(binding.getRoot(), TargetUrl.JWXT);
                         }
                     }
                     super.handleMessage(msg);
@@ -130,7 +128,7 @@ public class CourseQueryFragment extends Fragment {
             };
             getData(0);
         }
-        super.onCreateView(inflater,container,savedInstanceState);
+        super.onCreateView(inflater, container, savedInstanceState);
         return binding.getRoot();
     }
 
@@ -151,7 +149,7 @@ public class CourseQueryFragment extends Fragment {
             vm.setFilter(new HashMap<>());
             reset();
         });
-        binding.submit.setOnClickListener(v-> {
+        binding.submit.setOnClickListener(v -> {
             super.onViewCreated(view, savedInstanceState);
 //            Bundle arg = new Bundle();
 //            arg.putSerializable("filter",getMap());
@@ -179,33 +177,34 @@ public class CourseQueryFragment extends Fragment {
         //binding = null;
     }
 
-    void getData(int i){
+    void getData(int i) {
         http.newCall(new Request.Builder().url(new String[]{"https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox",
                         "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=233",
                         "https://jwxt.sysu.edu.cn/jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1",
                         "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=204",
                         "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=387"}[i])
-                .header("Cookie",cookie)
-                .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE")
+                .header("Cookie", cookie)
+                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE")
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what=1;
-                msg.arg1=i;
-                msg.obj=response.body().string();
+                msg.what = 1;
+                msg.arg1 = i;
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
     }
-    public HashMap<String,String> getMap(){
+
+    public HashMap<String, String> getMap() {
         filter.put("course", Objects.requireNonNull(binding.course.getText()).toString());
         filter.put("teacher", Objects.requireNonNull(binding.teacher.getText()).toString());
         filter.put("school", Objects.requireNonNull(binding.school.getText()).toString());
@@ -215,11 +214,11 @@ public class CourseQueryFragment extends Fragment {
         return filter;
     }
 
-    String parseFilter(HashMap<String,String> filter){
+    String parseFilter(HashMap<String, String> filter) {
         StringBuilder str = new StringBuilder();
-        String[] keys = new String[]{"course","campus", "day", "section", "school","teacher", "language", "special"};
-        String[] key = new String[]{"courseName","studyCampusId","week","classTimes","courseUnitNum","teachingTeacherNum","teachingLanguageCode","specialClassCode"};
-        for(int i=0;i<keys.length;i++){
+        String[] keys = new String[]{"course", "campus", "day", "section", "school", "teacher", "language", "special"};
+        String[] key = new String[]{"courseName", "studyCampusId", "week", "classTimes", "courseUnitNum", "teachingTeacherNum", "teachingLanguageCode", "specialClassCode"};
+        for (int i = 0; i < keys.length; i++) {
             String v = filter.getOrDefault(keys[i], "");
             if (v != null && !v.isEmpty()) {
                 str.append(String.format(",\"%s\":\"%s\"", key[i], v));

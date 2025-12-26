@@ -1,15 +1,12 @@
 package com.sysu.edu.academic;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.widget.LinearLayout;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,7 +20,6 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.databinding.ItemCardBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +47,7 @@ public class CourseCompletion extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
         cookie = params.getCookie();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 cookie = params.getCookie();
                 getCreditHours();
@@ -112,7 +108,7 @@ public class CourseCompletion extends AppCompatActivity {
                         params.toast(response.getString("message"));
                     } else {
                         params.toast(R.string.login_warning);
-                        launch.launch(new Intent(CourseCompletion.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                        params.gotoLogin(binding.getRoot(), TargetUrl.JWXT);
                     }
                 }
             }

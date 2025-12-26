@@ -115,7 +115,7 @@
         <item>4</item>
         <item>5</item>
     </string-array>
-    <string-array name="login_way">
+    <string-array name="login_mode">
         <item>仅提示</item>
         <item>仅主页提示</item>
         <item>手动登录</item>

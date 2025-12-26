@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,8 +12,6 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.PopupMenu;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,7 +27,6 @@ import com.sysu.edu.databinding.ItemAgendaBinding;
 import com.sysu.edu.databinding.ItemDetailBinding;
 import com.sysu.edu.databinding.ItemDurationBinding;
 import com.sysu.edu.databinding.ItemWeekdayBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -52,7 +48,6 @@ public class AgendaActivity extends AppCompatActivity {
     Handler handler;
     ArrayList<String> terms = new ArrayList<>();
     ArrayList<Integer> weeks = new ArrayList<>();
-    ActivityResultLauncher<Intent> launch;
     PopupMenu termPop;
     OkHttpClient http = new OkHttpClient.Builder().build();
     PopupMenu weekPop;
@@ -71,6 +66,17 @@ public class AgendaActivity extends AppCompatActivity {
         binding = ActivityAgendaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         params = new Params(this);
+        params.setCallback(o -> {
+            if (o.getResultCode() == RESULT_OK) {
+                cookie = params.getCookie();
+                if (currentTerm != null) {
+                    getTable(currentTerm, currentWeek);
+                } else {
+                    getTerm();
+                    getAvailableTerms();
+                }
+            }
+        });
         cookie = params.getCookie();
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         String[] duration = getResources().getStringArray(R.array.duration);
@@ -120,17 +126,6 @@ public class AgendaActivity extends AppCompatActivity {
             binding.day.addView(column);
             binding.week.addView(itemBinding.getRoot());
         }
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if (o.getResultCode() == RESULT_OK) {
-                cookie = params.getCookie();
-                if (currentTerm != null) {
-                    getTable(currentTerm, currentWeek);
-                } else {
-                    getTerm();
-                    getAvailableTerms();
-                }
-            }
-        });
         binding.term.setOnClickListener(v -> {
             if (termPop == null) {
                 termPop = new PopupMenu(v.getContext(), v, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
@@ -253,7 +248,7 @@ public class AgendaActivity extends AppCompatActivity {
                     }
                 } else {
                     params.toast(R.string.login_warning);
-                    launch.launch(new Intent(AgendaActivity.this, LoginActivity.class).putExtra("url", TargetUrl.JWXT));
+                    params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                 }
             }
         };

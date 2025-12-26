@@ -60,27 +60,29 @@ public class TodoList extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        if (i <= 5){
-            addType();
+        if (i <= 6) {
+            addType(db);
         }
     }
 
-    public void addType() {
-        getWritableDatabase().beginTransaction();
+    public void addType(SQLiteDatabase db) {
+        db.beginTransaction();
         ContentValues value = new ContentValues();
         for (String type : context.getResources().getStringArray(R.array.todo_base_type)) {
             value.put("name", type);
             try {
-                getWritableDatabase().insertWithOnConflict("types", null, value, SQLiteDatabase.CONFLICT_ABORT);
+                db.insertWithOnConflict("types", null, value, SQLiteDatabase.CONFLICT_ABORT);
             } catch (Exception ignored) {
             }
             value.clear();
         }
-        getWritableDatabase().setTransactionSuccessful();
-        getWritableDatabase().endTransaction();
-        close();
+        db.setTransactionSuccessful();
+        db.endTransaction();
     }
 
+    public void addType() {
+        addType(getWritableDatabase());
+    }
     /*public void add() {
         ContentValues value = new ContentValues();
         value.put("title", "标题");

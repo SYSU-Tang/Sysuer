@@ -1,22 +1,19 @@
 package com.sysu.edu.academic;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityListBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,10 +43,10 @@ public class CETActivity extends AppCompatActivity {
         page=0;
         binding = ActivityListBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        StaggeredFragment fr = binding.list.getFragment();
         params = new Params(this);
         cookie = params.getCookie();
-        StaggeredFragment fr = binding.list.getFragment();
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 page=0;
                 fr.clear();
@@ -86,7 +83,7 @@ public class CETActivity extends AppCompatActivity {
                     }
                     else {
                         params.toast(getString(R.string.login_warning));
-                        launch.launch(new Intent(CETActivity.this, LoginActivity.class));
+                        params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                     }
                 }
             }

@@ -1,7 +1,6 @@
 package com.sysu.edu.academic;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,8 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +17,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,6 +58,14 @@ public class MajorInfoFragment extends StaggeredFragment {
         }
         View view = super.onCreateView(inflater, container, savedInstanceState);
         Params params = new Params(requireActivity());
+        params.setCallback(o -> {
+            if (o.getResultCode() == Activity.RESULT_OK) {
+                cookie = params.getCookie();
+                page=0;
+                total=-1;
+                getList();
+            }
+        });
         cookie  = params.getCookie();
         binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -70,14 +74,6 @@ public class MajorInfoFragment extends StaggeredFragment {
                     getList();
                 }
                  super.onScrolled(v, dx, dy);
-            }
-        });
-        ActivityResultLauncher<Intent> launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                page=0;
-                total=-1;
-                getList();
             }
         });
         getList();
@@ -113,8 +109,8 @@ public class MajorInfoFragment extends StaggeredFragment {
                     }
                     else {
                         params.toast(R.string.login_warning);
-                        launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.JWXT));
-                    }
+                        params.gotoLogin(getView(), TargetUrl.JWXT);
+                        }
                 }
             }
         };

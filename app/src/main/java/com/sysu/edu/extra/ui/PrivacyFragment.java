@@ -2,15 +2,12 @@ package com.sysu.edu.extra.ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
@@ -20,7 +17,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -50,14 +46,14 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                         return false;
                     });
             params = new Params(requireActivity());
-            token = params.getToken();
-            ActivityResultLauncher<Intent> launchLogin = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+            params.setCallback(o -> {
                 if (o.getResultCode() == Activity.RESULT_OK) {
                     token = params.getToken();
                     getInfo();
                 }
             });
-            handler = new Handler(Looper.getMainLooper()) {
+            token = params.getToken();
+           handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     if (msg.what == -1) {
@@ -85,12 +81,11 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                             }
                         } else if (response != null && response.getInteger("code").equals(1003)) {
                             params.toast(R.string.login_warning);
-                            launchLogin.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.PAY));
+                            params.gotoLogin(getView(), TargetUrl.PAY);
                         } else {
                             if (response != null) {
                                 params.toast(response.getString("message"));
                             }
-                            //launchLogin.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", TargetUrl.PAY));
                         }
                     }
                 }
