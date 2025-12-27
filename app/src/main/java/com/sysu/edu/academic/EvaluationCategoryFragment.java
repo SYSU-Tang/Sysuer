@@ -2,7 +2,6 @@ package com.sysu.edu.academic;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,8 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,12 +20,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ItemEvaluationBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,8 +38,8 @@ import okhttp3.Response;
 public class EvaluationCategoryFragment extends Fragment {
     Params params;
     Handler handler;
-    ActivityResultLauncher<Intent> launch;
     RecyclerViewScrollBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -52,19 +47,19 @@ public class EvaluationCategoryFragment extends Fragment {
         if (binding == null) {
             binding = RecyclerViewScrollBinding.inflate(inflater, container, false);
             params = new Params(requireActivity());
+            params.setCallback(this,o -> {
+                if (o.getResultCode() == Activity.RESULT_OK) {
+                    getEvaluation();
+                }
+            });
             StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
             binding.getRoot().setLayoutManager(sgm);
             CategoryAdapter adp = new CategoryAdapter(requireContext());
             adp.setKeys(new String[]{"rwmc", "rwkssj", "rwjssj", "pjsl", "ypsl"});
             adp.setValues(new String[]{"%s", "起始时间：%s", "结束时间：%s", "总评数：%s", "已评数：%s"});
-            adp.setParams(new String[]{"rwid", "firstwjid","pjrdm"});
+            adp.setParams(new String[]{"rwid", "firstwjid", "pjrdm"});
             adp.setNavigation(R.id.from_category_to_course);
             binding.getRoot().setAdapter(adp);
-            launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    getEvaluation();
-                }
-            });
             getEvaluation();
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
@@ -74,11 +69,11 @@ public class EvaluationCategoryFragment extends Fragment {
                         if (data.get("code").equals("200")) {
                             data.getJSONObject("result").getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
                         } else {
-                            launch.launch(new Intent(requireContext(), LoginActivity.class));
+                            params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
                         }
                     } else if (msg.what == -1) {
                         params.toast(R.string.no_wifi_warning);
-                        Snackbar.make(binding.getRoot(), "去登录", Snackbar.LENGTH_LONG).setAction("登录", v -> launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", "https://pjxt.sysu.edu.cn"))).show();
+                        params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
                     }
                 }
             };
@@ -126,6 +121,7 @@ public class EvaluationCategoryFragment extends Fragment {
             super();
             this.context = context;
         }
+
         public void add(JSONObject e) {
             data.add(e);
             notifyItemInserted(data.size() - 1);
@@ -151,6 +147,7 @@ public class EvaluationCategoryFragment extends Fragment {
         public void setValues(String[] values) {
             this.values = values;
         }
+
         public void setParams(String[] params) {
             this.params = params;
         }
@@ -158,6 +155,7 @@ public class EvaluationCategoryFragment extends Fragment {
         public void setNavigation(int nav) {
             this.nav = nav;
         }
+
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemEvaluationBinding binding = ItemEvaluationBinding.bind(holder.itemView);

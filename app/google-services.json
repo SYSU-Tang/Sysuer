@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "169629797326",
+    "project_id": "edu-27b3e98b",
+    "storage_bucket": "edu-27b3e98b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:169629797326:android:e620f899c0f4b6ff29b99f",
+        "android_client_info": {
+          "package_name": "com.sysu.edu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUIA072ObNDAuGUGeEj6exJWPZqBsb4go"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

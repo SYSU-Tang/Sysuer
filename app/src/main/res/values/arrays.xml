@@ -74,6 +74,7 @@
         <item>@string/follow_system</item>
         <item>小</item>
         <item>较小</item>
+        <item>正常</item>
         <item>较大</item>
         <item>大</item>
     </string-array>
@@ -83,6 +84,7 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
     </string-array>
     <string-array name="registration_info">
         <item>今年注册记录</item>

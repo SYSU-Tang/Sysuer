@@ -2,7 +2,6 @@ package com.sysu.edu.academic;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,8 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -33,7 +30,6 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.DialogEditTextBinding;
 import com.sysu.edu.databinding.FragmentQuestionnaireBinding;
 import com.sysu.edu.databinding.ItemOptionBinding;
-import com.sysu.edu.login.LoginActivity;
 import com.sysu.edu.todo.info.TitleAdapter;
 
 import java.io.IOException;
@@ -52,7 +48,6 @@ import okhttp3.Response;
 public class EvaluationQuestionnaireFragment extends Fragment {
     Params params;
     Handler handler;
-    ActivityResultLauncher<Intent> launch;
     JSONObject answers = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}");
 
     @Nullable
@@ -64,7 +59,7 @@ public class EvaluationQuestionnaireFragment extends Fragment {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         ConcatAdapter adp = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
         binding.recyclerView.setAdapter(adp);
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(this,o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 getEvaluation(requireArguments().getString("rwid"),
                         requireArguments().getString("wjid"),
@@ -90,88 +85,94 @@ public class EvaluationQuestionnaireFragment extends Fragment {
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == 1) {
-                    JSONObject data = JSON.parseObject((String) msg.obj);
-                    if (data.get("code").equals("200")) {
-                        data.getJSONObject("result").getJSONArray("assessedObjList").forEach(l ->
-                        {
-                            ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->
+                switch (msg.what) {
+                    case 1: {
+                        JSONObject data = JSON.parseObject((String) msg.obj);
+                        if (data.get("code").equals("200")) {
+                            data.getJSONObject("result").getJSONArray("assessedObjList").forEach(l ->
                             {
-                                JSONObject pjjglist = ((JSONObject) list).clone();
-                                pjjglist.remove("dtjgList");
-                                pjjglist.put("pjxxlist",new JSONArray());
-                                answers.getJSONArray("pjjglist").add(pjjglist);
-                                TitleAdapter name = new TitleAdapter(requireContext());
-                                String bprmc = ((JSONObject) list).getString("bprmc");
-                                if (bprmc != null && !bprmc.isEmpty()) {
-                                    name.setTitle(bprmc);
-                                    name.setHeader(1);
-                                    adp.addAdapter(name);
-                                }// 被评名称
-                                ((JSONObject) list).getJSONArray("dtjgList").forEach(e ->
+                                ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->
                                 {
-                                    JSONObject pjxxlist = JSONObject.parse(String.format(
-                                            "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
-                                            ((JSONObject) list).getString("wjid"),
-                                            ((JSONObject) list).getString("wjssrwid"),
-                                            ((JSONObject) e).getString("tmid")
-                                    ));
-                                    JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
-                                    pjxxlist.put("xxdalist", da);
-                                    pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
+                                    JSONObject pjjglist = ((JSONObject) list).clone();
+                                    pjjglist.remove("dtjgList");
+                                    pjjglist.put("pjxxlist", new JSONArray());
+                                    answers.getJSONArray("pjjglist").add(pjjglist);
+                                    TitleAdapter name = new TitleAdapter(requireContext());
+                                    String bprmc = ((JSONObject) list).getString("bprmc");
+                                    if (bprmc != null && !bprmc.isEmpty()) {
+                                        name.setTitle(bprmc);
+                                        name.setHeader(1);
+                                        adp.addAdapter(name);
+                                    }// 被评名称
+                                    ((JSONObject) list).getJSONArray("dtjgList").forEach(e ->
+                                    {
+                                        JSONObject pjxxlist = JSONObject.parse(String.format(
+                                                "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
+                                                ((JSONObject) list).getString("wjid"),
+                                                ((JSONObject) list).getString("wjssrwid"),
+                                                ((JSONObject) e).getString("tmid")
+                                        ));
+                                        JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
+                                        pjxxlist.put("xxdalist", da);
+                                        pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
 
-                                    TitleAdapter title = new TitleAdapter(requireContext());
-                                    title.setTitle(((JSONObject) e).getString("tgmc"));
-                                    adp.addAdapter(title); // 题目标题
+                                        TitleAdapter title = new TitleAdapter(requireContext());
+                                        title.setTitle(((JSONObject) e).getString("tgmc"));
+                                        adp.addAdapter(title); // 题目标题
 
-                                    switch (((JSONObject) e).getString("tmlx")) {
-                                        case "1": {
-                                            OptionAdapter optionAdapter = new OptionAdapter(requireContext());
-                                            ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
-                                            optionAdapter.setAnswer(da);
-                                            adp.addAdapter(optionAdapter);
-                                            break;
+                                        switch (((JSONObject) e).getString("tmlx")) {
+                                            case "1": {
+                                                OptionAdapter optionAdapter = new OptionAdapter(requireContext());
+                                                ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
+                                                optionAdapter.setAnswer(da);
+                                                adp.addAdapter(optionAdapter);
+                                                break;
+                                            }
+                                            case "6": {
+                                                BlanketAdapter blanketAdapter = new BlanketAdapter(requireContext());
+                                                blanketAdapter.setAnswer(da);
+                                                adp.addAdapter(blanketAdapter);
+                                                break;
+                                            }
+                                            case "5": {
+                                                RankAdapter rankAdapter = new RankAdapter(requireContext());
+                                                rankAdapter.setAnswer(da);
+                                                adp.addAdapter(rankAdapter);
+                                                break;
+                                            }
+                                            default:
+                                                break;
                                         }
-                                        case "6": {
-                                            BlanketAdapter blanketAdapter = new BlanketAdapter(requireContext());
-                                            blanketAdapter.setAnswer(da);
-                                            adp.addAdapter(blanketAdapter);
-                                            break;
-                                        }
-                                        case "5": {
-                                            RankAdapter rankAdapter = new RankAdapter(requireContext());
-                                            rankAdapter.setAnswer(da);
-                                            adp.addAdapter(rankAdapter);
-                                            break;
-                                        }
-                                        default:
-                                            break;
-                                    }
+                                    });
                                 });
                             });
-                        });
-                    } else {
-                        launch.launch(new Intent(requireContext(), LoginActivity.class));
+                        } else {
+                            params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
+                        }
+                        break;
                     }
-                } else if (msg.what == 2) {
-                   // System.out.println(answers);
-                    JSONObject data = JSON.parseObject((String) msg.obj);
-                   // System.out.println(data);
-                    if (data.get("code").equals("200")) {
-                        params.toast(R.string.save_successfully);
-                    } else {
-                        params.toast(String.format("%s：%s", getString(R.string.save_fail), data.getString("msg")));
+                    case 2: {
+                        JSONObject data = JSON.parseObject((String) msg.obj);
+                        if (data.get("code").equals("200")) {
+                            params.toast(R.string.save_successfully);
+                        } else {
+                            params.toast(String.format("%s：%s", getString(R.string.save_fail), data.getString("msg")));
+                        }
+                        break;
                     }
-                } else if (msg.what == 3) {
-                    JSONObject data = JSON.parseObject((String) msg.obj);
-                    if (data.get("code").equals("200")) {
-                        params.toast(R.string.submit_successfully);
-                    } else {
-                        params.toast(String.format("%s：%s", getString(R.string.submit_fail), data.getString("msg")));
+                    case 3: {
+                        JSONObject data = JSON.parseObject((String) msg.obj);
+                        if (data.get("code").equals("200")) {
+                            params.toast(R.string.submit_successfully);
+                        } else {
+                            params.toast(String.format("%s：%s", getString(R.string.submit_fail), data.getString("msg")));
+                        }
+                        break;
                     }
-                } else if (msg.what == -1) {
-                    params.toast(R.string.no_wifi_warning);
-                    Snackbar.make(binding.getRoot(), "去登录", Snackbar.LENGTH_LONG).setAction("登录", v -> launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", "https://pjxt.sysu.edu.cn"))).show();
+                    case -1:
+                        params.toast(R.string.no_wifi_warning);
+                        params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
+                        break;
                 }
             }
         };
@@ -284,7 +285,8 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void setLastOption() {
         setOption(data.size() - 1);
     }
-    public void clearAnswer(){
+
+    public void clearAnswer() {
         answer.clear();
         int old = selected;
         selected = -1;
@@ -356,7 +358,8 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         answer.set(0, String.valueOf(rank));
         notifyItemChanged(0);
     }
-    public void clearAnswer(){
+
+    public void clearAnswer() {
         answer.clear();
         rank = 100;
         notifyItemChanged(0);
@@ -423,11 +426,12 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.content = text;
     }
 
-    public void clearAnswer(){
+    public void clearAnswer() {
         answer.clear();
         content = null;
         notifyItemChanged(0);
     }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         DialogEditTextBinding binding = DialogEditTextBinding.bind(holder.itemView);

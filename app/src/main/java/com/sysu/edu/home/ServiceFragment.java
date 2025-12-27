@@ -52,9 +52,9 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class ServiceFragment extends Fragment {
-    FragmentServiceBinding binding;
     // 创建HashMap来存储actions，使用id作为key
     private final Map<Integer, View.OnClickListener> actionMap = new HashMap<>();
+    FragmentServiceBinding binding;
     ActivityResultLauncher<Intent> launcher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {

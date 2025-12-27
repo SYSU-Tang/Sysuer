@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.gms.google.services)
+//    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -12,9 +14,10 @@ android {
         applicationId = "com.sysu.edu"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1925
-        versionName = "1.0.2"
+        versionCode = 1926
+        versionName = "1.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -24,7 +27,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+//            firebaseCrashlytics {
+//                mappingFileUploadEnabled = false
+//                nativeSymbolUploadEnabled = false
+//            }
         }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -76,6 +84,7 @@ dependencies {
     implementation(libs.dev.material) {
         exclude("dev.rikka.rikkax.appcompat", "appcompat")
     }
+    implementation(libs.firebase.crashlytics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <queries>
         <package android:name="com.tencent.wework" />
-
         <intent>
             <action android:name="android.intent.action.MAIN" />
         </intent>
@@ -24,11 +23,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SYSU"
-        tools:targetApi="36" >
+        tools:targetApi="36">
         <activity
             android:name=".todo.TodoActivity"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true"/>
+            android:exported="true" />
         <activity
             android:name=".academic.ExamActivity"
             android:configChanges="uiMode|orientation|screenSize"
@@ -36,113 +35,151 @@
         <activity
             android:name=".life.SchoolBus"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.AcademyNotification"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".life.Pay"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.PEList"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.SchoolWorkWarning"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.CourseCompletion"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.MajorInfo"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.RegisterInfo"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.CETActivity"
             android:configChanges="uiMode|orientation|screenSize"
-            android:exported="true"
-            android:theme="@style/Theme.SYSU" />
+            android:exported="true" />
         <activity
             android:name=".academic.SchoolRoll"
             android:configChanges="uiMode|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.CourseQuery"
-            android:exported="false"
-            android:theme="@style/Theme.SYSU" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.CourseDetail"
+            android:configChanges="uiMode|orientation|screenSize"
             android:exported="true"
-            android:theme="@style/Theme.SYSU" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.CourseSelection"
+            android:configChanges="uiMode|orientation|screenSize"
             android:exported="true"
-            android:theme="@style/Theme.SYSU" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".extra.PrivacyActivity"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".extra.SettingActivity"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".extra.AboutActivity"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.Grade"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".system.PEPreservation"
-            android:exported="false" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".news.News"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.TrainingSchedule"
-            android:exported="false" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".onlineClass.OnlineClassActivity"
-            android:exported="false" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".login.LoginActivity"
+            android:configChanges="uiMode|orientation|screenSize"
             android:exported="true"
-            android:theme="@style/Theme.SYSU" />
+            android:theme="@style/Theme.SYSU"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.CalendarActivity"
-            android:exported="false" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.EvaluationActivity"
             android:configChanges="uiMode|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.AgendaActivity"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.BrowserActivity"
-            android:exported="false" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".academic.ClassroomQueryActivity"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".stuwork.StuJob"
-            android:exported="true" />
+            android:configChanges="uiMode|orientation|screenSize"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|uiMode"
-            android:exported="true"
             android:enabled="true"
+            android:exported="false"
             android:icon="@mipmap/ic_launcher"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize|stateHidden" >
+            android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -156,7 +193,7 @@
             android:exported="true"
             android:icon="@drawable/ic_launcher_dark"
             android:label="@string/app_name"
-            android:targetActivity=".MainActivity" >
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -169,7 +206,7 @@
             android:exported="true"
             android:icon="@drawable/ic_launcher_light"
             android:label="@string/app_name"
-            android:targetActivity=".MainActivity" >
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -182,7 +219,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
-            android:targetActivity=".MainActivity" >
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -194,7 +231,7 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.sysu.edu.fileProvider"
             android:exported="false"
-            android:grantUriPermissions="true" >
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />

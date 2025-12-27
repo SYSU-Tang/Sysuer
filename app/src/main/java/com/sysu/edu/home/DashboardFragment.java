@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -335,12 +336,15 @@ public class DashboardFragment extends Fragment {
 }
 
 class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    Params params;
     Context context;
     ArrayList<JSONObject> data = new ArrayList<>();
 
     public CourseAdp(Context context) {
         super();
         this.context = context;
+        this.params = new Params((FragmentActivity) context);
+
     }
 
     public void set(ArrayList<JSONObject> d) {
@@ -365,7 +369,14 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemCourseBinding binding = ItemCourseBinding.bind(holder.itemView);
-        BiConsumer<Integer, String> a = (id, s) -> ((TextView) holder.itemView.findViewById(id)).setText(data.get(position).getString(s));
+        BiConsumer<Integer, String> a = (id, s) -> {
+            ((TextView) holder.itemView.findViewById(id)).setText(data.get(position).getString(s));
+            holder.itemView.findViewById(id).setOnLongClickListener(v -> {
+                params.copy(s + "：", data.get(position).getString(s));
+                params.toast(R.string.copy_successfully);
+                return true;
+            });
+        };
         holder.itemView.setOnClickListener(v -> ((MainActivity) context).launch().launch(new Intent(context, CourseDetail.class).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, holder.itemView, "miniapp")));
         a.accept(R.id.course_title, "courseName");
         a.accept(R.id.location_container, "teachingPlace");
@@ -389,12 +400,14 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 }
 
 class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    Params params;
     Context context;
     LinkedList<JSONObject> data = new LinkedList<>();
 
     public ExamAdp(Context context) {
         super();
         this.context = context;
+        this.params = new Params((FragmentActivity) context);
     }
 
     public void set(LinkedList<JSONObject> examData) {
@@ -424,14 +437,32 @@ class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         JSONObject examData = data.get(position);
         int startClassTimes = examData.getIntValue("startClassTimes");
         int endClassTimes = examData.getIntValue("endClassTimes");
-        binding.examName.setText(examData.getString("examSubjectName"));
-        binding.examLocation.setText(examData.getString("classroomNumber"));
-        binding.examDate.setText(examData.getString("examDate"));
-        binding.examDuration.setText(String.format("%s%s", examData.getString("duration"), context.getString(R.string.minute)));
-        binding.examTime.setText(examData.getString("durationTime"));
-        binding.examClassTime.setText(String.format(context.getString(R.string.section_range), startClassTimes, endClassTimes));
-        binding.examMode.setText(String.format("%s：%s", context.getString(R.string.exam_mode), examData.getString("examMode")));
-        binding.examStage.setText(String.format("%s：%s", context.getString(R.string.exam_stage), examData.getString("examStage")));
+        String[] text = new String[]{examData.getString("examSubjectName"),
+                examData.getString("classroomNumber"),
+                examData.getString("examDate"),
+                String.format("%s%s", examData.getString("duration"), context.getString(R.string.minute)),
+                examData.getString("durationTime"),
+                String.format(context.getString(R.string.section_range), startClassTimes, endClassTimes),
+                String.format("%s：%s", context.getString(R.string.exam_mode), examData.getString("examMode")),
+                String.format("%s：%s", context.getString(R.string.exam_stage), examData.getString("examStage"))};
+        TextView[] materialTextButtons = {
+                binding.examName,
+                binding.examLocation,
+                binding.examDate,
+                binding.examDuration,
+                binding.examTime,
+                binding.examClassTime,
+                binding.examMode,
+                binding.examStage,
+        };
+        for (int i = 0; i < 8; i++) {
+            materialTextButtons[i].setText(text[i]);
+            int finalI = i;
+            materialTextButtons[i].setOnClickListener(v -> {
+                params.copy(finalI+"：",text[finalI]);
+                params.toast(R.string.copy_successfully);
+            });
+        }
     }
 
     @Override

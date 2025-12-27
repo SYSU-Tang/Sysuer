@@ -36,7 +36,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:gravity="center_vertical"
-            android:text="@string/time"
+            android:textIsSelectable="true"
             android:textAppearance="?attr/textAppearanceBodyMedium"/>
         <!--<com.google.android.material.textview.MaterialTextView
             android:id="@+id/end_time"

@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,12 +24,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ItemEvaluationBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
-import com.sysu.edu.login.LoginActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +66,7 @@ public class EvaluationCourseFragment extends Fragment {
         if (type != null && rwid != null && account != null) {
             getEvaluation(type, rwid, account, page);
         }
-        launch = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+        params.setCallback(this,o -> {
             if (o.getResultCode() == Activity.RESULT_OK) {
                 page = 1;
                 getEvaluation(type, rwid, account, page);
@@ -86,11 +83,11 @@ public class EvaluationCourseFragment extends Fragment {
                             getEvaluation(type, rwid, account, ++page);
                         }
                     } else {
-                        launch.launch(new Intent(requireContext(), LoginActivity.class));
+                        params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
                     }
                 } else if (msg.what == -1) {
                     params.toast(R.string.no_wifi_warning);
-                    Snackbar.make(binding.getRoot(), "去登录", Snackbar.LENGTH_LONG).setAction("登录", v -> launch.launch(new Intent(requireContext(), LoginActivity.class).putExtra("url", "https://pjxt.sysu.edu.cn"))).show();
+                    params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
                 }
             }
         };

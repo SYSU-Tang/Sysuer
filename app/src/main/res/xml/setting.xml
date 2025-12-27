@@ -13,7 +13,6 @@
             app:entryValues="@array/value"
             app:icon="@drawable/color"
             app:key="icon_theme"
-
             app:defaultValue="2"
             app:title="@string/icon_theme" />
         <com.sysu.edu.preference.Preference
@@ -27,8 +26,8 @@
             app:entries="@array/font_size"
             app:entryValues="@array/font_value"
             app:icon="@drawable/font"
-            app:isPreferenceVisible="false"
             app:key="fontSize"
+            app:defaultValue="0"
             app:summary="@string/follow_system"
             app:title="@string/font_size" />
         <com.sysu.edu.preference.Preference

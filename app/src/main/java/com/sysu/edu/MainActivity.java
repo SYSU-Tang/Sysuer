@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -63,6 +64,18 @@ public class MainActivity extends AppCompatActivity {
     File file;
     ActivityResultLauncher<Intent> detailLauncher;
     BroadcastReceiver receiver;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        Configuration configuration = newBase.getResources().getConfiguration();
+        String fontValue = PreferenceManager.getDefaultSharedPreferences(newBase).getString("fontSize", "0");
+        //AppCompatDelegate.setDefaultNightMode(new Theme(newBase).getThemeMode());
+        if (!fontValue.equals("0")) {
+            configuration.fontScale = new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}[Integer.parseInt(fontValue) - 1];
+        }
+        applyOverrideConfiguration(configuration);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
