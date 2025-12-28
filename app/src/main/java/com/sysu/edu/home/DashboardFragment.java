@@ -86,9 +86,8 @@ public class DashboardFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         if (refresh) {
-            binding = FragmentDashboardBinding.inflate(inflater);
+            binding = FragmentDashboardBinding.inflate(inflater,container,false);
             binding.scan.setOnClickListener(v -> {
                 try {
                     Intent intent = new Intent();
@@ -121,7 +120,7 @@ public class DashboardFragment extends Fragment {
                 @Override
                 public void run() {
                     binding.time.setText(new SimpleDateFormat("hh:mm:ss", Locale.CHINESE).format(new Date()));
-                    handler.postDelayed(this, 1000);
+                    handler.postDelayed(this, 500);
                 }
             });
             params = new Params(requireActivity());
@@ -137,14 +136,14 @@ public class DashboardFragment extends Fragment {
             ExamAdp examAdp = new ExamAdp(requireActivity());
             binding.examList.setAdapter(examAdp);
             binding.toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-                if (group.getCheckedButtonId() == checkedId) {
-                    courseAdp.set(checkedId == R.id.today ? todayCourse : tomorrowCourse);
+                if (R.id.today == checkedId) {
+                    courseAdp.set(isChecked ? todayCourse : tomorrowCourse);
                     binding.noClass.setVisibility(courseAdp.getItemCount() == 0 ? View.VISIBLE : View.GONE);
                 }
             });
             binding.toggle2.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-                if (group.getCheckedButtonId() == checkedId) {
-                    examAdp.set(checkedId == R.id.this_week ? thisWeekExams : nextWeekExams);
+                if (R.id.week_17 == checkedId) {
+                    examAdp.set(isChecked ? thisWeekExams : nextWeekExams);
                     binding.noExam.setVisibility(examAdp.getItemCount() == 0 ? View.VISIBLE : View.GONE);
                 }
             });
@@ -165,25 +164,39 @@ public class DashboardFragment extends Fragment {
                                 ArrayList<JSONObject> beforeArray = new ArrayList<>();
                                 ArrayList<JSONObject> afterArray = new ArrayList<>();
                                 response.getJSONArray("data").forEach(e -> {
-                                    String status = getTimePosition(((JSONObject) e).getString("teachingDate") + " " + ((JSONObject) e).getString("startTime"), ((JSONObject) e).getString("teachingDate") + " " + ((JSONObject) e).getString("endTime"));
-                                    ((JSONObject) e).put("status", status);
-                                    ((JSONObject) e).put("time", ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime"));
-                                    ((JSONObject) e).put("course", "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课");
-                                    String flag = (String) ((JSONObject) e).get("useflag");
+                                    JSONObject jsonObject = (JSONObject) e;
+                                    String status = getTimePosition(jsonObject.getString("teachingDate") + " " + jsonObject.getString("startTime"), jsonObject.getString("teachingDate") + " " + jsonObject.getString("endTime"));
+                                    jsonObject.put("status", status);
+                                    jsonObject.put("time", jsonObject.get("startTime") + "~" + jsonObject.get("endTime"));
+                                    jsonObject.put("course", "第" + jsonObject.get("startClassTimes") + "~" + jsonObject.get("endClassTimes") + "节课");
+                                    String flag = (String) jsonObject.get("useflag");
                                     if (flag.equals("TD")) {
-                                        (Objects.equals(status, "before") ? beforeArray : afterArray).add((JSONObject) e);
+                                        (Objects.equals(status, "before") ? beforeArray : afterArray).add(jsonObject);
                                     }
-                                    (flag.equals("TD") ? todayCourse : tomorrowCourse).add((JSONObject) e);
+                                    (flag.equals("TD") ? todayCourse : tomorrowCourse).add(jsonObject);
 //                                    addCourse(flag.equals("TD") ? todayCourse : tomorrowCourse, (String) ((JSONObject) e).get("courseName"), (String) ((JSONObject) e).get("teachingPlace"), ((JSONObject) e).get("startTime") + "~" + ((JSONObject) e).get("endTime")
 //                                            , "第" + ((JSONObject) e).get("startClassTimes") + "~" + ((JSONObject) e).get("endClassTimes") + "节课", (String) ((JSONObject) e).get("teacherName"), flag);
                                 });
                                 binding.progress.setMax(todayCourse.size());
                                 binding.progress.setProgress(beforeArray.size());
                                 binding.courseList.scrollToPosition(beforeArray.size());
-                                binding.nextClass.setText(Html.fromHtml(afterArray.isEmpty() ? String.format("<h4><font color=\"#6750a4\">今天没课</font></h4>下一节：<b>%s</b><br/>地点：<b>无</b><br/>时间：<b>无</b>", tomorrowCourse.get(0).getString("courseName")) : String.format("<h4><font color=\"#6750a4\">%s</font></h4>地点：<b>%s</b><br/>时间：<b>%s</b><br/>日期：<b>%s</b>", todayCourse.get(beforeArray.size()).getString("courseName"), todayCourse.get(beforeArray.size()).getString("teachingPlace"), todayCourse.get(beforeArray.size()).getString("time"), todayCourse.get(beforeArray.size()).getString("teachingDate")), Html.FROM_HTML_MODE_COMPACT));
+                                binding.nextClass.setText(Html.fromHtml(afterArray.isEmpty() ? String.format("<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>",
+                                        getString(R.string.noClass),
+                                        getString(R.string.next_class),
+                                        tomorrowCourse.get(0).getString("courseName"),
+                                        getString(R.string.location), getString(R.string.none),
+                                        getString(R.string.time), getString(R.string.none)) :
+                                        String.format("<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>",
+                                                todayCourse.get(beforeArray.size()).getString("courseName"),
+                                                getString(R.string.location),
+                                                todayCourse.get(beforeArray.size()).getString("teachingPlace"),
+                                                getString(R.string.time),
+                                                todayCourse.get(beforeArray.size()).getString("time"),
+                                                getString(R.string.date),
+                                                todayCourse.get(beforeArray.size()).getString("teachingDate")), Html.FROM_HTML_MODE_COMPACT));
+                                binding.toggle.clearChecked();
                                 binding.toggle.check(R.id.today);
                                 break;
-
                             case 2:
                                 if (response.getJSONArray("data").isEmpty()) {
                                     break;
@@ -207,7 +220,8 @@ public class DashboardFragment extends Fragment {
                                         }
                                     });
                                 }
-                                binding.toggle2.check(R.id.this_week);
+                                binding.toggle2.clearChecked();
+                                binding.toggle2.check(R.id.week_17);
                                 break;
                             case 3:
                                 String term = response.getJSONObject("data").getString("acadYearSemester");
@@ -230,7 +244,7 @@ public class DashboardFragment extends Fragment {
                 }
             });
             spm.initLiveData();
-
+            //getTerm();
             TodoFragment todoFragment = new TodoFragment();
             getParentFragmentManager().beginTransaction().add(R.id.todo_list, todoFragment).commit();
             InitTodo initTodo = new InitTodo(requireActivity(), todoFragment);
@@ -277,7 +291,7 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    public void getTodayCourses(String term) {
+    void getTodayCourses(String term) {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=" + term)
                 .header("Cookie", cookie)
                 //.header("Accept-Language", Language.getLanguageCode(requireContext()))
@@ -299,7 +313,7 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    public String getTimePosition(String from, String to) {
+    String getTimePosition(String from, String to) {
         Date now = new Date();
         try {
             Date fromDate = new SimpleDateFormat("yy-MM-dd hh:mm", Locale.getDefault()).parse(from);
@@ -310,7 +324,7 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    public void getExams(String term) {
+    void getExams(String term) {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck")
                 .header("Cookie", cookie)
                 //.header("Accept-Language", Language.getLanguageCode(requireContext()))
@@ -459,7 +473,7 @@ class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             materialTextButtons[i].setText(text[i]);
             int finalI = i;
             materialTextButtons[i].setOnClickListener(v -> {
-                params.copy(finalI+"：",text[finalI]);
+                params.copy(finalI + "：", text[finalI]);
                 params.toast(R.string.copy_successfully);
             });
         }

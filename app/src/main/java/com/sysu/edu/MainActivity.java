@@ -2,7 +2,6 @@ package com.sysu.edu;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -45,7 +44,6 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.SysuerPreferenceManager;
 import com.sysu.edu.databinding.ActivityMainBinding;
-import com.sysu.edu.extra.SettingActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         super.attachBaseContext(newBase);
         Configuration configuration = newBase.getResources().getConfiguration();
         String fontValue = PreferenceManager.getDefaultSharedPreferences(newBase).getString("fontSize", "0");
-        //AppCompatDelegate.setDefaultNightMode(new Theme(newBase).getThemeMode());
         if (!fontValue.equals("0")) {
             configuration.fontScale = new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}[Integer.parseInt(fontValue) - 1];
         }
@@ -85,9 +82,7 @@ public class MainActivity extends AppCompatActivity {
         NavHostFragment fragment = (NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.dashboard_scroll));
         NavController navController = fragment.getNavController();
         NavGraph graph = new NavInflater(this, navController.getNavigatorProvider()).inflate(R.navigation.main_navigation);
-        if (savedInstanceState == null) {
-            graph.setStartDestination(new int[]{R.id.navigation_activity, R.id.navigation_service, R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home", "0"))]);
-        }
+        graph.setStartDestination(new int[]{R.id.navigation_dashboard, R.id.navigation_service, R.id.navigation_account}[Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("home", "0"))]);
 //        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
 //            //Log.d(TAG, "Shizuku 权限已授予");
 //        } else {
@@ -124,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
 //        }
         navController.setGraph(graph);
         NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
+        //navController.navigateUp();
+
         SysuerPreferenceManager spm = new ViewModelProvider(this).get(SysuerPreferenceManager.class);
         spm.setPM(PreferenceManager.getDefaultSharedPreferences(this));
         spm.initLiveData();
@@ -137,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     spm.setIsAgree(false);
                     supportFinishAfterTransition();
                 })
+                .setCancelable(false)
                 .create();
         spm.getIsAgreeLiveData().observe(this, aBoolean -> {
             if (aBoolean) {
@@ -215,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         detailLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
         });
         PackageManager pm = getPackageManager();
-        pm.setComponentEnabledSetting(new ComponentName(this, SettingActivity.class), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        //pm.setComponentEnabledSetting(new ComponentName(this, SettingActivity.class), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         //WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(ClassIsland.class).build());
         //new ClassIsland(this).doWork();
     }

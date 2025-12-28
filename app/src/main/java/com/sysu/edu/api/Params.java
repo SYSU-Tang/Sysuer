@@ -44,6 +44,7 @@ public class Params {
     public Params(FragmentActivity activity) {
         this.activity = activity;
         sharedPreferences = activity.getSharedPreferences("privacy", Context.MODE_PRIVATE);
+
     }
 
     public static int getYear() {

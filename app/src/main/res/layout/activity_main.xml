@@ -2,18 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"
-        android:layout_height="0dp"
         android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1">
+
         <com.google.android.material.appbar.AppBarLayout
             style="@style/SYSU.AppBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 style="@style/Widget.Material3.Toolbar"
@@ -21,27 +24,30 @@
                 android:layout_height="wrap_content"
                 app:layout_scrollFlags="scroll"
                 app:title="@string/app_name"
-                app:titleTextColor="?colorPrimary"/>
+                app:titleTextColor="?colorPrimary" />
         </com.google.android.material.appbar.AppBarLayout>
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/dashboard_scroll"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:defaultNavHost="true"
             android:fillViewport="true"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/main_navigation"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:layout="@layout/fragment_dashboard"/>
+            tools:layout="@layout/fragment_dashboard" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/nav_view"
         style="@style/SYSU.BottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:itemIconTint="?colorPrimary"
         app:itemTextColor="?colorPrimary"
-        android:id="@+id/nav_view"
         app:labelVisibilityMode="selected"
         app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior"
-        app:menu="@menu/home"/>
+        app:menu="@menu/home" />
 </LinearLayout>

@@ -9,8 +9,7 @@ public class Theme
 {
     Context context;
     public Theme(Context c){
-       //context.getSharedPreferences("setting", Context.MODE_PRIVATE).getString("theme","0");
-        this.context=c;
+       this.context=c;
     }
     public int getThemeCode(){
         return Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString("theme","2"));

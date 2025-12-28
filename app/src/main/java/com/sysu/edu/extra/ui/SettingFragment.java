@@ -41,6 +41,7 @@ public class SettingFragment extends PreferenceFragmentCompat {
         ((Preference) Objects.requireNonNull(findPreference("fontSize"))).setOnPreferenceChangeListener((preference, v) -> {
                     //Language.setLanguage(requireActivity());
                     requireActivity().recreate();
+
                     return true;
                 }
         );

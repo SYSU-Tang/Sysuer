@@ -2,10 +2,10 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/navigation_activity">
+    app:startDestination="@id/navigation_dashboard">
 
     <fragment
-        android:id="@+id/navigation_activity"
+        android:id="@+id/navigation_dashboard"
         android:name="com.sysu.edu.home.DashboardFragment"
         android:label="@string/dashboard"
         tools:layout="@layout/fragment_dashboard"/>
