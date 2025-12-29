@@ -1,7 +1,12 @@
 package com.sysu.edu;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
@@ -12,6 +17,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Application extends android.app.Application {
+    float defaultFontSize;
 
     @Override
     public void onCreate() {
@@ -20,16 +26,63 @@ public class Application extends android.app.Application {
         Language.setLanguage(this);
         SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if ((!pm.contains("dashboard"))|| Objects.requireNonNull(pm.getStringSet("dashboard",null)).isEmpty()) {
+        if ((!pm.contains("dashboard")) || Objects.requireNonNull(pm.getStringSet("dashboard", null)).isEmpty()) {
             pm.edit().putStringSet("dashboard", Set.of(getResources().getStringArray(R.array.dashboard_values))).apply();
         }
-    }
-/*
-    @Override
-    protected void attachBaseContext(Context base) {
-        Configuration configuration = base.getResources().getConfiguration();
-        configuration.fontScale = 2.0f;
-        super.attachBaseContext(base.createConfigurationContext(configuration));
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle bundle) {
+                Configuration configuration = activity.getResources().getConfiguration();
+                String fontValue = PreferenceManager.getDefaultSharedPreferences(activity).getString("fontSize", "0");
+                if (defaultFontSize == 0) {
+                    defaultFontSize = configuration.fontScale;
+                }
+                if (!fontValue.equals("0")) {
+                    configuration.fontScale = new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}[Integer.parseInt(fontValue) - 1];
+                } else {
+                    configuration.fontScale = defaultFontSize;
+                }
+                activity.getResources().updateConfiguration(configuration,activity.getResources().getDisplayMetrics());
+                getResources().updateConfiguration(configuration,getResources().getDisplayMetrics());
+            }
 
+            @Override
+            public void onActivityDestroyed(@NonNull Activity activity) {
+            }
+
+            @Override
+            public void onActivityPaused(@NonNull Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityResumed(@NonNull Activity activity) {
+
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle bundle) {
+
+            }
+
+            @Override
+            public void onActivityStarted(@NonNull Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityStopped(@NonNull Activity activity) {
+
+            }
+        });
+    }
+
+    /*private void setFontSize(Context newBase) {
+        Configuration configuration = newBase.getResources().getConfiguration();
+        String fontValue = PreferenceManager.getDefaultSharedPreferences(newBase).getString("fontSize", "0");
+        if (!fontValue.equals("0")) {
+            configuration.fontScale = new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}[Integer.parseInt(fontValue) - 1];
+        }
+        newBase.getResources().updateConfiguration(configuration, newBase.getResources().getDisplayMetrics());
     }*/
 }

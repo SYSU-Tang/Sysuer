@@ -204,13 +204,13 @@ public class Params {
                 LoginViewModel model = new ViewModelProvider(activity).get(LoginViewModel.class);
                 LoginWebFragment.getWebView(activity, model, () -> model.setUrl(String.format("javascript:(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", account, password)));
                 LoginActivity.initModel(activity, model, url, () -> {
-                    activity.recreate();
+                    //activity.recreate();
                     toast(R.string.login_successfully);
                 });
                 break;
             case "2":
             default:
-                launch.launch(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, "miniapp"));
+               launch.launch(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, "miniapp"));
                 break;
         }
     }

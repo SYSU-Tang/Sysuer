@@ -1,29 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurfaceContainer">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/agenda" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center">
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/last"
                 style="@style/Widget.Material3.Button.IconButton.Outlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:icon="?attr/homeAsUpIndicator"/>
+                app:icon="?attr/homeAsUpIndicator" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/term"
                 style="@style/Widget.Material3.Button.OutlinedButton.Icon"
@@ -32,7 +37,8 @@
                 android:layout_margin="4dp"
                 android:text="@string/term"
                 android:transitionName="miniapp"
-                app:icon="@drawable/calendar"/>
+                app:icon="@drawable/calendar" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/weekTime"
                 style="@style/Widget.Material3.Button.OutlinedButton.Icon"
@@ -41,19 +47,22 @@
                 android:layout_margin="4dp"
                 android:text="@string/week1"
                 android:transitionName="miniapp"
-                app:icon="@drawable/time"/>
+                app:icon="@drawable/time" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/next"
                 style="@style/Widget.Material3.Button.IconButton.Outlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:rotation="180"
-                app:icon="?attr/homeAsUpIndicator"/>
+                app:icon="?attr/homeAsUpIndicator" />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/week"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/month"
                 android:layout_width="wrap_content"
@@ -69,28 +78,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/colorSurfaceContainerHighest"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context=".academic.AgendaActivity">
-        <LinearLayout
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <GridLayout
+            android:id="@+id/day"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-            <GridLayout
-                android:id="@+id/day"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="8"
-                android:orientation="vertical"
-                android:rowCount="11">
-                <View
-                    android:layout_width="0dp"
-                    android:layout_row="0"
-                    android:layout_columnSpan="11"
-                    android:layout_column="1"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="fill" />
-            </GridLayout>
-        </LinearLayout>
+            android:layout_height="match_parent"
+            android:columnCount="8"
+            android:orientation="vertical"
+            android:rowCount="11">
+
+            <!--<View
+                android:layout_width="0dp"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:layout_columnSpan="11"
+                android:layout_columnWeight="1"
+                android:layout_gravity="fill" />-->
+        </GridLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

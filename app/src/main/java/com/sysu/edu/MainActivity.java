@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -62,17 +61,23 @@ public class MainActivity extends AppCompatActivity {
     File file;
     ActivityResultLauncher<Intent> detailLauncher;
     BroadcastReceiver receiver;
+    float defaultFontSize;
 
-    @Override
+   /* @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(newBase);
         Configuration configuration = newBase.getResources().getConfiguration();
         String fontValue = PreferenceManager.getDefaultSharedPreferences(newBase).getString("fontSize", "0");
+        if (defaultFontSize == 0) {
+            defaultFontSize = configuration.fontScale;
+        }
         if (!fontValue.equals("0")) {
             configuration.fontScale = new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}[Integer.parseInt(fontValue) - 1];
+        } else {
+            configuration.fontScale = defaultFontSize;
         }
+        super.attachBaseContext(newBase);
         applyOverrideConfiguration(configuration);
-    }
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -212,15 +217,15 @@ public class MainActivity extends AppCompatActivity {
         ContextCompat.registerReceiver(this, receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_NOT_EXPORTED);
         detailLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
         });
-        PackageManager pm = getPackageManager();
+        //PackageManager pm = getPackageManager();
         //pm.setComponentEnabledSetting(new ComponentName(this, SettingActivity.class), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         //WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(ClassIsland.class).build());
         //new ClassIsland(this).doWork();
     }
 
-    public ActivityResultLauncher<Intent> launch() {
+    /*public ActivityResultLauncher<Intent> launch() {
         return detailLauncher;
-    }
+    }*/
 
     void checkUpdate() {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://sysu-tang.github.io/latest.json").build()).enqueue(new Callback() {
@@ -247,7 +252,6 @@ public class MainActivity extends AppCompatActivity {
         receiver = null;
         super.onDestroy();
     }
-
 
     static class MyClickSpan extends ClickableSpan {
         String url;

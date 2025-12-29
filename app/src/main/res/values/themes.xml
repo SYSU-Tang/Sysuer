@@ -22,6 +22,7 @@
         <item name="simpleMenuPreferenceStyle">
             @style/Preference.Rikka.SimpleMenuPreference.Material3
         </item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch
         </item>
         <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
@@ -81,10 +82,10 @@
         <item name="cornerSize">4dp</item>
     </style>
     <!-- Base application theme. -->
-   <!-- <style name="Base.Theme.中大儿" parent="Theme.Material3.DayNight.NoActionBar">
-        &lt;!&ndash; Customize your light theme here. &ndash;&gt;
-        &lt;!&ndash; <item name="colorPrimary">@color/my_light_primary</item> &ndash;&gt;
-    </style>-->
+    <!-- <style name="Base.Theme.中大儿" parent="Theme.Material3.DayNight.NoActionBar">
+         &lt;!&ndash; Customize your light theme here. &ndash;&gt;
+         &lt;!&ndash; <item name="colorPrimary">@color/my_light_primary</item> &ndash;&gt;
+     </style>-->
     <!-- Base application theme. -->
     <!--    <style name="spinner" parent="Widget.AppCompat.TextView">-->
     <!--        <item name="android:textColor"/>-->

@@ -32,7 +32,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.sysu.edu.MainActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.academic.CourseDetail;
@@ -87,7 +86,7 @@ public class DashboardFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (refresh) {
-            binding = FragmentDashboardBinding.inflate(inflater,container,false);
+            binding = FragmentDashboardBinding.inflate(inflater, container, false);
             binding.scan.setOnClickListener(v -> {
                 try {
                     Intent intent = new Intent();
@@ -132,6 +131,7 @@ public class DashboardFragment extends Fragment {
                 }
             });
             CourseAdp courseAdp = new CourseAdp(requireActivity());
+            courseAdp.setOnClick((jsonObject, view) -> startActivity(new Intent(getContext(), CourseDetail.class).putExtra("code", jsonObject.getString("courseNum")).putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
             binding.courseList.setAdapter(courseAdp);
             ExamAdp examAdp = new ExamAdp(requireActivity());
             binding.examList.setAdapter(examAdp);
@@ -265,6 +265,7 @@ public class DashboardFragment extends Fragment {
                 }
                 visible.forEach(i -> List.of(binding.shortcutGroup, binding.nextClassCard, binding.timeCard, binding.courseGroup, binding.examGroup, binding.todoGroup).get(Integer.parseInt(i)).setVisibility(View.GONE));
             });
+
         }
         return binding.getRoot();
     }
@@ -353,6 +354,7 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Params params;
     Context context;
     ArrayList<JSONObject> data = new ArrayList<>();
+    BiConsumer<JSONObject, View> onClick;
 
     public CourseAdp(Context context) {
         super();
@@ -380,6 +382,10 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         };
     }
 
+    public void setOnClick(BiConsumer<JSONObject, View> onClick) {
+        this.onClick = onClick;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemCourseBinding binding = ItemCourseBinding.bind(holder.itemView);
@@ -391,7 +397,8 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return true;
             });
         };
-        holder.itemView.setOnClickListener(v -> ((MainActivity) context).launch().launch(new Intent(context, CourseDetail.class).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, holder.itemView, "miniapp")));
+
+        holder.itemView.setOnClickListener(v -> onClick.accept(data.get(position), v));
         a.accept(R.id.course_title, "courseName");
         a.accept(R.id.location_container, "teachingPlace");
         a.accept(R.id.time_container, "time");

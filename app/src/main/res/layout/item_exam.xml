@@ -1,37 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/box_background"
     android:padding="8dp">
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/exam_name"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
         android:text="@string/exam_name"
         android:textAppearance="?attr/textAppearanceTitleMedium"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.button.MaterialButton
-    android:id="@+id/exam_location"
-    style="@style/Widget.Material3.Button.TextButton.Icon"
-    android:layout_width="wrap_content"
-    android:layout_height="0dp"
-    android:text="@string/exam_location"
-    app:icon="@drawable/location"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/exam_name"/>
+        android:id="@+id/exam_location"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/exam_location"
+        app:icon="@drawable/location"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/exam_name" />
+
     <com.google.android.material.button.MaterialButton
-    android:id="@+id/exam_date"
-    style="@style/Widget.Material3.Button.TextButton.Icon"
-    android:layout_width="wrap_content"
-    android:layout_height="0dp"
-    android:text="@string/exam_date"
-    app:icon="@drawable/calendar"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/exam_location"/>
+        android:id="@+id/exam_date"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/exam_date"
+        app:icon="@drawable/calendar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/exam_location" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/exam_duration"
         style="@style/Widget.Material3.Button.TextButton.Icon"
@@ -40,7 +45,8 @@
         android:text="@string/exam_duration"
         app:icon="@drawable/alarm"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/exam_date"/>
+        app:layout_constraintTop_toBottomOf="@id/exam_date" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/exam_time"
         style="@style/Widget.Material3.Button.TextButton.Icon"
@@ -49,32 +55,35 @@
         android:text="@string/exam_time"
         app:icon="@drawable/time"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/exam_duration"/>
+        app:layout_constraintTop_toBottomOf="@id/exam_duration" />
+
     <com.google.android.material.button.MaterialButton
-    android:id="@+id/exam_class_time"
-    style="@style/Widget.Material3.Button.TextButton.Icon"
-    android:layout_width="wrap_content"
-    android:layout_height="0dp"
-    android:text="@string/exam_class"
-    app:icon="@drawable/course"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/exam_time"/>
+        android:id="@+id/exam_class_time"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/exam_class"
+        app:icon="@drawable/course"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/exam_time" />
+
     <com.google.android.material.button.MaterialButton
-    android:id="@+id/exam_mode"
-    style="@style/Widget.Material3.Button.TextButton.Icon"
-    android:layout_width="wrap_content"
-    android:layout_height="0dp"
-    android:text="@string/exam_mode"
-    app:icon="@drawable/info"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/exam_class_time"/>
+        android:id="@+id/exam_mode"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/exam_mode"
+        app:icon="@drawable/info"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/exam_class_time" />
+
     <com.google.android.material.button.MaterialButton
-    android:id="@+id/exam_stage"
-    style="@style/Widget.Material3.Button.TextButton.Icon"
-    android:layout_width="wrap_content"
-    android:layout_height="0dp"
-    android:text="@string/exam_stage"
-    app:icon="@drawable/info"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/exam_mode"/>
+        android:id="@+id/exam_stage"
+        style="@style/Widget.Material3.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="@string/exam_stage"
+        app:icon="@drawable/info"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/exam_mode" />
 </androidx.constraintlayout.widget.ConstraintLayout>
