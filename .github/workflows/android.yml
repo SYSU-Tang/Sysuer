@@ -22,5 +22,5 @@ jobs:
     - name: Releasing using Hub
       uses: sangatdesai/release-apk@main
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        GITHUB_TOKEN: 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
         APP_FOLDER: app
