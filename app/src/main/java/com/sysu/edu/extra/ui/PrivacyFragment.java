@@ -1,6 +1,5 @@
 package com.sysu.edu.extra.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,14 +45,12 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                         return false;
                     });
             params = new Params(requireActivity());
-            params.setCallback(o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    token = params.getToken();
-                    getInfo();
-                }
+            params.setCallback(() -> {
+                token = params.getToken();
+                getInfo();
             });
             token = params.getToken();
-           handler = new Handler(Looper.getMainLooper()) {
+            handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     if (msg.what == -1) {

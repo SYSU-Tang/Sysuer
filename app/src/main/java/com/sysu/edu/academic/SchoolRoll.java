@@ -46,11 +46,9 @@ public class SchoolRoll extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityPagerBinding.inflate(getLayoutInflater());
         params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == RESULT_OK) {
+        params.setCallback(() -> {
                 cookie = params.getCookie();
                 getNextPage(0);
-            }
         });
         cookie = params.getCookie();
         setContentView(binding.getRoot());

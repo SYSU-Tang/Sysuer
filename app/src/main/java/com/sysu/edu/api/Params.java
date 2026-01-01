@@ -12,8 +12,6 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -40,6 +38,7 @@ public class Params {
     final SharedPreferences sharedPreferences;
     ActivityResultLauncher<Intent> launch;
     FragmentActivity activity;
+    Runnable afterLogin;
 
     public Params(FragmentActivity activity) {
         this.activity = activity;
@@ -109,12 +108,30 @@ public class Params {
         return calendar;
     }
 
-    public void setCallback(ActivityResultCallback<ActivityResult> callback) {
+  /*  public void setCallback(ActivityResultCallback<ActivityResult> callback) {
         launch = activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), callback);
     }
 
     public void setCallback(Fragment fragment, ActivityResultCallback<ActivityResult> callback) {
         launch = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), callback);
+    }*/
+
+    public void setCallback(Runnable afterLogin) {
+        this.afterLogin = afterLogin;
+        this.launch = activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+            if (o.getResultCode() == FragmentActivity.RESULT_OK) {
+                afterLogin.run();
+            }
+        });
+    }
+
+    public void setCallback(Fragment fragment, Runnable afterLogin) {
+        this.afterLogin = afterLogin;
+        this.launch = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
+            if (o.getResultCode() == FragmentActivity.RESULT_OK) {
+                afterLogin.run();
+            }
+        });
     }
 
     public int dpToPx(int dps) {
@@ -205,12 +222,14 @@ public class Params {
                 LoginWebFragment.getWebView(activity, model, () -> model.setUrl(String.format("javascript:(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", account, password)));
                 LoginActivity.initModel(activity, model, url, () -> {
                     //activity.recreate();
+                    afterLogin.run();
                     toast(R.string.login_successfully);
+
                 });
                 break;
             case "2":
             default:
-               launch.launch(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, "miniapp"));
+                launch.launch(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, "miniapp"));
                 break;
         }
     }

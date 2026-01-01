@@ -41,11 +41,7 @@ public class ExamActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityExamBinding binding = ActivityExamBinding.inflate(getLayoutInflater());
         params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == RESULT_OK) {
-                getTerms();
-            }
-        });
+        params.setCallback(this::getTerms);
         ExamViewModel model = new ViewModelProvider(this).get(ExamViewModel.class);
         model.getTermList().observe(this, terms -> binding.terms.setSimpleItems(terms.toArray(new String[]{})));
         model.getTerm().observe(this, term -> {

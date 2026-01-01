@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -71,11 +70,9 @@ public class CourseQueryFragment extends Fragment {
 //                    .commit();
             binding.container.setColumnCount(new Params(requireActivity()).getColumn());
             Params params = new Params(requireActivity());
-            params.setCallback(o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
-                    getData(0);
-                }
+            params.setCallback(this, () -> {
+                cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
+                getData(0);
             });
             reset();
             cookie = params.getCookie();

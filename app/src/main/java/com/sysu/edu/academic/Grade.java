@@ -77,12 +77,10 @@ public class Grade extends AppCompatActivity {
         adp = new ScoreAdp(this);
         binding.scores.setAdapter(adp);
         Params params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == RESULT_OK) {
-                cookie = params.getCookie();
-                http = getHttp();
-                getPull();
-            }
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            http = getHttp();
+            getPull();
         });
         cookie = params.getCookie();
         http = getHttp();

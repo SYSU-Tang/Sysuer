@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,11 +46,7 @@ public class EvaluationCategoryFragment extends Fragment {
         if (binding == null) {
             binding = RecyclerViewScrollBinding.inflate(inflater, container, false);
             params = new Params(requireActivity());
-            params.setCallback(this,o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    getEvaluation();
-                }
-            });
+            params.setCallback(this, this::getEvaluation);
             StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
             binding.getRoot().setLayoutManager(sgm);
             CategoryAdapter adp = new CategoryAdapter(requireContext());

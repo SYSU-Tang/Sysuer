@@ -28,6 +28,8 @@ import com.sysu.edu.academic.CETActivity;
 import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
 import com.sysu.edu.academic.CourseCompletion;
+import com.sysu.edu.academic.CourseSelectedActivity;
+import com.sysu.edu.academic.CourseSelection;
 import com.sysu.edu.academic.EvaluationActivity;
 import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.academic.Grade;
@@ -39,7 +41,6 @@ import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemServiceBoxBinding;
-import com.sysu.edu.extra.LaunchMiniProgram;
 import com.sysu.edu.life.Pay;
 import com.sysu.edu.life.SchoolBus;
 import com.sysu.edu.news.News;
@@ -60,6 +61,7 @@ public class ServiceFragment extends Fragment {
             result -> {
             }
     );
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -121,7 +123,7 @@ public class ServiceFragment extends Fragment {
         actionMap.put(601, v -> {    // 二维码
             String linking = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("qrcode", "");
             if (linking.isEmpty()) {
-                new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
+                //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
             } else {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(linking)));
@@ -141,6 +143,7 @@ public class ServiceFragment extends Fragment {
 
         // 教务服务 (id: 7xx)
         actionMap.put(701, newActivity(EvaluationActivity.class));           // 评教
+        actionMap.put(702, newActivity(CourseSelection.class));
         actionMap.put(703, newActivity(AgendaActivity.class));               // 课程表
         actionMap.put(704, newActivity(ExamActivity.class));                 // 考试
         actionMap.put(705, newActivity(CalendarActivity.class));             // 校历
@@ -149,6 +152,8 @@ public class ServiceFragment extends Fragment {
         actionMap.put(709, browse("https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView")); // 个人培养方案
         actionMap.put(710, newActivity(TrainingSchedule.class));             // 培养方案
         actionMap.put(711, newActivity(MajorInfo.class));                    // 专业
+        actionMap.put(712, newActivity(CourseSelectedActivity.class));                  // 已选课程
+
 
         // 学习平台 (id: 8xx)
         actionMap.put(801, browse("https://www.seelight.net/"));             // SeeLight

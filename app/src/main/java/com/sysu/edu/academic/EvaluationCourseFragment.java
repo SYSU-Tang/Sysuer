@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -66,11 +65,9 @@ public class EvaluationCourseFragment extends Fragment {
         if (type != null && rwid != null && account != null) {
             getEvaluation(type, rwid, account, page);
         }
-        params.setCallback(this,o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                page = 1;
-                getEvaluation(type, rwid, account, page);
-            }
+        params.setCallback(this, () -> {
+            page = 1;
+            getEvaluation(type, rwid, account, page);
         });
         handler = new Handler(Looper.getMainLooper()) {
             @Override

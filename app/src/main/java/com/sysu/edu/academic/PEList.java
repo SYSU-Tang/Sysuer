@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +29,7 @@ public class PEList extends AppCompatActivity {
     Handler handler;
     OkHttpClient http = new OkHttpClient.Builder().build();
     Pager2Adapter adp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,23 +37,19 @@ public class PEList extends AppCompatActivity {
         setContentView(binding.getRoot());
         params = new Params(this);
         cookie = params.getCookie();
-        params.setCallback(o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-            }
-        });
+        params.setCallback(() -> cookie = params.getCookie());
         adp = new Pager2Adapter(this);
         adp.add(StaggeredFragment.newInstance(0));
         adp.add(StaggeredFragment.newInstance(0));
         adp.add(StaggeredFragment.newInstance(0));
         binding.pager.setAdapter(adp);
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"体测查询","课外积分","游泳"}[position])).attach();
-        binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
+        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"体测查询", "课外积分", "游泳"}[position])).attach();
+        binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                   params.toast(R.string.no_wifi_warning);
+                    params.toast(R.string.no_wifi_warning);
                 }/*else {
 //                    JSONObject response = JSONObject.parseObject((String) msg.obj);
 //                    if (response != null && response.getInteger("code").equals(200)) {
@@ -81,22 +77,22 @@ public class PEList extends AppCompatActivity {
         getTest();
     }
 
-    void getTest(){
+    void getTest() {
         http.newCall(new Request.Builder().url("https://tice.sysu.edu.cn/m/tice")
-                .header("Cookie",cookie)
+                .header("Cookie", cookie)
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what= 0 ;
-                msg.obj=response.body().string();
+                msg.what = 0;
+                msg.obj = response.body().string();
                 System.out.println(msg.obj);
                 handler.sendMessage(msg);
             }

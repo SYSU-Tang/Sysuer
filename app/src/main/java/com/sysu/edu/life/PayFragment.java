@@ -1,6 +1,5 @@
 package com.sysu.edu.life;
 
-import android.app.Activity;
 import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.os.Handler;
@@ -62,18 +61,16 @@ public class PayFragment extends StaggeredFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         params = new Params(requireActivity());
-        params.setCallback(this,o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                token = params.getToken();
-                getToPayList();
-            }
+        params.setCallback(this, () -> {
+            token = params.getToken();
+            getToPayList();
         });
         token = params.getToken();
         switch (position) {
             case 0:
                 FragmentPayNeedBinding b0 = FragmentPayNeedBinding.inflate(inflater);
                 b0.getRoot().addView(view);
-                b0.pay.setOnClickListener(a-> params.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
+                b0.pay.setOnClickListener(a -> params.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
                 binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -131,7 +128,7 @@ public class PayFragment extends StaggeredFragment {
                 b2.to.setOnClickListener(view2 -> {
                     MaterialDatePicker<Long> toDatePicker = MaterialDatePicker.Builder.datePicker().setSelection(dm.getToDateTimeMillis()).setCalendarConstraints(new CalendarConstraints.Builder().setValidator(CompositeDateValidator.allOf(List.of(DateValidatorPointForward.from(dm.getFromDateTimeMillis())))).build()).build();
                     toDatePicker.addOnPositiveButtonClickListener(selection -> {
-                        dm.toDate=new Date(selection);
+                        dm.toDate = new Date(selection);
                         toDatePicker.dismissAllowingStateLoss();
                         b2.to.setText(dm.getToDateString());
                         dm.getData();
@@ -151,7 +148,7 @@ public class PayFragment extends StaggeredFragment {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    params.toast( getString(R.string.no_wifi_warning));
+                    params.toast(getString(R.string.no_wifi_warning));
                 } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
@@ -220,46 +217,59 @@ public class PayFragment extends StaggeredFragment {
     @Override
     public void add(String title, @Nullable Integer icon, List<String> keys, List<String> values) {
         super.add(title, icon, keys, values);
-        if (position==0){
+        if (position == 0) {
             ChipGroup chips = view.findViewById(R.id.chips);
             Chip chip = ItemFilterChipBinding.inflate(getLayoutInflater(), chips, false).getRoot();
             chip.setText(title);
-            chips.addView(chip,chips.getChildCount()-1);
+            chips.addView(chip, chips.getChildCount() - 1);
         }
     }
 
-    void getPage(){
-        switch (position){
-            case 0:getToPayList();break;
-            case 1:getSelectivePayList();break;
-            case 2:getFeeList(String.valueOf(Params.getYear()));break;
-            case 3:getPaymentList();break;
-            case 4:getRefundList();break;
+    void getPage() {
+        switch (position) {
+            case 0:
+                getToPayList();
+                break;
+            case 1:
+                getSelectivePayList();
+                break;
+            case 2:
+                getFeeList(String.valueOf(Params.getYear()));
+                break;
+            case 3:
+                getPaymentList();
+                break;
+            case 4:
+                getRefundList();
+                break;
         }
     }
+
     void getToPayList() {
-        getList("https://pay.sysu.edu.cn/client/api/client/necessary/list","{}",0);
+        getList("https://pay.sysu.edu.cn/client/api/client/necessary/list", "{}", 0);
     }
 
     void getSelectivePayList() {
-        getList("https://pay.sysu.edu.cn/client/api/client/chooce/list","{}",1);
+        getList("https://pay.sysu.edu.cn/client/api/client/chooce/list", "{}", 1);
     }
 
     void getFeeList(String year) {
-        getList("https://pay.sysu.edu.cn/client/api/client/record/feelist",String.format("{\"year\":%s}", year),2);
+        getList("https://pay.sysu.edu.cn/client/api/client/record/feelist", String.format("{\"year\":%s}", year), 2);
     }
 
-    void getPaymentList(String from,String to) {
-        getList("https://pay.sysu.edu.cn/client/api/client/record/paymentlist",String.format("{\"startTime\":\"%s\",\"overTime\":\"%s\"}",from,to),3);
+    void getPaymentList(String from, String to) {
+        getList("https://pay.sysu.edu.cn/client/api/client/record/paymentlist", String.format("{\"startTime\":\"%s\",\"overTime\":\"%s\"}", from, to), 3);
     }
-    void getPaymentList(){
-        getPaymentList(Params.getDateTime(Params.getFirstOfMonth()),Params.getDateTime(Params.getEndOfMonth()));
+
+    void getPaymentList() {
+        getPaymentList(Params.getDateTime(Params.getFirstOfMonth()), Params.getDateTime(Params.getEndOfMonth()));
     }
 
     void getRefundList() {
-        getList("https://pay.sysu.edu.cn/client/api/client/refund/list","{}",4);
+        getList("https://pay.sysu.edu.cn/client/api/client/refund/list", "{}", 4);
     }
-    void getList(String url,String body,int what) {
+
+    void getList(String url, String body, int what) {
         http.newCall(new Request.Builder().url(url)
                 .header("token", token)
                 .header("Referer", "https://pay.sysu.edu.cn/")
@@ -282,27 +292,35 @@ public class PayFragment extends StaggeredFragment {
             }
         });
     }
-    class DateManager{
+
+    class DateManager {
         final Calendar c = Calendar.getInstance();
         public Date fromDate;
         public Date toDate;
-        public DateManager(){}
-        public String getFromDateString(){
+
+        public DateManager() {
+        }
+
+        public String getFromDateString() {
             return Params.toDate(fromDate);
         }
-        public String getToDateString(){
+
+        public String getToDateString() {
             return Params.toDate(toDate);
         }
-        public long getFromDateTimeMillis(){
+
+        public long getFromDateTimeMillis() {
             c.setTime(fromDate);
             return c.getTimeInMillis();
         }
-        public long getToDateTimeMillis(){
+
+        public long getToDateTimeMillis() {
             c.setTime(toDate);
             return c.getTimeInMillis();
         }
-        public void getData(){
-            getPaymentList(Params.getDateTime(fromDate),Params.getDateTime(toDate));
+
+        public void getData() {
+            getPaymentList(Params.getDateTime(fromDate), Params.getDateTime(toDate));
         }
     }
 }

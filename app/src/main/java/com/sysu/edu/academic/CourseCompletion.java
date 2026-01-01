@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -47,11 +46,9 @@ public class CourseCompletion extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
         cookie = params.getCookie();
-        params.setCallback(o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                getCreditHours();
-            }
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            getCreditHours();
         });
         binding.toolbar.setTitle(R.string.course_completion);
         Pager2Adapter adp = new Pager2Adapter(this).add(StaggeredFragment.newInstance(0)).add(new CourseCompletionFragment());

@@ -235,6 +235,11 @@
         "id": 711,
         "name": "Majors",
         "description": "Major information inquiry system, providing detailed information such as major introductions, faculty, and employment direction"
+      },
+      {
+        "id": 712,
+        "name": "Selected Courses",
+        "description": "Selected courses inquiry system, with functions such as course selection results, grade inquiry, and transcript printing"
       }
     ]
   },

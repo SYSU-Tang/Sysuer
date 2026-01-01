@@ -94,5 +94,5 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
     implementation(libs.api)
     implementation(libs.provider)
-    api(libs.wechat.sdk.android)
+    //api(libs.wechat.sdk.android)
 }

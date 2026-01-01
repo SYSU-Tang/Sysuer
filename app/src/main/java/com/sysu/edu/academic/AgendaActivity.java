@@ -1,5 +1,6 @@
 package com.sysu.edu.academic;
 
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,8 @@ import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -59,25 +62,25 @@ public class AgendaActivity extends AppCompatActivity {
     ActivityAgendaBinding binding;
     Params params;
     ItemDetailBinding detailBinding;
-
+    MutableLiveData<String> id = new MutableLiveData<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityAgendaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == RESULT_OK) {
-                cookie = params.getCookie();
-                if (currentTerm != null) {
-                    getTable(currentTerm, currentWeek);
-                } else {
-                    getTerm();
-                    getAvailableTerms();
-                }
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            if (currentTerm != null) {
+                getTable(currentTerm, currentWeek);
+            } else {
+                getTerm();
+                getAvailableTerms();
             }
-        });
-        cookie = params.getCookie();
+        }); // 登录回调
+        cookie = params.getCookie();// 获取cookie
+
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         String[] duration = getResources().getStringArray(R.array.duration);
         binding.toolbar.getMenu().add(R.string.today).setOnMenuItemClickListener(menuItem -> {
@@ -86,7 +89,6 @@ public class AgendaActivity extends AppCompatActivity {
             return false;
         }).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        //binding.month.setText(new SimpleDateFormat("M月", Locale.CHINESE).format(new Date()));
         Calendar calendar = Calendar.getInstance();
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
         binding.month.setText(getResources().getStringArray(R.array.months)[calendar.get(Calendar.MONTH)-1]);
@@ -104,7 +106,7 @@ public class AgendaActivity extends AppCompatActivity {
             }
             durationBinding.getRoot().setLayoutParams(new GridLayout.LayoutParams());
             binding.day.addView(durationBinding.getRoot());
-        }
+        } // 初始化课程时间
         for (int i = 0; i < 7; i++) {
             ItemWeekdayBinding itemBinding = ItemWeekdayBinding.inflate(getLayoutInflater(), binding.week, false);
             itemBinding.courseWeek.setText(getResources().getStringArray(R.array.weeks)[i]);
@@ -125,7 +127,7 @@ public class AgendaActivity extends AppCompatActivity {
             column.setLayoutParams(lp);
             binding.day.addView(column);
             binding.week.addView(itemBinding.getRoot());
-        }
+        } // 初始化周历
         binding.term.setOnClickListener(v -> {
             if (termPop == null) {
                 termPop = new PopupMenu(v.getContext(), v, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
@@ -135,7 +137,7 @@ public class AgendaActivity extends AppCompatActivity {
                 }));
             }
             termPop.show();
-        });
+        }); // 初始化学期选择
         binding.weekTime.setOnClickListener(v -> {
             if (weekPop == null) {
                 weekPop = new PopupMenu(v.getContext(), v, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
@@ -145,9 +147,10 @@ public class AgendaActivity extends AppCompatActivity {
                 }));
             }
             weekPop.show();
-        });
+        }); // 初始化周次选择
         detailDialog = new BottomSheetDialog(this);
         detailBinding = ItemDetailBinding.inflate(getLayoutInflater());
+        detailBinding.open.setOnClickListener(v -> startActivity(new Intent(this, CourseDetail.class).putExtra("id", id.getValue()), ActivityOptionsCompat.makeSceneTransitionAnimation(this,v,"miniapp").toBundle())); // 初始化打开链接
         detailDialog.setContentView(detailBinding.getRoot());
         handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -159,13 +162,13 @@ public class AgendaActivity extends AppCompatActivity {
                         case 1: {
                             views.forEach(e -> binding.day.removeView(e));
                             views.clear();
+                            System.out.println(response);
                             response.getJSONArray("data").forEach(e -> {
                                 String week = ((JSONObject) e).getString("week");
                                 String startClassTimes = ((JSONObject) e).getString("startClassTimes");
                                 String endClassTimes = ((JSONObject) e).getString("endClassTimes");
                                 JSONArray info = ((JSONObject) e).getJSONArray("teachingInfoList");
                                 JSONObject detail = (JSONObject) info.get(0);
-                                System.out.println(e);
                                 String course = detail.getString("courseName");
                                 String teacher = detail.getString("teacherName");
                                 String campus = detail.getString("teachingCampusName");
@@ -182,6 +185,7 @@ public class AgendaActivity extends AppCompatActivity {
                                 item.setOnClickListener(v -> {
                                     String location = (campus == null ? "" : campus) + "-" + (teachingBuildingName == null ? "" : teachingBuildingName) + "-" + (classroomNum == null ? "" : classroomNum);
                                     setDialogDetail(course, location, teacher, String.format(getString(R.string.from_to), startClassTimes, endClassTimes), detail.getString("assistantInfo"));
+                                    id.setValue(detail.getString("classesId"));
                                     detailDialog.show();
                                     //setDetail(course, location,teacher,String.format("第%s节到第%s节",startClassTimes,endClassTimes));
                                 });

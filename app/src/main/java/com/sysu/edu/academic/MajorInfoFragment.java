@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -59,13 +58,11 @@ public class MajorInfoFragment extends StaggeredFragment {
         }
         View view = super.onCreateView(inflater, container, savedInstanceState);
         Params params = new Params(requireActivity());
-        params.setCallback(this, o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                page = 0;
-                total = -1;
-                getList();
-            }
+        params.setCallback(this, () -> {
+            cookie = params.getCookie();
+            page = 0;
+            total = -1;
+            getList();
         });
         cookie = params.getCookie();
         binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

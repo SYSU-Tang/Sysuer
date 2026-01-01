@@ -1,15 +1,6 @@
 package com.sysu.edu.extra;
 
-import static androidx.core.content.ContextCompat.registerReceiver;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
-import androidx.core.content.ContextCompat;
-
-import com.tencent.mm.opensdk.constants.ConstantsAPI;
+/*import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -39,4 +30,4 @@ public class LaunchMiniProgram {
         req.miniprogramType = WXLaunchMiniProgram.Req.MINIPTOGRAM_TYPE_RELEASE;
         api.sendReq(req);
     }
-}
+}*/

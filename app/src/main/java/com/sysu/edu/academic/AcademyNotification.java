@@ -1,7 +1,6 @@
 package com.sysu.edu.academic;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -63,11 +62,9 @@ public class AcademyNotification extends AppCompatActivity {
         binding.toolbar.setTitle(R.string.academic_affair_notice);
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                getNotices();
-            }
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            getNotices();
         });
         cookie = params.getCookie();
         Pager2Adapter adp = new Pager2Adapter(this);

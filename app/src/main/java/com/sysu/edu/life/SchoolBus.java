@@ -1,6 +1,5 @@
 package com.sysu.edu.life;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,25 +36,24 @@ public class SchoolBus extends AppCompatActivity {
     Handler handler;
     OkHttpClient http = new OkHttpClient.Builder().build();
     ArrayList<String> routes = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPagerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         binding.toolbar.setTitle(R.string.major_info);
-        binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
-        cookie  = params.getCookie();
-        params.setCallback(o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                getData();
-            }
+        cookie = params.getCookie();
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            getData();
         });
         binding.toolbar.setTitle(R.string.school_bus);
         Pager2Adapter adp = new Pager2Adapter(this);
         binding.pager.setAdapter(adp);
-        ItemSchoolBusNoticeBinding notice = ItemSchoolBusNoticeBinding.inflate(getLayoutInflater(),binding.appBarLayout,false);
+        ItemSchoolBusNoticeBinding notice = ItemSchoolBusNoticeBinding.inflate(getLayoutInflater(), binding.appBarLayout, false);
         binding.appBarLayout.addView(notice.getRoot());
         notice.card.setOnClickListener(v -> notice.note.setVisibility(notice.note.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(routes.get(position))).attach();
@@ -64,39 +62,38 @@ public class SchoolBus extends AppCompatActivity {
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
                     params.toast(R.string.no_wifi_warning);
-                }else if(msg.what == 0){
+                } else if (msg.what == 0) {
                     params.toast(R.string.login_warning);
-                    params.gotoLogin(binding.toolbar,TargetUrl.PORTAL);
-                }
-                else{
+                    params.gotoLogin(binding.toolbar, TargetUrl.PORTAL);
+                } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getJSONObject("meta").getInteger("statusCode").equals(200)) {
                         if (response.get("data") != null) {
                             if (msg.what == 1) {
                                 response.getJSONObject("data").getJSONArray("workDay").forEach(a -> {
                                     StaggeredFragment fr = new StaggeredFragment();
-                                    routes.add(((JSONObject)a).getString("drivingDirectionName"));
+                                    routes.add(((JSONObject) a).getString("drivingDirectionName"));
                                     ArrayList<String> infos = new ArrayList<>();
-                                    for (String i:new String[]{"drivingDirectionName","startStation","endStation"}){
-                                        infos.add(((JSONObject)a).getString(i));
+                                    for (String i : new String[]{"drivingDirectionName", "startStation", "endStation"}) {
+                                        infos.add(((JSONObject) a).getString(i));
                                     }
                                     //fr.setNote(((JSONObject)a).getString("note"));
-                                    notice.note.setText(((JSONObject)a).getString("note"));
-                                    fr.add(SchoolBus.this, "路线详情", List.of("路线","起点","终点"),infos);
-                                    adp.add(fr);((JSONObject)a).getJSONArray("schoolBusShuttleMomentList").forEach(b->{
+                                    notice.note.setText(((JSONObject) a).getString("note"));
+                                    fr.add(SchoolBus.this, "路线详情", List.of("路线", "起点", "终点"), infos);
+                                    adp.add(fr);
+                                    ((JSONObject) a).getJSONArray("schoolBusShuttleMomentList").forEach(b -> {
                                         ArrayList<String> values = new ArrayList<>();
-                                        for (String i:new String[]{"passenger","vehiclesType","time","drivingRoute"}){
-                                            values.add(((JSONObject)b).getString(i));
+                                        for (String i : new String[]{"passenger", "vehiclesType", "time", "drivingRoute"}) {
+                                            values.add(((JSONObject) b).getString(i));
                                         }
-                                        fr.add(SchoolBus.this, values.get(2),R.drawable.round_rect, List.of("乘客","车辆","时间","路线"),values);
+                                        fr.add(SchoolBus.this, values.get(2), R.drawable.round_rect, List.of("乘客", "车辆", "时间", "路线"), values);
                                     });
                                 });
                             }
                         }
-                    }
-                    else {
+                    } else {
                         params.toast(getString(R.string.login_warning));
-                        params.gotoLogin(binding.toolbar,TargetUrl.PORTAL);
+                        params.gotoLogin(binding.toolbar, TargetUrl.PORTAL);
                     }
                 }
             }
@@ -104,21 +101,22 @@ public class SchoolBus extends AppCompatActivity {
         getData();
     }
 
-    void getData(){
+    void getData() {
         http.newCall(new Request.Builder().url("https://portal.sysu.edu.cn/newClient/api/extraCard/schoolBusShuttleInfo/selectSchoolBusMap")
-                .header("Cookie",cookie)
+                .header("Cookie", cookie)
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
+
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what = Objects.requireNonNull(response.header("Content-Type")).startsWith("application/json")?1:0;
-                msg.obj=response.body().string();
+                msg.what = Objects.requireNonNull(response.header("Content-Type")).startsWith("application/json") ? 1 : 0;
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });

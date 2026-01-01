@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -46,13 +45,11 @@ public class CETActivity extends AppCompatActivity {
         StaggeredFragment fr = binding.list.getFragment();
         params = new Params(this);
         cookie = params.getCookie();
-        params.setCallback(o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
+        params.setCallback(() -> {
                 page=0;
                 fr.clear();
                 cookie = params.getCookie();
                 getExchange();
-            }
         });
 
         binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());

@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,16 +30,17 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class CourseCompletionFragment extends StaggeredFragment{
+public class CourseCompletionFragment extends StaggeredFragment {
     String cookie;
     Handler handler;
     OkHttpClient http = new OkHttpClient.Builder().build();
     int total;
     int page;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
-        page=0;
+        page = 0;
         binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
@@ -51,20 +51,18 @@ public class CourseCompletionFragment extends StaggeredFragment{
             }
         });
         Params params = new Params(requireActivity());
-        cookie  = params.getCookie();
-        params.setCallback(this,o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                page = 0;
-                getStudentCourse();
-            }
+        cookie = params.getCookie();
+        params.setCallback(this, () -> {
+            cookie = params.getCookie();
+            page = 0;
+            getStudentCourse();
         });
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
                     Toast.makeText(requireContext(), getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
-                }else {
+                } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
                         if (response.get("data") != null) {
@@ -86,11 +84,11 @@ public class CourseCompletionFragment extends StaggeredFragment{
                                 });
                             }
                         }
-                    }else if(response != null && response.getInteger("code").equals(50030000)){
-                        params.toast(response.getString("message"));}
-                    else {
+                    } else if (response != null && response.getInteger("code").equals(50030000)) {
+                        params.toast(response.getString("message"));
+                    } else {
                         params.toast(R.string.login_warning);
-                        params.gotoLogin(getView(),TargetUrl.JWXT);
+                        params.gotoLogin(getView(), TargetUrl.JWXT);
                     }
                 }
             }
@@ -98,25 +96,26 @@ public class CourseCompletionFragment extends StaggeredFragment{
         getStudentCourse();
         return view;
     }
-    void getStudentCourse(){
+
+    void getStudentCourse() {
         page++;
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse")
-                .header("Cookie",cookie)
-                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"cultureTypeCode\":\"01\"}}", page), MediaType.parse("application/json")))
-                .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/gradua/")
+                .header("Cookie", cookie)
+                .post(RequestBody.create(String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"cultureTypeCode\":\"01\"}}", page), MediaType.parse("application/json")))
+                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/gradua/")
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what= 1;
-                msg.obj=response.body().string();
+                msg.what = 1;
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });

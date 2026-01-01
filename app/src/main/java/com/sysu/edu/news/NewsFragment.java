@@ -1,6 +1,5 @@
 package com.sysu.edu.news;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -79,11 +78,9 @@ public class NewsFragment extends Fragment {
         if (savedInstanceState == null) {
             binding = RecyclerViewScrollBinding.inflate(inflater);
             params = new Params(requireActivity());
-            params.setCallback(this,o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    cookie = params.getCookie();
-                    run.run();
-                }
+            params.setCallback(this, () -> {
+                cookie = params.getCookie();
+                run.run();
             });
             cookie = params.getCookie();
             //cookie = "authorization=Bearer%20eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c3NlYXJjaF8xMDAwNTAiLCJ1c2VyX25hbWUiOiIyNDMwODE1MiIsInNjb3BlIjpbImFsbCJdLCJuYW1lIjoiMjQzMDgxNTIiLCJleHAiOjE3NTkzOTg1MjUsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImp0aSI6Inp5Z3RBeEhDdkx0ckFMODdnWWJuNDhxWUlyNCIsImNsaWVudF9pZCI6IjE2NzNmMDFkOTYxYTYxMGZlOTIyMGVmZjBkN2IzYmM0IiwidXNlcm5hbWUiOiIyNDMwODE1MiJ9.viBuKujwPQO9ai5orJsJtloWhwZhDThl40O_kfJFK_k";

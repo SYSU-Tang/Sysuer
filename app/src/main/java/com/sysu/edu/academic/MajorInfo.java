@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -42,11 +41,9 @@ public class MajorInfo extends AppCompatActivity {
         binding.toolbar.setTitle(R.string.major_info);
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                getCategory();
-            }
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            getCategory();
         });
         cookie = params.getCookie();
         Pager2Adapter adp = new Pager2Adapter(this);

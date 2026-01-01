@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,18 +58,16 @@ public class EvaluationQuestionnaireFragment extends Fragment {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         ConcatAdapter adp = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
         binding.recyclerView.setAdapter(adp);
-        params.setCallback(this,o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                getEvaluation(requireArguments().getString("rwid"),
-                        requireArguments().getString("wjid"),
-                        requireArguments().getString("sxz"),
-                        requireArguments().getString("pjrdm"),
-                        requireArguments().getString("bpdm"),
-                        requireArguments().getString("kcdm"),
-                        requireArguments().getString("rwh"),
-                        Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
-                        requireArguments().getString("bpmc"));
-            }
+        params.setCallback(this, () -> {
+            getEvaluation(requireArguments().getString("rwid"),
+                    requireArguments().getString("wjid"),
+                    requireArguments().getString("sxz"),
+                    requireArguments().getString("pjrdm"),
+                    requireArguments().getString("bpdm"),
+                    requireArguments().getString("kcdm"),
+                    requireArguments().getString("rwh"),
+                    Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
+                    requireArguments().getString("bpmc"));
         });
         //{"rwid", "wjid","sxz","pjrdm","bpdm","kcdm","rwh"};
         getEvaluation(requireArguments().getString("rwid"),

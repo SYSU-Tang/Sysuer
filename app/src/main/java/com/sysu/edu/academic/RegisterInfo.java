@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,38 +38,37 @@ public class RegisterInfo extends AppCompatActivity {
     OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 1;
     Pager2Adapter adp;
-    boolean changeYear=false;
+    boolean changeYear = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPagerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == Activity.RESULT_OK) {
-                cookie = params.getCookie();
-                getNextPage(0);
-            }
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            getNextPage(0);
         });
         cookie = params.getCookie();
         adp = new Pager2Adapter(this);
         binding.pager.setAdapter(adp);
-        for(String i : new String[]{"2024","2025"}){
+        for (String i : new String[]{"2024", "2025"}) {
             binding.toolbar.getMenu().add(i).setOnMenuItemClickListener(menuItem -> {
                 getPay(i);
-                ((StaggeredFragment)adp.getItem(1)).clear();
+                ((StaggeredFragment) adp.getItem(1)).clear();
                 return false;
             });
         }
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(getResources().getStringArray(R.array.registration_info)[position])).attach();
-        binding.toolbar.setNavigationOnClickListener(v->supportFinishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         binding.toolbar.setTitle(R.string.register_info);
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
                     params.toast(R.string.no_wifi_warning);
-                }else {
+                } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
                         if (response.get("data") != null) {
@@ -80,11 +78,11 @@ public class RegisterInfo extends AppCompatActivity {
                                     int total = d.getInteger("total");
                                     d.getJSONArray("rows").forEach(a -> {
                                         ArrayList<String> values = new ArrayList<>();
-                                        String[] keyName = new String[]{"学年学期","校区","学院","年级专业","缴费状态","报到状态","注册状态","报到日期","注册日期"};
+                                        String[] keyName = new String[]{"学年学期", "校区", "学院", "年级专业", "缴费状态", "报到状态", "注册状态", "报到日期", "注册日期"};
                                         for (int i = 0; i < keyName.length; i++) {
-                                            values.add(((JSONObject) a).getString(new String[]{"academicYearTerm","campusName","collegeName","gradeMajorName","payedStatusName","checkInStatusName","registerStatusName","checkInDate","registerDate","","","",""}[i]));
+                                            values.add(((JSONObject) a).getString(new String[]{"academicYearTerm", "campusName", "collegeName", "gradeMajorName", "payedStatusName", "checkInStatusName", "registerStatusName", "checkInDate", "registerDate", "", "", "", ""}[i]));
                                         }
-                                        ((StaggeredFragment) adp.getItem(2)).add(RegisterInfo.this,values.get(0),R.drawable.calendar,List.of(keyName), values);
+                                        ((StaggeredFragment) adp.getItem(2)).add(RegisterInfo.this, values.get(0), R.drawable.calendar, List.of(keyName), values);
 
                                     });
                                     if (total / 10 > page - 1) {
@@ -102,7 +100,7 @@ public class RegisterInfo extends AppCompatActivity {
                                     for (int i = 0; i < keyName.length; i++) {
                                         values.add(d.getString(new String[]{"stuNum", "academicYearTerm", "checkInStatusName", "registerStatusName", "payedStatusName"}[i]));
                                     }
-                                    ((StaggeredFragment) adp.getItem(0)).add(RegisterInfo.this,"学生报到信息", List.of(keyName), values);
+                                    ((StaggeredFragment) adp.getItem(0)).add(RegisterInfo.this, "学生报到信息", List.of(keyName), values);
                                     getNextPage(msg.what + 1);
                                     break;
                                 }
@@ -110,36 +108,36 @@ public class RegisterInfo extends AppCompatActivity {
                                     JSONArray d = response.getJSONArray("data");
                                     d.forEach(v -> {
                                         ArrayList<String> values = new ArrayList<>();
-                                        String[] keyName = new String[]{"年份", "类别","项目名称" ,"金额（元）", "区间", "时间"};
+                                        String[] keyName = new String[]{"年份", "类别", "项目名称", "金额（元）", "区间", "时间"};
                                         for (int i = 0; i < keyName.length; i++) {
                                             values.add(((JSONObject) v).getString(new String[]{"acadYear", "typeName", "feeTypeName", "payedItemAmount", "feeTimeSection", "editeTime"}[i]));
                                         }
-                                        ((StaggeredFragment) adp.getItem(1)).setHideNull(RegisterInfo.this,true);
-                                        ((StaggeredFragment) adp.getItem(1)).add(RegisterInfo.this,values.get(1),R.drawable.money, List.of(keyName), values);
+                                        ((StaggeredFragment) adp.getItem(1)).setHideNull(RegisterInfo.this, true);
+                                        ((StaggeredFragment) adp.getItem(1)).add(RegisterInfo.this, values.get(1), R.drawable.money, List.of(keyName), values);
                                     });
                                     getNextPage(msg.what + 1);
                                     break;
                                 }
                             }
                         }
-                    }
-                    else {
+                    } else {
                         params.toast(R.string.login_warning);
-                        params.gotoLogin(binding.getRoot(),TargetUrl.JWXT);
+                        params.gotoLogin(binding.getRoot(), TargetUrl.JWXT);
                     }
                 }
             }
         };
         getNextPage(0);
     }
-    void getNextPage(int what){
-        if(changeYear){
+
+    void getNextPage(int what) {
+        if (changeYear) {
             return;
         }
-        if(what<3){
+        if (what < 3) {
             adp.add(StaggeredFragment.newInstance(what));
         }
-        switch (what){
+        switch (what) {
             case 0:
                 getInfo();
                 break;
@@ -149,72 +147,77 @@ public class RegisterInfo extends AppCompatActivity {
             case 2:
                 getList();
                 break;
-            default:changeYear=true;
+            default:
+                changeYear = true;
         }
     }
-    void getInfo(){
+
+    void getInfo() {
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/reports-register/stuRegistration/getSelfRegisterInfo")
-                .header("Cookie",cookie)
-                .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
+                .header("Cookie", cookie)
+                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what= 0;
-                msg.obj=response.body().string();
+                msg.what = 0;
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
     }
-    void getPay(){
+
+    void getPay() {
         getPay("2025");
     }
-    void getPay(String year){
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/reports-register/stuRegistration/getSelfPayInfoDetail?acadYear="+year)
-                .header("Cookie",cookie)
-                .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
+
+    void getPay(String year) {
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/reports-register/stuRegistration/getSelfPayInfoDetail?acadYear=" + year)
+                .header("Cookie", cookie)
+                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what= 1;
-                msg.obj=response.body().string();
+                msg.what = 1;
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
     }
-    void getList(){
+
+    void getList() {
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/reports-register/stuRegistration/getSelfRegisterList")
-                .header("Cookie",cookie)
-                .post(RequestBody.create(String.format(Locale.getDefault(),"{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{}}",page), MediaType.parse("application/json")))
-                .header("Referer","https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
+                .header("Cookie", cookie)
+                .post(RequestBody.create(String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{}}", page), MediaType.parse("application/json")))
+                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
-                msg.what=-1;
+                msg.what = -1;
                 handler.sendMessage(msg);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what= 2;
-                msg.obj=response.body().string();
+                msg.what = 2;
+                msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });

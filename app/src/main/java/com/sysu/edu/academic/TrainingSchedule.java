@@ -28,38 +28,36 @@ import okhttp3.Response;
 public class TrainingSchedule extends AppCompatActivity {
     ActivityTrainingScheduleBinding binding;
     OkHttpClient http = new OkHttpClient.Builder().build();
-    String cookie="";
+    String cookie = "";
     Handler handler;
     TrainingScheduleFragment schedule;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding=ActivityTrainingScheduleBinding.inflate(getLayoutInflater());
+        binding = ActivityTrainingScheduleBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Params params = new Params(this);
-        params.setCallback(o -> {
-            if (o.getResultCode() == RESULT_OK) {
-                cookie = params.getCookie();
-                getColleges("");
-                getGrades();
-                getTypes();
-                getProfessions("");
-            }
+        params.setCallback(() -> {
+            cookie = params.getCookie();
+            getColleges("");
+            getGrades();
+            getTypes();
+            getProfessions("");
         });
-        cookie=params.getCookie();
+        cookie = params.getCookie();
         binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         schedule = (TrainingScheduleFragment) (Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getChildFragmentManager().getFragments().get(0);
 
-       // System.out.println(getSupportFragmentManager().findFragmentById(R.id.fragment));
-      //  NavController navController = ((NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment)).getNavController();
-         handler=new Handler(getMainLooper()){
+        // System.out.println(getSupportFragmentManager().findFragmentById(R.id.fragment));
+        //  NavController navController = ((NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment)).getNavController();
+        handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 JSONObject data = JSON.parseObject((String) msg.obj);
-                if(data.getInteger("code")==200){
-                    schedule.deal(msg.what,data);
-                }else {
+                if (data.getInteger("code") == 200) {
+                    schedule.deal(msg.what, data);
+                } else {
                     params.toast(R.string.login_warning);
                     params.gotoLogin(binding.tool, TargetUrl.JWXT);
                 }
@@ -73,7 +71,7 @@ public class TrainingSchedule extends AppCompatActivity {
     }
 
     void getProfessions(String keyword) {
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode="+keyword).header("Cookie",cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode=" + keyword).header("Cookie", cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
             }
@@ -81,7 +79,7 @@ public class TrainingSchedule extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what=4;
+                msg.what = 4;
                 msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
@@ -90,7 +88,7 @@ public class TrainingSchedule extends AppCompatActivity {
 
     void getTypes() {
         http.newCall(new Request.Builder()
-                .url("https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=97").header("Cookie",cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
+                .url("https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=97").header("Cookie", cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
             }
@@ -98,14 +96,15 @@ public class TrainingSchedule extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what=3;
+                msg.what = 3;
                 msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
     }
-    void getColleges(String keyword){
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/department/recruitUnitPull").post(RequestBody.create("{\"departmentName\":\""+keyword+"\",\"subordinateDepartmentNumber\":null,\"id\":null}",MediaType.parse("application/json"))).header("Cookie",cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
+
+    void getColleges(String keyword) {
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/department/recruitUnitPull").post(RequestBody.create("{\"departmentName\":\"" + keyword + "\",\"subordinateDepartmentNumber\":null,\"id\":null}", MediaType.parse("application/json"))).header("Cookie", cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
             }
@@ -113,22 +112,24 @@ public class TrainingSchedule extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what=1;
+                msg.what = 1;
                 msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }
         });
     }
-    void getGrades(){
+
+    void getGrades() {
         http.newCall(new Request.Builder()
-                .url("https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=127").header("Cookie",cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
+                .url("https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=127").header("Cookie", cookie).header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/").build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
             }
+
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
-                msg.what=2;
+                msg.what = 2;
                 msg.obj = response.body().string();
                 handler.sendMessage(msg);
             }

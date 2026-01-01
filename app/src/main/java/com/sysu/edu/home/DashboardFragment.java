@@ -1,6 +1,5 @@
 package com.sysu.edu.home;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,7 +40,6 @@ import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
 import com.sysu.edu.databinding.ItemCourseBinding;
 import com.sysu.edu.databinding.ItemExamBinding;
-import com.sysu.edu.extra.LaunchMiniProgram;
 import com.sysu.edu.todo.InitTodo;
 import com.sysu.edu.todo.TodoFragment;
 import com.sysu.edu.todo.info.TodoInfo;
@@ -101,7 +99,7 @@ public class DashboardFragment extends Fragment {
             binding.qrcode.setOnClickListener(v -> {
                 String linking = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("qrcode", "");
                 if (linking.isEmpty()) {
-                    new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
+                    //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
                 } else {
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(linking)));
@@ -124,27 +122,25 @@ public class DashboardFragment extends Fragment {
             });
             params = new Params(requireActivity());
             cookie = params.getCookie();
-            params.setCallback(this, o -> {
-                if (o.getResultCode() == Activity.RESULT_OK) {
-                    cookie = params.getCookie();
-                    getTerm();
-                }
+            params.setCallback(this, () -> {
+                cookie = params.getCookie();
+                getTerm();
             });
-            CourseAdp courseAdp = new CourseAdp(requireActivity());
-            courseAdp.setOnClick((jsonObject, view) -> startActivity(new Intent(getContext(), CourseDetail.class).putExtra("code", jsonObject.getString("courseNum")).putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
-            binding.courseList.setAdapter(courseAdp);
-            ExamAdp examAdp = new ExamAdp(requireActivity());
-            binding.examList.setAdapter(examAdp);
+            CourseAdapter courseAdapter = new CourseAdapter(requireActivity());
+            courseAdapter.setOnClick((jsonObject, view) -> startActivity(new Intent(getContext(), CourseDetail.class).putExtra("code", jsonObject.getString("courseNum")).putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
+            binding.courseList.setAdapter(courseAdapter);
+            ExamAdapter examAdapter = new ExamAdapter(requireActivity());
+            binding.examList.setAdapter(examAdapter);
             binding.toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
                 if (R.id.today == checkedId) {
-                    courseAdp.set(isChecked ? todayCourse : tomorrowCourse);
-                    binding.noClass.setVisibility(courseAdp.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+                    courseAdapter.set(isChecked ? todayCourse : tomorrowCourse);
+                    binding.noClass.setVisibility(courseAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
                 }
             });
             binding.toggle2.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
                 if (R.id.week_17 == checkedId) {
-                    examAdp.set(isChecked ? thisWeekExams : nextWeekExams);
-                    binding.noExam.setVisibility(examAdp.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+                    examAdapter.set(isChecked ? thisWeekExams : nextWeekExams);
+                    binding.noExam.setVisibility(examAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
                 }
             });
             binding.date.setText(String.format("%s/星期%s", new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), new String[]{"日", "一", "二", "三", "四", "五", "六"}[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]));
@@ -244,7 +240,7 @@ public class DashboardFragment extends Fragment {
                 }
             });
             spm.initLiveData();
-            //getTerm();
+
             TodoFragment todoFragment = new TodoFragment();
             getParentFragmentManager().beginTransaction().add(R.id.todo_list, todoFragment).commit();
             InitTodo initTodo = new InitTodo(requireActivity(), todoFragment);
@@ -265,7 +261,6 @@ public class DashboardFragment extends Fragment {
                 }
                 visible.forEach(i -> List.of(binding.shortcutGroup, binding.nextClassCard, binding.timeCard, binding.courseGroup, binding.examGroup, binding.todoGroup).get(Integer.parseInt(i)).setVisibility(View.GONE));
             });
-
         }
         return binding.getRoot();
     }
@@ -350,13 +345,13 @@ public class DashboardFragment extends Fragment {
     }
 }
 
-class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Params params;
     Context context;
     ArrayList<JSONObject> data = new ArrayList<>();
     BiConsumer<JSONObject, View> onClick;
 
-    public CourseAdp(Context context) {
+    public CourseAdapter(Context context) {
         super();
         this.context = context;
         this.params = new Params((FragmentActivity) context);
@@ -397,7 +392,6 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return true;
             });
         };
-
         holder.itemView.setOnClickListener(v -> onClick.accept(data.get(position), v));
         a.accept(R.id.course_title, "courseName");
         a.accept(R.id.location_container, "teachingPlace");
@@ -420,12 +414,12 @@ class CourseAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 }
 
-class ExamAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class ExamAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Params params;
     Context context;
     LinkedList<JSONObject> data = new LinkedList<>();
 
-    public ExamAdp(Context context) {
+    public ExamAdapter(Context context) {
         super();
         this.context = context;
         this.params = new Params((FragmentActivity) context);
