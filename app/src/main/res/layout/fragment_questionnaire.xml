@@ -63,11 +63,11 @@
                 style="?attr/materialIconButtonFilledStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/confirm"
+                android:contentDescription="@string/submit"
                 android:text="@string/submit"
                 app:icon="@drawable/submit"
                 app:layout_overflowIcon="@drawable/submit"
-                app:layout_overflowText="@string/confirm" />
+                app:layout_overflowText="@string/submit" />
         </com.google.android.material.overflow.OverflowLinearLayout>
 
     </com.google.android.material.floatingtoolbar.FloatingToolbarLayout>

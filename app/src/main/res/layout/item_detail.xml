@@ -109,6 +109,7 @@
         android:layout_height="wrap_content"
         android:layout_row="6"
         android:layout_column="2"
+        android:visibility="gone"
         android:layout_gravity="end"
         android:text="@string/open"/>
 </GridLayout>

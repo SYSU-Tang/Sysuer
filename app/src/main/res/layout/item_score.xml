@@ -6,15 +6,16 @@
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     app:contentPadding="16dp">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/subject"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="@string/subject"
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
             app:layout_constraintLeft_toRightOf="@+id/score"
             app:layout_constraintRight_toRightOf="parent"
@@ -23,29 +24,30 @@
         <View
             android:id="@+id/divider"
             android:layout_width="0dp"
-            android:layout_marginTop="8dp"
             android:layout_height="1dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="?android:attr/listDivider"
             app:layout_constraintBottom_toTopOf="@+id/info"
             app:layout_constraintLeft_toLeftOf="@+id/subject"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/subject" />
+
         <TextView
             android:id="@+id/info"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/subject"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textIsSelectable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="@+id/subject"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider" />
+
         <TextView
             android:id="@+id/score"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="@string/score"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"

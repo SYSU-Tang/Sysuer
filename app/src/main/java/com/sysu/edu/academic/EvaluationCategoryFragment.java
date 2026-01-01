@@ -1,6 +1,7 @@
 package com.sysu.edu.academic;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,36 +45,34 @@ public class EvaluationCategoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if (binding == null) {
-            binding = RecyclerViewScrollBinding.inflate(inflater, container, false);
-            params = new Params(requireActivity());
-            params.setCallback(this, this::getEvaluation);
-            StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
-            binding.getRoot().setLayoutManager(sgm);
-            CategoryAdapter adp = new CategoryAdapter(requireContext());
-            adp.setKeys(new String[]{"rwmc", "rwkssj", "rwjssj", "pjsl", "ypsl"});
-            adp.setValues(new String[]{"%s", "起始时间：%s", "结束时间：%s", "总评数：%s", "已评数：%s"});
-            adp.setParams(new String[]{"rwid", "firstwjid", "pjrdm"});
-            adp.setNavigation(R.id.from_category_to_course);
-            binding.getRoot().setAdapter(adp);
-            getEvaluation();
-            handler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == 1) {
-                        JSONObject data = JSON.parseObject((String) msg.obj);
-                        if (data.get("code").equals("200")) {
-                            data.getJSONObject("result").getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
-                        } else {
-                            params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
-                        }
-                    } else if (msg.what == -1) {
-                        params.toast(R.string.no_wifi_warning);
+        binding = RecyclerViewScrollBinding.inflate(inflater, container, false);
+        params = new Params(requireActivity());
+        params.setCallback(this, this::getEvaluation);
+        StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
+        binding.getRoot().setLayoutManager(sgm);
+        CategoryAdapter adp = new CategoryAdapter(requireContext());
+        adp.setKeys(new String[]{"rwmc", "rwkssj", "rwjssj", "pjsl", "ypsl"});
+        adp.setValues(new String[]{"%s", "起始时间：%s", "结束时间：%s", "总评数：%s", "已评数：%s"});
+        adp.setParams(new String[]{"rwid", "firstwjid", "pjrdm"});
+        adp.setNavigation(R.id.from_category_to_course);
+        binding.getRoot().setAdapter(adp);
+        getEvaluation();
+        handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                if (msg.what == 1) {
+                    JSONObject data = JSON.parseObject((String) msg.obj);
+                    if (data.get("code").equals("200")) {
+                        data.getJSONObject("result").getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
+                    } else {
                         params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
                     }
+                } else if (msg.what == -1) {
+                    params.toast(R.string.no_wifi_warning);
+                    params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
                 }
-            };
-        }
+            }
+        };
         return binding.getRoot();
     }
 
@@ -161,6 +161,12 @@ public class EvaluationCategoryFragment extends Fragment {
             binding.open.setOnClickListener(v -> ((NavHostFragment) Objects.requireNonNull(((AppCompatActivity) context).getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController().navigate(nav, args));
             holder.itemView.setOnClickListener(v -> {
             });
+            Drawable drawable = AppCompatResources.getDrawable(context, Integer.parseInt(data.get(position).getString("pjsl"))<=Integer.parseInt(data.get(position).getString("ypsl"))  ? R.drawable.submit : R.drawable.window);
+            if (drawable != null) {
+                drawable.setBounds(0, 0, 72, 72);
+            }
+            binding.title.setCompoundDrawables(drawable, null, null, null);
+            binding.title.setCompoundDrawablePadding(36);
             binding.title.setText(String.format(values[0], data.get(position).getString(keys[0]) == null ? "" : data.get(position).getString(keys[0])));
             StringBuilder val = new StringBuilder();
             for (int i = 1; i < keys.length; i++) {

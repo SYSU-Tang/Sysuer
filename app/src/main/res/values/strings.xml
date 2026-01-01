@@ -216,4 +216,7 @@
     <string name="require_netid_password">需要提供NetID和密码</string>
     <string name="copy_successfully">成功复制</string>
     <string name="course_selected">已选课程</string>
+    <string name="last_week_warning">这是最后一周</string>
+    <string name="result">结果</string>
+    <string name="share">分享</string>
 </resources>

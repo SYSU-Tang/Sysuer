@@ -7,10 +7,8 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
@@ -41,7 +39,7 @@ public class CourseCompletionFragment extends StaggeredFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         page = 0;
-        binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        /*binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
                 if (!v.canScrollVertically(1) && total / 10 + 1 >= page) {
@@ -49,7 +47,7 @@ public class CourseCompletionFragment extends StaggeredFragment {
                 }
                 super.onScrolled(v, dx, dy);
             }
-        });
+        });*/
         Params params = new Params(requireActivity());
         cookie = params.getCookie();
         params.setCallback(this, () -> {
@@ -61,7 +59,7 @@ public class CourseCompletionFragment extends StaggeredFragment {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    Toast.makeText(requireContext(), getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                    params.toast(R.string.no_wifi_warning);
                 } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {

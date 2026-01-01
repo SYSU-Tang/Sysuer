@@ -74,7 +74,6 @@ public class CourseSelectedActivity extends AppCompatActivity {
                 page = 0;
                 adp.clear();
                 getSelectedCourses(newText);
-                //adp.filter(newText);
                 return true;
             }
         });
@@ -113,14 +112,13 @@ public class CourseSelectedActivity extends AppCompatActivity {
     }
 
     public void getSelectedCourses(String courseName) {
-        System.out.println(courseName);
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/selectedCourse/list")
                 .header("Cookie", params.getCookie())
                 .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE")
                 .post(RequestBody.create(String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", ++page, courseName), MediaType.parse("application/json"))).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                params.toast(R.string.no_wifi_warning);
+                runOnUiThread(() -> params.toast(R.string.no_wifi_warning));
             }
 
             @Override
@@ -224,17 +222,6 @@ public class CourseSelectedActivity extends AppCompatActivity {
                 binding.group.addView(item);
                 return id;
             }
-
-            /*public void update(JSONObject info) {
-                loadInfo(info);
-                *//*String[] key = new String[]{"courseName", "courseCategoryName", "courseUnitName", "scheduleExamTime", "examFormName", "credit", "teachingClassId", "teachingClassNum", "teachingClassName", "courseNum"};
-                String[] name = new String[]{"课程名称", "课程类别", "开设学院", "考试时间", "考核方式", "学分", "班级ID", "班级号", "班级名称", "课程号"};
-                binding.title.setText(info.getString("courseName"));
-                Pattern.compile(",").splitAsStream(info.getString("teachingTimePlace")).forEach(s -> ids.add(addItem(s.replace(";", "/"), "课程安排")));
-                for (int i = 0; i < key.length; i++) {
-                    ((MaterialButton) binding.group.findViewById(ids.get(i))).setText(String.format(Locale.getDefault(), "%s: %s", name[i], info.getString(key[i]) == null ? "无" : info.getString(key[i])));
-                }*//*
-            }*/
         }
     }
 }

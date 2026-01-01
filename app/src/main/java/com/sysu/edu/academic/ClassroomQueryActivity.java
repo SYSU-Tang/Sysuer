@@ -7,7 +7,6 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -54,34 +53,30 @@ import okhttp3.Response;
 public class ClassroomQueryActivity extends AppCompatActivity {
     Handler handler;
     String cookie = "";
-    OkHttpClient http;
+    OkHttpClient http = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+        @NonNull
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Request origin = chain.request();
+            return chain.proceed(origin.newBuilder()
+                    .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                    .header("Cookie", cookie)
+                    .header("Referer", "https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
+                    .method(origin.method(), origin.body())
+                    .build());
+        }
+    }).build();
     MaterialDatePicker<Long> dateDialog = MaterialDatePicker.Builder.datePicker().build();
     HashMap<String, ArrayList<Chip>> classroom = new HashMap<>();
     String dateStr;
     String startClassTime = "1";
     String endClassTime = "11";
     List<String> classType = List.of("002", "003");
-    RoomAdp adp;
+    RoomAdapter adp;
     int page = 1;
     int total = 0;
     HashMap<Integer, String> office = new HashMap<>();
     ActivityClassroomQueryBinding binding;
-
-    public OkHttpClient getHttp() {
-        return new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @NonNull
-            @Override
-            public Response intercept(@NonNull Chain chain) throws IOException {
-                Request origin = chain.request();
-                return chain.proceed(origin.newBuilder()
-                        .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
-                        .header("Cookie", cookie)
-                        .header("Referer", "https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
-                        .method(origin.method(), origin.body())
-                        .build());
-            }
-        }).build();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +86,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         Params params = new Params(this);
         params.setCallback(() -> {
             cookie = params.getCookie();
-            getCampus();
+            recreate();
         });
         binding.campusSelectAll.setOnClickListener(v -> {
             for (int i = 1; i < ((ChipGroup) v.getParent()).getChildCount(); i++) {
@@ -106,16 +101,15 @@ public class ClassroomQueryActivity extends AppCompatActivity {
             }
         });
         cookie = params.getCookie();
-        http = getHttp();
         dateDialog.addOnPositiveButtonClickListener(selection -> {
-            dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE).format(new Date(selection));
-            binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.CHINESE).format(new Date(selection)));
+            dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(selection));
+            binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault()).format(new Date(selection)));
         });
-        adp = new RoomAdp(this);
+        adp = new RoomAdapter(this);
         binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         binding.result.setAdapter(adp);
         binding.result.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
-        BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_HIDDEN);
+        BottomSheetBehavior.from(binding.resultSheet).setState(BottomSheetBehavior.STATE_HIDDEN);
         binding.date.setOnClickListener(v -> dateDialog.show(getSupportFragmentManager(), null));
         binding.timeSlider.addOnChangeListener((slider, value, fromUser) -> {
             startClassTime = String.format(Locale.getDefault(), "%.0f", slider.getValues().get(0));
@@ -128,7 +122,6 @@ public class ClassroomQueryActivity extends AppCompatActivity {
             getRoom();
         });
         getCampus();
-
         binding.result.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -139,25 +132,24 @@ public class ClassroomQueryActivity extends AppCompatActivity {
             }
         });
         binding.reset.setOnClickListener(view -> {
-            binding.officeGroup.getCheckedChipIds().forEach(e -> ((Chip) findViewById(e)).setChecked(false));
-            binding.campusGroup.getCheckedChipIds().forEach(e -> ((Chip) findViewById(e)).setChecked(false));
-            binding.typeGroup.getCheckedChipIds().forEach(e -> ((Chip) findViewById(e)).setChecked(true));
-            dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE).format(new Date());
+            binding.officeGroup.getCheckedChipIds().forEach(e -> ((Chip) binding.officeGroup.findViewById(e)).setChecked(false));
+            binding.campusGroup.getCheckedChipIds().forEach(e -> ((Chip) binding.campusGroup.findViewById(e)).setChecked(false));
+            binding.typeGroup.getCheckedChipIds().forEach(e -> ((Chip) binding.typeGroup.findViewById(e)).setChecked(true));
+            dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
             binding.timeSlider.setValues(List.of(1.0f, 11.0f));
-            dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE).format(new Date());
-            binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.CHINESE).format(new Date()));
+            dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault()).format(new Date()));
         });
-        dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE).format(new Date());
-        binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.CHINESE).format(new Date()));
+        dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault()).format(new Date()));
         handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == 0) {
-                    Toast.makeText(ClassroomQueryActivity.this, (String) msg.obj, Toast.LENGTH_LONG).show();
+                    params.toast((String) msg.obj);
                     return;
-                }
-                if (msg.what == -1) {
-                    Toast.makeText(ClassroomQueryActivity.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                } else if (msg.what == -1) {
+                    params.toast(R.string.no_wifi_warning);
                     return;
                 }
                 JSONObject dataString = JSON.parseObject((String) msg.obj);
@@ -165,9 +157,8 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     if (msg.what == 3) {
                         JSONObject data = dataString.getJSONObject("data");
                         total = data.getInteger("total");
-                        page++;
                         data.getJSONArray("rows").forEach(a -> adp.add((JSONObject) a));
-                        BottomSheetBehavior.from(findViewById(R.id.result_sheet)).setState(BottomSheetBehavior.STATE_EXPANDED);
+                        BottomSheetBehavior.from(binding.resultSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
                     } else {
                         binding.timeSlider.setValueFrom(1);
                         dataString.getJSONArray("data").forEach(campusInfo -> {
@@ -203,7 +194,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                         });
                     }
                 } else {
-                    Toast.makeText(ClassroomQueryActivity.this, getString(R.string.login_warning), Toast.LENGTH_LONG).show();
+                    params.toast(R.string.login_warning);
                     params.gotoLogin(binding.tool, TargetUrl.JWXT);
                 }
             }
@@ -264,14 +255,14 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 teachingBuildIDs.add(office.get(e));
             }
         });
-        if (teachingBuildIDs.isEmpty()) {
+         if (teachingBuildIDs.isEmpty()) {
             Message message = new Message();
             message.what = 0;
             message.obj = "请先选择教学楼";
             handler.sendMessage(message);
             return;
         }
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom").post(RequestBody.create("{\"pageNo\":" + page + ",\"pageSize\":20,\"param\":{\"dateStr\":\"" + dateStr + "\",\"teachingBuildIDs\":" + JSON.toJSONString(teachingBuildIDs) + ",\"startClassTimes\":" + startClassTime + ",\"endClassTimes\":" + endClassTime + ",\"classRoomTagList\":" + JSON.toJSONString(classType) + "}}", MediaType.parse("application/json"))).build()).enqueue(
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom").post(RequestBody.create(String.format("{\"pageNo\":%d,\"pageSize\":20,\"param\":{\"dateStr\":\"%s\",\"teachingBuildIDs\":%s,\"startClassTimes\":%s,\"endClassTimes\":%s,\"classRoomTagList\":%s}}", page++, dateStr, JSON.toJSONString(teachingBuildIDs), startClassTime, endClassTime, JSON.toJSONString(classType)), MediaType.parse("application/json"))).build()).enqueue(
                 new Callback() {
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
@@ -292,11 +283,11 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     }
 }
 
-class RoomAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class RoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
     ArrayList<JSONObject> json = new ArrayList<>();
 
-    public RoomAdp(Context context) {
+    public RoomAdapter(Context context) {
         super();
         this.context = context;
     }

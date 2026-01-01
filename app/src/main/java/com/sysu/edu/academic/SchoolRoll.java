@@ -47,8 +47,8 @@ public class SchoolRoll extends AppCompatActivity {
         binding = ActivityPagerBinding.inflate(getLayoutInflater());
         params = new Params(this);
         params.setCallback(() -> {
-                cookie = params.getCookie();
-                getNextPage(0);
+            cookie = params.getCookie();
+            getNextPage(0);
         });
         cookie = params.getCookie();
         setContentView(binding.getRoot());
@@ -318,13 +318,13 @@ public class SchoolRoll extends AppCompatActivity {
 
         };
         getNextPage(0);
-        //}
     }
 
     void getNextPage(int what) {
-        if (what < 8) {
-            pager2Adapter.add(StaggeredFragment.newInstance(what));
+        if (what >= 8) {
+            return;
         }
+        pager2Adapter.add(StaggeredFragment.newInstance(what));
         switch (what) {
             case 0:
                 getData();

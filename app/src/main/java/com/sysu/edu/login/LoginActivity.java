@@ -3,7 +3,6 @@ package com.sysu.edu.login;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MenuItem;
 import android.webkit.WebView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +15,6 @@ import com.sysu.edu.academic.Pager2Adapter;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityLoginBinding;
 
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,10 +54,10 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         binding.pager2.setAdapter(new Pager2Adapter(this).add(new LoginWebFragment()).add(new LoginFragment()));
         binding.tool.setNavigationOnClickListener(v -> finishAfterTransition());
-        binding.tool.getMenu().add(R.string.confirm).setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
+        /*binding.tool.getMenu().add(R.string.confirm).setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
             web.loadUrl(Objects.requireNonNull(getIntent().getStringExtra("url")));
             return false;
-        });
+        });*/
         new TabLayoutMediator(binding.options, binding.pager2, (tab, i) -> tab.setText(new int[]{R.string.web_login, R.string.password_login}[i])).attach();
         initModel(this, new ViewModelProvider(this).get(LoginViewModel.class), getIntent().getStringExtra("url") == null ? "https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home" : getIntent().getStringExtra("url"), () -> {
             setResult(RESULT_OK);

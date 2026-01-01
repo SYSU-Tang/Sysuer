@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -33,75 +34,101 @@ import java.util.List;
 public class StaggeredFragment extends Fragment {
 
     public RecyclerViewScrollBinding binding;
-    Params params;
     public int position;
+    Params params;
     StaggeredAdapter staggeredAdapter;
     StaggeredGridLayoutManager lm;
-    int orientation=StaggeredGridLayoutManager.VERTICAL;
-    boolean nested = true;
+    MutableLiveData<Integer> orientation = new MutableLiveData<>(StaggeredGridLayoutManager.VERTICAL);
+    MutableLiveData<Runnable> scrollBottom = new MutableLiveData<>();
+    MutableLiveData<Boolean> nestedScrollingEnabled = new MutableLiveData<>(true);
 
-    public static StaggeredFragment newInstance(int position){
-        StaggeredFragment s=new StaggeredFragment();
-        s.position=position;
+    public static StaggeredFragment newInstance(int position) {
+        StaggeredFragment s = new StaggeredFragment();
+        s.position = position;
         return s;
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         params = new Params(requireActivity());
         binding = RecyclerViewScrollBinding.inflate(inflater);
-        lm  = new StaggeredGridLayoutManager(params.getColumn(), orientation);
+        lm = new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL);
         binding.recyclerView.setLayoutManager(lm);
-        if(staggeredAdapter==null){
+        if (staggeredAdapter == null) {
             staggeredAdapter = new StaggeredAdapter(requireContext());
         }
+        orientation.observe(getViewLifecycleOwner(), o -> {
+            if (o != null) {
+                lm.setOrientation(o);
+            }
+        });
+        scrollBottom.observe(getViewLifecycleOwner(), runnable -> {
+            if (runnable != null) {
+                binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
+                        if (!v.canScrollVertically(1) && dy > 0) {
+                            runnable.run();
+                        }
+                    }
+                });
+            }
+        });
         binding.recyclerView.setAdapter(staggeredAdapter);
-        binding.recyclerView.setNestedScrollingEnabled(nested);
-        //binding.recyclerView
+        nestedScrollingEnabled.observe(getViewLifecycleOwner(), binding.recyclerView::setNestedScrollingEnabled);
+
         return binding.getRoot();
     }
-    public void setOrientation(int o){
-        this.orientation = o;
-        if(lm!=null){
-            lm.setOrientation(orientation);
-        }
+
+    public void setOrientation(int o) {
+        orientation.setValue(o);
     }
-    public void setNested(boolean nested){
-        this.nested = nested;
-        if(binding!=null){
-            binding.recyclerView.setNestedScrollingEnabled(nested);
-        }
+
+    public void setScrollBottom(Runnable runnable) {
+        scrollBottom.setValue(runnable);
     }
-    public void setHideNull(boolean hide){
+
+    public void setNested(boolean nested) {
+        nestedScrollingEnabled.setValue(nested);
+    }
+
+    public void setHideNull(boolean hide) {
         staggeredAdapter.setHideNull(hide);
     }
-    public void setHideNull(Context context,boolean hide){
-        if (staggeredAdapter==null) {
+
+    public void setHideNull(Context context, boolean hide) {
+        if (staggeredAdapter == null) {
             staggeredAdapter = new StaggeredAdapter(context);
         }
         setHideNull(hide);
     }
-    public void add(String title,@Nullable Integer icon,List<String> keys,List<String> values){
-        staggeredAdapter.add(title, keys, values,icon);
+
+    public void add(String title, @Nullable Integer icon, List<String> keys, List<String> values) {
+        staggeredAdapter.add(title, keys, values, icon);
     }
-    public void add(String title,List<String> keys,List<String> values){
-        add(title,null, keys, values);
+
+    public void add(String title, List<String> keys, List<String> values) {
+        add(title, null, keys, values);
     }
-    public void add(Context context, String title,Integer icon, List<String> keys, List<String> values){
-        if (staggeredAdapter==null) {
+
+    public void add(Context context, String title, Integer icon, List<String> keys, List<String> values) {
+        if (staggeredAdapter == null) {
             staggeredAdapter = new StaggeredAdapter(context);
         }
-        add(title, icon,keys, values);
+        add(title, icon, keys, values);
     }
-    public void add(Context context, String title, List<String> keys, List<String> values){
-        add(context,title, null,keys, values);
+
+    public void add(Context context, String title, List<String> keys, List<String> values) {
+        add(context, title, null, keys, values);
     }
+
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         lm.setSpanCount(params.getColumn());
     }
-     public void clear(){
+
+    public void clear() {
         staggeredAdapter.clear();
     }
 
@@ -227,7 +254,7 @@ public class StaggeredFragment extends Fragment {
             ColumnAdp adp = new ColumnAdp(context, keys.get(position), values.get(position), hideNull);
             ((RecyclerView) holder.itemView.findViewById(R.id.recycler_view)).setAdapter(adp);
             if (staggeredListener != null) {
-                staggeredListener.onBind(this, holder,position);
+                staggeredListener.onBind(this, holder, position);
             }
         }
 

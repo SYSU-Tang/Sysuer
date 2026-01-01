@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +19,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityGradeBinding;
+import com.sysu.edu.databinding.ItemScoreBinding;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -274,60 +274,58 @@ public class Grade extends AppCompatActivity {
                 }
         );
     }
-}
 
-class ScoreAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
-    ArrayList<JSONObject> data = new ArrayList<>();
+    static class ScoreAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        Context context;
+        ArrayList<JSONObject> data = new ArrayList<>();
 
-    public ScoreAdp(Context context) {
-        this.context = context;
-    }
-
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_score, parent, false)) {
-        };
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        holder.itemView.setOnClickListener(view -> {
-
-        });
-        JSONObject info = data.get(position);
-        String grade = "";
-        for (Object a : info.getJSONArray("scoreList")) {
-            grade = String.format("%s（%s）%s×%s%%+", grade, ((JSONObject) a).getString("FXMC"), ((JSONObject) a).getString("FXCJ"), ((JSONObject) a).getString("MRQZ"));
+        public ScoreAdp(Context context) {
+            this.context = context;
         }
-        ((TextView) holder.itemView.findViewById(R.id.subject)).setText(info.getString("scoCourseName"));
-        ((TextView) holder.itemView.findViewById(R.id.score)).setText(String.format("%s/%s", info.getString("scoFinalScore"), info.getString("scoPoint")));
-        ((TextView) holder.itemView.findViewById(R.id.info)).setText(String.format("学分：%s\n排名：%s\n课程类别：%s\n老师：%s\n是否通过：%s\n考试性质：%s\n成绩：%s",
-                info.getString("scoCredit"),
-                info.getString("teachClassRank"),
-                info.getString("scoCourseCategoryName"),
-                info.getString("scoTeacherName"),
-                info.getString("accessFlag"),
-                info.getString("examCharacter"),
-                //
-                grade.substring(0, grade.length() - 1) + "=" + info.getString("originalScore")));
-    }
 
-    public void add(JSONObject a) {
-        int tmp = getItemCount();
-        data.add(a);
-        notifyItemInserted(tmp);
-    }
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new RecyclerView.ViewHolder(ItemScoreBinding.inflate(LayoutInflater.from(context), parent, false).getRoot()) {
+            };
+        }
 
-    public void clear() {
-        int tmp = getItemCount();
-        data.clear();
-        notifyItemRangeRemoved(0, tmp);
-    }
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            ItemScoreBinding binding = ItemScoreBinding.bind(holder.itemView);
+            binding.getRoot().setOnClickListener(view -> {});
+            JSONObject info = data.get(position);
+            String grade = "";
+            for (Object a : info.getJSONArray("scoreList")) {
+                grade = String.format("%s（%s）%s×%s%%+", grade, ((JSONObject) a).getString("FXMC"), ((JSONObject) a).getString("FXCJ"), ((JSONObject) a).getString("MRQZ"));
+            }
+            binding.subject.setText(info.getString("scoCourseName"));
+            binding.score.setText(String.format("%s/%s", info.getString("scoFinalScore"), info.getString("scoPoint")));
+            binding.info.setText(String.format("学分：%s\n排名：%s\n课程类别：%s\n老师：%s\n是否通过：%s\n考试性质：%s\n成绩：%s",
+                    info.getString("scoCredit"),
+                    info.getString("teachClassRank"),
+                    info.getString("scoCourseCategoryName"),
+                    info.getString("scoTeacherName"),
+                    info.getString("accessFlag"),
+                    info.getString("examCharacter"),
+                    grade.substring(0, grade.length() - 1) + "=" + info.getString("originalScore")));
+        }
 
-    @Override
-    public int getItemCount() {
-        return data.size();
+        public void add(JSONObject a) {
+            int tmp = getItemCount();
+            data.add(a);
+            notifyItemInserted(tmp);
+        }
+
+        public void clear() {
+            int tmp = getItemCount();
+            data.clear();
+            notifyItemRangeRemoved(0, tmp);
+        }
+
+        @Override
+        public int getItemCount() {
+            return data.size();
+        }
     }
 }
