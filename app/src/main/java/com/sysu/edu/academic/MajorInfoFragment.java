@@ -34,7 +34,7 @@ public class MajorInfoFragment extends StaggeredFragment {
 
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 0;
     int total = -1;
     String code;

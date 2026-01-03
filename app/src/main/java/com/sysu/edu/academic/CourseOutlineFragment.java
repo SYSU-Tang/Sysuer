@@ -56,8 +56,8 @@ public class CourseOutlineFragment extends Fragment {
     }
 }
 class CourseOutlineAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-    Context context;
-    ArrayList<JSONObject> data =new ArrayList<>();
+    final Context context;
+    final ArrayList<JSONObject> data =new ArrayList<>();
     public CourseOutlineAdp(Context con){
         this.context=con;
     }

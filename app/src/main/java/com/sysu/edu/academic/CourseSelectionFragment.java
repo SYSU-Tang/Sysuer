@@ -58,18 +58,18 @@ import okhttp3.Response;
 
 public class CourseSelectionFragment extends Fragment {
 
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    final HashMap<String, CourseAdapter> map = new HashMap<>();
+    final HashMap<String, Integer> totals = new HashMap<>();
     FragmentCourseSelectionBinding binding;
-    OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     String cookie;
     int tmp;
     int page = 1;
-    HashMap<String, CourseAdapter> map = new HashMap<>();
     int selectedType;
     int selectedCate;
     CourseAdapter adp;
     Integer total;
-    HashMap<String, Integer> totals = new HashMap<>();
     String key;
     String term;
     CourseSelectionViewModel vm;
@@ -143,7 +143,6 @@ public class CourseSelectionFragment extends Fragment {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    System.out.println(response);
                     if (response != null && response.getInteger("code").equals(200)) {
                         switch (msg.what) {
                             case -1:
@@ -395,10 +394,10 @@ public class CourseSelectionFragment extends Fragment {
 }
 
 class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    String[] info = new String[]{"courseUnitName", "credit", "examFormName", "courseNum", "clazzNum"};
-    Context context;
-    CourseSelectionFragment c;
-    ArrayList<JSONObject> data = new ArrayList<>();
+    final String[] info = new String[]{"courseUnitName", "credit", "examFormName", "courseNum", "clazzNum"};
+    final Context context;
+    final CourseSelectionFragment c;
+    final ArrayList<JSONObject> data = new ArrayList<>();
 
     public CourseAdapter(CourseSelectionFragment c) {
         super();

@@ -59,8 +59,8 @@ public class NewsFragment extends Fragment {
     }
 
     public static class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        public ArrayList<JSONObject> data = new ArrayList<>();
-        Context context;
+        public final ArrayList<JSONObject> data = new ArrayList<>();
+        final Context context;
         StaggeredListener listener;
         // String cookie;
 

@@ -46,22 +46,22 @@ import okhttp3.Response;
 
 public class AgendaActivity extends AppCompatActivity {
 
+    final ArrayList<String> terms = new ArrayList<>();
+    final ArrayList<Integer> weeks = new ArrayList<>();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    final ArrayList<View> views = new ArrayList<>();
+    final MutableLiveData<String> id = new MutableLiveData<>();
     String cookie;
     Handler handler;
-    ArrayList<String> terms = new ArrayList<>();
-    ArrayList<Integer> weeks = new ArrayList<>();
     PopupMenu termPop;
-    OkHttpClient http = new OkHttpClient.Builder().build();
     PopupMenu weekPop;
     String currentTerm = "";
     int currentWeekIndex = -1;
-    ArrayList<View> views = new ArrayList<>();
     int currentWeek;
     BottomSheetDialog detailDialog;
     ActivityAgendaBinding binding;
     Params params;
     ItemDetailBinding detailBinding;
-    MutableLiveData<String> id = new MutableLiveData<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,7 @@ public class AgendaActivity extends AppCompatActivity {
         params = new Params(this);
         params.setCallback(() -> {
             cookie = params.getCookie();
-            if (currentTerm != null) {
+            if (currentTerm != null && !currentTerm.isEmpty() && currentWeekIndex != -1) {
                 getTable(currentTerm, currentWeek);
             } else {
                 getTerm();

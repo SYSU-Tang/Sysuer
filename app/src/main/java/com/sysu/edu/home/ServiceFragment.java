@@ -56,7 +56,7 @@ public class ServiceFragment extends Fragment {
     // 创建HashMap来存储actions，使用id作为key
     private final Map<Integer, View.OnClickListener> actionMap = new HashMap<>();
     FragmentServiceBinding binding;
-    ActivityResultLauncher<Intent> launcher = registerForActivityResult(
+    final ActivityResultLauncher<Intent> launcher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
             }
@@ -122,15 +122,15 @@ public class ServiceFragment extends Fragment {
         // 官方服务 (id: 6xx)
         actionMap.put(601, v -> {    // 二维码
             String linking = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("qrcode", "");
-            if (linking.isEmpty()) {
-                //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
-            } else {
+            if (!linking.isEmpty()) {
                 try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(linking)));
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linking)));
                 } catch (ActivityNotFoundException e) {
                     // Toast.makeText(requireContext(), R.string.no_app, Toast.LENGTH_LONG).show();
                 }
-            }
+            }/* else {
+                //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
+            }*/
         });
         actionMap.put(602, v -> {
             try {

@@ -36,7 +36,7 @@ public class SchoolWorkWarning extends AppCompatActivity {
     int order=0;
     String alarmOperationTerm;
     String alarmTerm;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

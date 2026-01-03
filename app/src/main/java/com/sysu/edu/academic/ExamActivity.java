@@ -32,7 +32,7 @@ import okhttp3.Response;
 
 public class ExamActivity extends AppCompatActivity {
 
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     Params params;
     Handler handler;
 

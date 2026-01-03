@@ -34,9 +34,9 @@ import okhttp3.Response;
 public class TrainingResultFragment extends Fragment {
     Handler handler;
     Params params;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 0;
-    MutableLiveData<Boolean> isBottom = new MutableLiveData<>(true);
+    final MutableLiveData<Boolean> isBottom = new MutableLiveData<>(true);
     Integer total;
 
     @Override

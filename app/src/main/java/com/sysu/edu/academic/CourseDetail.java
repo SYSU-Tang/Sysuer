@@ -32,7 +32,7 @@ import okhttp3.Response;
 public class CourseDetail extends AppCompatActivity {
 
     ActivityCourseDetailBinding binding;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     String cookie;
     String code;
@@ -195,8 +195,8 @@ public class CourseDetail extends AppCompatActivity {
 }
 
 class CourseDetailPageAdapter extends FragmentStateAdapter {
-    ArrayList<Fragment> fragments = new ArrayList<>();
-    FragmentActivity activity;
+    final ArrayList<Fragment> fragments = new ArrayList<>();
+    final FragmentActivity activity;
 
     public CourseDetailPageAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);

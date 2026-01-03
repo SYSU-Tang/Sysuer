@@ -34,7 +34,7 @@ public class CETActivity extends AppCompatActivity {
     String cookie;
     Handler handler;
     int order=0;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

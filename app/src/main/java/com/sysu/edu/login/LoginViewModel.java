@@ -4,13 +4,13 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class LoginViewModel extends ViewModel {
-    MutableLiveData<String> password = new MutableLiveData<>();
-    MutableLiveData<String> account = new MutableLiveData<>();
-    MutableLiveData<String> url = new MutableLiveData<>();
-    MutableLiveData<Boolean> login = new MutableLiveData<>();
-    MutableLiveData<String> sessionId = new MutableLiveData<>();
-    MutableLiveData<String> cookie = new MutableLiveData<>();
-    MutableLiveData<String> target = new MutableLiveData<>();
+    final MutableLiveData<String> password = new MutableLiveData<>();
+    final MutableLiveData<String> account = new MutableLiveData<>();
+    final MutableLiveData<String> url = new MutableLiveData<>();
+    final MutableLiveData<Boolean> login = new MutableLiveData<>();
+    final MutableLiveData<String> sessionId = new MutableLiveData<>();
+    final MutableLiveData<String> cookie = new MutableLiveData<>();
+    final MutableLiveData<String> target = new MutableLiveData<>();
     public MutableLiveData<String> getAccount(){
         return account;
     }

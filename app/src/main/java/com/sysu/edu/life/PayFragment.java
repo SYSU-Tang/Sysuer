@@ -46,7 +46,7 @@ import okhttp3.Response;
 public class PayFragment extends StaggeredFragment {
     public View view;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     String token;
     Params params;
     int order = 0;
@@ -70,7 +70,7 @@ public class PayFragment extends StaggeredFragment {
             case 0:
                 FragmentPayNeedBinding b0 = FragmentPayNeedBinding.inflate(inflater);
                 b0.getRoot().addView(view);
-                b0.pay.setOnClickListener(a -> params.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
+                b0.pay.setOnClickListener(params.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
                 binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {

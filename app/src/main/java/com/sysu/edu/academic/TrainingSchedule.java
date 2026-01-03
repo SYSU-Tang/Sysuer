@@ -27,7 +27,7 @@ import okhttp3.Response;
 
 public class TrainingSchedule extends AppCompatActivity {
     ActivityTrainingScheduleBinding binding;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     String cookie = "";
     Handler handler;
     TrainingScheduleFragment schedule;

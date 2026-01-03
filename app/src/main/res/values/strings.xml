@@ -211,7 +211,7 @@
     <string name="dashboard">面板</string>
     <string name="next_class">下一节课</string>
     <string name="shortcut">快捷方式</string>
-    <string name="logining">登录中...</string>
+    <string name="logging_in">登录中…</string>
     <string name="login_successfully">登录成功</string>
     <string name="require_netid_password">需要提供NetID和密码</string>
     <string name="copy_successfully">成功复制</string>
@@ -219,4 +219,19 @@
     <string name="last_week_warning">这是最后一周</string>
     <string name="result">结果</string>
     <string name="share">分享</string>
+    <string name="menu">按钮</string>
+    <string name="window">窗户</string>
+    <string name="credit">学分</string>
+    <string name="total_year">总学年</string>
+    <string name="total_rank">总排名</string>
+    <string name="total_credit">总学分</string>
+    <string name="total_point">总绩点</string>
+    <string name="current_rank">当前排名</string>
+    <string name="current_point">当前绩点</string>
+    <string name="term_credit">学期学分</string>
+    <string name="public_compulsory_credit">公必学分</string>
+    <string name="public_select_credit">公选学分</string>
+    <string name="major_compulsory_credit">专必学分</string>
+    <string name="major_select_credit">专选学分</string>
+    <string name="honor_credit">荣誉学分</string>
 </resources>

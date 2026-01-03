@@ -71,13 +71,13 @@ public class DashboardFragment extends Fragment {
 
     Handler handler;
     String cookie;
-    ArrayList<JSONObject> todayCourse = new ArrayList<>();
-    ArrayList<JSONObject> tomorrowCourse = new ArrayList<>();
-    LinkedList<JSONObject> thisWeekExams = new LinkedList<>();
-    LinkedList<JSONObject> nextWeekExams = new LinkedList<>();
+    final ArrayList<JSONObject> todayCourse = new ArrayList<>();
+    final ArrayList<JSONObject> tomorrowCourse = new ArrayList<>();
+    final LinkedList<JSONObject> thisWeekExams = new LinkedList<>();
+    final LinkedList<JSONObject> nextWeekExams = new LinkedList<>();
     Params params;
     FragmentDashboardBinding binding;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     boolean refresh = true;
 
     @Nullable
@@ -98,15 +98,15 @@ public class DashboardFragment extends Fragment {
             });
             binding.qrcode.setOnClickListener(v -> {
                 String linking = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("qrcode", "");
-                if (linking.isEmpty()) {
-                    //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
-                } else {
+                if (!linking.isEmpty()) {
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(linking)));
                     } catch (ActivityNotFoundException e) {
                         // Toast.makeText(requireContext(), R.string.no_app, Toast.LENGTH_LONG).show();
                     }
-                }
+                } /*else {
+                    //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
+                }*/
             });
             binding.agenda.setOnClickListener(view -> startActivity(new Intent(getContext(), AgendaActivity.class), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
             binding.courseList.addItemDecoration(new DividerItemDecoration(requireContext(), 0));
@@ -346,9 +346,9 @@ public class DashboardFragment extends Fragment {
 }
 
 class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Params params;
-    Context context;
-    ArrayList<JSONObject> data = new ArrayList<>();
+    final Params params;
+    final Context context;
+    final ArrayList<JSONObject> data = new ArrayList<>();
     BiConsumer<JSONObject, View> onClick;
 
     public CourseAdapter(Context context) {
@@ -415,9 +415,9 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 }
 
 class ExamAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Params params;
-    Context context;
-    LinkedList<JSONObject> data = new LinkedList<>();
+    final Params params;
+    final Context context;
+    final LinkedList<JSONObject> data = new LinkedList<>();
 
     public ExamAdapter(Context context) {
         super();

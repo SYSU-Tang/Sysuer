@@ -10,17 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.TextPaint;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.URLSpan;
-import android.view.View;
-import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -46,9 +36,9 @@ import com.sysu.edu.databinding.ActivityMainBinding;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Objects;
 
+import io.noties.markwon.Markwon;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -61,23 +51,6 @@ public class MainActivity extends AppCompatActivity {
     File file;
     ActivityResultLauncher<Intent> detailLauncher;
     BroadcastReceiver receiver;
-    float defaultFontSize;
-
-   /* @Override
-    protected void attachBaseContext(Context newBase) {
-        Configuration configuration = newBase.getResources().getConfiguration();
-        String fontValue = PreferenceManager.getDefaultSharedPreferences(newBase).getString("fontSize", "0");
-        if (defaultFontSize == 0) {
-            defaultFontSize = configuration.fontScale;
-        }
-        if (!fontValue.equals("0")) {
-            configuration.fontScale = new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}[Integer.parseInt(fontValue) - 1];
-        } else {
-            configuration.fontScale = defaultFontSize;
-        }
-        super.attachBaseContext(newBase);
-        applyOverrideConfiguration(configuration);
-    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,13 +97,12 @@ public class MainActivity extends AppCompatActivity {
 //        }
         navController.setGraph(graph);
         NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
-        //navController.navigateUp();
 
         SysuerPreferenceManager spm = new ViewModelProvider(this).get(SysuerPreferenceManager.class);
         spm.setPM(PreferenceManager.getDefaultSharedPreferences(this));
         spm.initLiveData();
         AlertDialog dialog = new MaterialAlertDialogBuilder(this).setTitle("用户协议和隐私政策")
-                .setMessage(Html.fromHtml("请阅读<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E7%94%A8%E6%88%B7%E5%8D%8F%E8%AE%AE\">用户协议</a>和<a href=\"https://sysu-tang.github.io/#/zh-cn/agreement/%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96\">隐私政策</a>", Html.FROM_HTML_MODE_LEGACY))
+                .setMessage(" ")
                 .setPositiveButton("同意", (dialogInterface, i) -> {
                     spm.setIsAgree(true);
                     spm.setIsAgreeLiveData(false);
@@ -144,33 +116,17 @@ public class MainActivity extends AppCompatActivity {
         spm.getIsAgreeLiveData().observe(this, aBoolean -> {
             if (aBoolean) {
                 dialog.show();
-                TextView text = Objects.requireNonNull(dialog.findViewById(android.R.id.message));
-                text.setMovementMethod(LinkMovementMethod.getInstance());
-                CharSequence str = text.getText();
-                if (str instanceof Spannable) {
-                    Spannable sp = (Spannable) text.getText();
-                    SpannableStringBuilder style = new SpannableStringBuilder(str);
-                    style.clearSpans();
-                    for (URLSpan url : sp.getSpans(0, str.length(), URLSpan.class)) {
-                        try {
-                            style.setSpan(new MyClickSpan(url.getURL()), sp.getSpanStart(url), sp.getSpanEnd(url), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        } catch (MalformedURLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    text.setText(style);
-                }
+                Markwon.builder(this).build().setMarkdown(Objects.requireNonNull(dialog.findViewById(android.R.id.message)), "请阅读[用户协议](https://sysu-tang.github.io/#/zh-cn/agreement/%E7%94%A8%E6%88%B7%E5%8D%8F%E8%AE%AE)和[隐私政策](https://sysu-tang.github.io/#/zh-cn/agreement/%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96)");
             } else if (spm.getUpdate()) {
                 checkUpdate();
             }
         });
         spm.setIsFirstLaunch(false);
         Params params = new Params(this);
-        handler = new Handler(Looper.getMainLooper()) {
+        handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                //System.out.println(msg.obj);
                 if (msg.what == -1) {
                     params.toast(R.string.no_wifi_warning);
                 } else {
@@ -178,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         int version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
                         if (version < response.getInteger("version")) {
-                            new MaterialAlertDialogBuilder(MainActivity.this).setMessage(response.getString("description")).setTitle("发现新版本").setPositiveButton("更新", (dialogInterface, i) -> {
+                            AlertDialog updateDialog = new MaterialAlertDialogBuilder(MainActivity.this).setMessage("").setTitle("发现新版本").setPositiveButton("更新", (dialogInterface, i) -> {
                                 file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "sysuer.apk");
                                 downloadId = ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).enqueue(new DownloadManager.Request(Uri.parse(response.getString("link"))).setDestinationUri(Uri.fromFile(file)).setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED));
 //                                DownloadManager.Query query = new DownloadManager.Query();
@@ -193,7 +149,9 @@ public class MainActivity extends AppCompatActivity {
 //                                }
 //                                cursor.close();
                             }).setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-                            }).setCancelable(response.getBoolean("enforce")).create().show();
+                            }).setCancelable(response.getBoolean("enforce")).create();
+                            updateDialog.show();
+                            Markwon.builder(MainActivity.this).build().setMarkdown(Objects.requireNonNull(updateDialog.findViewById(android.R.id.message)), response.getString("description"));
                         } else if (version < response.getInteger("version")) {
                             params.toast("本APP已被篡改");
                         }
@@ -223,10 +181,6 @@ public class MainActivity extends AppCompatActivity {
         //new ClassIsland(this).doWork();
     }
 
-    /*public ActivityResultLauncher<Intent> launch() {
-        return detailLauncher;
-    }*/
-
     void checkUpdate() {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://sysu-tang.github.io/latest.json").build()).enqueue(new Callback() {
             @Override
@@ -253,22 +207,4 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    static class MyClickSpan extends ClickableSpan {
-        String url;
-
-        public MyClickSpan(String url) throws MalformedURLException {
-            this.url = url;
-        }
-
-        @Override
-        public void updateDrawState(TextPaint ds) {
-            ds.setUnderlineText(false);
-            super.updateDrawState(ds);
-        }
-
-        @Override
-        public void onClick(@NonNull View v) {
-            v.getContext().startActivity(new Intent().setAction(Intent.ACTION_VIEW).setData(Uri.parse(url)));
-        }
-    }
 }

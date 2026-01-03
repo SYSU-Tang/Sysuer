@@ -1,6 +1,7 @@
 package com.sysu.edu.academic;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import io.noties.markwon.Markwon;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Interceptor;
@@ -37,17 +40,27 @@ public class Grade extends AppCompatActivity {
 
     ActivityGradeBinding binding;
     Handler handler;
-    String cookie = "";
-    OkHttpClient http;
-
     PopupMenu termPop;
     PopupMenu yearPop;
     PopupMenu typePop;
-    String year;
-    String type;
-    int term;
-    String[] terms;
-    ScoreAdp adp;
+    final MutableLiveData<String> trainType = new MutableLiveData<>();
+    final MutableLiveData<String> year = new MutableLiveData<>();
+    final MutableLiveData<Integer> term = new MutableLiveData<>();
+    GridLayoutManager gridLayoutManager;
+    Params params;
+    final OkHttpClient http = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+        @NonNull
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Request origin = chain.request();
+            return chain.proceed(origin.newBuilder()
+                    //.header("Accept-Language","zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                    .header("Cookie", params.getCookie())
+                    .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
+                    .method(origin.method(), origin.body())
+                    .build());
+        }
+    }).build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +68,11 @@ public class Grade extends AppCompatActivity {
         binding = ActivityGradeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         termPop = new PopupMenu(Grade.this, binding.term, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-        terms = new String[]{"第一学期", "第二学期", "第三学期"};
+        String[] terms = getResources().getStringArray(R.array.terms);
         for (int i = 0; i < terms.length; i++) {
-            String s = terms[i];
             int finalI = i + 1;
-            termPop.getMenu().add(s).setOnMenuItemClickListener(menuItem -> {
-                if (finalI != term) {
-                    setNow(year, finalI, type);
-                }
+            termPop.getMenu().add(terms[i]).setOnMenuItemClickListener(menuItem -> {
+                term.postValue(finalI);
                 return false;
             });
         }
@@ -70,27 +80,33 @@ public class Grade extends AppCompatActivity {
         yearPop = new PopupMenu(this, binding.year, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
         typePop = new PopupMenu(this, binding.type, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
         binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
-        binding.scores.setLayoutManager(new GridLayoutManager(this, new Params(this).getColumn()));
         binding.term.setOnClickListener(view -> termPop.show());
         binding.year.setOnClickListener(view -> yearPop.show());
         binding.type.setOnClickListener(view -> typePop.show());
-        adp = new ScoreAdp(this);
+        ScoreAdapter adp = new ScoreAdapter(this);
         binding.scores.setAdapter(adp);
-        Params params = new Params(this);
-        params.setCallback(() -> {
-            cookie = params.getCookie();
-            http = getHttp();
-            getPull();
-        });
-        cookie = params.getCookie();
-        http = getHttp();
+        params = new Params(this);
+        params.setCallback(this::getPull);
+        gridLayoutManager = new GridLayoutManager(this, params.getColumn());
+        binding.scores.setLayoutManager(gridLayoutManager);
         StaggeredFragment header = binding.header.getFragment();
         header.setNested(false);
+        trainType.observe(this, s -> getScore());
+        year.observe(this, s -> {
+            if (year.getValue() != null && term.getValue() != null) {
+                binding.year.setText(s);
+                getScore();
+            }
+        });
+        term.observe(this, s -> {
+            binding.term.setText(terms[s - 1]);
+            getScore();
+        });
         handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    params.toast((String) msg.obj);
+                    params.toast(R.string.no_wifi_warning);
                     return;
                 }
                 JSONObject dataString = JSON.parseObject((String) msg.obj);
@@ -102,10 +118,17 @@ public class Grade extends AppCompatActivity {
                             break;
                         case 2: {
                             JSONObject pull = dataString.getJSONObject("data");
-                            pull.getJSONArray("selectTrainType").forEach(a -> typePop.getMenu().add(((JSONObject) a).getString("dataName")));
+                            pull.getJSONArray("selectTrainType").forEach(a -> typePop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
+                                binding.type.setText(((JSONObject) a).getString("dataName"));
+                                trainType.setValue(((JSONObject) a).getString("dataNumber"));
+                                return false;
+                            }));
+                            binding.type.setText(pull.getJSONArray("selectTrainType").getJSONObject(0).getString("dataName"));
+                            trainType.setValue(pull.getJSONArray("selectTrainType").getJSONObject(0).getString("dataNumber"));
                             pull.getJSONArray("selectYearPull").forEach(a ->
                                     yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
-                                        setNow(((JSONObject) a).getString("dataName"), term, type);
+                                        year.postValue(((JSONObject) a).getString("dataName"));
+                                        binding.year.setText(((JSONObject) a).getString("dataNumber"));
                                         return false;
                                     }));
                             getNow();
@@ -113,19 +136,21 @@ public class Grade extends AppCompatActivity {
                         }
                         case 3: {
                             JSONObject pull = dataString.getJSONObject("data");
-                            setNow(pull.getString("acadYear"), pull.getInteger("acadSemester"), pull.getString("sequence"));
                             yearPop.getMenu().add(pull.getString("acadYear")).setOnMenuItemClickListener(menuItem -> {
-                                setNow(pull.getString("acadYear"), term, type);
+                                term.postValue(pull.getInteger("acadSemester"));
+                                year.postValue(pull.getString("acadYear"));
                                 return false;
                             });
+                            term.postValue(pull.getInteger("acadSemester"));
+                            year.postValue(pull.getString("acadYear"));
                             break;
                         }
                         case 4: {
                             JSONObject pull = dataString.getJSONObject("data");
-                            //System.out.println(pull);
-                            String totalRank = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("rank");
-                            String totalPoint = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("vegPoint");
-                            String totalCredit = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0).getString("totalCredit");
+                            JSONObject compulsorySelectTotal = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0);
+                            String totalRank = compulsorySelectTotal.getString("rank");
+                            String totalPoint = compulsorySelectTotal.getString("vegPoint");
+                            String totalCredit = compulsorySelectTotal.getString("totalCredit");
                             String rank = "";
                             String point = "";
                             if (!pull.getJSONArray("compulsorySelectList").isEmpty()) {
@@ -134,64 +159,33 @@ public class Grade extends AppCompatActivity {
                             }
                             String total = pull.getString("stuTotal");
                             JSONObject stuCredit = pull.getJSONObject("stuCredit");
-//                            binding.detail.setText(String.format("总排名：%s/%s\n总学分：%s\n总绩点：%s", totalRank, total, totalCredit, totalPoint));
-//                            binding.detail2.setText(String.format("当前排名：%s/%s\n当前绩点：%s", rank, total, point));
-//                            binding.detail3.setText(String.format("学期学分：%s\n公必学分：%s\n公选学分：%s\n专必学分：%s\n专选学分：%s\n荣誉学分：%s",
-//                                    stuCredit.getString("allGetCredit"),
-//                                    stuCredit.getString("publicGetCredit"),
-//                                    stuCredit.getString("publicSelectGetCredit"),
-//                                    stuCredit.getString("majorGetCredit"),
-//                                    stuCredit.getString("majorSelectGetCredit"),
-//                                    stuCredit.getString("honorCourseGetCredit")
-//                            ));
                             ArrayList<String> values = new ArrayList<>();
                             for (String key : new String[]{"allGetCredit", "publicGetCredit", "publicSelectGetCredit", "majorGetCredit", "majorSelectGetCredit", "honorCourseGetCredit"}) {
                                 values.add(stuCredit.getString(key));
                             }
                             header.clear();
-                            header.add("总学年", List.of("总排名", "总学分", "总绩点"), List.of(String.format("%s/%s", totalRank, total), totalCredit, totalPoint));
-                            header.add(String.format("%s学期", term), List.of("当前排名", "当前绩点"), List.of(String.format("%s/%s", rank, total), point));
-                            header.add("学分", List.of("学期学分", "公必学分", "公选学分", "专必学分", "专选学分", "荣誉学分"), values);
+                            header.add(getString(R.string.total_year), List.of(getString(R.string.total_rank), getString(R.string.total_credit), getString(R.string.total_point)), List.of(String.format("%s/%s", totalRank, total), totalCredit, totalPoint));
+                            header.add(terms[term.getValue() == null ? 1 : term.getValue() - 1], List.of(getString(R.string.current_rank), getString(R.string.current_point)), List.of(String.format("%s/%s", rank, total), point));
+                            header.add(getString(R.string.credit), List.of(getString(R.string.term_credit), getString(R.string.public_compulsory_credit), getString(R.string.public_select_credit), getString(R.string.major_compulsory_credit), getString(R.string.major_select_credit), getString(R.string.honor_credit)), values);
                             break;
                         }
                     }
                 } else {
                     params.toast(R.string.login_warning);
-                    params.gotoLogin(binding.tool, TargetUrl.JWXT);
+                    params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                 }
             }
         };
         getPull();
     }
 
-    public OkHttpClient getHttp() {
-        return new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @NonNull
-            @Override
-            public Response intercept(@NonNull Chain chain) throws IOException {
-                Request origin = chain.request();
-                return chain.proceed(origin.newBuilder()
-                        //.header("Accept-Language","zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
-                        .header("Cookie", cookie)
-                        .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
-                        .method(origin.method(), origin.body())
-                        .build());
-            }
-        }).build();
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        gridLayoutManager.setSpanCount(new Params(this).getColumn());
     }
 
-    public void setNow(String year, int term, String type) {
-        this.term = term;
-        this.year = year;
-        this.type = type;
-        binding.term.setText(terms[term - 1]);
-        binding.year.setText(year);
-        binding.type.setText("主修");
-        getScore(year, term, "01");
-        getTotalScore(year, term, "01");
-    }
-
-    public void getNow() {
+    void getNow() {
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist").build()).enqueue(
                 new Callback() {
                     @Override
@@ -212,7 +206,15 @@ public class Grade extends AppCompatActivity {
         );
     }
 
-    public void getScore(String year, int term, String type) {
+    void getScore() {
+        if (year.getValue() == null || term.getValue() == null || trainType.getValue() == null) {
+            return;
+        }
+        getScore(year.getValue(), term.getValue(), trainType.getValue());
+        getTotalScore(year.getValue(), term.getValue(), trainType.getValue());
+    }
+
+    void getScore(String year, int term, String type) {
         http.newCall(new Request.Builder().url(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term)).build()).enqueue(
                 new Callback() {
                     @Override
@@ -233,7 +235,7 @@ public class Grade extends AppCompatActivity {
         );
     }
 
-    public void getTotalScore(String year, int term, String type) {
+    void getTotalScore(String year, int term, String type) {
         http.newCall(new Request.Builder().url(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term)).build()).enqueue(
                 new Callback() {
                     @Override
@@ -254,7 +256,7 @@ public class Grade extends AppCompatActivity {
         );
     }
 
-    public void getPull() {
+    void getPull() {
         http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getPull").build()).enqueue(
                 new Callback() {
                     @Override
@@ -275,11 +277,11 @@ public class Grade extends AppCompatActivity {
         );
     }
 
-    static class ScoreAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        Context context;
-        ArrayList<JSONObject> data = new ArrayList<>();
+    static class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        final Context context;
+        final ArrayList<JSONObject> data = new ArrayList<>();
 
-        public ScoreAdp(Context context) {
+        public ScoreAdapter(Context context) {
             this.context = context;
         }
 
@@ -293,7 +295,8 @@ public class Grade extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemScoreBinding binding = ItemScoreBinding.bind(holder.itemView);
-            binding.getRoot().setOnClickListener(view -> {});
+            binding.getRoot().setOnClickListener(view -> {
+            });
             JSONObject info = data.get(position);
             String grade = "";
             for (Object a : info.getJSONArray("scoreList")) {
@@ -301,7 +304,7 @@ public class Grade extends AppCompatActivity {
             }
             binding.subject.setText(info.getString("scoCourseName"));
             binding.score.setText(String.format("%s/%s", info.getString("scoFinalScore"), info.getString("scoPoint")));
-            binding.info.setText(String.format("学分：%s\n排名：%s\n课程类别：%s\n老师：%s\n是否通过：%s\n考试性质：%s\n成绩：%s",
+            Markwon.builder(context).build().setMarkdown(binding.info, String.format("- 学分：**%s**\n- 排名：**%s**\n- 课程类别：**%s**\n- 老师：**%s**\n- 是否通过：**%s**\n- 考试性质：**%s**\n- 成绩：**%s**",
                     info.getString("scoCredit"),
                     info.getString("teachClassRank"),
                     info.getString("scoCourseCategoryName"),

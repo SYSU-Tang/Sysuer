@@ -27,7 +27,7 @@ public class PEList extends AppCompatActivity {
     Params params;
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     Pager2Adapter adp;
 
     @Override

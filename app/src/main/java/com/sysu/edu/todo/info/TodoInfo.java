@@ -3,28 +3,28 @@ package com.sysu.edu.todo.info;
 import androidx.lifecycle.MutableLiveData;
 
 public class TodoInfo {
-    MutableLiveData<String> title;
-    MutableLiveData<String> description;
-    MutableLiveData<String> dueDate;
-    MutableLiveData<String> ddlDate;
-    MutableLiveData<String> dueTime;
-    MutableLiveData<String> remindTime;
-    MutableLiveData<String> type;
-    MutableLiveData<String> location;
-    MutableLiveData<String> subject;
-    MutableLiveData<Integer> priority;
-    MutableLiveData<String> subtask;
-    MutableLiveData<String> attachment;
-    MutableLiveData<String> doneDate;
-    MutableLiveData<Integer> status;
-    MutableLiveData<String> color;
-    MutableLiveData<String> tag;
+    final MutableLiveData<String> title;
+    final MutableLiveData<String> description;
+    final MutableLiveData<String> dueDate;
+    final MutableLiveData<String> ddlDate;
+    final MutableLiveData<String> dueTime;
+    final MutableLiveData<String> remindTime;
+    final MutableLiveData<String> type;
+    final MutableLiveData<String> location;
+    final MutableLiveData<String> subject;
+    final MutableLiveData<Integer> priority;
+    final MutableLiveData<String> subtask;
+    final MutableLiveData<String> attachment;
+    final MutableLiveData<String> doneDate;
+    final MutableLiveData<Integer> status;
+    final MutableLiveData<String> color;
+    final MutableLiveData<String> tag;
     public final static Integer ADD = 0;
     public final static Integer VIEW = 1;
     public final static Integer TODO = 0;
     public final static Integer DONE = 1;
     public final static Integer DELETE = 2;
-    MutableLiveData<Integer> id;
+    final MutableLiveData<Integer> id;
     int function = ADD;
 
     public TodoInfo() {

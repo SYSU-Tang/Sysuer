@@ -46,9 +46,9 @@ import okhttp3.Response;
 public class CourseSelectedActivity extends AppCompatActivity {
     static Params params;
     static ActivityResultLauncher<Intent> launcher;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 0;
-    MutableLiveData<String> response = new MutableLiveData<>();
+    final MutableLiveData<String> response = new MutableLiveData<>();
     Handler handler;
 
     @Override
@@ -133,8 +133,8 @@ public class CourseSelectedActivity extends AppCompatActivity {
 
     static class CourseSelectedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        Context context;
-        ArrayList<JSONObject> data = new ArrayList<>();
+        final Context context;
+        final ArrayList<JSONObject> data = new ArrayList<>();
 
         public CourseSelectedAdapter(Context context) {
             this.context = context;
@@ -181,9 +181,9 @@ public class CourseSelectedActivity extends AppCompatActivity {
 
         static class ViewHolder extends RecyclerView.ViewHolder {
 
-            ItemCourseSelectedBinding binding;
-            ArrayList<Integer> ids = new ArrayList<>();
-            MutableLiveData<JSONObject> info = new MutableLiveData<>();
+            final ItemCourseSelectedBinding binding;
+            final ArrayList<Integer> ids = new ArrayList<>();
+            final MutableLiveData<JSONObject> info = new MutableLiveData<>();
 
             public ViewHolder(ItemCourseSelectedBinding binding) {
                 super(binding.getRoot());

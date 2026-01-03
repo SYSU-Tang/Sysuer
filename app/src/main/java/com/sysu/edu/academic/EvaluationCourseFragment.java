@@ -114,8 +114,8 @@ public class EvaluationCourseFragment extends Fragment {
 }
 
 class CourseEvaluationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
-    ArrayList<JSONObject> data = new ArrayList<>();
+    final Context context;
+    final ArrayList<JSONObject> data = new ArrayList<>();
     String[] keys;
     String[] values;
     String[] params;

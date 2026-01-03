@@ -48,9 +48,9 @@ import okhttp3.Response;
 
 public class NewsFragment extends Fragment {
     String cookie;
-    int position;
+    final int position;
     RecyclerViewScrollBinding binding;
-    OkHttpClient http = new OkHttpClient.Builder()/*.authenticator((route, response) -> {
+    final OkHttpClient http = new OkHttpClient.Builder()/*.authenticator((route, response) -> {
 //                System.out.println("Authenticating for response: " + response);
 //                System.out.println("Challenges: " + response.challenges());
                 String credential = Credentials.basic("tangxb6", "Tang@1245");
@@ -62,7 +62,7 @@ public class NewsFragment extends Fragment {
     Handler handler;
     int page = 1;
     Runnable run;
-    String authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c3NlYXJjaF8xMDAwNTAiLCJ1c2VyX25hbWUiOiIyNDMwODE1MiIsInNjb3BlIjpbImFsbCJdLCJuYW1lIjoiMjQzMDgxNTIiLCJleHAiOjE3NTkzOTg1MjUsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImp0aSI6Inp5Z3RBeEhDdkx0ckFMODdnWWJuNDhxWUlyNCIsImNsaWVudF9pZCI6IjE2NzNmMDFkOTYxYTYxMGZlOTIyMGVmZjBkN2IzYmM0IiwidXNlcm5hbWUiOiIyNDMwODE1MiJ9.viBuKujwPQO9ai5orJsJtloWhwZhDThl40O_kfJFK_k";//"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c2g1XzEwMDA0MCIsInVzZXJfbmFtZSI6IjI0MzA4MTUyIiwic2NvcGUiOlsiYWxsIl0sIm5hbWUiOiIyNDMwODE1MiIsImV4cCI6MTc1MTk4OTIyNiwiYXV0aG9yaXRpZXMiOlsiQURNSU4iXSwianRpIjoiZFFqR1Q5Q25Ia1lWUDY0VmlGZFZURExCU1lNIiwiY2xpZW50X2lkIjoiMTY3M2YwMWQ5NjFhNjEwZmU5MjIwZWZmMGQ3YjNiYzQiLCJ1c2VybmFtZSI6IjI0MzA4MTUyIn0.wYTyy8gBr37xItZW2qJp81W2T-17-E9y4RQiODLj9pQ";
+    final String authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c3NlYXJjaF8xMDAwNTAiLCJ1c2VyX25hbWUiOiIyNDMwODE1MiIsInNjb3BlIjpbImFsbCJdLCJuYW1lIjoiMjQzMDgxNTIiLCJleHAiOjE3NTkzOTg1MjUsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImp0aSI6Inp5Z3RBeEhDdkx0ckFMODdnWWJuNDhxWUlyNCIsImNsaWVudF9pZCI6IjE2NzNmMDFkOTYxYTYxMGZlOTIyMGVmZjBkN2IzYmM0IiwidXNlcm5hbWUiOiIyNDMwODE1MiJ9.viBuKujwPQO9ai5orJsJtloWhwZhDThl40O_kfJFK_k";//"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcl9tYW5hZ2VyIl0sImNsaWVudF9pZF9zeXMiOiJ6c2g1XzEwMDA0MCIsInVzZXJfbmFtZSI6IjI0MzA4MTUyIiwic2NvcGUiOlsiYWxsIl0sIm5hbWUiOiIyNDMwODE1MiIsImV4cCI6MTc1MTk4OTIyNiwiYXV0aG9yaXRpZXMiOlsiQURNSU4iXSwianRpIjoiZFFqR1Q5Q25Ia1lWUDY0VmlGZFZURExCU1lNIiwiY2xpZW50X2lkIjoiMTY3M2YwMWQ5NjFhNjEwZmU5MjIwZWZmMGQ3YjNiYzQiLCJ1c2VybmFtZSI6IjI0MzA4MTUyIn0.wYTyy8gBr37xItZW2qJp81W2T-17-E9y4RQiODLj9pQ";
     Params params;
 
     public NewsFragment(int pos) {
@@ -363,8 +363,8 @@ public class NewsFragment extends Fragment {
 }
 
 class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    ArrayList<HashMap<String, String>> data = new ArrayList<>();
-    FragmentActivity context;
+    final ArrayList<HashMap<String, String>> data = new ArrayList<>();
+    final FragmentActivity context;
     //String cookie;
 
     public NewsAdp(FragmentActivity context) {

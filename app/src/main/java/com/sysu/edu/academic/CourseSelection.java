@@ -21,9 +21,7 @@ public class CourseSelection extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityCourseSelectionBinding.inflate(getLayoutInflater());
-        binding.toolbar.setNavigationOnClickListener(view -> {
-            supportFinishAfterTransition();
-        });
+        binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         setContentView(binding.getRoot());
         //getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).commit();
         NavController navController =((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_course_selection))).getNavController();

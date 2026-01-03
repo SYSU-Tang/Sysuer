@@ -43,20 +43,31 @@ public class LoginWebFragment extends Fragment {
                 if (Pattern.compile(TargetUrl.LOGIN).matcher(url).find()) {
                     model.setLogin(false);
                 }
+                String element = "";
                 if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/").matcher(url).find()) {
-                    web.evaluateJavascript("document.querySelector('.ant-btn.ant-btn-primary').click();", null);
+                    element = ".ant-btn.ant-btn-primary";
                 } else if (Pattern.compile("//pay.sysu.edu.cn/#/").matcher(url).find()) {
-                    web.evaluateJavascript("document.querySelector('.el-button.login_btns.btn-netIdLogin.el-button--default.is-plain').click();", null);
+                    element = ".el-button.login_btns.btn-netIdLogin.el-button--default.is-plain";
                 } else if (Pattern.compile("//pjxt.sysu.edu.cn/").matcher(url).find()) {
-                    web.evaluateJavascript("document.querySelector('.log-g-iddl').click();", null);
-                } else if (Pattern.compile("//portal.sysu.edu.cn/newClient/#/login").matcher(url).find()) {
-                    web.evaluateJavascript("document.querySelector('.ant-btn.index-submit-3jXSy.ant-btn-primary.ant-btn-lg').click();", null);
+                    element = ".log-g-iddl";
+                } else if (Pattern.compile("portal.sysu.edu.cn/newClient/#/login").matcher(url).find()) {
+                    element = ".ant-btn.index-submit-3jXSy.ant-btn-primary.ant-btn-lg";
                 }
-                if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {
+                if (!element.isEmpty()) {
+                    web.evaluateJavascript("(function(){var needLogin = document.querySelector('" + element + "');if(needLogin!=null){needLogin.click();};return needLogin!=null;})()", s -> {
+                        if (Boolean.parseBoolean(s)) {
+                            model.setLogin(false);
+                        }
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            model.setCookie(CookieManager.getInstance().getCookie(url));
+                            model.setLogin(true);
+                        }, 500);
+                    });
+                }else if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         model.setCookie(CookieManager.getInstance().getCookie(url));
                         model.setLogin(true);
-                    }, 1000);
+                    }, 500);
                     return;
                 }
                 model.setLogin(false);

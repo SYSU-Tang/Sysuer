@@ -76,10 +76,6 @@ public class EvaluationCategoryFragment extends Fragment {
         return binding.getRoot();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
     public void getEvaluation() {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://pjxt.sysu.edu.cn/personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10")
@@ -105,8 +101,8 @@ public class EvaluationCategoryFragment extends Fragment {
     }
 
     public static class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        Context context;
-        ArrayList<JSONObject> data = new ArrayList<>();
+        final Context context;
+        final ArrayList<JSONObject> data = new ArrayList<>();
         String[] keys;
         String[] values;
         String[] params;

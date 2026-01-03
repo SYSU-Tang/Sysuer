@@ -31,7 +31,7 @@
         style="@style/TextAppearance.Material3.SearchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="..."
+        android:hint="@string/search"
         app:layout_anchor="@id/searchbar"
         app:layout_behavior="com.google.android.material.search.SearchView$Behavior">
         <androidx.recyclerview.widget.RecyclerView

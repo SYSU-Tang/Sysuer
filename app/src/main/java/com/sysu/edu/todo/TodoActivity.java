@@ -17,9 +17,7 @@ public class TodoActivity extends AppCompatActivity {
         ActivityTodoBinding binding = ActivityTodoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
-        binding.add.setOnClickListener(view -> {
-            initTodo.showTodoAddDialog();
-        });
+        binding.add.setOnClickListener(view -> initTodo.showTodoAddDialog());
         initTodo = new InitTodo(this,binding.fragmentTodo.getFragment());
 
     }

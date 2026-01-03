@@ -62,4 +62,9 @@
         <item>Volunteer</item>
         <item>Others</item>
     </string-array>
+    <string-array name="terms">
+        <item>First Term</item>
+        <item>Second Term</item>
+        <item>Third Term</item>
+    </string-array>
 </resources>

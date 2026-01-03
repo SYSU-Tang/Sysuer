@@ -6,6 +6,7 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -33,16 +34,14 @@ public class PEPreservation {
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 1;
-                    Bundle data = new Bundle();
-                    String datas = response.body().string();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",datas);
-                    msg.setData(data);
-                    //handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 1;
+                Bundle data = new Bundle();
+                String responseString = response.body().string();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",responseString);
+                msg.setData(data);
+                //handler.sendMessage(msg);
             }
         });
     }
@@ -58,15 +57,13 @@ public class PEPreservation {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() != null) {
-                    Message msg = new Message();
-                    msg.what = 2;
-                    Bundle data = new Bundle();
-                    data.putBoolean("isJson",response.header("Content-Type","").startsWith("application/json"));
-                    data.putString("data",response.body().string());
-                    msg.setData(data);
-                   // handler.sendMessage(msg);
-                }
+                Message msg = new Message();
+                msg.what = 2;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data",response.body().string());
+                msg.setData(data);
+                // handler.sendMessage(msg);
             }
         });
     }

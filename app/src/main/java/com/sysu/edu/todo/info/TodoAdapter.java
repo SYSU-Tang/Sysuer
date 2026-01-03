@@ -19,8 +19,8 @@ import java.util.Locale;
 
 public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private final InitTodo initTodo;
-    Context context;
-    ArrayList<TodoInfo> data = new ArrayList<>();
+    final Context context;
+    final ArrayList<TodoInfo> data = new ArrayList<>();
 
     public TodoAdapter(Context context, InitTodo initTodo) {
         super();

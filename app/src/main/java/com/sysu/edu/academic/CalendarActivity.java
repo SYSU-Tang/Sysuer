@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -50,38 +51,39 @@ public class CalendarActivity extends AppCompatActivity {
     int top = 0;
     Params params;
 
-   /* public static boolean save(ImageView view) {
-        try {
+    /* public static boolean save(ImageView view) {
+         try {
 
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+             ContentValues values = new ContentValues();
+             values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
 
-            Uri fileUri = view.getContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+             Uri fileUri = view.getContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-            if (fileUri == null) {
-                return false;
-            }
+             if (fileUri == null) {
+                 return false;
+             }
 
-            OutputStream outStream = view.getContext().getContentResolver().openOutputStream(fileUri);
+             OutputStream outStream = view.getContext().getContentResolver().openOutputStream(fileUri);
 
-            Bitmap bitmap = ((BitmapDrawable) view.getDrawable()).getBitmap();
-            if (outStream != null) {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
-                outStream.flush();
-                outStream.close();
-            }
-            view.getContext().sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", fileUri));
+             Bitmap bitmap = ((BitmapDrawable) view.getDrawable()).getBitmap();
+             if (outStream != null) {
+                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+                 outStream.flush();
+                 outStream.close();
+             }
+             view.getContext().sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", fileUri));
 
-            return true;
+             return true;
 
-        } catch (IOException ignored) {
-        }
-        return false;
-    }*/
-    public boolean save(String url,String fileName) {
-        return save(url,Environment.DIRECTORY_PICTURES + "/SYSUER", fileName,true);
+         } catch (IOException ignored) {
+         }
+         return false;
+     }*/
+    public boolean save(String url, String fileName) {
+        return save(url, Environment.DIRECTORY_PICTURES + "/SYSUER", fileName, true);
     }
-    public boolean save(String url, String parentDir, String fileName,boolean defaultDir) {
+
+    public boolean save(String url, String parentDir, String fileName, boolean defaultDir) {
         try {
 
             Uri fileUri;
@@ -91,8 +93,8 @@ public class CalendarActivity extends AppCompatActivity {
                 values.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
                 values.put(MediaStore.MediaColumns.RELATIVE_PATH, parentDir);
                 fileUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            }else {
-                fileUri = Uri.fromFile(new File(parentDir,fileName));
+            } else {
+                fileUri = Uri.fromFile(new File(parentDir, fileName));
             }
 
             if (fileUri == null) {
@@ -109,7 +111,16 @@ public class CalendarActivity extends AppCompatActivity {
                             if (outStream != null) {
                                 try {
                                     FileInputStream fileInputStream = new FileInputStream(resource);
-                                    FileUtils.copy(fileInputStream, outStream);
+
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                        FileUtils.copy(fileInputStream, outStream);
+                                    } else {
+                                        byte[] buffer = new byte[1024 * 4];
+                                        int bytesRead;
+                                        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                                            outStream.write(buffer, 0, bytesRead);
+                                        }
+                                    }
                                     outStream.flush();
                                     outStream.close();
                                     fileInputStream.close();

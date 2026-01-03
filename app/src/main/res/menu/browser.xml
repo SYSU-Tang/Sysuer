@@ -4,10 +4,10 @@
     <item
         app:showAsAction="ifRoom"
         android:icon="@drawable/window"
-        android:title="窗口"/>
+        android:title="@string/window"/>
     <item
         android:id="@+id/js"
         android:icon="@drawable/menu"
         app:showAsAction="always"
-        android:title="菜单"/>
+        android:title="@string/menu"/>
 </menu>

@@ -30,7 +30,7 @@ public class MajorInfo extends AppCompatActivity {
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     ArrayList<String> categories;
 
     @Override

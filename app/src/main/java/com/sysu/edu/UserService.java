@@ -9,12 +9,12 @@ import java.io.InputStreamReader;
 public class UserService extends IUserService.Stub {
 
     @Override
-    public void destroy() throws RemoteException {
+    public void destroy() {
         System.exit(0);
     }
 
     @Override
-    public void exit() throws RemoteException {
+    public void exit() {
         destroy();
     }
 
@@ -31,7 +31,7 @@ public class UserService extends IUserService.Stub {
     }
 
     @Override
-    public String execArr(String[] command) throws RemoteException {
+    public String execArr(String[] command) {
         try {
             // 执行shell命令
             Process process = Runtime.getRuntime().exec(command);

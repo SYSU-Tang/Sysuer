@@ -7,7 +7,7 @@ import androidx.preference.PreferenceManager;
 
 public class Theme
 {
-    Context context;
+    final Context context;
     public Theme(Context c){
        this.context=c;
     }

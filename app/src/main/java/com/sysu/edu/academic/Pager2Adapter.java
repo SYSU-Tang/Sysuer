@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class Pager2Adapter extends FragmentStateAdapter {
 
-    ArrayList<Fragment> fragments=new ArrayList<>();
+    final ArrayList<Fragment> fragments=new ArrayList<>();
 
     public Pager2Adapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);

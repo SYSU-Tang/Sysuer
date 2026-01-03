@@ -12,7 +12,7 @@ import androidx.core.app.NotificationCompat;
 
 public class ClassIsland{
 
-    Context context;
+    final Context context;
     public ClassIsland(Context context){
         this.context = context;
     }

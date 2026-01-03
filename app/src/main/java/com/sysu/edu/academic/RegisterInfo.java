@@ -35,7 +35,7 @@ public class RegisterInfo extends AppCompatActivity {
     Params params;
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 1;
     Pager2Adapter adp;
     boolean changeYear = false;

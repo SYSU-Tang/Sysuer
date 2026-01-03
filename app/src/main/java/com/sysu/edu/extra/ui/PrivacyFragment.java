@@ -31,7 +31,7 @@ import okhttp3.Response;
 public class PrivacyFragment extends PreferenceFragmentCompat {
     Params params;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     String token;
 
     @Override

@@ -38,9 +38,9 @@ public class StaggeredFragment extends Fragment {
     Params params;
     StaggeredAdapter staggeredAdapter;
     StaggeredGridLayoutManager lm;
-    MutableLiveData<Integer> orientation = new MutableLiveData<>(StaggeredGridLayoutManager.VERTICAL);
-    MutableLiveData<Runnable> scrollBottom = new MutableLiveData<>();
-    MutableLiveData<Boolean> nestedScrollingEnabled = new MutableLiveData<>(true);
+    final MutableLiveData<Integer> orientation = new MutableLiveData<>(StaggeredGridLayoutManager.VERTICAL);
+    final MutableLiveData<Runnable> scrollBottom = new MutableLiveData<>();
+    final MutableLiveData<Boolean> nestedScrollingEnabled = new MutableLiveData<>(true);
 
     public static StaggeredFragment newInstance(int position) {
         StaggeredFragment s = new StaggeredFragment();
@@ -133,10 +133,10 @@ public class StaggeredFragment extends Fragment {
     }
 
     static class ColumnAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        boolean hideNull;
-        List<String> value;
-        Context context;
-        List<String> key;
+        final boolean hideNull;
+        final List<String> value;
+        final Context context;
+        final List<String> key;
 
         public ColumnAdp(Context context, List<String> data, List<String> value, boolean hideNull) {
             super();
@@ -178,12 +178,12 @@ public class StaggeredFragment extends Fragment {
     }
 
     public static class StaggeredAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        public ArrayList<String> titles = new ArrayList<>();
+        public final ArrayList<String> titles = new ArrayList<>();
         boolean hideNull;
-        Context context;
-        ArrayList<List<String>> keys = new ArrayList<>();
-        ArrayList<Integer> icons = new ArrayList<>();
-        ArrayList<List<String>> values = new ArrayList<>();
+        final Context context;
+        final ArrayList<List<String>> keys = new ArrayList<>();
+        final ArrayList<Integer> icons = new ArrayList<>();
+        final ArrayList<List<String>> values = new ArrayList<>();
         StaggeredListener staggeredListener;
 
         public StaggeredAdapter(Context c) {

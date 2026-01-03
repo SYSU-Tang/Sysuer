@@ -50,7 +50,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
-        android:contentDescription="save"
+        android:contentDescription="@string/save"
         app:layout_behavior="com.google.android.material.floatingactionbutton.FloatingActionButton$Behavior"
         app:srcCompat="@drawable/submit" />
 

@@ -36,7 +36,7 @@ public class CourseCompletion extends AppCompatActivity {
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

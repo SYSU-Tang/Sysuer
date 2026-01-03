@@ -14,7 +14,7 @@ import com.sysu.edu.databinding.FragmentTodoBinding;
 public class TodoFragment extends Fragment {
 
     FragmentTodoBinding binding;
-    ConcatAdapter concatAdapter = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
+    final ConcatAdapter concatAdapter = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,

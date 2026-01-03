@@ -11,7 +11,7 @@ import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.databinding.ItemTitleBinding;
 
 public class TitleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
+    final Context context;
     String title = "";
     int n=0;
     public TitleAdapter(Context context){

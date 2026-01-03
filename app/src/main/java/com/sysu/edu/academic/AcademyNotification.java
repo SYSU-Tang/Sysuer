@@ -50,7 +50,7 @@ public class AcademyNotification extends AppCompatActivity {
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     AlertDialog dialog;
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -203,7 +203,7 @@ public class AcademyNotification extends AppCompatActivity {
 
     class MyClickSpan extends ClickableSpan {
         String text;
-        String url;
+        final String url;
 
         public MyClickSpan(String url) throws MalformedURLException {
             this.url = url;

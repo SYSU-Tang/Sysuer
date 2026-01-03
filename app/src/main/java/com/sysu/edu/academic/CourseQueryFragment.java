@@ -39,10 +39,10 @@ import okhttp3.Response;
 
 public class CourseQueryFragment extends Fragment {
 
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     String cookie;
-    HashMap<String, String> filter = new HashMap<>();
+    final HashMap<String, String> filter = new HashMap<>();
     HashMap<String, String> filterName = new HashMap<>();
     CourseSelectionViewModel vm;
     private FragmentCourseQueryBinding binding;

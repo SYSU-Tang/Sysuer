@@ -10,7 +10,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class Account {
-    String sessionId="a332e4ca-1746-4605-b8a1-eed071992d94";
+    final String sessionId="a332e4ca-1746-4605-b8a1-eed071992d94";
     public Account(){
 
     }

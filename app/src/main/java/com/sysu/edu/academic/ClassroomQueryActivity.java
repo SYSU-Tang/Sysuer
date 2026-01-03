@@ -53,7 +53,7 @@ import okhttp3.Response;
 public class ClassroomQueryActivity extends AppCompatActivity {
     Handler handler;
     String cookie = "";
-    OkHttpClient http = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+    final OkHttpClient http = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
         @NonNull
         @Override
         public Response intercept(@NonNull Chain chain) throws IOException {
@@ -66,8 +66,8 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     .build());
         }
     }).build();
-    MaterialDatePicker<Long> dateDialog = MaterialDatePicker.Builder.datePicker().build();
-    HashMap<String, ArrayList<Chip>> classroom = new HashMap<>();
+    final MaterialDatePicker<Long> dateDialog = MaterialDatePicker.Builder.datePicker().build();
+    final HashMap<String, ArrayList<Chip>> classroom = new HashMap<>();
     String dateStr;
     String startClassTime = "1";
     String endClassTime = "11";
@@ -75,7 +75,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     RoomAdapter adp;
     int page = 1;
     int total = 0;
-    HashMap<Integer, String> office = new HashMap<>();
+    final HashMap<Integer, String> office = new HashMap<>();
     ActivityClassroomQueryBinding binding;
 
     @Override
@@ -262,7 +262,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
             handler.sendMessage(message);
             return;
         }
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom").post(RequestBody.create(String.format("{\"pageNo\":%d,\"pageSize\":20,\"param\":{\"dateStr\":\"%s\",\"teachingBuildIDs\":%s,\"startClassTimes\":%s,\"endClassTimes\":%s,\"classRoomTagList\":%s}}", page++, dateStr, JSON.toJSONString(teachingBuildIDs), startClassTime, endClassTime, JSON.toJSONString(classType)), MediaType.parse("application/json"))).build()).enqueue(
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom").post(RequestBody.create(String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":20,\"param\":{\"dateStr\":\"%s\",\"teachingBuildIDs\":%s,\"startClassTimes\":%s,\"endClassTimes\":%s,\"classRoomTagList\":%s}}", page++, dateStr, JSON.toJSONString(teachingBuildIDs), startClassTime, endClassTime, JSON.toJSONString(classType)), MediaType.parse("application/json"))).build()).enqueue(
                 new Callback() {
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
@@ -284,8 +284,8 @@ public class ClassroomQueryActivity extends AppCompatActivity {
 }
 
 class RoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
-    ArrayList<JSONObject> json = new ArrayList<>();
+    final Context context;
+    final ArrayList<JSONObject> json = new ArrayList<>();
 
     public RoomAdapter(Context context) {
         super();

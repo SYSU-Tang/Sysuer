@@ -47,7 +47,7 @@ import okhttp3.Response;
 public class EvaluationQuestionnaireFragment extends Fragment {
     Params params;
     Handler handler;
-    JSONObject answers = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}");
+    final JSONObject answers = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}");
 
     @Nullable
     @Override
@@ -58,17 +58,15 @@ public class EvaluationQuestionnaireFragment extends Fragment {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         ConcatAdapter adp = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
         binding.recyclerView.setAdapter(adp);
-        params.setCallback(this, () -> {
-            getEvaluation(requireArguments().getString("rwid"),
-                    requireArguments().getString("wjid"),
-                    requireArguments().getString("sxz"),
-                    requireArguments().getString("pjrdm"),
-                    requireArguments().getString("bpdm"),
-                    requireArguments().getString("kcdm"),
-                    requireArguments().getString("rwh"),
-                    Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
-                    requireArguments().getString("bpmc"));
-        });
+        params.setCallback(this, () -> getEvaluation(requireArguments().getString("rwid"),
+                requireArguments().getString("wjid"),
+                requireArguments().getString("sxz"),
+                requireArguments().getString("pjrdm"),
+                requireArguments().getString("bpdm"),
+                requireArguments().getString("kcdm"),
+                requireArguments().getString("rwh"),
+                Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
+                requireArguments().getString("bpmc")));
         //{"rwid", "wjid","sxz","pjrdm","bpdm","kcdm","rwh"};
         getEvaluation(requireArguments().getString("rwid"),
                 requireArguments().getString("wjid"),
@@ -87,62 +85,60 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                         JSONObject data = JSON.parseObject((String) msg.obj);
                         if (data.get("code").equals("200")) {
                             data.getJSONObject("result").getJSONArray("assessedObjList").forEach(l ->
-                            {
-                                ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->
-                                {
-                                    JSONObject pjjglist = ((JSONObject) list).clone();
-                                    pjjglist.remove("dtjgList");
-                                    pjjglist.put("pjxxlist", new JSONArray());
-                                    answers.getJSONArray("pjjglist").add(pjjglist);
-                                    TitleAdapter name = new TitleAdapter(requireContext());
-                                    String bprmc = ((JSONObject) list).getString("bprmc");
-                                    if (bprmc != null && !bprmc.isEmpty()) {
-                                        name.setTitle(bprmc);
-                                        name.setHeader(1);
-                                        adp.addAdapter(name);
-                                    }// 被评名称
-                                    ((JSONObject) list).getJSONArray("dtjgList").forEach(e ->
+                                    ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->
                                     {
-                                        JSONObject pjxxlist = JSONObject.parse(String.format(
-                                                "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
-                                                ((JSONObject) list).getString("wjid"),
-                                                ((JSONObject) list).getString("wjssrwid"),
-                                                ((JSONObject) e).getString("tmid")
-                                        ));
-                                        JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
-                                        pjxxlist.put("xxdalist", da);
-                                        pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
+                                        JSONObject pjjglist = ((JSONObject) list).clone();
+                                        pjjglist.remove("dtjgList");
+                                        pjjglist.put("pjxxlist", new JSONArray());
+                                        answers.getJSONArray("pjjglist").add(pjjglist);
+                                        TitleAdapter name = new TitleAdapter(requireContext());
+                                        String bprmc = ((JSONObject) list).getString("bprmc");
+                                        if (bprmc != null && !bprmc.isEmpty()) {
+                                            name.setTitle(bprmc);
+                                            name.setHeader(1);
+                                            adp.addAdapter(name);
+                                        }// 被评名称
+                                        ((JSONObject) list).getJSONArray("dtjgList").forEach(e ->
+                                        {
+                                            JSONObject pjxxlist = JSONObject.parse(String.format(
+                                                    "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
+                                                    ((JSONObject) list).getString("wjid"),
+                                                    ((JSONObject) list).getString("wjssrwid"),
+                                                    ((JSONObject) e).getString("tmid")
+                                            ));
+                                            JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
+                                            pjxxlist.put("xxdalist", da);
+                                            pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
 
-                                        TitleAdapter title = new TitleAdapter(requireContext());
-                                        title.setTitle(((JSONObject) e).getString("tgmc"));
-                                        adp.addAdapter(title); // 题目标题
+                                            TitleAdapter title = new TitleAdapter(requireContext());
+                                            title.setTitle(((JSONObject) e).getString("tgmc"));
+                                            adp.addAdapter(title); // 题目标题
 
-                                        switch (((JSONObject) e).getString("tmlx")) {
-                                            case "1": {
-                                                OptionAdapter optionAdapter = new OptionAdapter(requireContext());
-                                                ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
-                                                optionAdapter.setAnswer(da);
-                                                adp.addAdapter(optionAdapter);
-                                                break;
+                                            switch (((JSONObject) e).getString("tmlx")) {
+                                                case "1": {
+                                                    OptionAdapter optionAdapter = new OptionAdapter(requireContext());
+                                                    ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
+                                                    optionAdapter.setAnswer(da);
+                                                    adp.addAdapter(optionAdapter);
+                                                    break;
+                                                }
+                                                case "6": {
+                                                    BlanketAdapter blanketAdapter = new BlanketAdapter(requireContext());
+                                                    blanketAdapter.setAnswer(da);
+                                                    adp.addAdapter(blanketAdapter);
+                                                    break;
+                                                }
+                                                case "5": {
+                                                    RankAdapter rankAdapter = new RankAdapter(requireContext());
+                                                    rankAdapter.setAnswer(da);
+                                                    adp.addAdapter(rankAdapter);
+                                                    break;
+                                                }
+                                                default:
+                                                    break;
                                             }
-                                            case "6": {
-                                                BlanketAdapter blanketAdapter = new BlanketAdapter(requireContext());
-                                                blanketAdapter.setAnswer(da);
-                                                adp.addAdapter(blanketAdapter);
-                                                break;
-                                            }
-                                            case "5": {
-                                                RankAdapter rankAdapter = new RankAdapter(requireContext());
-                                                rankAdapter.setAnswer(da);
-                                                adp.addAdapter(rankAdapter);
-                                                break;
-                                            }
-                                            default:
-                                                break;
-                                        }
-                                    });
-                                });
-                            });
+                                        });
+                                    }));
                         } else {
                             params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
                         }
@@ -173,9 +169,7 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                 }
             }
         };
-        binding.save.setOnClickListener(view -> {
-            saveEvaluation();
-        });
+        binding.save.setOnClickListener(view -> saveEvaluation());
         binding.submit.setOnClickListener(view -> Snackbar.make(binding.getRoot(), "提交后不可更改", Snackbar.LENGTH_LONG).setAction(R.string.confirm, v -> submitEvaluation()).show());
         binding.reset.setOnClickListener(view -> {
             adp.getAdapters().forEach(adapter -> {
@@ -190,17 +184,15 @@ public class EvaluationQuestionnaireFragment extends Fragment {
             /*answers.getJSONArray("pjjglist").forEach(o -> ((JSONObject) o).getJSONArray("pjxxlist").forEach(e -> ((JSONObject) e).put("xxdalist", new JSONArray())));
             adp.notifyDataSetChanged();*/
         });
-        binding.auto.setOnClickListener(v -> {
-            adp.getAdapters().forEach(adapter -> {
-                if (adapter instanceof OptionAdapter) {
-                    ((OptionAdapter) adapter).setLastOption();
-                } else if (adapter instanceof RankAdapter) {
-                    ((RankAdapter) adapter).setLastRank();
-                } else if (adapter instanceof BlanketAdapter) {
-                    ((BlanketAdapter) adapter).setLastContent();
-                }
-            });
-        });
+        binding.auto.setOnClickListener(v -> adp.getAdapters().forEach(adapter -> {
+            if (adapter instanceof OptionAdapter) {
+                ((OptionAdapter) adapter).setLastOption();
+            } else if (adapter instanceof RankAdapter) {
+                ((RankAdapter) adapter).setLastRank();
+            } else if (adapter instanceof BlanketAdapter) {
+                ((BlanketAdapter) adapter).setLastContent();
+            }
+        }));
         return binding.getRoot();
     }
 
@@ -258,8 +250,8 @@ public class EvaluationQuestionnaireFragment extends Fragment {
 }
 
 class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
-    ArrayList<JSONObject> data = new ArrayList<>();
+    final Context context;
+    final ArrayList<JSONObject> data = new ArrayList<>();
     int selected = -1;
     String option;
     JSONArray answer;
@@ -334,7 +326,7 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 }
 
 class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
+    final Context context;
     int rank;
 
     JSONArray answer;
@@ -388,7 +380,7 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 }
 
 class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    Context context;
+    final Context context;
     String content;
 
     JSONArray answer;

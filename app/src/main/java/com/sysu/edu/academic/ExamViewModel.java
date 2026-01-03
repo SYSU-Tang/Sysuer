@@ -8,13 +8,13 @@ import com.alibaba.fastjson2.JSONObject;
 import java.util.ArrayList;
 
 public class ExamViewModel extends ViewModel {
-    MutableLiveData<ArrayList<String>> termList = new MutableLiveData<>();
-    MutableLiveData<String> term = new MutableLiveData<>();
-    MutableLiveData<ArrayList<String>> examWeekList = new MutableLiveData<>();
-    MutableLiveData<ArrayList<JSONObject>> examWeekInfo = new MutableLiveData<>();
-    MutableLiveData<String> examWeek = new MutableLiveData<>();
-    MutableLiveData<String> examResult = new MutableLiveData<>();
-    MutableLiveData<String> examWeekId = new MutableLiveData<>();
+    final MutableLiveData<ArrayList<String>> termList = new MutableLiveData<>();
+    final MutableLiveData<String> term = new MutableLiveData<>();
+    final MutableLiveData<ArrayList<String>> examWeekList = new MutableLiveData<>();
+    final MutableLiveData<ArrayList<JSONObject>> examWeekInfo = new MutableLiveData<>();
+    final MutableLiveData<String> examWeek = new MutableLiveData<>();
+    final MutableLiveData<String> examResult = new MutableLiveData<>();
+    final MutableLiveData<String> examWeekId = new MutableLiveData<>();
     public MutableLiveData<ArrayList<String>> getTermList() {
         return termList;
     }

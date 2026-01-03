@@ -85,6 +85,8 @@ dependencies {
         exclude("dev.rikka.rikkax.appcompat", "appcompat")
     }
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
+    implementation(libs.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

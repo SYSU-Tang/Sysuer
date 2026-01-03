@@ -25,10 +25,10 @@ import java.util.Map;
 public class TrainingScheduleFragment extends Fragment {
 
     FragmentTrainingScheduleBinding binding;
-    MutableLiveData<String> unit = new MutableLiveData<>();
-    MutableLiveData<String> profession = new MutableLiveData<>();
-    MutableLiveData<String> type = new MutableLiveData<>();
-    MutableLiveData<String> grade = new MutableLiveData<>();
+    final MutableLiveData<String> unit = new MutableLiveData<>();
+    final MutableLiveData<String> profession = new MutableLiveData<>();
+    final MutableLiveData<String> type = new MutableLiveData<>();
+    final MutableLiveData<String> grade = new MutableLiveData<>();
 
 
     @Override
@@ -116,9 +116,7 @@ public class TrainingScheduleFragment extends Fragment {
                 binding.grade.setMinValue(1);
                 binding.grade.setMaxValue(list.size());
                 binding.grade.setDisplayedValues(list.toArray(new String[0]));
-                binding.grade.setOnValueChangedListener((slider, value, fromUser) -> {
-                    grade.setValue(professionIDs.get(fromUser - 1));
-                });
+                binding.grade.setOnValueChangedListener((slider, value, fromUser) -> grade.setValue(professionIDs.get(fromUser - 1)));
                 binding.grade.setValue(list.size());
                 grade.postValue(professionIDs.get(list.size() - 1));
                 break;

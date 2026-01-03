@@ -34,10 +34,10 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Params {
-    static Calendar c = Calendar.getInstance();
+    static final Calendar c = Calendar.getInstance();
     final SharedPreferences sharedPreferences;
     ActivityResultLauncher<Intent> launch;
-    FragmentActivity activity;
+    final FragmentActivity activity;
     Runnable afterLogin;
 
     public Params(FragmentActivity activity) {
@@ -217,14 +217,13 @@ public class Params {
                     launch.launch(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, "miniapp"));
                     break;
                 }
-                toast(R.string.logining);
+                toast(R.string.logging_in);
                 LoginViewModel model = new ViewModelProvider(activity).get(LoginViewModel.class);
                 LoginWebFragment.getWebView(activity, model, () -> model.setUrl(String.format("javascript:(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", account, password)));
                 LoginActivity.initModel(activity, model, url, () -> {
                     //activity.recreate();
                     afterLogin.run();
                     toast(R.string.login_successfully);
-
                 });
                 break;
             case "2":

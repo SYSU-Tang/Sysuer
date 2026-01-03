@@ -212,7 +212,14 @@
     <string name="dashboard">Dashboard</string>
     <string name="next_class">Next Class</string>
     <string name="shortcut">Shortcut</string>
-    <string name="logining">Logining...</string>
+    <string name="logging_in">LoggingIn…</string>
     <string name="login_successfully">Login Successfully</string>
     <string name="require_netid_password">NetID and Password Required</string>
+    <string name="copy_successfully">Copy Successfully</string>
+    <string name="course_selected">Selected Courses</string>
+    <string name="last_week_warning">This is the last week</string>
+    <string name="result">Result</string>
+    <string name="share">Share</string>
+    <string name="menu">Menu</string>
+    <string name="window">Window</string>
 </resources>

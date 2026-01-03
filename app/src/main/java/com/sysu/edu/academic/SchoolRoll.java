@@ -35,7 +35,7 @@ public class SchoolRoll extends AppCompatActivity {
     Map<String, List<String>> data;
     String cookie;
     int order = 0;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     Pager2Adapter pager2Adapter;
     int page = 1;

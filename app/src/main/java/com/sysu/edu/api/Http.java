@@ -14,7 +14,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class Http {
-    Context context;
+    final Context context;
     public Http(Context context){
         this.context=context;
     }

@@ -16,7 +16,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
             app:layout_constraintLeft_toRightOf="@+id/score"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

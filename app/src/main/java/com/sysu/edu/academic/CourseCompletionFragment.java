@@ -31,7 +31,7 @@ import okhttp3.Response;
 public class CourseCompletionFragment extends StaggeredFragment {
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     int total;
     int page;
 

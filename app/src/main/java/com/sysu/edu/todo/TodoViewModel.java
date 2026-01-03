@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 import com.sysu.edu.todo.info.TodoInfo;
 
 public class TodoViewModel extends ViewModel {
-    MutableLiveData<TodoInfo> todoItem = new MutableLiveData<>();
+    final MutableLiveData<TodoInfo> todoItem = new MutableLiveData<>();
 
     public MutableLiveData<TodoInfo> getTodoItem() {
         return todoItem;

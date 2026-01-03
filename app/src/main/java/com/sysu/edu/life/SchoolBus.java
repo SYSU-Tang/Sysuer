@@ -34,8 +34,8 @@ public class SchoolBus extends AppCompatActivity {
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    OkHttpClient http = new OkHttpClient.Builder().build();
-    ArrayList<String> routes = new ArrayList<>();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    final ArrayList<String> routes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
