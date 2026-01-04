@@ -224,6 +224,7 @@
     <string name="window">Window</string>
     <string name="credit">Credit</string>
     <string name="total_year">Total Year</string>
+    <string name="total_rank">Total Rank</string>
     <string name="total_credit">Total Credit</string>
     <string name="total_point">Total Point</string>
     <string name="current_rank">Current Rank</string>
