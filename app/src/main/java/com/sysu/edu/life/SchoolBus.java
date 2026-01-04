@@ -2,7 +2,6 @@ package com.sysu.edu.life;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.view.View;
 
@@ -57,7 +56,7 @@ public class SchoolBus extends AppCompatActivity {
         binding.appBarLayout.addView(notice.getRoot());
         notice.card.setOnClickListener(v -> notice.note.setVisibility(notice.note.getVisibility() == View.GONE ? View.VISIBLE : View.GONE));
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(routes.get(position))).attach();
-        handler = new Handler(Looper.getMainLooper()) {
+        handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {

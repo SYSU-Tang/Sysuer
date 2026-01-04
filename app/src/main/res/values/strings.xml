@@ -234,4 +234,5 @@
     <string name="major_compulsory_credit">专必学分</string>
     <string name="major_select_credit">专选学分</string>
     <string name="honor_credit">荣誉学分</string>
+    <string name="no_app">没有安装APP</string>
 </resources>

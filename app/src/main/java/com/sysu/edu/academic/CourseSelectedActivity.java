@@ -201,7 +201,13 @@ public class CourseSelectedActivity extends AppCompatActivity {
                 ids.forEach(e -> binding.group.removeView(binding.group.findViewById(e)));
                 ids.clear();
                 binding.title.setText(info.getString("courseName"));
-                Pattern.compile(",").splitAsStream(info.getString("teachingTimePlace")).forEach(s -> ids.add(addItem(s.replace(";", "/"), "课程安排")));
+
+                String teachingTimePlace = info.getString("teachingTimePlace");
+                if (teachingTimePlace == null || teachingTimePlace.isEmpty()) {
+                    ids.add(addItem("无", "课程安排"));
+                } else {
+                    Pattern.compile(",").splitAsStream(teachingTimePlace).forEach(s -> ids.add(addItem(s.replace(";", "/"), "课程安排")));
+                }
                 for (int i = 0; i < key.length; i++) {
                     ids.add(addItem(info.getString(key[i]) == null ? "无" : info.getString(key[i]), name[i]));
                 }

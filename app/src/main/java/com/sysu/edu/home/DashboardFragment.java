@@ -179,9 +179,9 @@ public class DashboardFragment extends Fragment {
                                 binding.nextClass.setText(Html.fromHtml(afterArray.isEmpty() ? String.format("<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>",
                                         getString(R.string.noClass),
                                         getString(R.string.next_class),
-                                        tomorrowCourse.get(0).getString("courseName"),
-                                        getString(R.string.location), getString(R.string.none),
-                                        getString(R.string.time), getString(R.string.none)) :
+                                        tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("courseName"),
+                                        getString(R.string.location), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("teachingPlace"),
+                                        getString(R.string.time), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("time")) :
                                         String.format("<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>",
                                                 todayCourse.get(beforeArray.size()).getString("courseName"),
                                                 getString(R.string.location),

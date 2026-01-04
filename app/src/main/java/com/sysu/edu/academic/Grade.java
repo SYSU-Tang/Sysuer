@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
@@ -38,14 +39,14 @@ import okhttp3.Response;
 
 public class Grade extends AppCompatActivity {
 
+    final MutableLiveData<String> trainType = new MutableLiveData<>();
+    final MutableLiveData<String> year = new MutableLiveData<>();
+    final MutableLiveData<Integer> term = new MutableLiveData<>();
     ActivityGradeBinding binding;
     Handler handler;
     PopupMenu termPop;
     PopupMenu yearPop;
     PopupMenu typePop;
-    final MutableLiveData<String> trainType = new MutableLiveData<>();
-    final MutableLiveData<String> year = new MutableLiveData<>();
-    final MutableLiveData<Integer> term = new MutableLiveData<>();
     GridLayoutManager gridLayoutManager;
     Params params;
     final OkHttpClient http = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
@@ -125,12 +126,15 @@ public class Grade extends AppCompatActivity {
                             }));
                             binding.type.setText(pull.getJSONArray("selectTrainType").getJSONObject(0).getString("dataName"));
                             trainType.setValue(pull.getJSONArray("selectTrainType").getJSONObject(0).getString("dataNumber"));
-                            pull.getJSONArray("selectYearPull").forEach(a ->
-                                    yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
-                                        year.postValue(((JSONObject) a).getString("dataName"));
-                                        binding.year.setText(((JSONObject) a).getString("dataNumber"));
-                                        return false;
-                                    }));
+                            JSONArray selectYearPull = pull.getJSONArray("selectYearPull");
+                            if (selectYearPull != null && !selectYearPull.isEmpty()) {
+                                selectYearPull.forEach(a ->
+                                        yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
+                                            year.postValue(((JSONObject) a).getString("dataName"));
+                                            binding.year.setText(((JSONObject) a).getString("dataNumber"));
+                                            return false;
+                                        }));
+                            }
                             getNow();
                             break;
                         }
@@ -185,25 +189,28 @@ public class Grade extends AppCompatActivity {
         gridLayoutManager.setSpanCount(new Params(this).getColumn());
     }
 
-    void getNow() {
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist").build()).enqueue(
-                new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Message message = new Message();
-                        message.what = 3;
-                        message.obj = response.body().string();
-                        handler.sendMessage(message);
-                    }
+    // 通用网络请求方法
+    private void sendRequest(String url, int what) {
+        http.newCall(new Request.Builder().url(url).build()).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message message = new Message();
+                message.what = what;
+                message.obj = response.body().string();
+                handler.sendMessage(message);
+            }
 
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Message message = new Message();
-                        message.what = -1;
-                        handler.sendMessage(message);
-                    }
-                }
-        );
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what = -1;
+                handler.sendMessage(message);
+            }
+        });
+    }
+
+    void getNow() {
+        sendRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist", 3);
     }
 
     void getScore() {
@@ -215,66 +222,17 @@ public class Grade extends AppCompatActivity {
     }
 
     void getScore(String year, int term, String type) {
-        http.newCall(new Request.Builder().url(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term)).build()).enqueue(
-                new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Message message = new Message();
-                        message.what = 1;
-                        message.obj = response.body().string();
-                        handler.sendMessage(message);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Message message = new Message();
-                        message.what = -1;
-                        handler.sendMessage(message);
-                    }
-                }
-        );
+        String url = String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term);
+        sendRequest(url, 1);
     }
 
     void getTotalScore(String year, int term, String type) {
-        http.newCall(new Request.Builder().url(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term)).build()).enqueue(
-                new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Message message = new Message();
-                        message.what = 4;
-                        message.obj = response.body().string();
-                        handler.sendMessage(message);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Message message = new Message();
-                        message.what = -1;
-                        handler.sendMessage(message);
-                    }
-                }
-        );
+        String url = String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term);
+        sendRequest(url, 4);
     }
 
     void getPull() {
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getPull").build()).enqueue(
-                new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Message message = new Message();
-                        message.what = 2;
-                        message.obj = response.body().string();
-                        handler.sendMessage(message);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Message message = new Message();
-                        message.what = -1;
-                        handler.sendMessage(message);
-                    }
-                }
-        );
+        sendRequest("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getPull", 2);
     }
 
     static class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

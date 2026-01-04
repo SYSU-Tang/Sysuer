@@ -222,4 +222,17 @@
     <string name="share">Share</string>
     <string name="menu">Menu</string>
     <string name="window">Window</string>
+    <string name="credit">Credit</string>
+    <string name="total_year">Total Year</string>
+    <string name="total_credit">Total Credit</string>
+    <string name="total_point">Total Point</string>
+    <string name="current_rank">Current Rank</string>
+    <string name="current_point">Current Point</string>
+    <string name="term_credit">Term Credit</string>
+    <string name="public_compulsory_credit">Public Compulsory Credit</string>
+    <string name="public_select_credit">Public Select Credit</string>
+    <string name="major_compulsory_credit">Major Compulsory Credit</string>
+    <string name="major_select_credit">Major Select Credit</string>
+    <string name="honor_credit">Honor Credit</string>
+    <string name="no_app">The APP is not installed on your device.</string>
 </resources>

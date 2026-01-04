@@ -38,6 +38,7 @@ import com.sysu.edu.academic.RegisterInfo;
 import com.sysu.edu.academic.SchoolRoll;
 import com.sysu.edu.academic.SchoolWorkWarning;
 import com.sysu.edu.academic.TrainingSchedule;
+import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemServiceBoxBinding;
@@ -61,13 +62,14 @@ public class ServiceFragment extends Fragment {
             result -> {
             }
     );
+    Params params;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
             binding = FragmentServiceBinding.inflate(inflater);
-
+            params = new Params(requireActivity());
             // 初始化actions HashMap
             initializeActionMap();
 
@@ -97,7 +99,13 @@ public class ServiceFragment extends Fragment {
 
         // 资讯门户 (id: 3xx)
         actionMap.put(301, newActivity(News.class));                 // 资讯门户
-        actionMap.put(302, v -> startActivity(Objects.requireNonNull(requireActivity().getPackageManager().getLaunchIntentForPackage("com.comingx.zanao")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))); // 校园集市
+        actionMap.put(302, v -> {
+            try {
+                startActivity(Objects.requireNonNull(requireActivity().getPackageManager().getLaunchIntentForPackage("com.comingx.zanao")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            } catch (ActivityNotFoundException e) {
+                params.toast(R.string.no_app);
+            }
+        }); // 校园集市
         actionMap.put(303, newActivity(AcademyNotification.class));  // 教务通知
 
         // 系统服务 (id: 4xx)
@@ -126,7 +134,7 @@ public class ServiceFragment extends Fragment {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linking)));
                 } catch (ActivityNotFoundException e) {
-                    // Toast.makeText(requireContext(), R.string.no_app, Toast.LENGTH_LONG).show();
+                    params.toast(R.string.no_app);
                 }
             }/* else {
                 //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
