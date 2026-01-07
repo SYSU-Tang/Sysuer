@@ -33,19 +33,21 @@ public class LoginWebFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 //boolean reloadCap = Objects.equals(sessionId, CookieManager.getInstance().getCookie(url));
                 //model.setSessionID(CookieManager.getInstance().getCookie(url));
-                //System.out.println(url);
+//                System.out.println(url);
                 if (Pattern.compile("cas\\.sysu\\.edu\\.cn/selfcare").matcher(url).find()) {
                     view.loadUrl(Objects.requireNonNull(model.getTarget().getValue()));
                     return;
                 }
                 if (Pattern.compile("cas\\.sysu\\.edu\\.cn/esc-sso/login/page\\?isLogin=fail").matcher(url).find()) {
-                    //System.out.println("登录中");
+//                    System.out.println("登录中");
                     model.setLogin(false);
-                    handler.postDelayed(afterLoad, 5000);
+                    handler.postDelayed(afterLoad, 500);
                     return;
                 }
                 String element = "";
-                if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/").matcher(url).find()) {
+                if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/login").matcher(url).find()) {
+                    element = ".ant-btn.ant-btn-primary.ant-btn-block";
+                }else if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/student").matcher(url).find()) {
                     element = ".ant-btn.ant-btn-primary";
                 } else if (Pattern.compile("//pay.sysu.edu.cn/#/").matcher(url).find()) {
                     element = ".el-button.login_btns.btn-netIdLogin.el-button--default.is-plain";
@@ -63,7 +65,7 @@ public class LoginWebFragment extends Fragment {
                     }
                 } else {
                     web.evaluateJavascript("(function(){var needLogin = document.querySelector('" + element + "');if(needLogin!=null){needLogin.click();};return needLogin!=null;})()", s -> {
-                        //System.out.println(s);
+//                        System.out.println(s);
                         if (!Boolean.parseBoolean(s)) {
                             handler.postDelayed(() -> {
                                 model.setCookie(CookieManager.getInstance().getCookie(url));

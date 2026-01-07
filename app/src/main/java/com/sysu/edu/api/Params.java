@@ -10,6 +10,7 @@ import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -219,7 +220,7 @@ public class Params {
                 }
                 toast(R.string.logging_in);
                 LoginViewModel model = new ViewModelProvider(activity).get(LoginViewModel.class);
-                LoginWebFragment.getWebView(activity, model, () -> model.setUrl(String.format("javascript:(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", account, password)));
+                WebView web = LoginWebFragment.getWebView(activity, model, () -> model.setUrl(String.format("javascript:(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", account, password)));
                 LoginActivity.initModel(activity, model, url, () -> {
                     //activity.recreate();
                     afterLogin.run();
