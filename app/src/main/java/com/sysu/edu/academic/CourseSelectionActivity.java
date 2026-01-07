@@ -13,7 +13,7 @@ import com.sysu.edu.databinding.ActivityCourseSelectionBinding;
 
 import java.util.Objects;
 
-public class CourseSelection extends AppCompatActivity {
+public class CourseSelectionActivity extends AppCompatActivity {
 
     ActivityCourseSelectionBinding binding;
 

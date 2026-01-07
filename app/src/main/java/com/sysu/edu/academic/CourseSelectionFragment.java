@@ -90,6 +90,7 @@ public class CourseSelectionFragment extends Fragment {
         if (savedInstanceState == null) {
             binding = FragmentCourseSelectionBinding.inflate(inflater, container, false);
             Params params = new Params(requireActivity());
+            params.setCallback(this::getInfo);
             binding.type.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 int cid = chipGroup.getCheckedChipId();
                 selectedType = (cid == R.id.my_major) ? 1 : (cid == R.id.public_selection) ? 4 : 2;

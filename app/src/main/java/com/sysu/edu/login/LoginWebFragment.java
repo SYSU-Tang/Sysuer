@@ -18,8 +18,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.sysu.edu.api.TargetUrl;
-
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -28,20 +26,23 @@ public class LoginWebFragment extends Fragment {
     @NonNull
     public static WebView getWebView(@NonNull FragmentActivity activity, LoginViewModel model, Runnable afterLoad) {
         WebView web = new WebView(activity);
+        Handler handler = new Handler(Looper.getMainLooper());
         model.getUrl().observe(activity, web::loadUrl);
         web.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 //boolean reloadCap = Objects.equals(sessionId, CookieManager.getInstance().getCookie(url));
                 //model.setSessionID(CookieManager.getInstance().getCookie(url));
-                if (Pattern.compile("//cas.sysu.edu.cn/selfcare").matcher(url).find()) {
-                    // model.setCookie(CookieManager.getInstance().getCookie(Objects.requireNonNull(model.getTarget().getValue())));
-                    // model.setLogin(true);
-                    //System.out.println(CookieManager.getInstance().getCookie(Objects.requireNonNull(model.getTarget().getValue())));
+                //System.out.println(url);
+                if (Pattern.compile("cas\\.sysu\\.edu\\.cn/selfcare").matcher(url).find()) {
                     view.loadUrl(Objects.requireNonNull(model.getTarget().getValue()));
+                    return;
                 }
-                if (Pattern.compile(TargetUrl.LOGIN).matcher(url).find()) {
+                if (Pattern.compile("cas\\.sysu\\.edu\\.cn/esc-sso/login/page\\?isLogin=fail").matcher(url).find()) {
+                    //System.out.println("登录中");
                     model.setLogin(false);
+                    handler.postDelayed(afterLoad, 5000);
+                    return;
                 }
                 String element = "";
                 if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/").matcher(url).find()) {
@@ -53,26 +54,23 @@ public class LoginWebFragment extends Fragment {
                 } else if (Pattern.compile("portal.sysu.edu.cn/newClient/#/login").matcher(url).find()) {
                     element = ".ant-btn.index-submit-3jXSy.ant-btn-primary.ant-btn-lg";
                 }
-                if (!element.isEmpty()) {
-                    web.evaluateJavascript("(function(){var needLogin = document.querySelector('" + element + "');if(needLogin!=null){needLogin.click();};return needLogin!=null;})()", s -> {
-                        if (Boolean.parseBoolean(s)) {
-                            model.setLogin(false);
-                        }
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (element.isEmpty()) {
+                    if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {
+                        handler.postDelayed(() -> {
                             model.setCookie(CookieManager.getInstance().getCookie(url));
                             model.setLogin(true);
                         }, 500);
+                    }
+                } else {
+                    web.evaluateJavascript("(function(){var needLogin = document.querySelector('" + element + "');if(needLogin!=null){needLogin.click();};return needLogin!=null;})()", s -> {
+                        //System.out.println(s);
+                        if (!Boolean.parseBoolean(s)) {
+                            handler.postDelayed(() -> {
+                                model.setCookie(CookieManager.getInstance().getCookie(url));
+                                model.setLogin(true);
+                            }, 500);
+                        }
                     });
-                }else if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        model.setCookie(CookieManager.getInstance().getCookie(url));
-                        model.setLogin(true);
-                    }, 500);
-                    return;
-                }
-                model.setLogin(false);
-                if (afterLoad != null) {
-                    new Handler(Looper.getMainLooper()).postDelayed(afterLoad, 500);
                 }
                 //ar script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
             }

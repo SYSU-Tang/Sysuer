@@ -29,7 +29,7 @@ import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
 import com.sysu.edu.academic.CourseCompletion;
 import com.sysu.edu.academic.CourseSelectedActivity;
-import com.sysu.edu.academic.CourseSelection;
+import com.sysu.edu.academic.CourseSelectionActivity;
 import com.sysu.edu.academic.EvaluationActivity;
 import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.academic.Grade;
@@ -151,7 +151,7 @@ public class ServiceFragment extends Fragment {
 
         // 教务服务 (id: 7xx)
         actionMap.put(701, newActivity(EvaluationActivity.class));           // 评教
-        actionMap.put(702, newActivity(CourseSelection.class));
+        actionMap.put(702, newActivity(CourseSelectionActivity.class));
         actionMap.put(703, newActivity(AgendaActivity.class));               // 课程表
         actionMap.put(704, newActivity(ExamActivity.class));                 // 考试
         actionMap.put(705, newActivity(CalendarActivity.class));             // 校历

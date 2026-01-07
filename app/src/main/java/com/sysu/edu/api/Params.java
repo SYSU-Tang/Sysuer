@@ -225,6 +225,7 @@ public class Params {
                     afterLogin.run();
                     toast(R.string.login_successfully);
                 });
+                //((FrameLayout)activity.findViewById(android.R.id.content)).addView(web);
                 break;
             case "2":
             default:

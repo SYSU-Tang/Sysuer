@@ -236,4 +236,181 @@
     <string name="major_select_credit">Major Select Credit</string>
     <string name="honor_credit">Honor Credit</string>
     <string name="no_app">The APP is not installed on your device.</string>
+    
+    <!-- School Roll Related Strings -->
+    <string name="schoolroll_family_info">Family Members and Social Relations</string>
+    <string name="schoolroll_education_info">Education and Experience</string>
+    <string name="schoolroll_exchange_info">Exchange Experience</string>
+    <string name="schoolroll_change_info">Status Changes</string>
+    <string name="schoolroll_major_info">Double Major/Minor Programs</string>
+    <string name="schoolroll_register_info">Registration Status</string>
+    <string name="schoolroll_punish_info">Disciplinary Actions</string>
+    
+    <string name="schoolroll_personal_info">Personal Basic Information</string>
+    <string name="schoolroll_roll_info">Student Status Information</string>
+    <string name="schoolroll_contact_info">Contact Information</string>
+    
+    <!-- Personal Basic Information Fields -->
+    <string name="schoolroll_student_number">Student ID</string>
+    <string name="schoolroll_name">Name</string>
+    <string name="schoolroll_english_name">English Name</string>
+    <string name="schoolroll_name_pinyin">Name Pinyin</string>
+    <string name="schoolroll_chinese_name">Chinese Name</string>
+    <string name="schoolroll_former_name">Former Name</string>
+    <string name="schoolroll_country">Country/Region</string>
+    <string name="schoolroll_id_type">ID Type</string>
+    <string name="schoolroll_id_number">ID Number</string>
+    <string name="schoolroll_former_id_type">Former ID Type</string>
+    <string name="schoolroll_former_id_number">Former ID Number</string>
+    <string name="schoolroll_gender">Gender</string>
+    <string name="schoolroll_birthday">Date of Birth</string>
+    <string name="schoolroll_marital_status">Marital Status</string>
+    <string name="schoolroll_health_status">Health Status</string>
+    <string name="schoolroll_religion">Religion</string>
+    <string name="schoolroll_blood_type">Blood Type</string>
+    <string name="schoolroll_id_validity">ID Validity Period</string>
+    <string name="schoolroll_birthplace">Place of Birth</string>
+    <string name="schoolroll_ethnicity">Ethnicity</string>
+    <string name="schoolroll_political_status">Political Status</string>
+    <string name="schoolroll_hometown">Hometown</string>
+    <string name="schoolroll_hk_macao_taiwan">HK/Macao/Taiwan/Foreign</string>
+    <string name="schoolroll_hobby">Specialty or Hobby</string>
+    <string name="schoolroll_hk_passport">HK/Macao/Taiwan Passport No.</string>
+    <string name="schoolroll_exam_number">Examinee Number</string>
+    
+    <!-- Student Status Information Fields -->
+    <string name="schoolroll_college">College</string>
+    <string name="schoolroll_department">Department</string>
+    <string name="schoolroll_grade">Grade</string>
+    <string name="schoolroll_grade_direction">Grade Major Direction</string>
+    <string name="schoolroll_campus">Current Campus</string>
+    <string name="schoolroll_grade_category">Grade Major Category</string>
+    <string name="schoolroll_major_category">Major Category</string>
+    <string name="schoolroll_major_direction">Major Direction</string>
+    <string name="schoolroll_standard_major">National Standard Major</string>
+    <string name="schoolroll_cross_college">Cross-College Category</string>
+    <string name="schoolroll_education_system">Education System</string>
+    <string name="schoolroll_student_type">Student Type</string>
+    <string name="schoolroll_discipline">Discipline Category</string>
+    <string name="schoolroll_degree_type">Degree Type</string>
+    <string name="schoolroll_credit_system">Comprehensive Credit System</string>
+    <string name="schoolroll_need_confirm">Requires Confirmation</string>
+    <string name="schoolroll_min_study_years">Minimum Study Years</string>
+    <string name="schoolroll_max_study_years">Maximum Study Years</string>
+    <string name="schoolroll_class">Class</string>
+    <string name="schoolroll_status">Current Student Status</string>
+    <string name="schoolroll_in_school">On Campus</string>
+    <string name="schoolroll_study_form">Study Form</string>
+    <string name="schoolroll_education_level">Education Level</string>
+    <string name="schoolroll_training_method">Training Method</string>
+    <string name="schoolroll_admission_method">Admission Method</string>
+    <string name="schoolroll_admission_date">Admission Date</string>
+    <string name="schoolroll_expected_graduation">Expected Graduation Date</string>
+    <string name="schoolroll_charge_grade">Fee Grade</string>
+    <string name="schoolroll_graduation_date">Graduation Date</string>
+    <string name="schoolroll_degree_category">Degree Category</string>
+    <string name="schoolroll_certificate_date">Certificate Date</string>
+    <string name="schoolroll_certificate_number">Certificate Number</string>
+    <string name="schoolroll_principal">Principal Name</string>
+    <string name="schoolroll_degree_date">Degree Date</string>
+    <string name="schoolroll_degree_number">Degree Number</string>
+    <string name="schoolroll_international_type">International Student Type</string>
+    <string name="schoolroll_funding_source">Funding Source</string>
+    <string name="schoolroll_csc_number">CSC/CIS Number</string>
+    <string name="schoolroll_teaching_language">Teaching Language</string>
+    <string name="schoolroll_origin">Place of Origin</string>
+    <string name="schoolroll_exam_type">Examinee Type</string>
+    <string name="schoolroll_graduation_type">Graduation Type</string>
+    <string name="schoolroll_high_school">Graduated High School</string>
+    <string name="schoolroll_gaokao_score">Gaokao Score</string>
+    <string name="schoolroll_admission_score">Admission Score</string>
+    <string name="schoolroll_province_enroll">Provincial Enrollment Count</string>
+    <string name="schoolroll_province_rank">Provincial Rank</string>
+    <string name="schoolroll_province_rank_percent">Provincial Rank Percentage</string>
+    <string name="schoolroll_top_rank">Top Rank in Province</string>
+    <string name="schoolroll_chinese">Chinese</string>
+    <string name="schoolroll_math">Mathematics</string>
+    <string name="schoolroll_english">Foreign Language</string>
+    <string name="schoolroll_comprehensive">Comprehensive</string>
+    <string name="schoolroll_physics">Physics</string>
+    <string name="schoolroll_chemistry">Chemistry</string>
+    <string name="schoolroll_biology">Biology</string>
+    <string name="schoolroll_politics">Politics</string>
+    <string name="schoolroll_history">History</string>
+    <string name="schoolroll_geography">Geography</string>
+    <string name="schoolroll_graduation_evaluation">Graduation Evaluation</string>
+    <string name="schoolroll_exam_characteristics">Examinee Characteristics</string>
+    
+    <!-- Contact Information Fields -->
+    <string name="schoolroll_phone">Phone Number</string>
+    <string name="schoolroll_email">Email</string>
+    <string name="schoolroll_train_station">Train Station</string>
+    <string name="schoolroll_qq_wechat">QQ/WeChat</string>
+    <string name="schoolroll_postal_code">Postal Code</string>
+    <string name="schoolroll_home_phone">Home Phone</string>
+    <string name="schoolroll_address">Mailing Address</string>
+    <string name="schoolroll_home_address">Home Address</string>
+    
+    <!-- Family Members and Social Relations Fields -->
+    <string name="schoolroll_relation">Relation</string>
+    <string name="schoolroll_family_name">Name</string>
+    <string name="schoolroll_work_unit">Work Unit</string>
+    <string name="schoolroll_position">Position</string>
+    <string name="schoolroll_family_phone">Phone Number</string>
+    <string name="schoolroll_family_birthday">Date of Birth</string>
+    
+    <!-- Education and Experience Fields -->
+    <string name="schoolroll_study_start">Study Start Date</string>
+    <string name="schoolroll_study_end">Study End Date</string>
+    <string name="schoolroll_study_unit">Study Unit</string>
+    <string name="schoolroll_study_address">Study Address</string>
+    
+    <!-- Exchange Experience Fields -->
+    <string name="schoolroll_exchange_start">Exchange Start Date</string>
+    <string name="schoolroll_exchange_end">Exchange End Date</string>
+    <string name="schoolroll_sent_school">Host School</string>
+    <string name="schoolroll_sent_major">Host Major</string>
+    <string name="schoolroll_exchange_status">Exchange Status</string>
+    
+    <!-- Status Changes Fields -->
+    <string name="schoolroll_issue_date">Issue Date</string>
+    <string name="schoolroll_issue_number">Document Number</string>
+    <string name="schoolroll_move_type">Change Type</string>
+    <string name="schoolroll_change_detail">Change Detail</string>
+    <string name="schoolroll_move_reason">Change Reason</string>
+    <string name="schoolroll_former_major">Previous Major</string>
+    <string name="schoolroll_after_major">New Major</string>
+    
+    <!-- Double Major/Minor Programs Fields -->
+    <string name="schoolroll_minor_type">Minor Type</string>
+    <string name="schoolroll_minor_college">College</string>
+    <string name="schoolroll_minor_major">Major Direction</string>
+    <string name="schoolroll_minor_grade">Grade</string>
+    <string name="schoolroll_minor_graduation">Graduation Conclusion</string>
+    
+    <!-- Registration Status Fields -->
+    <string name="schoolroll_academic_year">Academic Year/Semester</string>
+    <string name="schoolroll_checkin_status">Check-in Status</string>
+    <string name="schoolroll_register_status">Registration Status</string>
+    <string name="schoolroll_payment_status">Payment Status</string>
+    
+    <!-- Disciplinary Actions Fields -->
+    <string name="schoolroll_punish_date">Disciplinary Date</string>
+    <string name="schoolroll_punish_brief">Disciplinary Brief</string>
+    <string name="schoolroll_punish_type">Disciplinary Type</string>
+    <string name="schoolroll_punish_source">Disciplinary Source</string>
+    <string name="schoolroll_punish_name">Disciplinary Name</string>
+    <string name="schoolroll_punish_reason">Disciplinary Reason</string>
+    <string name="schoolroll_punish_time">Disciplinary Date</string>
+    <string name="schoolroll_punish_proof">Disciplinary Document No.</string>
+    <string name="schoolroll_punish_repeal_time">Repeal Date</string>
+    <string name="schoolroll_punish_repeal_proof">Repeal Document No.</string>
+    <string name="schoolroll_punish_graduate">Graduate on Time</string>
+    <string name="schoolroll_punish_degree">Degree Obtained</string>
+    <string name="schoolroll_punish_sponsor">Initiating Unit</string>
+    <string name="schoolroll_punish_department">Disciplinary Unit</string>
+    <string name="schoolroll_punish_clause">Applicable Clause</string>
+    <string name="schoolroll_punish_money">Penalty Amount</string>
+    <string name="schoolroll_punish_status">Student Status</string>
+    <string name="schoolroll_punish_in_school">On Campus</string>
 </resources>

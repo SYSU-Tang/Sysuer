@@ -2,7 +2,6 @@ package com.sysu.edu.academic;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
@@ -31,11 +30,11 @@ import okhttp3.Response;
 
 public class SchoolRoll extends AppCompatActivity {
 
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     ActivityPagerBinding binding;
     Map<String, List<String>> data;
     String cookie;
     int order = 0;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     Pager2Adapter pager2Adapter;
     int page = 1;
@@ -54,101 +53,107 @@ public class SchoolRoll extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         data = Map.of(
-                "个人基本信息", List.of("学号",
-                        "姓名",
-                        "英文姓名",
-                        "姓名拼音",
-                        "中文姓名",
-                        "曾用名",
-                        "国家/地区",
-                        "身份证件类型",
-                        "身份证件号",
-                        "曾用身份证件类型",
-                        "曾用身份证件号",
-                        "性别",
-                        "出生日期",
-                        "婚姻状况",
-                        "健康状况",
-                        "信仰宗教",
-                        "血型",
-                        "身份证件有效期",
-                        "出生地",
-                        "民族",
-                        "政治面貌",
-                        "籍贯",
-                        "港澳台侨外",
-                        "特长或爱好",
-                        "港澳台通行证号",
-                        "考生号"),
-                "学籍信息", List.of("学院",
-                        "系部",
-                        "年级",
-                        "年级专业方向",
-                        "当前校区",
-                        "所属年级专业大类",
-                        "专业大类",
-                        "专业方向",
-                        "国标专业",
-                        "跨院系大类",
-                        "学制",
-                        "学生类别",
-                        "学科门类",
-                        "专业授予学位",
-                        "是否全面学分制",
-                        "是否需要认定",
-                        "最短修读年限",
-                        "最长修读年限",
-                        "班级",
-                        "当前学籍状态",
-                        "是否在校",
-                        "学习形式",
-                        "培养层次",
-                        "培养方式",
-                        "入学方式",
-                        "入学日期",
-                        "预计毕业日期",
-                        "收费年级",
-                        "毕业日期",
-                        "授予学位类别",
-                        "毕业发证日期",
-                        "证书编号",
-                        "校长名",
-                        "学位发证日期",
-                        "学位证书编号",
-                        "来华留学生类别",
-                        "来华留学经费来源",
-                        "CSC/CIS编号",
-                        "授课语言",
-                        "生源地",
-                        "考生类别",
-                        "毕业类别",
-                        "毕业中学",
-                        "高考成绩",
-                        "投档成绩",
-                        "大类内本省录取人数",
-                        "大类内本省排名",
-                        "大类内本省排名百分比",
-                        "是否本省本大类排名第1或前15%",
-                        "语文",
-                        "数学",
-                        "外语",
-                        "综合",
-                        "物理",
-                        "化学",
-                        "生物",
-                        "政治",
-                        "历史",
-                        "地理",
-                        "毕业鉴定",
-                        "考生特征"),
-                "联系方式", List.of("联系电话",
-                        "邮箱",
-                        "火车到达站",
-                        "QQ/微信号",
-                        "邮政编码",
-                        "家庭电话",
-                        "通讯地址",
-                        "家庭地址")
+                getString(R.string.schoolroll_personal_info), List.of(
+                        getString(R.string.schoolroll_student_number),
+                        getString(R.string.schoolroll_name),
+                        getString(R.string.schoolroll_english_name),
+                        getString(R.string.schoolroll_name_pinyin),
+                        getString(R.string.schoolroll_chinese_name),
+                        getString(R.string.schoolroll_former_name),
+                        getString(R.string.schoolroll_country),
+                        getString(R.string.schoolroll_id_type),
+                        getString(R.string.schoolroll_id_number),
+                        getString(R.string.schoolroll_former_id_type),
+                        getString(R.string.schoolroll_former_id_number),
+                        getString(R.string.schoolroll_gender),
+                        getString(R.string.schoolroll_birthday),
+                        getString(R.string.schoolroll_marital_status),
+                        getString(R.string.schoolroll_health_status),
+                        getString(R.string.schoolroll_religion),
+                        getString(R.string.schoolroll_blood_type),
+                        getString(R.string.schoolroll_id_validity),
+                        getString(R.string.schoolroll_birthplace),
+                        getString(R.string.schoolroll_ethnicity),
+                        getString(R.string.schoolroll_political_status),
+                        getString(R.string.schoolroll_hometown),
+                        getString(R.string.schoolroll_hk_macao_taiwan),
+                        getString(R.string.schoolroll_hobby),
+                        getString(R.string.schoolroll_hk_passport),
+                        getString(R.string.schoolroll_exam_number)
+                ),
+                getString(R.string.schoolroll_roll_info), List.of(
+                        getString(R.string.schoolroll_college),
+                        getString(R.string.schoolroll_department),
+                        getString(R.string.schoolroll_grade),
+                        getString(R.string.schoolroll_grade_direction),
+                        getString(R.string.schoolroll_campus),
+                        getString(R.string.schoolroll_grade_category),
+                        getString(R.string.schoolroll_major_category),
+                        getString(R.string.schoolroll_major_direction),
+                        getString(R.string.schoolroll_standard_major),
+                        getString(R.string.schoolroll_cross_college),
+                        getString(R.string.schoolroll_education_system),
+                        getString(R.string.schoolroll_student_type),
+                        getString(R.string.schoolroll_discipline),
+                        getString(R.string.schoolroll_degree_type),
+                        getString(R.string.schoolroll_credit_system),
+                        getString(R.string.schoolroll_need_confirm),
+                        getString(R.string.schoolroll_min_study_years),
+                        getString(R.string.schoolroll_max_study_years),
+                        getString(R.string.schoolroll_class),
+                        getString(R.string.schoolroll_status),
+                        getString(R.string.schoolroll_in_school),
+                        getString(R.string.schoolroll_study_form),
+                        getString(R.string.schoolroll_education_level),
+                        getString(R.string.schoolroll_training_method),
+                        getString(R.string.schoolroll_admission_method),
+                        getString(R.string.schoolroll_admission_date),
+                        getString(R.string.schoolroll_expected_graduation),
+                        getString(R.string.schoolroll_charge_grade),
+                        getString(R.string.schoolroll_graduation_date),
+                        getString(R.string.schoolroll_degree_category),
+                        getString(R.string.schoolroll_certificate_date),
+                        getString(R.string.schoolroll_certificate_number),
+                        getString(R.string.schoolroll_principal),
+                        getString(R.string.schoolroll_degree_date),
+                        getString(R.string.schoolroll_degree_number),
+                        getString(R.string.schoolroll_international_type),
+                        getString(R.string.schoolroll_funding_source),
+                        getString(R.string.schoolroll_csc_number),
+                        getString(R.string.schoolroll_teaching_language),
+                        getString(R.string.schoolroll_origin),
+                        getString(R.string.schoolroll_exam_type),
+                        getString(R.string.schoolroll_graduation_type),
+                        getString(R.string.schoolroll_high_school),
+                        getString(R.string.schoolroll_gaokao_score),
+                        getString(R.string.schoolroll_admission_score),
+                        getString(R.string.schoolroll_province_enroll),
+                        getString(R.string.schoolroll_province_rank),
+                        getString(R.string.schoolroll_province_rank_percent),
+                        getString(R.string.schoolroll_top_rank),
+                        getString(R.string.schoolroll_chinese),
+                        getString(R.string.schoolroll_math),
+                        getString(R.string.schoolroll_english),
+                        getString(R.string.schoolroll_comprehensive),
+                        getString(R.string.schoolroll_physics),
+                        getString(R.string.schoolroll_chemistry),
+                        getString(R.string.schoolroll_biology),
+                        getString(R.string.schoolroll_politics),
+                        getString(R.string.schoolroll_history),
+                        getString(R.string.schoolroll_geography),
+                        getString(R.string.schoolroll_graduation_evaluation),
+                        getString(R.string.schoolroll_exam_characteristics)
+                ),
+                getString(R.string.schoolroll_contact_info), List.of(
+                        getString(R.string.schoolroll_phone),
+                        getString(R.string.schoolroll_email),
+                        getString(R.string.schoolroll_train_station),
+                        getString(R.string.schoolroll_qq_wechat),
+                        getString(R.string.schoolroll_postal_code),
+                        getString(R.string.schoolroll_home_phone),
+                        getString(R.string.schoolroll_address),
+                        getString(R.string.schoolroll_home_address)
+                )
         );
         List<List<String>> keys = List.of(List.of("studentNumber",
                         "basicName",
@@ -251,9 +256,18 @@ public class SchoolRoll extends AppCompatActivity {
         pager2Adapter = new Pager2Adapter(this);
         binding.pager.setAdapter(pager2Adapter);
         binding.toolbar.setTitle(R.string.school_enroll);
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"基本信息", "家庭成员及社会关系", "学历及经历", "交流经历", "异动情况", "双专业双学位辅修", "注册状态", "惩处"}[position])).attach();
+        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{
+                getString(R.string.schoolroll_basic_info),
+                getString(R.string.schoolroll_family_info),
+                getString(R.string.schoolroll_education_info),
+                getString(R.string.schoolroll_exchange_info),
+                getString(R.string.schoolroll_change_info),
+                getString(R.string.schoolroll_major_info),
+                getString(R.string.schoolroll_register_info),
+                getString(R.string.schoolroll_punish_info)
+        }[position])).attach();
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
-        handler = new Handler(Looper.getMainLooper()) {
+        handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
 
@@ -267,7 +281,11 @@ public class SchoolRoll extends AppCompatActivity {
                             if (msg.what == 0) {
                                 data.forEach((title, keyName) -> {
                                     ArrayList<String> values = new ArrayList<>();
-                                    int key = List.of("个人基本信息", "学籍信息", "联系方式").indexOf(title);
+                                    int key = List.of(
+                                            getString(R.string.schoolroll_personal_info),
+                                            getString(R.string.schoolroll_roll_info),
+                                            getString(R.string.schoolroll_contact_info)
+                                    ).indexOf(title);
                                     keys.get(key).forEach(c -> values.add(d.getString(c)));
                                     ((StaggeredFragment) pager2Adapter.getItem(0)).add(title, null, keyName, values);
                                 });
@@ -278,13 +296,55 @@ public class SchoolRoll extends AppCompatActivity {
                                     order++;
                                     ArrayList<String> values = new ArrayList<>();
                                     String[] keyName = new String[][]{
-                                            {"称谓", "姓名", "工作单位", "职务", "联系电话", "出生日期"},
-                                            {"学习起始日期", "学习终止日期", "学习单位", "学习地址"},
-                                            {"学习起始日期", "学习终止日期", "派往学校", "派往专业", "交流状态"},
-                                            {"发文日期", "文号", "异动类别", "异动细类", "异动原因", "异动前学院专业", "异动后学院专业"},
-                                            {"辅修类别", "学院", "专业方向", "年级", "毕业结论",},
-                                            {"学年学期", "报到状态", "注册状态", "缴费状态"},
-                                            {"违纪日期", "违纪简况", "违纪类别", "处分来源", "处分名称", "处分原因", "处分日期", "处分文号", "处分撤销日期", "处分撤销文号", "是否按时毕业", "是否获得学位", "处分发起单位", "处分单位", "适用条款", "处罚金额", "学籍状态", "是否在校"}
+                                            {getString(R.string.schoolroll_relation),
+                                                    getString(R.string.schoolroll_family_name),
+                                                    getString(R.string.schoolroll_work_unit),
+                                                    getString(R.string.schoolroll_position),
+                                                    getString(R.string.schoolroll_family_phone),
+                                                    getString(R.string.schoolroll_family_birthday)},
+                                            {getString(R.string.schoolroll_study_start),
+                                                    getString(R.string.schoolroll_study_end),
+                                                    getString(R.string.schoolroll_study_unit),
+                                                    getString(R.string.schoolroll_study_address)},
+                                            {getString(R.string.schoolroll_exchange_start),
+                                                    getString(R.string.schoolroll_exchange_end),
+                                                    getString(R.string.schoolroll_sent_school),
+                                                    getString(R.string.schoolroll_sent_major),
+                                                    getString(R.string.schoolroll_exchange_status)},
+                                            {getString(R.string.schoolroll_issue_date),
+                                                    getString(R.string.schoolroll_issue_number),
+                                                    getString(R.string.schoolroll_move_type),
+                                                    getString(R.string.schoolroll_change_detail),
+                                                    getString(R.string.schoolroll_move_reason),
+                                                    getString(R.string.schoolroll_former_major),
+                                                    getString(R.string.schoolroll_after_major)},
+                                            {getString(R.string.schoolroll_minor_type),
+                                                    getString(R.string.schoolroll_minor_college),
+                                                    getString(R.string.schoolroll_minor_major),
+                                                    getString(R.string.schoolroll_minor_grade),
+                                                    getString(R.string.schoolroll_minor_graduation)},
+                                            {getString(R.string.schoolroll_academic_year),
+                                                    getString(R.string.schoolroll_checkin_status),
+                                                    getString(R.string.schoolroll_register_status),
+                                                    getString(R.string.schoolroll_payment_status)},
+                                            {getString(R.string.schoolroll_punish_date),
+                                                    getString(R.string.schoolroll_punish_brief),
+                                                    getString(R.string.schoolroll_punish_type),
+                                                    getString(R.string.schoolroll_punish_source),
+                                                    getString(R.string.schoolroll_punish_name),
+                                                    getString(R.string.schoolroll_punish_reason),
+                                                    getString(R.string.schoolroll_punish_time),
+                                                    getString(R.string.schoolroll_punish_proof),
+                                                    getString(R.string.schoolroll_punish_repeal_time),
+                                                    getString(R.string.schoolroll_punish_repeal_proof),
+                                                    getString(R.string.schoolroll_punish_graduate),
+                                                    getString(R.string.schoolroll_punish_degree),
+                                                    getString(R.string.schoolroll_punish_sponsor),
+                                                    getString(R.string.schoolroll_punish_department),
+                                                    getString(R.string.schoolroll_punish_clause),
+                                                    getString(R.string.schoolroll_punish_money),
+                                                    getString(R.string.schoolroll_punish_status),
+                                                    getString(R.string.schoolroll_punish_in_school)}
                                     }[msg.what - 1];
                                     for (int i = 0; i < keyName.length; i++) {
                                         values.add(((JSONObject) a).getString(new String[][]{
@@ -320,37 +380,24 @@ public class SchoolRoll extends AppCompatActivity {
         getNextPage(0);
     }
 
+    // ... existing code ...
+
+
     void getNextPage(int what) {
-        if (what >= 8) {
+        if (what >= 8 || pager2Adapter.getItemCount() > what) {
             return;
         }
         pager2Adapter.add(StaggeredFragment.newInstance(what));
-        switch (what) {
-            case 0:
-                getData();
-                break;
-            case 1:
-                getFamily();
-                break;
-            case 2:
-                getExperience();
-                break;
-            case 3:
-                getExchange();
-                break;
-            case 4:
-                getChange();
-                break;
-            case 5:
-                getMin();
-                break;
-            case 6:
-                getRegister();
-                break;
-            case 7:
-                getPunish();
-                break;
-        }
+        new Runnable[]{
+                this::getData,
+                this::getFamily,
+                this::getExperience,
+                this::getExchange,
+                this::getChange,
+                this::getMin,
+                this::getRegister,
+                this::getPunish
+        }[what].run();
     }
 
     void getData() {
