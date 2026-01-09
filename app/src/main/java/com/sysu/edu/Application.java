@@ -1,6 +1,7 @@
 package com.sysu.edu;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -13,6 +14,8 @@ import androidx.preference.PreferenceManager;
 import com.sysu.edu.preference.Language;
 import com.sysu.edu.preference.Theme;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,7 +28,7 @@ public class Application extends android.app.Application {
         AppCompatDelegate.setDefaultNightMode(new Theme(this).getThemeMode());
         Language.setLanguage(this);
         SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(this);
-
+        initCrash();
         if ((!pm.contains("dashboard")) || Objects.requireNonNull(pm.getStringSet("dashboard", null)).isEmpty()) {
             pm.edit().putStringSet("dashboard", Set.of(getResources().getStringArray(R.array.dashboard_values))).apply();
         }
@@ -42,8 +45,8 @@ public class Application extends android.app.Application {
                 } else {
                     configuration.fontScale = defaultFontSize;
                 }
-                activity.getResources().updateConfiguration(configuration,activity.getResources().getDisplayMetrics());
-                getResources().updateConfiguration(configuration,getResources().getDisplayMetrics());
+                activity.getResources().updateConfiguration(configuration, activity.getResources().getDisplayMetrics());
+                getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
             }
 
             @Override
@@ -77,12 +80,15 @@ public class Application extends android.app.Application {
         });
     }
 
-    /*private void setFontSize(Context newBase) {
-        Configuration configuration = newBase.getResources().getConfiguration();
-        String fontValue = PreferenceManager.getDefaultSharedPreferences(newBase).getString("fontSize", "0");
-        if (!fontValue.equals("0")) {
-            configuration.fontScale = new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}[Integer.parseInt(fontValue) - 1];
-        }
-        newBase.getResources().updateConfiguration(configuration, newBase.getResources().getDisplayMetrics());
-    }*/
+    public void initCrash() {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            throwable.printStackTrace(pw);
+            pw.close();
+            startActivity(new Intent(Application.this, CrashActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("crash", sw.toString()));
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(10);
+        });
+    }
 }

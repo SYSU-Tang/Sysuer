@@ -2,9 +2,14 @@
     <!-- Base application theme. -->
     <style name="Theme.SYSU" parent="@style/Theme.SYSUER.Night" />
 
-    <style name="Theme.SYSUER.Night" parent="Theme.SYSUER.Base"/>
-        <!-- Primary brand color. -->
-        <!--<item name="colorPrimary">@color/purple_200</item>
+    <style name="Theme.SYSUER.Night" parent="Theme.SYSUER.Base" />
+    <!-- Base application theme. -->
+    <style name="Base.Theme.SYSU" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    </style>
+    <!-- Primary brand color. -->
+    <!--<item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/black</item>
         &lt;!&ndash; Secondary brand color. &ndash;&gt;
@@ -13,9 +18,9 @@
         <item name="colorOnSecondary">@color/black</item>
         &lt;!&ndash; Status bar color. &ndash;&gt;--><!--
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>-->
-        <!-- Customize your theme here. -->
+    <!-- Customize your theme here. -->
 
-<!--     Base application theme.
+    <!--     Base application theme.
     <style name="Base.Theme.中大儿" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
          Customize your dark theme here.
          <item name="colorPrimary">@color/my_dark_primary</item>

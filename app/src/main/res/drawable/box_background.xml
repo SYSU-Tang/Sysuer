@@ -6,7 +6,5 @@
             <solid android:color="#ffffff" />
         </shape>
     </item>
-    <item>
-        <shape />
-    </item>
+
 </ripple>

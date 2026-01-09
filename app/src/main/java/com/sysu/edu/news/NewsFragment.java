@@ -103,7 +103,7 @@ public class NewsFragment extends Fragment {
                     Bundle rdata = msg.getData();
                     boolean isJson = !rdata.getBoolean("isJson");
                     String json = rdata.getString("data");
-                    System.out.println(json);
+//                    System.out.println(json);
                     JSONObject data = new JSONObject();
                     if (isJson) {
                         params.toast(R.string.educational_wifi_warning);
@@ -175,6 +175,11 @@ public class NewsFragment extends Fragment {
                         } else if (code == 496) {
                             params.toast(data.getString("message"));
                             params.gotoLogin(getView(), NEWS);
+                        } else if (code == 497) {
+                            params.toast(data.getString("message"));
+                            params.gotoLogin(getView(), NEWS);
+                        } else {
+                            params.toast(data.getString("message"));
                         }
                     } //今日中大
 

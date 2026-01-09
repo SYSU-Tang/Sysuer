@@ -47,7 +47,7 @@ public class SchoolRoll extends AppCompatActivity {
         params = new Params(this);
         params.setCallback(() -> {
             cookie = params.getCookie();
-            getNextPage(0);
+            addNextPage(0);
         });
         cookie = params.getCookie();
         setContentView(binding.getRoot());
@@ -289,7 +289,7 @@ public class SchoolRoll extends AppCompatActivity {
                                     keys.get(key).forEach(c -> values.add(d.getString(c)));
                                     ((StaggeredFragment) pager2Adapter.getItem(0)).add(title, null, keyName, values);
                                 });
-                                getNextPage(msg.what + 1);
+                                addNextPage(msg.what + 1);
                             } else {
                                 int total = d.getInteger("total");
                                 d.getJSONArray("rows").forEach(a -> {
@@ -365,7 +365,7 @@ public class SchoolRoll extends AppCompatActivity {
                                 } else {
                                     page = 1;
                                     order = 0;
-                                    getNextPage(msg.what + 1);
+                                    addNextPage(msg.what + 1);
                                 }
                             }
                         }
@@ -377,13 +377,13 @@ public class SchoolRoll extends AppCompatActivity {
             }
 
         };
-        getNextPage(0);
+        addNextPage(0);
     }
 
     // ... existing code ...
 
 
-    void getNextPage(int what) {
+    void addNextPage(int what) {
         if (what >= 8 || pager2Adapter.getItemCount() > what) {
             return;
         }

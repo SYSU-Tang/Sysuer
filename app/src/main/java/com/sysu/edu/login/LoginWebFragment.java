@@ -49,7 +49,7 @@ public class LoginWebFragment extends Fragment {
                     element = ".ant-btn.ant-btn-primary.ant-btn-block";
                 }else if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/student").matcher(url).find()) {
                     element = ".ant-btn.ant-btn-primary";
-                } else if (Pattern.compile("//pay.sysu.edu.cn/#/").matcher(url).find()) {
+                } else if (Pattern.compile("//pay.sysu.edu.cn/#/$").matcher(url).find()) {
                     element = ".el-button.login_btns.btn-netIdLogin.el-button--default.is-plain";
                 } else if (Pattern.compile("//pjxt.sysu.edu.cn/").matcher(url).find()) {
                     element = ".log-g-iddl";

@@ -90,7 +90,7 @@ public class CourseSelectionFragment extends Fragment {
         if (savedInstanceState == null) {
             binding = FragmentCourseSelectionBinding.inflate(inflater, container, false);
             Params params = new Params(requireActivity());
-            params.setCallback(this::getInfo);
+            params.setCallback(this, this::getInfo);
             binding.type.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 int cid = chipGroup.getCheckedChipId();
                 selectedType = (cid == R.id.my_major) ? 1 : (cid == R.id.public_selection) ? 4 : 2;
@@ -173,7 +173,7 @@ public class CourseSelectionFragment extends Fragment {
                     } else if (response != null && response.getInteger("code").equals(52021100)) {
                         params.toast(response.getString("message"));
                     } else {
-                        params.toast(getString(R.string.login_warning));
+                        params.toast(R.string.login_warning);
                         params.gotoLogin(getView(), TargetUrl.JWXT);
                     }
                     super.handleMessage(msg);
