@@ -153,6 +153,10 @@ public class Params {
         return sharedPreferences.getString("Cookie", "");
     }
 
+    public String getAuthorization() {
+        return sharedPreferences.getString("authorization", "");
+    }
+
     public String getAccount() {
         return sharedPreferences.getString("username", "");
     }
@@ -224,6 +228,7 @@ public class Params {
                 LoginActivity.initModel(activity, model, url, () -> {
                     //activity.recreate();
                     afterLogin.run();
+                    web.destroy();
                     toast(R.string.login_successfully);
                 });
                 //((FrameLayout)activity.findViewById(android.R.id.content)).addView(web);

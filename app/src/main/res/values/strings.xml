@@ -413,5 +413,7 @@
     <string name="schoolroll_punish_money">处罚金额</string>
     <string name="schoolroll_punish_status">学籍状态</string>
     <string name="schoolroll_punish_in_school">是否在校</string>
+    <string name="educational_wifi_warning">需要校园网</string>
+    <string name="js">JS脚本</string>
 
 </resources>

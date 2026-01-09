@@ -15,6 +15,7 @@ import com.sysu.edu.academic.Pager2Adapter;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityLoginBinding;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,8 +38,12 @@ public class LoginActivity extends AppCompatActivity {
                 SharedPreferences.Editor edit = privacy.edit();
                 String cookie = model.getCookie().getValue();
                 Matcher match = Pattern.compile("ibps-1.0.1-token=(.+?);").matcher(cookie + ";");
+                Matcher authorization = Pattern.compile("authorization=(.+?);").matcher(cookie + ";");
                 if (match.find()) {
                     edit.putString("token", match.group(1));
+                }
+                if (authorization.find()) {
+                    edit.putString("authorization", Objects.requireNonNull(authorization.group(1)).replace("%20", " "));
                 }
                 edit.putString("Cookie", cookie);
                 edit.apply();

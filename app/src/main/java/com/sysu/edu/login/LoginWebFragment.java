@@ -33,7 +33,7 @@ public class LoginWebFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 //boolean reloadCap = Objects.equals(sessionId, CookieManager.getInstance().getCookie(url));
                 //model.setSessionID(CookieManager.getInstance().getCookie(url));
-//                System.out.println(url);
+                System.out.println(url);
                 if (Pattern.compile("cas\\.sysu\\.edu\\.cn/selfcare").matcher(url).find()) {
                     view.loadUrl(Objects.requireNonNull(model.getTarget().getValue()));
                     return;
@@ -65,12 +65,12 @@ public class LoginWebFragment extends Fragment {
                     }
                 } else {
                     web.evaluateJavascript("(function(){var needLogin = document.querySelector('" + element + "');if(needLogin!=null){needLogin.click();};return needLogin!=null;})()", s -> {
-//                        System.out.println(s);
+                        System.out.println(s);
                         if (!Boolean.parseBoolean(s)) {
                             handler.postDelayed(() -> {
                                 model.setCookie(CookieManager.getInstance().getCookie(url));
                                 model.setLogin(true);
-                            }, 500);
+                            }, 0);
                         }
                     });
                 }

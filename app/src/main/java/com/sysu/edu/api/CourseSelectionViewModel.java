@@ -6,12 +6,9 @@ import java.util.HashMap;
 
 public class CourseSelectionViewModel extends ViewModel {
     private String returnData;
-    private HashMap<String,String> filter;
+    private HashMap<String,String> filter = new HashMap<>();
 
     public HashMap<String, String> getFilter() {
-        if(filter==null){
-            filter=new HashMap<>();
-        }
         return filter;
     }
 
@@ -27,7 +24,6 @@ public class CourseSelectionViewModel extends ViewModel {
         returnData = data;
     }
 
-    // 清空数据，避免重复处理
     public void clearReturnData() {
         returnData = null;
     }

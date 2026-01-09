@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -71,7 +70,7 @@ public class CourseQueryFragment extends Fragment {
             binding.container.setColumnCount(new Params(requireActivity()).getColumn());
             Params params = new Params(requireActivity());
             params.setCallback(this, () -> {
-                cookie = requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("Cookie", "");
+                cookie = params.getCookie();
                 getData(0);
             });
             reset();
@@ -156,7 +155,7 @@ public class CourseQueryFragment extends Fragment {
 //            Navigation.findNavController(view).getGraph().
 //            ((CourseSelectionFragment) Objects.requireNonNull(Objects.requireNonNull(getParentFragmentManager().findFragmentById(R.id.nav_host_fragment_content_course_selection)).getChildFragmentManager().findFragmentById(R.id.selection_fragment))).setFilter(filter);
 
-            //           Navigation.findNavController(view).navigateUp();
+            //Navigation.findNavController(view).navigateUp();
             vm.setReturnData(parseFilter(getMap()));
             vm.setFilter(filterName);
             // System.out.println(parseFilter(getMap()));

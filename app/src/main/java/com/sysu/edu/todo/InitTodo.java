@@ -143,7 +143,7 @@ public class InitTodo {
         for (int i = 0; i < 4; i++) {
             ItemPreferenceBinding itemPreferenceBinding = ItemPreferenceBinding.inflate(activity.getLayoutInflater(), dialogBinding.times, false);
             itemPreferenceBinding.itemTitle.setText(activity.getString(new int[]{R.string.date, R.string.time, R.string.remind, R.string.ddl}[i]));
-            itemPreferenceBinding.icon.setImageResource(new int[]{R.drawable.calendar, R.drawable.time, R.drawable.alarm, R.drawable.warning}[i]);
+            itemPreferenceBinding.itemIcon.setImageResource(new int[]{R.drawable.calendar, R.drawable.time, R.drawable.alarm, R.drawable.warning}[i]);
             itemPreferenceBinding.getRoot().updateAppearance(i, 4);
 
             PopupMenu popupMenu = new PopupMenu(activity, itemPreferenceBinding.getRoot(), Gravity.NO_GRAVITY, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);

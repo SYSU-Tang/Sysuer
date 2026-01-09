@@ -16,7 +16,7 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/icon"
+                android:id="@+id/item_icon"
                 style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
                 android:layout_marginStart="16dp"
                 android:text="@string/add"
                 app:layout_constraintBottom_toTopOf="@id/item_content"
-                app:layout_constraintStart_toEndOf="@id/icon"
+                app:layout_constraintStart_toEndOf="@id/item_icon"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView

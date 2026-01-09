@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,8 +43,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class News extends AppCompatActivity {
-    ActivityNewsBinding binding;
     final OkHttpClient http = new OkHttpClient.Builder().build();
+    ActivityNewsBinding binding;
     Handler handler;
     String cookie = "login_token_ec583190dcd12bca757dd13df10f59c3=ad6e129cb0c2e7ad6d842afa0e0ebf31; username_ec583190dcd12bca757dd13df10f59c3=tangxb6; login_sn_ec583190dcd12bca757dd13df10f59c3=0c3845934e6ec207f5b898ed0d3dd86f;";//cookie + ";_webvpn_key=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidGFuZ3hiNiIsImdyb3VwcyI6WzNdLCJpYXQiOjE3NDM5Mjg1OTUsImV4cCI6MTc0NDAxNDk5NX0.luGDbfa_19Ye5TBVpwo3gaZPXldD7gsnSqGkX6IJHb0;";
     Params params;
@@ -104,7 +103,7 @@ public class News extends AppCompatActivity {
         params = new Params(this);
         binding.sugs.setAdapter(sug);
         binding.sugs.setLayoutManager(new GridLayoutManager(this, 1));
-        handler = new Handler(Looper.getMainLooper()) {
+        handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 Bundle rdata = msg.getData();
@@ -119,8 +118,8 @@ public class News extends AppCompatActivity {
                 if (data == null) {
                     return;
                 }
-                    if (Objects.equals(data.get("code"), "0000")) {
-                        if (msg.what == 1) {
+                if (Objects.equals(data.get("code"), "0000")) {
+                    if (msg.what == 1) {
                         sug.clear();
                         data.getJSONObject("data").getJSONArray("suggests").forEach(e -> sug.add((String) e));
                     } else if (Objects.equals(data.get("code"), 496)) {

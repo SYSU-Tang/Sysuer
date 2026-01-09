@@ -2,7 +2,6 @@ package com.sysu.edu.academic;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
@@ -45,7 +44,7 @@ public class PEList extends AppCompatActivity {
         binding.pager.setAdapter(adp);
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"体测查询", "课外积分", "游泳"}[position])).attach();
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
-        handler = new Handler(Looper.getMainLooper()) {
+        handler = new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {

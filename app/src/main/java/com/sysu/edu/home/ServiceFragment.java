@@ -109,7 +109,7 @@ public class ServiceFragment extends Fragment {
         actionMap.put(303, newActivity(AcademyNotification.class));  // 教务通知
 
         // 系统服务 (id: 4xx)
-        actionMap.put(401, browse("https://gym-443.webvpn.sysu.edu.cn/#/"));                   // 体育场馆预定系统
+        actionMap.put(401, browse("https://gym.sysu.edu.cn/#/"));                   // 体育场馆预定系统
         actionMap.put(402, browse("https://xgxt-443.webvpn.sysu.edu.cn/main/#/index"));        // 学工系统
         actionMap.put(403, browse("https://jwxt.sysu.edu.cn/jwxt/yd/index/#/Home"));           // 本科教务系统
         actionMap.put(404, browse("https://portal.sysu.edu.cn/newClient/#/newPortal/index"));  // 中山大学统一门户
@@ -164,7 +164,7 @@ public class ServiceFragment extends Fragment {
 
 
         // 学习平台 (id: 8xx)
-        actionMap.put(801, browse("https://www.seelight.net/"));             // SeeLight
+        actionMap.put(801, browse("https://seelight.net/"));             // SeeLight
         actionMap.put(802, browse("https://www.yuketang.cn/web"));           // 雨课堂
         actionMap.put(803, browse("https://www.ketangpai.com/"));            // 课堂派
         actionMap.put(804, browse("https://lms.sysu.edu.cn/"));              // 在线教学平台
