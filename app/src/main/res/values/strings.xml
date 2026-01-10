@@ -458,5 +458,6 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="crash">崩溃</string>
+    <string name="restart">重启</string>
 
 </resources>

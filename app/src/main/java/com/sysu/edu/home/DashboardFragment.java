@@ -4,13 +4,12 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.Html;
+import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +43,9 @@ import com.sysu.edu.todo.InitTodo;
 import com.sysu.edu.todo.TodoFragment;
 import com.sysu.edu.todo.info.TodoInfo;
 
+import org.commonmark.node.Heading;
+import org.commonmark.node.Node;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,6 +60,11 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
+import io.noties.markwon.AbstractMarkwonPlugin;
+import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonSpansFactory;
+import io.noties.markwon.MarkwonVisitor;
+import io.noties.markwon.core.CoreProps;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -69,15 +76,15 @@ import okhttp3.Response;
 
 public class DashboardFragment extends Fragment {
 
-    Handler handler;
-    String cookie;
     final ArrayList<JSONObject> todayCourse = new ArrayList<>();
     final ArrayList<JSONObject> tomorrowCourse = new ArrayList<>();
     final LinkedList<JSONObject> thisWeekExams = new LinkedList<>();
     final LinkedList<JSONObject> nextWeekExams = new LinkedList<>();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    Handler handler;
+    String cookie;
     Params params;
     FragmentDashboardBinding binding;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     boolean refresh = true;
 
     @Nullable
@@ -176,20 +183,51 @@ public class DashboardFragment extends Fragment {
                                 binding.progress.setMax(todayCourse.size());
                                 binding.progress.setProgress(beforeArray.size());
                                 binding.courseList.scrollToPosition(beforeArray.size());
-                                binding.nextClass.setText(Html.fromHtml(afterArray.isEmpty() ? String.format("<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>",
+                                //"<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>"
+                                // binding.nextClass.setText(Html.fromHtml(, Html.FROM_HTML_MODE_COMPACT));
+                                Markwon.builder(requireContext()).usePlugin(new AbstractMarkwonPlugin() {
+                                            @Override
+                                            public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
+                                                super.configureSpansFactory(builder);
+                                                builder.appendFactory(Heading.class, (heading, configuration) -> {
+                                                    if (CoreProps.HEADING_LEVEL.require(configuration) == 3) {
+                                                        return new ForegroundColorSpan(Color.parseColor("#6750a4"));
+                                                    }
+                                                    return null;
+                                                });
+                                            }
+
+                                    @Override
+                                    public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {
+                                        super.configureVisitor(builder);
+                                        builder.blockHandler(new MarkwonVisitor.BlockHandler() {
+                                            @Override
+                                            public void blockStart(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
+
+                                            }
+
+                                            @Override
+                                            public void blockEnd(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
+                                                if (visitor.hasNext(node)) {
+                                                    visitor.ensureNewLine();
+                                                }
+                                            }
+                                        });
+                                    }
+                                }).build().setMarkdown(binding.nextClass, afterArray.isEmpty() ? String.format("### %s\n\n%s：**%s**\n\n%s：**%s**\n\n%s：**%s**",
                                         getString(R.string.noClass),
                                         getString(R.string.next_class),
                                         tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("courseName"),
                                         getString(R.string.location), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("teachingPlace"),
                                         getString(R.string.time), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("time")) :
-                                        String.format("<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>",
+                                        String.format("## %s\n\n%s：**%s**\n\n%s：**%s**\n\n%s：**%s**",
                                                 todayCourse.get(beforeArray.size()).getString("courseName"),
                                                 getString(R.string.location),
                                                 todayCourse.get(beforeArray.size()).getString("teachingPlace"),
                                                 getString(R.string.time),
                                                 todayCourse.get(beforeArray.size()).getString("time"),
                                                 getString(R.string.date),
-                                                todayCourse.get(beforeArray.size()).getString("teachingDate")), Html.FROM_HTML_MODE_COMPACT));
+                                                todayCourse.get(beforeArray.size()).getString("teachingDate")));
                                 binding.toggle.clearChecked();
                                 binding.toggle.check(R.id.today);
                                 break;
@@ -404,7 +442,8 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface, colorSurface, true);
         boolean isBefore = Objects.equals(data.get(position).getString("status"), "before");
         binding.courseTitle.setTextAppearance(isBefore ? com.google.android.material.R.style.TextAppearance_Material3_TitleMedium : com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized);
-        ((GradientDrawable) ((RippleDrawable) holder.itemView.getBackground()).getDrawable(1)).setColor(Objects.equals(data.get(position).getString("status"), "in") ? colorSurfaceDim.data : isBefore ? 0x0 : colorSurface.data);
+        holder.itemView.getBackground().setTint(Objects.equals(data.get(position).getString("status"), "in") ? colorSurfaceDim.data : isBefore ? 0x0 : colorSurface.data);
+        //((GradientDrawable) ((RippleDrawable) holder.itemView.getBackground()).getDrawable(1)).setColor(Objects.equals(data.get(position).getString("status"), "in") ? colorSurfaceDim.data : isBefore ? 0x0 : colorSurface.data);
         binding.item.setAlpha(isBefore ? 0.64f : 1.0f);
     }
 

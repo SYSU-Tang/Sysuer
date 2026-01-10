@@ -31,6 +31,7 @@ firebaseCrashlytics = "20.0.3"
 googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.6"
 core = "4.6.2"
+extTables = "4.6.2"
 
 [libraries]
 api = { module = "dev.rikka.shizuku:api", version.ref = "api" }
@@ -69,6 +70,7 @@ material-preference = { group = "dev.rikka.rikkax.material", name = "material-pr
 dev-material = { group = "dev.rikka.rikkax.material", name = "material", version.ref = "materialVersion" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 core = { group = "io.noties.markwon", name = "core", version.ref = "core" }
+ext-tables = { group = "io.noties.markwon", name = "ext-tables", version.ref = "extTables" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
