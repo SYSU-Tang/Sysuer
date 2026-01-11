@@ -46,7 +46,7 @@ public class AboutActivity extends AppCompatActivity {
         ActivityInfoBinding binding = ActivityInfoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         params = new Params(this);
-        binding.tool.setNavigationOnClickListener(view -> finishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(view -> finishAfterTransition());
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg) {

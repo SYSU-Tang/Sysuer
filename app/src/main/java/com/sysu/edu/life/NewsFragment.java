@@ -1,0 +1,388 @@
+package com.sysu.edu.life;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.google.android.material.textview.MaterialTextView;
+import com.sysu.edu.R;
+import com.sysu.edu.academic.BrowserActivity;
+import com.sysu.edu.api.Params;
+import com.sysu.edu.databinding.RecyclerViewScrollBinding;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class NewsFragment extends Fragment {
+    final int position;
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    RecyclerViewScrollBinding binding;
+    Handler handler;
+    int page = 1;
+    Runnable run;
+    Params params;
+
+    public NewsFragment(int pos) {
+        this.position = pos;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        String NEWS = "https://iportal.sysu.edu.cn/#/todayEvent";
+        if (savedInstanceState == null) {
+            binding = RecyclerViewScrollBinding.inflate(inflater);
+            params = new Params(requireActivity());
+            params.setCallback(this, () -> run.run());
+            RecyclerView list = binding.recyclerView;
+            list.setLayoutManager(new GridLayoutManager(requireContext(), params.getColumn()));
+            list.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    if (recyclerView.canScrollVertically(1) && position != 0) {
+                        run.run();
+                    }
+                    super.onScrolled(recyclerView, dx, dy);
+                }
+            });
+            NewsAdp newsAdp = new NewsAdp(requireActivity());
+            list.setAdapter(newsAdp);
+            handler = new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(@NonNull Message msg) {
+                    Bundle rdata = msg.getData();
+                    boolean isJson = !rdata.getBoolean("isJson");
+                    String json = rdata.getString("data");
+                    JSONObject data = new JSONObject();
+                    if (isJson) {
+                        params.toast(R.string.educational_wifi_warning);
+                        return;
+                    } else if (json != null) {
+                        data = JSON.parseObject(json);
+                    }
+                    if (msg.what == -1) {
+                        params.toast(R.string.no_wifi_warning);
+                    } else {
+                        Integer code = data.getInteger("code");
+                        JSONObject response = null;
+                        if (msg.what != 3) {
+                            response = data.getJSONObject("data");
+                        }
+                        if (code == 10000) {
+                            switch (msg.what) {
+                                case 2:
+                                    response.getJSONArray("records").forEach(e -> {
+                                        JSONObject dataItem = (JSONObject) e;
+                                        JSONArray cover = dataItem.getJSONArray("coversPicList");
+                                        String image = "";
+                                        if (cover != null && !cover.isEmpty()) {
+                                            if (cover.getJSONObject(0) != null && cover.getJSONObject(0).getString("outLink") != null) {
+                                                image = cover.getJSONObject(0).getString("outLink");
+                                            }
+                                        }
+                                        newsAdp.add(dataItem.getString("title"), image, dataItem.getString("url"), dataItem.getString("createTime"), dataItem.getJSONObject("source").getString("seedName"));
+                                    });
+                                    break;
+                                case 3:
+                                    data.getJSONArray("data").forEach(e -> {
+                                        JSONObject dataItem = (JSONObject) e;
+                                        JSONArray cover = dataItem.getJSONArray("coversPicList");
+                                        String image = "";
+                                        if (cover != null && !cover.isEmpty()) {
+                                            image = cover.getJSONObject(0).getString("outLink");
+                                        }
+                                        newsAdp.add(dataItem.getString("title"), image, dataItem.getString("url"), dataItem.getString("createTime"), dataItem.getJSONObject("source").getString("seedName"));
+                                    });
+                                    break;
+                                case 4:
+                                    response.getJSONArray("records").forEach(e -> {
+                                        JSONObject dataItem = (JSONObject) e;
+                                        JSONArray cover = dataItem.getJSONArray("coversPicList");
+                                        String image = "";
+                                        if (cover != null && cover.getJSONObject(0) != null && !cover.isEmpty() && cover.getJSONObject(0).getString("outLink") != null) {
+                                            image = cover.getJSONObject(0).getString("outLink");
+                                        }
+                                        newsAdp.add(dataItem.getString("title"), image, dataItem.getString("url"), dataItem.getString("createTime"), dataItem.getJSONObject("source").getString("seedName"));
+                                    });
+                                    //通知
+                                    break;
+                                case 5:
+                                    response.getJSONArray("records").forEach(e -> {
+                                        JSONObject dataItem = (JSONObject) e;
+                                        JSONArray cover = dataItem.getJSONArray("coversPicList");
+                                        String image = "";
+                                        if (cover != null && cover.getJSONObject(0) != null && !cover.isEmpty() && cover.getJSONObject(0).getString("outLink") != null) {
+                                            image = cover.getJSONObject(0).getString("outLink");
+                                        }
+                                        newsAdp.add(dataItem.getString("title"), image, dataItem.getString("url"), dataItem.getString("createTime"), dataItem.getJSONObject("source").getString("seedName"));
+                                    });
+                                    break;
+                            }
+                        } else if (code == 10003) {
+                            params.toast(data.getString("message"));
+                            params.gotoLogin(getView(), NEWS);
+                        } else if (code == 496) {
+                            params.toast(data.getString("message"));
+                            params.gotoLogin(getView(), NEWS);
+                        } else if (code == 497) {
+                            params.toast(data.getString("message"));
+                            params.gotoLogin(getView(), NEWS);
+                        } else {
+                            params.toast(data.getString("message"));
+                        }
+                    } //今日中大
+
+                }
+            };
+        }
+        run = () -> {
+            List.of(this::getNews, this::getSubscription, this::getNotice, (Runnable) this::getDailyNews).get(position).run();
+            page += 1;
+        };
+        if (!params.getAuthorization().isEmpty()) {
+            run.run();
+        } else {
+            params.gotoLogin(getView(), NEWS);
+        }
+        //getAuthorization();
+        return binding.getRoot();
+    }
+
+    void getNews() {
+        http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/recommend/query-recommend")
+                .post(RequestBody.create("", MediaType.parse("application/json")))
+                .header("Authorization", params.getAuthorization())
+                .header("Cookie", params.getCookie())
+                .build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what = -1;
+                handler.sendMessage(message);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message msg = new Message();
+                msg.what = 3;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data", response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
+            }
+        });
+    }
+
+    void getSubscription() {
+        http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"3ytr4e6c\",\"notice\":false}", MediaType.parse("application/json")))
+                .header("Authorization", params.getAuthorization())
+                .header("Cookie", params.getCookie())
+                .build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what = -1;
+                handler.sendMessage(message);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message msg = new Message();
+                msg.what = 2;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data", response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
+            }
+        });
+    }
+
+//    void getAuthorization() {
+//        http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/auth-center/account/zscasLogin?clientid=zssearch_100050;zsshow")
+//                .header("Cookie", cookie)
+//                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0")
+//                .build()).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                Message message = new Message();
+//                message.what=-1;
+//                handler.sendMessage(message);
+//            }
+//
+//            @Override
+//            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                Message msg = new Message();
+//                msg.what = 1;
+//                Bundle data = new Bundle();
+//                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+//                data.putString("data", response.body().string());
+//                msg.setData(data);
+//                handler.sendMessage(msg);
+//            }
+//        });
+//    }
+
+    void getNotice() {
+        http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"3ytunvv6\",\"notice\":false}", MediaType.parse("application/json")))
+                .header("Authorization", params.getAuthorization())
+                .header("Cookie", params.getCookie())
+                .build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what = -1;
+                handler.sendMessage(message);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message msg = new Message();
+                msg.what = 4;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data", response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
+            }
+        });
+    }
+
+    void getDailyNews() {
+        http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"4cef8rqw\",\"notice\":false}", MediaType.parse("application/json")))
+                .header("Authorization", params.getAuthorization())
+                .header("Cookie", params.getCookie())
+                .build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what = -1;
+                handler.sendMessage(message);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message msg = new Message();
+                msg.what = 5;
+                Bundle data = new Bundle();
+                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+                data.putString("data", response.body().string());
+                msg.setData(data);
+                handler.sendMessage(msg);
+            }
+        });
+    }
+//    void getContent() {
+//        http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
+//                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":"+page+",\"apiCode\":\"4cef8rqw\",\"notice\":false}", MediaType.parse("application/json")))
+//                //.header("Authorization", authorization)
+//                .header("Cookie", cookie).build()).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                Message message = new Message();
+//                message.what=-1;
+//                handler.sendMessage(message);
+//            }
+//            @Override
+//            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                Message msg = new Message();
+//                msg.what = 5;
+//                Bundle data = new Bundle();
+//                data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
+//                data.putString("data",response.body().string());
+//                msg.setData(data);
+//                handler.sendMessage(msg);
+//            }
+//        });
+//    }
+}
+
+class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    final ArrayList<HashMap<String, String>> data = new ArrayList<>();
+    final FragmentActivity context;
+    //String cookie;
+
+    public NewsAdp(FragmentActivity context) {
+        super();
+        this.context = context;
+    }
+
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_news, parent, false)) {
+        };
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        MaterialTextView title = holder.itemView.findViewById(R.id.title);
+        MaterialTextView content = holder.itemView.findViewById(R.id.content);
+        AppCompatImageView image = holder.itemView.findViewById(R.id.image);
+        holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context, v, "miniapp").toBundle())
+                //context.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context, v, "miniapp").toBundle())
+        );
+        title.setText(data.get(position).getOrDefault("title", ""));
+        content.setText(String.format("#%s #%s", data.get(position).getOrDefault("source", ""), data.get(position).getOrDefault("time", "")));
+        String img = data.get(position).get("image");
+        if (img != null && !img.isEmpty()) {
+            Glide.with(context).load(img)
+                    // .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
+                    .placeholder(R.drawable.logo)
+                    .override(new Params(context).dpToPx(120), new Params(context).dpToPx(120)).optionalFitCenter().transform(new RoundedCorners(16))
+                    .into(image);
+        }
+    }
+
+    void add(String title, String image, String url, String time, String source) {
+        data.add(new HashMap<>(Map.of("title", title, "image", image, "url", url, "time", time, "source", source)));
+        notifyItemInserted(getItemCount() - 1);
+    }
+
+    //    NewsAdp setCookie(String cookie)
+//    {
+//        this.cookie=cookie;
+//        return this;
+//    }
+    @Override
+    public int getItemCount() {
+        return data.size();
+    }
+}

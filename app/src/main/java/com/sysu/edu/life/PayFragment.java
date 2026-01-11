@@ -44,9 +44,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class PayFragment extends StaggeredFragment {
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     public View view;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     String token;
     Params params;
     int order = 0;
@@ -63,7 +63,7 @@ public class PayFragment extends StaggeredFragment {
         params = new Params(requireActivity());
         params.setCallback(this, () -> {
             token = params.getToken();
-            getToPayList();
+            getPage();
         });
         token = params.getToken();
         switch (position) {

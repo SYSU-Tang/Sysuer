@@ -19,7 +19,7 @@
                 android:layout_height="?actionBarSize"
                 android:transitionName="miniapp"
                 app:layout_collapseMode="pin"
-                android:id="@+id/tool"
+                android:id="@+id/toolbar"
                 app:navigationIcon="?homeAsUpIndicator"
                 app:title="@string/classroom_query"/>
         </com.google.android.material.appbar.CollapsingToolbarLayout>

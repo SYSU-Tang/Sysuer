@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         binding.pager2.setAdapter(new Pager2Adapter(this).add(new LoginWebFragment()).add(new LoginFragment()));
-        binding.tool.setNavigationOnClickListener(v -> finishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(v -> finishAfterTransition());
         /*binding.tool.getMenu().add(R.string.confirm).setIcon(R.drawable.submit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener(menuItem -> {
             web.loadUrl(Objects.requireNonNull(getIntent().getStringExtra("url")));
             return false;

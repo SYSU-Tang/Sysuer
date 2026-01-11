@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/gym_reservation_nav"
+    app:startDestination="@id/gym_preservation_campus_fragment">
+
+    <fragment
+        android:id="@+id/gym_preservation_campus_fragment"
+        android:name="com.sysu.edu.life.GymPreservationListFragment">
+        <action
+            android:id="@+id/action_gym_preservation_campus_fragment_to_gym_preservation_field_fragment"
+            app:destination="@id/gym_preservation_field_fragment"/>
+        <argument
+            android:name="code"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gym_preservation_field_fragment"
+        android:name="com.sysu.edu.life.GymPreservationListFragment">
+        <argument
+            android:name="code"
+            android:defaultValue="1"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_gym_preservation_campus_fragment_to_gym_preservation_field_fragment"
+            app:destination="@id/gym_preservation_field_fragment">
+
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/gym_preservation_detail_fragment"
+        android:name="com.sysu.edu.life.GymPreservationListFragment">
+        <argument
+            android:name="code"
+            android:defaultValue="2"
+            app:argType="integer" />
+        <action
+            android:id="@+id/to_detail"
+            app:destination="@id/gym_preservation_detail_fragment"/>
+    </fragment>
+</navigation>

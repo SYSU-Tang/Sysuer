@@ -149,7 +149,7 @@ public class CalendarActivity extends AppCompatActivity {
         ActivityCalendarBinding binding = ActivityCalendarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         params = new Params(this);
-        binding.tool.setNavigationOnClickListener(view -> finishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(view -> finishAfterTransition());
         binding.scroll.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             if (top > scrollY && binding.tabs.getSelectedTabPosition() == 1 && scrollY < oldScrollY) {
                 Objects.requireNonNull(binding.tabs.getTabAt(0)).select();

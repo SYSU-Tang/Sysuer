@@ -42,9 +42,9 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemServiceBoxBinding;
+import com.sysu.edu.life.News;
 import com.sysu.edu.life.Pay;
 import com.sysu.edu.life.SchoolBus;
-import com.sysu.edu.news.News;
 import com.sysu.edu.todo.TodoActivity;
 
 import java.nio.charset.StandardCharsets;
@@ -164,7 +164,7 @@ public class ServiceFragment extends Fragment {
 
 
         // 学习平台 (id: 8xx)
-        actionMap.put(801, browse("https://seelight.net/"));             // SeeLight
+        actionMap.put(801, browse("http://seelight.net/html/homePage/homePagePhone.html"));             // SeeLight
         actionMap.put(802, browse("https://www.yuketang.cn/web"));           // 雨课堂
         actionMap.put(803, browse("https://www.ketangpai.com/"));            // 课堂派
         actionMap.put(804, browse("https://lms.sysu.edu.cn/"));              // 在线教学平台
@@ -173,6 +173,8 @@ public class ServiceFragment extends Fragment {
 
         // 生活服务 (id: 9xx)
         actionMap.put(902, newActivity(SchoolBus.class));                    // 校车
+        actionMap.put(903, browse("https://visitor.sysu.edu.cn/"));                 // 逸仙通行
+        actionMap.put(905, browse("https://gongfang.sysu.edu.cn/h5_separation/repair_apply/index.html#/applyDetail/20251231162524362223"));                 // 报修
         actionMap.put(906, browse("https://zhny.sysu.edu.cn/h5/#/"));        // 水电费
         actionMap.put(907, newActivity(Pay.class));                          // 缴费大厅
 

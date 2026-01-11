@@ -16,7 +16,7 @@ public class StuJob extends AppCompatActivity {
         ActivityStudentJobBinding binding = ActivityStudentJobBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         //binding.getRoot().openDrawer(GravityCompat.START,true);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, binding.getRoot(), binding.tool, R.string.open, R.string.close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, binding.getRoot(), binding.toolbar, R.string.open, R.string.close);
         toggle.syncState();
         binding.getRoot().addDrawerListener(toggle);
     }

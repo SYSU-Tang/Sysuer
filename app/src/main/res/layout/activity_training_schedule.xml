@@ -8,7 +8,7 @@
     style="@style/SYSU.AppBarLayout"
     android:layout_height="wrap_content">
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/tool"
+        android:id="@+id/toolbar"
         app:navigationIcon="?homeAsUpIndicator"
         android:layout_width="match_parent"
         android:transitionName="miniapp"

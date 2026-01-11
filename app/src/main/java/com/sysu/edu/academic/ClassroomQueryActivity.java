@@ -106,7 +106,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
             binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault()).format(new Date(selection)));
         });
         adp = new RoomAdapter(this);
-        binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         binding.result.setAdapter(adp);
         binding.result.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
         BottomSheetBehavior.from(binding.resultSheet).setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -195,7 +195,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     }
                 } else {
                     params.toast(R.string.login_warning);
-                    params.gotoLogin(binding.tool, TargetUrl.JWXT);
+                    params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                 }
             }
         };

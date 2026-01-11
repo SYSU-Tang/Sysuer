@@ -46,7 +46,7 @@ public class TrainingSchedule extends AppCompatActivity {
             getProfessions("");
         });
         cookie = params.getCookie();
-        binding.tool.setNavigationOnClickListener(view -> supportFinishAfterTransition());
+        binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         schedule = (TrainingScheduleFragment) (Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getChildFragmentManager().getFragments().get(0);
 
         // System.out.println(getSupportFragmentManager().findFragmentById(R.id.fragment));
@@ -59,7 +59,7 @@ public class TrainingSchedule extends AppCompatActivity {
                     schedule.deal(msg.what, data);
                 } else {
                     params.toast(R.string.login_warning);
-                    params.gotoLogin(binding.tool, TargetUrl.JWXT);
+                    params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
                 }
                 super.handleMessage(msg);
             }
