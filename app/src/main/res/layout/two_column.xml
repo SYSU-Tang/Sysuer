@@ -14,7 +14,7 @@
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/value"
-        app:layout_constraintHorizontal_weight="6"
+        app:layout_constraintHorizontal_weight="5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
     <TextView
@@ -25,7 +25,7 @@
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         app:layout_constraintBottom_toBottomOf="@id/key"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="4"
+        app:layout_constraintHorizontal_weight="5"
         app:layout_constraintStart_toEndOf="@id/key"
         app:layout_constraintTop_toTopOf="@id/key"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

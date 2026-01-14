@@ -74,8 +74,7 @@ public class LoginWebFragment extends Fragment {
                         }
                     });
                 }
-                //ar script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};", s -> {});
-            }
+                }
 //            @Override
 //            public void onLoadResource(WebView view, String url) {
 //               // view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);

@@ -2,42 +2,47 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/gym_reservation_nav"
-    app:startDestination="@id/gym_preservation_campus_fragment">
+    app:startDestination="@id/gym_campus_nav">
 
-    <fragment
-        android:id="@+id/gym_preservation_campus_fragment"
-        android:name="com.sysu.edu.life.GymPreservationListFragment">
-        <action
-            android:id="@+id/action_gym_preservation_campus_fragment_to_gym_preservation_field_fragment"
-            app:destination="@id/gym_preservation_field_fragment"/>
-        <argument
-            android:name="code"
-            android:defaultValue="0"
-            app:argType="integer" />
-    </fragment>
+    <navigation
+        android:id="@+id/gym_campus_nav"
+        app:startDestination="@id/gym_campus_fragment">
+        <fragment
+            android:id="@+id/gym_campus_fragment"
+            android:name="com.sysu.edu.life.GymReservationListFragment">
+            <action
+                android:id="@+id/campus_to_field"
+                app:destination="@id/gym_field_fragment" />
+            <argument
+                android:name="code"
+                android:defaultValue="0"
+                app:argType="integer" />
+        </fragment>
 
+        <fragment
+            android:id="@+id/gym_field_fragment"
+            android:name="com.sysu.edu.life.GymReservationListFragment">
+            <argument
+                android:name="code"
+                android:defaultValue="1"
+                app:argType="integer" />
+            <action
+                android:id="@+id/campus_to_field"
+                app:destination="@id/gym_detail_fragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/gym_detail_fragment"
+            android:name="com.sysu.edu.life.GymDetailFragment">
+            <argument
+                android:name="code"
+                android:defaultValue="2"
+                app:argType="integer" />
+        </fragment>
+    </navigation>
     <fragment
-        android:id="@+id/gym_preservation_field_fragment"
-        android:name="com.sysu.edu.life.GymPreservationListFragment">
-        <argument
-            android:name="code"
-            android:defaultValue="1"
-            app:argType="integer" />
-        <action
-            android:id="@+id/action_gym_preservation_campus_fragment_to_gym_preservation_field_fragment"
-            app:destination="@id/gym_preservation_field_fragment">
-
-        </action>
-    </fragment>
+        android:id="@+id/gym_reservation_fragment"
+        android:name="com.sysu.edu.life.GymReservationFragment" />
     <fragment
-        android:id="@+id/gym_preservation_detail_fragment"
-        android:name="com.sysu.edu.life.GymPreservationListFragment">
-        <argument
-            android:name="code"
-            android:defaultValue="2"
-            app:argType="integer" />
-        <action
-            android:id="@+id/to_detail"
-            app:destination="@id/gym_preservation_detail_fragment"/>
-    </fragment>
+        android:id="@+id/gym_account_fragment"
+        android:name="com.sysu.edu.life.GymAccountFragment" />
 </navigation>

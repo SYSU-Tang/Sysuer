@@ -236,228 +236,200 @@
     <string name="honor_credit">荣誉学分</string>
     <string name="no_app">没有安装APP</string>
 
-    <!-- SchoolRoll.java 字符串资源 -->
-    <string name="schoolroll_basic_info">基本信息</string>
-    <string name="schoolroll_family_info">家庭成员及社会关系</string>
-    <string name="schoolroll_education_info">学历及经历</string>
-    <string name="schoolroll_exchange_info">交流经历</string>
-    <string name="schoolroll_change_info">异动情况</string>
-    <string name="schoolroll_major_info">双专业双学位辅修</string>
-    <string name="schoolroll_register_info">注册状态</string>
-    <string name="schoolroll_punish_info">惩处</string>
+    <!-- SchoolEnrollmentActivity.java 字符串资源 -->
+    <string name="school_enrollment_basic_info">基本信息</string>
+    <string name="school_enrollment_family_info">家庭成员及社会关系</string>
+    <string name="school_enrollment_education_info">学历及经历</string>
+    <string name="school_enrollment_exchange_info">交流经历</string>
+    <string name="school_enrollment_change_info">异动情况</string>
+    <string name="school_enrollment_major_info">双专业双学位辅修</string>
+    <string name="school_enrollment_register_info">注册状态</string>
+    <string name="school_enrollment_punish_info">惩处</string>
 
-    <string name="schoolroll_personal_info">个人基本信息</string>
-    <string name="schoolroll_roll_info">学籍信息</string>
-    <string name="schoolroll_contact_info">联系方式</string>
+    <string name="school_enrollment_personal_info">个人基本信息</string>
+    <string name="school_enrollment_roll_info">学籍信息</string>
+    <string name="school_enrollment_contact_info">联系方式</string>
 
     <!-- 个人基本信息字段 -->
-    <string name="schoolroll_student_number">学号</string>
-    <string name="schoolroll_name">姓名</string>
-    <string name="schoolroll_english_name">英文姓名</string>
-    <string name="schoolroll_name_pinyin">姓名拼音</string>
-    <string name="schoolroll_chinese_name">中文姓名</string>
-    <string name="schoolroll_former_name">曾用名</string>
-    <string name="schoolroll_country">国家/地区</string>
-    <string name="schoolroll_id_type">身份证件类型</string>
-    <string name="schoolroll_id_number">身份证件号</string>
-    <string name="schoolroll_former_id_type">曾用身份证件类型</string>
-    <string name="schoolroll_former_id_number">曾用身份证件号</string>
-    <string name="schoolroll_gender">性别</string>
-    <string name="schoolroll_birthday">出生日期</string>
-    <string name="schoolroll_marital_status">婚姻状况</string>
-    <string name="schoolroll_health_status">健康状况</string>
-    <string name="schoolroll_religion">信仰宗教</string>
-    <string name="schoolroll_blood_type">血型</string>
-    <string name="schoolroll_id_validity">身份证件有效期</string>
-    <string name="schoolroll_birthplace">出生地</string>
-    <string name="schoolroll_ethnicity">民族</string>
-    <string name="schoolroll_political_status">政治面貌</string>
-    <string name="schoolroll_hometown">籍贯</string>
-    <string name="schoolroll_hk_macao_taiwan">港澳台侨外</string>
-    <string name="schoolroll_hobby">特长或爱好</string>
-    <string name="schoolroll_hk_passport">港澳台通行证号</string>
-    <string name="schoolroll_exam_number">考生号</string>
+    <string name="school_enrollment_student_number">学号</string>
+    <string name="school_enrollment_name">姓名</string>
+    <string name="school_enrollment_english_name">英文姓名</string>
+    <string name="school_enrollment_name_pinyin">姓名拼音</string>
+    <string name="school_enrollment_chinese_name">中文姓名</string>
+    <string name="school_enrollment_former_name">曾用名</string>
+    <string name="school_enrollment_country">国家/地区</string>
+    <string name="school_enrollment_id_type">身份证件类型</string>
+    <string name="school_enrollment_id_number">身份证件号</string>
+    <string name="school_enrollment_former_id_type">曾用身份证件类型</string>
+    <string name="school_enrollment_former_id_number">曾用身份证件号</string>
+    <string name="school_enrollment_gender">性别</string>
+    <string name="school_enrollment_birthday">出生日期</string>
+    <string name="school_enrollment_marital_status">婚姻状况</string>
+    <string name="school_enrollment_health_status">健康状况</string>
+    <string name="school_enrollment_religion">信仰宗教</string>
+    <string name="school_enrollment_blood_type">血型</string>
+    <string name="school_enrollment_id_validity">身份证件有效期</string>
+    <string name="school_enrollment_birthplace">出生地</string>
+    <string name="school_enrollment_ethnicity">民族</string>
+    <string name="school_enrollment_political_status">政治面貌</string>
+    <string name="school_enrollment_hometown">籍贯</string>
+    <string name="school_enrollment_hk_macao_taiwan">港澳台侨外</string>
+    <string name="school_enrollment_hobby">特长或爱好</string>
+    <string name="school_enrollment_hk_passport">港澳台通行证号</string>
+    <string name="school_enrollment_exam_number">考生号</string>
 
     <!-- 学籍信息字段 -->
-    <string name="schoolroll_college">学院</string>
-    <string name="schoolroll_department">系部</string>
-    <string name="schoolroll_grade">年级</string>
-    <string name="schoolroll_grade_direction">年级专业方向</string>
-    <string name="schoolroll_campus">当前校区</string>
-    <string name="schoolroll_grade_category">所属年级专业大类</string>
-    <string name="schoolroll_major_category">专业大类</string>
-    <string name="schoolroll_major_direction">专业方向</string>
-    <string name="schoolroll_standard_major">国标专业</string>
-    <string name="schoolroll_cross_college">跨院系大类</string>
-    <string name="schoolroll_education_system">学制</string>
-    <string name="schoolroll_student_type">学生类别</string>
-    <string name="schoolroll_discipline">学科门类</string>
-    <string name="schoolroll_degree_type">专业授予学位</string>
-    <string name="schoolroll_credit_system">是否全面学分制</string>
-    <string name="schoolroll_need_confirm">是否需要认定</string>
-    <string name="schoolroll_min_study_years">最短修读年限</string>
-    <string name="schoolroll_max_study_years">最长修读年限</string>
-    <string name="schoolroll_class">班级</string>
-    <string name="schoolroll_status">当前学籍状态</string>
-    <string name="schoolroll_in_school">是否在校</string>
-    <string name="schoolroll_study_form">学习形式</string>
-    <string name="schoolroll_education_level">培养层次</string>
-    <string name="schoolroll_training_method">培养方式</string>
-    <string name="schoolroll_admission_method">入学方式</string>
-    <string name="schoolroll_admission_date">入学日期</string>
-    <string name="schoolroll_expected_graduation">预计毕业日期</string>
-    <string name="schoolroll_charge_grade">收费年级</string>
-    <string name="schoolroll_graduation_date">毕业日期</string>
-    <string name="schoolroll_degree_category">授予学位类别</string>
-    <string name="schoolroll_certificate_date">毕业发证日期</string>
-    <string name="schoolroll_certificate_number">证书编号</string>
-    <string name="schoolroll_principal">校长名</string>
-    <string name="schoolroll_degree_date">学位发证日期</string>
-    <string name="schoolroll_degree_number">学位证书编号</string>
-    <string name="schoolroll_international_type">来华留学生类别</string>
-    <string name="schoolroll_funding_source">来华留学经费来源</string>
-    <string name="schoolroll_csc_number">CSC/CIS编号</string>
-    <string name="schoolroll_teaching_language">授课语言</string>
-    <string name="schoolroll_origin">生源地</string>
-    <string name="schoolroll_exam_type">考生类别</string>
-    <string name="schoolroll_graduation_type">毕业类别</string>
-    <string name="schoolroll_high_school">毕业中学</string>
-    <string name="schoolroll_gaokao_score">高考成绩</string>
-    <string name="schoolroll_admission_score">投档成绩</string>
-    <string name="schoolroll_province_enroll">大类内本省录取人数</string>
-    <string name="schoolroll_province_rank">大类内本省排名</string>
-    <string name="schoolroll_province_rank_percent">大类内本省排名百分比</string>
-    <string name="schoolroll_top_rank">是否本省本大类排名第1或前15%</string>
-    <string name="schoolroll_chinese">语文</string>
-    <string name="schoolroll_math">数学</string>
-    <string name="schoolroll_english">外语</string>
-    <string name="schoolroll_comprehensive">综合</string>
-    <string name="schoolroll_physics">物理</string>
-    <string name="schoolroll_chemistry">化学</string>
-    <string name="schoolroll_biology">生物</string>
-    <string name="schoolroll_politics">政治</string>
-    <string name="schoolroll_history">历史</string>
-    <string name="schoolroll_geography">地理</string>
-    <string name="schoolroll_graduation_evaluation">毕业鉴定</string>
-    <string name="schoolroll_exam_characteristics">考生特征</string>
+    <string name="school_enrollment_college">学院</string>
+    <string name="school_enrollment_department">系部</string>
+    <string name="school_enrollment_grade">年级</string>
+    <string name="school_enrollment_grade_direction">年级专业方向</string>
+    <string name="school_enrollment_campus">当前校区</string>
+    <string name="school_enrollment_grade_category">所属年级专业大类</string>
+    <string name="school_enrollment_major_category">专业大类</string>
+    <string name="school_enrollment_major_direction">专业方向</string>
+    <string name="school_enrollment_standard_major">国标专业</string>
+    <string name="school_enrollment_cross_college">跨院系大类</string>
+    <string name="school_enrollment_education_system">学制</string>
+    <string name="school_enrollment_student_type">学生类别</string>
+    <string name="school_enrollment_discipline">学科门类</string>
+    <string name="school_enrollment_degree_type">专业授予学位</string>
+    <string name="school_enrollment_credit_system">是否全面学分制</string>
+    <string name="school_enrollment_need_confirm">是否需要认定</string>
+    <string name="school_enrollment_min_study_years">最短修读年限</string>
+    <string name="school_enrollment_max_study_years">最长修读年限</string>
+    <string name="school_enrollment_class">班级</string>
+    <string name="school_enrollment_status">当前学籍状态</string>
+    <string name="school_enrollment_in_school">是否在校</string>
+    <string name="school_enrollment_study_form">学习形式</string>
+    <string name="school_enrollment_education_level">培养层次</string>
+    <string name="school_enrollment_training_method">培养方式</string>
+    <string name="school_enrollment_admission_method">入学方式</string>
+    <string name="school_enrollment_admission_date">入学日期</string>
+    <string name="school_enrollment_expected_graduation">预计毕业日期</string>
+    <string name="school_enrollment_charge_grade">收费年级</string>
+    <string name="school_enrollment_graduation_date">毕业日期</string>
+    <string name="school_enrollment_degree_category">授予学位类别</string>
+    <string name="school_enrollment_certificate_date">毕业发证日期</string>
+    <string name="school_enrollment_certificate_number">证书编号</string>
+    <string name="school_enrollment_principal">校长名</string>
+    <string name="school_enrollment_degree_date">学位发证日期</string>
+    <string name="school_enrollment_degree_number">学位证书编号</string>
+    <string name="school_enrollment_international_type">来华留学生类别</string>
+    <string name="school_enrollment_funding_source">来华留学经费来源</string>
+    <string name="school_enrollment_csc_number">CSC/CIS编号</string>
+    <string name="school_enrollment_teaching_language">授课语言</string>
+    <string name="school_enrollment_origin">生源地</string>
+    <string name="school_enrollment_exam_type">考生类别</string>
+    <string name="school_enrollment_graduation_type">毕业类别</string>
+    <string name="school_enrollment_high_school">毕业中学</string>
+    <string name="school_enrollment_gaokao_score">高考成绩</string>
+    <string name="school_enrollment_admission_score">投档成绩</string>
+    <string name="school_enrollment_province_enroll">大类内本省录取人数</string>
+    <string name="school_enrollment_province_rank">大类内本省排名</string>
+    <string name="school_enrollment_province_rank_percent">大类内本省排名百分比</string>
+    <string name="school_enrollment_top_rank">是否本省本大类排名第1或前15%</string>
+    <string name="school_enrollment_chinese">语文</string>
+    <string name="school_enrollment_math">数学</string>
+    <string name="school_enrollment_english">外语</string>
+    <string name="school_enrollment_comprehensive">综合</string>
+    <string name="school_enrollment_physics">物理</string>
+    <string name="school_enrollment_chemistry">化学</string>
+    <string name="school_enrollment_biology">生物</string>
+    <string name="school_enrollment_politics">政治</string>
+    <string name="school_enrollment_history">历史</string>
+    <string name="school_enrollment_geography">地理</string>
+    <string name="school_enrollment_graduation_evaluation">毕业鉴定</string>
+    <string name="school_enrollment_exam_characteristics">考生特征</string>
 
     <!-- 联系方式字段 -->
-    <string name="schoolroll_phone">联系电话</string>
-    <string name="schoolroll_email">邮箱</string>
-    <string name="schoolroll_train_station">火车到达站</string>
-    <string name="schoolroll_qq_wechat">QQ/微信号</string>
-    <string name="schoolroll_postal_code">邮政编码</string>
-    <string name="schoolroll_home_phone">家庭电话</string>
-    <string name="schoolroll_address">通讯地址</string>
-    <string name="schoolroll_home_address">家庭地址</string>
+    <string name="school_enrollment_phone">联系电话</string>
+    <string name="school_enrollment_email">邮箱</string>
+    <string name="school_enrollment_train_station">火车到达站</string>
+    <string name="school_enrollment_qq_wechat">QQ/微信号</string>
+    <string name="school_enrollment_postal_code">邮政编码</string>
+    <string name="school_enrollment_home_phone">家庭电话</string>
+    <string name="school_enrollment_address">通讯地址</string>
+    <string name="school_enrollment_home_address">家庭地址</string>
 
     <!-- 家庭成员及社会关系字段 -->
-    <string name="schoolroll_relation">称谓</string>
-    <string name="schoolroll_family_name">姓名</string>
-    <string name="schoolroll_work_unit">工作单位</string>
-    <string name="schoolroll_position">职务</string>
-    <string name="schoolroll_family_phone">联系电话</string>
-    <string name="schoolroll_family_birthday">出生日期</string>
+    <string name="school_enrollment_relation">称谓</string>
+    <string name="school_enrollment_family_name">姓名</string>
+    <string name="school_enrollment_work_unit">工作单位</string>
+    <string name="school_enrollment_position">职务</string>
+    <string name="school_enrollment_family_phone">联系电话</string>
+    <string name="school_enrollment_family_birthday">出生日期</string>
 
     <!-- 学历及经历字段 -->
-    <string name="schoolroll_study_start">学习起始日期</string>
-    <string name="schoolroll_study_end">学习终止日期</string>
-    <string name="schoolroll_study_unit">学习单位</string>
-    <string name="schoolroll_study_address">学习地址</string>
+    <string name="school_enrollment_study_start">学习起始日期</string>
+    <string name="school_enrollment_study_end">学习终止日期</string>
+    <string name="school_enrollment_study_unit">学习单位</string>
+    <string name="school_enrollment_study_address">学习地址</string>
 
     <!-- 交流经历字段 -->
-    <string name="schoolroll_exchange_start">学习起始日期</string>
-    <string name="schoolroll_exchange_end">学习终止日期</string>
-    <string name="schoolroll_sent_school">派往学校</string>
-    <string name="schoolroll_sent_major">派往专业</string>
-    <string name="schoolroll_exchange_status">交流状态</string>
+    <string name="school_enrollment_exchange_start">学习起始日期</string>
+    <string name="school_enrollment_exchange_end">学习终止日期</string>
+    <string name="school_enrollment_sent_school">派往学校</string>
+    <string name="school_enrollment_sent_major">派往专业</string>
+    <string name="school_enrollment_exchange_status">交流状态</string>
 
     <!-- 异动情况字段 -->
-    <string name="schoolroll_issue_date">发文日期</string>
-    <string name="schoolroll_issue_number">文号</string>
-    <string name="schoolroll_move_type">异动类别</string>
-    <string name="schoolroll_change_detail">异动细类</string>
-    <string name="schoolroll_move_reason">异动原因</string>
-    <string name="schoolroll_former_major">异动前学院专业</string>
-    <string name="schoolroll_after_major">异动后学院专业</string>
+    <string name="school_enrollment_issue_date">发文日期</string>
+    <string name="school_enrollment_issue_number">文号</string>
+    <string name="school_enrollment_move_type">异动类别</string>
+    <string name="school_enrollment_change_detail">异动细类</string>
+    <string name="school_enrollment_move_reason">异动原因</string>
+    <string name="school_enrollment_former_major">异动前学院专业</string>
+    <string name="school_enrollment_after_major">异动后学院专业</string>
 
     <!-- 双专业双学位辅修字段 -->
-    <string name="schoolroll_minor_type">辅修类别</string>
-    <string name="schoolroll_minor_college">学院</string>
-    <string name="schoolroll_minor_major">专业方向</string>
-    <string name="schoolroll_minor_grade">年级</string>
-    <string name="schoolroll_minor_graduation">毕业结论</string>
+    <string name="school_enrollment_minor_type">辅修类别</string>
+    <string name="school_enrollment_minor_college">学院</string>
+    <string name="school_enrollment_minor_major">专业方向</string>
+    <string name="school_enrollment_minor_grade">年级</string>
+    <string name="school_enrollment_minor_graduation">毕业结论</string>
 
     <!-- 注册状态字段 -->
-    <string name="schoolroll_academic_year">学年学期</string>
-    <string name="schoolroll_checkin_status">报到状态</string>
-    <string name="schoolroll_register_status">注册状态</string>
-    <string name="schoolroll_payment_status">缴费状态</string>
+    <string name="school_enrollment_academic_year">学年学期</string>
+    <string name="school_enrollment_checkin_status">报到状态</string>
+    <string name="school_enrollment_register_status">注册状态</string>
+    <string name="school_enrollment_payment_status">缴费状态</string>
 
     <!-- 惩处字段 -->
-    <string name="schoolroll_punish_date">违纪日期</string>
-    <string name="schoolroll_punish_brief">违纪简况</string>
-    <string name="schoolroll_punish_type">违纪类别</string>
-    <string name="schoolroll_punish_source">处分来源</string>
-    <string name="schoolroll_punish_name">处分名称</string>
-    <string name="schoolroll_punish_reason">处分原因</string>
-    <string name="schoolroll_punish_time">处分日期</string>
-    <string name="schoolroll_punish_proof">处分文号</string>
-    <string name="schoolroll_punish_repeal_time">处分撤销日期</string>
-    <string name="schoolroll_punish_repeal_proof">处分撤销文号</string>
-    <string name="schoolroll_punish_graduate">是否按时毕业</string>
-    <string name="schoolroll_punish_degree">是否获得学位</string>
-    <string name="schoolroll_punish_sponsor">处分发起单位</string>
-    <string name="schoolroll_punish_department">处分单位</string>
-    <string name="schoolroll_punish_clause">适用条款</string>
-    <string name="schoolroll_punish_money">处罚金额</string>
-    <string name="schoolroll_punish_status">学籍状态</string>
-    <string name="schoolroll_punish_in_school">是否在校</string>
+    <string name="school_enrollment_punish_date">违纪日期</string>
+    <string name="school_enrollment_punish_brief">违纪简况</string>
+    <string name="school_enrollment_punish_type">违纪类别</string>
+    <string name="school_enrollment_punish_source">处分来源</string>
+    <string name="school_enrollment_punish_name">处分名称</string>
+    <string name="school_enrollment_punish_reason">处分原因</string>
+    <string name="school_enrollment_punish_time">处分日期</string>
+    <string name="school_enrollment_punish_proof">处分文号</string>
+    <string name="school_enrollment_punish_repeal_time">处分撤销日期</string>
+    <string name="school_enrollment_punish_repeal_proof">处分撤销文号</string>
+    <string name="school_enrollment_punish_graduate">是否按时毕业</string>
+    <string name="school_enrollment_punish_degree">是否获得学位</string>
+    <string name="school_enrollment_punish_sponsor">处分发起单位</string>
+    <string name="school_enrollment_punish_department">处分单位</string>
+    <string name="school_enrollment_punish_clause">适用条款</string>
+    <string name="school_enrollment_punish_money">处罚金额</string>
+    <string name="school_enrollment_punish_status">学籍状态</string>
+    <string name="school_enrollment_punish_in_school">是否在校</string>
     <string name="educational_wifi_warning">需要校园网</string>
     <string name="js">JS脚本</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="lorem_ipsum">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
-        volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
-        dui nec risus. Maecenas non sodales nisi, vel dictum dolor. Class aptent taciti sociosqu ad
-        litora torquent per conubia nostra, per inceptos himenaeos. Suspendisse blandit eleifend
-        diam, vel rutrum tellus vulputate quis. Aliquam eget libero aliquet, imperdiet nisl a,
-        ornare ex. Sed rhoncus est ut libero porta lobortis. Fusce in dictum tellus.\n\n
-        Suspendisse interdum ornare ante. Aliquam nec cursus lorem. Morbi id magna felis. Vivamus
-        egestas, est a condimentum egestas, turpis nisl iaculis ipsum, in dictum tellus dolor sed
-        neque. Morbi tellus erat, dapibus ut sem a, iaculis tincidunt dui. Interdum et malesuada
-        fames ac ante ipsum primis in faucibus. Curabitur et eros porttitor, ultricies urna vitae,
-        molestie nibh. Phasellus at commodo eros, non aliquet metus. Sed maximus nisl nec dolor
-        bibendum, vel congue leo egestas.\n\n
-        Sed interdum tortor nibh, in sagittis risus mollis quis. Curabitur mi odio, condimentum sit
-        amet auctor at, mollis non turpis. Nullam pretium libero vestibulum, finibus orci vel,
-        molestie quam. Fusce blandit tincidunt nulla, quis sollicitudin libero facilisis et. Integer
-        interdum nunc ligula, et fermentum metus hendrerit id. Vestibulum lectus felis, dictum at
-        lacinia sit amet, tristique id quam. Cras eu consequat dui. Suspendisse sodales nunc ligula,
-        in lobortis sem porta sed. Integer id ultrices magna, in luctus elit. Sed a pellentesque
-        est.\n\n
-        Aenean nunc velit, lacinia sed dolor sed, ultrices viverra nulla. Etiam a venenatis nibh.
-        Morbi laoreet, tortor sed facilisis varius, nibh orci rhoncus nulla, id elementum leo dui
-        non lorem. Nam mollis ipsum quis auctor varius. Quisque elementum eu libero sed commodo. In
-        eros nisl, imperdiet vel imperdiet et, scelerisque a mauris. Pellentesque varius ex nunc,
-        quis imperdiet eros placerat ac. Duis finibus orci et est auctor tincidunt. Sed non viverra
-        ipsum. Nunc quis augue egestas, cursus lorem at, molestie sem. Morbi a consectetur ipsum, a
-        placerat diam. Etiam vulputate dignissim convallis. Integer faucibus mauris sit amet finibus
-        convallis.\n\n
-        Phasellus in aliquet mi. Pellentesque habitant morbi tristique senectus et netus et
-        malesuada fames ac turpis egestas. In volutpat arcu ut felis sagittis, in finibus massa
-        gravida. Pellentesque id tellus orci. Integer dictum, lorem sed efficitur ullamcorper,
-        libero justo consectetur ipsum, in mollis nisl ex sed nisl. Donec maximus ullamcorper
-        sodales. Praesent bibendum rhoncus tellus nec feugiat. In a ornare nulla. Donec rhoncus
-        libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
-        vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
-    </string>
     <string name="crash">崩溃</string>
     <string name="restart">重启</string>
+    <string name="reservation">预约</string>
+    <string name="wallet">钱包</string>
+    <string name="school_id">学号</string>
+    <string name="sport_credit">运动时</string>
+    <string name="net_id">NetId</string>
+    <string name="admin">管理员</string>
+    <string name="is_swimmer_valid">游泳健康证</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="reservable">可预约</string>
+    <string name="reserved">已预约</string>
+    <string name="reserve">预约</string>
+    <string name="fee">费用</string>
+    <string name="no_train_type">没有培养类型</string>
 
 </resources>

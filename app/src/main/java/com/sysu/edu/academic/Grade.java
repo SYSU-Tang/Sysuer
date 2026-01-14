@@ -1,6 +1,5 @@
 package com.sysu.edu.academic;
 
-import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -62,6 +61,7 @@ public class Grade extends AppCompatActivity {
                     .build());
         }
     }).build();
+    ArrayList<String> years;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,7 @@ public class Grade extends AppCompatActivity {
         binding.term.setOnClickListener(view -> termPop.show());
         binding.year.setOnClickListener(view -> yearPop.show());
         binding.type.setOnClickListener(view -> typePop.show());
-        ScoreAdapter adp = new ScoreAdapter(this);
+        ScoreAdapter adp = new ScoreAdapter();
         binding.scores.setAdapter(adp);
         params = new Params(this);
         params.setCallback(this::getPull);
@@ -119,32 +119,55 @@ public class Grade extends AppCompatActivity {
                             break;
                         case 2: {
                             JSONObject pull = dataString.getJSONObject("data");
-                            pull.getJSONArray("selectTrainType").forEach(a -> typePop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
-                                binding.type.setText(((JSONObject) a).getString("dataName"));
-                                trainType.setValue(((JSONObject) a).getString("dataNumber"));
-                                return false;
-                            }));
-                            binding.type.setText(pull.getJSONArray("selectTrainType").getJSONObject(0).getString("dataName"));
-                            trainType.setValue(pull.getJSONArray("selectTrainType").getJSONObject(0).getString("dataNumber"));
+
+                            // 初始化培养类型选项
+                            JSONArray type = pull.getJSONArray("selectTrainType");
+                            type.forEach(a ->
+                            {
+                                JSONObject typeItem = (JSONObject) a;
+                                typePop.getMenu().add(typeItem.getString("dataName")).setOnMenuItemClickListener(menuItem -> {
+                                    binding.type.setText(typeItem.getString("dataName"));
+                                    trainType.setValue(typeItem.getString("dataNumber"));
+                                    return false;
+                                });
+                            });
+
+                            // 选择培养类型的第一个选项
+                            if (!type.isEmpty()) {
+                                binding.type.setText(type.getJSONObject(0).getString("dataName"));
+                                trainType.setValue(type.getJSONObject(0).getString("dataNumber"));
+                            } else {
+                                params.toast(R.string.no_train_type);
+                            }
+
+                            // 初始化学年选项
+                            years = new ArrayList<>();
                             JSONArray selectYearPull = pull.getJSONArray("selectYearPull");
                             if (selectYearPull != null && !selectYearPull.isEmpty()) {
-                                selectYearPull.forEach(a ->
-                                        yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
-                                            year.postValue(((JSONObject) a).getString("dataName"));
-                                            binding.year.setText(((JSONObject) a).getString("dataNumber"));
-                                            return false;
-                                        }));
+                                selectYearPull.forEach(a -> {
+                                    years.add(((JSONObject) a).getString("dataName"));
+                                    yearPop.getMenu().add(((JSONObject) a).getString("dataName")).setOnMenuItemClickListener(menuItem -> {
+                                        year.postValue(((JSONObject) a).getString("dataName"));
+                                        binding.year.setText(((JSONObject) a).getString("dataNumber"));
+                                        return false;
+                                    });
+                                });
                             }
+
+                            //获取这个学期的信息
                             getNow();
                             break;
                         }
                         case 3: {
+                            // 初始化学期选项
                             JSONObject pull = dataString.getJSONObject("data");
-                            yearPop.getMenu().add(pull.getString("acadYear")).setOnMenuItemClickListener(menuItem -> {
-                                term.postValue(pull.getInteger("acadSemester"));
-                                year.postValue(pull.getString("acadYear"));
-                                return false;
-                            });
+                            if (years != null && !years.contains(pull.getString("acadYear"))) {
+                                yearPop.getMenu().add(pull.getString("acadYear")).setOnMenuItemClickListener(menuItem -> {
+                                    term.postValue(pull.getInteger("acadSemester"));
+                                    year.postValue(pull.getString("acadYear"));
+                                    return false;
+                                });
+                            }
                             term.postValue(pull.getInteger("acadSemester"));
                             year.postValue(pull.getString("acadYear"));
                             break;
@@ -189,8 +212,7 @@ public class Grade extends AppCompatActivity {
         gridLayoutManager.setSpanCount(new Params(this).getColumn());
     }
 
-    // 通用网络请求方法
-    private void sendRequest(String url, int what) {
+    void sendRequest(String url, int what) {
         http.newCall(new Request.Builder().url(url).build()).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
@@ -236,17 +258,15 @@ public class Grade extends AppCompatActivity {
     }
 
     static class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        final Context context;
         final ArrayList<JSONObject> data = new ArrayList<>();
 
-        public ScoreAdapter(Context context) {
-            this.context = context;
+        public ScoreAdapter() {
         }
 
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(ItemScoreBinding.inflate(LayoutInflater.from(context), parent, false).getRoot()) {
+            return new RecyclerView.ViewHolder(ItemScoreBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
 
@@ -262,7 +282,7 @@ public class Grade extends AppCompatActivity {
             }
             binding.subject.setText(info.getString("scoCourseName"));
             binding.score.setText(String.format("%s/%s", info.getString("scoFinalScore"), info.getString("scoPoint")));
-            Markwon.builder(context).build().setMarkdown(binding.info, String.format("- 学分：**%s**\n- 排名：**%s**\n- 课程类别：**%s**\n- 老师：**%s**\n- 是否通过：**%s**\n- 考试性质：**%s**\n- 成绩：**%s**",
+            Markwon.builder(binding.getRoot().getContext()).build().setMarkdown(binding.info, String.format("- 学分：**%s**\n- 排名：**%s**\n- 课程类别：**%s**\n- 老师：**%s**\n- 是否通过：**%s**\n- 考试性质：**%s**\n- 成绩：**%s**",
                     info.getString("scoCredit"),
                     info.getString("teachClassRank"),
                     info.getString("scoCourseCategoryName"),

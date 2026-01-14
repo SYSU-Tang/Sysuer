@@ -19,6 +19,11 @@ public class TitleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.context = context;
     }
 
+    public TitleAdapter(Context context,String title){
+        super();
+        this.context = context;
+        setTitle(title);
+    }
     public String getTitle() {
         return title;
     }

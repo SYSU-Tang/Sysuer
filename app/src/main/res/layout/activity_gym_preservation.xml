@@ -25,106 +25,21 @@
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <LinearLayout
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/content"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <!--<HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:scrollbars="none">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/campus"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    app:chipSpacingVertical="0dp"
-                    app:lineSpacing="0dp"
-                    app:selectionRequired="true"
-                    app:singleLine="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.chip.Chip
-                        style="@style/Widget.Material3.Chip.Assist"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/campus" />
-
-                </com.google.android.material.chip.ChipGroup>
-
-            </HorizontalScrollView>-->
-
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/content"
-                android:name="androidx.navigation.fragment.NavHostFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:navGraph="@navigation/gym_reservation_nav"/>
-            <!--<com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/field"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/fields"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />-->
-
-           <!-- <com.google.android.material.chip.ChipGroup
-                android:id="@+id/field"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:selectionRequired="true"
-                app:singleSelection="true" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/date"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/panel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:selectionRequired="true"
-                app:singleLine="true"
-                app:singleSelection="true" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/time"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:selectionRequired="true"
-                app:singleSelection="true" />
-
-            <com.google.android.material.button.MaterialButton
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/preservation" />-->
-        </LinearLayout>
+            app:defaultNavHost="false"
+            app:navGraph="@navigation/gym_reservation_nav" />
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior"
+        app:menu="@menu/gym" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -23,11 +22,9 @@ public class EvaluationActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         //binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
-        NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController();
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
+        NavigationUI.setupWithNavController(binding.toolbar, ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController(), new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
             supportFinishAfterTransition();
             return true;
-        }).build();
-        NavigationUI.setupWithNavController(binding.toolbar, navController, appBarConfiguration);
+        }).build());
     }
 }

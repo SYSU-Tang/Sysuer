@@ -198,7 +198,7 @@ public class BrowserActivity extends AppCompatActivity {
 
     static class JSAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ArrayList<JSONObject> j = new ArrayList<>();
-        WebView web;
+        final WebView web;
 
         public JSAdapter(WebView web) {
             super();

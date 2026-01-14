@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/gym_campus_nav"
+        android:icon="@drawable/card"
+        android:title="@string/field" />
+    <item
+        android:id="@+id/gym_reservation_fragment"
+        android:icon="@drawable/book"
+        android:title="@string/reservation" />
+    <item
+        android:id="@+id/gym_account_fragment"
+        android:icon="@drawable/account"
+        android:title="@string/account" />
+</menu>

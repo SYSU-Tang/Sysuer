@@ -186,16 +186,16 @@ public class DashboardFragment extends Fragment {
                                 //"<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>"
                                 // binding.nextClass.setText(Html.fromHtml(, Html.FROM_HTML_MODE_COMPACT));
                                 Markwon.builder(requireContext()).usePlugin(new AbstractMarkwonPlugin() {
-                                            @Override
-                                            public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-                                                super.configureSpansFactory(builder);
-                                                builder.appendFactory(Heading.class, (heading, configuration) -> {
-                                                    if (CoreProps.HEADING_LEVEL.require(configuration) == 3) {
-                                                        return new ForegroundColorSpan(Color.parseColor("#6750a4"));
-                                                    }
-                                                    return null;
-                                                });
+                                    @Override
+                                    public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
+                                        super.configureSpansFactory(builder);
+                                        builder.appendFactory(Heading.class, (heading, configuration) -> {
+                                            if (CoreProps.HEADING_LEVEL.require(configuration) == 3) {
+                                                return new ForegroundColorSpan(Color.parseColor("#6750a4"));
                                             }
+                                            return null;
+                                        });
+                                    }
 
                                     @Override
                                     public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {

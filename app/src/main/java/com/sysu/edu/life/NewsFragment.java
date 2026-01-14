@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -24,10 +23,11 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.BrowserActivity;
 import com.sysu.edu.api.Params;
+import com.sysu.edu.api.TargetUrl;
+import com.sysu.edu.databinding.ItemNewsBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
 
 import java.io.IOException;
@@ -62,7 +62,6 @@ public class NewsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        String NEWS = "https://iportal.sysu.edu.cn/#/todayEvent";
         if (savedInstanceState == null) {
             binding = RecyclerViewScrollBinding.inflate(inflater);
             params = new Params(requireActivity());
@@ -72,7 +71,7 @@ public class NewsFragment extends Fragment {
             list.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    if (recyclerView.canScrollVertically(1) && position != 0) {
+                    if (!recyclerView.canScrollVertically(1) && position != 0 && dy > 0) {
                         run.run();
                     }
                     super.onScrolled(recyclerView, dx, dy);
@@ -121,7 +120,7 @@ public class NewsFragment extends Fragment {
                                         JSONObject dataItem = (JSONObject) e;
                                         JSONArray cover = dataItem.getJSONArray("coversPicList");
                                         String image = "";
-                                        if (cover != null && !cover.isEmpty()) {
+                                        if (cover != null && !cover.isEmpty() && cover.getJSONObject(0) != null && cover.getJSONObject(0).getString("outLink") != null) {
                                             image = cover.getJSONObject(0).getString("outLink");
                                         }
                                         newsAdp.add(dataItem.getString("title"), image, dataItem.getString("url"), dataItem.getString("createTime"), dataItem.getJSONObject("source").getString("seedName"));
@@ -153,13 +152,13 @@ public class NewsFragment extends Fragment {
                             }
                         } else if (code == 10003) {
                             params.toast(data.getString("message"));
-                            params.gotoLogin(getView(), NEWS);
+                            params.gotoLogin(getView(), TargetUrl.NEWS);
                         } else if (code == 496) {
                             params.toast(data.getString("message"));
-                            params.gotoLogin(getView(), NEWS);
+                            params.gotoLogin(getView(), TargetUrl.NEWS);
                         } else if (code == 497) {
                             params.toast(data.getString("message"));
-                            params.gotoLogin(getView(), NEWS);
+                            params.gotoLogin(getView(), TargetUrl.NEWS);
                         } else {
                             params.toast(data.getString("message"));
                         }
@@ -168,14 +167,11 @@ public class NewsFragment extends Fragment {
                 }
             };
         }
-        run = () -> {
-            List.of(this::getNews, this::getSubscription, this::getNotice, (Runnable) this::getDailyNews).get(position).run();
-            page += 1;
-        };
+        run = () -> List.of(this::getNews, this::getSubscription, this::getNotice, (Runnable) this::getDailyNews).get(position).run();
         if (!params.getAuthorization().isEmpty()) {
             run.run();
         } else {
-            params.gotoLogin(getView(), NEWS);
+            params.gotoLogin(getView(), TargetUrl.NEWS);
         }
         //getAuthorization();
         return binding.getRoot();
@@ -209,7 +205,7 @@ public class NewsFragment extends Fragment {
 
     void getSubscription() {
         http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
-                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"3ytr4e6c\",\"notice\":false}", MediaType.parse("application/json")))
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page++ + ",\"apiCode\":\"3ytr4e6c\",\"notice\":false}", MediaType.parse("application/json")))
                 .header("Authorization", params.getAuthorization())
                 .header("Cookie", params.getCookie())
                 .build()).enqueue(new Callback() {
@@ -260,7 +256,7 @@ public class NewsFragment extends Fragment {
 
     void getNotice() {
         http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
-                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"3ytunvv6\",\"notice\":false}", MediaType.parse("application/json")))
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page++ + ",\"apiCode\":\"3ytunvv6\",\"notice\":false}", MediaType.parse("application/json")))
                 .header("Authorization", params.getAuthorization())
                 .header("Cookie", params.getCookie())
                 .build()).enqueue(new Callback() {
@@ -286,7 +282,7 @@ public class NewsFragment extends Fragment {
 
     void getDailyNews() {
         http.newCall(new Request.Builder().url("https://iportal.sysu.edu.cn/ai_service/content-portal/user/content/page")
-                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page + ",\"apiCode\":\"4cef8rqw\",\"notice\":false}", MediaType.parse("application/json")))
+                .post(RequestBody.create("{\"pageSize\":20,\"currentPage\":" + page++ + ",\"apiCode\":\"4cef8rqw\",\"notice\":false}", MediaType.parse("application/json")))
                 .header("Authorization", params.getAuthorization())
                 .header("Cookie", params.getCookie())
                 .build()).enqueue(new Callback() {
@@ -347,27 +343,25 @@ class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_news, parent, false)) {
+
+        return new RecyclerView.ViewHolder(ItemNewsBinding.inflate(LayoutInflater.from(context), parent, false).getRoot()) {
         };
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        MaterialTextView title = holder.itemView.findViewById(R.id.title);
-        MaterialTextView content = holder.itemView.findViewById(R.id.content);
-        AppCompatImageView image = holder.itemView.findViewById(R.id.image);
+        ItemNewsBinding binding = ItemNewsBinding.bind(holder.itemView);
         holder.itemView.setOnClickListener(v -> context.startActivity(new Intent(context, BrowserActivity.class).setData(Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context, v, "miniapp").toBundle())
                 //context.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(data.get(position).get("url"))), ActivityOptionsCompat.makeSceneTransitionAnimation(context, v, "miniapp").toBundle())
         );
-        title.setText(data.get(position).getOrDefault("title", ""));
-        content.setText(String.format("#%s #%s", data.get(position).getOrDefault("source", ""), data.get(position).getOrDefault("time", "")));
+        binding.title.setText(data.get(position).getOrDefault("title", ""));
+        binding.content.setText(String.format("#%s #%s", data.get(position).getOrDefault("source", ""), data.get(position).getOrDefault("time", "")));
         String img = data.get(position).get("image");
         if (img != null && !img.isEmpty()) {
             Glide.with(context).load(img)
-                    // .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
-                    .placeholder(R.drawable.logo)
+                    //.placeholder(R.drawable.logo)
                     .override(new Params(context).dpToPx(120), new Params(context).dpToPx(120)).optionalFitCenter().transform(new RoundedCorners(16))
-                    .into(image);
+                    .into(binding.image);
         }
     }
 
@@ -376,11 +370,6 @@ class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyItemInserted(getItemCount() - 1);
     }
 
-    //    NewsAdp setCookie(String cookie)
-//    {
-//        this.cookie=cookie;
-//        return this;
-//    }
     @Override
     public int getItemCount() {
         return data.size();

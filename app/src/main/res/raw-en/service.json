@@ -314,6 +314,11 @@
         "id": 907,
         "name": "Payment Hall",
         "description": "Campus online payment platform for paying various fees such as tuition, accommodation, and miscellaneous fees"
+      },
+      {
+        "id": 908,
+        "name": "Sports Venues",
+        "description": "Sports venue query and reservation system, with functions such as sports facility information, online reservations, and real-time status updates"
       }
     ]
   },

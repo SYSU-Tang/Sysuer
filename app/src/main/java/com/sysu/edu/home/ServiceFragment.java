@@ -35,13 +35,14 @@ import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.academic.Grade;
 import com.sysu.edu.academic.MajorInfo;
 import com.sysu.edu.academic.RegisterInfo;
-import com.sysu.edu.academic.SchoolRoll;
+import com.sysu.edu.academic.SchoolEnrollmentActivity;
 import com.sysu.edu.academic.SchoolWorkWarning;
 import com.sysu.edu.academic.TrainingSchedule;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemServiceBoxBinding;
+import com.sysu.edu.life.GymReservationActivity;
 import com.sysu.edu.life.News;
 import com.sysu.edu.life.Pay;
 import com.sysu.edu.life.SchoolBus;
@@ -88,7 +89,7 @@ public class ServiceFragment extends Fragment {
     // 初始化actions HashMap
     private void initializeActionMap() {
         // 学术服务 (id: 1xx)
-        actionMap.put(101, newActivity(SchoolRoll.class));           // 学籍
+        actionMap.put(101, newActivity(SchoolEnrollmentActivity.class));           // 学籍
         actionMap.put(102, newActivity(CETActivity.class));          // 四六级
         actionMap.put(103, newActivity(RegisterInfo.class));         // 注册
         actionMap.put(104, newActivity(SchoolWorkWarning.class));    // 学业预警
@@ -177,6 +178,9 @@ public class ServiceFragment extends Fragment {
         actionMap.put(905, browse("https://gongfang.sysu.edu.cn/h5_separation/repair_apply/index.html#/applyDetail/20251231162524362223"));                 // 报修
         actionMap.put(906, browse("https://zhny.sysu.edu.cn/h5/#/"));        // 水电费
         actionMap.put(907, newActivity(Pay.class));                          // 缴费大厅
+        actionMap.put(908, newActivity(GymReservationActivity.class));     // 体育馆预约
+
+
 
         // 人工智能服务 (id: 10xx)
         actionMap.put(1001, browse("https://chat.sysu.edu.cn/zntgc/agent"));     // Deepseek
