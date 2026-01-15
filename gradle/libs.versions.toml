@@ -22,12 +22,12 @@ annotation = "1.9.1"
 kotlin = "2.3.0"
 lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.12.2"
-composeBom = "2025.12.01"
+composeBom = "2026.01.00"
 preference = "1.2.1"
 workRuntime = "2.11.0"
 materialPreference = "2.0.0"
 materialVersion = "2.7.2"
-firebaseCrashlytics = "20.0.3"
+firebaseCrashlytics = "20.0.4"
 googleGmsGoogleServices = "4.4.4"
 googleFirebaseCrashlytics = "3.0.6"
 core = "4.6.2"
@@ -61,7 +61,7 @@ ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.10.0" }
+ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.10.1" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
 preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }

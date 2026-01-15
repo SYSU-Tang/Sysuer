@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,14 +32,15 @@ import java.util.List;
 
 public class StaggeredFragment extends Fragment {
 
-    public RecyclerViewScrollBinding binding;
-    public int position;
-    Params params;
-    StaggeredAdapter staggeredAdapter;
-    StaggeredGridLayoutManager lm;
+    public static RecyclerViewScrollBinding binding;
     final MutableLiveData<Integer> orientation = new MutableLiveData<>(StaggeredGridLayoutManager.VERTICAL);
     final MutableLiveData<Runnable> scrollBottom = new MutableLiveData<>();
     final MutableLiveData<Boolean> nestedScrollingEnabled = new MutableLiveData<>(true);
+    final MutableLiveData<Boolean> hideNull = new MutableLiveData<>(false);
+    public int position;
+    protected Params params;
+    protected StaggeredAdapter staggeredAdapter;
+    StaggeredGridLayoutManager lm;
 
     public static StaggeredFragment newInstance(int position) {
         StaggeredFragment s = new StaggeredFragment();
@@ -74,6 +74,11 @@ public class StaggeredFragment extends Fragment {
                 });
             }
         });
+        hideNull.observe(getViewLifecycleOwner(), b -> {
+            if (b != null) {
+                staggeredAdapter.setHideNull(b);
+            }
+        });
         binding.recyclerView.setAdapter(staggeredAdapter);
         nestedScrollingEnabled.observe(getViewLifecycleOwner(), binding.recyclerView::setNestedScrollingEnabled);
 
@@ -93,14 +98,7 @@ public class StaggeredFragment extends Fragment {
     }
 
     public void setHideNull(boolean hide) {
-        staggeredAdapter.setHideNull(hide);
-    }
-
-    public void setHideNull(Context context, boolean hide) {
-        if (staggeredAdapter == null) {
-            staggeredAdapter = new StaggeredAdapter(context);
-        }
-        setHideNull(hide);
+        hideNull.setValue(hide);
     }
 
     public void add(String title, @Nullable Integer icon, List<String> keys, List<String> values) {
@@ -132,70 +130,88 @@ public class StaggeredFragment extends Fragment {
         staggeredAdapter.clear();
     }
 
-    static class ColumnAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    static class TwoColumnsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final boolean hideNull;
-        final List<String> value;
-        final Context context;
-        final List<String> key;
+        public List<String> value;
+        List<String> key;
+        StaggeredListener rowListener;
+        Integer itemCount;
 
-        public ColumnAdp(Context context, List<String> data, List<String> value, boolean hideNull) {
+        public TwoColumnsAdapter(List<String> data, List<String> value, boolean hideNull) {
             super();
             this.key = data;
             this.hideNull = hideNull;
             this.value = value;
-            this.context = context;
+        }
+
+        public void setValue(List<String> value) {
+            this.value = value;
+            notifyItemRangeChanged(0, getItemCount());
+        }
+        public void setKey(List<String> key) {
+            this.key = key;
+            notifyItemRangeChanged(0, getItemCount());
         }
 
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            TwoColumnBinding b = TwoColumnBinding.inflate(LayoutInflater.from(context), parent, false);
-            b.item.setOnClickListener(view -> {
-            });
-            return new RecyclerView.ViewHolder(b.getRoot()) {
+            TwoColumnBinding twoColumnBinding = TwoColumnBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+            if (rowListener != null) {
+                rowListener.onCreate(TwoColumnsAdapter.this,twoColumnBinding);
+            }
+            return new RecyclerView.ViewHolder(twoColumnBinding.getRoot()) {
             };
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            ((TextView) holder.itemView.findViewById(R.id.key)).setText(key.get(position));
+            TwoColumnBinding b = TwoColumnBinding.bind(holder.itemView);
+            b.key.setText(key.get(position));
             holder.itemView.setOnClickListener(v -> {
-                ClipboardManager clip = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipboardManager clip = (ClipboardManager) b.getRoot().getContext().getSystemService(Context.CLIPBOARD_SERVICE);
                 clip.setPrimaryClip(ClipData.newPlainText(key.get(position), value.get(position)));
             });
             if (position < value.size() && value.get(position) != null) {
-                ((TextView) holder.itemView.findViewById(R.id.value)).setText(value.get(position));
+                b.value.setText(value.get(position));
             } else if (hideNull) {
                 holder.itemView.setVisibility(View.GONE);
                 holder.itemView.getLayoutParams().height = 0;
             }
+            if (rowListener != null) {
+                rowListener.onBind(TwoColumnsAdapter.this,holder,position);
+            }
+        }
+
+        public void setListener(StaggeredListener listener) {
+            this.rowListener = listener;
         }
 
         @Override
         public int getItemCount() {
-            return key.size();
+            return itemCount==null ? key.size() : itemCount;
+        }
+
+        public void setItemCount(Integer count){
+            itemCount = count;
         }
     }
 
     public static class StaggeredAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public final ArrayList<String> titles = new ArrayList<>();
-        boolean hideNull;
         final Context context;
         final ArrayList<List<String>> keys = new ArrayList<>();
         final ArrayList<Integer> icons = new ArrayList<>();
         final ArrayList<List<String>> values = new ArrayList<>();
+        public TwoColumnsAdapter twoColumnsAdapter;
         StaggeredListener staggeredListener;
+        boolean hideNull;
 
         public StaggeredAdapter(Context c) {
             super();
             this.context = c;
             this.hideNull = false;
         }
-        /*public StaggeredAdapter(Context c,boolean hideNull){
-            super();
-            this.context = c;
-            this.hideNull=hideNull;
-        }*/
 
         public void setHideNull(boolean hideNull) {
             this.hideNull = hideNull;
@@ -240,19 +256,18 @@ public class StaggeredFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemCardBinding item = ItemCardBinding.bind(holder.itemView);
-            TextView title = item.title;
-            title.setText(titles.get(position));
+            item.title.setText(titles.get(position));
             if (icons.get(position) != null) {
-                title.setCompoundDrawablePadding(new Params((FragmentActivity) context).dpToPx(4));
+                item.title.setCompoundDrawablePadding(new Params((FragmentActivity) context).dpToPx(4));
                 Drawable icon = AppCompatResources.getDrawable(context, icons.get(position));
                 if (icon != null) {
                     icon.setBounds(0, 0, 72, 72);
-                    title.setCompoundDrawables(icon, null, null, null);
+                    item.title.setCompoundDrawables(icon, null, null, null);
                 }
             }
             item.title.setText(titles.get(position));
-            ColumnAdp adp = new ColumnAdp(context, keys.get(position), values.get(position), hideNull);
-            ((RecyclerView) holder.itemView.findViewById(R.id.recycler_view)).setAdapter(adp);
+            twoColumnsAdapter = new TwoColumnsAdapter(keys.get(position), values.get(position), hideNull);
+            ((RecyclerView) holder.itemView.findViewById(R.id.recycler_view)).setAdapter(twoColumnsAdapter);
             if (staggeredListener != null) {
                 staggeredListener.onBind(this, holder, position);
             }

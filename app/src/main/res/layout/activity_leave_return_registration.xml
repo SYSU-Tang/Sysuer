@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        style="@style/SYSU.AppBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:transitionName="miniapp"
+            app:layout_scrollFlags="enterAlways|scroll"
+            app:navigationIcon="?homeAsUpIndicator"
+            app:title="@string/leave_return_registration" />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/year"
+            app:startIconDrawable="@drawable/calendar">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/years"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/leave_return_list_fragment"
+        android:name="com.sysu.edu.academic.LeaveReturnListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

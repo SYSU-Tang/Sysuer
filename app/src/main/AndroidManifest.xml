@@ -23,14 +23,21 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.SYSU"
+        android:usesCleartextTraffic="true"
         tools:targetApi="36">
+        <activity
+            android:name=".academic.LeaveReturnRegistrationActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true" />
+        <activity
+            android:name=".life.NetPayActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true" />
         <activity
             android:name=".CrashActivity"
             android:configChanges="orientation|screenSize"
-            android:exported="true"
-            />
+            android:exported="true" />
         <activity
             android:name=".academic.CourseSelectedActivity"
             android:configChanges="orientation|screenSize"

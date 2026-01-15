@@ -71,30 +71,21 @@ public class CourseCompletion extends AppCompatActivity {
                                     }
                                     ((StaggeredFragment) adp.getItem(0)).staggeredAdapter.setListener(new StaggeredListener() {
                                         @Override
-                                        public void onBind(StaggeredFragment.StaggeredAdapter a, RecyclerView.ViewHolder holder, int position) {
+                                        public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> a, RecyclerView.ViewHolder holder, int position) {
+                                            List<String> item = ((StaggeredFragment.StaggeredAdapter) a).values.get(position);
                                             LinearProgressIndicator progress = holder.itemView.findViewById(R.id.progress);
-                                            progress.setMax((int) Float.parseFloat(a.values.get(position).get(3)));
-                                            progress.setProgress((int) Float.parseFloat(a.values.get(position).get(4)));
+                                            progress.setMax((int) Float.parseFloat(item.get(3)));
+                                            progress.setProgress((int) Float.parseFloat(item.get(4)));
                                         }
 
                                         @Override
-                                        public void onCreate(StaggeredFragment.StaggeredAdapter a, ViewBinding binding) {
+                                        public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> a, ViewBinding binding) {
                                             LinearProgressIndicator progress = new LinearProgressIndicator(CourseCompletion.this);
                                             progress.setId(R.id.progress);
                                             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
                                             lp.setMargins(params.dpToPx(12), params.dpToPx(6), params.dpToPx(12), params.dpToPx(12));
                                             progress.setLayoutParams(lp);
                                             ((ItemCardBinding) binding).getRoot().addView(progress);
-                                        }
-
-                                        @Override
-                                        public void onBind(NewsFragment.NewsAdp a, RecyclerView.ViewHolder holder, int position) {
-
-                                        }
-
-                                        @Override
-                                        public void onCreate(NewsFragment.NewsAdp a, ViewBinding binding) {
-
                                         }
                                     });
                                     ((StaggeredFragment) adp.getItem(0)).add(CourseCompletion.this, values.get(0), List.of("课程类别", "培养方案学分要求", "免修课程学分", "实际毕业学分要求", "实得"), values);

@@ -33,6 +33,7 @@ import com.sysu.edu.academic.CourseSelectionActivity;
 import com.sysu.edu.academic.EvaluationActivity;
 import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.academic.Grade;
+import com.sysu.edu.academic.LeaveReturnRegistrationActivity;
 import com.sysu.edu.academic.MajorInfo;
 import com.sysu.edu.academic.RegisterInfo;
 import com.sysu.edu.academic.SchoolEnrollmentActivity;
@@ -43,6 +44,7 @@ import com.sysu.edu.databinding.FragmentServiceBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemServiceBoxBinding;
 import com.sysu.edu.life.GymReservationActivity;
+import com.sysu.edu.life.NetPayActivity;
 import com.sysu.edu.life.News;
 import com.sysu.edu.life.Pay;
 import com.sysu.edu.life.SchoolBus;
@@ -94,6 +96,7 @@ public class ServiceFragment extends Fragment {
         actionMap.put(103, newActivity(RegisterInfo.class));         // 注册
         actionMap.put(104, newActivity(SchoolWorkWarning.class));    // 学业预警
         actionMap.put(105, newActivity(CourseCompletion.class));     // 课程完成情况
+        actionMap.put(106, newActivity(LeaveReturnRegistrationActivity.class));     // 请假返回登记
 
         // 学习服务 (id: 2xx)
         actionMap.put(201, newActivity(TodoActivity.class));         // 待办
@@ -179,6 +182,7 @@ public class ServiceFragment extends Fragment {
         actionMap.put(906, browse("https://zhny.sysu.edu.cn/h5/#/"));        // 水电费
         actionMap.put(907, newActivity(Pay.class));                          // 缴费大厅
         actionMap.put(908, newActivity(GymReservationActivity.class));     // 体育馆预约
+        actionMap.put(909, newActivity(NetPayActivity.class));              // 校园网
 
 
 

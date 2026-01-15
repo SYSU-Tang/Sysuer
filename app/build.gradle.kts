@@ -14,8 +14,8 @@ android {
         applicationId = "com.sysu.edu"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1928
-        versionName = "1.0.5"
+        versionCode = 1929
+        versionName = "1.0.7(beta)"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -27,16 +27,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-//            firebaseCrashlytics {
-//                mappingFileUploadEnabled = false
-//                nativeSymbolUploadEnabled = false
-//            }
         }
 
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         viewBinding = true

@@ -28,6 +28,11 @@
         "id": 105,
         "name": "Course Progress",
         "description": "Course completion inquiry, view completed courses, credit statistics, and graduation requirement completion progress"
+      },
+      {
+        "id": 106,
+        "name": "Left Return Campus Registration",
+        "description":"Left Return Campus Registration system, where students submit off-campus registration applications before the end of the semester, recording off-campus departure time, reason, etc."
       }
     ]
   },
@@ -319,6 +324,11 @@
         "id": 908,
         "name": "Sports Venues",
         "description": "Sports venue query and reservation system, with functions such as sports facility information, online reservations, and real-time status updates"
+      },
+      {
+        "id": 909,
+        "name": "Campus Network",
+        "description": "Campus network management system"
       }
     ]
   },

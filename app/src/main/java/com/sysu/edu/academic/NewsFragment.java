@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.textview.MaterialTextView;
-import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ItemNewsBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
@@ -87,8 +85,7 @@ public class NewsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            MaterialTextView title = holder.itemView.findViewById(R.id.title);
-            MaterialTextView content = holder.itemView.findViewById(R.id.content);
+            ItemNewsBinding binding = ItemNewsBinding.bind(holder.itemView);
 
             // AppCompatImageView image = holder.itemView.findViewById(R.id.image);
             if(listener!=null){listener.onBind(this,holder,position);}
@@ -100,8 +97,8 @@ public class NewsFragment extends Fragment {
     //            title.setCompoundDrawablePadding(12);
     //            title.setCompoundDrawables(latest,null,null,null);
     //        }
-            title.setText(data.get(position).getString("title"));
-            content.setText(data.get(position).getString("deliveryDate"));
+            binding.title.setText(data.get(position).getString("title"));
+            binding.content.setText(data.get(position).getString("deliveryDate"));
     //        String img = data.get(position).get("image");
     //        if (img != null && !img.isEmpty()) {
     //            Glide.with(context).load(img)

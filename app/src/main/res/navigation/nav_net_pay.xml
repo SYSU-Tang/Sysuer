@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/net_order_fragment">
+
+    <fragment
+        android:id="@+id/net_order_fragment"
+        android:name="com.sysu.edu.life.NetOrderFragment">
+        <argument
+            android:name="code"
+            android:defaultValue="0"
+            app:argType="integer"/>
+    </fragment>
+    <fragment
+        android:id="@+id/net_status_fragment"
+        android:name="com.sysu.edu.life.NetOrderFragment">
+        <argument
+            android:name="code"
+            android:defaultValue="1"
+            app:argType="integer"/>
+    </fragment>
+</navigation>

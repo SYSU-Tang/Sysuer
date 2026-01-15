@@ -36,11 +36,10 @@ import io.noties.markwon.ext.tables.TablePlugin;
 
 public class CrashActivity extends AppCompatActivity {
 
+    final MutableLiveData<String> crash = new MutableLiveData<>();
     ActivityCrashBinding binding;
     String crashInfo;
     Params params;
-
-    final MutableLiveData<String> crash = new MutableLiveData<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +75,8 @@ public class CrashActivity extends AppCompatActivity {
     }
 
 
-    private void openIssueInBrowser() {
-        new Thread(() -> {
+    void openIssueInBrowser() {
+//        new Thread(() -> {
             try {
                 String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                         Locale.getDefault()).format(new Date());
@@ -95,23 +94,15 @@ public class CrashActivity extends AppCompatActivity {
 
                 String title = String.format("[崩溃报告] %s - %s", exceptionType, timestamp);
 
-
                 final String githubUrl = generateGitHubWebIssueUrl(title);
 
                 params.copy("crash_issue", crash.getValue());
                 params.toast(R.string.copy_successfully);
-                runOnUiThread(() -> openBrowserWithUrl(githubUrl));
 
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(githubUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             } catch (Exception ignored) {
             }
-        }).start();
-    }
-
-    void openBrowserWithUrl(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(url));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+//        }).start();
     }
 
 

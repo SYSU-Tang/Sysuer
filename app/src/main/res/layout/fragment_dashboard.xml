@@ -228,14 +228,14 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/week17" />
+                android:text="@string/week18" />
 
             <Button
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/week_18"
-                android:text="@string/week18" />
+                android:text="@string/week19" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.material.card.MaterialCardView

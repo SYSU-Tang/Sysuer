@@ -37,8 +37,8 @@ import java.util.Locale;
 public class Params {
     static final Calendar c = Calendar.getInstance();
     final SharedPreferences sharedPreferences;
-    ActivityResultLauncher<Intent> launch;
     final FragmentActivity activity;
+    ActivityResultLauncher<Intent> launch;
     Runnable afterLogin;
 
     public Params(FragmentActivity activity) {
@@ -224,14 +224,18 @@ public class Params {
                 }
                 toast(R.string.logging_in);
                 LoginViewModel model = new ViewModelProvider(activity).get(LoginViewModel.class);
-                WebView web = LoginWebFragment.getWebView(activity, model, () -> model.setUrl(String.format("javascript:(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", account, password)));
+                WebView web = LoginWebFragment.getWebView(activity, model, () -> model.setUrl(String.format("javascript:(function(){" +
+                        "function waitElement(selector, callback) {" +
+                        "const element = document.querySelector(selector);" +
+                        "if (element) {callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}" +
+                        "waitElement('.para-widget-account-psw', () => {" +
+                        "var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click();});})()", account, password)));
                 LoginActivity.initModel(activity, model, url, () -> {
-                    //activity.recreate();
                     afterLogin.run();
                     web.destroy();
                     toast(R.string.login_successfully);
                 });
-                //((FrameLayout)activity.findViewById(android.R.id.content)).addView(web);
+//                ((FrameLayout)activity.findViewById(android.R.id.content)).addView(web);
                 break;
             case "2":
             default:

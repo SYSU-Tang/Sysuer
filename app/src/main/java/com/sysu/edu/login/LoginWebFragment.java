@@ -34,14 +34,14 @@ public class LoginWebFragment extends Fragment {
                 //boolean reloadCap = Objects.equals(sessionId, CookieManager.getInstance().getCookie(url));
                 //model.setSessionID(CookieManager.getInstance().getCookie(url));
                 System.out.println(url);
-                if (Pattern.compile("cas\\.sysu\\.edu\\.cn/selfcare").matcher(url).find()) {
+                if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/selfcare").matcher(url).find()) {
                     view.loadUrl(Objects.requireNonNull(model.getTarget().getValue()));
                     return;
                 }
-                if (Pattern.compile("cas\\.sysu\\.edu\\.cn/esc-sso/login/page\\?isLogin=fail").matcher(url).find()) {
-//                    System.out.println("登录中");
+                if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page").matcher(url).find()) {
+                    //System.out.println("登录中");
                     model.setLogin(false);
-                    handler.postDelayed(afterLoad, 500);
+                    afterLoad.run();
                     return;
                 }
                 String element = "";
