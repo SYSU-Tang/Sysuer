@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -95,8 +96,8 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     } else {
                         int code = msg.getData().getInt("code");
 
-                        System.out.println(msg.what);
-                        System.out.println(msg.getData().getString("response"));
+//                        System.out.println(msg.what);
+//                        System.out.println(msg.getData().getString("response"));
                         if (code == 200) {
                             JSONObject json = JSONObject.parse(msg.getData().getString("response"));
                             if (json != null && json.getInteger("code") == 200) {
@@ -111,10 +112,17 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
 //                                    });
                                     isStay = data.getString("sflx");
                                     try {
-                                        leaveDate.postValue(Objects.requireNonNull(new SimpleDateFormat("yyyy-MM-dd").parse(data.getString("yjlxsj"))).getTime());
-                                        returnDate.postValue(Objects.requireNonNull(new SimpleDateFormat("yyyy-MM-dd").parse(data.getString("yjfxsj"))).getTime());
+                                        Date leaveTime = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(data.getString("yjlxsj") == null ? "" : data.getString("yjlxsj"));
+                                        if (leaveTime != null){
+                                            leaveDate.postValue(leaveTime.getTime());
+                                        }
+                                        Date returnTime = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(data.getString("yjfxsj") == null ? "" : data.getString("yjfxsj"));
+                                        if (returnTime != null){
+                                            returnDate.postValue(returnTime.getTime());
+                                        }
+                                        returnDate.postValue(Objects.requireNonNull((new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())).parse(data.getString("yjfxsj"))).getTime());
                                     } catch (ParseException e) {
-                                        throw new RuntimeException(e);
+                                        //throw new RuntimeException(e);
                                     }
 
                                     country = data.getString("wcdgj");
@@ -264,7 +272,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     button.setLayoutParams(lp);
                     button.setOnClickListener(v -> {
                         if (isStay.equals("0")) {
-                            save(id, isStay, leaveDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd").format(new Date(leaveDate.getValue())), returnDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd").format(returnDate.getValue()), leave.get(3), leave.get(4), country, province, city);
+                            save(id, isStay, leaveDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(leaveDate.getValue())), returnDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault()).format(returnDate.getValue()), leave.get(3), leave.get(4), country, province, city);
                         } else {
 
                             save(id, isStay, stay.get(1));
@@ -399,7 +407,8 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
 
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int pos) {
+            int position = holder.getBindingAdapterPosition();
             ItemTitleBinding binding = ItemTitleBinding.bind(holder.itemView);
             binding.title.setText(value.get(position));
             binding.getRoot().setBackgroundResource(position == selection ? R.drawable.bg_selected : R.drawable.box_background);

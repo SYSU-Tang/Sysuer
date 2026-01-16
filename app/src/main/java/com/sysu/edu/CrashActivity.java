@@ -77,31 +77,31 @@ public class CrashActivity extends AppCompatActivity {
 
     void openIssueInBrowser() {
 //        new Thread(() -> {
-            try {
-                String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                        Locale.getDefault()).format(new Date());
-                String exceptionType = "Unknown Exception";
+        try {
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                    Locale.getDefault()).format(new Date());
+            String exceptionType = "Unknown Exception";
 
-                if (crashInfo != null && !crashInfo.isEmpty()) {
-                    String[] lines = crashInfo.split("\n");
-                    if (lines.length > 0) {
-                        String firstLine = lines[0];
-                        if (firstLine.contains(":")) {
-                            exceptionType = firstLine.split(":")[0];
-                        }
+            if (crashInfo != null && !crashInfo.isEmpty()) {
+                String[] lines = crashInfo.split("\n");
+                if (lines.length > 0) {
+                    String firstLine = lines[0];
+                    if (firstLine.contains(":")) {
+                        exceptionType = firstLine.split(":")[0];
                     }
                 }
-
-                String title = String.format("[崩溃报告] %s - %s", exceptionType, timestamp);
-
-                final String githubUrl = generateGitHubWebIssueUrl(title);
-
-                params.copy("crash_issue", crash.getValue());
-                params.toast(R.string.copy_successfully);
-
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(githubUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            } catch (Exception ignored) {
             }
+
+            String title = String.format("[崩溃报告] %s - %s", exceptionType, timestamp);
+
+            final String githubUrl = generateGitHubWebIssueUrl(title);
+
+            params.copy("crash_issue", crash.getValue());
+            params.toast(R.string.copy_successfully);
+
+            startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(githubUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (Exception ignored) {
+        }
 //        }).start();
     }
 

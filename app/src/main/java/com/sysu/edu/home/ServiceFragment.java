@@ -32,7 +32,7 @@ import com.sysu.edu.academic.CourseSelectedActivity;
 import com.sysu.edu.academic.CourseSelectionActivity;
 import com.sysu.edu.academic.EvaluationActivity;
 import com.sysu.edu.academic.ExamActivity;
-import com.sysu.edu.academic.Grade;
+import com.sysu.edu.academic.GradeActivity;
 import com.sysu.edu.academic.LeaveReturnRegistrationActivity;
 import com.sysu.edu.academic.MajorInfo;
 import com.sysu.edu.academic.RegisterInfo;
@@ -160,7 +160,7 @@ public class ServiceFragment extends Fragment {
         actionMap.put(704, newActivity(ExamActivity.class));                 // 考试
         actionMap.put(705, newActivity(CalendarActivity.class));             // 校历
         actionMap.put(706, newActivity(ClassroomQueryActivity.class));       // 自习室
-        actionMap.put(707, newActivity(Grade.class));                        // 成绩
+        actionMap.put(707, newActivity(GradeActivity.class));                        // 成绩
         actionMap.put(709, browse("https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView")); // 个人培养方案
         actionMap.put(710, newActivity(TrainingSchedule.class));             // 培养方案
         actionMap.put(711, newActivity(MajorInfo.class));                    // 专业
