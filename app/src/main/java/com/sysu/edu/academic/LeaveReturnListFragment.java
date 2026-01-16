@@ -73,7 +73,7 @@ public class LeaveReturnListFragment extends StaggeredFragment {
                                     MaterialButton button = holder.itemView.findViewById(R.id.button);
                                     button.setText(isRegistering ? status.equals("registering")? "开始登记":"修改登记" : "查看详情");
                                     button.setOnClickListener(v -> {
-//                                        if (isRegistering) {
+                                        if (isRegistering) {
                                             Bundle arg = new Bundle();
                                             arg.putString("Id", json.getJSONArray("data").getJSONObject(position).getString("cjlfxgzId"));
 
@@ -82,7 +82,7 @@ public class LeaveReturnListFragment extends StaggeredFragment {
                                                     .replace(R.id.leave_return_list_fragment, LeaveReturnRegistrationFragment.class, arg)
                                                     .addToBackStack(null)
                                                     .commit();
-//                                        }
+                                        }
                                     });
                                 }
 
