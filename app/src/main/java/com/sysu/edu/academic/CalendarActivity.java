@@ -215,10 +215,7 @@ public class CalendarActivity extends AppCompatActivity {
                                     menu.add(R.string.share).setOnMenuItemClickListener(item -> {
                                         String fileName = System.currentTimeMillis() + ".jpg";
                                         save(url, Objects.requireNonNull(getExternalCacheDir()).getPath(), fileName, false);
-                                        Intent intent = new Intent(Intent.ACTION_SEND);
-                                        intent.setType("image/jpeg");
-                                        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(CalendarActivity.this, "com.sysu.edu.fileProvider", new File(Objects.requireNonNull(getExternalCacheDir()).getPath() + "/" + fileName)));
-                                        startActivity(Intent.createChooser(intent, getString(R.string.share)));
+                                        startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("image/jpeg").putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(CalendarActivity.this, "com.sysu.edu.fileProvider", new File(Objects.requireNonNull(getExternalCacheDir()).getPath() + "/" + fileName))), getString(R.string.share)));
                                         return true;
                                     });
                                     pop.show();
@@ -244,10 +241,9 @@ public class CalendarActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
                 msg.what = 1;
-                Matcher matcher1 = Pattern.compile("block-region-left.+?>([\\s\\S]+?)<.+?block-region-left-below").matcher(response.body().string());//
-                // .usePattern()
-                if (matcher1.find()) {
-                    msg.obj = Pattern.compile("</?(?!img|strong).+?>|\\s+").matcher(Objects.requireNonNull(matcher1.group(1))).replaceAll("");
+                Matcher matcher = Pattern.compile("block-region-left.+?>([\\s\\S]+?)<.+?block-region-left-below").matcher(response.body().string());//
+                if (matcher.find()) {
+                    msg.obj = Pattern.compile("</?(?!img|strong).+?>|\\s+").matcher(Objects.requireNonNull(matcher.group(1))).replaceAll("");
                     handler.sendMessage(msg);
                 }
             }

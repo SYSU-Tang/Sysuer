@@ -1,7 +1,6 @@
 package com.sysu.edu.academic;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -44,11 +44,11 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class CourseSelectedActivity extends AppCompatActivity {
-    static Params params;
-    static ActivityResultLauncher<Intent> launcher;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
-    int page = 0;
     final MutableLiveData<String> response = new MutableLiveData<>();
+    Params params;
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    ActivityResultLauncher<Intent> launcher;
+    int page = 0;
     Handler handler;
 
     @Override
@@ -59,7 +59,7 @@ public class CourseSelectedActivity extends AppCompatActivity {
         params.setCallback(this::getSelectedCourses);
         launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
         });
-        CourseSelectedAdapter adp = new CourseSelectedAdapter(this);
+        CourseSelectedAdapter adp = new CourseSelectedAdapter();
         setContentView(binding.getRoot());
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         binding.search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -131,19 +131,16 @@ public class CourseSelectedActivity extends AppCompatActivity {
         });
     }
 
-    static class CourseSelectedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public static class CourseSelectedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        final Context context;
         final ArrayList<JSONObject> data = new ArrayList<>();
 
-        public CourseSelectedAdapter(Context context) {
-            this.context = context;
-
+        public CourseSelectedAdapter() {
+            super();
         }
 
         public void add(JSONObject jsonObject) {
             data.add(jsonObject);
-
             notifyItemInserted(getItemCount() - 1);
         }
 
@@ -151,7 +148,7 @@ public class CourseSelectedActivity extends AppCompatActivity {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-            ViewHolder vh = new ViewHolder(ItemCourseSelectedBinding.inflate(LayoutInflater.from(context), parent, false));
+            ViewHolder vh = new ViewHolder(ItemCourseSelectedBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             vh.setInfo(data.get(viewType));
             return vh;
         }
@@ -159,8 +156,8 @@ public class CourseSelectedActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ((ViewHolder) holder).setInfo(data.get(position));
-            ((ViewHolder) holder).binding.getRoot().setOnClickListener(view -> launcher.launch(new Intent(context, CourseDetail.class).putExtra("id", data.get(position).getString("teachingClassId")).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("teachingClassNum")),
-                    ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((ViewHolder) holder).binding.title, "miniapp")));
+            ((ViewHolder) holder).binding.getRoot().setOnClickListener(view -> view.getContext().startActivity(new Intent(view.getContext(), CourseDetail.class).putExtra("id", data.get(position).getString("teachingClassId")).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("teachingClassNum")),
+                    ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) view.getContext(), ((ViewHolder) holder).binding.title, "miniapp").toBundle()));
         }
 
         @Override
@@ -188,7 +185,7 @@ public class CourseSelectedActivity extends AppCompatActivity {
             public ViewHolder(ItemCourseSelectedBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
-                info.observe((CourseSelectedActivity) binding.getRoot().getContext(), this::loadInfo);
+                info.observe((FragmentActivity) binding.getRoot().getContext(), this::loadInfo);
             }
 
             public void setInfo(JSONObject info) {
@@ -216,6 +213,7 @@ public class CourseSelectedActivity extends AppCompatActivity {
 
             int addItem(String value, String name) {
                 MaterialButton item = new MaterialButton(binding.getRoot().getContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+                Params params = new Params((FragmentActivity) binding.getRoot().getContext());
                 item.setTextAppearance(binding.getRoot().getContext(), com.google.android.material.R.style.TextAppearance_Material3_BodyMedium);
                 item.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT));
                 item.setOnClickListener(v -> params.copy(name, value));

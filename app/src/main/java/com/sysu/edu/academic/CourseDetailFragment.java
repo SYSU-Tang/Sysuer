@@ -27,6 +27,7 @@ public class CourseDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCourseDetailBinding.inflate(inflater);
+
         return binding.getRoot();
     }
 

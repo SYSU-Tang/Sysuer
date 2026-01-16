@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,7 +31,6 @@ import androidx.transition.TransitionInflater;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CourseSelectionViewModel;
@@ -81,33 +79,33 @@ public class CourseSelectionFragment extends Fragment {
                 .inflateTransition(android.R.transition.move));
         setSharedElementReturnTransition(TransitionInflater.from(requireContext())
                 .inflateTransition(android.R.transition.move));
-        vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
         super.onCreate(savedInstanceState);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
+        if (binding == null) {
             binding = FragmentCourseSelectionBinding.inflate(inflater, container, false);
+            vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
             Params params = new Params(requireActivity());
             params.setCallback(this, this::getInfo);
-            binding.type.setOnCheckedStateChangeListener((chipGroup, list) -> {
+            binding.head.type.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 int cid = chipGroup.getCheckedChipId();
                 selectedType = (cid == R.id.my_major) ? 1 : (cid == R.id.public_selection) ? 4 : 2;
                 selectedCate = 11;
-                if (cid != R.id.my_major && binding.category.getHeight() != 0) {
-                    tmp = binding.category.getHeight();
+                if (cid != R.id.my_major && binding.head.category.getHeight() != 0) {
+                    tmp = binding.head.category.getHeight();
                 }
-                ValueAnimator a = ValueAnimator.ofInt(chipGroup.getCheckedChipId() == R.id.my_major ? new int[]{0, tmp} : new int[]{binding.category.getHeight() == 0 ? 0 : tmp, 0});
+                ValueAnimator a = ValueAnimator.ofInt(chipGroup.getCheckedChipId() == R.id.my_major ? new int[]{0, tmp} : new int[]{binding.head.category.getHeight() == 0 ? 0 : tmp, 0});
                 a.addUpdateListener(valueAnimator -> {
-                    LinearLayout.LayoutParams lp = ((LinearLayout.LayoutParams) binding.category.getLayoutParams());
+                    LinearLayout.LayoutParams lp = ((LinearLayout.LayoutParams) binding.head.category.getLayoutParams());
                     lp.height = (int) valueAnimator.getAnimatedValue();
-                    binding.category.setLayoutParams(lp);
+                    binding.head.category.setLayoutParams(lp);
                 });
                 a.start();
                 init();
             });
-            binding.category.setOnCheckedStateChangeListener((chipGroup, list) -> {
+            binding.head.category.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 int cid = chipGroup.getCheckedChipId();
                 selectedType = 1;
                 if (cid == R.id.major_compulsory) {
@@ -135,7 +133,7 @@ public class CourseSelectionFragment extends Fragment {
             getInfo();
             binding.course.setLayoutManager(new GridLayoutManager(requireContext(), params.getColumn()));
             binding.course.addItemDecoration(new SpacesItemDecoration(params.dpToPx(8)));
-            binding.filter.setOnCheckedStateChangeListener((chipGroup, list) -> {
+            binding.head.filter.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 adp.clear();
                 totals.put(key, -1);
                 getInfo();
@@ -182,14 +180,13 @@ public class CourseSelectionFragment extends Fragment {
             binding.course.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
-                    if (v.canScrollVertically(1) && total / 10 + 1 >= page) {
+                    if (!v.canScrollVertically(1) && total / 10 + 1 >= page) {
                         getCourseList();
                     }
-                    binding.head.setElevation(v.canScrollVertically(-1) ? params.dpToPx(2) : 0);
+                    binding.head.getRoot().setElevation(v.canScrollVertically(-1) ? params.dpToPx(2) : 0);
                     super.onScrolled(v, dx, dy);
                 }
             });
-            // getInfo();
         }
         return binding.getRoot();
     }
@@ -202,10 +199,10 @@ public class CourseSelectionFragment extends Fragment {
             totals.put(key, -1);
             //map.put(key, null);
             getInfo();
-            vm.clearReturnData();
+//            vm.clearReturnData();
         }
         if (savedInstanceState == null) {
-            binding.addFilter.setOnClickListener(v ->
+            binding.head.addFilter.setOnClickListener(v ->
                             Navigation.findNavController(view).navigate(R.id.filter_fragment, null, new NavOptions.Builder()
                                     .setEnterAnim(android.R.animator.fade_in)
                                     .setExitAnim(android.R.animator.fade_out)
@@ -232,6 +229,7 @@ public class CourseSelectionFragment extends Fragment {
         if (total != null) {
             totals.put(key, -1);
         }
+
         binding.course.setAdapter(adp);
         if (!Objects.equals(adp.getItemCount(), total)) {
             getCourseList();
@@ -249,11 +247,10 @@ public class CourseSelectionFragment extends Fragment {
     }
 
     void getCourseList() {
-        page++;
-        String body = String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"param\":{\"semesterYear\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"hiddenConflictStatus\":\"0\",\"hiddenSelectedStatus\":\"%d\",\"hiddenEmptyStatus\":\"%d\",\"vacancySortStatus\":\"%d\",\"collectionStatus\":\"%d\"%s}}", page, term, selectedType, selectedCate,
-                boolean2int(binding.hideSelected.isChecked()), boolean2int(binding.hideVacancy.isChecked()), boolean2int(binding.vacancy.isChecked()), boolean2int(binding.onlyCollection.isChecked()),
+        String body = String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"param\":{\"semesterYear\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"hiddenConflictStatus\":\"0\",\"hiddenSelectedStatus\":\"%d\",\"hiddenEmptyStatus\":\"%d\",\"vacancySortStatus\":\"%d\",\"collectionStatus\":\"%d\"%s}}", ++page, term, selectedType, selectedCate,
+                boolean2int(binding.head.hideSelected.isChecked()), boolean2int(binding.head.hideVacancy.isChecked()), boolean2int(binding.head.vacancy.isChecked()), boolean2int(binding.head.onlyCollection.isChecked()),
                 filterText);
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list")
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list")//
                 .header("Cookie", cookie)
                 .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE")
                 .post(RequestBody.create(body, MediaType.get("application/json"))).build()).enqueue(new Callback() {
@@ -396,14 +393,13 @@ public class CourseSelectionFragment extends Fragment {
 
 class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     final String[] info = new String[]{"courseUnitName", "credit", "examFormName", "courseNum", "clazzNum"};
-    final Context context;
+    //    final Context context;
     final CourseSelectionFragment c;
     final ArrayList<JSONObject> data = new ArrayList<>();
 
     public CourseAdapter(CourseSelectionFragment c) {
         super();
         this.c = c;
-        this.context = c.requireContext();
     }
 
     void add(JSONObject e) {
@@ -414,7 +410,8 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        @NonNull ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context));
+        Context context = parent.getContext();
+        ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context), parent, false);
         for (int i = 0; i < info.length; i++) {
             Chip chip = (Chip) LayoutInflater.from(context).inflate(R.layout.item_action_chip, binding.courseInfo, false);
             chip.setOnLongClickListener(a -> {
@@ -430,17 +427,15 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((TextView) holder.itemView.findViewById(R.id.course_name)).setText(convert(position, "courseName"));
-        MaterialButton open = holder.itemView.findViewById(R.id.open);
-        MaterialButton select = holder.itemView.findViewById(R.id.select);
-        MaterialButton like = holder.itemView.findViewById(R.id.like);
-        like.setSelected(data.get(position).getInteger("collectionStatus") == 1);
-        select.setSelected(data.get(position).getInteger("selectedStatus") == 3);
-        select.setText(select.isSelected() ? "退课" : "选课");
-        like.setText(like.isSelected() ? "取消收藏" : "收藏");
-        select.setOnClickListener(v -> {
-            //Snackbar.make(v,"已"+((MaterialButton)v).getText(),Snackbar.LENGTH_LONG).show();
-
+        ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.bind(holder.itemView);
+        Context context = binding.getRoot().getContext();
+        binding.courseName.setText(convert(position, "courseName"));
+        MaterialButton open = binding.open;
+        binding.like.setSelected(data.get(position).getInteger("collectionStatus") == 1);
+        binding.select.setSelected(data.get(position).getInteger("selectedStatus") == 3);
+        binding.select.setText(binding.select.isSelected() ? "退课" : "选课");
+        binding.like.setText(binding.like.isSelected() ? "取消收藏" : "收藏");
+        binding.select.setOnClickListener(v -> {
             if (v.isSelected()) {
                 c.unselect(convert(position, "courseId"), convert(position, "teachingClassId"));
             } else {
@@ -449,23 +444,23 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             v.setSelected(!v.isSelected());
             ((MaterialButton) v).setText(v.isSelected() ? "退课" : "选课");
         });
-        like.setOnClickListener(v -> {
+        binding.like.setOnClickListener(v -> {
             Snackbar.make(v, "已" + ((MaterialButton) v).getText(), Snackbar.LENGTH_LONG).show();
             c.like(convert(position, "teachingClassId"));
             v.setSelected(!v.isSelected());
             ((MaterialButton) v).setText(v.isSelected() ? "取消收藏" : "收藏");
         });
         open.setOnClickListener(v -> context.startActivity(new Intent(context, CourseDetail.class).putExtra("code", convert(position, "courseNum")).putExtra("id", convert(position, "courseId")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, v, "miniapp").toBundle()));
-        ((TextView) holder.itemView.findViewById(R.id.course_name)).setText(convert(position, "courseName"));
-        ((TextView) holder.itemView.findViewById(R.id.head)).setText(convert(position, "teachingTimePlace").replace(";", " | ").replace(",", "\n"));
+        binding.courseName.setText(convert(position, "courseName"));
+        binding.head.setText(convert(position, "teachingTimePlace").replace(";", " | ").replace(",", "\n"));
         for (int i = 0; i < info.length; i++) {
             String content = convert(position, info[i]);
-            ((Chip) ((ChipGroup) holder.itemView.findViewById(R.id.course_info)).getChildAt(i)).setText(String.format("%s：%s", (new String[]{"开设部门", "学分", "考查形式", "课程代码", "班级代码", "剩余空位", "待筛选人数", "选上人数"})[i], content));
+            ((Chip) binding.courseInfo.getChildAt(i)).setText(String.format("%s：%s", (new String[]{"开设部门", "学分", "考查形式", "课程代码", "班级代码", "剩余空位", "待筛选人数", "选上人数"})[i], content));
         }
         String[] seats = new String[]{"baseReceiveNum", "filterSelectedNum", "courseSelectedNum"};
         for (int i = 0; i < seats.length; i++) {
             String content = convert(position, seats[i]);
-            ((MaterialButton) holder.itemView.findViewById(new int[]{R.id.left, R.id.filtering, R.id.selected}[i])).setText(String.format("%s\n%s", (new String[]{"剩余", "待筛选", "选上"})[i], content));
+            (new MaterialButton[]{binding.left, binding.filtering, binding.selected}[i]).setText(String.format("%s\n%s", (new String[]{"剩余", "待筛选", "选上"})[i], content));
         }
     }
 

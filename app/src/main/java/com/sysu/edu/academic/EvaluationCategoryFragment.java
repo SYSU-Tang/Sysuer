@@ -62,7 +62,7 @@ public class EvaluationCategoryFragment extends Fragment {
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == 1) {
                     JSONObject data = JSON.parseObject((String) msg.obj);
-                    if (data.get("code").equals("200")) {
+                    if (data!=null &&data.get("code").equals("200")) {
                         data.getJSONObject("result").getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
                     } else {
                         params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");

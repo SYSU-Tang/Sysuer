@@ -27,7 +27,6 @@ import com.sysu.edu.databinding.FragmentCourseQueryBinding;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -40,11 +39,11 @@ public class CourseQueryFragment extends Fragment {
 
     final OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
-    String cookie;
-    final HashMap<String, String> filter = new HashMap<>();
+    HashMap<String, String> filterValue = new HashMap<>();
     HashMap<String, String> filterName = new HashMap<>();
     CourseSelectionViewModel vm;
-    private FragmentCourseQueryBinding binding;
+    FragmentCourseQueryBinding binding;
+    Params params;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,125 +51,105 @@ public class CourseQueryFragment extends Fragment {
                 .inflateTransition(android.R.transition.move));
         setSharedElementReturnTransition(TransitionInflater.from(requireContext())
                 .inflateTransition(android.R.transition.move));
-        vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
-
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            binding = FragmentCourseQueryBinding.inflate(inflater, container, false);
-//            getParentFragmentManager().beginTransaction()
-//                    // .setCustomAnimations()
-//                    .addSharedElement(binding.submit, "miniapp")
-//                    .addToBackStack(null)
-//                    .commit();
-            binding.container.setColumnCount(new Params(requireActivity()).getColumn());
-            Params params = new Params(requireActivity());
-            params.setCallback(this, () -> {
-                cookie = params.getCookie();
-                getData(0);
-            });
-            reset();
-            cookie = params.getCookie();
-            handler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == -1) {
-                        params.toast(getString(R.string.no_wifi_warning));
-                        return;
-                    }
-                    JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    if (response != null) {
-                        if (response.getInteger("code").equals(200)) {
-                            switch (msg.what) {
-                                case -1:
-                                    break;
-                                case 1:
-                                    JSONArray data = response.getJSONArray("data");
-                                    if (data != null) {
-                                        if (msg.arg1 < 4) {
-                                            getData(msg.arg1 + 1);
-                                        }
-                                        ArrayList<String> items = new ArrayList<>();
-                                        ArrayList<String> itemCodes = new ArrayList<>();
-                                        items.add("");
-                                        itemCodes.add("");
-                                        data.forEach(a -> {
-                                            items.add(((JSONObject) a).getString(new String[]{"campusName", "dataName", "minorName", "dataName", "dataName"}[msg.arg1]));
-                                            itemCodes.add(((JSONObject) a).getString(new String[]{"id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber"}[msg.arg1]));
-                                        });
-                                        MaterialAutoCompleteTextView v = new MaterialAutoCompleteTextView[]{binding.campuses, binding.days, binding.sections, binding.languages, binding.special}[msg.arg1];
-                                        v.setSimpleItems(items.toArray(new String[]{}));
-                                        final int a = msg.arg1;
-                                        v.setOnItemClickListener((adapterView, view, i, l) -> {
-                                            filter.put(new String[]{"campus", "day", "section", "language", "special"}[a], itemCodes.get(i));
-                                            filterName.put(new String[]{"campus", "day", "section", "language", "special"}[a], items.get(i));
-                                        });
-                                    }
-                                    break;
-                            }
-                        } else if (response.getInteger("code").equals(50021000)) {
-                            params.toast(response.getString("message"));
-                        } else if (response.getInteger("code").equals(53000007)) {
-                            params.toast(R.string.login_warning);
-                            params.gotoLogin(binding.getRoot(), TargetUrl.JWXT);
-                        }
-                    }
-                    super.handleMessage(msg);
-                }
-            };
-            getData(0);
-        }
         super.onCreateView(inflater, container, savedInstanceState);
+        vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
+        filterValue = vm.getFilterValue();
+        filterName = vm.getFilterName();
+        binding = FragmentCourseQueryBinding.inflate(inflater, container, false);
+        binding.container.setColumnCount(new Params(requireActivity()).getColumn());
+        params = new Params(requireActivity());
+        params.setCallback(this, () -> getData(0));
+        handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                if (msg.what == -1) {
+                    params.toast(getString(R.string.no_wifi_warning));
+                    return;
+                }
+                JSONObject response = JSONObject.parseObject((String) msg.obj);
+                if (response != null) {
+                    if (response.getInteger("code").equals(200)) {
+                        switch (msg.what) {
+                            case -1:
+                                break;
+                            case 1:
+                                JSONArray data = response.getJSONArray("data");
+                                if (data != null) {
+                                    if (msg.arg1 < 4) {
+                                        getData(msg.arg1 + 1);
+                                    }
+                                    ArrayList<String> items = new ArrayList<>();
+                                    ArrayList<String> itemCodes = new ArrayList<>();
+                                    items.add("");
+                                    itemCodes.add("");
+                                    data.forEach(a -> {
+                                        items.add(((JSONObject) a).getString(new String[]{"campusName", "dataName", "minorName", "dataName", "dataName"}[msg.arg1]));
+                                        itemCodes.add(((JSONObject) a).getString(new String[]{"id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber"}[msg.arg1]));
+                                    });
+                                    MaterialAutoCompleteTextView v = new MaterialAutoCompleteTextView[]{binding.campuses, binding.days, binding.sections, binding.languages, binding.special}[msg.arg1];
+                                    v.setSimpleItems(items.toArray(new String[]{}));
+                                    final int a = msg.arg1;
+                                    v.setOnItemClickListener((adapterView, view, i, l) -> {
+                                        filterValue.put(new String[]{"campus", "day", "section", "language", "special"}[a], itemCodes.get(i));
+                                        filterName.put(new String[]{"campus", "day", "section", "language", "special"}[a], items.get(i));
+                                    });
+                                }
+                                break;
+                        }
+                    } else if (response.getInteger("code").equals(50021000)) {
+                        params.toast(response.getString("message"));
+                    } else if (response.getInteger("code").equals(53000007)) {
+                        params.toast(R.string.login_warning);
+                        params.gotoLogin(binding.getRoot(), TargetUrl.JWXT);
+                    }
+                }
+                super.handleMessage(msg);
+            }
+        };
+        getData(0);
+        load();
         return binding.getRoot();
     }
 
     void reset() {
-        filterName = vm.getFilter();
-        binding.campuses.setText(filterName.get("campus"));
-        binding.course.setText(filterName.get("course"));
-        binding.days.setText(filterName.get("day"));
-        binding.sections.setText(filterName.get("section"));
-        binding.languages.setText(filterName.get("language"));
-        binding.special.setText(filterName.get("special"));
+        filterName = vm.getFilterName();
+        filterValue = vm.getFilterValue();
+        vm.setFilterName(filterName);
+        vm.setFilterValue(filterValue);
+        load();
+    }
+
+    void load() {
+        binding.campuses.setText(filterName.getOrDefault("campus", ""), false);
+        binding.course.setText(filterName.getOrDefault("course", ""));
+        binding.days.setText(filterName.get("day"), false);
+        binding.sections.setText(filterName.get("section"), false);
+        binding.languages.setText(filterName.get("language"), false);
+        binding.special.setText(filterName.getOrDefault("special", ""), false);
         binding.school.setText(filterName.get("school"));
         binding.teacher.setText(filterName.get("teacher"));
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        binding.reset.setOnClickListener(view1 -> {
-            vm.setFilter(new HashMap<>());
-            reset();
-        });
+        super.onViewCreated(view, savedInstanceState);
+        binding.reset.setOnClickListener(v -> reset());
         binding.submit.setOnClickListener(v -> {
-            super.onViewCreated(view, savedInstanceState);
-//            Bundle arg = new Bundle();
-//            arg.putSerializable("filter",getMap());
-//            arg.putBoolean("isFilter",true);
-//            System.out.println(getParentFragmentManager().findFragmentById(R.id.nav_host_fragment_content_course_selection));
-//            System.out.println(R.id.selection_fragment);
-//            Navigation.findNavController(view).getGraph().
-//            ((CourseSelectionFragment) Objects.requireNonNull(Objects.requireNonNull(getParentFragmentManager().findFragmentById(R.id.nav_host_fragment_content_course_selection)).getChildFragmentManager().findFragmentById(R.id.selection_fragment))).setFilter(filter);
-
-            //Navigation.findNavController(view).navigateUp();
             vm.setReturnData(parseFilter(getMap()));
-            vm.setFilter(filterName);
-            // System.out.println(parseFilter(getMap()));
+            vm.setFilterName(filterName);
+            vm.setFilterValue(filterValue);
             Navigation.findNavController(view).navigateUp();
-//            Navigation.findNavController(view).navigate(,arg, new NavOptions.Builder()
-//                    .setEnterAnim(android.R.animator.fade_in)
-//                    .setExitAnim(android.R.animator.fade_out)
-//                    .build(), new FragmentNavigator.Extras(Map.of(v, "miniapp")));
         });
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        //binding = null;
+        binding = null;
     }
 
     void getData(int i) {
@@ -179,7 +158,7 @@ public class CourseQueryFragment extends Fragment {
                         "https://jwxt.sysu.edu.cn/jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1",
                         "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=204",
                         "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=387"}[i])
-                .header("Cookie", cookie)
+                .header("Cookie", params.getCookie())
                 .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE")
                 .build()).enqueue(new Callback() {
             @Override
@@ -201,13 +180,13 @@ public class CourseQueryFragment extends Fragment {
     }
 
     public HashMap<String, String> getMap() {
-        filter.put("course", Objects.requireNonNull(binding.course.getText()).toString());
-        filter.put("teacher", Objects.requireNonNull(binding.teacher.getText()).toString());
-        filter.put("school", Objects.requireNonNull(binding.school.getText()).toString());
-        filterName.put("course", Objects.requireNonNull(binding.course.getText()).toString());
-        filterName.put("teacher", Objects.requireNonNull(binding.teacher.getText()).toString());
-        filterName.put("school", Objects.requireNonNull(binding.school.getText()).toString());
-        return filter;
+        filterValue.put("course", binding.course.getText() == null ? "" : binding.course.getText().toString());
+        filterValue.put("teacher", binding.teacher.getText() == null ? "" : binding.teacher.getText().toString());
+        filterValue.put("school", binding.school.getText() == null ? "" : binding.school.getText().toString());
+        filterName.put("course", binding.course.getText() == null ? "" : binding.course.getText().toString());
+        filterName.put("teacher", binding.teacher.getText() == null ? "" : binding.teacher.getText().toString());
+        filterName.put("school", binding.school.getText() == null ? "" : binding.school.getText().toString());
+        return filterValue;
     }
 
     String parseFilter(HashMap<String, String> filter) {

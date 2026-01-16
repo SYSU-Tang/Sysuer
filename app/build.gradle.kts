@@ -42,7 +42,7 @@ android {
     sourceSets {
         getByName("main") {
             java {
-                srcDirs(
+                val directories: MutableSet<String> = mutableSetOf(
                     "src\\main\\java"
                 )
             }

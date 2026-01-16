@@ -96,7 +96,7 @@
     <string name="en">大英</string>
     <string name="public_compulsory">公必</string>
     <string name="honor">荣誉课程</string>
-    <string name="filter">过滤</string>
+    <string name="filter">筛选</string>
     <string name="filter_by_vacancy">按剩余空位排序</string>
     <string name="hide_vacancy">隐藏无空位</string>
     <string name="hide_selected">隐藏已选</string>
@@ -437,5 +437,6 @@
     <string name="status">状态</string>
     <string name="pause">暂停</string>
     <string name="leave_return_registration">离返校登记</string>
+    <string name="preview">预览</string>
 
 </resources>

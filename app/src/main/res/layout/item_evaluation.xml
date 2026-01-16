@@ -1,88 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Material3.CardView.Elevated"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    style="@style/Widget.Material3.CardView.Elevated"
     app:contentPaddingBottom="8dp"
     app:contentPaddingTop="8dp">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/title"
-            style = "@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="16dp"
-            android:drawablePadding="16dp"
-            android:gravity="center"
-            app:drawableStartCompat="@drawable/window"
-            android:text="@string/evaluation"
-            android:textAppearance="?attr/textAppearanceTitleLarge"/>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginBottom="8dp"
-            android:background="?android:attr/listDivider" />
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/start_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:gravity="center_vertical"
-            android:textIsSelectable="true"
-            android:textAppearance="?attr/textAppearanceBodyMedium"/>
-        <!--<com.google.android.material.textview.MaterialTextView
-            android:id="@+id/end_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="8dp"
-            android:drawableStart="@drawable/time"
-            android:drawablePadding="4dp"
-            android:gravity="center_vertical"
-            android:text="@string/time"
-            android:textAppearance="?attr/textAppearanceBodyMedium"/>
+            android:drawablePadding="16dp"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/listDivider" />
+
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/total"
-            android:layout_width="wrap_content"
+            android:id="@+id/start_time"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:drawableStart="@drawable/window"
-            android:drawablePadding="4dp"
             android:gravity="center_vertical"
-            android:text="@string/total_evaluation"
-            android:textAppearance="?attr/textAppearanceBodyMedium"/>
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/total_for"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:drawableStart="@drawable/check"
-            android:drawablePadding="4dp"
-            android:gravity="center_vertical"
-            android:text="@string/total_for_evaluation"
-            android:textAppearance="?attr/textAppearanceBodyMedium"/>-->
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textIsSelectable="true" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="?android:attr/listDivider" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/open"
             style="@style/Widget.Material3.Button.TonalButton"
@@ -90,6 +55,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
-            android:text="@string/open"/>
+            android:text="@string/open" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

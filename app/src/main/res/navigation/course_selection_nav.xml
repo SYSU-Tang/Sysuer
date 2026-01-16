@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/selection_fragment">
+    <fragment
+        android:id="@+id/selection_fragment"
+        android:name="com.sysu.edu.academic.CourseSelectionFragment"
+        android:label="@string/course_selection"/>
+    <fragment
+        android:id="@+id/filter_fragment"
+        android:name="com.sysu.edu.academic.CourseQueryFragment"
+        android:label="@string/filter" />
+    <fragment
+        android:id="@+id/preview_fragment"
+        android:name="com.sysu.edu.academic.CourseSelectionPreviewFragment"
+        android:label="@string/preview" />
+</navigation>
