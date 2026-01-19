@@ -48,19 +48,19 @@ import okhttp3.Response;
 public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     View view;
     Handler handler;
-    OkHttpClient http = new OkHttpClient();
+    final OkHttpClient http = new OkHttpClient();
     JSONArray transportation;
     JSONArray destination;
-    MutableLiveData<Long> leaveDate = new MutableLiveData<>();
-    MutableLiveData<Long> returnDate = new MutableLiveData<>();
+    final MutableLiveData<Long> leaveDate = new MutableLiveData<>();
+    final MutableLiveData<Long> returnDate = new MutableLiveData<>();
     String country = "";
     String province = "";
     String city = "";
     String isStay = "";
     ArrayList<String> leave = new ArrayList<>(List.of("离校", "", "", "", "", ""));
     ArrayList<String> stay = new ArrayList<>(List.of("留校", ""));
-    ArrayList<String> leaveKeys = new ArrayList<>(List.of("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地"));
-    ArrayList<String> stayKeys = new ArrayList<>(List.of("假期去向", "留校原因"));
+    final ArrayList<String> leaveKeys = new ArrayList<>(List.of("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地"));
+    final ArrayList<String> stayKeys = new ArrayList<>(List.of("假期去向", "留校原因"));
     String id;
 
     @Override
@@ -379,7 +379,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
 
     static class OneColumnAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        ArrayList<String> value = new ArrayList<>();
+        final ArrayList<String> value = new ArrayList<>();
         Consumer<Integer> action;
         int selection = -1;
 

@@ -5,6 +5,7 @@ import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -36,7 +37,7 @@ public class CourseSelectionActivity extends AppCompatActivity {
         binding.tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                navController.navigate(new int[]{R.id.selection_fragment,R.id.preview_fragment}[tab.getPosition()]);
+                navController.navigate(new int[]{R.id.selection_navigation,R.id.preview_navigation}[tab.getPosition()], null,new NavOptions.Builder().setLaunchSingleTop(true).build());
             }
 
             @Override
@@ -49,13 +50,7 @@ public class CourseSelectionActivity extends AppCompatActivity {
 
             }
         });
-        binding.toolbar.setNavigationOnClickListener(view -> {
-            if (Objects.requireNonNull(navController.getCurrentDestination()).getId()==R.id.selection_fragment) {
-                supportFinishAfterTransition();
-            }else{
-                navController.navigateUp();
-            }
-        });
+        binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }
 }

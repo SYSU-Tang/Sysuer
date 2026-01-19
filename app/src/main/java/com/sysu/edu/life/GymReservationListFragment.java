@@ -182,7 +182,7 @@ public class GymReservationListFragment extends Fragment {
                 .url(url)
                 .header("Accept", "application/json, text/plain, */*")
                 .header("Cookie", viewModel.token)
-                .header("Authorization", viewModel.authorization.getValue())
+                .header("Authorization", Objects.requireNonNull(viewModel.authorization.getValue()))
                 .header("User-Agent", viewModel.ua)
                 .build()).enqueue(new Callback() {
             @Override
@@ -222,7 +222,7 @@ public class GymReservationListFragment extends Fragment {
         new OkHttpClient().newCall(new Request.Builder()
                         .header("Cookie", viewModel.token)
                         .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
-                        .header("Authorization", viewModel.authorization.getValue())
+                        .header("Authorization", Objects.requireNonNull(viewModel.authorization.getValue()))
                         .url("https://gym.sysu.edu.cn/api/Campus/active").build())
                 .enqueue(new Callback() {
                     @Override

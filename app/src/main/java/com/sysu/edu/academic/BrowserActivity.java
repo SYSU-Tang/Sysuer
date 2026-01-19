@@ -79,14 +79,17 @@ public class BrowserActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 //System.out.println(url);
-                Pattern pattern = Pattern.compile("//cas.+.sysu.edu.cn");
-                if (pattern.matcher(url).find()) {
-//                    web.evaluateJavascript(String.format("document.querySelector('#username').value='%s';document.querySelector('#password').value='%s';",username,password), s -> {
-//                    });
-                    //String.format("javascript:(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", account, password)
-                    web.evaluateJavascript(String.format("(function(){var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click()})()", username, password), s -> {
+                if (Pattern.matches("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page", url)) {
+                    web.evaluateJavascript(String.format("""
+                            javascript:(function(){\
+                            function waitElement(selector, callback) {\
+                            const element = document.querySelector(selector);\
+                            if (element) {callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}\
+                            waitElement('.para-widget-account-psw', () => {\
+                            var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click();});})()""", username, password), s -> {
                     });
                 }
+
                 super.onPageFinished(view, url);
             }
 
@@ -197,8 +200,8 @@ public class BrowserActivity extends AppCompatActivity {
     }
 
     static class JSAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        ArrayList<JSONObject> j = new ArrayList<>();
         final WebView web;
+        ArrayList<JSONObject> j = new ArrayList<>();
 
         public JSAdapter(WebView web) {
             super();

@@ -35,7 +35,7 @@ public class LeaveReturnListFragment extends StaggeredFragment {
 
     View view;
     Handler handler;
-    OkHttpClient http = new OkHttpClient();
+    final OkHttpClient http = new OkHttpClient();
 
     @Nullable
     @Override

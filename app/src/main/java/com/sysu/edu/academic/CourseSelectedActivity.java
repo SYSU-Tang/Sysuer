@@ -45,8 +45,8 @@ import okhttp3.Response;
 
 public class CourseSelectedActivity extends AppCompatActivity {
     final MutableLiveData<String> response = new MutableLiveData<>();
-    Params params;
     final OkHttpClient http = new OkHttpClient.Builder().build();
+    Params params;
     ActivityResultLauncher<Intent> launcher;
     int page = 0;
     Handler handler;

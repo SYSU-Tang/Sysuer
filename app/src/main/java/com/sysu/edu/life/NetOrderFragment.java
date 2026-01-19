@@ -41,7 +41,7 @@ import okhttp3.Response;
 
 public class NetOrderFragment extends StaggeredFragment {
 
-    OkHttpClient http = new OkHttpClient.Builder().build();
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     Handler handler;
     View view;
 

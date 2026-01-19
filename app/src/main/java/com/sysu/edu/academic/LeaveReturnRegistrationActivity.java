@@ -27,7 +27,7 @@ import okhttp3.Response;
 public class LeaveReturnRegistrationActivity extends AppCompatActivity {
 
     Handler handler;
-    OkHttpClient http = new OkHttpClient();
+    final OkHttpClient http = new OkHttpClient();
     Params params;
 
 

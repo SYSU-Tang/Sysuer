@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel;
 import java.util.HashMap;
 
 public class CourseSelectionViewModel extends ViewModel {
-    public MutableLiveData<HashMap<String, String>> filterName = new MutableLiveData<>(new HashMap<>());
-    public MutableLiveData<HashMap<String, String>> filterValue = new MutableLiveData<>(new HashMap<>());
+    public final MutableLiveData<HashMap<String, String>> filterName = new MutableLiveData<>(new HashMap<>());
+    public final MutableLiveData<HashMap<String, String>> filterValue = new MutableLiveData<>(new HashMap<>());
     String returnData;
 
     public HashMap<String, String> getFilterName() {

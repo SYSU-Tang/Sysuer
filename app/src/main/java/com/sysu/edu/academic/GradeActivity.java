@@ -62,6 +62,7 @@ public class GradeActivity extends AppCompatActivity {
                     .build());
         }
     }).build();
+
     ArrayList<String> years;
 
     @Override
@@ -245,13 +246,11 @@ public class GradeActivity extends AppCompatActivity {
     }
 
     void getScore(String year, int term, String type) {
-        String url = String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term);
-        sendRequest(url, 1);
+        sendRequest(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term), 1);
     }
 
     void getTotalScore(String year, int term, String type) {
-        String url = String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term);
-        sendRequest(url, 4);
+        sendRequest(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=%s&trainTypeCode=%s&addScoreFlag=true&scoSemester=%d", year, type, term), 4);
     }
 
     void getPull() {
@@ -260,9 +259,6 @@ public class GradeActivity extends AppCompatActivity {
 
     static class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final ArrayList<JSONObject> data = new ArrayList<>();
-
-        public ScoreAdapter() {
-        }
 
         @NonNull
         @Override
@@ -292,7 +288,7 @@ public class GradeActivity extends AppCompatActivity {
                     info.getString("examCharacter"),
                     info.getString("scoCourseNumber"),
                     info.getString("teachClassNumber"),
-                    Objects.requireNonNull(grade.getValue()) + "=" + info.getString("originalScore")));
+                    Objects.requireNonNull(grade.getValue()) + "=" + (info.getString("originalScore") == null ? "" : info.getString("originalScore"))));
         }
 
         public void add(JSONObject a) {

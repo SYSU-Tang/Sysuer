@@ -41,7 +41,7 @@ public class LoginWebFragment extends Fragment {
                 if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page").matcher(url).find()) {
                     //System.out.println("登录中");
                     model.setLogin(false);
-                    afterLoad.run();
+                    if (afterLoad != null) afterLoad.run();
                     return;
                 }
                 String element = "";
@@ -110,6 +110,6 @@ public class LoginWebFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return getWebView(requireActivity(), new ViewModelProvider(requireActivity()).get(LoginViewModel.class), null);
+        return getWebView(requireActivity(), new ViewModelProvider(requireActivity()).get(LoginViewModel.class), ()->{});
     }
 }

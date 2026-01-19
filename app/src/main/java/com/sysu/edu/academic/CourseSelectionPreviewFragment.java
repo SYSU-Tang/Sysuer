@@ -50,14 +50,13 @@ import okhttp3.Response;
 
 public class CourseSelectionPreviewFragment extends Fragment {
 
+    final OkHttpClient http = new OkHttpClient();
+    final MutableLiveData<Integer> type = new MutableLiveData<>();
     Handler handler;
-    OkHttpClient http = new OkHttpClient();
     Params params;
     CourseSelectionViewModel vm;
     FragmentCourseSelectionPreviewBinding binding;
-
     int page = 1;
-    MutableLiveData<Integer> type = new MutableLiveData<>();
     Integer total;
 
     @Nullable
@@ -76,15 +75,15 @@ public class CourseSelectionPreviewFragment extends Fragment {
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
                     if (!recyclerView.canScrollVertically(1) && dy > 0 && total / 10.0 > page - 1) {
-                        getList(type.getValue() == null ? 1 : type.getValue());
+                        getList();
                     }
                 }
             });
-            binding.type.addOnButtonCheckedListener((group, checkedId, isChecked) -> type.postValue(binding.major.isChecked() ? 1 : binding.publicSelection.isChecked() ? 4 : 2));
+            binding.type.addOnButtonCheckedListener((group, checkedId, isChecked) -> type.setValue(binding.major.isChecked() ? 1 : binding.publicSelection.isChecked() ? 4 : 2));
             type.observe(getViewLifecycleOwner(), v -> {
                 page = 1;
                 previewAdapter.clear();
-                getList(v);
+                getList();
             });
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
@@ -101,10 +100,10 @@ public class CourseSelectionPreviewFragment extends Fragment {
                     }
                 }
             };
-            vm.filterValue.observe(requireActivity(), filter -> {
+            vm.filterValue.observe(requireActivity(), f -> {
                 page = 1;
                 previewAdapter.clear();
-                getList(type.getValue() == null ? 1 : type.getValue());
+                getList();
             });
         }
         return binding.getRoot();
@@ -113,9 +112,10 @@ public class CourseSelectionPreviewFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        binding.addFilter.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.filter_fragment, null, new NavOptions.Builder()
+        binding.addFilter.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.preview_to_filter2, null, new NavOptions.Builder()
                 .setEnterAnim(android.R.animator.fade_in)
                 .setExitAnim(android.R.animator.fade_out)
+                        .setLaunchSingleTop(true)
                 .build(), new FragmentNavigator.Extras(Map.of(v, "miniapp"))));
     }
 
@@ -142,16 +142,16 @@ public class CourseSelectionPreviewFragment extends Fragment {
         });
     }
 
-    void getList(int type) {
+    void getList() {
         sendRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/schoolCourse/pageList",
                 String.format("{\"pageNo\":%s,\"pageSize\":10,\"total\":false,\"param\":{\"hiddenSelectedStatus\":\"0\",\"type\":\"%s\"%s}}",
-                        page++, type, vm.getReturnData()),
+                        page++, type.getValue() == null ? 1 : type.getValue(), vm.getReturnData()),
                 0);
     }
 
     static class CourseSelectionPreviewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        ArrayList<JSONObject> data = new ArrayList<>();
+        final ArrayList<JSONObject> data = new ArrayList<>();
 
         @NonNull
         @Override

@@ -203,7 +203,7 @@ public class CourseSelectionFragment extends Fragment {
         }
         if (savedInstanceState == null) {
             binding.head.addFilter.setOnClickListener(v ->
-                            Navigation.findNavController(view).navigate(R.id.filter_fragment, null, new NavOptions.Builder()
+                            Navigation.findNavController(view).navigate(R.id.selection_to_filter1, null, new NavOptions.Builder()
                                     .setEnterAnim(android.R.animator.fade_in)
                                     .setExitAnim(android.R.animator.fade_out)
                                     .build(), new FragmentNavigator.Extras(Map.of(v, "miniapp")))
