@@ -27,14 +27,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import io.noties.markwon.Markwon;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class GradeActivity extends AppCompatActivity {
@@ -42,6 +46,7 @@ public class GradeActivity extends AppCompatActivity {
     final MutableLiveData<String> trainType = new MutableLiveData<>();
     final MutableLiveData<String> year = new MutableLiveData<>();
     final MutableLiveData<Integer> term = new MutableLiveData<>();
+    final Map<String, Integer> gradeMap = Map.of("A", 90, "B", 80, "C", 70, "D", 60, "E", 0);
     ActivityGradeBinding binding;
     Handler handler;
     PopupMenu termPop;
@@ -88,6 +93,49 @@ public class GradeActivity extends AppCompatActivity {
         binding.type.setOnClickListener(view -> typePop.show());
         ScoreAdapter adp = new ScoreAdapter();
         binding.scores.setAdapter(adp);
+        class GradeManager {
+            String classNumber;
+            int grade;
+            int position = -1;
+            int minGrade = -1;
+
+            void getGrade(String classNumber, int position, int minGrade) {
+                this.classNumber = classNumber;
+                this.grade = minGrade;
+                if (this.minGrade < 0) {
+                    this.minGrade = minGrade;
+                }
+                if (this.position < 0) {
+                    this.position = position;
+                }
+                //System.out.println(String.format("{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"%s\",\"beforeAchievementPoint\":\"%s\",\"afterAchievementPoint\":\"%s\",\"cultureTypeCode\":\"01\"}}", classNumber, minGrade, maxGrade));
+                postRequest("https://jwxt.sysu.edu.cn/jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse", String.format("{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"%s\",\"beforeAchievementPoint\":\"%s\",\"afterAchievementPoint\":\"%s\",\"cultureTypeCode\":\"01\"}}", classNumber, minGrade, minGrade), 5);
+            }
+
+            void getGrade() {
+                if (grade - minGrade < 6) {
+                    getGrade(classNumber, position, ++grade);
+                }
+            }
+
+            void setGrade() {
+                adp.setGrade(position, String.valueOf(grade));
+                params.toast(String.valueOf(grade));
+                grade = 0;
+                position = -1;
+                minGrade = -1;
+                classNumber = "";
+            }
+        }
+        GradeManager gradeManager = new GradeManager();
+        adp.setAction(position -> {
+            String level = adp.getLevel(position);
+            //int maxGrade = gradeMap.getOrDefault(level.substring(0, 1), 0) + (level.length() == 2 ? 10 : 5);
+            int minGrade = gradeMap.getOrDefault(level.substring(0, 1), 0) + (level.length() == 2 ? 5 : 0);
+            //params.toast(String.format(Locale.getDefault(), "%s: %d-%d", level, maxGrade, minGrade));
+            gradeManager.getGrade(adp.getClassNumber(position), position, minGrade);
+        });
+
         params = new Params(this);
         params.setCallback(this::getPull);
         gridLayoutManager = new GridLayoutManager(this, params.getColumn());
@@ -101,6 +149,7 @@ public class GradeActivity extends AppCompatActivity {
                 getScore();
             }
         });
+
         term.observe(this, s -> {
             binding.term.setText(terms[s - 1]);
             getScore();
@@ -198,6 +247,13 @@ public class GradeActivity extends AppCompatActivity {
                             header.add(getString(R.string.credit), List.of(getString(R.string.term_credit), getString(R.string.public_compulsory_credit), getString(R.string.public_select_credit), getString(R.string.major_compulsory_credit), getString(R.string.major_select_credit), getString(R.string.honor_credit)), values);
                             break;
                         }
+                        case 5:
+                            System.out.println(dataString);
+                            if (dataString.containsKey("data") && !dataString.getJSONObject("data").getInteger("total").equals(0)) {
+                                gradeManager.setGrade();
+                            } else {
+                                gradeManager.getGrade();
+                            }
                     }
                 } else {
                     params.toast(R.string.login_warning);
@@ -216,6 +272,26 @@ public class GradeActivity extends AppCompatActivity {
 
     void sendRequest(String url, int what) {
         http.newCall(new Request.Builder().url(url).build()).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message message = new Message();
+                message.what = what;
+                message.obj = response.body().string();
+                handler.sendMessage(message);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message message = new Message();
+                message.what = -1;
+                handler.sendMessage(message);
+            }
+        });
+    }
+
+    void postRequest(String url, String data, int what) {
+        http.newCall(new Request.Builder().url(url)
+                .post(RequestBody.create(data, MediaType.parse("application/json"))).build()).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message message = new Message();
@@ -257,8 +333,13 @@ public class GradeActivity extends AppCompatActivity {
         sendRequest("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getPull", 2);
     }
 
+    void getGrade(String classNumber, int minGrade, int maxGrade) {
+        postRequest("https://jwxt.sysu.edu.cn/jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse", String.format("{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"%s\",\"beforeAchievementPoint\":\"%s\",\"afterAchievementPoint\":\"%s\",\"cultureTypeCode\":\"01\"}}", classNumber, minGrade, maxGrade), 5);
+    }
+
     static class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final ArrayList<JSONObject> data = new ArrayList<>();
+        Consumer<Integer> action;
 
         @NonNull
         @Override
@@ -267,12 +348,28 @@ public class GradeActivity extends AppCompatActivity {
             };
         }
 
+        public void setAction(Consumer<Integer> action) {
+            this.action = action;
+        }
+
+        public void setGrade(int position, String grade) {
+            data.get(position).put("originalScore", grade);
+            notifyItemChanged(position);
+        }
+
+        public String getLevel(int position) {
+            return data.get(position).getString("scoFinalScore");
+        }
+
+        public String getClassNumber(int position) {
+            return data.get(position).getString("scoCourseNumber");
+        }
+
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemScoreBinding binding = ItemScoreBinding.bind(holder.itemView);
-            binding.getRoot().setOnClickListener(view -> {
-            });
             JSONObject info = data.get(position);
+            binding.getRoot().setOnClickListener(view -> action.accept(position));
             MutableLiveData<String> grade = new MutableLiveData<>("");
             if (info.containsKey("scoreList"))
                 info.getJSONArray("scoreList").forEach(a -> grade.setValue(String.format("%s（%s）%s×%s%%+", grade, ((JSONObject) a).getString("FXMC"), ((JSONObject) a).getString("FXCJ"), ((JSONObject) a).getString("MRQZ"))));
@@ -288,7 +385,7 @@ public class GradeActivity extends AppCompatActivity {
                     info.getString("examCharacter"),
                     info.getString("scoCourseNumber"),
                     info.getString("teachClassNumber"),
-                    Objects.requireNonNull(grade.getValue()) + "=" + (info.getString("originalScore") == null ? "" : info.getString("originalScore"))));
+                    (info.getString("originalScore") == null ? "点击查看总成绩" : Objects.requireNonNull(grade.getValue()) + "=" + info.getString("originalScore"))));
         }
 
         public void add(JSONObject a) {
