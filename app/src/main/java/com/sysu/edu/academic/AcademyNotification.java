@@ -28,6 +28,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sysu.edu.R;
+import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
@@ -50,8 +51,9 @@ public class AcademyNotification extends AppCompatActivity {
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
+    //    final OkHttpClient http = new OkHttpClient.Builder().build();
     AlertDialog dialog;
+    HttpManager http;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -136,30 +138,15 @@ public class AcademyNotification extends AppCompatActivity {
                 }
             }
         };
+        http = new HttpManager(handler);
+        http.setParams(params);
+        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/");
         getSchoolNotices();
         getNotices();
     }
 
-    void getList(String a, int what) {
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/system-manage/info-delivery?column=" + a + "&deliveryObject=02&status=1&resourceCode=jwgld")
-                .header("Cookie", cookie)
-                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/")
-                .build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Message msg = new Message();
-                msg.what = -1;
-                handler.sendMessage(msg);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Message msg = new Message();
-                msg.what = what;
-                msg.obj = response.body().string();
-                handler.sendMessage(msg);
-            }
-        });
+    void getList(String column, int what) {
+        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/system-manage/info-delivery?column=" + column + "&deliveryObject=02&status=1&resourceCode=jwgld", what);
     }
 
     void getNotices() {
@@ -171,30 +158,12 @@ public class AcademyNotification extends AppCompatActivity {
     }
 
     void getContent(String id) {
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/system-manage/info-delivery/noticeId?id=" + id)
-                .header("Cookie", cookie)
-                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/")
-                .build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Message msg = new Message();
-                msg.what = -1;
-                handler.sendMessage(msg);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Message msg = new Message();
-                msg.what = 2;
-                msg.obj = response.body().string();
-                handler.sendMessage(msg);
-            }
-        });
+        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/system-manage/info-delivery/noticeId?id=" + id, 2);
     }
 
     class MyClickSpan extends ClickableSpan {
-        String text;
         final String url;
+        String text;
 
         public MyClickSpan(String url) throws MalformedURLException {
             this.url = url;

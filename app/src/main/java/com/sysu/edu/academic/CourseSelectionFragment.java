@@ -266,7 +266,7 @@ public class CourseSelectionFragment extends Fragment {
     }
 
     void getInfo() {
-        http.sendRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0);
+        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0);
     }
 
     void select(String code) {

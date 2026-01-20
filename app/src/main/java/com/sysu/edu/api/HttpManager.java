@@ -87,7 +87,7 @@ public class HttpManager {
         sendRequest(url, data, type, what);
     }
 
-    public void sendRequest(@NonNull String url, int what) {
+    public void getRequest(@NonNull String url, int what) {
         sendRequest(url, null, null, what);
     }
 }
