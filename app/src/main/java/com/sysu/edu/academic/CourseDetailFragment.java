@@ -34,32 +34,37 @@ public class CourseDetailFragment extends Fragment {
     @Override
     public void setArguments(@Nullable Bundle args) {
         if (args != null) {
-            //System.out.println(args.getString("data"));
-            JSONObject data0 = JSONObject.parse(args.getString("data"));
-            if (data0 != null) {
+            JSONObject data = JSONObject.parse(args.getString("data"));
+            if (data != null) {
                 switch (args.getInt("what")) {
                     case 1:
-                        data = data0;
+                        this.data = data;
                         break;
                     case 2:
-                        binding.intro.setText(data.getString("courseContentInChinese"));
-                        binding.goal.setText(data.getString("courseObjectiveAndRequirement"));
-                        binding.method.setText(data.getString("teachMethod"));
-                        binding.evaluationMethod.setText(data.getString("evaluationMethod"));
-                        binding.reference.setText(data.getString("referenceBook"));
-                        binding.resource.setText(data.getString("courseResource"));
-                        String[] info = new String[]{"courseName","faceProfessionName", "courseTypeName", "courseNum","courseId" ,"subCourseTypeName", "subTypeModuleName","courseTextBook", "credit", "totalHours", "lecturesCreHours", "labCreHours", "weekHours","totalHoursComment","languageName", "establishUnitNumberName", "planClassSize", "teacherName", "intendedAcadYear", "intendedCampusName"};
-                        for (int i = 0; i < info.length; i++) {
-                            String content = (i==9|i==10?data0:data).getString(info[i]);
-                            if (content == null) {content = "";}
-                            Chip chip = ItemActionChipBinding.inflate(getLayoutInflater()).getRoot();
-                            chip.setText(String.format("%s：%s", (new String[]{"课程名称","面向专业","课程类别", "课程编码","课程id" ,"课程细类", "艺术教育板块", "课本","学分", "总学时", "理论学时", "实践(含实验)学时", "周学时","总学时备注", "授课语种", "开课单位", "接收人数", "主讲教师", "意向开课学期", "意向线下上课校区", "是否有意向开设跨校园同步课程"})[i], content));
-                            chip.setOnLongClickListener(a -> {
-                                ((ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("", ((Chip) a).getText()));
-                                return false;
-                            });
-                            chip.setOnClickListener(a -> Snackbar.make(requireContext(), chip, ((Chip) a).getText(), Snackbar.LENGTH_LONG).show());
-                            binding.detail.addView(chip);
+                        try {
+                            binding.intro.setText(this.data.getString("courseContentInChinese"));
+                            binding.goal.setText(this.data.getString("courseObjectiveAndRequirement"));
+                            binding.method.setText(this.data.getString("teachMethod"));
+                            binding.evaluationMethod.setText(this.data.getString("evaluationMethod"));
+                            binding.reference.setText(this.data.getString("referenceBook"));
+                            binding.resource.setText(this.data.getString("courseResource"));
+
+                            String[] info = new String[]{"courseName", "faceProfessionName", "courseTypeName", "courseNum", "courseId", "subCourseTypeName", "subTypeModuleName", "courseTextBook", "credit", "totalHours", "lecturesCreHours", "labCreHours", "weekHours", "totalHoursComment", "languageName", "establishUnitNumberName", "planClassSize", "teacherName", "intendedAcadYear", "intendedCampusName"};
+                            for (int i = 0; i < info.length; i++) {
+                                String content = (i == 9 | i == 10 ? data : this.data).getString(info[i]);
+                                if (content == null) {
+                                    content = "";
+                                }
+                                Chip chip = ItemActionChipBinding.inflate(getLayoutInflater()).getRoot();
+                                chip.setText(String.format("%s：%s", (new String[]{"课程名称", "面向专业", "课程类别", "课程编码", "课程id", "课程细类", "艺术教育板块", "课本", "学分", "总学时", "理论学时", "实践(含实验)学时", "周学时", "总学时备注", "授课语种", "开课单位", "接收人数", "主讲教师", "意向开课学期", "意向线下上课校区", "是否有意向开设跨校园同步课程"})[i], content));
+                                chip.setOnLongClickListener(a -> {
+                                    ((ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("", ((Chip) a).getText()));
+                                    return false;
+                                });
+                                chip.setOnClickListener(a -> Snackbar.make(requireContext(), chip, ((Chip) a).getText(), Snackbar.LENGTH_LONG).show());
+                                binding.detail.addView(chip);
+                            }
+                        } catch (Exception ignored) {
                         }
                         break;
                 }

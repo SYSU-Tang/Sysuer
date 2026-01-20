@@ -105,7 +105,7 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".academic.CourseDetail"
+            android:name=".academic.CourseDetailActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />

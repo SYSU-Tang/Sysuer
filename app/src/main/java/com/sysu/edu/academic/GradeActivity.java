@@ -46,7 +46,7 @@ public class GradeActivity extends AppCompatActivity {
     final MutableLiveData<String> trainType = new MutableLiveData<>();
     final MutableLiveData<String> year = new MutableLiveData<>();
     final MutableLiveData<Integer> term = new MutableLiveData<>();
-    final Map<String, Integer> gradeMap = Map.of("A", 90, "B", 80, "C", 70, "D", 60, "E", 0);
+    final Map<String, Integer> gradeMap = Map.of("A", 100, "B", 90, "C", 80, "D", 70, "E", 60);
     ActivityGradeBinding binding;
     Handler handler;
     PopupMenu termPop;
@@ -87,53 +87,59 @@ public class GradeActivity extends AppCompatActivity {
         binding.tabs.setHorizontalScrollBarEnabled(false);
         yearPop = new PopupMenu(this, binding.year, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
         typePop = new PopupMenu(this, binding.type, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
-        binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
-        binding.term.setOnClickListener(view -> termPop.show());
-        binding.year.setOnClickListener(view -> yearPop.show());
-        binding.type.setOnClickListener(view -> typePop.show());
+        binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
+        binding.term.setOnClickListener(v -> termPop.show());
+        binding.year.setOnClickListener(v -> yearPop.show());
+        binding.type.setOnClickListener(v -> typePop.show());
         ScoreAdapter adp = new ScoreAdapter();
         binding.scores.setAdapter(adp);
         class GradeManager {
             String classNumber;
-            int grade;
+            int grade = -1;
             int position = -1;
-            int minGrade = -1;
+            int maxGrade = -1;
+            boolean isFetching = false;
 
-            void getGrade(String classNumber, int position, int minGrade) {
+            void getGrade(String classNumber, int pos, int maxGrade) {
                 this.classNumber = classNumber;
-                this.grade = minGrade;
-                if (this.minGrade < 0) {
-                    this.minGrade = minGrade;
+                grade = maxGrade;
+                isFetching = true;
+                if (this.maxGrade < 0) {
+                    this.maxGrade = maxGrade;
                 }
-                if (this.position < 0) {
-                    this.position = position;
+                if (position < 0) {
+                    position = pos;
                 }
-                //System.out.println(String.format("{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"%s\",\"beforeAchievementPoint\":\"%s\",\"afterAchievementPoint\":\"%s\",\"cultureTypeCode\":\"01\"}}", classNumber, minGrade, maxGrade));
-                postRequest("https://jwxt.sysu.edu.cn/jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse", String.format("{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"%s\",\"beforeAchievementPoint\":\"%s\",\"afterAchievementPoint\":\"%s\",\"cultureTypeCode\":\"01\"}}", classNumber, minGrade, minGrade), 5);
+                postRequest("https://jwxt.sysu.edu.cn/jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse", String.format("{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"%s\",\"beforeAchievementPoint\":\"%s\",\"afterAchievementPoint\":\"%s\",\"cultureTypeCode\":\"01\"}}", classNumber, maxGrade, maxGrade), 5);
             }
 
             void getGrade() {
-                if (grade - minGrade < 6) {
-                    getGrade(classNumber, position, ++grade);
+                if (maxGrade - grade < 60) {
+                    getGrade(classNumber, position, --grade);
+                } else {
+                    isFetching = false;
                 }
             }
 
             void setGrade() {
                 adp.setGrade(position, String.valueOf(grade));
                 params.toast(String.valueOf(grade));
-                grade = 0;
+                grade = -1;
                 position = -1;
-                minGrade = -1;
+                maxGrade = -1;
                 classNumber = "";
+                isFetching = false;
             }
         }
         GradeManager gradeManager = new GradeManager();
         adp.setAction(position -> {
-            String level = adp.getLevel(position);
-            //int maxGrade = gradeMap.getOrDefault(level.substring(0, 1), 0) + (level.length() == 2 ? 10 : 5);
-            int minGrade = gradeMap.getOrDefault(level.substring(0, 1), 0) + (level.length() == 2 ? 5 : 0);
-            //params.toast(String.format(Locale.getDefault(), "%s: %d-%d", level, maxGrade, minGrade));
-            gradeManager.getGrade(adp.getClassNumber(position), position, minGrade);
+            if (gradeManager.isFetching) {
+                params.toast(R.string.grade_fetching);
+            } else {
+                String level = adp.getLevel(position);
+                int minGrade = gradeMap.getOrDefault(level.substring(0, 1), 0) - (level.length() == 2 ? 0 : 6);
+                gradeManager.getGrade(adp.getClassNumber(position), position, minGrade);
+            }
         });
 
         params = new Params(this);
@@ -369,7 +375,11 @@ public class GradeActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemScoreBinding binding = ItemScoreBinding.bind(holder.itemView);
             JSONObject info = data.get(position);
-            binding.getRoot().setOnClickListener(view -> action.accept(position));
+            binding.getRoot().setOnClickListener(view -> {
+                if (info.getString("originalScore") == null) {
+                    action.accept(position);
+                }
+            });
             MutableLiveData<String> grade = new MutableLiveData<>("");
             if (info.containsKey("scoreList"))
                 info.getJSONArray("scoreList").forEach(a -> grade.setValue(String.format("%s（%s）%s×%s%%+", grade, ((JSONObject) a).getString("FXMC"), ((JSONObject) a).getString("FXCJ"), ((JSONObject) a).getString("MRQZ"))));

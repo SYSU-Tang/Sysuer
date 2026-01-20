@@ -34,9 +34,4 @@ public class CourseSelectionViewModel extends ViewModel {
         returnData = data;
     }
 
-    //public void clearReturnData() {
-//        returnData = null;
-//    }
-
 }
-

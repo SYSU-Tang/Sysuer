@@ -63,7 +63,6 @@ public class CourseSelectionPreviewFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
-
             binding = FragmentCourseSelectionPreviewBinding.inflate(inflater, container, false);
             params = new Params(requireActivity());
             vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
@@ -79,7 +78,7 @@ public class CourseSelectionPreviewFragment extends Fragment {
                     }
                 }
             });
-            binding.type.addOnButtonCheckedListener((group, checkedId, isChecked) -> type.setValue(binding.major.isChecked() ? 1 : binding.publicSelection.isChecked() ? 4 : 2));
+            binding.type.addOnButtonCheckedListener((group, checkedId, isChecked) -> type.setValue(binding.major.isChecked() ? 1 : binding.collegePublicSelective.isChecked() ? 4 : 2));
             type.observe(getViewLifecycleOwner(), v -> {
                 page = 1;
                 previewAdapter.clear();
@@ -171,7 +170,7 @@ public class CourseSelectionPreviewFragment extends Fragment {
             for (int i = 0; i < key.length; i++) {
                 md.append(String.format("\n%s：**%s**\n", name[i], data.get(position).getString(key[i]) == null ? "无" : data.get(position).getString(key[i])));
             }
-            View.OnClickListener action = view -> view.getContext().startActivity(new Intent(view.getContext(), CourseDetail.class).putExtra("id", data.get(position).getString("teachingClassId")).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("teachingClassNum")),
+            View.OnClickListener action = view -> view.getContext().startActivity(new Intent(view.getContext(), CourseDetailActivity.class).putExtra("id", data.get(position).getString("teachingClassId")).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("teachingClassNum")),
                     ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) binding.getRoot().getContext(), binding.title, "miniapp").toBundle());
             binding.getRoot().setOnClickListener(action);
             binding.open.setOnClickListener(action);

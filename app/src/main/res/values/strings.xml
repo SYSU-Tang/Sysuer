@@ -438,5 +438,7 @@
     <string name="pause">暂停</string>
     <string name="leave_return_registration">离返校登记</string>
     <string name="preview">预览</string>
+    <string name="grade_fetching">正在获取成绩当中…</string>
+    <string name="hide_filter">隐藏过滤面板</string>
 
 </resources>

@@ -156,7 +156,7 @@ public class CourseSelectedActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ((ViewHolder) holder).setInfo(data.get(position));
-            ((ViewHolder) holder).binding.getRoot().setOnClickListener(view -> view.getContext().startActivity(new Intent(view.getContext(), CourseDetail.class).putExtra("id", data.get(position).getString("teachingClassId")).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("teachingClassNum")),
+            ((ViewHolder) holder).binding.getRoot().setOnClickListener(view -> view.getContext().startActivity(new Intent(view.getContext(), CourseDetailActivity.class).putExtra("id", data.get(position).getString("teachingClassId")).putExtra("code", data.get(position).getString("courseNum")).putExtra("class", data.get(position).getString("teachingClassNum")),
                     ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) view.getContext(), ((ViewHolder) holder).binding.title, "miniapp").toBundle()));
         }
 

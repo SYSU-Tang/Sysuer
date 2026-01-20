@@ -32,7 +32,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
-import com.sysu.edu.academic.CourseDetail;
+import com.sysu.edu.academic.CourseDetailActivity;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.SysuerPreferenceManager;
 import com.sysu.edu.api.TargetUrl;
@@ -134,7 +134,7 @@ public class DashboardFragment extends Fragment {
                 getTerm();
             });
             CourseAdapter courseAdapter = new CourseAdapter(requireActivity());
-            courseAdapter.setOnClick((jsonObject, view) -> startActivity(new Intent(getContext(), CourseDetail.class).putExtra("code", jsonObject.getString("courseNum")).putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
+            courseAdapter.setOnClick((jsonObject, view) -> startActivity(new Intent(getContext(), CourseDetailActivity.class).putExtra("code", jsonObject.getString("courseNum")).putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
             binding.courseList.setAdapter(courseAdapter);
             ExamAdapter examAdapter = new ExamAdapter(requireActivity());
             binding.examList.setAdapter(examAdapter);

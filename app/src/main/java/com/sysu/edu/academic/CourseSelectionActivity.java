@@ -26,18 +26,14 @@ public class CourseSelectionActivity extends AppCompatActivity {
         binding = ActivityCourseSelectionBinding.inflate(getLayoutInflater());
         binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         setContentView(binding.getRoot());
-        //getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).commit();
-        NavController navController =((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.course_selection_fragment))).getNavController();
-       // NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_course_selection);
-        AppBarConfiguration appBarConfiguration =
-                new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> false).build();
-        NavigationUI.setupWithNavController(binding.toolbar, navController, appBarConfiguration);
+        NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.course_selection_fragment))).getNavController();
+        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> false).build());
         binding.tab.addTab(binding.tab.newTab().setText(R.string.course_selection));
         binding.tab.addTab(binding.tab.newTab().setText(R.string.preview));
         binding.tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                navController.navigate(new int[]{R.id.selection_navigation,R.id.preview_navigation}[tab.getPosition()], null,new NavOptions.Builder().setLaunchSingleTop(true).build());
+                navController.navigate(new int[]{R.id.selection_navigation, R.id.preview_navigation}[tab.getPosition()], null, new NavOptions.Builder().setLaunchSingleTop(true).build());
             }
 
             @Override
@@ -50,7 +46,8 @@ public class CourseSelectionActivity extends AppCompatActivity {
 
             }
         });
-        binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
+        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> false).build());
+        //binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }
 }

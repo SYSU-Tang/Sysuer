@@ -125,7 +125,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         binding.result.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (recyclerView.canScrollVertically(1) && total / 20 + 1 >= page) {
+                if (!recyclerView.canScrollVertically(1) && total / 20 + 1 >= page) {
                     getRoom();
                 }
                 super.onScrolled(recyclerView, dx, dy);

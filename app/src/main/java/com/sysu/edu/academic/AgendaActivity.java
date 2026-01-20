@@ -149,7 +149,7 @@ public class AgendaActivity extends AppCompatActivity {
         }); // 初始化周次选择
         detailDialog = new BottomSheetDialog(this);
         detailBinding = ItemDetailBinding.inflate(getLayoutInflater());
-        detailBinding.open.setOnClickListener(v -> startActivity(new Intent(this, CourseDetail.class).putExtra("id", id.getValue()), ActivityOptionsCompat.makeSceneTransitionAnimation(this, v, "miniapp").toBundle())); // 初始化打开链接
+        detailBinding.open.setOnClickListener(v -> startActivity(new Intent(this, CourseDetailActivity.class).putExtra("id", id.getValue()), ActivityOptionsCompat.makeSceneTransitionAnimation(this, v, "miniapp").toBundle())); // 初始化打开链接
         detailDialog.setContentView(detailBinding.getRoot());
         handler = new Handler(getMainLooper()) {
             @Override
