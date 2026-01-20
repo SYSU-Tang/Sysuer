@@ -27,7 +27,6 @@ public class CourseDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCourseDetailBinding.inflate(inflater);
-
         return binding.getRoot();
     }
 
@@ -48,7 +47,6 @@ public class CourseDetailFragment extends Fragment {
                             binding.evaluationMethod.setText(this.data.getString("evaluationMethod"));
                             binding.reference.setText(this.data.getString("referenceBook"));
                             binding.resource.setText(this.data.getString("courseResource"));
-
                             String[] info = new String[]{"courseName", "faceProfessionName", "courseTypeName", "courseNum", "courseId", "subCourseTypeName", "subTypeModuleName", "courseTextBook", "credit", "totalHours", "lecturesCreHours", "labCreHours", "weekHours", "totalHoursComment", "languageName", "establishUnitNumberName", "planClassSize", "teacherName", "intendedAcadYear", "intendedCampusName"};
                             for (int i = 0; i < info.length; i++) {
                                 String content = (i == 9 | i == 10 ? data : this.data).getString(info[i]);
@@ -64,8 +62,7 @@ public class CourseDetailFragment extends Fragment {
                                 chip.setOnClickListener(a -> Snackbar.make(requireContext(), chip, ((Chip) a).getText(), Snackbar.LENGTH_LONG).show());
                                 binding.detail.addView(chip);
                             }
-                        } catch (Exception ignored) {
-                        }
+                        } catch (Exception ignored) {}
                         break;
                 }
 

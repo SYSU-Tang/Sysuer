@@ -47,7 +47,11 @@ public class CourseDetailActivity extends AppCompatActivity {
         Params params = new Params(this);
         params.setCallback(() -> {
             cookie = params.getCookie();
-            getCourseOutline();
+            if (code == null || classNum == null) {
+                getCourseOutline2();
+            } else {
+                getCourseOutline();
+            }
         });
         binding.pager.setAdapter(courseDetailPageAdapter);
         courseDetailPageAdapter.add(new CourseDetailFragment());
@@ -83,6 +87,7 @@ public class CourseDetailActivity extends AppCompatActivity {
                             break;
                         case 2:
                             JSONObject data2 = response.getJSONObject("data");
+                            System.out.println(data2);
                             if (data2 != null) {
                                 Bundle bundle = new Bundle();
                                 bundle.putInt("what", 2);

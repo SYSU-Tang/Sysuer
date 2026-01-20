@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class CourseSelectionFragment extends Fragment {
 
@@ -87,14 +88,17 @@ public class CourseSelectionFragment extends Fragment {
                 getInfo();
             });
             vm.filterValue.observe(requireActivity(), f -> {
-//                System.out.println(f);
                 filter.setValue(vm.getReturnData());
                 clear();
                 getCourseList();
             });
             binding.head.type.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 int cid = chipGroup.getCheckedChipId();
-                type.setValue((cid == R.id.my_major) ? 1 : (cid == R.id.college_public_selective) ? 4 : 2);
+                if (cid == R.id.my_major) {
+                    seleCategory();
+                } else {
+                    type.setValue((cid == R.id.college_public_selective) ? 4 : 2);
+                }
                 if (cid != R.id.my_major && binding.head.category.getHeight() != 0) {
                     tmp = binding.head.category.getHeight();
                 }
@@ -115,22 +119,7 @@ public class CourseSelectionFragment extends Fragment {
                 getCourseList();
             });
             binding.head.category.setOnCheckedStateChangeListener((chipGroup, list) -> {
-                int cid = chipGroup.getCheckedChipId();
-                if (cid == R.id.major_compulsory) {
-                    typeCate.setValue(List.of(1, 11));
-                } else if (cid == R.id.major_selective) {
-                    typeCate.setValue(List.of(1, 21));
-                } else if (cid == R.id.school_public_selective) {
-                    typeCate.setValue(List.of(1, 30));
-                } else if (cid == R.id.pe) {
-                    typeCate.setValue(List.of(3, 10));
-                } else if (cid == R.id.en) {
-                    typeCate.setValue(List.of(5, 1));
-                } else if (cid == R.id.public_compulsory) {
-                    typeCate.setValue(List.of(1, 10));
-                } else if (cid == R.id.honor) {
-                    typeCate.setValue(List.of(1, 31));
-                }
+                seleCategory();
             });
             cookie = params.getCookie();
             binding.course.setLayoutManager(gm = new GridLayoutManager(requireContext(), params.getColumn()));
@@ -140,11 +129,21 @@ public class CourseSelectionFragment extends Fragment {
                 clear();
                 getCourseList();
             });
+            adp.setSelectAction(position -> {
+                if (adp.getItem(position).getInteger("selectedStatus") == 3 || adp.getItem(position).getInteger("selectedStatus") == 4) {
+                    unselect(adp.convert(position, "courseId"), adp.convert(position, "teachingClassId"));
+                } else {
+                    select(adp.convert(position, "teachingClassId"));
+                }
+            });
+
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    if (response != null && response.getInteger("code").equals(200)) {
+                    System.out.println(response);
+                    Integer code = response.getInteger("code");
+                    if (code.equals(200)) {
                         switch (msg.what) {
                             case -1:
                                 params.toast(R.string.no_wifi_warning);
@@ -160,12 +159,12 @@ public class CourseSelectionFragment extends Fragment {
                                 }
                                 break;
                             case 3:
-                                params.toast(response.getString("data"));
+                                params.toast(response.getString("message"));
+                                clear();
+                                getCourseList();
                                 break;
                         }
-                    } else if (response != null && response.getInteger("code").equals(50021000)) {
-                        params.toast(response.getString("message"));
-                    } else if (response != null && response.getInteger("code").equals(52021100)) {
+                    } else if (code.equals(50021000) || code.equals(52021104) || code.equals(52021100)) {
                         params.toast(response.getString("message"));
                     } else {
                         params.toast(R.string.login_warning);
@@ -191,6 +190,25 @@ public class CourseSelectionFragment extends Fragment {
             getInfo();
         }
         return binding.getRoot();
+    }
+
+    private void seleCategory() {
+        int cid = binding.head.category.getCheckedChipId();
+        if (cid == R.id.major_compulsory) {
+            typeCate.setValue(List.of(1, 11));
+        } else if (cid == R.id.major_selective) {
+            typeCate.setValue(List.of(1, 21));
+        } else if (cid == R.id.school_public_selective) {
+            typeCate.setValue(List.of(1, 30));
+        } else if (cid == R.id.pe) {
+            typeCate.setValue(List.of(3, 10));
+        } else if (cid == R.id.en) {
+            typeCate.setValue(List.of(5, 1));
+        } else if (cid == R.id.public_compulsory) {
+            typeCate.setValue(List.of(1, 10));
+        } else if (cid == R.id.honor) {
+            typeCate.setValue(List.of(1, 31));
+        }
     }
 
     @Override
@@ -229,10 +247,9 @@ public class CourseSelectionFragment extends Fragment {
     }
 
     void getCourseList() {
-//        System.out.println("getCourseList");
         if (type.getValue() == null || category.getValue() == null || term == null)
             return;
-        getCourseList(typeCate.getValue()==null || typeCate.getValue().get(0) == null ? 1 : typeCate.getValue().get(0), typeCate.getValue()==null || typeCate.getValue().get(1) == null ? 11 : typeCate.getValue().get(1), term, filter.getValue() == null ? "" : filter.getValue());
+        getCourseList(typeCate.getValue() == null || typeCate.getValue().get(0) == null ? 1 : typeCate.getValue().get(0), typeCate.getValue() == null || typeCate.getValue().get(1) == null ? 11 : typeCate.getValue().get(1), term, filter.getValue() == null ? "" : filter.getValue());
     }
 
     void getCourseList(int selectedType, int selectedCate, String term, String filterText) {
@@ -284,9 +301,11 @@ public class CourseSelectionFragment extends Fragment {
 }
 
 class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final String[] info = new String[]{"courseUnitName", "credit", "examFormName", "courseNum", "clazzNum"};
+    final String[] info = new String[]{"credit", "examFormName", "clazzNum"};
     final CourseSelectionFragment c;
     final ArrayList<JSONObject> data = new ArrayList<>();
+    Consumer<Integer> selectAction;
+    Consumer<Integer> likeAction;
 
     public CourseAdapter(CourseSelectionFragment c) {
         super();
@@ -316,23 +335,32 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         };
     }
 
+    public void setSelectAction(Consumer<Integer> action) {
+        this.selectAction = action;
+    }
+
+    public void setLikeAction(Consumer<Integer> action) {
+        this.likeAction = action;
+    }
+
+    public JSONObject getItem(int position) {
+        return data.get(position);
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.bind(holder.itemView);
         Context context = binding.getRoot().getContext();
-        binding.courseName.setText(convert(position, "courseName"));
+        binding.courseName.setText(String.format("%s-%s", convert(position, "courseNum"), convert(position, "courseName")));
         binding.like.setSelected(data.get(position).getInteger("collectionStatus") == 1);
         binding.select.setSelected(data.get(position).getInteger("selectedStatus") == 3 || data.get(position).getInteger("selectedStatus") == 4);
         binding.select.setText(binding.select.isSelected() ? "退课" : "选课");
         binding.like.setText(binding.like.isSelected() ? "取消收藏" : "收藏");
         binding.select.setOnClickListener(v -> {
-            if (v.isSelected()) {
-                c.unselect(convert(position, "courseId"), convert(position, "teachingClassId"));
-            } else {
-                c.select(convert(position, "teachingClassId"));
-            }
-            v.setSelected(!v.isSelected());
-            ((MaterialButton) v).setText(v.isSelected() ? "退课" : "选课");
+            if (selectAction != null)
+                selectAction.accept(position);
+            /*v.setSelected(!v.isSelected());
+            ((MaterialButton) v).setText(v.isSelected() ? "退课" : "选课");*/
         });
         binding.like.setOnClickListener(v -> {
             Snackbar.make(v, "已" + ((MaterialButton) v).getText(), Snackbar.LENGTH_LONG).show();
@@ -341,11 +369,10 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((MaterialButton) v).setText(v.isSelected() ? "取消收藏" : "收藏");
         });
         binding.open.setOnClickListener(v -> context.startActivity(new Intent(context, CourseDetailActivity.class).putExtra("code", convert(position, "courseNum")).putExtra("id", convert(position, "courseId")).putExtra("class", convert(position, "clazzNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, v, "miniapp").toBundle()));
-        binding.courseName.setText(convert(position, "courseName"));
         binding.head.setText(convert(position, "teachingTimePlace").replace(";", " | ").replace(",", "\n"));
         for (int i = 0; i < info.length; i++) {
             String content = convert(position, info[i]);
-            ((Chip) binding.courseInfo.getChildAt(i)).setText(String.format("%s：%s", (new String[]{"开设部门", "学分", "考查形式", "课程代码", "班级代码", "剩余空位", "待筛选人数", "选上人数"})[i], content));
+            ((Chip) binding.courseInfo.getChildAt(i)).setText(String.format("%s：%s", (new String[]{"学分", "考查形式", "课程代码", "剩余空位", "待筛选人数", "选上人数"})[i], content));
         }
         String[] seats = new String[]{"baseReceiveNum", "filterSelectedNum", "courseSelectedNum"};
         for (int i = 0; i < seats.length; i++) {

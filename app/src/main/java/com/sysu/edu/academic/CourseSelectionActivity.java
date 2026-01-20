@@ -33,7 +33,7 @@ public class CourseSelectionActivity extends AppCompatActivity {
         binding.tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                navController.navigate(new int[]{R.id.selection_navigation, R.id.preview_navigation}[tab.getPosition()], null, new NavOptions.Builder().setLaunchSingleTop(true).build());
+                navController.navigate(new int[]{R.id.selection_navigation, R.id.preview_navigation}[tab.getPosition()], null, new NavOptions.Builder().setRestoreState(true).setLaunchSingleTop(true).build());
             }
 
             @Override
