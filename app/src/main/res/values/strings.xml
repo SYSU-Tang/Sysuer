@@ -443,5 +443,6 @@
     <string name="start_registration">开始登记</string>
     <string name="modify_registration">修改登记</string>
     <string name="view_detail">查看详情</string>
+    <string name="all">全部</string>
 
 </resources>

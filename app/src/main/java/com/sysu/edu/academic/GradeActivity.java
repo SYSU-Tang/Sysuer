@@ -46,7 +46,7 @@ public class GradeActivity extends AppCompatActivity {
     final MutableLiveData<String> trainType = new MutableLiveData<>();
     final MutableLiveData<String> year = new MutableLiveData<>();
     final MutableLiveData<Integer> term = new MutableLiveData<>();
-    final Map<String, Integer> gradeMap = Map.of("A", 100, "B", 90, "C", 80, "D", 70, "E", 60);
+    final Map<String, Integer> gradeMap = Map.of("A", 100, "B", 90, "C", 80, "D", 70, "F", 60);
     ActivityGradeBinding binding;
     Handler handler;
     PopupMenu termPop;
@@ -91,8 +91,15 @@ public class GradeActivity extends AppCompatActivity {
         binding.term.setOnClickListener(v -> termPop.show());
         binding.year.setOnClickListener(v -> yearPop.show());
         binding.type.setOnClickListener(v -> typePop.show());
+        yearPop.getMenu().add(R.string.all).setOnMenuItemClickListener(menuItem -> {
+            sendRequest(String.format("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?trainTypeCode=%s", trainType.getValue()), 1);
+            binding.year.setText(R.string.all);
+            return false;
+        });
+
         ScoreAdapter adp = new ScoreAdapter();
         binding.scores.setAdapter(adp);
+
         class GradeManager {
             String classNumber;
             int grade = -1;
@@ -254,7 +261,7 @@ public class GradeActivity extends AppCompatActivity {
                             break;
                         }
                         case 5:
-                            System.out.println(dataString);
+//                            System.out.println(dataString);
                             if (dataString.containsKey("data") && !dataString.getJSONObject("data").getInteger("total").equals(0)) {
                                 gradeManager.setGrade();
                             } else {
@@ -384,8 +391,9 @@ public class GradeActivity extends AppCompatActivity {
             if (info.containsKey("scoreList"))
                 info.getJSONArray("scoreList").forEach(a -> grade.setValue(String.format("%s（%s）%s×%s%%+", grade, ((JSONObject) a).getString("FXMC"), ((JSONObject) a).getString("FXCJ"), ((JSONObject) a).getString("MRQZ"))));
             binding.subject.setText(info.getString("scoCourseName"));
-            binding.score.setText(String.format("%s/%s", info.getString("scoFinalScore"), info.getString("scoPoint")));
-            Markwon.builder(binding.getRoot().getContext()).build().setMarkdown(binding.info, String.format("- 学分：**%s**\n- 班级排名：**%s**\n- 年级排名：**%s**\n- 课程类别：**%s**\n- 老师：**%s**\n- 是否通过：**%s**\n- 考试性质：**%s**\n- 班级号：**%s**\n- 教学班号：**%s**\n- 成绩：**%s**",
+            binding.score.setText(String.format("%s%s", info.getString("scoFinalScore"), info.getString("scoPoint") == null ? "" : "/" + info.getString("scoPoint")));
+            Markwon.builder(binding.getRoot().getContext()).build().setMarkdown(binding.info, String.format("- 学期：**%s**\n- 学分：**%s**\n- 班级排名：**%s**\n- 年级排名：**%s**\n- 课程类别：**%s**\n- 老师：**%s**\n- 是否通过：**%s**\n- 考试性质：**%s**\n- 班级号：**%s**\n- 教学班号：**%s**\n- 成绩：**%s**",
+                    String.format("%s第%s学期", info.getString("scoSchoolYear"), info.getString("scoSemester")),
                     info.getString("scoCredit"),
                     info.getString("teachClassRank"),
                     info.getString("gradeMajorRank"),
