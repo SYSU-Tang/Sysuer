@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <queries>
         <package android:name="com.tencent.wework" />
@@ -15,7 +16,6 @@
     <queries>
         <package android:name="com.tencent.mm" />
     </queries>
-
     <application
         android:name=".Application"
         android:allowBackup="true"
@@ -244,6 +244,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
+
+        <receiver android:name=".AlarmReceiver"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -26,9 +26,10 @@ import okhttp3.Response;
 
 public class LeaveReturnRegistrationActivity extends AppCompatActivity {
 
-    Handler handler;
     final OkHttpClient http = new OkHttpClient();
+    Handler handler;
     Params params;
+    String baseUrl = "https://xgxt.sysu.edu.cn";
 
 
     @Override
@@ -47,7 +48,6 @@ public class LeaveReturnRegistrationActivity extends AppCompatActivity {
                     params.toast(R.string.no_wifi_warning);
                 } else if (msg.what == 0) {
                     int code = msg.getData().getInt("code");
-                    //System.out.println(msg.getData().getString("response"));
                     if (code == 200) {
                         //System.out.println(msg.getData().getString("response"));
                         if (msg.getData().getBoolean("isJSON")) {
@@ -64,10 +64,13 @@ public class LeaveReturnRegistrationActivity extends AppCompatActivity {
                                 params.toast(msg.getData().getString("message"));
                             }
                         } else {
-                            params.gotoLogin(binding.toolbar, TargetUrl.XGXT);
+                            params.toast(R.string.educational_wifi_warning);
+                            baseUrl = "https://xgxt-443.webvpn.sysu.edu.cn";
+                            getYears();
+                            //params.gotoLogin(binding.toolbar, TargetUrl.XGXT_WEBVPN);
                         }
                     } else if (code == 302) {
-                        params.gotoLogin(binding.toolbar, TargetUrl.XGXT);
+                        params.gotoLogin(binding.toolbar, TargetUrl.XGXT_WEBVPN);
                     } else {
                         params.toast(R.string.educational_wifi_warning);
                     }
@@ -78,11 +81,11 @@ public class LeaveReturnRegistrationActivity extends AppCompatActivity {
     }
 
     void getYears() {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/school-year", 0);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/school-year", 0);
     }
 
     void sendRequest(String url, int what) {
-        http.newCall(new Request.Builder().url(url)
+        http.newCall(new Request.Builder().url(baseUrl + url)
                 .header("Cookie", params.getCookie())
                 .build()).enqueue(new Callback() {
 

@@ -1,20 +1,20 @@
 <resources>
-    <string-array name="theme" >
+    <string-array name="theme">
         <item>@string/light</item>
         <item>@string/dark</item>
         <item>@string/follow_system</item>
     </string-array>
-    <string-array name="value" >
+    <string-array name="value">
         <item>0</item>
         <item>1</item>
         <item>2</item>
     </string-array>
-    <string-array name="language" >
+    <string-array name="language">
         <item>中文</item>
         <item>English</item>
         <item>@string/follow_system</item>
     </string-array>
-    <string-array name="home" >
+    <string-array name="home">
         <item>@string/dashboard</item>
         <item>@string/service</item>
         <item>@string/account</item>
@@ -133,5 +133,23 @@
         <item>第一学期</item>
         <item>第二学期</item>
         <item>第三学期</item>
+    </string-array>
+
+    <string-array name="registration_keys">
+        <item>办理学年</item>
+        <item>离校登记时间</item>
+        <item>工作说明</item>
+        <item>节假日名称</item>
+        <item>节假日日期</item>
+        <item>工作状态</item>
+        <item>状态</item>
+    </string-array>
+
+    <string-array name="registration_info_keys">
+        <item>社会实践</item>
+        <item>科研</item>
+        <item>实习</item>
+        <item>复习</item>
+        <item>其他</item>
     </string-array>
 </resources>

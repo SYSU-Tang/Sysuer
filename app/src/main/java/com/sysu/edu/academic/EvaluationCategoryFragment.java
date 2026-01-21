@@ -22,24 +22,19 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
+import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ItemEvaluationBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class EvaluationCategoryFragment extends Fragment {
     Params params;
     Handler handler;
     RecyclerViewScrollBinding binding;
+    HttpManager http;
 
     @Nullable
     @Override
@@ -56,13 +51,12 @@ public class EvaluationCategoryFragment extends Fragment {
         adp.setParams(new String[]{"rwid", "firstwjid", "pjrdm"});
         adp.setNavigation(R.id.from_category_to_course);
         binding.getRoot().setAdapter(adp);
-        getEvaluation();
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == 1) {
                     JSONObject data = JSON.parseObject((String) msg.obj);
-                    if (data!=null &&data.get("code").equals("200")) {
+                    if (data!=null && Objects.equals(data.get("code"), "200")) {
                         data.getJSONObject("result").getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
                     } else {
                         params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
@@ -73,31 +67,16 @@ public class EvaluationCategoryFragment extends Fragment {
                 }
             }
         };
+        http = new HttpManager(handler);
+        http.setParams(params);
+        getEvaluation();
+
         return binding.getRoot();
     }
 
 
     public void getEvaluation() {
-        new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://pjxt.sysu.edu.cn/personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10")
-                .header("Cookie", params.getCookie())
-                //.addHeader("Cookie", "JSESSIONID=F547A1B2729098E0B101716397DC48DC;INCO=9b1595d95278e78f17d51a5f35287020;")
-                // .post(RequestBody.create("{\"acadYear\":\"2024-2\",\"examWeekId\":\"1864116471884476417\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", MediaType.parse("application/json")))
-                .build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Message message = new Message();
-                message.what = -1;
-                handler.sendMessage(message);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Message msg = new Message();
-                msg.what = 1;
-                msg.obj = response.body().string();
-                handler.sendMessage(msg);
-            }
-        });
+        http.getRequest("https://pjxt.sysu.edu.cn/personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10", 1);
     }
 
     public static class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

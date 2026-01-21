@@ -17,7 +17,6 @@
         app:checkedChip="@+id/my_major"
         app:chipSpacingVertical="4dp"
         app:selectionRequired="true"
-        app:singleLine="true"
         app:singleSelection="true">
 
         <com.google.android.material.chip.Chip

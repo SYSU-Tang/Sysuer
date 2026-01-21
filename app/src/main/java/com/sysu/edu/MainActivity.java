@@ -179,6 +179,15 @@ public class MainActivity extends AppCompatActivity {
         //pm.setComponentEnabledSetting(new ComponentName(this, SettingActivity.class), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
         //WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(ClassIsland.class).build());
         //new ClassIsland(this).doWork();
+        /*if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
+        } else {
+            AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            Intent intentMorning = new Intent(this, AlarmReceiver.class).setAction("VIDEO_TIMER");
+            PendingIntent piMorning = PendingIntent.getBroadcast(this, 0, intentMorning, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);     //设置事件
+            manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    System.currentTimeMillis() + 2 * 1000, piMorning);
+        }*/
     }
 
     void checkUpdate() {

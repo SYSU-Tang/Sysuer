@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class CourseSelectionFragment extends Fragment {
@@ -118,9 +119,7 @@ public class CourseSelectionFragment extends Fragment {
                 clear();
                 getCourseList();
             });
-            binding.head.category.setOnCheckedStateChangeListener((chipGroup, list) -> {
-                seleCategory();
-            });
+            binding.head.category.setOnCheckedStateChangeListener((chipGroup, list) -> seleCategory());
             cookie = params.getCookie();
             binding.course.setLayoutManager(gm = new GridLayoutManager(requireContext(), params.getColumn()));
             binding.course.addItemDecoration(new SpacesItemDecoration(params.dpToPx(8)));
@@ -140,10 +139,13 @@ public class CourseSelectionFragment extends Fragment {
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
+                    if (msg.obj == null) {
+                        //params.toast(R.string.no_wifi_warning);
+                        return;
+                    }
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    System.out.println(response);
                     Integer code = response.getInteger("code");
-                    if (code.equals(200)) {
+                    if (Objects.equals(code, 200)) {
                         switch (msg.what) {
                             case -1:
                                 params.toast(R.string.no_wifi_warning);
@@ -153,6 +155,7 @@ public class CourseSelectionFragment extends Fragment {
                                 getCourseList();
                                 break;
                             case 1:
+
                                 if (response.getJSONObject("data") != null) {
                                     total = response.getJSONObject("data").getInteger("total");
                                     response.getJSONObject("data").getJSONArray("rows").forEach(e -> adp.add((JSONObject) e));
@@ -164,7 +167,7 @@ public class CourseSelectionFragment extends Fragment {
                                 getCourseList();
                                 break;
                         }
-                    } else if (code.equals(50021000) || code.equals(52021104) || code.equals(52021100)) {
+                    } else if (Objects.equals(code, 50021000) || Objects.equals(code, 52021104) || Objects.equals(code, 52021100)) {
                         params.toast(response.getString("message"));
                     } else {
                         params.toast(R.string.login_warning);
@@ -292,7 +295,6 @@ public class CourseSelectionFragment extends Fragment {
 
         @Override
         public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            //super.getItemOffsets(outRect, view, parent, state);
             outRect.top = space / 2;
             outRect.right = space;
             outRect.bottom = space / 2;

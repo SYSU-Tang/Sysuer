@@ -46,7 +46,10 @@ public class CourseSelectionActivity extends AppCompatActivity {
 
             }
         });
-        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> false).build());
+        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
+            supportFinishAfterTransition();
+            return true;
+        }).build());
         //binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }

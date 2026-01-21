@@ -431,4 +431,12 @@
     <string name="reserve">Reserve</string>
     <string name="fee">Fee</string>
     <string name="no_train_type">No training type</string>
+    <string name="net_pay">Online Payment</string>
+    <string name="net_manager">Campus Network Management</string>
+    <string name="leave_return_registration">Leave/Return Registration</string>
+    <string name="grade_fetching">Fetching grades…</string>
+    <string name="hide_filter">Hide Filter Panel</string>
+    <string name="start_registration">Start Registration</string>
+    <string name="modify_registration">Modify Registration</string>
+    <string name="view_detail">View Details</string>
 </resources>

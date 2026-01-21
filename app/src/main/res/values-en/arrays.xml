@@ -17,16 +17,16 @@
     </integer-array>
     <string-array name="weeks">
         <item>Mon</item>
-        <item>Thu</item>
+        <item>Tue</item>
         <item>Wed</item>
-        <item>Tur</item>
+        <item>Thu</item>
         <item>Fri</item>
         <item>Sat</item>
         <item>Sun</item>
     </string-array>
     <string-array name="months">
         <item>Jan</item>
-        <item>Fre</item>
+        <item>Feb</item>
         <item>Mar</item>
         <item>Apr</item>
         <item>May</item>
@@ -36,7 +36,7 @@
         <item>Sep</item>
         <item>Oct</item>
         <item>Nov</item>
-        <item>Dem</item>
+        <item>Dec</item>
     </string-array>
     <string-array name="font_size">
         <item>@string/follow_system</item>
@@ -66,5 +66,22 @@
         <item>First Term</item>
         <item>Second Term</item>
         <item>Third Term</item>
+    </string-array>
+    <string-array name="registration_keys">
+        <item>Processing Academic Year</item>
+        <item>Leave School Registration Time</item>
+        <item>Work Description</item>
+        <item>Holiday Name</item>
+        <item>Holiday Date</item>
+        <item>Work Status</item>
+        <item>Status</item>
+    </string-array>
+
+    <string-array name="registration_info_keys">
+        <item>Social Practice</item>
+        <item>Scientific Research</item>
+        <item>Internship</item>
+        <item>Review</item>
+        <item>Others</item>
     </string-array>
 </resources>

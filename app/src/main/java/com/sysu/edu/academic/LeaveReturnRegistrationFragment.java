@@ -46,29 +46,29 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LeaveReturnRegistrationFragment extends StaggeredFragment {
-    View view;
-    Handler handler;
     final OkHttpClient http = new OkHttpClient();
-    JSONArray transportation;
-    JSONArray destination;
     final MutableLiveData<Long> leaveDate = new MutableLiveData<>();
     final MutableLiveData<Long> returnDate = new MutableLiveData<>();
+    final ArrayList<String> leaveKeys = new ArrayList<>(List.of("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地"));
+    final ArrayList<String> stayKeys = new ArrayList<>(List.of("假期去向", "留校原因"));
+    View view;
+    Handler handler;
+    JSONArray transportation;
+    JSONArray destination;
     String country = "";
     String province = "";
     String city = "";
     String isStay = "";
-    ArrayList<String> leave = new ArrayList<>(List.of("离校", "", "", "", "", ""));
-    ArrayList<String> stay = new ArrayList<>(List.of("留校", ""));
-    final ArrayList<String> leaveKeys = new ArrayList<>(List.of("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地"));
-    final ArrayList<String> stayKeys = new ArrayList<>(List.of("假期去向", "留校原因"));
+    ArrayList<String> leave;
+    ArrayList<String> stay;
     String id;
+    String baseUrl = "https://xgxt.sysu.edu.cn";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
             view = super.onCreateView(inflater, container, savedInstanceState);
             id = requireArguments().getString("Id");
-            getInfo(id);
             BottomSheetDialog regionDialog = new BottomSheetDialog(requireContext());
             DialogRegionBinding dialogRegionBinding = DialogRegionBinding.inflate(inflater, container, false);
             regionDialog.setContentView(dialogRegionBinding.getRoot());
@@ -87,7 +87,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
             dialogRegionBinding.county.recyclerView.setAdapter(cityAdapter);
             dialogRegionBinding.county.recyclerView.setNestedScrollingEnabled(false);
             dialogRegionBinding.county.recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_ALWAYS);
-
             handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
@@ -95,9 +94,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                         params.toast(R.string.no_wifi_warning);
                     } else {
                         int code = msg.getData().getInt("code");
-
-//                        System.out.println(msg.what);
-//                        System.out.println(msg.getData().getString("response"));
                         if (code == 200) {
                             JSONObject json = JSONObject.parse(msg.getData().getString("response"));
                             if (json != null && json.getInteger("code") == 200) {
@@ -105,19 +101,17 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                                     ArrayList<String> value = new ArrayList<>();
                                     clear();
                                     JSONObject data = json.getJSONObject("data");
-//                                    data.forEach(e -> {
                                     for (String i : new String[]{"xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj"})
                                         value.add(data.getString(i));
                                     add("基本信息", List.of("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段"), value);
-//                                    });
                                     isStay = data.getString("sflx");
                                     try {
                                         Date leaveTime = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(data.getString("yjlxsj") == null ? "" : data.getString("yjlxsj"));
-                                        if (leaveTime != null){
+                                        if (leaveTime != null) {
                                             leaveDate.postValue(leaveTime.getTime());
                                         }
                                         Date returnTime = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(data.getString("yjfxsj") == null ? "" : data.getString("yjfxsj"));
-                                        if (returnTime != null){
+                                        if (returnTime != null) {
                                             returnDate.postValue(returnTime.getTime());
                                         }
                                         returnDate.postValue(Objects.requireNonNull((new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())).parse(data.getString("yjfxsj"))).getTime());
@@ -139,7 +133,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                                     } else {
                                         add("登记", stayKeys, stay);
                                     }
-
                                     getDestination();
                                     getTransportation();
                                     getCountry();
@@ -186,6 +179,8 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                             }
                         } else {
                             params.toast(R.string.educational_wifi_warning);
+                            baseUrl = "https://xgxt-443.webvpn.sysu.edu.cn";
+                            getInfo(id);
                         }
                     }
                 }
@@ -241,7 +236,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                                     } else if (a.getItemCount() == 2) {
                                         if (pos == 1) {
                                             PopupMenu menu = new PopupMenu(requireContext(), holder.itemView);
-                                            List.of("社会实践", "科研", "实习", "复习", "其他").forEach(i -> menu.getMenu().add(i).setOnMenuItemClickListener(item -> {
+                                            List.of(getResources().getStringArray(R.array.registration_info_keys)).forEach(i -> menu.getMenu().add(i).setOnMenuItemClickListener(item -> {
                                                 stay.set(pos, i);
                                                 ((TwoColumnsAdapter) a).setValue(stay);
                                                 return true;
@@ -272,7 +267,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     button.setLayoutParams(lp);
                     button.setOnClickListener(v -> {
                         if (isStay.equals("0")) {
-                            save(id, isStay, leaveDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(leaveDate.getValue())), returnDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault()).format(returnDate.getValue()), leave.get(3), leave.get(4), country, province, city);
+                            save(id, isStay, leaveDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(leaveDate.getValue())), returnDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(returnDate.getValue()), leave.get(3), leave.get(4), country, province, city);
                         } else {
 
                             save(id, isStay, stay.get(1));
@@ -282,12 +277,13 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     ((ItemCardBinding) binding).getRoot().addView(button);
                 }
             });
+            getInfo(id);
         }
         return view;
     }
 
     void sendRequest(String url, int what) {
-        http.newCall(new Request.Builder().url(url)
+        http.newCall(new Request.Builder().url(baseUrl + url)
                 .header("Cookie", params.getCookie())
                 .build()).enqueue(new Callback() {
 
@@ -312,7 +308,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     }
 
     void postRequest(String url, String data, int what) {
-        http.newCall(new Request.Builder().url(url)
+        http.newCall(new Request.Builder().url(baseUrl + url)
                 .header("Cookie", params.getCookie())
                 .post(RequestBody.create(data, MediaType.parse("application/json")))
                 .build()).enqueue(new Callback() {
@@ -338,42 +334,40 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     }
 
     void save(String id, String isStay, String leaveTime, String returnTime, String leaveType, String transportation, String country, String province, String city) {
-        postRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/register",
+        postRequest("/jjrlfx/api/sm-jjrlfx/student/register",
                 String.format(
-                        """
-                                {"cjlfxgzId":"%s","sflx":"%s","yjlxsj":"%s","yjfxsj":"%s","qxlx":"%s","jtgj":"%s","wcd":{"gj":"%s","sf":"%s","cs":"%s"},"wcdgj":"%s","wcdsf":"%s","wcdcs":"%s"}
-                                """,
+                        "{\"cjlfxgzId\":\"%s\",\"sflx\":\"%s\",\"yjlxsj\":\"%s\",\"yjfxsj\":\"%s\",\"qxlx\":\"%s\",\"jtgj\":\"%s\",\"wcd\":{\"gj\":\"%s\",\"sf\":\"%s\",\"cs\":\"%s\"},\"wcdgj\":\"%s\",\"wcdsf\":\"%s\",\"wcdcs\":\"%s\"}\n",
                         id, isStay, leaveTime, returnTime, leaveType, transportation, country, province, city, country, province, city
                 ), 6);
     }
 
-    void save(String id,String isStay, String reason) {
-        postRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/register",
-                String.format("{\"cjlfxgzId\":\"%s\",\"sflx\":\"%s\",\"lxyy\":\"%s\"}", id, isStay,reason), 6);
+    void save(String id, String isStay, String reason) {
+        postRequest("/jjrlfx/api/sm-jjrlfx/student/register",
+                String.format("{\"cjlfxgzId\":\"%s\",\"sflx\":\"%s\",\"lxyy\":\"%s\"}", id, isStay, reason), 6);
     }
 
     void getInfo(String id) {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/" + id + "/info", 0);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/" + id + "/info", 0);
     }
 
     void getTransportation() {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/transport", 1);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/transport", 1);
     }
 
     void getDestination() {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/destination-type", 2);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/destination-type", 2);
     }
 
     void getCountry() {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/country/drop", 3);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/country/drop", 3);
     }
 
     void getProvince() {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/province/drop?0=%E4%B8%AD&1=%E5%9B%BD", 4);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/province/drop?0=%E4%B8%AD&1=%E5%9B%BD", 4);
     }
 
     void getCity(String province) {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/city/drop?fdm=" + province, 5);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/city/drop?fdm=" + province, 5);
     }
 
 
@@ -437,5 +431,4 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
             }
         }
     }
-    //void get
 }

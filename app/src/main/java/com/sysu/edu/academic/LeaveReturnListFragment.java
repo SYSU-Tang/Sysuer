@@ -19,6 +19,7 @@ import androidx.viewbinding.ViewBinding;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.button.MaterialButton;
 import com.sysu.edu.R;
+import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ItemCardBinding;
 
 import java.io.IOException;
@@ -33,9 +34,10 @@ import okhttp3.Response;
 
 public class LeaveReturnListFragment extends StaggeredFragment {
 
+    final OkHttpClient http = new OkHttpClient();
     View view;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient();
+    String baseUrl = "https://xgxt.sysu.edu.cn";
 
     @Nullable
     @Override
@@ -44,7 +46,6 @@ public class LeaveReturnListFragment extends StaggeredFragment {
             view = super.onCreateView(inflater, container, savedInstanceState);
         }
         LeaveReturnRegistrationViewModel viewModel = new ViewModelProvider(requireActivity()).get(LeaveReturnRegistrationViewModel.class);
-
         viewModel.year.observe(getViewLifecycleOwner(), this::getList);
         handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -53,55 +54,60 @@ public class LeaveReturnListFragment extends StaggeredFragment {
                     params.toast(R.string.no_wifi_warning);
                 } else if (msg.what == 0) {
                     int code = msg.getData().getInt("code");
-                    if (code == 200) {
-                        JSONObject json = JSONObject.parse(msg.getData().getString("response"));
-                        if (json != null && json.getInteger("code") == 200) {
-                            clear();
-                            json.getJSONArray("data").forEach(e -> {
-                                ArrayList<String> value = new ArrayList<>();
-                                for (String i : new String[]{"blxn", "lxdjsj", "gzsm","jjrmc", "jjrrq", "gzzt","zt"})
-                                    value.add(((JSONObject) e).getString(i));
+                    boolean isJSON = msg.getData().getBoolean("isJSON");
+                    if (isJSON) {
+                        if (code == 200) {
+                            JSONObject json = JSONObject.parse(msg.getData().getString("response"));
+                            if (json != null && json.getInteger("code") == 200) {
+                                clear();
+                                json.getJSONArray("data").forEach(e -> {
+                                    ArrayList<String> value = new ArrayList<>();
+                                    for (String i : new String[]{"blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt"})
+                                        value.add(((JSONObject) e).getString(i));
+                                    add(((JSONObject) e).getString("gzmc"), ((JSONObject) e).getInteger("gzztm") == 1 ? R.drawable.uncheck : R.drawable.check, List.of(getResources().getStringArray(R.array.registration_keys)), value);
+                                });
+                                staggeredAdapter.setListener(new StaggeredListener() {
+                                    @Override
+                                    public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> a, RecyclerView.ViewHolder holder, int position) {
+                                        boolean isRegistering = json.getJSONArray("data").getJSONObject(position).getInteger("gzztm") == 1;
+                                        String status = json.getJSONArray("data").getJSONObject(position).getString("zt");
+                                        MaterialButton button = holder.itemView.findViewById(R.id.button);
+                                        button.setText(isRegistering ? status.equals("registering") ? R.string.start_registration : R.string.modify_registration : R.string.view_detail);
+                                        button.setOnClickListener(v -> {
+                                            if (isRegistering) {
+                                                Bundle arg = new Bundle();
+                                                arg.putString("Id", json.getJSONArray("data").getJSONObject(position).getString("cjlfxgzId"));
+                                                requireActivity().getSupportFragmentManager()
+                                                        .beginTransaction()
+                                                        .replace(R.id.leave_return_list_fragment, LeaveReturnRegistrationFragment.class, arg)
+                                                        .addToBackStack(null)
+                                                        .commit();
+                                            }
+                                        });
+                                    }
 
-                                add(((JSONObject) e).getString("gzmc"), ((JSONObject) e).getInteger("gzztm") == 1 ? R.drawable.uncheck : R.drawable.check, List.of("办理学年", "离校登记时间", "工作说明", "节假日名称", "节假日日期", "工作状态","状态"), value);
-
-                            });
-                            staggeredAdapter.setListener(new StaggeredListener() {
-                                @Override
-                                public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> a, RecyclerView.ViewHolder holder, int position) {
-                                    boolean isRegistering = json.getJSONArray("data").getJSONObject(position).getInteger("gzztm") == 1;
-                                    String status = json.getJSONArray("data").getJSONObject(position).getString("zt");
-                                    MaterialButton button = holder.itemView.findViewById(R.id.button);
-                                    button.setText(isRegistering ? status.equals("registering")? "开始登记":"修改登记" : "查看详情");
-                                    button.setOnClickListener(v -> {
-                                        if (isRegistering) {
-                                            Bundle arg = new Bundle();
-                                            arg.putString("Id", json.getJSONArray("data").getJSONObject(position).getString("cjlfxgzId"));
-
-                                            requireActivity().getSupportFragmentManager()
-                                                    .beginTransaction()
-                                                    .replace(R.id.leave_return_list_fragment, LeaveReturnRegistrationFragment.class, arg)
-                                                    .addToBackStack(null)
-                                                    .commit();
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> a, ViewBinding binding) {
-                                    MaterialButton button = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle);
-                                    button.setId(R.id.button);
-                                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                                    lp.gravity = Gravity.END;
-                                    lp.setMargins(0, 0, params.dpToPx(16), params.dpToPx(16));
-                                    button.setLayoutParams(lp);
-                                    ((ItemCardBinding) binding).getRoot().addView(button);
-                                }
-                            });
-                        } else if (json != null) {
-                            params.toast(json.getString("msg"));
+                                    @Override
+                                    public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> a, ViewBinding binding) {
+                                        MaterialButton button = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle);
+                                        button.setId(R.id.button);
+                                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                        lp.gravity = Gravity.END;
+                                        lp.setMargins(0, 0, params.dpToPx(16), params.dpToPx(16));
+                                        button.setLayoutParams(lp);
+                                        ((ItemCardBinding) binding).getRoot().addView(button);
+                                    }
+                                });
+                            } else if (json != null) {
+                                params.toast(json.getString("msg"));
+                            }
+                        } else {
+                            params.toast(R.string.login_warning);
+                            params.gotoLogin(getView(), TargetUrl.XGXT);
                         }
                     } else {
                         params.toast(R.string.educational_wifi_warning);
+                        baseUrl = "https://xgxt-443.webvpn.sysu.edu.cn";
+                        getList(viewModel.year.getValue());
                     }
                 }
             }
@@ -110,11 +116,11 @@ public class LeaveReturnListFragment extends StaggeredFragment {
     }
 
     void getList(String year) {
-        sendRequest("https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/api/sm-jjrlfx/student/work-list?blxn=" + year, 0);
+        sendRequest("/jjrlfx/api/sm-jjrlfx/student/work-list?blxn=" + year, 0);
     }
 
     void sendRequest(String url, int what) {
-        http.newCall(new Request.Builder().url(url)
+        http.newCall(new Request.Builder().url(baseUrl + url)
                 .header("Cookie", params.getCookie())
                 .build()).enqueue(new Callback() {
 
@@ -124,6 +130,7 @@ public class LeaveReturnListFragment extends StaggeredFragment {
                 msg.what = what;
                 Bundle bundle = new Bundle();
                 bundle.putInt("code", response.code());
+                bundle.putBoolean("isJSON", response.headers("Content-Type").contains("application/json"));
                 bundle.putString("response", response.body().string());
                 msg.setData(bundle);
                 handler.sendMessage(msg);
@@ -133,6 +140,7 @@ public class LeaveReturnListFragment extends StaggeredFragment {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Message msg = new Message();
                 msg.what = -1;
+
                 handler.sendMessage(msg);
             }
         });
