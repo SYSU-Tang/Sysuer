@@ -60,7 +60,6 @@ public class GradeActivity extends AppCompatActivity {
         public Response intercept(@NonNull Chain chain) throws IOException {
             Request origin = chain.request();
             return chain.proceed(origin.newBuilder()
-                    //.header("Accept-Language","zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
                     .header("Cookie", params.getCookie())
                     .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/")
                     .method(origin.method(), origin.body())

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,10 +26,10 @@ import okhttp3.Response;
 
 public class MajorInfo extends AppCompatActivity {
 
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     ArrayList<String> categories;
 
     @Override
@@ -53,7 +52,7 @@ public class MajorInfo extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    Toast.makeText(MajorInfo.this, getString(R.string.no_wifi_warning), Toast.LENGTH_LONG).show();
+                    params.toast(R.string.no_wifi_warning);
                 } else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {

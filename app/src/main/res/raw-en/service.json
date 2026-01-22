@@ -33,6 +33,11 @@
         "id": 106,
         "name": "Left Return Campus Registration",
         "description":"Left Return Campus Registration system, where students submit off-campus registration applications before the end of the semester, recording off-campus departure time, reason, etc."
+      },
+      {
+        "id": 107,
+        "name": "Physics Fitness Test",
+        "description":"Physics Fitness Test Result,PE Credit,Swimming Certification"
       }
     ]
   },

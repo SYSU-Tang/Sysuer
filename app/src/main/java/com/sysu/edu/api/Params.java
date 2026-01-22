@@ -177,6 +177,11 @@ public class Params {
         return sharedPreferences.getString("token", "");
     }
 
+    public boolean isDeveloper() {
+        return sharedPreferences.getBoolean("developer", false);
+    }
+
+
     public View.OnClickListener browse(String url) {
         return (View v) -> v.getContext().startActivity(new Intent(activity, BrowserActivity.class).setData(Uri.parse(url)));
     }
@@ -243,4 +248,5 @@ public class Params {
                 break;
         }
     }
+
 }

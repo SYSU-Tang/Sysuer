@@ -37,6 +37,7 @@ public class StaggeredFragment extends Fragment {
     final MutableLiveData<Runnable> scrollBottom = new MutableLiveData<>();
     final MutableLiveData<Boolean> nestedScrollingEnabled = new MutableLiveData<>(true);
     final MutableLiveData<Boolean> hideNull = new MutableLiveData<>(false);
+    final MutableLiveData<StaggeredListener> staggeredListener = new MutableLiveData<>();
     public int position;
     protected Params params;
     protected StaggeredAdapter staggeredAdapter;
@@ -74,6 +75,7 @@ public class StaggeredFragment extends Fragment {
                 });
             }
         });
+        staggeredListener.observe(getViewLifecycleOwner(), v -> staggeredAdapter.setListener(v));
         hideNull.observe(getViewLifecycleOwner(), b -> {
             if (b != null) {
                 staggeredAdapter.setHideNull(b);
@@ -99,6 +101,10 @@ public class StaggeredFragment extends Fragment {
 
     public void setHideNull(boolean hide) {
         hideNull.setValue(hide);
+    }
+
+    public void setListener(StaggeredListener v) {
+        staggeredListener.setValue(v);
     }
 
     public void add(String title, @Nullable Integer icon, List<String> keys, List<String> values) {
@@ -130,7 +136,7 @@ public class StaggeredFragment extends Fragment {
         staggeredAdapter.clear();
     }
 
-    static class TwoColumnsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public static class TwoColumnsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final boolean hideNull;
         public List<String> value;
         List<String> key;
@@ -148,9 +154,25 @@ public class StaggeredFragment extends Fragment {
             this.value = value;
             notifyItemRangeChanged(0, getItemCount());
         }
+
         public void setKey(List<String> key) {
             this.key = key;
             notifyItemRangeChanged(0, getItemCount());
+        }
+
+        public void setKeyValue(List<String> key, List<String> value) {
+            this.key = key;
+            this.value = value;
+            notifyItemRangeChanged(0, getItemCount());
+        }
+
+        public void add(String key, String value) {
+            ArrayList<String> newKey = new ArrayList<>(this.key);
+            ArrayList<String> newValue = new ArrayList<>(this.value);
+            newKey.add(key);
+            newValue.add(value);
+            setKeyValue(newKey, newValue);
+            notifyItemInserted(getItemCount());
         }
 
         @NonNull
@@ -158,7 +180,7 @@ public class StaggeredFragment extends Fragment {
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             TwoColumnBinding twoColumnBinding = TwoColumnBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
             if (rowListener != null) {
-                rowListener.onCreate(TwoColumnsAdapter.this,twoColumnBinding);
+                rowListener.onCreate(TwoColumnsAdapter.this, twoColumnBinding);
             }
             return new RecyclerView.ViewHolder(twoColumnBinding.getRoot()) {
             };
@@ -179,7 +201,7 @@ public class StaggeredFragment extends Fragment {
                 holder.itemView.getLayoutParams().height = 0;
             }
             if (rowListener != null) {
-                rowListener.onBind(TwoColumnsAdapter.this,holder,position);
+                rowListener.onBind(TwoColumnsAdapter.this, holder, position);
             }
         }
 
@@ -189,10 +211,10 @@ public class StaggeredFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return itemCount==null ? key.size() : itemCount;
+            return itemCount == null ? key.size() : itemCount;
         }
 
-        public void setItemCount(Integer count){
+        public void setItemCount(Integer count) {
             itemCount = count;
         }
     }
@@ -203,7 +225,9 @@ public class StaggeredFragment extends Fragment {
         final ArrayList<List<String>> keys = new ArrayList<>();
         final ArrayList<Integer> icons = new ArrayList<>();
         final ArrayList<List<String>> values = new ArrayList<>();
-        public TwoColumnsAdapter twoColumnsAdapter;
+        final ArrayList<TwoColumnsAdapter> twoColumnsAdapters = new ArrayList<>();
+        // public TwoColumnsAdapter twoColumnsAdapter;
+
         StaggeredListener staggeredListener;
         boolean hideNull;
 
@@ -229,6 +253,10 @@ public class StaggeredFragment extends Fragment {
             notifyItemInserted(getItemCount());
         }
 
+        /*public void add(String key,String value){
+            twoColumnsAdapter.add(key,value);
+        }*/
+
         public void clear() {
             int tmp = getItemCount();
             titles.clear();
@@ -253,12 +281,34 @@ public class StaggeredFragment extends Fragment {
             };
         }
 
+        /* public List<String> getKeys(int pos) {
+             return keys.get(pos);
+         }
+         public List<String> getValues(int pos) {
+             return values.get(pos);
+         }*/
+        /*public void addRow(int pos, List<String> keys, List<String> values) {
+            this.keys.get(pos).addAll(keys);
+            this.values.get(pos).addAll(values);
+        }*/
+
+        public TwoColumnsAdapter getTwoColumnsAdapter(int pos) {
+            return twoColumnsAdapters.get(pos);
+        }
+
+        public void addRow(int pos, String keys, String values) {
+            if (pos < getItemCount()) {
+                getTwoColumnsAdapter(pos).add(keys, values);
+                notifyItemChanged(pos);
+            }
+        }
+
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemCardBinding item = ItemCardBinding.bind(holder.itemView);
             item.title.setText(titles.get(position));
             if (icons.get(position) != null) {
-                item.title.setCompoundDrawablePadding(new Params((FragmentActivity) context).dpToPx(4));
+                item.title.setCompoundDrawablePadding(new Params((FragmentActivity) context).dpToPx(8));
                 Drawable icon = AppCompatResources.getDrawable(context, icons.get(position));
                 if (icon != null) {
                     icon.setBounds(0, 0, 72, 72);
@@ -266,7 +316,11 @@ public class StaggeredFragment extends Fragment {
                 }
             }
             item.title.setText(titles.get(position));
-            twoColumnsAdapter = new TwoColumnsAdapter(keys.get(position), values.get(position), hideNull);
+            TwoColumnsAdapter twoColumnsAdapter;
+            if (twoColumnsAdapters.size() < position + 1 || (twoColumnsAdapter = twoColumnsAdapters.get(position)) == null) {
+                twoColumnsAdapter = new TwoColumnsAdapter(keys.get(position), values.get(position), hideNull);
+                twoColumnsAdapters.add(twoColumnsAdapter);
+            }
             ((RecyclerView) holder.itemView.findViewById(R.id.recycler_view)).setAdapter(twoColumnsAdapter);
             if (staggeredListener != null) {
                 staggeredListener.onBind(this, holder, position);

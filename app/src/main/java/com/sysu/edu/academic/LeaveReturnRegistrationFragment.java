@@ -188,7 +188,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
             staggeredAdapter.setListener(new StaggeredListener() {
                 @Override
                 public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> a, RecyclerView.ViewHolder holder, int position) {
-                    ((StaggeredAdapter) a).twoColumnsAdapter.setListener(new StaggeredListener() {
+                    staggeredAdapter.getTwoColumnsAdapter(position).setListener(new StaggeredListener() {
                         @Override
                         public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> a, RecyclerView.ViewHolder holder, int pos) {
 

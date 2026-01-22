@@ -10,5 +10,6 @@ public class TargetUrl {
     public static final String NETPAY = "https://netpay.sysu.edu.cn/netpay/index.jsp";
     public static final String XGXT = "https://xgxt.sysu.edu.cn/#/index";
     public static final String XGXT_WEBVPN = "https://xgxt-443.webvpn.sysu.edu.cn/#/index";
+    public static final String TICE = "https://tice.sysu.edu.cn";
     //static String CAS = "https://cas.sysu.edu.cn/cas/login";
 }

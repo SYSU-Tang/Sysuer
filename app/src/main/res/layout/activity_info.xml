@@ -3,42 +3,46 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<com.google.android.material.appbar.AppBarLayout
-    android:layout_width="match_parent"
-    style="@style/SYSU.AppBarLayout"
-    android:fitsSystemWindows="true"
-    android:layout_height="wrap_content">
-    <com.google.android.material.appbar.CollapsingToolbarLayout
-        style="@style/Widget.Material3.CollapsingToolbar.Large"
+
+    <com.google.android.material.appbar.AppBarLayout
+        style="@style/SYSU.AppBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="?collapsingToolbarLayoutLargeSize"
-        app:expandedTitleMargin="10dp"
-        app:layout_scrollFlags="scroll|exitUntilCollapsed">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="24dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/ic_launcher"
-            app:layout_collapseMode="parallax" />
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            style="@style/Widget.Material3.CollapsingToolbar.Large"
+            android:layout_width="match_parent"
+            android:layout_height="?collapsingToolbarLayoutLargeSize"
+            app:expandedTitleMargin="10dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:transitionName="miniapp"
-            app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
-            app:layout_collapseMode="pin"
-            app:navigationIcon="?homeAsUpIndicator"
-            app:title="@string/app_name"/>
-    </com.google.android.material.appbar.CollapsingToolbarLayout>
-</com.google.android.material.appbar.AppBarLayout>
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment"
-            android:name="com.sysu.edu.extra.ui.AboutFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/icon"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="24dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/ic_launcher"
+                app:layout_collapseMode="parallax" />
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:transitionName="miniapp"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="?homeAsUpIndicator"
+                app:title="@string/app_name" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment"
+        android:name="com.sysu.edu.extra.ui.AboutFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

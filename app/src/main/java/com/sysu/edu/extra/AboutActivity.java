@@ -26,6 +26,7 @@ import com.sysu.edu.databinding.ActivityInfoBinding;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -39,6 +40,7 @@ public class AboutActivity extends AppCompatActivity {
     File file;
     long downloadId;
     private Handler handler;
+    ArrayList<Long> click = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,20 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         params = new Params(this);
         binding.toolbar.setNavigationOnClickListener(view -> finishAfterTransition());
+        binding.icon.setOnClickListener(v -> {
+            if(click.isEmpty() || System.currentTimeMillis()-click.get(click.size()-1)<500){
+                if (click.size()==4){
+                 params.toast("已开启开发者模式");
+                 getPreferences(Context.MODE_PRIVATE).edit().putBoolean("developer", true).apply();
+                 click.clear();
+                }else{
+                    //params.toast("请再点击"+(4-click.size())+"次");
+                    click.add(System.currentTimeMillis());
+                }
+            }else{
+                click.clear();
+            }
+        });
         handler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg) {

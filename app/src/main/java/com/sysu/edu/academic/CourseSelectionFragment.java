@@ -36,7 +36,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
-import com.sysu.edu.api.CourseSelectionViewModel;
 import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
@@ -96,7 +95,7 @@ public class CourseSelectionFragment extends Fragment {
             binding.head.type.setOnCheckedStateChangeListener((chipGroup, list) -> {
                 int cid = chipGroup.getCheckedChipId();
                 if (cid == R.id.my_major) {
-                    seleCategory();
+                    selectCategory();
                 } else {
                     type.setValue((cid == R.id.college_public_selective) ? 4 : 2);
                 }
@@ -119,7 +118,7 @@ public class CourseSelectionFragment extends Fragment {
                 clear();
                 getCourseList();
             });
-            binding.head.category.setOnCheckedStateChangeListener((chipGroup, list) -> seleCategory());
+            binding.head.category.setOnCheckedStateChangeListener((chipGroup, list) -> selectCategory());
             cookie = params.getCookie();
             binding.course.setLayoutManager(gm = new GridLayoutManager(requireContext(), params.getColumn()));
             binding.course.addItemDecoration(new SpacesItemDecoration(params.dpToPx(8)));
@@ -195,7 +194,7 @@ public class CourseSelectionFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private void seleCategory() {
+    private void selectCategory() {
         int cid = binding.head.category.getCheckedChipId();
         if (cid == R.id.major_compulsory) {
             typeCate.setValue(List.of(1, 11));
@@ -303,7 +302,7 @@ public class CourseSelectionFragment extends Fragment {
 }
 
 class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final String[] info = new String[]{"credit", "examFormName", "clazzNum"};
+    final String[] info = new String[]{"credit", "clazzNum", "scheduleExamTime", "examFormName"};
     final CourseSelectionFragment c;
     final ArrayList<JSONObject> data = new ArrayList<>();
     Consumer<Integer> selectAction;
@@ -353,33 +352,34 @@ class CourseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.bind(holder.itemView);
         Context context = binding.getRoot().getContext();
+
         binding.courseName.setText(String.format("%s-%s", convert(position, "courseNum"), convert(position, "courseName")));
         binding.like.setSelected(data.get(position).getInteger("collectionStatus") == 1);
         binding.select.setSelected(data.get(position).getInteger("selectedStatus") == 3 || data.get(position).getInteger("selectedStatus") == 4);
-        binding.select.setText(binding.select.isSelected() ? "退课" : "选课");
-        binding.like.setText(binding.like.isSelected() ? "取消收藏" : "收藏");
+        binding.select.setText(binding.select.isSelected() ? context.getString(R.string.drop_course) : context.getString(R.string.select_course));
+        binding.like.setText(binding.like.isSelected() ? context.getString(R.string.unlike) : context.getString(R.string.like));
         binding.select.setOnClickListener(v -> {
             if (selectAction != null)
                 selectAction.accept(position);
-            /*v.setSelected(!v.isSelected());
-            ((MaterialButton) v).setText(v.isSelected() ? "退课" : "选课");*/
         });
         binding.like.setOnClickListener(v -> {
-            Snackbar.make(v, "已" + ((MaterialButton) v).getText(), Snackbar.LENGTH_LONG).show();
+            Snackbar.make(v, context.getString(R.string.already) + ((MaterialButton) v).getText(), Snackbar.LENGTH_LONG).show();
+            ((MaterialButton) v).setText(v.isSelected() ? context.getString(R.string.unlike) : context.getString(R.string.like));
             c.like(convert(position, "teachingClassId"));
             v.setSelected(!v.isSelected());
-            ((MaterialButton) v).setText(v.isSelected() ? "取消收藏" : "收藏");
         });
         binding.open.setOnClickListener(v -> context.startActivity(new Intent(context, CourseDetailActivity.class).putExtra("code", convert(position, "courseNum")).putExtra("id", convert(position, "courseId")).putExtra("class", convert(position, "clazzNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, v, "miniapp").toBundle()));
         binding.head.setText(convert(position, "teachingTimePlace").replace(";", " | ").replace(",", "\n"));
+        String[] courseInfoLabels = context.getResources().getStringArray(R.array.course_info_labels);
+        String[] seatInfoLabels = context.getResources().getStringArray(R.array.seat_info_labels);
         for (int i = 0; i < info.length; i++) {
             String content = convert(position, info[i]);
-            ((Chip) binding.courseInfo.getChildAt(i)).setText(String.format("%s：%s", (new String[]{"学分", "考查形式", "课程代码", "剩余空位", "待筛选人数", "选上人数"})[i], content));
+            ((Chip) binding.courseInfo.getChildAt(i)).setText(String.format("%s：%s", courseInfoLabels[i], content));
         }
         String[] seats = new String[]{"baseReceiveNum", "filterSelectedNum", "courseSelectedNum"};
         for (int i = 0; i < seats.length; i++) {
             String content = convert(position, seats[i]);
-            (new MaterialButton[]{binding.left, binding.filtering, binding.selected}[i]).setText(String.format("%s\n%s", (new String[]{"剩余", "待筛选", "选上"})[i], content));
+            (new MaterialButton[]{binding.left, binding.filtering, binding.selected}[i]).setText(String.format("%s\n%s", seatInfoLabels[i], content));
         }
     }
 

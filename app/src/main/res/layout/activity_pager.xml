@@ -6,30 +6,33 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".academic.SchoolEnrollmentActivity">
+
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
         style="@style/SYSU.AppBarLayout"
         android:layout_width="match_parent"
-        android:id="@+id/app_bar_layout"
         android:layout_height="wrap_content">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:transitionName="miniapp"
             app:layout_scrollFlags="enterAlways|scroll"
-            app:navigationIcon="?homeAsUpIndicator"/>
+            app:navigationIcon="?homeAsUpIndicator" />
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#00000000"
             app:tabMode="scrollable"
-            app:tabUnboundedRipple="true">
-        </com.google.android.material.tabs.TabLayout>
+            app:tabUnboundedRipple="true" />
     </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

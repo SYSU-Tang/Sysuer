@@ -444,5 +444,10 @@
     <string name="modify_registration">修改登记</string>
     <string name="view_detail">查看详情</string>
     <string name="all">全部</string>
+    <!-- 课程选择相关字符串 -->
+    <string name="drop_course">退课</string>
+    <string name="unlike">取消收藏</string>
+    <string name="already">已</string>
+    <string name="physical_fitness_test_result">体测查询</string>
 
 </resources>

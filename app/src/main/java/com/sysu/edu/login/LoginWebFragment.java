@@ -55,6 +55,8 @@ public class LoginWebFragment extends Fragment {
                     element = ".log-g-iddl";
                 } else if (Pattern.compile("portal.sysu.edu.cn/newClient/#/login").matcher(url).find()) {
                     element = ".ant-btn.index-submit-3jXSy.ant-btn-primary.ant-btn-lg";
+                } else if (Pattern.compile("tice.sysu.edu.cn").matcher(url).find()) {
+                    element = "#netid-login";
                 }
                 if (element.isEmpty()) {
                     if (Pattern.compile(Objects.requireNonNull(model.getTarget().getValue())).matcher(url).find()) {

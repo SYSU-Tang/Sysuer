@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:columnCount="1">
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="wrap_content"
@@ -22,11 +23,13 @@
             android:layout_marginBottom="16dp"
             android:hint="@string/course"
             app:startIconDrawable="@drawable/book">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/course"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="wrap_content"
@@ -59,12 +62,14 @@
             android:layout_marginBottom="8dp"
             android:hint="@string/week"
             app:startIconDrawable="@drawable/calendar">
+
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/days"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"/>
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="wrap_content"
@@ -76,12 +81,14 @@
             android:layout_marginBottom="8dp"
             android:hint="@string/section"
             app:startIconDrawable="@drawable/time">
+
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/sections"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"/>
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="wrap_content"
@@ -93,12 +100,14 @@
             android:layout_marginBottom="8dp"
             android:hint="@string/language"
             app:startIconDrawable="@drawable/language">
+
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/languages"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"/>
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="wrap_content"
@@ -110,12 +119,14 @@
             android:layout_marginBottom="8dp"
             android:hint="@string/special"
             app:startIconDrawable="@drawable/course">
+
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/special"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"/>
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="wrap_content"
@@ -127,11 +138,13 @@
             android:layout_marginBottom="8dp"
             android:hint="@string/school"
             app:startIconDrawable="@drawable/school">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/school"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="wrap_content"
@@ -143,11 +156,13 @@
             android:layout_marginBottom="8dp"
             android:hint="@string/teacher"
             app:startIconDrawable="@drawable/account">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/teacher"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <TableRow
 
             android:layout_width="match_parent"
@@ -155,25 +170,27 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/submit"
-            style="@style/Widget.Material3.Button.IconButton.Outlined"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="fill_horizontal"
-            android:layout_weight="1"
-            android:text="@string/confirm"
-            android:transitionName="miniapp"
-            app:icon="@drawable/submit"/>
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/reset"
-            style="@style/Widget.Material3.Button.IconButton.Outlined"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="fill_horizontal"
-            android:layout_weight="1"
-            android:text="@string/reset"
-            app:icon="@drawable/reset"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/reset"
+                style="@style/Widget.Material3.Button.IconButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_horizontal"
+                android:layout_weight="1"
+                android:text="@string/reset"
+                app:icon="@drawable/reset" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/submit"
+                style="@style/Widget.Material3.Button.IconButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_horizontal"
+                android:layout_weight="1"
+                android:text="@string/confirm"
+                android:transitionName="miniapp"
+                app:icon="@drawable/submit" />
         </TableRow>
     </GridLayout>
 </androidx.core.widget.NestedScrollView>

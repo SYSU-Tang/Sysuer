@@ -152,4 +152,22 @@
         <item>复习</item>
         <item>其他</item>
     </string-array>
+    
+    <!-- 课程信息标签 -->
+    <string-array name="course_info_labels">
+        <item>学分</item>
+        <item>教学班代码</item>
+        <item>考查</item>
+        <item>考查方式</item>
+        <item>剩余空位</item>
+        <item>待筛选人数</item>
+        <item>选上人数</item>
+    </string-array>
+    
+    <!-- 座位信息标签 -->
+    <string-array name="seat_info_labels">
+        <item>剩余</item>
+        <item>待筛选</item>
+        <item>选上</item>
+    </string-array>
 </resources>

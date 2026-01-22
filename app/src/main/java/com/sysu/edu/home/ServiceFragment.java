@@ -35,6 +35,7 @@ import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.academic.GradeActivity;
 import com.sysu.edu.academic.LeaveReturnRegistrationActivity;
 import com.sysu.edu.academic.MajorInfo;
+import com.sysu.edu.academic.PhysicalFitnessTestResultActivity;
 import com.sysu.edu.academic.RegisterInfo;
 import com.sysu.edu.academic.SchoolEnrollmentActivity;
 import com.sysu.edu.academic.SchoolWorkWarning;
@@ -97,6 +98,8 @@ public class ServiceFragment extends Fragment {
         actionMap.put(104, newActivity(SchoolWorkWarning.class));    // 学业预警
         actionMap.put(105, newActivity(CourseCompletion.class));     // 课程完成情况
         actionMap.put(106, newActivity(LeaveReturnRegistrationActivity.class));     // 请假返回登记
+        actionMap.put(107, newActivity(PhysicalFitnessTestResultActivity.class));     // 体测
+
 
         // 学习服务 (id: 2xx)
         actionMap.put(201, newActivity(TodoActivity.class));         // 待办

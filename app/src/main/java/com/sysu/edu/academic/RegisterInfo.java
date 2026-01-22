@@ -113,7 +113,7 @@ public class RegisterInfo extends AppCompatActivity {
                                             values.add(((JSONObject) v).getString(new String[]{"acadYear", "typeName", "feeTypeName", "payedItemAmount", "feeTimeSection", "editeTime"}[i]));
                                         }
                                         ((StaggeredFragment) adp.getItem(1)).setHideNull(true);
-                                        ((StaggeredFragment) adp.getItem(1)).add(values.get(1), R.drawable.money, List.of(keyName), values);
+                                        ((StaggeredFragment) adp.getItem(1)).add(RegisterInfo.this,values.get(1), R.drawable.money, List.of(keyName), values);
                                     });
                                     getNextPage(msg.what + 1);
                                     break;

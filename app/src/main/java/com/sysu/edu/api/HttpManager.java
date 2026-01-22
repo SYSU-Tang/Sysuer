@@ -1,5 +1,6 @@
 package com.sysu.edu.api;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -23,6 +25,7 @@ public class HttpManager {
     String authorization;
     OkHttpClient http;
     Params params;
+    String ua;
 
     public HttpManager(Handler handler) {
         http = new OkHttpClient();
@@ -49,6 +52,8 @@ public class HttpManager {
         this.authorization = authorization;
     }
 
+    public void setUA(String ua){this.ua = ua;}
+
     private void sendRequest(@NonNull String url, String data, String type, int what) {
         if (handler == null) {
             Log.e("HttpManager", "Handler Requested");
@@ -60,6 +65,7 @@ public class HttpManager {
         if (cookie != null) request.header("Cookie", cookie);
         if (authorization != null) request.header("Authorization", authorization);
         if (referrer != null) request.header("Referer", referrer);
+        if (ua != null) request.header("User-Agent", ua);
         if (data != null) request.post(RequestBody.create(data, MediaType.get(type)));
         http.newCall(request.build()).enqueue(new Callback() {
             @Override
@@ -74,6 +80,11 @@ public class HttpManager {
                 Message msg = new Message();
                 msg.what = what;
                 msg.obj = response.body().string();
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("code", response.code());
+                bundle.putBoolean("isJSON", Objects.requireNonNull(response.header("Content-Type")).contains("application/json"));
+                msg.setData(bundle);
                 handler.sendMessage(msg);
             }
         });

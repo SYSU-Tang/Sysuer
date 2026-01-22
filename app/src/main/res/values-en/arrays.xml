@@ -1,5 +1,5 @@
 <resources>
-    <string-array name="home" >
+    <string-array name="home">
         <item>@string/activity</item>
         <item>@string/service</item>
         <item>@string/account</item>
@@ -84,4 +84,21 @@
         <item>Review</item>
         <item>Others</item>
     </string-array>
+
+    <string-array name="course_info_labels">
+        <item>Credits</item>
+        <item>Teaching Class Code</item>
+        <item>Assessment</item>
+        <item>Assessment Method</item>
+        <item>Remaining Seats</item>
+        <item>Number of People to be Filtered</item>
+        <item>Number of Selected People</item>
+    </string-array>
+
+    <string-array name="seat_info_labels">
+        <item>Remaining</item>
+        <item>Filtering</item>
+        <item>Selected</item>
+    </string-array>
+
 </resources>
