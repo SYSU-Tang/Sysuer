@@ -23,7 +23,7 @@ public class HttpManager {
     String referrer;
     String cookie;
     String authorization;
-    OkHttpClient http;
+    final OkHttpClient http;
     Params params;
     String ua;
 

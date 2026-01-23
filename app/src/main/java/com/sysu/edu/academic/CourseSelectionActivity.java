@@ -27,7 +27,6 @@ public class CourseSelectionActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         setContentView(binding.getRoot());
         NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.course_selection_fragment))).getNavController();
-//        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> false).build());
         binding.tab.addTab(binding.tab.newTab().setText(R.string.course_selection));
         binding.tab.addTab(binding.tab.newTab().setText(R.string.preview));
         binding.tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -50,7 +49,14 @@ public class CourseSelectionActivity extends AppCompatActivity {
             supportFinishAfterTransition();
             return true;
         }).build());
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> binding.tab.selectTab(binding.tab.getTabAt(destination.getId() == R.id.preview_fragment ? 1 : 0)));
         //binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+
+        return super.onSupportNavigateUp();
     }
 }

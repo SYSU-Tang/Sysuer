@@ -40,6 +40,7 @@ import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseSelectionBinding;
+import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemCourseSelectionBinding;
 
 import java.util.ArrayList;
@@ -60,13 +61,13 @@ public class CourseSelectionFragment extends Fragment {
     Integer total;
     String term;
     CourseSelectionViewModel vm;
-    MutableLiveData<String> filter = new MutableLiveData<>();
-    MutableLiveData<Integer> type = new MutableLiveData<>(1);
-    MutableLiveData<Integer> category = new MutableLiveData<>(11);
+    final MutableLiveData<String> filter = new MutableLiveData<>();
+    final MutableLiveData<Integer> type = new MutableLiveData<>(1);
+    final MutableLiveData<Integer> category = new MutableLiveData<>(11);
     GridLayoutManager gm;
     Params params;
     HttpManager http;
-    MediatorLiveData<List<Integer>> typeCate;
+    final MediatorLiveData<List<Integer>> typeCate = new MediatorLiveData<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -89,6 +90,15 @@ public class CourseSelectionFragment extends Fragment {
             });
             vm.filterValue.observe(requireActivity(), f -> {
                 filter.setValue(vm.getReturnData());
+                binding.head.seniorFilter.removeAllViews();
+                vm.getFilterName().forEach((k, v) ->
+                {
+                    if (v != null && !v.isEmpty()) {
+                        ItemActionChipBinding item = ItemActionChipBinding.inflate(inflater, binding.head.filter, false);
+                        item.getRoot().setText(v);
+                        binding.head.seniorFilter.addView(item.getRoot());
+                    }
+                });
                 clear();
                 getCourseList();
             });
@@ -111,7 +121,6 @@ public class CourseSelectionFragment extends Fragment {
                 animator.start();
             });
             binding.zoom.setOnClickListener(v -> binding.head.getRoot().setVisibility(binding.head.getRoot().getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
-            typeCate = new MediatorLiveData<>();
             typeCate.addSource(type, s -> typeCate.setValue(List.of(type.getValue() == null ? 1 : type.getValue(), s)));
             typeCate.addSource(category, s -> typeCate.setValue(List.of(type.getValue() == null ? 11 : type.getValue(), s)));
             typeCate.observe(requireActivity(), s -> {

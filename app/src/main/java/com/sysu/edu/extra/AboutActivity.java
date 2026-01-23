@@ -40,7 +40,7 @@ public class AboutActivity extends AppCompatActivity {
     File file;
     long downloadId;
     private Handler handler;
-    ArrayList<Long> click = new ArrayList<>();
+    final ArrayList<Long> click = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

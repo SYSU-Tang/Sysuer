@@ -5,9 +5,9 @@
     android:id="@+id/head"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/background_light"
     android:orientation="vertical"
     android:padding="8dp"
-    android:background="@color/background_light"
     tools:showIn="@layout/fragment_course_selection">
 
     <com.google.android.material.chip.ChipGroup
@@ -15,7 +15,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:checkedChip="@+id/my_major"
-        app:chipSpacingVertical="4dp"
         app:selectionRequired="true"
         app:singleSelection="true">
 
@@ -51,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:checkedChip="@+id/major_compulsory"
-        app:chipSpacingVertical="4dp"
+        app:chipSpacingVertical="-8dp"
         app:selectionRequired="true"
         app:singleSelection="true">
 
@@ -115,7 +114,7 @@
         android:id="@+id/filter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:chipSpacingVertical="4dp">
+        app:chipSpacingVertical="-8dp">
 
         <com.google.android.material.chip.Chip
             style="@style/Widget.Material3.Chip.Assist"
@@ -160,4 +159,11 @@
             android:transitionName="miniapp"
             app:chipIcon="@drawable/add" />
     </com.google.android.material.chip.ChipGroup>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/senior_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:chipSpacingHorizontal="0dp"
+        app:chipSpacingVertical="-8dp" />
 </LinearLayout>

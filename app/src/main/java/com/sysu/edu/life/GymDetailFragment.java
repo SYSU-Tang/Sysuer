@@ -75,7 +75,7 @@ public class GymDetailFragment extends Fragment {
         dialog.setContentView(dialogBinding.getRoot());
         initReservationDialog(dialogBinding);
 
-        date.setAction((p) -> position.setValue(p));
+        date.setAction(position::setValue);
         Params params = new Params(requireActivity());
         binding.date.recyclerView.setAdapter(date);
         binding.date.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -93,7 +93,6 @@ public class GymDetailFragment extends Fragment {
         binding.field.recyclerView.setAdapter(field);
         id = requireArguments().getString("id");
         field.setAction((JSONObject p) -> {
-            //System.out.println(p);
             JSONObject studentFee = fee.get("学生");
             if (studentFee != null) {
                 updateReservationDialog(dialogBinding, p.getString("Venue"), p.getString("Date"), p.getString("Duration"), String.format(Locale.getDefault(), "运动时￥%d或现金￥%d", studentFee.getInteger("CreditFee"), studentFee.getInteger("CashFee")), p.getString("Type"));
@@ -165,6 +164,7 @@ public class GymDetailFragment extends Fragment {
         if (position.getValue() == null) {
             position.postValue(0);
         }
+
         return binding.getRoot();
     }
 

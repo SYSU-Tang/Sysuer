@@ -116,16 +116,17 @@ public class CourseQueryFragment extends Fragment {
             };
             getData(0);
             load();
-            requireActivity().getOnBackPressedDispatcher().addCallback(
-                    requireActivity(),
-                    new OnBackPressedCallback(true) {
-                        @Override
-                        public void handleOnBackPressed() {
-                            submit();
-                        }
-                    }
-            );
+
         }
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+                getViewLifecycleOwner(),
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        submit();
+                    }
+                }
+        );
         return binding.getRoot();
     }
 
@@ -154,9 +155,7 @@ public class CourseQueryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         navController = Navigation.findNavController(view);
         binding.reset.setOnClickListener(v -> reset());
-        binding.submit.setOnClickListener(v -> {
-            submit();
-        });
+        binding.submit.setOnClickListener(v -> submit());
     }
 
     private void submit() {

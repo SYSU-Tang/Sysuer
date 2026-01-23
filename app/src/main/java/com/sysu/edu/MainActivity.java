@@ -188,6 +188,12 @@ public class MainActivity extends AppCompatActivity {
             manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     System.currentTimeMillis() + 2 * 1000, piMorning);
         }*/
+       /* ClassIsland.sendCourseFocusNotification(
+                this,
+                "高等数学",           // 课程名称
+                "10分钟",            // 剩余时间
+                "逸夫楼301"          // 教室
+        );*/
     }
 
     void checkUpdate() {
