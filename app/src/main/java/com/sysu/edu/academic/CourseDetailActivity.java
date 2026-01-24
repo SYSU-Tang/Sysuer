@@ -87,7 +87,7 @@ public class CourseDetailActivity extends AppCompatActivity {
                             break;
                         case 2:
                             JSONObject data2 = response.getJSONObject("data");
-                            System.out.println(data2);
+//                            System.out.println(data2);
                             if (data2 != null) {
                                 Bundle bundle = new Bundle();
                                 bundle.putInt("what", 2);

@@ -139,7 +139,7 @@ public class NetOrderFragment extends StaggeredFragment {
                         }
                     } else if (msg.what == 2 || msg.what == 3) {
                         try {
-                            System.out.println(msg.obj);
+//                            System.out.println(msg.obj);
                             /*JSONObject json = JSONObject.parse((String) msg.obj);
                             if (json.getBoolean("success")) {
                                 params.toast(json.getString("message"));

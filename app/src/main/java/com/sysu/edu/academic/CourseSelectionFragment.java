@@ -52,6 +52,10 @@ import java.util.function.Consumer;
 
 public class CourseSelectionFragment extends Fragment {
 
+    final MutableLiveData<String> filter = new MutableLiveData<>();
+    final MutableLiveData<Integer> type = new MutableLiveData<>(1);
+    final MutableLiveData<Integer> category = new MutableLiveData<>(11);
+    final MediatorLiveData<List<Integer>> typeCate = new MediatorLiveData<>();
     FragmentCourseSelectionBinding binding;
     Handler handler;
     String cookie;
@@ -61,13 +65,9 @@ public class CourseSelectionFragment extends Fragment {
     Integer total;
     String term;
     CourseSelectionViewModel vm;
-    final MutableLiveData<String> filter = new MutableLiveData<>();
-    final MutableLiveData<Integer> type = new MutableLiveData<>(1);
-    final MutableLiveData<Integer> category = new MutableLiveData<>(11);
     GridLayoutManager gm;
     Params params;
     HttpManager http;
-    final MediatorLiveData<List<Integer>> typeCate = new MediatorLiveData<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -137,6 +137,7 @@ public class CourseSelectionFragment extends Fragment {
                 getCourseList();
             });
             adp.setSelectAction(position -> {
+//                System.out.println(adp.getItem(position));
                 if (adp.getItem(position).getInteger("selectedStatus") == 3 || adp.getItem(position).getInteger("selectedStatus") == 4) {
                     unselect(adp.convert(position, "courseId"), adp.convert(position, "teachingClassId"));
                 } else {
@@ -153,6 +154,7 @@ public class CourseSelectionFragment extends Fragment {
                     }
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     Integer code = response.getInteger("code");
+//                    System.out.println(response);
                     if (Objects.equals(code, 200)) {
                         switch (msg.what) {
                             case -1:
@@ -170,12 +172,12 @@ public class CourseSelectionFragment extends Fragment {
                                 }
                                 break;
                             case 3:
-                                params.toast(response.getString("message"));
+                                params.toast(response.getString("data"));
                                 clear();
                                 getCourseList();
                                 break;
                         }
-                    } else if (Objects.equals(code, 50021000) || Objects.equals(code, 52021104) || Objects.equals(code, 52021100)) {
+                    } else if (Objects.equals(code, 50021000) || Objects.equals(code, 52021104) || Objects.equals(code, 52021100) || Objects.equals(code, 52021133) || Objects.equals(code, 52021170)) {
                         params.toast(response.getString("message"));
                     } else {
                         params.toast(R.string.login_warning);
@@ -260,7 +262,7 @@ public class CourseSelectionFragment extends Fragment {
     void getCourseList() {
         if (type.getValue() == null || category.getValue() == null || term == null)
             return;
-        getCourseList(typeCate.getValue() == null || typeCate.getValue().get(0) == null ? 1 : typeCate.getValue().get(0), typeCate.getValue() == null || typeCate.getValue().get(1) == null ? 11 : typeCate.getValue().get(1), term, filter.getValue() == null ? "" : filter.getValue());
+        getCourseList(getType(), getCategory(), term, filter.getValue() == null ? "" : filter.getValue());
     }
 
     void getCourseList(int selectedType, int selectedCate, String term, String filterText) {
@@ -282,14 +284,22 @@ public class CourseSelectionFragment extends Fragment {
 
     void select(String code) {
         http.postRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/choose",
-                String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, type.getValue(), category.getValue()),
+                String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, getType(), getCategory()),
                 3);
 
     }
 
+    int getType() {
+        return Objects.requireNonNull(typeCate.getValue()).get(0) == null ? 1 : typeCate.getValue().get(0);
+    }
+
+    int getCategory() {
+        return Objects.requireNonNull(typeCate.getValue()).get(1) == null ? 11 : typeCate.getValue().get(1);
+    }
+
     void unselect(String classId, String code) {
         http.postRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/back",
-                String.format(Locale.getDefault(), "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}", classId, code, type.getValue()),
+                String.format(Locale.getDefault(), "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}", classId, code, getType()),
                 3);
 
     }
