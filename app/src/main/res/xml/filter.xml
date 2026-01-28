@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory app:title="@string/time">
+        <rikka.preference.SimpleMenuPreference
+            app:icon="@drawable/calendar"
+            app:key="year"
+            app:persistent="false"
+            app:title="@string/year"
+            app:useSimpleSummaryProvider="true" />
+        <rikka.preference.SimpleMenuPreference
+            app:key="end_year"
+            app:persistent="false"
+            app:title="结束学年"
+            app:useSimpleSummaryProvider="true"/>
+        <rikka.preference.SimpleMenuPreference
+            app:icon="@drawable/course"
+            app:key="week"
+            app:persistent="false"
+            app:title="星期"
+            app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.RangeSliderPreference
+            android:max="26"
+            app:key="week_range"
+            app:persistent="false"
+            app:seekBarIncrement="1"
+            app:showSeekBarValue="true"
+            app:title="周次"
+            app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.RangeSliderPreference
+            android:max="12"
+            app:key="class"
+            app:persistent="false"
+            app:seekBarIncrement="1"
+            app:showSeekBarValue="true"
+            app:title="节次"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/location">
+        <rikka.preference.SimpleMenuPreference
+            app:icon="@drawable/location"
+            app:key="campus"
+            app:persistent="false"
+            app:title="@string/campus"
+            app:useSimpleSummaryProvider="true" />
+        <rikka.preference.SimpleMenuPreference
+            app:icon="@drawable/location"
+            app:key="office"
+            app:persistent="false"
+            app:title="@string/office"
+            app:useSimpleSummaryProvider="true" />
+        <rikka.preference.SimpleMenuPreference
+            app:icon="@drawable/home"
+            app:key="classroom"
+            app:persistent="false"
+            app:title="@string/classroom"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <PreferenceCategory app:title="课程">
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/calendar"
+            app:key="course_name"
+            app:persistent="false"
+            app:title="@string/course_name"
+            app:useSimpleSummaryProvider="true" />
+        <rikka.preference.SimpleMenuPreference
+            app:icon="@drawable/calendar"
+            app:key="course_type"
+            app:persistent="false"
+            app:title="@string/course_type"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+    <PreferenceCategory app:title="教学班">
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/language"
+            app:key="class_name"
+            app:persistent="false"
+            app:title="教学班名称"
+            app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.FilterPreference
+            app:icon="@drawable/menu"
+            app:key="class_level"
+            app:persistent="false"
+            app:title="教学班层次"
+            app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/id"
+            app:key="class_id"
+            app:persistent="false"
+            app:title="教学班编号"
+            app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/account"
+            app:key="teacher"
+            app:persistent="false"
+            app:title="主讲教师"
+            app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.FilterPreference
+            app:icon="@drawable/group"
+            app:key="department"
+            app:persistent="false"
+            app:title="开课单位"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+</androidx.preference.PreferenceScreen>
