@@ -23,11 +23,13 @@ import com.alibaba.fastjson2.JSONReader;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.AcademyNotification;
 import com.sysu.edu.academic.AgendaActivity;
+import com.sysu.edu.academic.AssistantInfoActivity;
 import com.sysu.edu.academic.BrowserActivity;
 import com.sysu.edu.academic.CETActivity;
 import com.sysu.edu.academic.CalendarActivity;
 import com.sysu.edu.academic.ClassroomQueryActivity;
-import com.sysu.edu.academic.CourseCompletion;
+import com.sysu.edu.academic.CourseCompletionActivity;
+import com.sysu.edu.academic.CourseQueryActivity;
 import com.sysu.edu.academic.CourseSelectedActivity;
 import com.sysu.edu.academic.CourseSelectionActivity;
 import com.sysu.edu.academic.EvaluationActivity;
@@ -59,7 +61,7 @@ import java.util.stream.IntStream;
 
 public class ServiceFragment extends Fragment {
     // 创建HashMap来存储actions，使用id作为key
-    private final Map<Integer, View.OnClickListener> actionMap = new HashMap<>();
+    final Map<Integer, View.OnClickListener> actionMap = new HashMap<>();
     FragmentServiceBinding binding;
     final ActivityResultLauncher<Intent> launcher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -80,7 +82,6 @@ public class ServiceFragment extends Fragment {
             JSONReader reader = JSONReader.of(getResources().openRawResource(R.raw.service), StandardCharsets.UTF_8);
             JSONArray array = reader.readJSONArray();
 
-            // 使用HashMap替代原来的二维数组
             IntStream.range(0, array.size()).forEach(i -> {
                 JSONObject serviceGroup = array.getJSONObject(i);
                 initBoxWithHashMap(inflater, serviceGroup.getString("name"), serviceGroup.getJSONArray("items"));
@@ -96,7 +97,7 @@ public class ServiceFragment extends Fragment {
         actionMap.put(102, newActivity(CETActivity.class));          // 四六级
         actionMap.put(103, newActivity(RegisterInfo.class));         // 注册
         actionMap.put(104, newActivity(SchoolWorkWarning.class));    // 学业预警
-        actionMap.put(105, newActivity(CourseCompletion.class));     // 课程完成情况
+        actionMap.put(105, newActivity(CourseCompletionActivity.class));     // 课程完成情况
         actionMap.put(106, newActivity(LeaveReturnRegistrationActivity.class));     // 请假返回登记
         actionMap.put(107, newActivity(PhysicalFitnessTestResultActivity.class));     // 体测
 
@@ -164,10 +165,12 @@ public class ServiceFragment extends Fragment {
         actionMap.put(705, newActivity(CalendarActivity.class));             // 校历
         actionMap.put(706, newActivity(ClassroomQueryActivity.class));       // 自习室
         actionMap.put(707, newActivity(GradeActivity.class));                        // 成绩
+        actionMap.put(708, newActivity(CourseQueryActivity.class));                  // 课程
         actionMap.put(709, browse("https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView")); // 个人培养方案
         actionMap.put(710, newActivity(TrainingSchedule.class));             // 培养方案
         actionMap.put(711, newActivity(MajorInfo.class));                    // 专业
         actionMap.put(712, newActivity(CourseSelectedActivity.class));                  // 已选课程
+        actionMap.put(713, newActivity(AssistantInfoActivity.class));       // 助教信息
 
 
         // 学习平台 (id: 8xx)
@@ -188,21 +191,19 @@ public class ServiceFragment extends Fragment {
         actionMap.put(909, newActivity(NetPayActivity.class));              // 校园网
 
 
-
         // 人工智能服务 (id: 10xx)
         actionMap.put(1001, browse("https://chat.sysu.edu.cn/zntgc/agent"));     // Deepseek
         actionMap.put(1002, browse("https://chat.sysu.edu.cn/znt/chat/empty"));  // 逸闻
         actionMap.put(1003, browse("https://xgxw.sysu.edu.cn/aicounsellor/agents/outlink/sunyatsenuniversity")); // 学工君
     }
 
-    // 新的initBox方法，使用HashMap来获取对应的action
-    public void initBoxWithHashMap(LayoutInflater inflater, String box_title, JSONArray items) {
-        ItemServiceBoxBinding b = ItemServiceBoxBinding.inflate(inflater);
-        b.serviceBoxTitle.setText(box_title);
+    void initBoxWithHashMap(LayoutInflater inflater, String box_title, JSONArray items) {
+        ItemServiceBoxBinding binding = ItemServiceBoxBinding.inflate(inflater);
+        binding.serviceBoxTitle.setText(box_title);
         IntStream.range(0, items.size()).forEach(index -> {
             JSONObject item = items.getJSONObject(index);
             int itemId = item.getIntValue("id");
-            ItemActionChipBinding chip = ItemActionChipBinding.inflate(inflater, b.serviceBoxItems, false);
+            ItemActionChipBinding chip = ItemActionChipBinding.inflate(inflater, binding.serviceBoxItems, false);
 
             // 从HashMap中获取对应的action，如果没有则显示"未开发"
             View.OnClickListener action = actionMap.get(itemId);
@@ -211,16 +212,16 @@ public class ServiceFragment extends Fragment {
             );
 
             chip.getRoot().setText(item.getString("name"));
-            b.serviceBoxItems.addView(chip.getRoot());
+            binding.serviceBoxItems.addView(chip.getRoot());
         });
-        binding.serviceContainer.addView(b.getRoot());
+        this.binding.serviceContainer.addView(binding.getRoot());
     }
 
-    public View.OnClickListener browse(String url) {
+    View.OnClickListener browse(String url) {
         return view -> startActivity(new Intent(view.getContext(), BrowserActivity.class).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle());
     }
 
-    public View.OnClickListener newActivity(Class<?> activity_class) {
+    View.OnClickListener newActivity(Class<?> activity_class) {
         return view -> launcher.launch(new Intent(view.getContext(), activity_class), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp"));
     }
 }

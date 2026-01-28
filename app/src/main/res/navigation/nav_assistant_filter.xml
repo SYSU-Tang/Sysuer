@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/assistant_info_filter_fragment">
+
+    <fragment
+        android:id="@+id/assistant_info_filter_fragment"
+        android:name="com.sysu.edu.academic.AssistantInfoFilterFragment"
+        tools:layout="@layout/fragment_assistant_info_filter">
+        <action
+            android:id="@+id/filter_to_result"
+            app:destination="@id/assistant_info_result_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/assistant_info_result_fragment"
+        android:name="com.sysu.edu.academic.AssistantInfoResultFragment" />
+
+</navigation>

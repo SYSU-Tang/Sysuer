@@ -4,7 +4,7 @@
         <item>@string/dark</item>
         <item>@string/follow_system</item>
     </string-array>
-    <string-array name="value">
+    <string-array name="values_3">
         <item>0</item>
         <item>1</item>
         <item>2</item>
@@ -24,12 +24,6 @@
         <item>微信支付</item>
         <item>QQ钱包</item>
     </string-array>
-
-    <integer-array name="sponsor_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </integer-array>
     <string-array name="weeks">
         <item>一</item>
         <item>二</item>
@@ -78,7 +72,7 @@
         <item>较大</item>
         <item>大</item>
     </string-array>
-    <string-array name="font_value">
+    <string-array name="values_6">
         <item>0</item>
         <item>1</item>
         <item>2</item>
@@ -109,21 +103,13 @@
         <item>@string/exam</item>
         <item>@string/todo</item>
     </string-array>
-    <string-array name="dashboard_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-    </string-array>
     <string-array name="login_mode">
         <item>仅提示</item>
         <item>仅主页提示</item>
         <item>手动登录</item>
         <item>无感登录</item>
     </string-array>
-    <string-array name="login_value">
+    <string-array name="values_4">
         <item>0</item>
         <item>1</item>
         <item>2</item>
@@ -152,7 +138,7 @@
         <item>复习</item>
         <item>其他</item>
     </string-array>
-    
+
     <!-- 课程信息标签 -->
     <string-array name="course_info_labels">
         <item>学分</item>
@@ -163,7 +149,7 @@
         <item>待筛选人数</item>
         <item>选上人数</item>
     </string-array>
-    
+
     <!-- 座位信息标签 -->
     <string-array name="seat_info_labels">
         <item>剩余</item>

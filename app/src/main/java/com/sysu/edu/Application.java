@@ -30,7 +30,7 @@ public class Application extends android.app.Application {
         SharedPreferences pm = PreferenceManager.getDefaultSharedPreferences(this);
         initCrash();
         if ((!pm.contains("dashboard")) || Objects.requireNonNull(pm.getStringSet("dashboard", null)).isEmpty()) {
-            pm.edit().putStringSet("dashboard", Set.of(getResources().getStringArray(R.array.dashboard_values))).apply();
+            pm.edit().putStringSet("dashboard", Set.of(getResources().getStringArray(R.array.values_6))).apply();
         }
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override

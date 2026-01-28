@@ -49,7 +49,7 @@
         </Preference>
         <rikka.preference.SimpleMenuPreference
             app:entries="@array/sponsors"
-            app:entryValues="@array/sponsor_values"
+            app:entryValues="@array/values_3"
             app:icon="@drawable/money"
             app:key="sponsor"
             app:persistent="false"

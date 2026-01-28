@@ -145,7 +145,7 @@ public class DashboardFragment extends Fragment {
                 }
             });
             binding.toggle2.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-                if (R.id.week_17 == checkedId) {
+                if (R.id.week_18 == checkedId) {
                     examAdapter.set(isChecked ? thisWeekExams : nextWeekExams);
                     binding.noExam.setVisibility(examAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
                 }
@@ -183,8 +183,6 @@ public class DashboardFragment extends Fragment {
                                 binding.progress.setMax(todayCourse.size());
                                 binding.progress.setProgress(beforeArray.size());
                                 binding.courseList.scrollToPosition(beforeArray.size());
-                                //"<h4><font color=\"#6750a4\">%s</font></h4>%s：<b>%s</b><br/>%s：<b>%s</b><br/>%s：<b>%s</b>"
-                                // binding.nextClass.setText(Html.fromHtml(, Html.FROM_HTML_MODE_COMPACT));
                                 Markwon.builder(requireContext()).usePlugin(new AbstractMarkwonPlugin() {
                                     @Override
                                     public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
@@ -232,10 +230,10 @@ public class DashboardFragment extends Fragment {
                                 binding.toggle.check(R.id.today);
                                 break;
                             case 2:
-                                if (response.getJSONArray("data").isEmpty()) {
+                                JSONArray dataArray = response.getJSONArray("data");
+                                if (dataArray.isEmpty()) {
                                     break;
                                 }
-                                JSONArray dataArray = response.getJSONArray("data");
                                 for (int i = 0; i < dataArray.size(); i++) {
                                     JSONObject e = dataArray.getJSONObject(i);
                                     LinkedList<JSONObject> exams = List.of(thisWeekExams, nextWeekExams).get(i);
@@ -255,14 +253,20 @@ public class DashboardFragment extends Fragment {
                                     });
                                 }
                                 binding.toggle2.clearChecked();
-                                binding.toggle2.check(R.id.week_17);
+                                binding.toggle2.check(R.id.week_18);
                                 break;
                             case 3:
                                 String term = response.getJSONObject("data").getString("acadYearSemester");
                                 binding.date.setText(String.format("第%s学期\n%s\n星期%s", term, new SimpleDateFormat("M月dd日", Locale.CHINESE).format(new Date()), new String[]{"日", "一", "二", "三", "四", "五", "六"}[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]));
                                 getTodayCourses(term);
                                 getExams(term);
+                                getWeek(term);
                                 refresh = false;
+                                break;
+                            case 4:
+                                String week = response.getJSONArray("data").getJSONObject(0).getString("weekTimes");
+                                binding.date.setText(String.format("第%s周\n%s", week, binding.date.getText().toString()));
+                                binding.toggle2.check(week.equals("19") ? R.id.week_19 : R.id.week_18);
                                 break;
                         }
                     } else {
@@ -299,6 +303,7 @@ public class DashboardFragment extends Fragment {
                 }
                 visible.forEach(i -> List.of(binding.shortcutGroup, binding.nextClassCard, binding.timeCard, binding.courseGroup, binding.examGroup, binding.todoGroup).get(Integer.parseInt(i)).setVisibility(View.GONE));
             });
+
         }
         return binding.getRoot();
     }
@@ -325,10 +330,31 @@ public class DashboardFragment extends Fragment {
         });
     }
 
+    void getWeek(String term) {
+        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=" + term)
+                .header("Cookie", cookie)
+                .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/yd/index/").build()
+        ).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Message msg = new Message();
+                msg.what = -1;
+                handler.sendMessage(msg);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Message msg = new Message();
+                msg.what = 4;
+                msg.obj = response.body().string();
+                handler.sendMessage(msg);
+            }
+        });
+    }
+
     void getTodayCourses(String term) {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=" + term)
                 .header("Cookie", cookie)
-                //.header("Accept-Language", Language.getLanguageCode(requireContext()))
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -361,7 +387,6 @@ public class DashboardFragment extends Fragment {
     void getExams(String term) {
         new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck")
                 .header("Cookie", cookie)
-                //.header("Accept-Language", Language.getLanguageCode(requireContext()))
                 .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/mk/")
                 .post(RequestBody.create(String.format("{\"acadYear\":\"%s\",\"examWeekId\":\"1928284621349085186\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", term), MediaType.parse("application/json")))
                 .build()).enqueue(new Callback() {

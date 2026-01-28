@@ -4,8 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground">
+
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/pic"
+        android:id="@+id/image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -14,64 +15,71 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearance="@style/RoundRect" />
+
     <View
         android:id="@+id/divider"
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintRight_toRightOf="parent" />
+
     <com.google.android.material.chip.ChipGroup
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_height="wrap_content"
         app:chipSpacingVertical="0dp"
         app:horizontalItemSpacing="0dp"
         app:layout_constraintBottom_toTopOf="@id/divider"
-        app:layout_constraintLeft_toRightOf="@id/pic"
+        app:layout_constraintLeft_toRightOf="@id/image"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <com.google.android.material.chip.Chip
             android:id="@+id/location"
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:chipIcon="@drawable/location"
-            app:chipIconTint="?attr/colorPrimary"/>
+            app:chipIconTint="?attr/colorPrimary" />
+
         <com.google.android.material.chip.Chip
             android:id="@+id/time"
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:chipIcon="@drawable/time"
-            app:chipIconTint="?attr/colorPrimary"/>
+            app:chipIconTint="?attr/colorPrimary" />
+
         <com.google.android.material.chip.Chip
             android:id="@+id/floor"
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:chipIcon="@drawable/floor"
-            app:chipIconTint="?attr/colorPrimary"/>
+            app:chipIconTint="?attr/colorPrimary" />
+
         <com.google.android.material.chip.Chip
             android:id="@+id/seat"
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:chipIcon="@drawable/seat"
-            app:chipIconTint="?attr/colorPrimary"/>
+            app:chipIconTint="?attr/colorPrimary" />
     </com.google.android.material.chip.ChipGroup>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/name"
         android:layout_width="0dp"
-        android:gravity="center"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:textAppearance="?textAppearanceTitleMedium"
         app:layout_constraintBottom_toBottomOf="@id/divider"
         app:layout_constraintLeft_toRightOf="@id/type"
-        app:layout_constraintRight_toRightOf="@id/pic"
-        app:layout_constraintTop_toTopOf="@id/type"/>
+        app:layout_constraintRight_toRightOf="@id/image"
+        app:layout_constraintTop_toTopOf="@id/type" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/type"
@@ -79,9 +87,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/self_study_room"
-        app:layout_constraintLeft_toLeftOf="@id/pic"
         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
         app:icon="@drawable/book"
         app:layout_constraintBottom_toTopOf="@id/divider"
-        app:layout_constraintTop_toBottomOf="@id/pic"/>
+        app:layout_constraintLeft_toLeftOf="@id/image"
+        app:layout_constraintTop_toBottomOf="@id/image" />
 </androidx.constraintlayout.widget.ConstraintLayout>

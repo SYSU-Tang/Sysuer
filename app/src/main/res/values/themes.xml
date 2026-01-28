@@ -16,6 +16,8 @@
         <!--        &lt;!&ndash; Status bar color. &ndash;&gt;-->
         <!--        <item name="android:statusBarColor">@color/white</item>-->
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
+        <item name="editTextPreferenceStyle">@style/Preference.Rikka.EditTextPreference.Material3</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Rikka.SeekbarPreference.Material3</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
@@ -27,7 +29,7 @@
         </item>
         <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
         <!--        <item name="switchPreferenceStyle">-->
-        <!--            @style/Preference.Rikka.MateriaSwitchPreference-->
+        <!--            @style/MenuPreference.Rikka.MateriaSwitchPreference-->
         <!--        </item>-->
         <!--        <item name="preferenceStyle">@style/preference</item>-->
         <!-- Customize your theme here. -->

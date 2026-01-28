@@ -250,6 +250,11 @@
         "id": 712,
         "name": "Selected Courses",
         "description": "Selected courses inquiry system, with functions such as course selection results, grade inquiry, and transcript printing"
+      },
+      {
+        "id": 713,
+        "name": "Teaching Assistants",
+        "description": "Teaching assistants information inquiry system, with functions such as assistant names, courses they are teaching, and contact information"
       }
     ]
   },

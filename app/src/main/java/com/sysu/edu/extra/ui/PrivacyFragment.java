@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,22 +28,22 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class PrivacyFragment extends PreferenceFragmentCompat {
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     Params params;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     String token;
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         if (savedInstanceState == null) {
             setPreferencesFromResource(R.xml.privacy, rootKey);
+            params = new Params(requireActivity());
             ((Preference) Objects.requireNonNull(findPreference("netId"))).setSummary(requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("username", ""));
             ((Preference) Objects.requireNonNull(findPreference("password")))
                     .setOnPreferenceClickListener(preference -> {
-                        Toast.makeText(requireContext(), requireContext().getSharedPreferences("privacy", Context.MODE_PRIVATE).getString("password", ""), Toast.LENGTH_LONG).show();
+                        params.toast(params.getPassword());
                         return false;
                     });
-            params = new Params(requireActivity());
             params.setCallback(() -> {
                 token = params.getToken();
                 getInfo();

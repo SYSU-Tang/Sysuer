@@ -15,7 +15,7 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1930
-        versionName = "1.0.8(beta2)"
+        versionName = "1.0.8(beta3)"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -56,7 +56,6 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.fastjson2)
     implementation(libs.appcompat)
-    implementation(libs.material)
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
@@ -74,16 +73,20 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.preference)
     implementation(libs.work.runtime)
-    implementation(libs.material.preference) {
+    implementation(libs.material.preference)
+    {
         exclude("dev.rikka.rikkax.appcompat", "appcompat")
     }
-    implementation(libs.dev.material) {
+    implementation(libs.dev.material)
+    {
         exclude("dev.rikka.rikkax.appcompat", "appcompat")
     }
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.core)
     implementation(libs.ext.tables)
+    implementation(libs.ext.strikethrough)
+    implementation(libs.google.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -93,5 +96,12 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
     implementation(libs.api)
     implementation(libs.provider)
+    implementation(libs.html)
+//    implementation("dev.rikka.rikkax.appcompat:appcompat:1.6.1")
+    /*configurations.all {
+        exclude("androidx.appcompat", "appcompat")
+    }*/
+//    implementation(libs.androidx.preference.material3)
+//    implementation("com.github.knightwood:material3-preference:1.4")
     //api(libs.wechat.sdk.android)
 }

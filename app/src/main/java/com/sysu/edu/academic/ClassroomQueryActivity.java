@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
@@ -19,20 +20,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.imageview.ShapeableImageView;
-import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
+import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityClassroomQueryBinding;
 import com.sysu.edu.databinding.ItemClassroomResultBinding;
 import com.sysu.edu.databinding.ItemFilterChipBinding;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,53 +39,31 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
 public class ClassroomQueryActivity extends AppCompatActivity {
+
+    final HashMap<Integer, String> office = new HashMap<>();
     Handler handler;
-    String cookie = "";
-    final OkHttpClient http = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-        @NonNull
-        @Override
-        public Response intercept(@NonNull Chain chain) throws IOException {
-            Request origin = chain.request();
-            return chain.proceed(origin.newBuilder()
-                    .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
-                    .header("Cookie", cookie)
-                    .header("Referer", "https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
-                    .method(origin.method(), origin.body())
-                    .build());
-        }
-    }).build();
-    final MaterialDatePicker<Long> dateDialog = MaterialDatePicker.Builder.datePicker().build();
-    final HashMap<String, ArrayList<Chip>> classroom = new HashMap<>();
+    HttpManager http;
     String dateStr;
     String startClassTime = "1";
     String endClassTime = "11";
+    MutableLiveData<String> campusLiveData = new MutableLiveData<>();
     List<String> classType = List.of("002", "003");
-    RoomAdapter adp;
+    RoomAdapter roomAdapter;
     int page = 1;
     int total = 0;
-    final HashMap<Integer, String> office = new HashMap<>();
     ActivityClassroomQueryBinding binding;
+    Params params;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final MaterialDatePicker<Long> dateDialog = MaterialDatePicker.Builder.datePicker().build();
+        final HashMap<String, ArrayList<Chip>> classroom = new HashMap<>();
         binding = ActivityClassroomQueryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        Params params = new Params(this);
-        params.setCallback(() -> {
-            cookie = params.getCookie();
-            recreate();
-        });
+        params = new Params(this);
+        params.setCallback(this::getCampus);
         binding.campusSelectAll.setOnClickListener(v -> {
             for (int i = 1; i < ((ChipGroup) v.getParent()).getChildCount(); i++) {
                 Chip chip = (Chip) ((ChipGroup) v.getParent()).getChildAt(i);
@@ -100,28 +76,26 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 chip.setChecked(!chip.isChecked());
             }
         });
-        cookie = params.getCookie();
         dateDialog.addOnPositiveButtonClickListener(selection -> {
             dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(selection));
             binding.dateText.setText(new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault()).format(new Date(selection)));
         });
-        adp = new RoomAdapter(this);
+        roomAdapter = new RoomAdapter(this);
         binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
-        binding.result.setAdapter(adp);
+        binding.result.setAdapter(roomAdapter);
         binding.result.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
         BottomSheetBehavior.from(binding.resultSheet).setState(BottomSheetBehavior.STATE_HIDDEN);
         binding.date.setOnClickListener(v -> dateDialog.show(getSupportFragmentManager(), null));
         binding.timeSlider.addOnChangeListener((slider, value, fromUser) -> {
             startClassTime = String.format(Locale.getDefault(), "%.0f", slider.getValues().get(0));
             endClassTime = String.format(Locale.getDefault(), "%.0f", slider.getValues().get(1));
-            ((MaterialTextView) findViewById(R.id.time)).setText(String.format(getString(R.string.section_range_x), startClassTime, endClassTime));
+            binding.time.setText(String.format(getString(R.string.section_range_x), startClassTime, endClassTime));
         });
         binding.query.setOnClickListener(v -> {
-            adp.clear();
+            roomAdapter.clear();
             page = 1;
             getRoom();
         });
-        getCampus();
         binding.result.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -157,7 +131,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     if (msg.what == 3) {
                         JSONObject data = dataString.getJSONObject("data");
                         total = data.getInteger("total");
-                        data.getJSONArray("rows").forEach(a -> adp.add((JSONObject) a));
+                        data.getJSONArray("rows").forEach(a -> roomAdapter.add((JSONObject) a));
                         BottomSheetBehavior.from(binding.resultSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
                     } else {
                         binding.timeSlider.setValueFrom(1);
@@ -182,12 +156,12 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                                     break;
                                 }
                                 case 2: {
-                                    classroom.computeIfAbsent(msg.getData().getString("campus"), k -> new ArrayList<>());
+                                    classroom.computeIfAbsent(campusLiveData.getValue(), k -> new ArrayList<>());
                                     Chip chip = ItemFilterChipBinding.inflate(getLayoutInflater(), binding.officeGroup, false).getRoot();
                                     binding.officeGroup.addView(chip);
                                     office.put(chip.getId(), ((JSONObject) campusInfo).getString("id"));
                                     chip.setText(((JSONObject) campusInfo).getString("dataName"));
-                                    Objects.requireNonNull(classroom.get(msg.getData().getString("campus"))).add(chip);
+                                    Objects.requireNonNull(classroom.get(campusLiveData.getValue())).add(chip);
                                     break;
                                 }
                             }
@@ -199,51 +173,40 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 }
             }
         };
+        http = new HttpManager(handler);
+        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/");
+        http.setParams(params);
+        getCampus();
     }
 
     public void getCampus() {
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox").build()).enqueue(
-                new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Message message = new Message();
-                        message.what = 1;
-                        message.obj = response.body().string();
-                        handler.sendMessage(message);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Message message = new Message();
-                        message.what = -1;
-                        handler.sendMessage(message);
-                    }
-                }
-        );
+        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox", 1);
     }
 
-    public void getOffice(String c) {
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull").post(RequestBody.create("{\"campusIdList\":[\"" + c + "\"]}", MediaType.parse("application/json"))).build()).enqueue(
-                new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Message message = new Message();
-                        message.what = 2;
-                        Bundle data = new Bundle();
-                        data.putString("campus", c);
-                        message.setData(data);
-                        message.obj = response.body().string();
-                        handler.sendMessage(message);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Message message = new Message();
-                        message.what = -1;
-                        handler.sendMessage(message);
-                    }
-                }
-        );
+    public void getOffice(String campus) {
+        campusLiveData.setValue(campus);
+        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull", "{\"campusIdList\":[\"" + campus + "\"]}", 2);
+//        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull").post(RequestBody.create("{\"campusIdList\":[\"" + campus + "\"]}", MediaType.parse("application/json"))).build()).enqueue(
+//                new Callback() {
+//                    @Override
+//                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                        Message message = new Message();
+//                        message.what = 2;
+//                        Bundle data = new Bundle();
+//                        data.putString("campus", campus);
+//                        message.setData(data);
+//                        message.obj = response.body().string();
+//                        handler.sendMessage(message);
+//                    }
+//
+//                    @Override
+//                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                        Message message = new Message();
+//                        message.what = -1;
+//                        handler.sendMessage(message);
+//                    }
+//                }
+//        );
     }
 
     public void getRoom() {
@@ -255,84 +218,87 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                 teachingBuildIDs.add(office.get(e));
             }
         });
-         if (teachingBuildIDs.isEmpty()) {
+        if (teachingBuildIDs.isEmpty()) {
             Message message = new Message();
             message.what = 0;
             message.obj = "请先选择教学楼";
             handler.sendMessage(message);
             return;
         }
-        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom").post(RequestBody.create(String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":20,\"param\":{\"dateStr\":\"%s\",\"teachingBuildIDs\":%s,\"startClassTimes\":%s,\"endClassTimes\":%s,\"classRoomTagList\":%s}}", page++, dateStr, JSON.toJSONString(teachingBuildIDs), startClassTime, endClassTime, JSON.toJSONString(classType)), MediaType.parse("application/json"))).build()).enqueue(
-                new Callback() {
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Message message = new Message();
-                        message.what = 3;
-                        message.obj = response.body().string();
-                        handler.sendMessage(message);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Message message = new Message();
-                        message.what = -1;
-                        handler.sendMessage(message);
-                    }
-                }
-        );
-    }
-}
-
-class RoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final Context context;
-    final ArrayList<JSONObject> json = new ArrayList<>();
-
-    public RoomAdapter(Context context) {
-        super();
-        this.context = context;
+        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom", String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":20,\"param\":{\"dateStr\":\"%s\",\"teachingBuildIDs\":%s,\"startClassTimes\":%s,\"endClassTimes\":%s,\"classRoomTagList\":%s}}", page++, dateStr, JSON.toJSONString(teachingBuildIDs), startClassTime, endClassTime, JSON.toJSONString(classType)), 3);
+////        http.newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn/jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom")
+//                        .post(RequestBody.create(String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":20,\"param\":{\"dateStr\":\"%s\",\"teachingBuildIDs\":%s,\"startClassTimes\":%s,\"endClassTimes\":%s,\"classRoomTagList\":%s}}", page++, dateStr, JSON.toJSONString(teachingBuildIDs), startClassTime, endClassTime, JSON.toJSONString(classType)), MediaType.parse("application/json"))).build())
+//                .enqueue(new Callback() {
+//                             @Override
+//                             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                                 Message message = new Message();
+//                                 message.what = 3;
+//                                 message.obj = response.body().string();
+//                                 handler.sendMessage(message);
+//                             }
+//
+//                             @Override
+//                             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                                 Message message = new Message();
+//                                 message.what = -1;
+//                                 handler.sendMessage(message);
+//                             }
+//                         }
+//                );
     }
 
-    public void add(JSONObject jsonobject) {
-        json.add(jsonobject);
-        notifyItemInserted(getItemCount());
-    }
+    static class RoomAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        final Context context;
+        final ArrayList<JSONObject> json = new ArrayList<>();
 
-    public void clear() {
-        int temp = getItemCount();
-        json.clear();
-        notifyItemRangeRemoved(0, temp);
-    }
+        public RoomAdapter(Context context) {
+            super();
+            this.context = context;
+        }
 
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(ItemClassroomResultBinding.inflate(LayoutInflater.from(context), parent, false).getRoot()) {
-        };
-    }
+        public void add(JSONObject jsonobject) {
+            json.add(jsonobject);
+            notifyItemInserted(getItemCount());
+        }
 
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((Chip) holder.itemView.findViewById(R.id.location)).setText(json.get(position).getString("teachingBuildingName"));
-        ((Chip) holder.itemView.findViewById(R.id.time)).setText(json.get(position).getString("classTimes"));
-        ((Chip) holder.itemView.findViewById(R.id.floor)).setText(json.get(position).getString("floor"));
-        ((Chip) holder.itemView.findViewById(R.id.seat)).setText(json.get(position).getString("seats"));
-        ((MaterialButton) holder.itemView.findViewById(R.id.type)).setText(json.get(position).getString("classRoomTag"));
-        ((MaterialTextView) holder.itemView.findViewById(R.id.name)).setText(json.get(position).getString("classRoomNum"));
-        Glide.with(context)
-                .load(new GlideUrl("https://jwxt.sysu.edu.cn/jwxt/base-info/classroom/classRoomView?fileName=jspic.png&filePath=" + json.get(position).get("photoPath"), new LazyHeaders.Builder()
-                        .addHeader("Cookie", ((ClassroomQueryActivity) context).cookie)
-                        .addHeader("Referer", "https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
-                        .build()))
-                .placeholder(R.drawable.logo)
-                .override((int) (145 * 3.6), (int) (132 * 3.6))
-                .fitCenter()
-                .into((ShapeableImageView) holder.itemView.findViewById(R.id.pic));
-        holder.itemView.setOnClickListener(v -> {
-        });
-    }
+        public void clear() {
+            int temp = getItemCount();
+            json.clear();
+            notifyItemRangeRemoved(0, temp);
+        }
 
-    @Override
-    public int getItemCount() {
-        return json.size();
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new RecyclerView.ViewHolder(ItemClassroomResultBinding.inflate(LayoutInflater.from(context), parent, false).getRoot()) {
+            };
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            ItemClassroomResultBinding binding = ItemClassroomResultBinding.bind(holder.itemView);
+            binding.location.setText(json.get(position).getString("teachingBuildingName"));
+            binding.time.setText(json.get(position).getString("classTimes"));
+            binding.floor.setText(json.get(position).getString("floor"));
+            binding.seat.setText(json.get(position).getString("seats"));
+            binding.type.setText(json.get(position).getString("classRoomTag"));
+            binding.name.setText(json.get(position).getString("classRoomNum"));
+            Glide.with(context)
+                    .load(new GlideUrl("https://jwxt.sysu.edu.cn/jwxt/base-info/classroom/classRoomView?fileName=jspic.png&filePath=" + json.get(position).get("photoPath"), new LazyHeaders.Builder()
+                            .addHeader("Cookie", ((ClassroomQueryActivity) context).params.getCookie())
+                            .addHeader("Referer", "https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/")
+                            .build()))
+                    .placeholder(R.drawable.logo)
+                    .override((int) (145 * 3.6), (int) (132 * 3.6))
+                    .fitCenter()
+                    .into(binding.image);
+            binding.getRoot().setOnClickListener(v -> {
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return json.size();
+        }
     }
 }

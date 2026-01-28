@@ -449,5 +449,9 @@
     <string name="unlike">取消收藏</string>
     <string name="already">已</string>
     <string name="physical_fitness_test_result">体测查询</string>
+    <string name="course_number">课程编码</string>
+    <string name="classroom">教室</string>
+    <string name="course_name">课程名称</string>
+    <string name="course_type">课程类别</string>
 
 </resources>

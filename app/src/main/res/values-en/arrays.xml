@@ -10,7 +10,7 @@
         <item>QQ Wallet</item>
     </string-array>
 
-    <integer-array name="sponsor_values">
+    <integer-array name="values_3">
         <item>0</item>
         <item>1</item>
         <item>2</item>

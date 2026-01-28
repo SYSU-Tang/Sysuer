@@ -91,7 +91,8 @@ public class GradeActivity extends AppCompatActivity {
         binding.year.setOnClickListener(v -> yearPop.show());
         binding.type.setOnClickListener(v -> typePop.show());
         yearPop.getMenu().add(R.string.all).setOnMenuItemClickListener(menuItem -> {
-            sendRequest(String.format("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?trainTypeCode=%s", trainType.getValue()), 1);
+            sendRequest(String.format("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/list?trainTypeCode=%s&addScoreFlag=true", trainType.getValue()), 1);
+            sendRequest(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getSortByYear?trainTypeCode=%s&addScoreFlag=true", trainType.getValue()), 4);
             binding.year.setText(R.string.all);
             return false;
         });
@@ -174,6 +175,7 @@ public class GradeActivity extends AppCompatActivity {
                     return;
                 }
                 JSONObject dataString = JSON.parseObject((String) msg.obj);
+//                System.out.println(dataString);
                 if (dataString.getInteger("code") == 200) {
                     switch (msg.what) {
                         case 1:
@@ -267,6 +269,8 @@ public class GradeActivity extends AppCompatActivity {
                                 gradeManager.getGrade();
                             }
                     }
+                } else if (dataString.getInteger("code") == 50011000) {
+                    params.toast(dataString.getString("message"));
                 } else {
                     params.toast(R.string.login_warning);
                     params.gotoLogin(binding.toolbar, TargetUrl.JWXT);
@@ -343,10 +347,6 @@ public class GradeActivity extends AppCompatActivity {
 
     void getPull() {
         sendRequest("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/score-check/getPull", 2);
-    }
-
-    void getGrade(String classNumber, int minGrade, int maxGrade) {
-        postRequest("https://jwxt.sysu.edu.cn/jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse", String.format("{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"%s\",\"beforeAchievementPoint\":\"%s\",\"afterAchievementPoint\":\"%s\",\"cultureTypeCode\":\"01\"}}", classNumber, minGrade, maxGrade), 5);
     }
 
     static class ScoreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

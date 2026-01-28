@@ -1,22 +1,11 @@
 package com.sysu.edu.academic;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.TextPaint;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.URLSpan;
-import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -33,25 +22,21 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonVisitor;
+import io.noties.markwon.html.HtmlPlugin;
+import io.noties.markwon.html.HtmlTag;
+import io.noties.markwon.html.MarkwonHtmlRenderer;
+import io.noties.markwon.html.TagHandler;
 
 public class AcademyNotification extends AppCompatActivity {
 
     ActivityPagerBinding binding;
-    String cookie;
     Handler handler;
-    //    final OkHttpClient http = new OkHttpClient.Builder().build();
     AlertDialog dialog;
     HttpManager http;
 
@@ -64,11 +49,7 @@ public class AcademyNotification extends AppCompatActivity {
         binding.toolbar.setTitle(R.string.academic_affair_notice);
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
         Params params = new Params(this);
-        params.setCallback(() -> {
-            cookie = params.getCookie();
-            getNotices();
-        });
-        cookie = params.getCookie();
+        params.setCallback(this::getNotices);
         Pager2Adapter adp = new Pager2Adapter(this);
         NewsFragment f1 = new NewsFragment();
         NewsFragment f2 = new NewsFragment();
@@ -113,7 +94,19 @@ public class AcademyNotification extends AppCompatActivity {
                                     //System.out.println(response);
                                     dialog.setMessage(Html.fromHtml(response.getString("data"), Html.FROM_HTML_MODE_COMPACT));
                                     dialog.show();
-                                    TextView text = Objects.requireNonNull(dialog.findViewById(android.R.id.message));
+                                    Markwon.builder(AcademyNotification.this).usePlugin(HtmlPlugin.create().addHandler(new TagHandler() {
+                                        @Override
+                                        public void handle(@NonNull MarkwonVisitor visitor, @NonNull MarkwonHtmlRenderer renderer, @NonNull HtmlTag tag) {
+
+                                        }
+
+                                        @NonNull
+                                        @Override
+                                        public Collection<String> supportedTags() {
+                                            return Collections.emptyList();
+                                        }
+                                    })).build().setMarkdown(Objects.requireNonNull(dialog.findViewById(android.R.id.message)), response.getString("data"));
+                                    /*TextView text = Objects.requireNonNull(dialog.findViewById(android.R.id.message));
                                     text.setMovementMethod(LinkMovementMethod.getInstance());
                                     CharSequence str = text.getText();
                                     if (str instanceof Spannable) {
@@ -128,7 +121,7 @@ public class AcademyNotification extends AppCompatActivity {
                                             }
                                         }
                                         text.setText(style);
-                                    }
+                                    }*/
                             }
                         }
                     } else {
@@ -161,55 +154,55 @@ public class AcademyNotification extends AppCompatActivity {
         http.getRequest("https://jwxt.sysu.edu.cn/jwxt/system-manage/info-delivery/noticeId?id=" + id, 2);
     }
 
-    class MyClickSpan extends ClickableSpan {
-        final String url;
-        String text;
-
-        public MyClickSpan(String url) throws MalformedURLException {
-            this.url = url;
-            //System.out.println(url);
-            if (url.startsWith("/")) {
-                this.text = Uri.parse(url).getQueryParameter("fileName");
-            }
-        }
-
-        @Override
-        public void updateDrawState(TextPaint ds) {
-            ds.setUnderlineText(false);
-            super.updateDrawState(ds);
-        }
-
-        @Override
-        public void onClick(@NonNull View v) {
-            if (url.startsWith("/")) {
-                new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn" + url)
-                        .header("Cookie", AcademyNotification.this.cookie)
-                        .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/")
-                        .build()).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        //String mediaType = Objects.requireNonNull(response.header().contentType()).toString();
-                        // 回到主线程操纵界面
-                        //runOnUiThread(() -> tv_result.setText("下载网络文件返回："+desc));
-                        String path = Environment.getExternalStorageDirectory() + "/Download/" + text.replace("\n", "");
-                        OutputStream outputStream = new FileOutputStream(path);
-                        byte[] buffer = new byte[4096];
-                        int bytesRead;
-                        while ((bytesRead = response.body().byteStream().read(buffer)) != -1) {
-                            outputStream.write(buffer, 0, bytesRead);
-                        }
-                        outputStream.close();
-                        Intent intent = new Intent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(Intent.ACTION_VIEW).setDataAndType(Uri.fromFile(new File(path)), "*/*");
-                        v.getContext().startActivity(intent);
-                    }
-                });
-            } else {
-                v.getContext().startActivity(new Intent().setAction(Intent.ACTION_VIEW).setData(Uri.parse(url)));
-            }
-        }
-    }
+//    class MyClickSpan extends ClickableSpan {
+//        final String url;
+//        String text;
+//
+//        public MyClickSpan(String url) throws MalformedURLException {
+//            this.url = url;
+//            //System.out.println(url);
+//            if (url.startsWith("/")) {
+//                this.text = Uri.parse(url).getQueryParameter("fileName");
+//            }
+//        }
+//
+//        @Override
+//        public void updateDrawState(TextPaint ds) {
+//            ds.setUnderlineText(false);
+//            super.updateDrawState(ds);
+//        }
+//
+//        @Override
+//        public void onClick(@NonNull View v) {
+//            if (url.startsWith("/")) {
+//                new OkHttpClient.Builder().build().newCall(new Request.Builder().url("https://jwxt.sysu.edu.cn" + url)
+//                        .header("Cookie", AcademyNotification.this.params.getCookie())
+//                        .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/")
+//                        .build()).enqueue(new Callback() {
+//                    @Override
+//                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                    }
+//
+//                    @Override
+//                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                        //String mediaType = Objects.requireNonNull(response.header().contentType()).toString();
+//                        // 回到主线程操纵界面
+//                        //runOnUiThread(() -> tv_result.setText("下载网络文件返回："+desc));
+//                        String path = Environment.getExternalStorageDirectory() + "/Download/" + text.replace("\n", "");
+//                        OutputStream outputStream = new FileOutputStream(path);
+//                        byte[] buffer = new byte[4096];
+//                        int bytesRead;
+//                        while ((bytesRead = response.body().byteStream().read(buffer)) != -1) {
+//                            outputStream.write(buffer, 0, bytesRead);
+//                        }
+//                        outputStream.close();
+//                        Intent intent = new Intent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setAction(Intent.ACTION_VIEW).setDataAndType(Uri.fromFile(new File(path)), "*/*");
+//                        v.getContext().startActivity(intent);
+//                    }
+//                });
+//            } else {
+//                v.getContext().startActivity(new Intent().setAction(Intent.ACTION_VIEW).setData(Uri.parse(url)));
+//            }
+//        }
+//    }
 }

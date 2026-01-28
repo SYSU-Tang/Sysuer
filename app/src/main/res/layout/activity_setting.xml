@@ -2,16 +2,21 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
     android:layout_height="match_parent">
+
     <com.google.android.material.appbar.AppBarLayout
         style="@style/SYSU.AppBarLayout"
         android:layout_width="match_parent"
+        android:fitsSystemWindows="false"
         android:layout_height="wrap_content">
+
         <com.google.android.material.appbar.CollapsingToolbarLayout
             style="@style/Widget.Material3.CollapsingToolbar.Medium"
             android:layout_width="match_parent"
             android:layout_height="?collapsingToolbarLayoutMediumSize"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -20,13 +25,14 @@
                 app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_collapseMode="pin"
                 app:navigationIcon="?homeAsUpIndicator"
-                app:title="@string/setting"/>
+                app:title="@string/setting" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment"
         android:name="com.sysu.edu.extra.ui.SettingFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -15,7 +15,7 @@
         </fragment>
         <fragment
             android:id="@+id/filter1_fragment"
-            android:name="com.sysu.edu.academic.CourseQueryFragment"
+            android:name="com.sysu.edu.academic.CourseFilterFragment"
             android:label="@string/filter" />
     </navigation>
     <navigation
@@ -31,7 +31,7 @@
         </fragment>
         <fragment
             android:id="@+id/filter2_fragment"
-            android:name="com.sysu.edu.academic.CourseQueryFragment"
+            android:name="com.sysu.edu.academic.CourseFilterFragment"
             android:label="@string/filter" />
     </navigation>
 </navigation>

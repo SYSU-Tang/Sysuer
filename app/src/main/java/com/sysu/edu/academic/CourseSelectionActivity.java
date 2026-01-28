@@ -53,10 +53,4 @@ public class CourseSelectionActivity extends AppCompatActivity {
         //binding.toolbar.setNavigationOnClickListener(view -> supportFinishAfterTransition());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-
-        return super.onSupportNavigateUp();
-    }
 }

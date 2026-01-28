@@ -3,43 +3,49 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:fitsSystemWindows="true">
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="128dp">
+        android:layout_height="?collapsingToolbarLayoutMediumSize">
+
         <com.google.android.material.appbar.CollapsingToolbarLayout
             style="?attr/collapsingToolbarLayoutMediumStyle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:minHeight="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
             <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 android:transitionName="miniapp"
                 app:layout_collapseMode="pin"
-                android:id="@+id/toolbar"
                 app:navigationIcon="?homeAsUpIndicator"
-                app:title="@string/classroom_query"/>
+                app:title="@string/classroom_query" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="12dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="12dp">
+
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:text="@string/campus"/>
+                android:text="@string/campus" />
+
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/campusGroup"
                 android:layout_width="match_parent"
@@ -49,61 +55,68 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 app:chipSpacingVertical="0dp">
+
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/campus_select_all"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/campus_select_all"
                     android:text="@string/select_all" />
             </com.google.android.material.chip.ChipGroup>
+
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:text="@string/office"/>
+                android:text="@string/office" />
+
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/officeGroup"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="0dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                app:chipSpacingVertical="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp">
+                app:chipSpacingVertical="0dp">
+
                 <com.google.android.material.chip.Chip
+                    android:id="@+id/office_select_all"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/office_select_all"
                     android:text="@string/select_all" />
             </com.google.android.material.chip.ChipGroup>
+
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:text="@string/classroom_type"/>
+                android:text="@string/classroom_type" />
+
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/typeGroup"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="0dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 app:chipSpacingVertical="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
                 app:selectionRequired="true">
+
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.Material3.Chip.Filter.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:text="@string/self_study_room" />
+
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.Material3.Chip.Filter.Elevated"
                     android:layout_width="wrap_content"
@@ -111,77 +124,89 @@
                     android:checked="true"
                     android:text="@string/seminar_room" />
             </com.google.android.material.chip.ChipGroup>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:background="?android:attr/listDivider" />
+
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <TableRow
                     android:id="@+id/date"
-                    android:padding="4dp"
-                    android:background="?android:selectableItemBackground">
+                    android:background="?android:selectableItemBackground"
+                    android:padding="4dp">
+
                     <com.google.android.material.textview.MaterialTextView
                         style="@style/TextAppearance.Material3.BodyMedium"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_margin="8dp"
-                        android:text="@string/date"/>
+                        android:layout_weight="1"
+                        android:text="@string/date" />
+
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/dateText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center|end"
                         android:layout_margin="8dp"
-                        android:text="@string/date"/>
+                        android:text="@string/date" />
                 </TableRow>
-                <TableRow
-                    android:padding="4dp">
+
+                <TableRow android:padding="4dp">
+
                     <com.google.android.material.textview.MaterialTextView
                         style="@style/TextAppearance.Material3.BodyMedium"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
                         android:layout_weight="1"
-                        android:text="@string/time"/>
+                        android:text="@string/time" />
+
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center|end"
                         android:layout_margin="8dp"
-                        android:text="@string/default_class"/>
+                        android:text="@string/default_class" />
                 </TableRow>
+
                 <com.google.android.material.slider.RangeSlider
                     android:id="@+id/timeSlider"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:stepSize="1"
                     android:layout_marginTop="4dp"
+                    android:stepSize="1"
                     android:text="@string/date"
                     android:valueFrom="1"
                     android:valueTo="11"
-                    app:values="@array/number"/>
+                    app:values="@array/number" />
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
                     android:background="?android:attr/listDivider" />
+
                 <TableRow>
+
                     <com.google.android.material.button.MaterialButton
-                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:id="@+id/reset"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:text="@string/reset"/>
+                        android:text="@string/reset" />
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/query"
                         style="@style/Widget.Material3.Button.OutlinedButton"
@@ -190,29 +215,32 @@
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:text="@string/query"/>
+                        android:text="@string/query" />
                 </TableRow>
             </TableLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
     <LinearLayout
         android:id="@+id/result_sheet"
-        android:fitsSystemWindows="true"
         style="@style/Widget.MaterialComponents.BottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
         android:orientation="vertical"
         app:layout_behavior="@string/bottom_sheet_behavior"
         app:paddingBottomSystemWindowInsets="true"
         app:paddingLeftSystemWindowInsets="true"
         app:paddingRightSystemWindowInsets="true"
         app:paddingTopSystemWindowInsets="true">
+
         <com.google.android.material.bottomsheet.BottomSheetDragHandleView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/result"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

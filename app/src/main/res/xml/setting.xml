@@ -1,38 +1,38 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory app:title="@string/appearance">
-        <com.sysu.edu.preference.Preference
+        <com.sysu.edu.preference.MenuPreference
             app:entries="@array/theme"
-            app:entryValues="@array/value"
+            app:entryValues="@array/values_3"
             app:icon="@drawable/theme"
             app:key="theme"
             app:defaultValue="2"
             app:title="@string/theme" />
-        <com.sysu.edu.preference.Preference
+        <com.sysu.edu.preference.MenuPreference
             app:entries="@array/theme"
-            app:entryValues="@array/value"
+            app:entryValues="@array/values_3"
             app:icon="@drawable/color"
             app:key="icon_theme"
             app:defaultValue="2"
             app:title="@string/icon_theme" />
-        <com.sysu.edu.preference.Preference
+        <com.sysu.edu.preference.MenuPreference
             app:entries="@array/language"
-            app:entryValues="@array/value"
+            app:entryValues="@array/values_3"
             app:defaultValue="2"
             app:key="language"
             app:icon="@drawable/language"
             app:title="@string/language" />
-        <com.sysu.edu.preference.Preference
+        <com.sysu.edu.preference.MenuPreference
             app:entries="@array/font_size"
-            app:entryValues="@array/font_value"
+            app:entryValues="@array/values_6"
             app:icon="@drawable/font"
             app:key="fontSize"
             app:defaultValue="0"
             app:summary="@string/follow_system"
             app:title="@string/font_size" />
-        <com.sysu.edu.preference.Preference
+        <com.sysu.edu.preference.MenuPreference
             app:defaultValue="0"
-            app:entryValues="@array/value"
+            app:entryValues="@array/values_3"
             app:icon="@drawable/home"
             app:entries="@array/home"
             app:key="home"
@@ -46,9 +46,9 @@
             app:useSimpleSummaryProvider="true" />
 
         <MultiSelectListPreference
-            app:defaultValue="@array/dashboard_values"
+            app:defaultValue="@array/values_6"
             app:entries="@array/dashboard"
-            app:entryValues="@array/dashboard_values"
+            app:entryValues="@array/values_6"
             app:icon="@drawable/window"
             app:key="dashboard"
             app:positiveButtonText="@string/confirm"
@@ -56,10 +56,10 @@
             app:title="@string/dashboard" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/login">
-        <com.sysu.edu.preference.Preference
+        <com.sysu.edu.preference.MenuPreference
             app:defaultValue="2"
             app:entries="@array/login_mode"
-            app:entryValues="@array/login_value"
+            app:entryValues="@array/values_4"
             app:icon="@drawable/account"
             app:key="loginMode"
             app:title="@string/login" />

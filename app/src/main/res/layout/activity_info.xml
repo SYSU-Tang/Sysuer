@@ -2,19 +2,19 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
         style="@style/SYSU.AppBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="false">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             style="@style/Widget.Material3.CollapsingToolbar.Large"
             android:layout_width="match_parent"
             android:layout_height="?collapsingToolbarLayoutLargeSize"
-            app:expandedTitleMargin="10dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <com.google.android.material.imageview.ShapeableImageView
@@ -22,7 +22,6 @@
                 android:layout_width="128dp"
                 android:layout_height="128dp"
                 android:layout_gravity="center"
-                android:layout_marginBottom="24dp"
                 android:scaleType="fitCenter"
                 android:src="@mipmap/ic_launcher"
                 app:layout_collapseMode="parallax" />
@@ -32,7 +31,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:transitionName="miniapp"
-                app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_collapseMode="pin"
                 app:navigationIcon="?homeAsUpIndicator"
                 app:title="@string/app_name" />
@@ -45,4 +43,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:startDestination="@id/course_query_fragment">
+    app:startDestination="@id/course_query_filter_fragment">
     <fragment
-        android:id="@+id/course_query_fragment"
-        android:name="com.sysu.edu.academic.CourseQueryFragment"/>
+        android:id="@+id/course_query_filter_fragment"
+        android:name="com.sysu.edu.academic.CourseQueryFilterFragment"/>
+
 </navigation>
