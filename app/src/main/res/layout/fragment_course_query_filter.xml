@@ -6,26 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".academic.CourseQueryFilterFragment">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
-            android:id="@+id/container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <include
-                android:id="@+id/year"
-                layout="@layout/item_preference"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="8dp" />
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

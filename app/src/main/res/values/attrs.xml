@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="rangeSliderPreferenceStyle" format="reference">
+        <attr name="valueFrom" format="float" />
+        <attr name="valueTo" format="float" />
+    </declare-styleable>
+    <declare-styleable name="editPreferenceStyle">
+        <attr name="value" />
+        <attr name="isFilter" />
+    </declare-styleable>
+    <attr name="rangeSliderPreferenceStyle" format="reference" />
+    <attr name="sliderPreferenceStyle" format="reference" />
+    <attr name="filterPreferenceStyle" format="reference" />
+    <declare-styleable name="filterPreferenceStyle" format="reference">
+        <attr name="value" />
+        <attr name="isFilter" />
+        <attr name="canEdit" format="boolean" />
+    </declare-styleable>
+    <attr name="value" format="string" />
+    <attr name="isFilter" format="boolean" />
+    <declare-styleable name="FullscreenAttrs">
+        <attr name="fullscreenBackgroundColor" format="color" />
+        <attr name="fullscreenTextColor" format="color" />
+    </declare-styleable>
+</resources>

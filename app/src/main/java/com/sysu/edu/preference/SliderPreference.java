@@ -19,18 +19,15 @@ public class SliderPreference extends SeekBarPreference {
     }
 
     public SliderPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        setLayoutResource(R.layout.preference_slider);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public SliderPreference(@NonNull Context context) {
-        super(context);
-        setLayoutResource(R.layout.preference_slider);
+        this(context, null);
     }
 
     public SliderPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        setLayoutResource(R.layout.preference_slider);
+        this(context, attrs, R.attr.sliderPreferenceStyle);
     }
 
     @Override
@@ -41,14 +38,20 @@ public class SliderPreference extends SeekBarPreference {
         binding.seekbar.setValueFrom(getMin());
         binding.title.setText(getTitle());
         binding.icon.setImageDrawable(getIcon());
-        binding.seekbarValue.setVisibility(getShowSeekBarValue() ? View.VISIBLE : View.INVISIBLE);
+        binding.seekbarValue.setVisibility(getShowSeekBarValue() ? View.VISIBLE : View.GONE);
         binding.seekbarValue.setText(String.valueOf(getValue()));
         binding.seekbar.setValue(getValue());
-        binding.seekbar.addOnChangeListener((slider, v, b) -> binding.seekbarValue.setText(String.valueOf(v)));
+        binding.seekbar.addOnChangeListener((slider, v, b) -> setValue((int) v));
+        binding.getRoot().setOnClickListener(v -> onClick());
     }
 
     @Override
     protected void onClick() {
         super.onClick();
+    }
+
+    @Override
+    public int getValue() {
+        return super.getValue() == 0 ? getMin() : super.getValue();
     }
 }

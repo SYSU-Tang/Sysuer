@@ -255,6 +255,11 @@
         "id": 713,
         "name": "Teaching Assistants",
         "description": "Teaching assistants information inquiry system, with functions such as assistant names, courses they are teaching, and contact information"
+      },
+      {
+        "id": 714,
+        "name": "Level Grades",
+        "description": "Level grade inquiry system, with functions such as level grade inquiry, GPA calculation, and transcript printing"
       }
     ]
   },

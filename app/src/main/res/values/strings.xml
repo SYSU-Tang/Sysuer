@@ -53,7 +53,7 @@
     <string name="score">成绩</string>
     <string name="subject">科目</string>
     <string name="year">学年</string>
-    <string name="trainType">培养类型</string>
+    <string name="train_type">培养类型</string>
     <string name="calendar">校历</string>
     <string name="week18">18周</string>
     <string name="week19">19周</string>
@@ -453,5 +453,7 @@
     <string name="classroom">教室</string>
     <string name="course_name">课程名称</string>
     <string name="course_type">课程类别</string>
+    <string name="year_semester">学年学期</string>
+    <string name="min_grade">成绩不低于</string>
 
 </resources>

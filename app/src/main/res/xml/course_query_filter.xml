@@ -4,24 +4,29 @@
     <PreferenceCategory app:title="@string/time">
         <rikka.preference.SimpleMenuPreference
             app:icon="@drawable/calendar"
-            app:key="year"
+            app:key="yearSemester"
             app:persistent="false"
-            app:title="@string/year"
+            app:title="@string/year_semester"
             app:useSimpleSummaryProvider="true" />
         <rikka.preference.SimpleMenuPreference
-            app:key="end_year"
+            app:key="endYear"
             app:persistent="false"
             app:title="结束学年"
-            app:useSimpleSummaryProvider="true"/>
-        <rikka.preference.SimpleMenuPreference
+            app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.SliderPreference
+            android:max="7"
             app:icon="@drawable/course"
             app:key="week"
+            app:min="0"
             app:persistent="false"
-            app:title="星期"
+            app:seekBarIncrement="1"
+            app:showSeekBarValue="true"
+            app:title="@string/week"
             app:useSimpleSummaryProvider="true" />
         <com.sysu.edu.preference.RangeSliderPreference
             android:max="26"
-            app:key="week_range"
+            app:key="weekRange"
+            app:min="0"
             app:persistent="false"
             app:seekBarIncrement="1"
             app:showSeekBarValue="true"
@@ -29,7 +34,8 @@
             app:useSimpleSummaryProvider="true" />
         <com.sysu.edu.preference.RangeSliderPreference
             android:max="12"
-            app:key="class"
+            app:key="classRange"
+            app:min="0"
             app:persistent="false"
             app:seekBarIncrement="1"
             app:showSeekBarValue="true"
@@ -45,11 +51,13 @@
             app:useSimpleSummaryProvider="true" />
         <rikka.preference.SimpleMenuPreference
             app:icon="@drawable/location"
-            app:key="office"
+            app:isFilter="true"
+            app:key="teachingBuilding"
             app:persistent="false"
             app:title="@string/office"
             app:useSimpleSummaryProvider="true" />
-        <rikka.preference.SimpleMenuPreference
+        <com.sysu.edu.preference.FilterPreference
+            app:allowDividerAbove="false"
             app:icon="@drawable/home"
             app:key="classroom"
             app:persistent="false"
@@ -59,13 +67,13 @@
     <PreferenceCategory app:title="课程">
         <com.sysu.edu.preference.EditPreference
             app:icon="@drawable/calendar"
-            app:key="course_name"
+            app:key="courseName"
             app:persistent="false"
             app:title="@string/course_name"
             app:useSimpleSummaryProvider="true" />
         <rikka.preference.SimpleMenuPreference
             app:icon="@drawable/calendar"
-            app:key="course_type"
+            app:key="courseType"
             app:persistent="false"
             app:title="@string/course_type"
             app:useSimpleSummaryProvider="true" />
@@ -74,19 +82,20 @@
     <PreferenceCategory app:title="教学班">
         <com.sysu.edu.preference.EditPreference
             app:icon="@drawable/language"
-            app:key="class_name"
+            app:key="className"
             app:persistent="false"
             app:title="教学班名称"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.FilterPreference
+        <rikka.preference.SimpleMenuPreference
             app:icon="@drawable/menu"
-            app:key="class_level"
+            app:isFilter="false"
+            app:key="classLevel"
             app:persistent="false"
             app:title="教学班层次"
             app:useSimpleSummaryProvider="true" />
         <com.sysu.edu.preference.EditPreference
             app:icon="@drawable/id"
-            app:key="class_id"
+            app:key="classId"
             app:persistent="false"
             app:title="教学班编号"
             app:useSimpleSummaryProvider="true" />
@@ -97,7 +106,9 @@
             app:title="主讲教师"
             app:useSimpleSummaryProvider="true" />
         <com.sysu.edu.preference.FilterPreference
+            app:canEdit="true"
             app:icon="@drawable/group"
+            app:isFilter="false"
             app:key="department"
             app:persistent="false"
             app:title="开课单位"

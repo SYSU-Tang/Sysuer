@@ -4,6 +4,12 @@
     app:startDestination="@id/course_query_filter_fragment">
     <fragment
         android:id="@+id/course_query_filter_fragment"
-        android:name="com.sysu.edu.academic.CourseQueryFilterFragment"/>
-
+        android:name="com.sysu.edu.academic.CourseQueryFilterFragment">
+        <action
+            android:id="@+id/query_to_result"
+            app:destination="@id/courseQueryResultFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseQueryResultFragment"
+        android:name="com.sysu.edu.academic.CourseQueryResultFragment" />
 </navigation>

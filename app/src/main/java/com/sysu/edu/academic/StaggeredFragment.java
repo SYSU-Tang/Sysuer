@@ -226,7 +226,6 @@ public class StaggeredFragment extends Fragment {
         final ArrayList<Integer> icons = new ArrayList<>();
         final ArrayList<List<String>> values = new ArrayList<>();
         final ArrayList<TwoColumnsAdapter> twoColumnsAdapters = new ArrayList<>();
-        // public TwoColumnsAdapter twoColumnsAdapter;
 
         StaggeredListener staggeredListener;
         boolean hideNull;
@@ -306,7 +305,6 @@ public class StaggeredFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemCardBinding item = ItemCardBinding.bind(holder.itemView);
-            item.title.setText(titles.get(position));
             if (icons.get(position) != null) {
                 item.title.setCompoundDrawablePadding(new Params((FragmentActivity) context).dpToPx(8));
                 Drawable icon = AppCompatResources.getDrawable(context, icons.get(position));
@@ -314,12 +312,14 @@ public class StaggeredFragment extends Fragment {
                     icon.setBounds(0, 0, 72, 72);
                     item.title.setCompoundDrawables(icon, null, null, null);
                 }
-            }
-            item.title.setText(titles.get(position));
+            }// 设置图标
+            item.title.setText(titles.get(position)); // 设置标题
             TwoColumnsAdapter twoColumnsAdapter;
             if (twoColumnsAdapters.size() < position + 1 || (twoColumnsAdapter = twoColumnsAdapters.get(position)) == null) {
                 twoColumnsAdapter = new TwoColumnsAdapter(keys.get(position), values.get(position), hideNull);
                 twoColumnsAdapters.add(twoColumnsAdapter);
+            } else if (twoColumnsAdapters.size() >= position + 1 && (twoColumnsAdapter = twoColumnsAdapters.get(position)) != null) {
+                twoColumnsAdapter.setKeyValue(keys.get(position), values.get(position));
             }
             ((RecyclerView) holder.itemView.findViewById(R.id.recycler_view)).setAdapter(twoColumnsAdapter);
             if (staggeredListener != null) {

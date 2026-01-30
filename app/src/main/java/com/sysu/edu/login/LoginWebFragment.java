@@ -22,15 +22,22 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class LoginWebFragment extends Fragment {
+    static int time = 0;
+
     @SuppressLint("SetJavaScriptEnabled")
-    @NonNull
     public static WebView getWebView(@NonNull FragmentActivity activity, LoginViewModel model, Runnable afterLoad) {
         WebView web = new WebView(activity);
         Handler handler = new Handler(Looper.getMainLooper());
         model.getUrl().observe(activity, web::loadUrl);
+        time = 0;
         web.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
+                time++;
+                if (time >= 100) {
+                    web.stopLoading();
+                    return;
+                }
                 //boolean reloadCap = Objects.equals(sessionId, CookieManager.getInstance().getCookie(url));
                 //model.setSessionID(CookieManager.getInstance().getCookie(url));
                 System.out.println(url);
@@ -47,7 +54,7 @@ public class LoginWebFragment extends Fragment {
                 String element = "";
                 if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/login").matcher(url).find()) {
                     element = ".ant-btn.ant-btn-primary.ant-btn-block";
-                }else if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/student").matcher(url).find()) {
+                } else if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/#/student").matcher(url).find()) {
                     element = ".ant-btn.ant-btn-primary";
                 } else if (Pattern.compile("//pay.sysu.edu.cn/#/$").matcher(url).find()) {
                     element = ".el-button.login_btns.btn-netIdLogin.el-button--default.is-plain";
@@ -76,7 +83,7 @@ public class LoginWebFragment extends Fragment {
                         }
                     });
                 }
-                }
+            }
 //            @Override
 //            public void onLoadResource(WebView view, String url) {
 //               // view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
@@ -112,6 +119,7 @@ public class LoginWebFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return getWebView(requireActivity(), new ViewModelProvider(requireActivity()).get(LoginViewModel.class), ()->{});
+        return getWebView(requireActivity(), new ViewModelProvider(requireActivity()).get(LoginViewModel.class), () -> {
+        });
     }
 }
