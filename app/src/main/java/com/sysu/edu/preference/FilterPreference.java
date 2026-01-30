@@ -76,7 +76,8 @@ public class FilterPreference extends ListPreference {
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    valueLiveData.setValue(s.toString());
+                    if (!s.toString().equals(valueLiveData.getValue()))
+                        valueLiveData.setValue(s.toString());
                 }
             };
             binding.textField.addTextChangedListener(textWatcher);

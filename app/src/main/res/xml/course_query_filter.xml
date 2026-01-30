@@ -71,6 +71,12 @@
             app:persistent="false"
             app:title="@string/course_name"
             app:useSimpleSummaryProvider="true" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/calendar"
+            app:key="courseNumber"
+            app:persistent="false"
+            app:title="@string/course_number"
+            app:useSimpleSummaryProvider="true" />
         <rikka.preference.SimpleMenuPreference
             app:icon="@drawable/calendar"
             app:key="courseType"

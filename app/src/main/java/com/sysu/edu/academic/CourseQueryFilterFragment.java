@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -45,67 +46,67 @@ public class CourseQueryFilterFragment extends PreferenceFragmentCompat {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        if (binding == null) {
-            binding = FragmentCourseQueryFilterBinding.inflate(inflater, container, false);
-            binding.getRoot().addView(super.onCreateView(inflater, container, savedInstanceState));
-            binding.fab.setOnClickListener(v -> {
-                Navigation.findNavController(binding.getRoot()).navigate(R.id.query_to_result);
-            });
-            Params params = new Params(requireActivity());
-            params.setCallback(this, () -> getData(0));
-            Handler handler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    super.handleMessage(msg);
-                    if (msg.what == -1) {
-                        params.toast(R.string.no_wifi_warning);
-                    } else {
-                        JSONObject response = JSONObject.parseObject((String) msg.obj);
-                        Integer code = response.getInteger("code");
-                        ArrayList<String> option = new ArrayList<>();
-                        ArrayList<String> number = new ArrayList<>();
-                        option.add("");
-                        number.add("");
-                        if (code == 200) {
-                            if (msg.what < 6) {
-                                response.getJSONArray("data").forEach(e -> {
-                                    option.add(((JSONObject) e).getString(List.of(
-                                            "acadYearSemester", "campusName", "dataName", "dataName", "name", "departmentName"
-                                    ).get(msg.what)));
-                                    number.add(((JSONObject) e).getString(List.of(
-                                            "acadYearSemester", "campusNumber", "dataNumber", "dataNumber", "id", "departmentNumber"
-                                    ).get(msg.what)));
-                                });
-                                ListPreference preference = Objects.requireNonNull(getPreferenceManager().findPreference(List.of(
-                                        "yearSemester", "campus", "classLevel", "courseType", "teachingBuilding", "department"
+//        if (binding == null) {
+        binding = FragmentCourseQueryFilterBinding.inflate(inflater, container, false);
+        binding.getRoot().addView(super.onCreateView(inflater, container, savedInstanceState));
+        binding.fab.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("params", getParams().toString());
+            Navigation.findNavController(binding.getRoot()).navigate(R.id.query_to_result, bundle, new NavOptions.Builder().build());
+        });
+        Params params = new Params(requireActivity());
+        params.setCallback(this, () -> getData(0));
+        Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == -1) {
+                    params.toast(R.string.no_wifi_warning);
+                } else {
+                    JSONObject response = JSONObject.parseObject((String) msg.obj);
+                    Integer code = response.getInteger("code");
+                    ArrayList<String> option = new ArrayList<>();
+                    ArrayList<String> number = new ArrayList<>();
+                    option.add("");
+                    number.add("");
+                    if (code == 200) {
+                        if (msg.what < 6) {
+                            response.getJSONArray("data").forEach(e -> {
+                                option.add(((JSONObject) e).getString(List.of(
+                                        "acadYearSemester", "campusName", "dataName", "dataName", "name", "departmentName"
                                 ).get(msg.what)));
+                                number.add(((JSONObject) e).getString(List.of(
+                                        "acadYearSemester", "campusNumber", "dataNumber", "dataNumber", "id", "departmentNumber"
+                                ).get(msg.what)));
+                            });
+                            ListPreference preference = Objects.requireNonNull(getPreferenceManager().findPreference(List.of(
+                                    "yearSemester", "campus", "classLevel", "courseType", "teachingBuilding", "department"
+                            ).get(msg.what)));
+                            preference.setEntries(option.toArray(new String[]{}));
+                            preference.setEntryValues(number.toArray(new String[]{}));
+                            if (msg.what == 0) {
+                                preference = Objects.requireNonNull(getPreferenceManager().findPreference("endYear"));
                                 preference.setEntries(option.toArray(new String[]{}));
                                 preference.setEntryValues(number.toArray(new String[]{}));
-                                if (msg.what == 0) {
-                                    preference = Objects.requireNonNull(getPreferenceManager().findPreference("endYear"));
-                                    preference.setEntries(option.toArray(new String[]{}));
-                                    preference.setEntryValues(number.toArray(new String[]{}));
-                                }
-                                if (msg.what < 5) getData(msg.what + 1);
                             }
-                        } else if (code == 53000007) {
-                            params.toast(R.string.login_warning);
-                            params.gotoLogin(getView(), TargetUrl.JWXT);
-                        } else {
-                            params.toast(response.getString("message"));
+                            if (msg.what < 5) getData(msg.what + 1);
                         }
+                    } else if (code == 53000007) {
+                        params.toast(R.string.login_warning);
+                        params.gotoLogin(getView(), TargetUrl.JWXT);
+                    } else {
+                        params.toast(response.getString("message"));
                     }
                 }
-            };
-            http = new HttpManager(handler);
-            http.setParams(params);
-            http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/");
-            getData(0);
-            FilterPreference department = Objects.requireNonNull(getPreferenceManager().findPreference("department"));
-            department.getValueLiveData().observe(requireActivity(), v -> {
-                System.out.println("department: " + department.getValueLiveData().getValue());
-            });
-        }
+            }
+        };
+        http = new HttpManager(handler);
+        http.setParams(params);
+        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/");
+        getData(0);
+        FilterPreference department = Objects.requireNonNull(getPreferenceManager().findPreference("department"));
+        department.getValueLiveData().observe(requireActivity(), this::getTeachingBuilding);
+//        }
         return binding.getRoot();
     }
 
@@ -134,8 +135,8 @@ public class CourseQueryFilterFragment extends PreferenceFragmentCompat {
     }
 
     public void getTeachingBuilding(String text) {
-        System.out.println(text);
-//        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/department/findCommonDepartmentPull?nameParm=" + text, 5);
+//        System.out.println(text);
+        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/department/findCommonDepartmentPull?nameParm=" + text, 5);
     }
 
     public void getData(int pos) {
@@ -157,28 +158,38 @@ public class CourseQueryFilterFragment extends PreferenceFragmentCompat {
             params.put("weekDay", String.valueOf(week.getValue()));
         }
         if (weekRange != null) {
-            if (weekRange.getValues()[0] == 0)
-                params.put("beginWeek", String.valueOf(weekRange.getValues()[0]));
-            if (weekRange.getValues()[1] == 0)
-                params.put("endWeek", String.valueOf(weekRange.getValues()[1]));
+            if ((int) weekRange.getValues()[0] != 0)
+                params.put("beginWeek", String.valueOf((int) weekRange.getValues()[0]));
+            if ((int) weekRange.getValues()[1] != 0)
+                params.put("endWeek", String.valueOf((int) weekRange.getValues()[1]));
         }
         if (classRange != null) {
-            if (classRange.getValues()[0] == 0)
-                params.put("beginLesson", String.valueOf(classRange.getValues()[0]));
-            if (classRange.getValues()[1] == 0)
-                params.put("endLesson", String.valueOf(classRange.getValues()[1]));
+            if ((int) classRange.getValues()[0] != 0)
+                params.put("beginLesson", String.valueOf((int) classRange.getValues()[0]));
+            if ((int) classRange.getValues()[1] != 0)
+                params.put("endLesson", String.valueOf((int) classRange.getValues()[1]));
         }
-
         insertMenuValue(params, "yearSemester", "yearTerm");
         insertMenuValue(params, "endYear", "endYearTerm");
+        insertMenuValue(params, "classLevel", "classLevelNumber");
+        insertMenuValue(params, "campus", "campus");
+        insertMenuValue(params, "teachingBuilding", "teachingBuildingID");
+        insertMenuValue(params, "teachingType", "teachingTypeNumber");
+        insertMenuValue(params, "courseType", "courseCategoryNumber");
+        insertMenuValue(params, "department", "openingUnitNumber");
 
+        insertEditValue(params, "courseName", "courseName");//课程名称
+        insertEditValue(params, "teacher", "teachingNum");//教师
+        insertEditValue(params, "classNumber", "classNumber");//班号
+        insertEditValue(params, "className", "className");//教学班
+        insertEditValue(params, "courseNumber", "courseNumber");//课程编码
         return params;
         /*{"pageNo":1,"pageSize":10,"total":true,"param":{"yearTerm":"2025-1","endYearTerm":"2026-1","openingUnitNumber":"1","courseName":"名称","teachingNum":"教师","openingSchoolNumber":"5063559","courseCategoryNumber":"3286159","classLevelNumber":"1","classNumber":"班号","className":"教学班","teachingTypeNumber":"1","courseNumber":"编码","teachingBuildingID":"2513856","classRoomID":"2514104","weekDay":"1","beginWeek":"1","endWeek":"5","beginLesson":"2","endLesson":"3"}}*/
     }
 
     private void insertMenuValue(JSONObject params, String key, String value) {
         SimpleMenuPreference preference = getPreferenceManager().findPreference(key);
-        if (preference != null && !preference.getValue().isEmpty()) {
+        if (preference != null && (preference.getValue() == null || !preference.getValue().isEmpty())) {
             params.put(value, preference.getValue());
         }
     }

@@ -40,12 +40,11 @@ public class GradeForLevelActivity extends AppCompatActivity {
     MutableLiveData<String> trainType = new MutableLiveData<>();
     MutableLiveData<String> year = new MutableLiveData<>();
     MutableLiveData<String> courseType = new MutableLiveData<>();
-    MutableLiveData<String> courseName = new MutableLiveData<>("");
-    MutableLiveData<String> courseNumber = new MutableLiveData<>("");
-    MutableLiveData<String> minGrade = new MutableLiveData<>("");
+    MutableLiveData<String> courseName = new MutableLiveData<>();
+    MutableLiveData<String> courseNumber = new MutableLiveData<>();
+    MutableLiveData<String> minGrade = new MutableLiveData<>();
     MutableLiveData<String> input;
     Handler handler;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -234,7 +233,6 @@ public class GradeForLevelActivity extends AppCompatActivity {
             params.put("courseNum", courseNumber.getValue());
         if (minGrade.getValue() != null && !minGrade.getValue().isEmpty())
             params.put("finalAchievement", Integer.parseInt(minGrade.getValue()));
-        System.out.println(params);
         return params;
     }
 }
