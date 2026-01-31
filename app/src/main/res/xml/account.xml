@@ -4,29 +4,29 @@
         <Preference
             app:icon="@drawable/account"
             app:title="@string/privacy">
-            <intent android:targetClass="com.sysu.edu.extra.PrivacyActivity"
-                android:targetPackage="com.sysu.edu"/>
+            <intent
+                android:targetClass="com.sysu.edu.extra.PrivacyActivity"
+                android:targetPackage="com.sysu.edu" />
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/app">
         <Preference
-            app:icon="@drawable/setting"
             android:persistent="false"
+            app:icon="@drawable/setting"
             app:key="setting"
-            app:title="@string/setting" >
-        </Preference>
+            app:title="@string/setting"></Preference>
         <Preference
             app:icon="@drawable/info"
             app:title="@string/about">
-            <intent android:action="android.intent.action.VIEW"
+            <intent
+                android:action="android.intent.action.VIEW"
                 android:targetClass="com.sysu.edu.extra.AboutActivity"
-                android:targetPackage="com.sysu.edu">
-            </intent>
+                android:targetPackage="com.sysu.edu"></intent>
         </Preference>
         <Preference
             app:icon="@drawable/help"
             app:title="@string/help">
-            <intent android:data="https://sysu-tang.github.io/#/"/>
+            <intent android:data="https://sysu-tang.github.io/#/" />
         </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

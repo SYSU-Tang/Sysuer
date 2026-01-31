@@ -2,28 +2,28 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:startDestination="@id/category">
-        <fragment
-            android:id="@+id/category"
+    <fragment
+        android:id="@+id/category"
 
-            android:name="com.sysu.edu.academic.EvaluationCategoryFragment">
-            <action
-                android:id="@+id/from_category_to_course"
-                app:destination="@id/course"
-                app:popUpTo="@id/category"
-                app:popUpToSaveState="true"
-                app:restoreState="true"/>
-        </fragment>
-        <fragment
-            android:id="@+id/course"
-            android:name="com.sysu.edu.academic.EvaluationCourseFragment">
-            <action
-                android:id="@+id/from_course_to_evaluation"
-                app:destination="@id/evaluation"
-                app:popUpTo="@id/course"
-                app:popUpToSaveState="true"
-                app:restoreState="true"/>
-        </fragment>
-        <fragment
-            android:id="@+id/evaluation"
-            android:name="com.sysu.edu.academic.EvaluationQuestionnaireFragment"/>
+        android:name="com.sysu.edu.academic.EvaluationCategoryFragment">
+        <action
+            android:id="@+id/from_category_to_course"
+            app:destination="@id/course"
+            app:popUpTo="@id/category"
+            app:popUpToSaveState="true"
+            app:restoreState="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/course"
+        android:name="com.sysu.edu.academic.EvaluationCourseFragment">
+        <action
+            android:id="@+id/from_course_to_evaluation"
+            app:destination="@id/evaluation"
+            app:popUpTo="@id/course"
+            app:popUpToSaveState="true"
+            app:restoreState="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/evaluation"
+        android:name="com.sysu.edu.academic.EvaluationQuestionnaireFragment" />
 </navigation>

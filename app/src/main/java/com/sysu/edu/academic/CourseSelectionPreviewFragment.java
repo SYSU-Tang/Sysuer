@@ -113,7 +113,7 @@ public class CourseSelectionPreviewFragment extends Fragment {
         binding.addFilter.setOnClickListener(v -> Navigation.findNavController(view).navigate(R.id.preview_to_filter2, null, new NavOptions.Builder()
                 .setEnterAnim(android.R.animator.fade_in)
                 .setExitAnim(android.R.animator.fade_out)
-                        .setLaunchSingleTop(true)
+                .setLaunchSingleTop(true)
                 .build(), new FragmentNavigator.Extras(Map.of(v, "miniapp"))));
     }
 

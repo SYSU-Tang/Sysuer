@@ -67,7 +67,7 @@ public class GymAccountFragment extends Fragment {
                             for (int i = 0; i < keys.length; i++) {
                                 preferenceAdapter.addItem(getString(List.of(R.string.type, R.string.name, R.string.school_id, R.string.net_id, R.string.sport_credit, R.string.wallet).get(i)), json.getString(keys[i]));
                             }
-                            concatAdapter.addAdapter( new TitleAdapter(getContext(), getString(R.string.account)));
+                            concatAdapter.addAdapter(new TitleAdapter(getContext(), getString(R.string.account)));
                             concatAdapter.addAdapter(preferenceAdapter);
 
                             String[] cash_keys = {"Credits", "CashWallet"};
@@ -75,7 +75,7 @@ public class GymAccountFragment extends Fragment {
                             for (int i = 0; i < cash_keys.length; i++) {
                                 cashAdapter.addItem(getString(List.of(R.string.sport_credit, R.string.wallet).get(i)), json.getString(cash_keys[i]), R.drawable.money);
                             }
-                            concatAdapter.addAdapter( new TitleAdapter(getContext(), getString(R.string.wallet)));
+                            concatAdapter.addAdapter(new TitleAdapter(getContext(), getString(R.string.wallet)));
                             concatAdapter.addAdapter(cashAdapter);
 
                             String[] id_keys = {"validSwimmer", "IsAdmin"};
@@ -83,7 +83,7 @@ public class GymAccountFragment extends Fragment {
                             for (int i = 0; i < id_keys.length; i++) {
                                 idAdapter.addItem(getString(List.of(R.string.is_swimmer_valid, R.string.admin).get(i)), json.getBoolean(id_keys[i]) ? getString(R.string.yes) : getString(R.string.no), R.drawable.help);
                             }
-                            concatAdapter.addAdapter( new TitleAdapter(getContext(), getString(R.string.other)));
+                            concatAdapter.addAdapter(new TitleAdapter(getContext(), getString(R.string.other)));
                             concatAdapter.addAdapter(idAdapter);
                         }
                     } else {
@@ -136,7 +136,7 @@ class PreferenceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     final ArrayList<String> contents = new ArrayList<>();
     final ArrayList<Integer> icons = new ArrayList<>();
 
-        final Context context;
+    final Context context;
 
     public PreferenceAdapter(Context context) {
         super();
@@ -157,7 +157,7 @@ class PreferenceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         binding.itemTitle.setText(titles.get(pos));
         binding.itemContent.setText(contents.get(pos));
         binding.getRoot().setOnClickListener(v -> {
-           // params.toast(titles.get(pos) + ": " + contents.get(pos));
+            // params.toast(titles.get(pos) + ": " + contents.get(pos));
         });
         if (icons.size() > pos && icons.get(pos) != null) {
             binding.itemIcon.setImageResource(icons.get(pos));

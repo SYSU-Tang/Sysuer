@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <com.google.android.material.navigationrail.NavigationRailView
+        android:id="@+id/nav_view"
         style="@style/Widget.MaterialComponents.NavigationRailView.Colored.Compact"
         android:layout_width="wrap_content"
-        android:id="@+id/nav_view"
         android:layout_height="match_parent"
         android:background="?android:attr/windowBackground"
         app:itemIconTint="?colorPrimary"
@@ -15,14 +16,17 @@
         app:labelVisibilityMode="selected"
         app:menu="@menu/home"
         app:menuGravity="center" />
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
             style="@style/SYSU.AppBarLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 style="@style/Widget.Material3.Toolbar"
@@ -30,14 +34,15 @@
                 android:layout_height="wrap_content"
                 app:layout_scrollFlags="noScroll"
                 app:title="@string/app_name"
-                app:titleTextColor="?colorPrimary"/>
+                app:titleTextColor="?colorPrimary" />
         </com.google.android.material.appbar.AppBarLayout>
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/dashboard_scroll"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-            tools:layout="@layout/fragment_dashboard"/>
+            tools:layout="@layout/fragment_dashboard" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </LinearLayout>

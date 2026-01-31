@@ -31,11 +31,11 @@ import okhttp3.Response;
 
 public class RegisterInfo extends AppCompatActivity {
 
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     ActivityPagerBinding binding;
     Params params;
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 1;
     Pager2Adapter adp;
     boolean changeYear = false;
@@ -113,7 +113,7 @@ public class RegisterInfo extends AppCompatActivity {
                                             values.add(((JSONObject) v).getString(new String[]{"acadYear", "typeName", "feeTypeName", "payedItemAmount", "feeTimeSection", "editeTime"}[i]));
                                         }
                                         ((StaggeredFragment) adp.getItem(1)).setHideNull(true);
-                                        ((StaggeredFragment) adp.getItem(1)).add(RegisterInfo.this,values.get(1), R.drawable.money, List.of(keyName), values);
+                                        ((StaggeredFragment) adp.getItem(1)).add(RegisterInfo.this, values.get(1), R.drawable.money, List.of(keyName), values);
                                     });
                                     getNextPage(msg.what + 1);
                                     break;

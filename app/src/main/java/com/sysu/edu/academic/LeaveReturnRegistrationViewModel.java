@@ -5,5 +5,5 @@ import androidx.lifecycle.ViewModel;
 
 public class LeaveReturnRegistrationViewModel extends ViewModel {
 
-    final MutableLiveData<String> year = new MutableLiveData<String>();
+    final MutableLiveData<String> year = new MutableLiveData<>();
 }

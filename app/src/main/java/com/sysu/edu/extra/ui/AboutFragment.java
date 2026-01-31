@@ -23,13 +23,13 @@ public class AboutFragment extends PreferenceFragmentCompat {
         setPreferencesFromResource(R.xml.about, rootKey);
         try {
             PackageInfo version = requireContext().getPackageManager().getPackageInfo(requireContext().getPackageName(), 0);
-            ((Preference)Objects.requireNonNull(findPreference("version"))).setSummary(String.format("%s(%s)",version.versionName,version.versionCode));
-            ((Preference)Objects.requireNonNull(findPreference("version"))).setOnPreferenceClickListener(preference -> {
-                ((AboutActivity)requireActivity()).checkUpdate();
+            ((Preference) Objects.requireNonNull(findPreference("version"))).setSummary(String.format("%s(%s)", version.versionName, version.versionCode));
+            ((Preference) Objects.requireNonNull(findPreference("version"))).setOnPreferenceClickListener(preference -> {
+                ((AboutActivity) requireActivity()).checkUpdate();
                 return false;
             });
-            ((SimpleMenuPreference)Objects.requireNonNull(findPreference("sponsor"))).setOnPreferenceChangeListener((a,b) -> {
-                startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("alipays://platformapi/startapp?saId=10000007&amp;clientVersion=3.7.0.0718&amp;qrcode=https%3A%2F%2Fqr.alipay.com%2Ftsx11036pqmv0tkfj6lq8c5%3F_s%3Dweb-other")));
+            ((SimpleMenuPreference) Objects.requireNonNull(findPreference("sponsor"))).setOnPreferenceChangeListener((a, b) -> {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("alipays://platformapi/startapp?saId=10000007&amp;clientVersion=3.7.0.0718&amp;qrcode=https%3A%2F%2Fqr.alipay.com%2Ftsx11036pqmv0tkfj6lq8c5%3F_s%3Dweb-other")));
                 return false;
             });
         } catch (PackageManager.NameNotFoundException e) {

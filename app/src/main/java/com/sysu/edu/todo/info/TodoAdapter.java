@@ -17,16 +17,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-    private final InitTodo initTodo;
+public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     final Context context;
     final ArrayList<TodoInfo> data = new ArrayList<>();
+    private final InitTodo initTodo;
 
     public TodoAdapter(Context context, InitTodo initTodo) {
         super();
         this.context = context;
         this.initTodo = initTodo;
     }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -41,7 +42,7 @@ public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         TodoInfo item = data.get(position);
         binding.title.setText(item.getTitle().getValue());
         binding.description.setText(item.getDescription().getValue());
-       //binding.dueDate.setText(item.getDueDate());
+        //binding.dueDate.setText(item.getDueDate());
         binding.getRoot().setOnClickListener(v -> {
             initTodo.initDialog(item);
             initTodo.showDialog();
@@ -53,7 +54,7 @@ public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             item.setStatus(isChecked ? TodoInfo.DONE : TodoInfo.TODO);
             //notifyItemChanged(position);
         });
-        item.getStatus().observe((FragmentActivity)context, status -> {
+        item.getStatus().observe((FragmentActivity) context, status -> {
             boolean isCheck = status != null && status.equals(TodoInfo.DONE);
             binding.getRoot().setAlpha(isCheck ? 0.5f : 1.0f);
             binding.check.setChecked(isCheck);
@@ -70,14 +71,15 @@ public class TodoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         //binding.dueDate.setText(item.get("due_date"));
     }
 
-   /* public TodoInfo getTodoInfoAt(int position){
-        return data.get(position);
-    }*/
-    public void add(TodoInfo item){
+    /* public TodoInfo getTodoInfoAt(int position){
+         return data.get(position);
+     }*/
+    public void add(TodoInfo item) {
         data.add(item);
-        notifyItemInserted(data.size()-1);
+        notifyItemInserted(data.size() - 1);
     }
-    public void clear(){
+
+    public void clear() {
         int tmp = getItemCount();
         data.clear();
         notifyItemRangeRemoved(0, tmp);

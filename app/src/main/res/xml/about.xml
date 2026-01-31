@@ -5,18 +5,18 @@
         <Preference
             android:key="version"
             app:icon="@drawable/submit"
-            app:title="@string/current_version"/>
+            app:title="@string/current_version" />
         <Preference
             android:summary="https://github.com/SYSU-Tang/Sysuer/releases"
             app:icon="@drawable/down"
             app:title="@string/download_link">
-            <intent android:data="https://github.com/SYSU-Tang/Sysuer/releases"/>
+            <intent android:data="https://github.com/SYSU-Tang/Sysuer/releases" />
         </Preference>
         <Preference
             android:summary="https://sysu-tang.github.io/#/"
             app:icon="@drawable/web"
             app:title="@string/official_website">
-            <intent android:data="https://sysu-tang.github.io/#/"/>
+            <intent android:data="https://sysu-tang.github.io/#/" />
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/project">
@@ -24,19 +24,19 @@
             app:icon="@drawable/account"
             app:summary="https://github.com/SYSU-Tang"
             app:title="SYSU—Tang">
-            <intent android:data="https://github.com/SYSU-Tang"/>
+            <intent android:data="https://github.com/SYSU-Tang" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/SYSU-Tang/Sysuer/"
             app:title="@string/app_name">
-            <intent android:data="https://github.com/SYSU-Tang/Sysuer/"/>
+            <intent android:data="https://github.com/SYSU-Tang/Sysuer/" />
         </Preference>
         <Preference
             app:icon="@drawable/group"
             app:summary="1063579244"
             app:title="@string/qq_group">
-            <intent android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3Di4M0YfNzHskNiXgiYTAvA1EAWZh7HNQx"/>
+            <intent android:data="mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3Di4M0YfNzHskNiXgiYTAvA1EAWZh7HNQx" />
         </Preference>
     </PreferenceCategory>
 
@@ -45,7 +45,7 @@
             android:summary="https://github.com/SYSU-Tang/Sysuer/issues"
             app:icon="@drawable/question"
             app:title="@string/submit_issues">
-            <intent android:data="https://github.com/SYSU-Tang/Sysuer/issues"/>
+            <intent android:data="https://github.com/SYSU-Tang/Sysuer/issues" />
         </Preference>
         <rikka.preference.SimpleMenuPreference
             app:entries="@array/sponsors"
@@ -54,83 +54,83 @@
             app:key="sponsor"
             app:persistent="false"
             app:summary="3Q"
-            app:title="@string/sponsor"/>
+            app:title="@string/sponsor" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/permission">
         <Preference
             app:defaultValue="true"
             app:icon="@drawable/book"
             app:key="privacyPolicy"
-            app:summary="https://sysu-tang.github.io/#/zh-cn/agreement/隐私政策"
             app:persistent="false"
+            app:summary="https://sysu-tang.github.io/#/zh-cn/agreement/隐私政策"
             app:title="@string/privacy_policy">
 
-        <intent android:data="https://sysu-tang.github.io/#/zh-cn/agreement/隐私政策"/>
+            <intent android:data="https://sysu-tang.github.io/#/zh-cn/agreement/隐私政策" />
 
-    </Preference>
+        </Preference>
         <Preference
             app:defaultValue="true"
-            app:summary="https://sysu-tang.github.io/#/zh-cn/agreement/用户协议"
             app:icon="@drawable/book"
             app:key="userAgreement"
             app:persistent="false"
+            app:summary="https://sysu-tang.github.io/#/zh-cn/agreement/用户协议"
             app:title="@string/user_agreement">
-            <intent android:data="https://sysu-tang.github.io/#/zh-cn/agreement/用户协议"/>
+            <intent android:data="https://sysu-tang.github.io/#/zh-cn/agreement/用户协议" />
         </Preference>
         <Preference
             app:icon="@drawable/book"
             app:key="permissionDescription"
             app:persistent="false"
-            app:title="@string/permission_introduction"/>
+            app:title="@string/permission_introduction" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/open_source">
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/alibaba/fastjson2"
-            app:title="fastjson2" >
-            <intent android:data="https://github.com/alibaba/fastjson2"/>
+            app:title="fastjson2">
+            <intent android:data="https://github.com/alibaba/fastjson2" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/square/okhttp"
             app:title="okhttp">
-            <intent android:data="https://github.com/square/okhttp"/>
+            <intent android:data="https://github.com/square/okhttp" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/androidx/androidx"
             app:title="androidx">
-            <intent android:data="https://github.com/androidx/androidx"/>
+            <intent android:data="https://github.com/androidx/androidx" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/material-components/material-components-android"
             app:title="Material3">
-            <intent android:data="https://github.com/material-components/material-components-android"/>
+            <intent android:data="https://github.com/material-components/material-components-android" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/JetBrains/kotlin"
             app:title="Kotlin">
-            <intent android:data="https://github.com/JetBrains/kotlin"/>
+            <intent android:data="https://github.com/JetBrains/kotlin" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/RikkaApps/Shizuku"
             app:title="Shizuku">
-            <intent android:data="https://github.com/RikkaApps/Shizuku"/>
+            <intent android:data="https://github.com/RikkaApps/Shizuku" />
         </Preference>
         <Preference
-        app:icon="@drawable/version"
-        app:summary="https://github.com/bumptech/glide"
-        app:title="Glide">
-        <intent android:data="https://github.com/bumptech/glide"/>
-    </Preference>
+            app:icon="@drawable/version"
+            app:summary="https://github.com/bumptech/glide"
+            app:title="Glide">
+            <intent android:data="https://github.com/bumptech/glide" />
+        </Preference>
         <Preference
             app:icon="@drawable/version"
             app:summary="https://github.com/RikkaApps/RikkaX"
             app:title="RikkaX">
-            <intent android:data="https://github.com/RikkaApps/RikkaX"/>
+            <intent android:data="https://github.com/RikkaApps/RikkaX" />
         </Preference>
     </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

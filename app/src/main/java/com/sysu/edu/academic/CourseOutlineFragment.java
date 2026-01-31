@@ -30,19 +30,19 @@ public class CourseOutlineFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if(root == null) {
+        if (root == null) {
             RecyclerViewBinding binding = RecyclerViewBinding.inflate(inflater);
             adp = new CourseOutlineAdp(requireContext());
             binding.recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 1));
             binding.recyclerView.setAdapter(adp);
-            if(data!=null){
+            if (data != null) {
                 data.forEach(e -> {
                     if (e != null && adp != null) {
                         adp.add((JSONObject) e);
                     }
                 });
             }
-            root=binding.getRoot();
+            root = binding.getRoot();
         }
         return root;
     }
@@ -55,16 +55,20 @@ public class CourseOutlineFragment extends Fragment {
         super.setArguments(args);
     }
 }
-class CourseOutlineAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+
+class CourseOutlineAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     final Context context;
-    final ArrayList<JSONObject> data =new ArrayList<>();
-    public CourseOutlineAdp(Context con){
-        this.context=con;
+    final ArrayList<JSONObject> data = new ArrayList<>();
+
+    public CourseOutlineAdp(Context con) {
+        this.context = con;
     }
-    public void add(JSONObject json){
+
+    public void add(JSONObject json) {
         data.add(json);
         notifyItemInserted(getItemCount());
     }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -75,16 +79,17 @@ class CourseOutlineAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((TextView)holder.itemView.findViewById(R.id.title)).setText(String.format("%s（%s学时）", convert(position,"sectionDesignation"), convert(position,"teachingHours")));
-        ((TextView)holder.itemView.findViewById(R.id.intro)).setText(String.format("教学内容：%s\n育人元素：%s\n重点、难点：%s", convert(position,"teachingMainContent"), convert(position,"courseElements"),convert(position,"keyPoints")));
+        ((TextView) holder.itemView.findViewById(R.id.title)).setText(String.format("%s（%s学时）", convert(position, "sectionDesignation"), convert(position, "teachingHours")));
+        ((TextView) holder.itemView.findViewById(R.id.intro)).setText(String.format("教学内容：%s\n育人元素：%s\n重点、难点：%s", convert(position, "teachingMainContent"), convert(position, "courseElements"), convert(position, "keyPoints")));
     }
 
     @Override
     public int getItemCount() {
         return data.size();
     }
-    String convert(int position,String key){
+
+    String convert(int position, String key) {
         String a = data.get(position).getString(key);
-        return (a==null?"":a).replace("\n\n","\n");
+        return (a == null ? "" : a).replace("\n\n", "\n");
     }
 }

@@ -22,7 +22,7 @@ public class FilterPreference extends ListPreference {
 
     boolean isFilter;
     boolean canEdit;
-    MutableLiveData<String> valueLiveData = new MutableLiveData<>();
+    final MutableLiveData<String> valueLiveData = new MutableLiveData<>();
     TextWatcher textWatcher;
 
     public FilterPreference(@NonNull Context context) {
@@ -57,8 +57,9 @@ public class FilterPreference extends ListPreference {
         PreferenceFilterBinding binding = PreferenceFilterBinding.bind(holder.itemView);
         binding.textInputLayout.setStartIconDrawable(getIcon());
         binding.textInputLayout.setHint(getTitle());
-        binding.textField.setText(valueLiveData.getValue(), isFilter);
+        // binding.textField.setText((getValue() == null || getValue().isEmpty()) && !binding.textField.is() ? "" : valueLiveData.getValue(), isFilter);
         binding.textField.setInputType(canEdit ? InputType.TYPE_CLASS_TEXT : InputType.TYPE_NULL);
+        binding.textField.setSelection(binding.textField.getText().length());
         if (getEntries() != null)
             binding.textField.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, getEntries()));
         binding.textField.setOnItemClickListener((parent, view, position, id) -> setValueIndex(position));
@@ -82,9 +83,11 @@ public class FilterPreference extends ListPreference {
             };
             binding.textField.addTextChangedListener(textWatcher);
         }
-        binding.getRoot().setOnClickListener(v -> {
-            binding.textField.showDropDown();
-        });
+        /*binding.getRoot().setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus && (getValue() == null || getValue().isEmpty()))
+                binding.textField.setText("");
+        });*/
+        binding.getRoot().setOnClickListener(v -> binding.textField.showDropDown());
 
     }
 
@@ -107,10 +110,9 @@ public class FilterPreference extends ListPreference {
         notifyChanged();
     }
 
-    public void setEntriesAndValues(CharSequence[] values) {
-        setEntries(values);
-        setEntryValues(values);
+    @Override
+    public void setEntries(CharSequence[] entries) {
+        super.setEntries(entries);
         notifyChanged();
     }
-
 }

@@ -24,12 +24,11 @@ import java.util.Map;
 
 public class TrainingScheduleFragment extends Fragment {
 
-    FragmentTrainingScheduleBinding binding;
     final MutableLiveData<String> unit = new MutableLiveData<>();
     final MutableLiveData<String> profession = new MutableLiveData<>();
     final MutableLiveData<String> type = new MutableLiveData<>();
     final MutableLiveData<String> grade = new MutableLiveData<>();
-
+    FragmentTrainingScheduleBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

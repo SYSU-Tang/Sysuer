@@ -22,11 +22,11 @@ import okhttp3.Response;
 
 public class PEList extends AppCompatActivity {
 
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     ActivityPagerBinding binding;
     Params params;
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     Pager2Adapter adp;
 
     @Override

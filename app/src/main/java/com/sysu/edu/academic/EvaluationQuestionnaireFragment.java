@@ -45,9 +45,9 @@ import okhttp3.Response;
 
 
 public class EvaluationQuestionnaireFragment extends Fragment {
+    final JSONObject answers = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}");
     Params params;
     Handler handler;
-    final JSONObject answers = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}");
 
     @Nullable
     @Override

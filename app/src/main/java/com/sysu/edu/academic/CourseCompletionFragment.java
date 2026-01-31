@@ -29,9 +29,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class CourseCompletionFragment extends StaggeredFragment {
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     int total;
     int page;
 

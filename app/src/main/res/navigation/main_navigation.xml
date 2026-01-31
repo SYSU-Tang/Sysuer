@@ -8,7 +8,7 @@
         android:id="@+id/navigation_dashboard"
         android:name="com.sysu.edu.home.DashboardFragment"
         android:label="@string/dashboard"
-        tools:layout="@layout/fragment_dashboard"/>
+        tools:layout="@layout/fragment_dashboard" />
     <fragment
         android:id="@+id/navigation_service"
         android:name="com.sysu.edu.home.ServiceFragment"
@@ -18,5 +18,5 @@
     <fragment
         android:id="@+id/navigation_account"
         android:name="com.sysu.edu.home.AccountFragment"
-        android:label="@string/account"/>
+        android:label="@string/account" />
 </navigation>

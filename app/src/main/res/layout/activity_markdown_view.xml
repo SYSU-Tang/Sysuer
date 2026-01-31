@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <com.google.android.material.appbar.AppBarLayout
         style="@style/SYSU.AppBarLayout"
         android:layout_width="match_parent"
@@ -14,17 +15,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:transitionName="miniapp"
-            app:layout_scrollFlags="scroll"
-            app:navigationIcon="?homeAsUpIndicator"
-            app:title="培养方案" />
+            app:layout_scrollFlags="enterAlways|scroll"
+            app:navigationIcon="?homeAsUpIndicator" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:defaultNavHost="true"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        app:navGraph="@navigation/training" />
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/copy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/copy"
+        app:icon="@drawable/copy"
+        app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior" />
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

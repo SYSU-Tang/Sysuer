@@ -28,14 +28,14 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-     <com.google.android.material.floatingactionbutton.FloatingActionButton
-         android:id="@+id/add"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_gravity="bottom|end"
-         android:layout_marginEnd="@dimen/fab_margin"
-         android:layout_marginBottom="16dp"
-         android:contentDescription="@string/add_todo"
-         app:srcCompat="@drawable/add" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/add_todo"
+        app:srcCompat="@drawable/add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

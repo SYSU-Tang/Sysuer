@@ -26,8 +26,8 @@ import com.sysu.edu.databinding.ItemFilterChipBinding;
 public class AssistantInfoFilterFragment extends Fragment {
 
     HttpManager http;
-    MutableLiveData<String> term = new MutableLiveData<>();
-    MutableLiveData<String> campus = new MutableLiveData<>();
+    final MutableLiveData<String> term = new MutableLiveData<>();
+    final MutableLiveData<String> campus = new MutableLiveData<>();
     FragmentAssistantInfoFilterBinding binding;
 
     @Nullable

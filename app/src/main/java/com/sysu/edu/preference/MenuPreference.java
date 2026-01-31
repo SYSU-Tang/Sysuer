@@ -30,6 +30,7 @@ public class MenuPreference extends SimpleMenuPreference {
         super.onSetInitialValue(defaultValue);
         setSummary(getEntries()[Integer.parseInt(getValue())]);
     }
+
     @Override
     protected boolean persistString(String value) {
         setSummary(getEntries()[Integer.parseInt(value)]);

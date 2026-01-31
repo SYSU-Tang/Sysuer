@@ -4,23 +4,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
+
     <com.google.android.material.appbar.AppBarLayout
         style="@style/SYSU.AppBarLayout.Solid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
-            android:layout_width = "match_parent"
-            android:layout_height = "?attr/actionBarSize"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             android:transitionName="miniapp"
             app:layout_scrollFlags="scroll|enterAlways"
             app:navigationIcon="?homeAsUpIndicator"
             app:title="@string/cet" />
     </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/list"
         android:name="com.sysu.edu.academic.StaggeredFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -4,28 +4,33 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
     <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
         style="@style/SYSU.AppBarLayout.Solid"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <com.google.android.material.search.SearchBar
+            android:id="@+id/searchbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/searchbar"
             android:hint="@string/news"
-            android:transitionName="miniapp"/>
+            android:transitionName="miniapp" />
+
         <com.google.android.material.tabs.TabLayout
-            android:background="#00000000"
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="noScroll"/>
+            android:background="#00000000"
+            app:layout_scrollFlags="noScroll" />
     </com.google.android.material.appbar.AppBarLayout>
+
     <com.google.android.material.search.SearchView
         android:id="@+id/searchView"
         style="@style/TextAppearance.Material3.SearchView"
@@ -34,9 +39,10 @@
         android:hint="@string/search"
         app:layout_anchor="@id/searchbar"
         app:layout_behavior="com.google.android.material.search.SearchView$Behavior">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/sugs"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
     </com.google.android.material.search.SearchView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

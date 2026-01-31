@@ -9,7 +9,7 @@
         <argument
             android:name="code"
             android:defaultValue="0"
-            app:argType="integer"/>
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/net_status_fragment"
@@ -17,6 +17,6 @@
         <argument
             android:name="code"
             android:defaultValue="1"
-            app:argType="integer"/>
+            app:argType="integer" />
     </fragment>
 </navigation>

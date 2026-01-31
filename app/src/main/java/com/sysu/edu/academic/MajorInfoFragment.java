@@ -32,9 +32,9 @@ import okhttp3.Response;
 
 public class MajorInfoFragment extends StaggeredFragment {
 
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 0;
     int total = -1;
     String code;

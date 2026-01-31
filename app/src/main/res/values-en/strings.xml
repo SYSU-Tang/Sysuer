@@ -238,6 +238,7 @@
     <string name="no_app">The APP is not installed on your device.</string>
 
     <!-- School Roll Related Strings -->
+    <string name="school_enrollment_basic_info">Basic Info</string>
     <string name="school_enrollment_family_info">Family Members and Social Relations</string>
     <string name="school_enrollment_education_info">Education and Experience</string>
     <string name="school_enrollment_exchange_info">Exchange Experience</string>
@@ -448,5 +449,21 @@
     <string name="already">Already</string>
     <string name="order">Order</string>
     <string name="status">Status</string>
+    <string name="physical_fitness_test_result">Physical Fitness Test Result</string>
+    <string name="course_number">Course Number</string>
+    <string name="classroom">Classroom</string>
+    <string name="course_name">Course Name</string>
+    <string name="course_type">Course Type</string>
+    <string name="year_semester">Year and Term</string>
+    <string name="min_grade">Min Grade</string>
+    <string name="class_name">Class Name</string>
+    <string name="teaching_class">Teaching Class</string>
+    <string name="class_level">Class Level</string>
+    <string name="class_number">Class Number</string>
+    <string name="department">Department</string>
+    <string name="main_teacher">Lecturer</string>
+    <string name="end_year">End of School Year</string>
+    <string name="teaching_type">Teaching Type</string>
+    <string name="copy">Copy</string>
 
 </resources>

@@ -3,51 +3,59 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<com.google.android.material.appbar.AppBarLayout
-    style="@style/SYSU.AppBarLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:elevation="3dp">
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        style="@style/Widget.Material3.Toolbar"
+
+    <com.google.android.material.appbar.AppBarLayout
+        style="@style/SYSU.AppBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:transitionName="miniapp"
-        app:layout_scrollFlags="scroll|snap"
-        app:navigationIcon="?homeAsUpIndicator"
-        app:title="@string/score"/>
-    <HorizontalScrollView
-        android:id="@+id/tabs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/year"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+        app:elevation="3dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            style="@style/Widget.Material3.Toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:transitionName="miniapp"
+            app:layout_scrollFlags="scroll|snap"
+            app:navigationIcon="?homeAsUpIndicator"
+            app:title="@string/score" />
+
+        <HorizontalScrollView
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/year"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/term"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/term"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/type"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/train_type"/>
-        </LinearLayout>
-    </HorizontalScrollView>
-</com.google.android.material.appbar.AppBarLayout>
+                android:layout_height="match_parent">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/year"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/year" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/term"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/term" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/type"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/train_type" />
+            </LinearLayout>
+        </HorizontalScrollView>
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -57,12 +65,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/header"
                 android:name="com.sysu.edu.academic.StaggeredFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>
+                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
             <View
                 android:layout_width="match_parent"
@@ -70,10 +79,11 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:background="?android:attr/listDivider" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/scores"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

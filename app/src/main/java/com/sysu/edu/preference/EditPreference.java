@@ -69,7 +69,6 @@ public class EditPreference extends Preference {
     }
 
 
-
     public String getValue() {
         return mValue;
     }

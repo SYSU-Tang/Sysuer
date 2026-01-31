@@ -30,11 +30,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class SchoolBus extends AppCompatActivity {
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    final ArrayList<String> routes = new ArrayList<>();
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
-    final ArrayList<String> routes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

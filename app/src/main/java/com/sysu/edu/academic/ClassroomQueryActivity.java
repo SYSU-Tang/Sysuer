@@ -47,7 +47,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     String dateStr;
     String startClassTime = "1";
     String endClassTime = "11";
-    MutableLiveData<String> campusLiveData = new MutableLiveData<>();
+    final MutableLiveData<String> campusLiveData = new MutableLiveData<>();
     List<String> classType = List.of("002", "003");
     RoomAdapter roomAdapter;
     int page = 1;

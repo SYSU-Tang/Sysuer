@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class Pager2Adapter extends FragmentStateAdapter {
 
-    final ArrayList<Fragment> fragments=new ArrayList<>();
+    final ArrayList<Fragment> fragments = new ArrayList<>();
 
     public Pager2Adapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
@@ -21,14 +21,16 @@ public class Pager2Adapter extends FragmentStateAdapter {
         return fragments.get(position);
     }
 
-    public Pager2Adapter add(Fragment e){
+    public Pager2Adapter add(Fragment e) {
         fragments.add(e);
         notifyItemInserted(getItemCount());
         return this;
     }
-    public Fragment getItem(int position){
+
+    public Fragment getItem(int position) {
         return fragments.get(position);
     }
+
     @Override
     public int getItemCount() {
         return fragments.size();

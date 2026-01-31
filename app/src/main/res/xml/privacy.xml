@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
-        <Preference
-            app:icon="@drawable/web"
-            app:key="netId"
-            app:summary="NetID"
-            app:title="NetID"/>
-        <Preference
-            app:icon="@drawable/password"
-            app:key="password"
-            app:title="@string/password"/>
+    <Preference
+        app:icon="@drawable/web"
+        app:key="netId"
+        app:summary="NetID"
+        app:title="NetID" />
+    <Preference
+        app:icon="@drawable/password"
+        app:key="password"
+        app:title="@string/password" />
 </androidx.preference.PreferenceScreen>

@@ -7,11 +7,13 @@
     android:orientation="vertical"
     android:paddingLeft="16dp"
     android:paddingRight="16dp">
+
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
         android:layout_row="0"
         android:layout_column="1"
         android:layout_columnSpan="2"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center" />
+
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.Material3.Button.TextButton.Icon"
         android:layout_width="wrap_content"
@@ -19,17 +21,19 @@
         android:layout_row="1"
         android:layout_column="1"
         android:text="@string/name"
-        app:icon="@drawable/course"/>
+        app:icon="@drawable/course" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/course"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_row="1"
-        android:textIsSelectable="true"
         android:layout_column="2"
         android:layout_gravity="fill"
         android:gravity="end|center"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textIsSelectable="true" />
+
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.Material3.Button.TextButton.Icon"
         android:layout_width="wrap_content"
@@ -37,17 +41,19 @@
         android:layout_row="2"
         android:layout_column="1"
         android:text="@string/location"
-        app:icon="@drawable/location"/>
+        app:icon="@drawable/location" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/location"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_row="2"
-        android:textIsSelectable="true"
         android:layout_column="2"
         android:layout_gravity="fill"
         android:gravity="end|center"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textIsSelectable="true" />
+
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.Material3.Button.TextButton.Icon"
         android:layout_width="wrap_content"
@@ -55,7 +61,8 @@
         android:layout_row="3"
         android:layout_column="1"
         android:text="@string/teacher"
-        app:icon="@drawable/account"/>
+        app:icon="@drawable/account" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/teacher"
         android:layout_width="0dp"
@@ -63,9 +70,10 @@
         android:layout_row="3"
         android:layout_column="2"
         android:layout_gravity="fill"
-        android:textIsSelectable="true"
         android:gravity="end|center"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textIsSelectable="true" />
+
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.Material3.Button.TextButton.Icon"
         android:layout_width="wrap_content"
@@ -73,7 +81,8 @@
         android:layout_row="4"
         android:layout_column="1"
         android:text="@string/assistant"
-        app:icon="@drawable/account"/>
+        app:icon="@drawable/account" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/assistant"
         android:layout_width="0dp"
@@ -81,9 +90,10 @@
         android:layout_row="4"
         android:layout_column="2"
         android:layout_gravity="fill"
-        android:textIsSelectable="true"
         android:gravity="end|center"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textIsSelectable="true" />
+
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.Material3.Button.TextButton.Icon"
         android:layout_width="wrap_content"
@@ -91,7 +101,8 @@
         android:layout_row="5"
         android:layout_column="1"
         android:text="@string/classTime"
-        app:icon="@drawable/calendar"/>
+        app:icon="@drawable/calendar" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/classTime"
         android:layout_width="0dp"
@@ -99,9 +110,10 @@
         android:layout_row="5"
         android:layout_column="2"
         android:layout_gravity="fill"
-        android:textIsSelectable="true"
         android:gravity="end|center"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textIsSelectable="true" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/open"
         style="@style/Widget.Material3.Button.TonalButton"
@@ -109,7 +121,7 @@
         android:layout_height="wrap_content"
         android:layout_row="6"
         android:layout_column="2"
-        android:visibility="gone"
         android:layout_gravity="end"
-        android:text="@string/open"/>
+        android:text="@string/open"
+        android:visibility="gone" />
 </GridLayout>

@@ -119,9 +119,9 @@
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/next_class"
                 android:layout_width="match_parent"
-                android:textIsSelectable="true"
                 android:layout_height="wrap_content"
-                android:lineSpacingMultiplier="1.25" />
+                android:lineSpacingMultiplier="1.25"
+                android:textIsSelectable="true" />
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
@@ -141,17 +141,17 @@
                     style="@style/TextAppearance.Material3.TitleMedium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textIsSelectable="true"
                     android:layout_marginTop="0dp"
                     android:layout_marginBottom="2sp"
-                    android:textColor="?colorPrimary" />
+                    android:textColor="?colorPrimary"
+                    android:textIsSelectable="true" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/time"
-                    android:textIsSelectable="true"
                     style="@style/TextAppearance.Material3.BodyMedium"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:textIsSelectable="true" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -231,10 +231,10 @@
                 android:text="@string/week18" />
 
             <Button
+                android:id="@+id/week_19"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/week_19"
                 android:text="@string/week19" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 

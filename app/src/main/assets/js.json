@@ -3,7 +3,9 @@
     "title": "网页调试",
     "description": "使用Eruda，开启网页调试",
     "matches": [
-      ".+",".?","."
+      ".+",
+      ".?",
+      "."
     ],
     "script": "var script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/eruda';document.body.appendChild(script);script.onload=function(){eruda.init()};"
   },
@@ -31,16 +33,16 @@
     ],
     "script": "['.sys-header','.sys-footer','.ant-breadcrumb'].forEach(function(v){document.querySelector(v).style.display='none';});document.querySelector('div.pyfa > div > h1').style.margin='0px';"
   },
-    {
-        "title": "Welearn助手",
-        "description": "自动选择Welearn平台的选择题、判断题、填空题和下拉框答案",
-        "matches": [
-          "://welearn.sflep.com/Student/StudyCourse.aspx",
-          "://welearn.sflep.com/student/StudyCourse.aspx",
-          "://welearn.sflep.com/student/studyCourse.aspx",
-          "://welearn.sflep.com/student/Studycourse.aspx",
-          "://welearn.sflep.com/student/studycourse.aspx"
-        ],
-        "script": "var script=document.createElement('script');script.src='https://sysu-tang.github.io/WeLearn_Assistant.js';document.body.appendChild(script);"
-    }
+  {
+    "title": "Welearn助手",
+    "description": "自动选择Welearn平台的选择题、判断题、填空题和下拉框答案",
+    "matches": [
+      "://welearn.sflep.com/Student/StudyCourse.aspx",
+      "://welearn.sflep.com/student/StudyCourse.aspx",
+      "://welearn.sflep.com/student/studyCourse.aspx",
+      "://welearn.sflep.com/student/Studycourse.aspx",
+      "://welearn.sflep.com/student/studycourse.aspx"
+    ],
+    "script": "var script=document.createElement('script');script.src='https://sysu-tang.github.io/WeLearn_Assistant.js';document.body.appendChild(script);"
+  }
 ]

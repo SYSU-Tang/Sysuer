@@ -29,6 +29,7 @@ import com.sysu.edu.databinding.TwoColumnBinding;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class StaggeredFragment extends Fragment {
 
@@ -136,6 +137,23 @@ public class StaggeredFragment extends Fragment {
         staggeredAdapter.clear();
     }
 
+    public String toTable() {
+        StringBuilder markdown = new StringBuilder();
+        int itemCount = staggeredAdapter.getItemCount();
+        markdown.append("序号|").append(String.join("|", staggeredAdapter.getKeys(0))).append("\n")
+                .append("---|".repeat(staggeredAdapter.getKeys(0).size() + 1)).append("\n");
+        IntStream.range(0, itemCount).forEach(i -> markdown.append(i + 1).append("|").append(String.join("|", staggeredAdapter.getValues(i))).append("\n"));
+        return markdown.toString();
+    }
+
+    /*public void viewTable(MaterialToolbar toolbar) {
+        toolbar.getMenu().add("导出").setIcon(R.drawable.export).setOnMenuItemClickListener(item -> {
+            startActivity(new Intent(requireContext(), MarkdownViewActivity.class).putExtra("content", toTable()).putExtra("title", toolbar.getTitle()),
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), toolbar, "miniapp").toBundle());
+            return false;
+        }).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    }*/
+
     public static class TwoColumnsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final boolean hideNull;
         public List<String> value;
@@ -213,10 +231,6 @@ public class StaggeredFragment extends Fragment {
         public int getItemCount() {
             return itemCount == null ? key.size() : itemCount;
         }
-
-        public void setItemCount(Integer count) {
-            itemCount = count;
-        }
     }
 
     public static class StaggeredAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -280,12 +294,13 @@ public class StaggeredFragment extends Fragment {
             };
         }
 
-        /* public List<String> getKeys(int pos) {
-             return keys.get(pos);
-         }
-         public List<String> getValues(int pos) {
-             return values.get(pos);
-         }*/
+        public List<String> getKeys(int pos) {
+            return keys.get(pos);
+        }
+
+        public List<String> getValues(int pos) {
+            return values.get(pos);
+        }
         /*public void addRow(int pos, List<String> keys, List<String> values) {
             this.keys.get(pos).addAll(keys);
             this.values.get(pos).addAll(values);

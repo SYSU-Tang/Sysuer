@@ -34,8 +34,8 @@
             android:layout_height="match_parent"
             android:fillViewport="true"
             app:defaultNavHost="true"
-            app:navGraph="@navigation/main_navigation"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:navGraph="@navigation/main_navigation"
             tools:layout="@layout/fragment_dashboard" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

@@ -5,17 +5,19 @@
     android:layout_weight="1"
     android:gravity="center"
     android:orientation="vertical">
+
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/course_week"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
-        android:id="@+id/course_week"
         android:textAppearance="?attr/textAppearanceTitleMedium"
         android:textColor="?attr/colorAccent"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/course_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceBodyMedium"/>
+        android:textAppearance="?attr/textAppearanceBodyMedium" />
 </LinearLayout>

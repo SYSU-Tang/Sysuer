@@ -95,6 +95,7 @@
                 android:text="@string/add"
                 app:chipIcon="@drawable/add" />
         </com.google.android.material.chip.ChipGroup>
+
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/tag"
             android:layout_width="0dp"
@@ -119,6 +120,7 @@
                 android:text="@string/add"
                 app:chipIcon="@drawable/add" />
         </com.google.android.material.chip.ChipGroup>
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/location"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -151,57 +153,57 @@
                 android:layout_height="wrap_content">
 
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                        <com.google.android.material.imageview.ShapeableImageView
-                            android:id="@+id/priority_icon"
-                            style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:srcCompat="@drawable/priority" />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/priority_icon"
+                        style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/priority" />
 
-                        <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/priority_key"
-                            style="@style/Widget.Material3.TextView.ListItem.LabelText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:drawablePadding="8dp"
-                            android:gravity="center_vertical"
-                            android:text="@string/priority"
-                            app:layout_constraintStart_toEndOf="@id/priority_icon"
-                            app:layout_constraintTop_toTopOf="parent" />
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/priority_key"
+                        style="@style/Widget.Material3.TextView.ListItem.LabelText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/priority"
+                        app:layout_constraintStart_toEndOf="@id/priority_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                        <TextView
-                            android:id="@+id/priority_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:drawablePadding="16dp"
-                            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                            app:layout_constraintBottom_toBottomOf="@id/priority_key"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/priority_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="16dp"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                        app:layout_constraintBottom_toBottomOf="@id/priority_key"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/priority_slider"
-                            style="@style/Widget.Material3.Slider"
-                            android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:stepSize="1"
-                            android:value="0"
-                            android:valueFrom="0"
-                            android:valueTo="4"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="@id/priority_key"
-                            app:layout_constraintTop_toBottomOf="@id/priority_key"
-                            app:thumbHeight="16dp"
-                            app:trackHeight="8dp" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/priority_slider"
+                        style="@style/Widget.Material3.Slider"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:stepSize="1"
+                        android:value="0"
+                        android:valueFrom="0"
+                        android:valueTo="4"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/priority_key"
+                        app:layout_constraintTop_toBottomOf="@id/priority_key"
+                        app:thumbHeight="16dp"
+                        app:trackHeight="8dp" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.listitem.ListItemCardView>
         </com.google.android.material.listitem.ListItemLayout>
 

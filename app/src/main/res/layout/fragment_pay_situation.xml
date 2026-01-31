@@ -4,22 +4,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-<com.google.android.material.textfield.TextInputLayout
-    android:id="@+id/p"
-    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/colorBackground"
-    android:hint="@string/year"
-    android:paddingStart="16dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="8dp"
-    app:startIconDrawable="@drawable/calendar">
-    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-        android:id="@+id/spinner"
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/p"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="none"/>
-</com.google.android.material.textfield.TextInputLayout>
+        android:background="?android:attr/colorBackground"
+        android:hint="@string/year"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        app:startIconDrawable="@drawable/calendar">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

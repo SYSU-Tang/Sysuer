@@ -1,17 +1,20 @@
 package com.sysu.edu.academic;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alibaba.fastjson2.JSONObject;
@@ -37,12 +40,12 @@ public class GradeForLevelActivity extends AppCompatActivity {
     PopupMenu trainTypePop;
     PopupMenu courseTypePop;
 
-    MutableLiveData<String> trainType = new MutableLiveData<>();
-    MutableLiveData<String> year = new MutableLiveData<>();
-    MutableLiveData<String> courseType = new MutableLiveData<>();
-    MutableLiveData<String> courseName = new MutableLiveData<>();
-    MutableLiveData<String> courseNumber = new MutableLiveData<>();
-    MutableLiveData<String> minGrade = new MutableLiveData<>();
+    final MutableLiveData<String> trainType = new MutableLiveData<>();
+    final MutableLiveData<String> year = new MutableLiveData<>();
+    final MutableLiveData<String> courseType = new MutableLiveData<>();
+    final MutableLiveData<String> courseName = new MutableLiveData<>();
+    final MutableLiveData<String> courseNumber = new MutableLiveData<>();
+    final MutableLiveData<String> minGrade = new MutableLiveData<>();
     MutableLiveData<String> input;
     Handler handler;
 
@@ -62,6 +65,11 @@ public class GradeForLevelActivity extends AppCompatActivity {
             if ((page - 1) * 10 < total)
                 getGrade();
         });
+        binding.toolbar.getMenu().add("导出").setIcon(R.drawable.export).setOnMenuItemClickListener(item -> {
+            startActivity(new Intent(this, MarkdownViewActivity.class).putExtra("content", fragment.toTable()).putExtra("title", "成绩"),
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(this, binding.toolbar, "miniapp").toBundle());
+            return false;
+        }).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         yearPop = new PopupMenu(this, binding.year);
         trainTypePop = new PopupMenu(this, binding.trainType);
         courseTypePop = new PopupMenu(this, binding.courseType);

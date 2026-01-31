@@ -56,7 +56,7 @@ public class EvaluationCategoryFragment extends Fragment {
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == 1) {
                     JSONObject data = JSON.parseObject((String) msg.obj);
-                    if (data!=null && Objects.equals(data.get("code"), "200")) {
+                    if (data != null && Objects.equals(data.get("code"), "200")) {
                         data.getJSONObject("result").getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
                     } else {
                         params.gotoLogin(getView(), "https://pjxt.sysu.edu.cn");
@@ -136,7 +136,7 @@ public class EvaluationCategoryFragment extends Fragment {
             binding.open.setOnClickListener(v -> ((NavHostFragment) Objects.requireNonNull(((AppCompatActivity) context).getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController().navigate(nav, args));
             holder.itemView.setOnClickListener(v -> {
             });
-            Drawable drawable = AppCompatResources.getDrawable(context, Integer.parseInt(data.get(position).getString("pjsl"))<=Integer.parseInt(data.get(position).getString("ypsl"))  ? R.drawable.submit : R.drawable.window);
+            Drawable drawable = AppCompatResources.getDrawable(context, Integer.parseInt(data.get(position).getString("pjsl")) <= Integer.parseInt(data.get(position).getString("ypsl")) ? R.drawable.submit : R.drawable.window);
             if (drawable != null) {
                 drawable.setBounds(0, 0, 72, 72);
             }

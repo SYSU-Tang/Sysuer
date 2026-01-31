@@ -20,18 +20,20 @@ public class PEPreservation {
     String cookie;
     String authorization;
 
-    public PEPreservation(){
+    public PEPreservation() {
         http = new OkHttpClient.Builder().build();
     }
-    void getCampus(){
+
+    void getCampus() {
         http.newCall(new Request.Builder().url("https://gym.sysu.edu.cn/api/Campus/active")
-                .header("Cookie",cookie)
+                .header("Cookie", cookie)
                 .header("Authorization", authorization)
                 .build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
 
             }
+
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
@@ -39,15 +41,16 @@ public class PEPreservation {
                 Bundle data = new Bundle();
                 String responseString = response.body().string();
                 data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                data.putString("data",responseString);
+                data.putString("data", responseString);
                 msg.setData(data);
                 //handler.sendMessage(msg);
             }
         });
     }
-    void getField(){
+
+    void getField() {
         http.newCall(new Request.Builder().url("https://gym.sysu.edu.cn/api/venuetype/all")
-                .header("Cookie",cookie)
+                .header("Cookie", cookie)
                 .header("Authorization", authorization)
                 .build()).enqueue(new Callback() {
             @Override
@@ -61,7 +64,7 @@ public class PEPreservation {
                 msg.what = 2;
                 Bundle data = new Bundle();
                 data.putBoolean("isJson", Objects.requireNonNull(response.header("Content-Type", "")).startsWith("application/json"));
-                data.putString("data",response.body().string());
+                data.putString("data", response.body().string());
                 msg.setData(data);
                 // handler.sendMessage(msg);
             }

@@ -21,9 +21,9 @@ public class AssistantInfoActivity extends AppCompatActivity {
         ActivityAssistantInfoBinding binding = ActivityAssistantInfoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController();
-        NavigationUI.setupWithNavController(binding.toolbar, navController,new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
-        supportFinishAfterTransition();
-        return false;
+        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
+            supportFinishAfterTransition();
+            return false;
         }).build());
     }
 }

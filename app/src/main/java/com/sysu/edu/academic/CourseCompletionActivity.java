@@ -33,10 +33,10 @@ import okhttp3.Response;
 
 public class CourseCompletionActivity extends AppCompatActivity {
 
+    final OkHttpClient http = new OkHttpClient.Builder().build();
     ActivityPagerBinding binding;
     String cookie;
     Handler handler;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

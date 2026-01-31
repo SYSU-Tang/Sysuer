@@ -32,11 +32,11 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class TrainingResultFragment extends Fragment {
+    final OkHttpClient http = new OkHttpClient.Builder().build();
+    final MutableLiveData<Boolean> isBottom = new MutableLiveData<>(true);
     Handler handler;
     Params params;
-    final OkHttpClient http = new OkHttpClient.Builder().build();
     int page = 0;
-    final MutableLiveData<Boolean> isBottom = new MutableLiveData<>(true);
     Integer total;
 
     @Override
@@ -54,7 +54,7 @@ public class TrainingResultFragment extends Fragment {
         // StaggeredFragment staggeredFragment = (StaggeredFragment) getParentFragmentManager().findFragmentById(R.id.result);
         getParentFragmentManager().beginTransaction().add(R.id.result, staggeredFragment).commit();
         isBottom.observe(getViewLifecycleOwner(), aBoolean -> {
-            if(aBoolean &&(total == null || total / 10.0 > page)){
+            if (aBoolean && (total == null || total / 10.0 > page)) {
                 getSelectedCourses(requireArguments().getString("unit"), requireArguments().getString("grade"), requireArguments().getString("profession"), requireArguments().getString("type"));
                 isBottom.setValue(false);
             }

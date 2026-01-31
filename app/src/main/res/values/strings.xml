@@ -455,5 +455,14 @@
     <string name="course_type">课程类别</string>
     <string name="year_semester">学年学期</string>
     <string name="min_grade">成绩不低于</string>
+    <string name="class_name">教学班名称</string>
+    <string name="teaching_class">教学班</string>
+    <string name="class_level">教学班层次</string>
+    <string name="class_number">教学班编号</string>
+    <string name="department">开课单位</string>
+    <string name="main_teacher">主讲教师</string>
+    <string name="end_year">结束学年</string>
+    <string name="teaching_type">教学类型</string>
+    <string name="copy">复制</string>
 
 </resources>

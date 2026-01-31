@@ -87,7 +87,7 @@ public class AgendaActivity extends AppCompatActivity {
             getTable(currentTerm, currentWeek);
             getRange(currentTerm, currentWeek);
             return false;
-        }).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         Calendar calendar = Calendar.getInstance();
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
         binding.month.setText(getResources().getStringArray(R.array.months)[calendar.get(Calendar.MONTH)]);

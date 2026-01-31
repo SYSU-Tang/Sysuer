@@ -9,10 +9,10 @@
         tools:layout="@layout/fragment_training_schedule">
         <action
             android:id="@+id/confirmationAction"
-            app:destination="@id/result"/>
+            app:destination="@id/result" />
     </fragment>
     <fragment
         android:id="@+id/result"
         android:name="com.sysu.edu.academic.TrainingResultFragment"
-        tools:layout="@layout/fragment_training_result"/>
+        tools:layout="@layout/fragment_training_result" />
 </navigation>

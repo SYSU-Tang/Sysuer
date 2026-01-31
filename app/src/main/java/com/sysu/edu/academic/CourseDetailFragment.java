@@ -62,7 +62,8 @@ public class CourseDetailFragment extends Fragment {
                                 chip.setOnClickListener(a -> Snackbar.make(requireContext(), chip, ((Chip) a).getText(), Snackbar.LENGTH_LONG).show());
                                 binding.detail.addView(chip);
                             }
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                         break;
                 }
 

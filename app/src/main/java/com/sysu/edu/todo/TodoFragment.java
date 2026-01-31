@@ -11,10 +11,12 @@ import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.sysu.edu.databinding.FragmentTodoBinding;
+
 public class TodoFragment extends Fragment {
 
-    FragmentTodoBinding binding;
     final ConcatAdapter concatAdapter = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
+    FragmentTodoBinding binding;
+
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,
@@ -31,11 +33,11 @@ public class TodoFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-   /* public TodoAdapter getTodoAdapter(Context context) {
-        if (todoAdapter == null)
-            todoAdapter = new TodoAdapter(context);
-        return todoAdapter;
-    }*/
+    /* public TodoAdapter getTodoAdapter(Context context) {
+         if (todoAdapter == null)
+             todoAdapter = new TodoAdapter(context);
+         return todoAdapter;
+     }*/
 //    public void addTitleAdapter(TitleAdapter titleAdp) {
 //        concatAdapter.addAdapter(titleAdp);
 //    }
@@ -45,7 +47,8 @@ public class TodoFragment extends Fragment {
     public ConcatAdapter getConcatAdapter() {
         return concatAdapter;
     }
-//    public TitleAdapter getTitleAdapter(Context context) {
+
+    //    public TitleAdapter getTitleAdapter(Context context) {
 //        if (titleAdp == null)
 //            titleAdp = new TitleAdapter(context);
 //        return titleAdp;

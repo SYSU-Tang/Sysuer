@@ -57,8 +57,7 @@ public class AssistantInfoResultFragment extends StaggeredFragment {
                         }
                     } else if (response.getInteger("code") == 50041000) {
                         params.toast(response.getString("message"));
-                    }
-                    else{
+                    } else {
                         params.toast(R.string.login_warning);
                         params.gotoLogin(view, TargetUrl.JWXT);
                     }

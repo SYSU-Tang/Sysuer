@@ -22,12 +22,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 android:fitsSystemWindows="true"
-                app:layout_collapseMode="pin"
                 android:transitionName="miniapp"
+                app:layout_collapseMode="pin"
                 app:navigationIcon="?homeAsUpIndicator"
                 app:title="@string/login" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/options"
             android:layout_width="match_parent"

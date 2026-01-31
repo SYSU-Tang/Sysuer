@@ -6,12 +6,14 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".academic.CourseDetailActivity">
+
     <com.google.android.material.appbar.AppBarLayout
         style="@style/SYSU.AppBarLayout.Solid"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        app:statusBarForeground="?attr/colorSurfaceContainer"
-        android:background="?attr/colorSurfaceContainer">
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainer"
+        app:statusBarForeground="?attr/colorSurfaceContainer">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -20,24 +22,28 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:navigationIcon="?homeAsUpIndicator"
             app:title="@string/course_detail" />
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorSurfaceContainer">
+
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/course_detail"/>
+                android:text="@string/course_detail" />
+
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/course_draft"/>
+                android:text="@string/course_draft" />
         </com.google.android.material.tabs.TabLayout>
     </com.google.android.material.appbar.AppBarLayout>
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"/>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

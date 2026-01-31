@@ -11,6 +11,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <include
         android:id="@+id/field"
         layout="@layout/two_column"
@@ -66,5 +67,5 @@
         android:text="@string/reserve"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/type"/>
+        app:layout_constraintTop_toBottomOf="@id/type" />
 </androidx.constraintlayout.widget.ConstraintLayout>

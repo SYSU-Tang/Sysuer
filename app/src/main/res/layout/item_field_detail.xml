@@ -6,12 +6,13 @@
     android:layout_height="match_parent"
     android:layout_margin="4dp"
     app:contentPadding="8dp">
-<com.google.android.material.textview.MaterialTextView
-    android:id="@+id/field_detail"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:gravity="center"
-    android:maxWidth="160dp"
-    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/field_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:maxWidth="160dp"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 </com.google.android.material.card.MaterialCardView>

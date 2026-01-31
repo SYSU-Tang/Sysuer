@@ -3,6 +3,11 @@ package com.sysu.edu.todo.info;
 import androidx.lifecycle.MutableLiveData;
 
 public class TodoInfo {
+    public final static Integer ADD = 0;
+    public final static Integer VIEW = 1;
+    public final static Integer TODO = 0;
+    public final static Integer DONE = 1;
+    public final static Integer DELETE = 2;
     final MutableLiveData<String> title;
     final MutableLiveData<String> description;
     final MutableLiveData<String> dueDate;
@@ -19,11 +24,6 @@ public class TodoInfo {
     final MutableLiveData<Integer> status;
     final MutableLiveData<String> color;
     final MutableLiveData<String> tag;
-    public final static Integer ADD = 0;
-    public final static Integer VIEW = 1;
-    public final static Integer TODO = 0;
-    public final static Integer DONE = 1;
-    public final static Integer DELETE = 2;
     final MutableLiveData<Integer> id;
     int function = ADD;
 
@@ -48,12 +48,14 @@ public class TodoInfo {
         reset();
     }
 
-    public int getFunction(){
+    public int getFunction() {
         return function;
     }
-    public void setFunction(int function){
+
+    public void setFunction(int function) {
         this.function = function;
     }
+
     public MutableLiveData<String> getDdlDate() {
         return ddlDate;
     }
@@ -137,6 +139,7 @@ public class TodoInfo {
     public MutableLiveData<String> getSubtask() {
         return subtask;
     }
+
     public void setSubtask(String subtask) {
         this.subtask.setValue(subtask);
     }
@@ -180,6 +183,7 @@ public class TodoInfo {
     public void setDoneDate(String doneDate) {
         this.doneDate.setValue(doneDate);
     }
+
     public MutableLiveData<Integer> getId() {
         return id;
     }
@@ -187,7 +191,8 @@ public class TodoInfo {
     public void setId(Integer id) {
         this.id.setValue(id);
     }
-    public void reset(){
+
+    public void reset() {
         setTitle("");
         setDescription("");
         setDueDate("");
@@ -206,7 +211,8 @@ public class TodoInfo {
         setTag("");
         function = ADD;
     }
-    public void copyFrom(TodoInfo todoInfo){
+
+    public void copyFrom(TodoInfo todoInfo) {
         title.setValue(todoInfo.getTitle().getValue());
         description.setValue(todoInfo.getDescription().getValue());
         dueDate.setValue(todoInfo.getDueDate().getValue());

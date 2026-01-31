@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/floating_toolbar"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingtoolbar.FloatingToolbarLayout
         android:id="@+id/floating_toolbar"
@@ -48,6 +48,7 @@
                 app:icon="@drawable/reset"
                 app:layout_overflowIcon="@drawable/reset"
                 app:layout_overflowText="@string/reset" />
+
             <Button
                 android:id="@+id/auto"
                 style="?attr/materialIconButtonFilledStyle"
@@ -58,6 +59,7 @@
                 app:icon="@drawable/edit"
                 app:layout_overflowIcon="@drawable/edit"
                 app:layout_overflowText="@string/fill" />
+
             <Button
                 android:id="@+id/submit"
                 style="?attr/materialIconButtonFilledStyle"

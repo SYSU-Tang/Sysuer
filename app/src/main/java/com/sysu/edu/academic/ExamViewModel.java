@@ -15,6 +15,7 @@ public class ExamViewModel extends ViewModel {
     final MutableLiveData<String> examWeek = new MutableLiveData<>();
     final MutableLiveData<String> examResult = new MutableLiveData<>();
     final MutableLiveData<String> examWeekId = new MutableLiveData<>();
+
     public MutableLiveData<ArrayList<String>> getTermList() {
         return termList;
     }

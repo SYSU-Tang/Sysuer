@@ -24,7 +24,8 @@
             android:textAppearance="?attr/textAppearanceTitleMedium"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.constraintlayout.helper.widget.Flow
             android:id="@+id/flow"
             android:layout_width="wrap_content"
@@ -35,30 +36,34 @@
             app:flow_wrapMode="chain"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/course_title"/>
+            app:layout_constraintTop_toBottomOf="@id/course_title" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/time_container"
             style="@style/Widget.Material3.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:icon="@drawable/time"/>
+            app:icon="@drawable/time" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/course"
             style="@style/Widget.Material3.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:icon="@drawable/calendar"/>
+            app:icon="@drawable/calendar" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/teacher"
             style="@style/Widget.Material3.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:icon="@drawable/account"/>
+            app:icon="@drawable/account" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/location_container"
             style="@style/Widget.Material3.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:icon="@drawable/location"/>
+            app:icon="@drawable/location" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

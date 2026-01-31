@@ -156,4 +156,18 @@
         <item>待筛选</item>
         <item>选上</item>
     </string-array>
+    <string-array name="course_type_entries">
+        <item />
+        <item>公必</item>
+        <item>公选</item>
+        <item>专必</item>
+        <item>专选</item>
+    </string-array>
+    <string-array name="course_type_values">
+        <item />
+        <item>3286159</item>
+        <item>3286162</item>
+        <item>3286160</item>
+        <item>3286161</item>
+    </string-array>
 </resources>

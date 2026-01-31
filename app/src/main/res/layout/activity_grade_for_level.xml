@@ -24,7 +24,7 @@
             android:paddingStart="12dp"
             android:paddingTop="4dp"
             android:paddingEnd="4dp"
-            android:paddingBottom="4dp">
+            android:paddingBottom="8dp">
 
             <androidx.constraintlayout.helper.widget.Flow
                 android:layout_width="0dp"
@@ -41,45 +41,46 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/year"
-                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/year" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/train_type"
-                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/train_type" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/course_type"
-                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/course_type" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/course_name"
-                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/course_name" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/course_number"
-                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/course_number" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/min_grade"
-                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/min_grade" />
+                android:text="@string/min_grade"
+                android:visibility="gone" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -45,13 +45,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center">
+
             <com.google.android.material.button.MaterialButton
-            android:id="@+id/restart"
-            style="@style/ThemeOverlay.Material3Expressive.Button.Tonal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/restart"
-            app:icon="@drawable/refresh" />
+                android:id="@+id/restart"
+                style="@style/ThemeOverlay.Material3Expressive.Button.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/restart"
+                app:icon="@drawable/refresh" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/copy"

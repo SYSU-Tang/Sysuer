@@ -27,9 +27,9 @@
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
         <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/available_capacity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/available_capacity"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

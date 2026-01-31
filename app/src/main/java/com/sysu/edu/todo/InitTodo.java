@@ -44,13 +44,13 @@ import java.util.Objects;
 public class InitTodo {
 
     final TodoList todoDB;
-    int toAddCode = 0;
     final DialogTodoBinding dialogBinding;
+    final AlertDialog todoDetailDialog;
+    final FragmentActivity activity;
+    int toAddCode = 0;
     ArrayList<String> types;
     ArrayList<String> subjects;
     ArrayList<String> tags;
-    final AlertDialog todoDetailDialog;
-    final FragmentActivity activity;
     TodoInfo todoInfo = new TodoInfo();
     int count;
 
@@ -423,7 +423,7 @@ public class InitTodo {
         window.setBackgroundDrawableResource(R.drawable.top_capsule);
         window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         window.setWindowAnimations(com.google.android.material.R.style.Animation_Design_BottomSheetDialog);
-       // View decorView = window.getDecorView();
+        // View decorView = window.getDecorView();
 
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
