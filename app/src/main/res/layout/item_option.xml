@@ -17,9 +17,9 @@
 
         <RadioButton
             android:id="@+id/option"
+            android:layout_height="wrap_content"
             style="@style/Widget.Material3.TextView.ListItem.LabelText"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:clickable="false" />
 
     </com.google.android.material.listitem.ListItemCardView>

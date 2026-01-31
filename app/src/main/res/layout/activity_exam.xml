@@ -26,7 +26,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp">
-
             <androidx.constraintlayout.helper.widget.Flow
                 android:id="@+id/filter"
                 android:layout_width="match_parent"
@@ -37,54 +36,49 @@
                 app:flow_horizontalGap="8dp"
                 app:flow_horizontalStyle="packed"
                 app:flow_verticalGap="4dp"
-                app:flow_wrapMode="chain" />
-
+                app:flow_wrapMode="chain"/>
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/exam_week_filter"
                 style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="@string/exam_week"
                 app:boxCornerRadiusBottomEnd="3dp"
                 app:boxCornerRadiusBottomStart="3dp"
                 app:boxStrokeWidth="0dp"
+                android:hint="@string/exam_week"
                 app:placeholderText="@string/exam">
-
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/exam_weeks"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:inputType="none"
+                    android:id="@+id/exam_weeks"
                     android:singleLine="true"
-                    app:simpleItems="@array/weeks" />
+                    app:simpleItems="@array/weeks"/>
             </com.google.android.material.textfield.TextInputLayout>
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/term_filter"
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
                 android:layout_width="wrap_content"
+                app:boxStrokeWidth="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/term"
                 app:boxCornerRadiusBottomEnd="3dp"
                 app:boxCornerRadiusBottomStart="3dp"
-                app:boxStrokeWidth="0dp"
                 app:placeholderText="@string/term">
-
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/terms"
                     style="@style/ThemeOverlay.Material3.AutoCompleteTextView.FilledBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:inputType="none"
-                    android:lines="1" />
+                    android:lines="1"/>
             </com.google.android.material.textfield.TextInputLayout>
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/date"
+                android:layout_height="wrap_content"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:visibility="gone"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.appbar.AppBarLayout>

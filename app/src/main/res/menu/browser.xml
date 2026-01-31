@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:icon="@drawable/window"
         android:title="@string/window"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/window"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/js"
         android:icon="@drawable/menu"
         android:title="@string/menu"
-        app:showAsAction="always" />
+        app:showAsAction="always"/>
 </menu>
