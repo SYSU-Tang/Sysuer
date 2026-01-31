@@ -14,8 +14,8 @@ android {
         applicationId = "com.sysu.edu"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1930
-        versionName = "1.0.8(beta4)"
+        versionCode = 1931
+        versionName = "1.0.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.ext.tables)
     implementation(libs.ext.strikethrough)
     implementation(libs.google.material)
+    implementation(libs.recycler.table)
+    implementation(libs.recycler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
