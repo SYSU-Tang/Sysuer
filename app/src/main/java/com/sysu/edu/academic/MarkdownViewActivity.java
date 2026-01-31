@@ -40,7 +40,7 @@ public class MarkdownViewActivity extends AppCompatActivity {
                 .build();
         binding.recycler.setAdapter(adapter);
         adapter.setMarkdown(Markwon.builder(this)
-                .usePlugin(TableEntryPlugin.create(this)) // Table rendering
+                .usePlugin(TableEntryPlugin.create(this))
                 .build(), content == null ? "" : content);
     }
 }

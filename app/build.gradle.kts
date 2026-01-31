@@ -87,8 +87,8 @@ dependencies {
     implementation(libs.ext.tables)
     implementation(libs.ext.strikethrough)
     implementation(libs.google.material)
-    implementation(libs.recycler.table)
     implementation(libs.recycler)
+    implementation(libs.recycler.table)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -99,11 +99,8 @@ dependencies {
     implementation(libs.api)
     implementation(libs.provider)
     implementation(libs.html)
-//    implementation("dev.rikka.rikkax.appcompat:appcompat:1.6.1")
     /*configurations.all {
         exclude("androidx.appcompat", "appcompat")
     }*/
-//    implementation(libs.androidx.preference.material3)
-//    implementation("com.github.knightwood:material3-preference:1.4")
     //api(libs.wechat.sdk.android)
 }

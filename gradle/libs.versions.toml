@@ -15,18 +15,18 @@ material = "1.10.0"
 constraintlayout = "2.1.4"
 lifecycleLivedataKtx = "2.6.1"
 lifecycleViewmodelKtx = "2.6.1"
-navigationFragment = "2.9.6"
-navigationUi = "2.9.6"
+navigationFragment = "2.9.7"
+navigationUi = "2.9.7"
 legacySupportV4 = "1.0.0"
-activity = "1.12.2"
+activity = "1.12.3"
 okhttp = "4.12.0"
 annotation = "1.9.1"
 kotlin = "2.3.0"
 lifecycleRuntimeKtx = "2.6.1"
-activityCompose = "1.12.2"
-composeBom = "2026.01.00"
+activityCompose = "1.12.3"
+composeBom = "2026.01.01"
 preference = "1.2.1"
-workRuntime = "2.11.0"
+workRuntime = "2.11.1"
 materialPreference = "2.0.0"
 materialVersion = "2.7.2"
 firebaseCrashlytics = "20.0.4"
@@ -39,6 +39,8 @@ material3Preference = "1.4"
 preferenceDataCore = "1.2.8"
 androidxPreferenceMaterial3 = "1.2.1-alpha07"
 googleMaterial = "1.13.0"
+recycler = "4.6.2"
+recyclerTable = "4.6.2"
 
 [libraries]
 api = { module = "dev.rikka.shizuku:api", version.ref = "api" }
@@ -69,7 +71,7 @@ ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.10.1" }
+ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.10.2" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
 preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
@@ -84,6 +86,8 @@ material3-preference = { group = "com.github.knightwood", name = "material3-pref
 preference-data-core = { group = "com.github.Knightwood.ComposePreference", name = "preference-data-core", version.ref = "preferenceDataCore" }
 androidx-preference-material3 = { group = "com.github.halifox", name = "androidx.preference.material3", version.ref = "androidxPreferenceMaterial3" }
 google-material = { group = "com.google.android.material", name = "material", version = "1.14.0-alpha09" }
+recycler = { group = "io.noties.markwon", name = "recycler", version.ref = "recycler" }
+recycler-table = { group = "io.noties.markwon", name = "recycler-table", version.ref = "recyclerTable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

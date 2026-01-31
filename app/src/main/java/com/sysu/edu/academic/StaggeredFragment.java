@@ -266,10 +266,6 @@ public class StaggeredFragment extends Fragment {
             notifyItemInserted(getItemCount());
         }
 
-        /*public void add(String key,String value){
-            twoColumnsAdapter.add(key,value);
-        }*/
-
         public void clear() {
             int tmp = getItemCount();
             titles.clear();
@@ -301,18 +297,26 @@ public class StaggeredFragment extends Fragment {
         public List<String> getValues(int pos) {
             return values.get(pos);
         }
-        /*public void addRow(int pos, List<String> keys, List<String> values) {
-            this.keys.get(pos).addAll(keys);
-            this.values.get(pos).addAll(values);
+
+        /*public void addRow(int pos, String key, String value) {
+            this.keys.get(pos).add(key);
+            this.values.get(pos).add(value);
+
         }*/
 
         public TwoColumnsAdapter getTwoColumnsAdapter(int pos) {
             return twoColumnsAdapters.get(pos);
         }
 
-        public void addRow(int pos, String keys, String values) {
+        public void addRow(int pos, String key, String value) {
             if (pos < getItemCount()) {
-                getTwoColumnsAdapter(pos).add(keys, values);
+//                getTwoColumnsAdapter(pos).add(key, value);
+                ArrayList<String> newKeys = new ArrayList<>(getKeys(pos));
+                newKeys.add(key);
+                keys.set(pos, newKeys);
+                ArrayList<String> newValues = new ArrayList<>(getValues(pos));
+                newValues.add(value);
+                values.set(pos, newValues);
                 notifyItemChanged(pos);
             }
         }
@@ -329,14 +333,18 @@ public class StaggeredFragment extends Fragment {
                 }
             }// 设置图标
             item.title.setText(titles.get(position)); // 设置标题
-            TwoColumnsAdapter twoColumnsAdapter;
-            if (twoColumnsAdapters.size() < position + 1 || (twoColumnsAdapter = twoColumnsAdapters.get(position)) == null) {
+
+            RecyclerView recyclerView = holder.itemView.findViewById(R.id.recycler_view);
+            TwoColumnsAdapter twoColumnsAdapter = (TwoColumnsAdapter) recyclerView.getAdapter();
+            if (twoColumnsAdapter == null) {
                 twoColumnsAdapter = new TwoColumnsAdapter(keys.get(position), values.get(position), hideNull);
-                twoColumnsAdapters.add(twoColumnsAdapter);
-            } else if (twoColumnsAdapters.size() >= position + 1 && (twoColumnsAdapter = twoColumnsAdapters.get(position)) != null) {
+                recyclerView.setAdapter(twoColumnsAdapter);
+            } else {
                 twoColumnsAdapter.setKeyValue(keys.get(position), values.get(position));
             }
-            ((RecyclerView) holder.itemView.findViewById(R.id.recycler_view)).setAdapter(twoColumnsAdapter);
+            if (twoColumnsAdapters.size() <= position || twoColumnsAdapters.get(position) == null)
+                twoColumnsAdapters.add(position, twoColumnsAdapter);
+
             if (staggeredListener != null) {
                 staggeredListener.onBind(this, holder, position);
             }
