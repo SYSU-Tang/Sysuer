@@ -75,6 +75,7 @@ public class LeaveReturnRegistrationActivity extends AppCompatActivity {
                 }
             }
         });
+        http.setParams(params);
         getYears();
     }
 

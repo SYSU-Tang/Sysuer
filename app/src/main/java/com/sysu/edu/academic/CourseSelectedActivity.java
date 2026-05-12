@@ -101,6 +101,7 @@ public class CourseSelectedActivity extends AppCompatActivity {
                 }
             }
         });
+        http.setParams(params);
         http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE");
         getSelectedCourses("");
     }

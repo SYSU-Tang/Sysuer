@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -36,12 +37,14 @@ import java.util.Objects;
 public class EvaluationCourseFragment extends Fragment {
     HttpManager http;
     int page = 1;
+    EvaluationViewModel vm;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         RecyclerViewScrollBinding binding = RecyclerViewScrollBinding.inflate(inflater, container, false);
         Params params = new Params(this);
+        vm = new ViewModelProvider(this).get(EvaluationViewModel.class);
         StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
         binding.getRoot().setLayoutManager(sgm);
         CourseEvaluationAdapter adp = new CourseEvaluationAdapter();
@@ -53,8 +56,6 @@ public class EvaluationCourseFragment extends Fragment {
         String type = requireArguments().getString("firstwjid");
         String rwid = requireArguments().getString("rwid");
         String account = requireArguments().getString("pjrdm");
-        if (type != null && rwid != null && account != null)
-            getEvaluation(type, rwid, account);
         params.setCallback(() -> {
             page = 1;
             adp.clear();
@@ -63,28 +64,36 @@ public class EvaluationCourseFragment extends Fragment {
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == 1) {
-                    JSONObject response = JSON.parseObject((String) msg.obj);
-                    if (response.get("code").equals("200")) {
-                        JSONObject result = response.getJSONObject("result");
-                        result.getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
-                        if (result.getInteger("total") / 20.0 > page)
-                            getEvaluation(type, rwid, account);
-                    } else {
-                        params.gotoLogin(TargetUrl.PJXT);
-                    }
-                } else if (msg.what == -1) {
+                if (msg.what == -1) {
                     params.toast(R.string.no_net_connected);
-                    params.gotoLogin(TargetUrl.PJXT);
+                    params.gotoLogin(vm.authorizationManager.isAccessible()? TargetUrl.PJXT:TargetUrl.PJXT_WEBVPN);
+                } else if(msg.getData().getBoolean("isJSON")){
+                    if (msg.what == 1) {
+                        JSONObject response = JSON.parseObject((String) msg.obj);
+                        if (response.get("code").equals("200")) {
+                            JSONObject result = response.getJSONObject("result");
+                            result.getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
+                            if (result.getInteger("total") / 20.0 > page)
+                                getEvaluation(type, rwid, account);
+                        } else {
+                            params.gotoLogin(vm.authorizationManager.isAccessible() ? TargetUrl.PJXT : TargetUrl.PJXT_WEBVPN);
+                        }
+                    }
+                }else{
+                    vm.authorizationManager.isAccessible((String)msg.obj);
+                    if (type != null && rwid != null && account != null)
+                        getEvaluation(type, rwid, account);
                 }
             }
         });
         http.setParams(params);
+        if (type != null && rwid != null && account != null)
+            getEvaluation(type, rwid, account);
         return binding.getRoot();
     }
 
     public void getEvaluation(String wjid, String rwid, String account) {
-        http.getRequest(String.format(Locale.getDefault(), "https://pjxt.sysu.edu.cn/personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", account, wjid, rwid, page++), 1);
+        http.getRequest(vm.authorizationManager.getBaseUrl() + String.format(Locale.getDefault(), "personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", account, wjid, rwid, page++), 1);
     }
 
 

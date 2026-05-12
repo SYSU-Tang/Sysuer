@@ -26,21 +26,11 @@ import java.util.Locale;
 @SuppressWarnings("ALL")
 public class CourseCompletionFragment extends StaggeredFragment {
     HttpManager http;
-    //    int total = -1;
     int page = 0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
-        /*binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
-                if (!v.canScrollVertically(1) && total / 10 + 1 >= page) {
-                    //getStudentCourse();
-                }
-                super.onScrolled(v, dx, dy);
-            }
-        });*/
         Params params = new Params(this);
         params.setCallback(() -> {
             page = 0;
@@ -57,11 +47,9 @@ public class CourseCompletionFragment extends StaggeredFragment {
                         if (response.get("data") != null) {
                             if (msg.what == 0) {
                                 JSONObject data = response.getJSONObject("data");
-//                                total = data.getInteger("total");
                                 data.getJSONArray("rows").forEach(a -> {
                                     ArrayList<String> values = extractValue((JSONObject) a, new String[]{"acadYearSemester", "courseNumber", "courseName", "courseCategoryName", "credit",/**/"acadYearSemester", "achievementCourseNumber", "achievementCourseName", "achievementCourseCategoryName", "achievementCredit", "ispassed", "achievementPoint"});
                                     if (values.get(0) != null) {
-                                        //noinspection SequencedCollectionMethodCanBeUsed
                                         values.set(0, values.get(0).replace(",", "|"));
                                     }
                                     if (values.get(5) != null) {
@@ -80,6 +68,7 @@ public class CourseCompletionFragment extends StaggeredFragment {
                 }
             }
         });
+        http.setParams(params);
         http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/gradua/");
         getStudentCourse();
         return view;

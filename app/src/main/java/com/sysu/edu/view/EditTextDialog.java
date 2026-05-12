@@ -101,7 +101,6 @@ public class EditTextDialog {
         return binding.edit;
     }
 
-
     public void setPasswordMode() {
         binding.edit.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
         binding.editLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);

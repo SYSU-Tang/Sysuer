@@ -96,6 +96,7 @@ public class RegistrationActivity extends AppCompatActivity {
                 }
             }
         });
+        http.setParams(params);
         http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/");
         getNextPage(0);
     }

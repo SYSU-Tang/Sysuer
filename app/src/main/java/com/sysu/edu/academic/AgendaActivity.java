@@ -80,6 +80,8 @@ public class AgendaActivity extends AppCompatActivity {
             }
         });
         http.setParams(params);
+//        http.setTarget(TargetUrl.PORTAL);
+//        System.out.println("loginForPortal:" + CookieManager.getInstance().getCookie(TargetUrl.PORTAL));
         getAgenda();
         binding.calendarView.setOnCalendarSelectListener(new CalendarView.OnCalendarSelectListener() {
             @Override

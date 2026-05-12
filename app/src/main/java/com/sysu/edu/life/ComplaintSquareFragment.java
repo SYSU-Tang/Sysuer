@@ -57,6 +57,7 @@ public class ComplaintSquareFragment extends Fragment {
                 }
             }
         });
+        http.setParams(params);
         getSquare();
         return binding.getRoot();
     }

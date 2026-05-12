@@ -48,6 +48,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     final MutableLiveData<Long> returnDate = new MutableLiveData<>();
     final ArrayList<String> leaveKeys = new ArrayList<>(List.of("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地"));
     final ArrayList<String> stayKeys = new ArrayList<>(List.of("假期去向", "留校原因"));
+    final AuthorizationManager authorizationManager = new AuthorizationManager("https://xgxt.sysu.edu.cn/", "https://xgxt.sysu.edu.cn/");
     HttpManager http;
     View view;
     JSONArray transportation;
@@ -59,7 +60,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     ArrayList<String> leave;
     ArrayList<String> stay;
     String id;
-    final AuthorizationManager authorizationManager = new AuthorizationManager("https://xgxt.sysu.edu.cn/", "https://xgxt.sysu.edu.cn/");
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -182,6 +182,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     }
                 }
             });
+            http.setParams(params);
             setListener(new AdapterListener() {
                 @Override
                 public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
@@ -323,7 +324,8 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(ItemTitleBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {};
+            return new RecyclerView.ViewHolder(ItemTitleBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
+            };
         }
 
         public void setAction(Consumer<Integer> action) {

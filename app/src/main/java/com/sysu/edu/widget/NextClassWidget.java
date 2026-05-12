@@ -21,18 +21,16 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.api.ContextUtil;
+import com.sysu.edu.api.CookieManager;
 import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.TargetUrl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -80,19 +78,18 @@ public class NextClassWidget extends AppWidgetProvider {
                                 JSONObject array = new JSONObject();
                                 if (isAvailable) {
                                     array = afterArray.isEmpty() ? tomorrowCourse.get(0) : todayCourse.get(beforeArray.size());
-                                    try {
-                                        Date target = new SimpleDateFormat("yyyy-MM-dd hh:mm", Locale.getDefault()).parse(String.format("%s %s",
-                                                array.getString("teachingDate"), array.getString("endTime")));
-                                        if (target != null)
-                                            WorkManager.getInstance(context.getApplicationContext())
-                                                    .enqueueUniqueWork("next_class_widget_update",
-                                                            ExistingWorkPolicy.KEEP, new OneTimeWorkRequest.Builder(NextClassWidgetWorker.class)
-                                                                    .setConstraints(new Constraints.Builder()
-                                                                            .setRequiredNetworkType(NetworkType.CONNECTED)
-                                                                            .build())
-                                                                    .setInitialDelay(target.getTime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS).build());
-                                    } catch (ParseException _) {
-                                    }
+                                    //                                        Date target = new SimpleDateFormat("yyyy-MM-dd hh:mm", Locale.getDefault()).parse(String.format("%s %s",
+//                                                array.getString("teachingDate"), array.getString("endTime")));
+                                    LocalDateTime target = LocalDateTime.parse(String.format("%s %s",
+                                            array.getString("teachingDate"), array.getString("endTime")), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                                    if (target != null)
+                                        WorkManager.getInstance(context.getApplicationContext())
+                                                .enqueueUniqueWork("next_class_widget_update",
+                                                        ExistingWorkPolicy.KEEP, new OneTimeWorkRequest.Builder(NextClassWidgetWorker.class)
+                                                                .setConstraints(new Constraints.Builder()
+                                                                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                                                                        .build())
+                                                                .setInitialDelay(target.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis(), TimeUnit.MILLISECONDS).build());
                                 }
 
                                 remoteViews.setTextViewText(R.id.content, String.format("%s：%s\n%s：%s %s",
@@ -141,6 +138,7 @@ public class NextClassWidget extends AppWidgetProvider {
                 }
             }
         });
+        http.setCookieManager(new CookieManager(context));
         getTerm();
     }
 

@@ -245,6 +245,7 @@ public class CourseScheduleActivity extends AppCompatActivity {
                 }
             }
         });
+        http.setParams(params);
         http.setReferrer("https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/");
         getTerm();
         getAvailableTerms();

@@ -128,6 +128,7 @@ public class EnergyAccountFragment extends Fragment {
                 }
             });
             http.setAuthorizationRequired(true);
+            http.setParams(params);
             http.setAuthorizationJar(new AuthorizationJar(requireContext()));
             binding = FragmentEnergyOrderBinding.inflate(inflater, container, false);
             binding.recyclerViewScroll.getRoot().setLayoutManager(new LinearLayoutManager(requireContext()));

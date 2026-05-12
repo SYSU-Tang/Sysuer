@@ -69,7 +69,7 @@ public class ComplaintMainFragment extends Fragment {
                 }
             }
         });
-
+        http.setParams(params);
         return binding.getRoot();
     }
 

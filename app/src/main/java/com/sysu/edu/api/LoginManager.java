@@ -3,7 +3,6 @@ package com.sysu.edu.api;
 import static android.text.TextUtils.isEmpty;
 
 import android.util.Log;
-import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
 
@@ -17,8 +16,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +41,7 @@ import okhttp3.Response;
 public class LoginManager {
 
     private static final int TIMEOUT = 30;
+    private static com.sysu.edu.api.CookieManager cm;
     private final CookieStore cookieJar = new CookieStore();
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
@@ -48,12 +50,10 @@ public class LoginManager {
             .followRedirects(true)
             .cookieJar(cookieJar)
             .build();
-
     private final OkHttpClient directClient = new OkHttpClient.Builder().followRedirects(false).cookieJar(cookieJar).build();
     private final AuthorizationManager casAuthorizationManager = new AuthorizationManager("https://cas.sysu.edu.cn", "https://cas.sysu.edu.cn");
     AuthorizationJar authorizationJar;
     LoginListener loginListener;
-
     boolean isLogin = false;
 
     private String getPublicKey() {
@@ -156,6 +156,8 @@ public class LoginManager {
             try {
                 String host = HttpUrl.get(service).host();
                 String targetBaseUrl = HttpUrl.get(service).scheme() + "://" + host + "/";
+//                cookieJar.initCookieStore(targetBaseUrl);
+//                cookieJar.clear(targetBaseUrl);
                 if (service.contains("webvpn") || TargetUrl.PORTAL.equals(service)) {
                     casAuthorizationManager.setAccessible(false);
                     JSONObject publicKey = JSONObject.parse(getPublicKey()).getJSONObject("data").getJSONObject("param");
@@ -179,6 +181,7 @@ public class LoginManager {
                             cookieJar.saveFromResponse(HttpUrl.get("https://mportal.sysu.edu.cn"), webvpnKey);
                             loginForPortal();
                             cookieJar.copy("https://portal.sysu.edu.cn", "https://mportal.sysu.edu.cn");
+                            return false;
                         }
                         case TargetUrl.XGXT_WEBVPN -> {
                             request("/esc-sso/login?service=" + service);
@@ -212,6 +215,7 @@ public class LoginManager {
                         case TargetUrl.LMS -> setToken(host, getLmsToken());
                     }
                 }
+//                cookieJar.sync(targetBaseUrl, cookieJar.loadForRequest(HttpUrl.get(targetBaseUrl)));
                 onSuccess();
             } catch (Exception e) {
                 Log.e("LoginManager", e.getMessage(), e);
@@ -237,7 +241,7 @@ public class LoginManager {
     }
 
     private void loginForPortal() throws IOException {
-        /* Response response = */
+//        Response response =
         client.newCall(new Request.Builder().header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
                 .url("https://portal.sysu.edu.cn/newClient/auth?service=https%3A%2F%2Fportal.sysu.edu.cn%2FnewClient%2F%23%2FnewPortal%2Findex").build()).execute();
     }
@@ -297,6 +301,11 @@ public class LoginManager {
 
     public void setAuthorization(AuthorizationJar authorizationJar) {
         this.authorizationJar = authorizationJar;
+
+    }
+
+    public void setCookieManager(com.sysu.edu.api.CookieManager cookieManager) {
+        cm = cookieManager;
     }
 
     public void getGymToken(String targetBaseUrl) throws IOException {
@@ -338,13 +347,17 @@ public class LoginManager {
     }
 
     static class CookieStore implements CookieJar {
-
-        private final CookieManager cookieManager = CookieManager.getInstance();
-
         private final HashMap<String, List<Cookie>> _cookieStore = new HashMap<>();
 
         public CookieStore() {
-            cookieManager.setAcceptCookie(true);
+        }
+
+        private void initCookieStore(String host) {
+            Set<String> cookieSet = cm.get(host);
+            for (String cookie : cookieSet) {
+                String[] nameValue = cookie.trim().split("=", 2);
+                add(host, new Cookie.Builder().domain(host).name(nameValue[0]).value(nameValue[1]).build());
+            }
         }
 
         @Override
@@ -357,7 +370,7 @@ public class LoginManager {
                     && !currentCookies.isEmpty())
                 currentCookies.stream().filter(currentCookie -> !responseCookies.contains(currentCookie) && (!currentCookie.value().isEmpty()) && (!keys.contains(currentCookie.name()))).forEach(responseCookies::add);
             _cookieStore.put(host, responseCookies);
-            responseCookies.forEach(e -> cookieManager.setCookie(url.scheme()+"://"+host+"/", e.toString()));
+            cm.set(host, responseCookies.stream().map(Cookie::toString).collect(Collectors.toCollection(HashSet::new)));
         }
 
         @NonNull
@@ -378,8 +391,8 @@ public class LoginManager {
             return loadForRequest(HttpUrl.get(url)).stream().map(Cookie::toString).collect(Collectors.joining("; "));
         }
 
-        public void add(String url, Cookie cookie) {
-            saveFromResponse(HttpUrl.parse(url), List.of(cookie));
+        public void add(String baseUrl, Cookie cookie) {
+            saveFromResponse(HttpUrl.get(baseUrl), List.of(cookie));
         }
     }
 

@@ -1,6 +1,7 @@
 package com.sysu.edu.api;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -89,7 +90,15 @@ public class Params {
         return contextUtil.getCookie();
     }
 
-//    /**
+    public ContextUtil getContextUtil() {
+        return contextUtil;
+    }
+
+    public Context getContext(){
+        return getContextUtil().getContext();
+    }
+
+    //    /**
 //     * 获取 Authorization
 //     *
 //     * @return Authorization

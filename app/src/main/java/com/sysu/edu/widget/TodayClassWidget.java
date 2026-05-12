@@ -22,6 +22,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.AgendaActivity;
 import com.sysu.edu.api.ContextUtil;
+import com.sysu.edu.api.CookieManager;
 import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.TargetUrl;
 
@@ -111,6 +112,7 @@ public class TodayClassWidget extends AppWidgetProvider {
                 }
             }
         });
+        http.setCookieManager(new CookieManager(context));
         getTerm();
     }
 

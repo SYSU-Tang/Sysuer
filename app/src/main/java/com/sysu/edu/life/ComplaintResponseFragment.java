@@ -93,6 +93,7 @@ public class ComplaintResponseFragment extends Fragment {
                 }
             }
         });
+        http.setParams(params);
         return binding.getRoot();
     }
 

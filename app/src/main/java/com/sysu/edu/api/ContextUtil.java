@@ -207,6 +207,7 @@ public class ContextUtil {
     public void login(String url, Runnable afterLogin) {
         if (!getPassword().isEmpty() && !getUserName().isEmpty()) {
             LoginManager loginManager = new LoginManager();
+            loginManager.setCookieManager(new CookieManager(context));
             loginManager.setAuthorization(new AuthorizationJar(context));
             loginManager.setOnLoginListener(new LoginManager.LoginListener() {
                 @Override

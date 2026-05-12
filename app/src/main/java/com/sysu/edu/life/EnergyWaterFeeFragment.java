@@ -49,7 +49,6 @@ public class EnergyWaterFeeFragment extends Fragment {
     HttpManager http;
     String name = "";
     final RequestQueue requestQueue = new RequestQueue();
-
     final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
     final MutableLiveData<String> roomCode = new MutableLiveData<>();
     ConcatAdapter adapter;
@@ -162,6 +161,7 @@ public class EnergyWaterFeeFragment extends Fragment {
             }
         });
         http.setAuthorizationRequired(true);
+        http.setParams(params);
         http.setAuthorizationJar(new AuthorizationJar(requireContext()));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
         requestQueue.add(this::getUserInfo);

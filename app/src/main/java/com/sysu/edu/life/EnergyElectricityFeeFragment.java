@@ -153,6 +153,7 @@ public class EnergyElectricityFeeFragment extends Fragment {
             }
         });
         http.setAuthorizationRequired(true);
+        http.setParams(params);
         http.setAuthorizationJar(new AuthorizationJar(requireContext()));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         requestQueue.add(this::getUserInfo);

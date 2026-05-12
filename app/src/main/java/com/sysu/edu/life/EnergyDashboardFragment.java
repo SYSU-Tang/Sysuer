@@ -110,6 +110,7 @@ public class EnergyDashboardFragment extends Fragment {
                 }
             });
             http.setAuthorizationRequired(true);
+            http.setParams(params);
             http.setAuthorizationJar(new AuthorizationJar(requireContext()));
             requestQueue.add(this::getUserInfo);
             requestQueue.add(this::getWaterInfo);

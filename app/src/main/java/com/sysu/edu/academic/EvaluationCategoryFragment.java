@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -35,6 +36,7 @@ public class EvaluationCategoryFragment extends Fragment {
     HttpManager http;
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     Params params;
+    EvaluationViewModel vm;
 
     @Nullable
     @Override
@@ -50,26 +52,28 @@ public class EvaluationCategoryFragment extends Fragment {
         categoryAdapter.setParams(new String[]{"rwid", "firstwjid", "pjrdm"});
         categoryAdapter.setNavigation(R.id.from_category_to_course);
         binding.getRoot().setAdapter(categoryAdapter);
+        vm = new ViewModelProvider(this).get(EvaluationViewModel.class);
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-//                System.out.println(msg.obj);
-                if (msg.what == 1) {
-                    JSONObject data = JSON.parseObject((String) msg.obj);
-                    if (data != null && Objects.equals(data.get("code"), "200")) {
-                        data.getJSONObject("result").getJSONArray("list").forEach(e -> categoryAdapter.add((JSONObject) e));
-                    } else {
-                        params.gotoLogin(TargetUrl.PJXT);
+                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                else if(msg.getData().getBoolean("isJSON")){
+                    if (msg.what == 1) {
+                        JSONObject data = JSON.parseObject((String) msg.obj);
+                        if (data != null && Objects.equals(data.get("code"), "200")) {
+                            data.getJSONObject("result").getJSONArray("list").forEach(e -> categoryAdapter.add((JSONObject) e));
+                        } else {
+                            params.gotoLogin(vm.authorizationManager.isAccessible()? TargetUrl.PJXT:TargetUrl.PJXT_WEBVPN);
+                        }
                     }
-                } else if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                    params.gotoLogin(TargetUrl.PJXT);
+                }else{
+                    vm.authorizationManager.isAccessible((String)msg.obj);
+                    getEvaluation();
                 }
             }
         });
         http.setParams(params);
         getEvaluation();
-
         return binding.getRoot();
     }
 
@@ -81,7 +85,7 @@ public class EvaluationCategoryFragment extends Fragment {
     }
 
     public void getEvaluation() {
-        http.getRequest("https://pjxt.sysu.edu.cn/personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10", 1);
+        http.getRequest(vm.authorizationManager.getBaseUrl() + "personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10", 1);
     }
 
     public static class CategoryAdapter extends RecyclerAdapter<JSONObject> {
@@ -94,7 +98,8 @@ public class EvaluationCategoryFragment extends Fragment {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {};
+            return new RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
+            };
         }
 
         public void setKeys(String[] keys) {
@@ -120,7 +125,8 @@ public class EvaluationCategoryFragment extends Fragment {
             JSONObject item = get(position);
             for (String param : params) args.putString(param, item.getString(param));
             binding.open.setOnClickListener(_ -> ((NavHostFragment) Objects.requireNonNull(((AppCompatActivity) binding.getRoot().getContext()).getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController().navigate(nav, args));
-            holder.itemView.setOnClickListener(_ -> {});
+            holder.itemView.setOnClickListener(_ -> {
+            });
             binding.title.setCompoundDrawablesWithIntrinsicBounds(Integer.parseInt(item.getString("pjsl")) <= Integer.parseInt(item.getString("ypsl")) ? R.drawable.submit : R.drawable.window, 0, 0, 0);
             binding.title.setCompoundDrawablePadding(36);
             binding.title.setText(String.format(values[0], trim(item.getString(keys[0]))));

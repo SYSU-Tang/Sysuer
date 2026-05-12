@@ -5,7 +5,6 @@ import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
 
@@ -22,9 +21,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HttpManager {
-    final CookieManager cookieManager = CookieManager.getInstance(); // 全局 CookieManager 实例
     final OkHttpClient http = new OkHttpClient.Builder()
             .build(); // 全局 OkHttpClient 实例
+    CookieManager cookieManager; // 全局 CookieManager 实例
     Handler handler; // 处理消息的 Handler 对象
     String referrer; // Referer 头字段值
     String cookie; // Cookie 头字段值
@@ -71,6 +70,11 @@ public class HttpManager {
      */
     public void setParams(Params params) {
         this.params = params;
+        this.cookieManager = new CookieManager(params.getContext());
+    }
+
+    public void setCookieManager(CookieManager cookieManager){
+        this.cookieManager = cookieManager;
     }
 
     /**
@@ -158,16 +162,16 @@ public class HttpManager {
      */
     private void sendRequest(@NonNull String url, String data, String type, int what, String method) {
         Request.Builder request = generateRequest(url, data, type, method);
-        sendRequest(request.build(),what);
+        sendRequest(request.build(), what);
     }
 
     /**
      * 发送网络请求
      *
      * @param request 请求对象
-     * @param what 消息标识
+     * @param what    消息标识
      */
-    public void sendRequest(Request request,int what){
+    public void sendRequest(Request request, int what) {
         http.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -210,11 +214,11 @@ public class HttpManager {
     public Request.Builder generateRequest(@NonNull String url, String data, String type, String method) {
         Request.Builder request = new Request.Builder().url(url);
         String host = HttpUrl.get(url).host();
+        if (target != null)
+            host = HttpUrl.get(target).host();
         if (params != null) request.header("Cookie", params.getCookie());
-        if (target != null && cookieManager.getCookie(target) != null) {
-            request.header("Cookie", cookieManager.getCookie(target));
-        } else if (cookieManager.getCookie(url) != null) {
-            request.header("Cookie", cookieManager.getCookie(url));
+        if (cookieManager.get(host) != null) {
+            request.header("Cookie", cookieManager.toString(host));
         }
         if (cookie != null) request.header("Cookie", cookie);
         if (isAuthorizationRequired && authorizationJar != null)
@@ -222,7 +226,8 @@ public class HttpManager {
         if (authorization != null) request.header("Authorization", authorization);
         if (referrer != null) request.header("Referer", referrer);
         if (ua != null) request.header("User-Agent", ua);
-        if (data != null) request.post(RequestBody.create(data, MediaType.get(toStringOrDefault(type,"application/json"))));
+        if (data != null)
+            request.post(RequestBody.create(data, MediaType.get(toStringOrDefault(type, "application/json"))));
         if (isTokenRequired && authorizationJar != null)
             request.header("token", authorizationJar.getToken(host));
         if (header != null) header.forEach(request::header);

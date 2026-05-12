@@ -96,10 +96,8 @@ public class HomeworkMainFragment extends Fragment {
                 }
             }
         });
-//        http.setTarget(TargetUrl.LMS);
+        http.setParams(params);
         getLmsTask(authorizationJar.getToken("lms.sysu.edu.cn"));
-        System.out.println(authorizationJar.getCookie("lms.sysu.edu.cn"));
-        System.out.println(authorizationJar.getCookie(TargetUrl.LMS));
         return binding.getRoot();
     }
 

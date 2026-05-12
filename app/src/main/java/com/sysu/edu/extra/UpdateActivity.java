@@ -122,6 +122,7 @@ public class UpdateActivity extends AppCompatActivity {
                 }
             }
         });
+        http.setParams(params);
         final ArrayList<Long> click = new ArrayList<>();
         binding.icon.setOnClickListener(_ -> {
             if (click.isEmpty() || System.currentTimeMillis() - click.get(click.size() - 1) < 500)
