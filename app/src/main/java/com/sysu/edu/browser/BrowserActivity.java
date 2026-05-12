@@ -89,7 +89,7 @@ public class BrowserActivity extends AppCompatActivity {
     BrowserHelper db;
     JavaScript js;
     Params params;
-
+    
     @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +115,7 @@ public class BrowserActivity extends AppCompatActivity {
                     startActivity(new Intent(Intent.ACTION_VIEW).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setData(Uri.parse(url1)));
                 return true;
             }
-
+            
             @Nullable
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -134,7 +134,7 @@ public class BrowserActivity extends AppCompatActivity {
                 }
                 return super.shouldInterceptRequest(view, request);
             }
-
+            
             @Override
             public void onPageFinished(WebView view, String link) {
                 if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page").matcher(link).find()) {
@@ -162,13 +162,13 @@ public class BrowserActivity extends AppCompatActivity {
                 new MaterialAlertDialogBuilder(BrowserActivity.this).setMessage(message).setPositiveButton(R.string.confirm, (_, _) -> result.confirm()).create().show();
                 return true;
             }
-
+            
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
                 new MaterialAlertDialogBuilder(BrowserActivity.this).setMessage(message).setPositiveButton(R.string.confirm, (_, _) -> result.confirm()).create().show();
                 return true;
             }
-
+            
             @Override
             public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
                 WebView newWebView = new WebView(BrowserActivity.this);
@@ -185,14 +185,14 @@ public class BrowserActivity extends AppCompatActivity {
                 resultMsg.sendToTarget();
                 return true;
             }
-
+            
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 binding.toolbar.setTitle(title);
                 binding.toolbar.setSubtitle(view.getUrl());
                 super.onReceivedTitle(view, title);
             }
-
+            
             @Override
             public void onReceivedIcon(WebView view, Bitmap icon) {
                 binding.toolbar.setLogo(new BitmapDrawable(getResources(), icon));
@@ -200,18 +200,18 @@ public class BrowserActivity extends AppCompatActivity {
                 binding.toolbar.setLogoScaleType(ImageView.ScaleType.FIT_CENTER);
                 super.onReceivedIcon(view, icon);
             }
-
+            
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
                 progress.postValue(newProgress);
             }
         });
-
+        
         /*
          * 下载弹窗
          * */
-
+        
         GridDialog downloadDialog = new GridDialog(this);
         downloadDialog.setColumn(1);
         downloadDialog.loadMenu(List.of(R.string.link, R.string.location), List.of(R.drawable.link, R.drawable.save), List.of(
@@ -228,7 +228,7 @@ public class BrowserActivity extends AppCompatActivity {
         });
         downloadDialog.setNegativeButton(R.string.cancel, (_, _) -> {
         });
-
+        
         web.setDownloadListener((url1, _, _, _, _) -> {
             String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + getFileName(url1);
             downloadDialog.getMenu(0).setText(url1);
@@ -260,7 +260,7 @@ public class BrowserActivity extends AppCompatActivity {
         setPrivacyMode(preference.isPrivacyMode());
         cookie.setAcceptCookie(preference.isCookieAccept());
         cookie.setAcceptThirdPartyCookies(web, preference.isThirdPartyCookieAccept());
-
+        
         /*
          * 长按菜单
          * */
@@ -301,7 +301,7 @@ public class BrowserActivity extends AppCompatActivity {
         jsDialog.setContentView(JSBinding.getRoot());
         jsDialog.setTitle(R.string.js);
         JSAdapter jsAdapter = new JSAdapter();
-
+        
         jsAdapter.setListener(new AdapterListener() {
             @Override
             public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
@@ -342,12 +342,12 @@ public class BrowserActivity extends AppCompatActivity {
                     return false;
                 });
             }
-
+            
             @Override
             public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
             }
         });
-
+        
         RecyclerView jsList = JSBinding.recyclerView.getRoot();
         jsList.setLayoutManager(new LinearLayoutManager(BrowserActivity.this));
         jsList.setAdapter(jsAdapter);
@@ -355,7 +355,7 @@ public class BrowserActivity extends AppCompatActivity {
                 ActivityOptionsCompat.makeSceneTransitionAnimation(BrowserActivity.this, v, "miniapp").toBundle()));
         JSBinding.add.setOnClickListener(v -> startActivity(new Intent(BrowserActivity.this, JSActivity.class).putExtra("operation", "add"),
                 ActivityOptionsCompat.makeSceneTransitionAnimation(BrowserActivity.this, v, "miniapp").toBundle()));
-
+        
         /*
          * 菜单弹窗
          * */
@@ -369,7 +369,7 @@ public class BrowserActivity extends AppCompatActivity {
                             menuDialog.dismiss();
                         }), Integer.class);
         refreshButton = menuDialog.getMenu(2);
-
+        
         /*
          * UA 弹窗
          * */
@@ -419,7 +419,7 @@ public class BrowserActivity extends AppCompatActivity {
         themeDialog.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
         themeDialog.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
         themeDialog.selectMenu(preference.getTheme());
-
+        
         /*
          * Cookie 弹窗
          * */
@@ -444,7 +444,7 @@ public class BrowserActivity extends AppCompatActivity {
         );
         cookieModeDialog.toggleMenu(0, preference.isCookieAccept());
         cookieModeDialog.toggleMenu(1, preference.isThirdPartyCookieAccept());
-
+        
         /*
          * 网页弹窗
          * */
@@ -496,13 +496,13 @@ public class BrowserActivity extends AppCompatActivity {
         browserDialog.toggleMenu(3, preference.isJSEnabled());
         browserDialog.toggleMenu(4, preference.isSaveMobileDataMode());
         browserDialog.toggleMenu(6, preference.isPrivacyMode());
-
+        
         /*
          * Cookie 弹窗
          * */
         var cookieDialog = new EditTextDialog(this);
         cookieDialog.setTitle(R.string.cookie);
-
+        
         /*
          * 网站弹窗
          * */
@@ -516,7 +516,7 @@ public class BrowserActivity extends AppCompatActivity {
                             String targetUrl = trim(web.getUrl());
                             cookieDialog.setValue(cookie.getCookie(targetUrl));
                             cookieDialog.getDialog().setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.save), (_, _) -> cookie.setCookie(targetUrl, cookieDialog.getText()));
-                            cookieDialog.getDialog().setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), (_, _) -> cookie.setCookie(targetUrl, ""));
+                            cookieDialog.getDialog().setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), (_, _) -> web.evaluateJavascript(BrowserCookieManager.clearAllCookies, null));
                             cookieDialog.getDialog().setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.copy), (_, _) -> params.copy("Cookie:", cookieDialog.getText()));
                             cookieDialog.show();
                         },
@@ -537,11 +537,11 @@ public class BrowserActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
             }
-
+            
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
-
+            
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 web.findAllAsync(s.toString());
@@ -554,7 +554,7 @@ public class BrowserActivity extends AppCompatActivity {
             if (isDoneCounting)
                 binding.number.setText(String.format("%s/%s", activeMatchOrdinal == 0 ? 0 : activeMatchOrdinal + 1, numberOfMatches));
         });
-
+        
         progress.observe(this, p -> {
             refreshButton.setIconResource(p == 100 ? R.drawable.refresh : R.drawable.close);
             refreshButton.setText(p == 100 ? R.string.refresh : R.string.stop);
@@ -578,7 +578,7 @@ public class BrowserActivity extends AppCompatActivity {
             }
         });
     }
-
+    
     private void getJSList() {
         Cursor cursor = db.getReadableDatabase().query("js", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
@@ -595,7 +595,7 @@ public class BrowserActivity extends AppCompatActivity {
         }
         cursor.close();
     }
-
+    
     void setPrivacyMode(boolean enabled) {
 //        webSettings.setSaveFormData(!enabled);
         webSettings.setDomStorageEnabled(!enabled);
@@ -603,7 +603,7 @@ public class BrowserActivity extends AppCompatActivity {
         webSettings.setAllowFileAccess(!enabled);
         webSettings.setAllowContentAccess(!enabled);
     }
-
+    
     protected void onDestroy() {
         if (web != null) {
             web.stopLoading();
@@ -613,29 +613,29 @@ public class BrowserActivity extends AppCompatActivity {
         }
         super.onDestroy();
     }
-
+    
     void goBack() {
         if (web.canGoBack()) web.goBack();
     }
-
+    
     void goForward() {
         if (web.canGoForward()) web.goForward();
     }
-
+    
     void refresh() {
         if (progress.getValue() != null && progress.getValue() == 100) web.reload();
         else web.stopLoading();
     }
-
+    
     void pageUp() {
         web.pageUp(true);
     }
-
+    
     void pageDown() {
         web.pageDown(true);
     }
-
-
+    
+    
     private void showLinkMenu(final String url, PopupMenu popup) {
         popup.getMenu().add(R.string.open_in_browser).setOnMenuItemClickListener(_ -> {
             web.loadUrl(url);
@@ -651,7 +651,7 @@ public class BrowserActivity extends AppCompatActivity {
         });
         popup.show();
     }
-
+    
     private void showImageMenu(final String imageUrl, PopupMenu popup) {
         popup.getMenu().add(R.string.download).setOnMenuItemClickListener(_ -> {
 //            System.out.println(imageUrl);
@@ -661,12 +661,12 @@ public class BrowserActivity extends AppCompatActivity {
                 public void onDownloadProgress(long progress, long total) {
                     System.out.println(progress + " " + total);
                 }
-
+                
                 @Override
                 public void onDownloadComplete(String path) {
                     Snackbar.make(web, String.format("下载完成，保存到：%s", path), Snackbar.LENGTH_LONG).setAction(R.string.open, _ -> openFile(BrowserActivity.this, path)).show();
                 }
-
+                
                 @Override
                 public void onDownloadError(int code, String message) {
                     System.out.println(code + " " + message);
@@ -688,11 +688,11 @@ public class BrowserActivity extends AppCompatActivity {
         });
         popup.show();
     }
-
+    
     private void shareText(String text) {
         startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), getString(R.string.share)));
     }
-
+    
     String getFileName(String url) {
         try {
             String path = URLDecoder.decode(URI.create(url).getPath(), "UTF-8");
@@ -702,14 +702,14 @@ public class BrowserActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
     }
-
+    
     @Override
     protected void onResume() {
         super.onResume();
         js.clear();
         getJSList();
     }
-
+    
     static class JSAdapter extends RecyclerAdapter<JSONObject> {
         @NonNull
         @Override
@@ -717,7 +717,7 @@ public class BrowserActivity extends AppCompatActivity {
             return new RecyclerView.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_preference, parent, false)) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemPreferenceBinding binding = ItemPreferenceBinding.bind(holder.itemView);
