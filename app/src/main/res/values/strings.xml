@@ -69,7 +69,8 @@
     <string name="home">首页</string>
     <string name="appearance">外观</string>
     <string name="open_source">开源</string>
-    <string name="week_x">第%s周</string>
+    <string name="week_d">第%d周</string>
+    <string name="week_s">第%s周</string>
     <string name="no_net_connected">请检查网络！</string>
     <string name="login_warning">请登录！</string>
     <string name="term_x">第%s学期</string>

@@ -70,7 +70,8 @@
     <string name="home">Home</string>
     <string name="appearance">Appearance</string>
     <string name="open_source">Open Source</string>
-    <string name="week_x">Week %s</string>
+    <string name="week_d">Week %d</string>
+    <string name="week_s">Week %s</string>
     <string name="no_net_connected">Please check the wifi</string>
     <string name="login_warning">Login please!</string>
     <string name="term_x">Term %s</string>

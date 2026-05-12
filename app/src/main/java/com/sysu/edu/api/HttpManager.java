@@ -213,13 +213,10 @@ public class HttpManager {
      */
     public Request.Builder generateRequest(@NonNull String url, String data, String type, String method) {
         Request.Builder request = new Request.Builder().url(url);
-        String host = HttpUrl.get(url).host();
-        if (target != null)
-            host = HttpUrl.get(target).host();
+        String host = HttpUrl.get(toStringOrDefault(target, url)).host();
         if (params != null) request.header("Cookie", params.getCookie());
-        if (cookieManager.get(host) != null) {
+        if (cookieManager != null && cookieManager.get(host) != null)
             request.header("Cookie", cookieManager.toString(host));
-        }
         if (cookie != null) request.header("Cookie", cookie);
         if (isAuthorizationRequired && authorizationJar != null)
             request.header("Authorization", authorizationJar.getAuthorization(host));

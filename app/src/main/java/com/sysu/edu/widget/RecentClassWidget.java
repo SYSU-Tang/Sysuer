@@ -119,7 +119,7 @@ public class RecentClassWidget extends AppWidgetProvider {
                                 remoteViews.setTextViewText(R.id.day, String.format("%s %s周%s", term, LocalDateTime.now().format(DateTimeFormatter.ofPattern("M.dd")), new String[]{"日", "一", "二", "三", "四", "五", "六"}[Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1]));
                                 break;
                             case 4:
-                                remoteViews.setTextViewText(R.id.week, String.format(context.getString(R.string.week_x), response.getJSONArray("data").getJSONObject(0).getString("weekTimes")));
+                                remoteViews.setTextViewText(R.id.week, String.format(context.getString(R.string.week_d), response.getJSONArray("data").getJSONObject(0).getString("weekTimes")));
                                 break;
                         }
 
