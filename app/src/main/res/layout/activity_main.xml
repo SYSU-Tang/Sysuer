@@ -43,8 +43,6 @@
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:itemIconTint="?colorPrimary"
-        app:itemTextColor="?colorPrimary"
         app:labelVisibilityMode="selected"
         app:menu="@menu/home" />
 </LinearLayout>

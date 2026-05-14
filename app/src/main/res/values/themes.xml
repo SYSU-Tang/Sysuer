@@ -33,10 +33,12 @@
         <item name="android:windowAnimationStyle">@style/fade</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
         <item name="colorOnContainerChecked">@color/md_theme_default_light_secondaryContainer</item>
         <item name="colorOnContainerUnchecked">@color/md_theme_default_light_secondaryContainer
         </item>
         <item name="colorSecondaryContainer">@color/md_theme_default_light_secondaryContainer</item>
+        <item name="colorPrimaryContainer">@color/md_theme_default_light_primaryContainer</item>
     </style>
 
     <style name="fade">
