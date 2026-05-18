@@ -67,9 +67,9 @@ public class SchoolBusActivity extends AppCompatActivity {
         http = new HttpManager(new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                } else if (!msg.getData().getBoolean("isJSON")) {
+                System.out.println(msg);
+                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                else if (!msg.getData().getBoolean("isJSON")) {
                     params.toast(R.string.login_warning);
                     params.gotoLogin(TargetUrl.PORTAL);
                 } else {
@@ -81,7 +81,7 @@ public class SchoolBusActivity extends AppCompatActivity {
                         }
                     } else {
                         params.toast(getString(R.string.login_warning));
-                        params.gotoLogin(TargetUrl.PORTAL);
+//                        params.gotoLogin(TargetUrl.PORTAL);
                     }
                 }
             }

@@ -16,7 +16,7 @@ import com.sysu.edu.view.StaggeredFragment;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MajorInfo extends AppCompatActivity {
+public class MajorInfoActivity extends AppCompatActivity {
     JwxtModel model;
     
     @Override

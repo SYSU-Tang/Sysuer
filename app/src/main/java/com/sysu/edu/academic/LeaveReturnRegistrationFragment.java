@@ -1,11 +1,9 @@
 package com.sysu.edu.academic;
 
+import static com.sysu.edu.api.CommonUtil.extractValue;
 import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,22 +23,20 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.sysu.edu.R;
-import com.sysu.edu.api.AuthorizationManager;
-import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.databinding.DialogRegionBinding;
 import com.sysu.edu.databinding.ItemCardBinding;
 import com.sysu.edu.databinding.ItemTitleBinding;
+import com.sysu.edu.model.XgxtModel;
 import com.sysu.edu.view.AdapterListener;
 import com.sysu.edu.view.RecyclerAdapter;
 import com.sysu.edu.view.StaggeredFragment;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class LeaveReturnRegistrationFragment extends StaggeredFragment {
@@ -48,8 +44,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     final MutableLiveData<Long> returnDate = new MutableLiveData<>();
     final ArrayList<String> leaveKeys = new ArrayList<>(List.of("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地"));
     final ArrayList<String> stayKeys = new ArrayList<>(List.of("假期去向", "留校原因"));
-    final AuthorizationManager authorizationManager = new AuthorizationManager("https://xgxt.sysu.edu.cn/", "https://xgxt.sysu.edu.cn/");
-    HttpManager http;
     View view;
     JSONArray transportation;
     JSONArray destination;
@@ -60,12 +54,14 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     ArrayList<String> leave;
     ArrayList<String> stay;
     String id;
-
+    XgxtModel model;
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
             view = super.onCreateView(inflater, container, savedInstanceState);
             id = requireArguments().getString("Id");
+            model = new XgxtModel(requireContext());
             BottomSheetDialog regionDialog = new BottomSheetDialog(requireContext());
             DialogRegionBinding dialogRegionBinding = DialogRegionBinding.inflate(inflater, container, false);
             regionDialog.setContentView(dialogRegionBinding.getRoot());
@@ -84,112 +80,75 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
             dialogRegionBinding.county.recyclerView.setAdapter(cityAdapter);
             dialogRegionBinding.county.recyclerView.setNestedScrollingEnabled(false);
             dialogRegionBinding.county.recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_ALWAYS);
-            http = new HttpManager(new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == -1) {
-                        params.toast(R.string.no_net_connected);
-                    } else {
-                        int code = msg.getData().getInt("code");
-                        if (code == 200) {
-                            JSONObject json = JSONObject.parse((String) msg.obj);
-                            if (json != null && json.getInteger("code") == 200) {
-                                if (msg.what == 0) {
-                                    ArrayList<String> value = new ArrayList<>();
-                                    clear();
-                                    JSONObject data = json.getJSONObject("data");
-                                    for (String i : new String[]{"xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj"})
-                                        value.add(data.getString(i));
-                                    add("基本信息", List.of("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段"), value);
-                                    isStay = data.getString("sflx");
-                                    try {
-                                        Date leaveTime = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(toStringOrDefault(data.getString("yjlxsj")));
-                                        if (leaveTime != null) {
-                                            leaveDate.postValue(leaveTime.getTime());
-                                        }
-                                        Date returnTime = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(toStringOrDefault(data.getString("yjfxsj")));
-                                        if (returnTime != null) {
-                                            returnDate.postValue(returnTime.getTime());
-                                        }
-                                        returnDate.postValue(Objects.requireNonNull((new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())).parse(data.getString("yjfxsj"))).getTime());
-                                    } catch (ParseException e) {
-                                        //throw new RuntimeException(e)
-                                    }
-
-                                    country = data.getString("wcdgj");
-                                    province = data.getString("wcdsf");
-                                    city = data.getString("wcdcs");
-
-                                    String reason = data.getString("lxyy");
-
-                                    leave = new ArrayList<>(List.of("离校", data.getString("yjlxsj"), data.getString("yjfxsj"),
-                                            data.getString("qxlx"), data.getString("jtgj"), country + " " + province + " " + city));
-                                    stay = new ArrayList<>(List.of("留校", reason == null ? "" : reason));
-                                    if (Objects.equals(isStay, "0")) {
-                                        add("登记", leaveKeys, leave);
-                                    } else {
-                                        add("登记", stayKeys, stay);
-                                    }
-                                    getDestination();
-                                    getTransportation();
-                                    getCountry();
-                                } else if (msg.what == 1) {
-                                    transportation = json.getJSONArray("data");
-                                } else if (msg.what == 2) {
-                                    destination = json.getJSONArray("data");
-                                } else if (msg.what == 3) {
-                                    countryAdapter.clear();
-                                    json.getJSONArray("data").forEach(e -> countryAdapter.add(((JSONObject) e).getString("label")));
-                                    countryAdapter.setAction(pos -> {
-                                        country = json.getJSONArray("data").getJSONObject(pos).getString("value");
-                                        if ("中国".equals(country)) {
-                                            getProvince();
-                                        } else {
-                                            city = "";
-                                            province = "";
-                                        }
-                                    });
-                                    countryAdapter.setResult(country);
-                                    if ("中国".equals(country)) {
-                                        getProvince();
-                                    }
-                                    // dialogRegionBinding.regionList.setAdapter(new TwoColumnsAdapter(destination));
-                                } else if (msg.what == 4) {
-                                    provinceAdapter.clear();
-                                    json.getJSONArray("data").forEach(e -> provinceAdapter.add(((JSONObject) e).getString("label")));
-                                    provinceAdapter.setAction(pos -> {
-                                        province = json.getJSONArray("data").getJSONObject(pos).getString("value");
-                                        getCity(province);
-                                    });
-                                    getCity(province);
-                                    provinceAdapter.setResult(province);
-                                } else if (msg.what == 5) {
-                                    cityAdapter.clear();
-                                    json.getJSONArray("data").forEach(e -> cityAdapter.add(((JSONObject) e).getString("label")));
-                                    cityAdapter.setAction(pos -> city = json.getJSONArray("data").getJSONObject(pos).getString("value"));
-                                    cityAdapter.setResult(city);
-                                } else if (msg.what == 6) {
-                                    params.toast(json.getString("message"));
-                                } else {
-                                    params.toast(json.getString("message"));
-                                }
-                            }
-                        } else {
-                            params.toast(R.string.educational_wifi_warning);
-                            authorizationManager.setAccessible(false);
-                            getInfo(id);
+            model.getMessage().observe(requireActivity(), message -> {
+                JSONObject response = (JSONObject) message.getSecond();
+                if (response != null && response.getInteger("code") == 200) {
+                    switch (message.getFirst()) {
+                        case 0 -> {
+                            clear();
+                            JSONObject data = response.getJSONObject("data");
+                            add("基本信息", List.of("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段")
+                                    , extractValue(data,new String[]{"xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj"}));
+                            isStay = data.getString("sflx");
+                            leaveDate.postValue(LocalDate.parse(toStringOrDefault(data.getString("yjlxsj"))).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+                            returnDate.postValue(LocalDate.parse(toStringOrDefault(data.getString("yjfxsj"))).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+                            country = data.getString("wcdgj");
+                            province = data.getString("wcdsf");
+                            city = data.getString("wcdcs");
+                            String reason = data.getString("lxyy");
+                            leave = new ArrayList<>(List.of("离校", data.getString("yjlxsj"), data.getString("yjfxsj"),
+                                    data.getString("qxlx"), data.getString("jtgj"), country + " " + province + " " + city));
+                            stay = new ArrayList<>(List.of("留校", toStringOrDefault(reason)));
+                            if ("0".equals(isStay)) add(getString(R.string.registration), leaveKeys, leave);
+                            else add(getString(R.string.registration), stayKeys, stay);
+                            getDestination();
+                            getTransportation();
+                            getCountry();
                         }
+                        case 1 -> transportation = response.getJSONArray("data");
+                        case 2 -> destination = response.getJSONArray("data");
+                        case 3 -> {
+                            countryAdapter.clear();
+                            response.getJSONArray("data").forEach(e -> countryAdapter.add(((JSONObject) e).getString("label")));
+                            countryAdapter.setAction(pos -> {
+                                country = response.getJSONArray("data").getJSONObject(pos).getString("value");
+                                if ("中国".equals(country)) getProvince();
+                                else {
+                                    city = "";
+                                    province = "";
+                                }
+                            });
+                            countryAdapter.setResult(country);
+                            if ("中国".equals(country)) getProvince();
+                            // dialogRegionBinding.regionList.setAdapter(new TwoColumnsAdapter(destination));
+                        }
+                        case 4 -> {
+                            provinceAdapter.clear();
+                            response.getJSONArray("data").forEach(e -> provinceAdapter.add(((JSONObject) e).getString("label")));
+                            provinceAdapter.setAction(pos -> {
+                                province = response.getJSONArray("data").getJSONObject(pos).getString("value");
+                                getCity(province);
+                            });
+                            getCity(province);
+                            provinceAdapter.setResult(province);
+                        }
+                        case 5 -> {
+                            cityAdapter.clear();
+                            response.getJSONArray("data").forEach(e -> cityAdapter.add(((JSONObject) e).getString("label")));
+                            cityAdapter.setAction(pos -> city = response.getJSONArray("data").getJSONObject(pos).getString("value"));
+                            cityAdapter.setResult(city);
+                        }
+                        default -> params.toast(response.getString("message"));
                     }
                 }
             });
-            http.setParams(params);
             setListener(new AdapterListener() {
                 @Override
                 public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
                     staggeredAdapter.getTwoColumnsAdapter(position).setListener(new AdapterListener() {
                         @Override
                         public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int pos) {
-
+                            
                             holder.itemView.setOnClickListener(_ -> {
                                 if (position == 1) {
                                     if (pos == 0) {
@@ -217,7 +176,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                                                     .setSelection(pos == 2 ? returnDate.getValue() != null ? returnDate.getValue() : MaterialDatePicker.todayInUtcMilliseconds() : leaveDate.getValue() != null ? leaveDate.getValue() : MaterialDatePicker.todayInUtcMilliseconds())
                                                     .build();
                                             calendar.show(getParentFragmentManager(), "calendar");
-
+                                            
                                             calendar.addOnPositiveButtonClickListener(aLong -> {
                                                 leave.set(pos, calendar.getHeaderText());
                                                 ((TwoColumnsAdapter) adapter).setValue(leave);
@@ -245,16 +204,16 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                                 }
                             });
                         }
-
+                        
                         @Override
                         public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
-
+                            
                         }
                     });
-
+                    
                     holder.itemView.findViewById(R.id.button).setVisibility(position == 0 ? View.GONE : View.VISIBLE);
                 }
-
+                
                 @Override
                 public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
                     MaterialButton button = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle);
@@ -264,11 +223,9 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     lp.setMargins(0, 0, params.dpToPx(16), params.dpToPx(16));
                     button.setLayoutParams(lp);
                     button.setOnClickListener(_ -> {
-                        if ("0".equals(isStay)) {
-                            save(id, isStay, leaveDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(leaveDate.getValue())), returnDate.getValue() == null ? "" : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(returnDate.getValue()), leave.get(3), leave.get(4), country, province, city);
-                        } else {
-                            save(id, isStay, stay.get(1));
-                        }
+                        if ("0".equals(isStay))
+                            save(id, isStay, leaveDate.getValue() == null ? "" : Instant.ofEpochMilli(leaveDate.getValue()).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), returnDate.getValue() == null ? "" : Instant.ofEpochMilli(returnDate.getValue()).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), leave.get(3), leave.get(4), country, province, city);
+                        else save(id, isStay, stay.get(1));
                     });
                     button.setText(R.string.save);
                     ((ItemCardBinding) binding).getRoot().addView(button);
@@ -278,60 +235,60 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
         }
         return view;
     }
-
+    
     void save(String id, String isStay, String leaveTime, String returnTime, String leaveType, String transportation, String country, String province, String city) {
-        http.postRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/register",
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/register",
                 String.format(
                         "{\"cjlfxgzId\":\"%s\",\"sflx\":\"%s\",\"yjlxsj\":\"%s\",\"yjfxsj\":\"%s\",\"qxlx\":\"%s\",\"jtgj\":\"%s\",\"wcd\":{\"gj\":\"%s\",\"sf\":\"%s\",\"cs\":\"%s\"},\"wcdgj\":\"%s\",\"wcdsf\":\"%s\",\"wcdcs\":\"%s\"}\n",
                         id, isStay, leaveTime, returnTime, leaveType, transportation, country, province, city, country, province, city
                 ), 6);
     }
-
+    
     void save(String id, String isStay, String reason) {
-        http.postRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/register",
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/register",
                 String.format("{\"cjlfxgzId\":\"%s\",\"sflx\":\"%s\",\"lxyy\":\"%s\"}", id, isStay, reason), 6);
     }
-
+    
     void getInfo(String id) {
-        http.getRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/" + id + "/info", 0);
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/" + id + "/info", 0);
     }
-
+    
     void getTransportation() {
-        http.getRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/transport", 1);
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/transport", 1);
     }
-
+    
     void getDestination() {
-        http.getRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/destination-type", 2);
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/destination-type", 2);
     }
-
+    
     void getCountry() {
-        http.getRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/country/drop", 3);
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/country/drop", 3);
     }
-
+    
     void getProvince() {
-        http.getRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/province/drop?0=%E4%B8%AD&1=%E5%9B%BD", 4);
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/province/drop?0=%E4%B8%AD&1=%E5%9B%BD", 4);
     }
-
+    
     void getCity(String province) {
-        http.getRequest(authorizationManager.getBaseUrl() + "jjrlfx/api/sm-jjrlfx/student/city/drop?fdm=" + province, 5);
+        model.addAndNext("jjrlfx/api/sm-jjrlfx/student/city/drop?fdm=" + province, 5);
     }
-
+    
     static class OneColumnAdapter extends RecyclerAdapter<String> {
-
-        Consumer<Integer> action;
+        
+        Consumer<? super Integer> action;
         int selection = -1;
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(ItemTitleBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
-
-        public void setAction(Consumer<Integer> action) {
+        
+        public void setAction(Consumer<? super Integer> action) {
             this.action = action;
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int pos) {
             int position = holder.getBindingAdapterPosition();
@@ -346,13 +303,11 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
             });
             super.onBindViewHolder(holder, pos);
         }
-
+        
         public String getResult() {
-            if (selection == -1)
-                return "";
-            return get(selection);
+            return selection == -1 ? "" : get(selection);
         }
-
+        
         public void setResult(String result) {
             if (data.contains(result)) selection = data.indexOf(result);
         }

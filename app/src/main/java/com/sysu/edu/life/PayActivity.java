@@ -11,7 +11,7 @@ import com.sysu.edu.view.Pager2Adapter;
 
 import java.util.stream.IntStream;
 
-public class Pay extends AppCompatActivity {
+public class PayActivity extends AppCompatActivity {
 
     Pager2Adapter adp;
     ActivityPagerBinding binding;

@@ -14,8 +14,6 @@ import com.sysu.edu.databinding.ActivityGymPreservationBinding;
 import java.util.Objects;
 
 public class GymReservationActivity extends AppCompatActivity {
-//    GymReservationViewModel viewModel;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +26,5 @@ public class GymReservationActivity extends AppCompatActivity {
             return false;
         }).build());
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-//        viewModel = new ViewModelProvider(this).get(GymReservationViewModel.class);
     }
 }

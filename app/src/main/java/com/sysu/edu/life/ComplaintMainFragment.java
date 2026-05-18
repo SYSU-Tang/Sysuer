@@ -100,7 +100,7 @@ public class ComplaintMainFragment extends Fragment {
                 }
             };
             if (inputStream != null) inputStream.close();
-            http.sendRequest(http.generateRequest("https://xinfang.sysu.edu.cn/jsp_api/upload", null, null, "POST").post(new MultipartBody.Builder().setType(MultipartBody.FORM)
+            http.sendRequest(http.generateRequest("https://xinfang.sysu.edu.cn/jsp_api/upload", null, null).post(new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("file", uri.getLastPathSegment(), requestBody).build()).build(), 1);
 
         } catch (IOException e) {

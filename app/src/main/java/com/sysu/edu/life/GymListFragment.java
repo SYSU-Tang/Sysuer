@@ -145,9 +145,9 @@ public class GymListFragment extends Fragment {
 
     private static class FieldAdapter extends RecyclerAdapter<JSONObject> {
 
-        Consumer<String> action;
+        Consumer<? super String> action;
 
-        public void setAction(Consumer<String> action) {
+        public void setAction(Consumer<? super String> action) {
             this.action = action;
         }
 

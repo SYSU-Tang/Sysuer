@@ -287,7 +287,7 @@ public class NetOrderFragment extends StaggeredFragment {
     void gotoWechat(JSONObject data) {
         StringBuilder info = new StringBuilder();
         data.forEach((key, value) -> info.append(key).append("=").append(value).append("&"));
-        new OkHttpClient.Builder().followRedirects(false).build().newCall(http.generateRequest("https://fee.sysu.edu.cn/gateway/unifiedorder/pagepay", info.toString(), "application/x-www-form-urlencoded", "POST").build()).enqueue(new Callback() {
+        new OkHttpClient.Builder().followRedirects(false).build().newCall(http.generateRequest("https://fee.sysu.edu.cn/gateway/unifiedorder/pagepay", info.toString(), "application/x-www-form-urlencoded").build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 http.sendFailure();
