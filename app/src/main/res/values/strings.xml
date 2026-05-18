@@ -654,5 +654,9 @@
     <string name="content_helper_text">请务必点明诉求的关键要素，包括但不限于时间、地点、缘由,字数不能多于1000个。</string>
     <string name="attachment">附件</string>
     <string name="optional">可选</string>
+    <string name="login_success">登录成功</string>
+    <string name="set_sysu_code_warning">请在设置里配置逸仙码</string>
+    <string name="fix_sysu_code_warning">请修正正确的逸仙码链接</string>
+    <string name="registration">登记</string>
 
 </resources>

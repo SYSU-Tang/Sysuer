@@ -160,8 +160,7 @@ public class StaggeredFragment extends Fragment {
         Integer itemCount;
 
         public TwoColumnsAdapter(List<String> data, List<String> value, boolean hideNull) {
-            super();
-            this.key = data;
+            key = data;
             this.hideNull = hideNull;
             this.value = value;
         }
@@ -196,7 +195,7 @@ public class StaggeredFragment extends Fragment {
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             TwoColumnBinding twoColumnBinding = TwoColumnBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
             if (rowListener != null) {
-                rowListener.onCreate(TwoColumnsAdapter.this, twoColumnBinding);
+                rowListener.onCreate(this, twoColumnBinding);
             }
             return new RecyclerView.ViewHolder(twoColumnBinding.getRoot()) {
             };
@@ -217,12 +216,12 @@ public class StaggeredFragment extends Fragment {
                 holder.itemView.getLayoutParams().height = 0;
             }
             if (rowListener != null) {
-                rowListener.onBind(TwoColumnsAdapter.this, holder, position);
+                rowListener.onBind(this, holder, position);
             }
         }
 
         public void setListener(AdapterListener listener) {
-            this.rowListener = listener;
+            rowListener = listener;
         }
 
         @Override
@@ -246,12 +245,12 @@ public class StaggeredFragment extends Fragment {
         }
 
         public void setListener(AdapterListener listener) {
-            this.adapterListener = listener;
+            adapterListener = listener;
         }
 
         public void add(String title, List<String> keys, List<String> values, Integer icon) {
             titles.add(title);
-            this.icons.add(icon);
+            icons.add(icon);
             this.keys.add(keys);
             this.values.add(values);
             notifyItemInserted(getItemCount() - 1);

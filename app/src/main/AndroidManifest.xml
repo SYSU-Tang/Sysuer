@@ -134,7 +134,7 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".life.Pay"
+            android:name=".life.PayActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
@@ -149,7 +149,7 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".academic.MajorInfo"
+            android:name=".academic.MajorInfoActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />

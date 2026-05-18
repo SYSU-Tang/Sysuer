@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(708, newActivity(CourseQueryActivity.class));                  // 课程
 //        actionMap.put(709, browse("https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView")); // 个人培养方案
 //        actionMap.put(710, newActivity(TrainingProgramActivity.class));             // 培养方案
-//        actionMap.put(711, newActivity(MajorInfo.class));                    // 专业
+//        actionMap.put(711, newActivity(MajorInfoActivity.class));                    // 专业
 //        actionMap.put(712, newActivity(CourseSelectedActivity.class));                  // 已选课程
 //        actionMap.put(713, newActivity(AssistantInfoActivity.class));       // 助教信息
 //        actionMap.put(714, newActivity(GradeForLevelActivity.class));           // 等级制成绩
@@ -326,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(903, browse("https://visitor.sysu.edu.cn/"));                 // 逸仙通行
 //        actionMap.put(905, browse("https://gongfang.sysu.edu.cn/h5_separation/repair_apply/index.html#/applyDetail/20251231162524362223"));                 // 报修
 //        actionMap.put(906, browse("https://zhny.sysu.edu.cn/h5/#/"));        // 水电费
-//        actionMap.put(907, newActivity(Pay.class));                          // 缴费大厅
+//        actionMap.put(907, newActivity(PayActivity.class));                          // 缴费大厅
 //        actionMap.put(908, newActivity(GymReservationActivity.class));     // 体育馆预约
 //        actionMap.put(909, newActivity(NetPayActivity.class));              // 校园网
 
