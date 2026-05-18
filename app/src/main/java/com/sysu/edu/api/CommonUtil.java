@@ -17,7 +17,7 @@ import okhttp3.HttpUrl;
  * 通用工具类
  */
 public class CommonUtil {
-
+    
     /**
      * 从 JSONObject 中提取指定键的值
      *
@@ -31,7 +31,7 @@ public class CommonUtil {
         for (String i : keys) values.add(data.getString(i));
         return values;
     }
-
+    
     /**
      * 从 JSONObject 中提取指定键的值
      *
@@ -44,7 +44,7 @@ public class CommonUtil {
         for (String i : keys) values.add(data.getString(i));
         return values;
     }
-
+    
     /**
      * 将boolean值转换为字符串"1"或"0"
      *
@@ -55,7 +55,7 @@ public class CommonUtil {
     public static String bool2str(boolean b) {
         return b ? "1" : "0";
     }
-
+    
     /**
      * 检查字符串是否为空或仅包含空格
      *
@@ -66,7 +66,7 @@ public class CommonUtil {
     public static boolean isEmpty(String str) {
         return str == null || str.trim().isEmpty();
     }
-
+    
     /**
      * 检查对象是否为空或仅包含空格
      *
@@ -77,8 +77,8 @@ public class CommonUtil {
     public static <T> boolean isEmpty(T str) {
         return str == null || str.toString().trim().isEmpty();
     }
-
-
+    
+    
     /**
      * 对字符串进行trim操作，若字符串为空则返回空字符串
      *
@@ -89,7 +89,7 @@ public class CommonUtil {
     public static String trim(String str) {
         return str == null ? "" : str.trim();
     }
-
+    
     /**
      * 从资源 ID 列表中获取对应的字符串数组
      *
@@ -101,7 +101,7 @@ public class CommonUtil {
     public static String[] getString(Context context, int[] resource) {
         return Arrays.stream(resource).mapToObj(context::getString).toArray(String[]::new);
     }
-
+    
     /**
      * 从资源 ID 列表中获取对应的字符串数组
      *
@@ -113,7 +113,7 @@ public class CommonUtil {
     public static String[] getString(Context context, List<Integer> resource) {
         return resource.stream().mapToInt(Integer::intValue).mapToObj(context::getString).toArray(String[]::new);
     }
-
+    
     /**
      * 从 JSONArray 中提取指定键的值
      *
@@ -133,7 +133,7 @@ public class CommonUtil {
         });
         return new Tuple2<>(names, values);
     }
-
+    
     /**
      * 从 JSONArray 中提取指定键的值
      *
@@ -147,7 +147,7 @@ public class CommonUtil {
         array.forEach(i -> names.add(((JSONObject) i).getString(nameKey)));
         return names;
     }
-
+    
     /**
      * 将boolean值转换为整数1或0
      *
@@ -158,7 +158,7 @@ public class CommonUtil {
     public static int bool2int(boolean bool) {
         return bool ? 1 : 0;
     }
-
+    
     /**
      * 将对象转换为字符串，若对象为空则返回空字符串
      *
@@ -169,7 +169,7 @@ public class CommonUtil {
     public static <T> String toStringOrDefault(T t) {
         return toStringOrDefault(t, "");
     }
-
+    
     /**
      * 将对象转换为字符串，若对象为空则返回默认值
      *
@@ -181,7 +181,15 @@ public class CommonUtil {
     public static <T> String toStringOrDefault(T t, String defaultValue) {
         return t == null ? defaultValue : t.toString();
     }
-
+    
+    public static Integer toIntegerOrDefault(Integer t, Integer defaultValue) {
+        return t == null ? defaultValue : t;
+    }
+    
+    public static Integer toIntegerOrDefault(String t, Integer defaultValue) {
+        return isEmpty(t) ? defaultValue : Integer.parseInt(t);
+    }
+    
     /**
      * 从 URL 中提取主机名
      *
@@ -192,7 +200,7 @@ public class CommonUtil {
     public static String getHost(String url) {
         return HttpUrl.get(url).host();
     }
-
+    
     /**
      * 简单的元组类，用于存储两个值
      *
@@ -200,39 +208,39 @@ public class CommonUtil {
      * @param <T1> 第二个值的类型
      */
     public static class Tuple2<T, T1> {
-
+        
         public T first;
         public T1 second;
-
+        
         public Tuple2(T first, T1 second) {
             this.first = first;
             this.second = second;
         }
-
+        
         public Tuple2() {
         }
-
+        
         @NonNull
         @Override
         public String toString() {
             return "(" + first + ", " + second + ")";
         }
-
+        
         public T getFirst() {
             return first;
         }
-
+        
         public void setFirst(T first) {
             this.first = first;
         }
-
+        
         public T1 getSecond() {
             return second;
         }
-
+        
         public void setSecond(T1 second) {
             this.second = second;
         }
     }
-
+    
 }

@@ -35,7 +35,7 @@ public class HttpManager {
     boolean isTokenRequired; // 是否需要 token 头字段
     Map<String, String> header;// 自定义请求头字段
     AuthorizationJar authorizationJar;// 自定义 Authorization 头字段
-
+    
     /**
      * 构造函数
      *
@@ -44,7 +44,7 @@ public class HttpManager {
     public HttpManager(Handler handler) {
         setHandler(handler);
     }
-
+    
     /**
      * 获取处理消息的 Handler 对象
      *
@@ -53,7 +53,7 @@ public class HttpManager {
     public Handler getHandler() {
         return handler;
     }
-
+    
     /**
      * 设置处理消息的 Handler 对象
      *
@@ -62,7 +62,7 @@ public class HttpManager {
     public void setHandler(Handler handler) {
         this.handler = handler;
     }
-
+    
     /**
      * 设置请求参数
      *
@@ -70,13 +70,9 @@ public class HttpManager {
      */
     public void setParams(Params params) {
         this.params = params;
-        this.cookieManager = new CookieManager(params.getContext());
+        cookieManager = new CookieManager(params.getContext());
     }
-
-    public void setCookieManager(CookieManager cookieManager){
-        this.cookieManager = cookieManager;
-    }
-
+    
     /**
      * 设置 Referer 头字段
      *
@@ -85,7 +81,7 @@ public class HttpManager {
     public void setReferrer(String referrer) {
         this.referrer = referrer;
     }
-
+    
     /**
      * 设置 Cookie 头字段，优先级最高
      *
@@ -94,7 +90,7 @@ public class HttpManager {
     public void setCookie(String cookie) {
         this.cookie = cookie;
     }
-
+    
     /**
      * 设置是否需要 Authorization 头字段
      *
@@ -103,7 +99,7 @@ public class HttpManager {
     public void setAuthorizationRequired(boolean isAuthorizationRequired) {
         this.isAuthorizationRequired = isAuthorizationRequired;
     }
-
+    
     /**
      * 设置是否需要 token 头字段
      *
@@ -112,7 +108,7 @@ public class HttpManager {
     public void setTokenRequired(boolean isTokenRequired) {
         this.isTokenRequired = isTokenRequired;
     }
-
+    
     /**
      * 设置 User-Agent 头字段
      *
@@ -121,7 +117,7 @@ public class HttpManager {
     public void setUA(String ua) {
         this.ua = ua;
     }
-
+    
     /**
      * 设置请求目标 URL
      *
@@ -130,7 +126,7 @@ public class HttpManager {
     public void setTarget(String target) {
         this.target = target;
     }
-
+    
     /**
      * 设置请求头字段
      *
@@ -140,7 +136,7 @@ public class HttpManager {
     public void setHeader(Map<String, String> header) {
         this.header = header;
     }
-
+    
     /**
      * 设置 AuthorizationJar 对象
      *
@@ -150,21 +146,7 @@ public class HttpManager {
     public void setAuthorizationJar(AuthorizationJar authorizationJar) {
         this.authorizationJar = authorizationJar;
     }
-
-
-    /**
-     * 发送网络请求
-     *
-     * @param url  请求 URL
-     * @param data 请求数据
-     * @param type 请求数据类型
-     * @param what 消息标识
-     */
-    private void sendRequest(@NonNull String url, String data, String type, int what, String method) {
-        Request.Builder request = generateRequest(url, data, type, method);
-        sendRequest(request.build(), what);
-    }
-
+    
     /**
      * 发送网络请求
      *
@@ -178,7 +160,7 @@ public class HttpManager {
 //                System.out.println(request.url());
                 sendFailure();
             }
-
+            
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();
@@ -194,29 +176,28 @@ public class HttpManager {
             }
         });
     }
-
+    
     /**
      * 发送失败消息
      */
     public void sendFailure() {
         handler.sendEmptyMessage(-1);
     }
-
+    
     /**
      * 获取请求构建器
      *
-     * @param url    请求 URL
-     * @param data   请求数据
-     * @param type   请求数据类型
-     * @param method 请求方法
+     * @param url  请求 URL
+     * @param data 请求数据
+     * @param type 请求数据类型
      * @return 请求构建器
      */
-    public Request.Builder generateRequest(@NonNull String url, String data, String type, String method) {
+    public Request.Builder generateRequest(@NonNull String url, String data, String type) {
         Request.Builder request = new Request.Builder().url(url);
         String host = HttpUrl.get(toStringOrDefault(target, url)).host();
-        if (params != null) request.header("Cookie", params.getCookie());
-        if (cookieManager != null && cookieManager.get(host) != null)
-            request.header("Cookie", cookieManager.toString(host));
+//        if (params != null) request.header("Cookie", params.getCookie());
+        if (cookieManager != null)
+            request.header("Cookie", cookieManager.toSimpleString(host));
         if (cookie != null) request.header("Cookie", cookie);
         if (isAuthorizationRequired && authorizationJar != null)
             request.header("Authorization", authorizationJar.getAuthorization(host));
@@ -228,10 +209,42 @@ public class HttpManager {
         if (isTokenRequired && authorizationJar != null)
             request.header("token", authorizationJar.getToken(host));
         if (header != null) header.forEach(request::header);
-        if ("DELETE".equals(method)) request.delete();
         return request;
     }
-
+    
+    /**
+     * 生成 GET 请求构建器
+     *
+     * @param url 请求 URL
+     * @return 请求构建器
+     */
+    public Request.Builder generateGetRequest(String url) {
+        return generateRequest(url, null, null);
+    }
+    
+    /**
+     * 生成 POST 请求构建器
+     *
+     * @param url  请求 URL
+     * @param data 请求数据
+     * @param type 请求数据类型
+     * @return 请求构建器
+     */
+    public Request.Builder generatePostRequest(String url, String data, String type) {
+        return generateRequest(url, data, type);
+    }
+    
+    /**
+     * 生成 POST JSON 请求构建器
+     *
+     * @param url  请求 URL
+     * @param data 请求 JSON 数据
+     * @return 请求构建器
+     */
+    public Request.Builder generatePostRequest(String url, String data) {
+        return generateRequest(url, data, "application/json");
+    }
+    
     /**
      * 发送 POST 请求
      *
@@ -240,9 +253,9 @@ public class HttpManager {
      * @param what 消息标识
      */
     public void postRequest(@NonNull String url, String data, int what) {
-        sendRequest(url, data, "application/json", what, "POST");
+        sendRequest(generatePostRequest(url, data).build(), what);
     }
-
+    
     /**
      * 发送 POST 请求
      *
@@ -252,9 +265,9 @@ public class HttpManager {
      * @param what 消息标识
      */
     public void postRequest(@NonNull String url, String data, String type, int what) {
-        sendRequest(url, data, type, what, "POST");
+        sendRequest(generatePostRequest(url, data, type).build(), what);
     }
-
+    
     /**
      * 发送 GET 请求
      *
@@ -262,9 +275,9 @@ public class HttpManager {
      * @param what 消息标识
      */
     public void getRequest(@NonNull String url, int what) {
-        sendRequest(url, null, null, what, "GET");
+        sendRequest(generateGetRequest(url).build(), what);
     }
-
+    
     /**
      * 发送 DELETE 请求
      *
@@ -272,6 +285,28 @@ public class HttpManager {
      * @param what 消息标识
      */
     public void deleteRequest(@NonNull String url, int what) {
-        sendRequest(url, null, null, what, "DELETE");
+        sendRequest(generateGetRequest(url).delete().build(), what);
+    }
+    
+    /**
+     * 获取 OkHttpClient 客户端
+     *
+     * @return OkHttpClient 客户端
+     */
+    public OkHttpClient getClient() {
+        return http;
+    }
+    
+    /**
+     * 获取 CookieManager 管理器
+     *
+     * @return CookieManager 管理器
+     */
+    public CookieManager getCookieManager() {
+        return cookieManager;
+    }
+    
+    public void setCookieManager(CookieManager cookieManager) {
+        this.cookieManager = cookieManager;
     }
 }

@@ -3,11 +3,12 @@ package com.sysu.edu.api;
 import static android.text.TextUtils.isEmpty;
 import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.util.Log;
 import android.util.TypedValue;
@@ -27,24 +28,28 @@ import java.util.concurrent.ExecutionException;
 public class ContextUtil {
     private final Context context;
     private final SharedPreferences sharedPreferences;
+    private final LoginManager loginManager = new LoginManager();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private DialogAccountBinding binding;
     private AlertDialog dialog;
-
+    
     public ContextUtil(Context context) {
         this.context = context;
         sharedPreferences = context.getSharedPreferences("privacy", Context.MODE_PRIVATE);
+        loginManager.setCookieManager(new CookieManager(context));
+        loginManager.setAuthorization(new AuthorizationJar(context));
     }
-
+    
     public Context getContext() {
         return context;
     }
-
+    
     public int getColorFromAttr(int attr) {
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(attr, typedValue, true);
         return typedValue.data;
     }
-
+    
     /**
      * 将 dp 值转换为 px 值
      *
@@ -54,7 +59,7 @@ public class ContextUtil {
     public int dpToPx(int dps) {
         return Math.round(context.getResources().getDisplayMetrics().density * dps);
     }
-
+    
     /**
      * 获取 Cookie
      *
@@ -63,20 +68,7 @@ public class ContextUtil {
     public String getCookie() {
         return sharedPreferences.getString("Cookie", "");
     }
-
-//    /**
-//     * 获取 Authorization
-//     *
-//     * @return Authorization
-//     */
-//    public String getAuthorization() {
-//        return sharedPreferences.getString("authorization", "");
-//    }
-
-//    public void setAuthorization(String auth) {
-//        sharedPreferences.edit().putString("authorization", auth).apply();
-//    }
-
+    
     /**
      * 获取用户名
      *
@@ -85,7 +77,7 @@ public class ContextUtil {
     public String getUserName() {
         return sharedPreferences.getString("username", "");
     }
-
+    
     /**
      * 设置用户名
      *
@@ -94,7 +86,7 @@ public class ContextUtil {
     public void setUserName(String userName) {
         sharedPreferences.edit().putString("username", userName).apply();
     }
-
+    
     /**
      * 获取密码
      *
@@ -103,7 +95,7 @@ public class ContextUtil {
     public String getPassword() {
         return sharedPreferences.getString("password", "");
     }
-
+    
     /**
      * 设置密码
      *
@@ -112,7 +104,7 @@ public class ContextUtil {
     public void setPassword(String password) {
         sharedPreferences.edit().putString("password", password).apply();
     }
-
+    
     /**
      * 获取 SharedPreferences 对象
      *
@@ -121,25 +113,7 @@ public class ContextUtil {
     public SharedPreferences getSharedPreferences() {
         return sharedPreferences;
     }
-
-//    /**
-//     * 获取 Token
-//     *
-//     * @return Token
-//     */
-//    public String getToken() {
-//        return sharedPreferences.getString("token", "");
-//    }
-//
-//    /**
-//     * 设置 Token
-//     *
-//     * @param token Token
-//     */
-//    public void setToken(String token) {
-//        sharedPreferences.edit().putString("token", token).apply();
-//    }
-
+    
     /**
      * 获取是否为开发者
      *
@@ -148,7 +122,7 @@ public class ContextUtil {
     public boolean isDeveloper() {
         return sharedPreferences.getBoolean("developer", false);
     }
-
+    
     /**
      * 设置是否为开发者
      *
@@ -157,7 +131,7 @@ public class ContextUtil {
     public void setDeveloper(boolean developer) {
         sharedPreferences.edit().putBoolean("developer", developer).apply();
     }
-
+    
     /**
      * 复制文本到剪贴板
      *
@@ -168,7 +142,7 @@ public class ContextUtil {
         ClipboardManager clip = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         clip.setPrimaryClip(ClipData.newPlainText(tag, text));
     }
-
+    
     /**
      * 显示 Toast 消息
      *
@@ -177,7 +151,7 @@ public class ContextUtil {
     public void toast(int resource) {
         Toast.makeText(context, resource, Toast.LENGTH_LONG).show();
     }
-
+    
     /**
      * 显示 Toast 消息
      *
@@ -186,16 +160,7 @@ public class ContextUtil {
     public void toast(String toast) {
         Toast.makeText(context, toast, Toast.LENGTH_LONG).show();
     }
-
-//    /**
-//     * 获取登录模式
-//     *
-//     * @return 登录模式（"0"：弹窗登录；"1"：主页弹窗、其他跳转登录；"2"：跳转登录；"3"：自动登录）
-//     */
-//    public String getLoginMode() {
-//        return PreferenceManager.getDefaultSharedPreferences(context).getString("loginMode", "2");
-//    }
-
+    
     /**
      * 登录
      *
@@ -203,40 +168,38 @@ public class ContextUtil {
      * @param afterLogin 登录成功后的回调 Runnable 对象
      *
      */
-
+    
     public void login(String url, Runnable afterLogin) {
         if (!getPassword().isEmpty() && !getUserName().isEmpty()) {
-            LoginManager loginManager = new LoginManager();
-            loginManager.setCookieManager(new CookieManager(context));
-            loginManager.setAuthorization(new AuthorizationJar(context));
             loginManager.setOnLoginListener(new LoginManager.LoginListener() {
                 @Override
                 public void onSuccess() {
-
+//                    toast(R.string.login_success);
                 }
-
+                
                 @Override
                 public void onError(String code, String message) {
                     if ("SSO10002".equals(code))
-                        ((Activity) context).runOnUiThread(() -> changeAccount(url, afterLogin));
+                        handler.post(() -> changeAccount(url, afterLogin));
                     else if ("SSO10093".equals(code))
-                        toast(toStringOrDefault(JSONObject.parse(message).getString("msg")));
+                        handler.post(() -> toast(toStringOrDefault(JSONObject.parse(message).getString("msg"))));
+                    else handler.post(() -> toast(message));
                 }
             });
-            if (isEmpty(url)) return;
-            boolean login = false;
-            try {
-                login = loginManager.login(getUserName(), getPassword(), url);
-            } catch (ExecutionException | InterruptedException e) {
-                Log.e("ContextUtil", "login: ", e);
+            if (!isEmpty(url)) {
+                boolean login = false;
+                try {
+                    login = loginManager.login(getUserName(), getPassword(), url);
+                } catch (ExecutionException | InterruptedException e) {
+                    Log.e("ContextUtil", "login: ", e);
+                }
+                System.out.println("Login result: " + login);
+                if (login && afterLogin != null) afterLogin.run();
             }
-            System.out.println("Login result: " + login);
-            if (login && afterLogin != null) afterLogin.run();
         } else changeAccount(url, afterLogin);
     }
-
+    
     public void changeAccount(String url, Runnable afterLogin) {
-
         if (binding == null)
             binding = DialogAccountBinding.inflate(LayoutInflater.from(context));
         if (dialog == null)

@@ -36,8 +36,9 @@ public class AuthorizationManager {
      * @return 如果内容中不包含"Access Forbidden"，则返回true；否则返回false
      */
     public boolean isAccessible(String content) {
-        isAccessible = !Pattern.compile("Access Forbidden").matcher(content).find();
-        return isAccessible;
+        boolean isInaccessible = Pattern.compile("Access Forbidden").matcher(content).find();
+        if(isInaccessible) isAccessible = false;
+        return !isInaccessible;
     }
 
     /**
@@ -66,7 +67,8 @@ public class AuthorizationManager {
      * @return 如果内容中不包含"中山大学统一身份认证"，则返回true；否则返回false
      */
     public boolean isAuthorized(String content) {
-        isAuthorized = !Pattern.compile("中山大学统一身份认证").matcher(content).find();
-        return isAuthorized;
+        boolean isContentUnauthorized = Pattern.compile("中山大学统一身份认证").matcher(content).find();
+        if(isContentUnauthorized) isAuthorized = false;
+        return !isContentUnauthorized;
     }
 }

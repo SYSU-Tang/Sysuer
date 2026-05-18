@@ -13,6 +13,7 @@ import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ public class LoginManager {
     
     private static final int TIMEOUT = 30;
     private static CookieManager cookieManager;
+    private final ArrayDeque<Long> timestamps = new ArrayDeque<>();
     private final CookieStore cookieJar = new CookieStore();
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
@@ -60,8 +62,8 @@ public class LoginManager {
             return client.newCall(new Request.Builder()
                     .url(casAuthorizationManager.getBaseUrl() + "/esc-sso/api/v3/auth/policy").build()).execute().body().string();
         } catch (IOException _) {
+            return "";
         }
-        return "";
     }
     
     private String doLogin(String username, String password, String publicKeyId) {
@@ -82,8 +84,7 @@ public class LoginManager {
         try {
             Response response = client.newCall(new Request.Builder().url(url).build()).execute();
             String body = response.body().string();
-            System.out.println(response.headers().toMultimap());
-            System.out.println(body);
+//            System.out.println(body);
             if (Objects.requireNonNull(response.header("Content-Type", "")).contains("application/json")) {
                 String redirect = redirect(body);
                 if (redirect == null) return;
@@ -99,12 +100,13 @@ public class LoginManager {
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36")
                 .url(url).build()).execute();
         String a = response.body().string();
-        if (Objects.requireNonNull(response.header("Content-Type", "")).contains("application/json")) {
+        String header = response.header("Content-Type", "");
+        if (header != null && header.contains("application/json")) {
             String redirect = redirect(a);
-            if (redirect == null) return a;
-            return loginForGym(redirect);
+            return redirect == null ? a : loginForGym(redirect);
+        } else {
+            return a;
         }
-        return a;
     }
     
     
@@ -117,11 +119,9 @@ public class LoginManager {
      */
     private String redirect(String response) {
         JSONObject json = JSONObject.parse(response);
-        if ("0".equals(json.getString("code"))) {
-            if (json.containsKey("data")) return json.getJSONObject("data").getString("redirect");
-            else return json.getString("redirect");
-        } else {
-//            System.out.println("Login error: " + json.getString("code") + " " + json);
+        if ("0".equals(json.getString("code")))
+            return json.containsKey("data") ? json.getJSONObject("data").getString("redirect") : json.getString("redirect");
+        else {
             onError(json.getString("code"), response);
             return null;
         }
@@ -153,12 +153,21 @@ public class LoginManager {
      *
      */
     public boolean login(String username, String password, String service) throws ExecutionException, InterruptedException {
+        long now = System.currentTimeMillis();
+        if (!timestamps.isEmpty()) {
+            Long top = timestamps.getLast();
+            if (top != null && now - top > 4000)
+                timestamps.clear();
+        }
+        if (timestamps.size() >= 5) {
+            onError("503", "登录频率过快");
+            return false;
+        }
+        timestamps.add(now);
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String host = HttpUrl.get(service).host();
                 String targetBaseUrl = HttpUrl.get(service).scheme() + "://" + host + "/";
-//                cookieJar.initCookieStore(targetBaseUrl);
-//                cookieJar.clear(targetBaseUrl);
                 cookieJar.add("https://cas.sysu.edu.cn", new Cookie.Builder().name("device_trust_Cookie").value("true").domain("cas.sysu.edu.cn").build());
                 if (service.contains("webvpn") || TargetUrl.PORTAL.equals(service)) {
                     casAuthorizationManager.setAccessible(false);
@@ -182,7 +191,6 @@ public class LoginManager {
                             cookieJar.saveFromResponse(HttpUrl.get("https://mportal.sysu.edu.cn"), webvpnKey);
                             loginForPortal();
                             cookieJar.copy("https://portal.sysu.edu.cn", "https://mportal.sysu.edu.cn");
-                            return false;
                         }
                         case TargetUrl.XGXT_WEBVPN -> {
                             request("/esc-sso/login?service=" + service);
@@ -304,7 +312,7 @@ public class LoginManager {
         
     }
     
-    public void setCookieManager(com.sysu.edu.api.CookieManager cookieManager) {
+    public void setCookieManager(CookieManager cookieManager) {
         LoginManager.cookieManager = cookieManager;
     }
     
