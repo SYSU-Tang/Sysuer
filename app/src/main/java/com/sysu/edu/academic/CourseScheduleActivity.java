@@ -1,20 +1,15 @@
 package com.sysu.edu.academic;
 
-import static android.text.TextUtils.isEmpty;
+import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.PopupMenu;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.lifecycle.MutableLiveData;
@@ -22,18 +17,16 @@ import androidx.lifecycle.MutableLiveData;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textview.MaterialTextView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.ContextUtil;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ActivityCourseScheduleBinding;
 import com.sysu.edu.databinding.ItemAgendaBinding;
 import com.sysu.edu.databinding.ItemDetailBinding;
 import com.sysu.edu.databinding.ItemDurationBinding;
 import com.sysu.edu.databinding.ItemWeekdayBinding;
+import com.sysu.edu.model.JwxtModel;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +41,6 @@ public class CourseScheduleActivity extends AppCompatActivity {
     final ArrayList<View> views = new ArrayList<>();
     final MutableLiveData<String> id = new MutableLiveData<>();
     final CommonUtil.Tuple2<String, Integer> realTime = new CommonUtil.Tuple2<>();
-    HttpManager http;
     PopupMenu termPop;
     PopupMenu weekPop;
     String currentTerm = "";
@@ -56,23 +48,15 @@ public class CourseScheduleActivity extends AppCompatActivity {
     int currentWeek;
     BottomSheetDialog detailDialog;
     ActivityCourseScheduleBinding binding;
-    Params params;
     ItemDetailBinding detailBinding;
+    JwxtModel model;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityCourseScheduleBinding.inflate(getLayoutInflater());
+        model = new JwxtModel(this);
         setContentView(binding.getRoot());
-        params = new Params(this);
-        params.setCallback(() -> {
-            if (!isEmpty(currentTerm) && currentWeekIndex != -1) {
-                getTable(currentTerm, currentWeek);
-            } else {
-                getTerm();
-                getAvailableTerms();
-            }
-        });
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         String[] duration = getResources().getStringArray(R.array.duration);
         binding.toolbar.getMenu().add(R.string.today).setOnMenuItemClickListener(_ -> {
@@ -101,12 +85,11 @@ public class CourseScheduleActivity extends AppCompatActivity {
             itemBinding.courseDate.setText(getOldDate(i - weekday));
             View column = new View(this);
             if (i == weekday) {
-                TypedValue typedValue = new TypedValue();
-                getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurfaceDim, typedValue, true);
-                itemBinding.courseDate.setTextColor(typedValue.data);
-                itemBinding.courseWeek.setTextColor(typedValue.data);
+                int color = model.getContextUtil().getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim);
+                itemBinding.courseDate.setTextColor(color);
+                itemBinding.courseWeek.setTextColor(color);
                 itemBinding.getRoot().setBackgroundResource(R.drawable.weekday);
-                column.setBackground(new ColorDrawable(typedValue.data));
+                column.setBackgroundColor(color);
             }
             GridLayout.LayoutParams lp = new GridLayout.LayoutParams(GridLayout.spec(0, 11, 1.0f), GridLayout.spec(i + 1, 1.0f));
             lp.height = 0;
@@ -140,113 +123,101 @@ public class CourseScheduleActivity extends AppCompatActivity {
         detailBinding = ItemDetailBinding.inflate(getLayoutInflater());
         detailBinding.open.setOnClickListener(v -> startActivity(new Intent(this, CourseDetailActivity.class).putExtra("id", id.getValue()), ActivityOptionsCompat.makeSceneTransitionAnimation(this, v, "miniapp").toBundle())); // 初始化打开链接
         detailDialog.setContentView(detailBinding.getRoot());
-        ContextUtil contextUtil = new ContextUtil(this);
-        http = new HttpManager(new Handler(getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                super.handleMessage(msg);
-                if (msg.obj == null) return;
-                JSONObject response = JSONObject.parseObject((String) msg.obj);
-                if (response.getInteger("code").equals(200)) {
-                    switch (msg.what) {
-                        case 1 -> {
-                            views.forEach(e -> binding.day.removeView(e));
-                            views.clear();
-                            response.getJSONArray("data").forEach(e -> {
-                                JSONObject data = (JSONObject) e;
-                                String week = data.getString("week");
-                                if (week != null) {
-                                    String startClassTimes = data.getString("startClassTimes");
-                                    String endClassTimes = data.getString("endClassTimes");
-                                    JSONArray info = data.getJSONArray("teachingInfoList");
-//                                    JSONObject detail = info.getJSONObject(0);
-                                    info.forEach(o -> {
-                                        JSONObject detail = (JSONObject) o;
-                                        String course = detail.getString("courseName");
-                                        String teacher = detail.getString("teacherName");
-                                        String campus = detail.getString("teachingCampusName");
-                                        String isStop = detail.getString("whetherStopClass");
-                                        String teachingBuildingName = detail.getString("teachingBuildingName");
-                                        String classroomNum = detail.getString("classroomNum");
-                                        ItemAgendaBinding itemAgendaBinding = ItemAgendaBinding.inflate(getLayoutInflater(), binding.day, false);
-                                        View item = itemAgendaBinding.getRoot();
-                                        if (isStop != null && !"0".equals(isStop)) {
-                                            item.setEnabled(false);
-                                            item.setBackgroundColor(contextUtil.getColorFromAttr(com.google.android.material.R.attr.colorPrimaryContainer));
-                                        }
-                                        views.add(item);
-                                        item.setOnClickListener(_ -> {
-                                            String location = (campus == null ? "" : campus) + "-" + (teachingBuildingName == null ? "" : teachingBuildingName) + "-" + (classroomNum == null ? "" : classroomNum);
-                                            setDialogDetail(course, location, teacher, String.format(getString(R.string.from_to), startClassTimes, endClassTimes), detail.getString("assistantInfo"));
-                                            id.setValue(detail.getString("classesId"));
-                                            detailDialog.show();
-                                        });
-                                        itemAgendaBinding.content.setText(String.format("%s/%s-%s", course, teachingBuildingName == null ? "" : teachingBuildingName, classroomNum == null ? "" : classroomNum));
-                                        GridLayout.LayoutParams gl = new GridLayout.LayoutParams();
-                                        gl.columnSpec = GridLayout.spec(Integer.parseInt(week), 1.0f);
-                                        gl.width = 0;
-                                        gl.height = 0;
-                                        gl.setGravity(Gravity.FILL);
-                                        gl.rowSpec = GridLayout.spec(Integer.parseInt(startClassTimes) - 1, Integer.parseInt(endClassTimes) - Integer.parseInt(startClassTimes) + 1, 1.0f);
-                                        item.setLayoutParams(gl);
-                                        binding.day.addView(item);
+        model.getMessage().observe(this, message -> {
+            JSONObject response = (JSONObject) message.second;
+            if (response.getInteger("code").equals(200)) {
+                switch (message.getFirst()) {
+                    case 1 -> {
+                        views.forEach(e -> binding.day.removeView(e));
+                        views.clear();
+                        response.getJSONArray("data").forEach(e -> {
+                            JSONObject data = (JSONObject) e;
+                            String week = data.getString("week");
+                            if (week != null) {
+                                String startClassTimes = data.getString("startClassTimes");
+                                String endClassTimes = data.getString("endClassTimes");
+                                JSONArray info = data.getJSONArray("teachingInfoList");
+                                info.forEach(o -> {
+                                    JSONObject detail = (JSONObject) o;
+                                    String course = detail.getString("courseName");
+                                    String teacher = detail.getString("teacherName");
+                                    String campus = detail.getString("teachingCampusName");
+                                    String isStop = detail.getString("whetherStopClass");
+                                    String teachingBuildingName = detail.getString("teachingBuildingName");
+                                    String classroomNum = detail.getString("classroomNum");
+                                    ItemAgendaBinding itemAgendaBinding = ItemAgendaBinding.inflate(getLayoutInflater(), binding.day, false);
+                                    MaterialCardView item = itemAgendaBinding.getRoot();
+                                    if (isStop != null && !"0".equals(isStop)) {
+                                        item.setEnabled(false);
+                                        item.setCardBackgroundColor(model.getContextUtil().getColorFromAttr(com.google.android.material.R.attr.colorErrorContainer));
+                                    }
+                                    views.add(item);
+                                    item.setOnClickListener(_ -> {
+                                        String location = toStringOrDefault(campus) + "-" + toStringOrDefault(teachingBuildingName) + "-" + toStringOrDefault(classroomNum);
+                                        setDialogDetail(course, location, teacher, String.format(getString(R.string.from_to), startClassTimes, endClassTimes), detail.getString("assistantInfo"));
+                                        id.setValue(detail.getString("classesId"));
+                                        detailDialog.show();
                                     });
-                                }
-                            });
-                        }
-                        case 2 -> {
-                            currentTerm = response.getJSONObject("data").getString("acadYearSemester");
-                            binding.term.setText(currentTerm);
-                            getAvailableWeeks(currentTerm);
-                            getTable(currentTerm, currentWeek);
-                            realTime.setFirst(currentTerm);
-                        }// 获取 Term
-                        case 3 -> {
-                            JSONObject data = response.getJSONObject("data");
-                            if (data != null) {
-                                LocalDate date = LocalDate.parse(data.getString("startTime"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                                if (date != null) {
-                                    binding.month.setText(getResources().getStringArray(R.array.months)[date.getMonthValue() - 1]);
-                                    for (int i = 0; i < 7; i++)
-                                        ((MaterialTextView) binding.week.getChildAt(i + 1).findViewById(R.id.course_date)).setText(String.format(Locale.getDefault(), "%2d%s", date.plusDays(i).getDayOfMonth(), getString(R.string.day)));
-                                }
+                                    itemAgendaBinding.content.setText(String.format("%s/%s-%s", course, toStringOrDefault(teachingBuildingName), toStringOrDefault(classroomNum)));
+                                    GridLayout.LayoutParams gl = new GridLayout.LayoutParams();
+                                    gl.columnSpec = GridLayout.spec(Integer.parseInt(week), 1.0f);
+                                    gl.width = 0;
+                                    gl.height = 0;
+                                    gl.setGravity(Gravity.FILL);
+                                    gl.rowSpec = GridLayout.spec(Integer.parseInt(startClassTimes) - 1, Integer.parseInt(endClassTimes) - Integer.parseInt(startClassTimes) + 1, 1.0f);
+                                    item.setLayoutParams(gl);
+                                    binding.day.addView(item);
+                                });
+                            }
+                        });
+                    }
+                    case 2 -> {
+                        currentTerm = response.getJSONObject("data").getString("acadYearSemester");
+                        binding.term.setText(currentTerm);
+                        getAvailableTerms();
+                        getAvailableWeeks(currentTerm);
+                        getTable(currentTerm, currentWeek);
+                        realTime.setFirst(currentTerm);
+                    }// 获取 Term
+                    case 3 -> {
+                        JSONObject data = response.getJSONObject("data");
+                        if (data != null) {
+                            LocalDate date = LocalDate.parse(data.getString("startTime"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                            if (date != null) {
+                                binding.month.setText(getResources().getStringArray(R.array.months)[date.getMonthValue() - 1]);
+                                for (int i = 0; i < 7; i++)
+                                    ((MaterialTextView) binding.week.getChildAt(i + 1).findViewById(R.id.course_date)).setText(String.format(Locale.getDefault(), "%2d%s", date.plusDays(i).getDayOfMonth(), getString(R.string.day)));
                             }
                         }
-                        case 4 -> {
-                            terms.clear();
-                            response.getJSONArray("data").forEach(e -> terms.add(((JSONObject) e).getString("acadYearSemester")));
-                        }// 获取 Term
-                        case 5 -> {
-                            weeks.clear();
-                            String nowWeekly = response.getJSONObject("data").getString("nowWeekly");
-                            if (nowWeekly != null) currentWeek = Integer.parseInt(nowWeekly);
-                            response.getJSONObject("data").getJSONArray("weeklyList").forEach(e -> weeks.add(((JSONObject) e).getInteger("weekly")));
-                            currentWeekIndex = weeks.indexOf(currentWeek);
-                            binding.weekTime.setText(String.format(getString(R.string.week_d), currentWeek));
-                            getTable(currentTerm, currentWeek);
-                            realTime.setSecond(currentWeekIndex);
-                        }
-                        case -1 -> params.toast(R.string.no_net_connected);
                     }
-                } else if (response.get("code").equals(50043000)) {
-                    params.toast(response.getString("message"));
-                } else {
-                    params.gotoLogin(TargetUrl.JWXT);
+                    case 4 -> {
+                        terms.clear();
+                        response.getJSONArray("data").forEach(e -> terms.add(((JSONObject) e).getString("acadYearSemester")));
+                    }// 获取 Term
+                    case 5 -> {
+                        weeks.clear();
+                        String nowWeekly = response.getJSONObject("data").getString("nowWeekly");
+                        if (nowWeekly != null) currentWeek = Integer.parseInt(nowWeekly);
+                        response.getJSONObject("data").getJSONArray("weeklyList").forEach(e -> weeks.add(((JSONObject) e).getInteger("weekly")));
+                        currentWeekIndex = weeks.indexOf(currentWeek);
+                        binding.weekTime.setText(String.format(getString(R.string.week_d), currentWeek));
+                        getTable(currentTerm, currentWeek);
+                        realTime.setSecond(currentWeekIndex);
+                    }
                 }
-            }
+                model.nextAll();
+            } 
         });
-        http.setParams(params);
-        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/");
         getTerm();
-        getAvailableTerms();
+        model.next();
     }
     
     void getAvailableWeeks(String academicYear) {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender/weekly?academicYear=" + academicYear, 5);
+        model.add("jwxt/base-info/school-calender/weekly?academicYear=" + academicYear, 5);
     }
     
     void getAvailableTerms() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4);
+        model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4);
     }
     
     String getOldDate(int distanceDay) {
@@ -260,11 +231,12 @@ public class CourseScheduleActivity extends AppCompatActivity {
             getAvailableWeeks(currentTerm);
             getTable(currentTerm, currentWeek);
             getRange(currentTerm, currentWeek);
+            model.nextAll();
         }
     }
     
     void getRange(String academicYear, int week) {
-        http.getRequest(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/base-info/school-calender?academicYear=%s&weekly=%d", academicYear, week), 3);
+        model.add(String.format(Locale.getDefault(), "jwxt/base-info/school-calender?academicYear=%s&weekly=%d", academicYear, week), 3);
     }
     
     void setDialogDetail(String course, String location, String teacher, String classTime, String assistant) {
@@ -282,18 +254,17 @@ public class CourseScheduleActivity extends AppCompatActivity {
             binding.weekTime.setText(String.format(getString(R.string.week_d), currentWeek));
             getTable(currentTerm, currentWeek);
             getRange(currentTerm, currentWeek);
-        } else if (newWeek == weeks.size()) {
-            params.toast(R.string.last_week_warning);
-        }
+            model.nextAll();
+        } else if (newWeek == weeks.size())
+            model.getContextUtil().toast(R.string.last_week_warning);
     }
     
     void getTable(String academicYear, int week) {
-        if (!academicYear.isEmpty() && week >= 1) {
-            http.getRequest(String.format(Locale.getDefault(), "https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d", academicYear, week), 1);
-        }
+        if (!academicYear.isEmpty() && week > 0)
+            model.add(String.format(Locale.getDefault(), "jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=%s&weekly=%d", academicYear, week), 1);
     }
     
     void getTerm() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist", 2);
+        model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 2);
     }
 }

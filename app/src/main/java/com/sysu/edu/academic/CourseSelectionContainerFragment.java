@@ -24,7 +24,6 @@ public class CourseSelectionContainerFragment extends Fragment {
     NavController nav;
 
     public static CourseSelectionContainerFragment newInstance(int position) {
-
         Bundle args = new Bundle();
         args.putInt("position", position);
         CourseSelectionContainerFragment fragment = new CourseSelectionContainerFragment();
@@ -53,10 +52,10 @@ public class CourseSelectionContainerFragment extends Fragment {
 
     @Override
     public void onResume() {
-        super.onResume();
         NavigationUI.setupWithNavController(requireActivity().findViewById(R.id.toolbar), nav, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
             requireActivity().supportFinishAfterTransition();
             return false;
         }).build());
+        super.onResume();
     }
 }

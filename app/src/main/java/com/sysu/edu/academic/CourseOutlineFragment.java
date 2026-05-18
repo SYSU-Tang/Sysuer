@@ -34,11 +34,9 @@ public class CourseOutlineFragment extends Fragment {
             binding.recyclerViewScroll.recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 1));
             binding.recyclerViewScroll.recyclerView.setAdapter(adp);
             binding.fab.setOnClickListener(_ -> startActivity(new Intent(requireContext(), MarkdownViewActivity.class).putExtra("content", adp.toMarkdown()).putExtra("title", getString(R.string.course_outline))));
-            if (data != null) {
-                data.forEach(e -> {
-                    if (e != null) adp.add((JSONObject) e);
-                });
-            }
+            if (data != null) data.forEach(e -> {
+                if (e != null) adp.add((JSONObject) e);
+            });
             root = binding.getRoot();
         }
         return root;
@@ -62,6 +60,7 @@ public class CourseOutlineFragment extends Fragment {
             ItemCourseOutlineBinding binding = ItemCourseOutlineBinding.bind(holder.itemView);
             binding.title.setText(String.format("%s（%s%s）", convert(position, "sectionDesignation"), convert(position, "teachingHours"), holder.itemView.getResources().getString(R.string.study_hour)));
             binding.intro.setText(String.format("教学内容：%s\n育人元素：%s\n重点、难点：%s", convert(position, "teachingMainContent"), convert(position, "courseElements"), convert(position, "keyPoints")));
+            super.onBindViewHolder(holder, position);
         }
 
         String convert(int position, String key) {
@@ -73,7 +72,7 @@ public class CourseOutlineFragment extends Fragment {
             md.append("|章节|学时|教学内容|育人元素|重点、难点|\n|---|---|---|---|---|\n");
             data.forEach(e -> {
                 if (e != null) {
-                    md.append(trim(e.getString("sectionDesignation")).replace("\n", ";")).append("|");
+                    md.append(trim(e.getString("sectionDesignation")).replace("\n", ">")).append("|");
                     md.append(trim(e.getString("teachingHours"))).append("|");
                     md.append(trim(e.getString("teachingMainContent")).replace("\n", "")).append("|");
                     md.append(trim(e.getString("courseElements")).replace("\n", "")).append("|");

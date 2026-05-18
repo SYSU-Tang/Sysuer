@@ -57,12 +57,12 @@ public class PersonalInformationActivity extends AppCompatActivity {
                 super.handleMessage(msg);
                 boolean isJSON = msg.getData().getBoolean("isJSON");
                 int code = msg.getData().getInt("code");
-                String response = (String) msg.obj;
                 if (code == 0) {
                     auth.setAccessible(false);
                     getPersonalInfo();
                     return;
                 }
+                String response = (String) msg.obj;
                 if (response == null) {
                     params.toast(R.string.no_net_connected);
                     return;

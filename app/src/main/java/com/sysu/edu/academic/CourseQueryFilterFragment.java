@@ -1,9 +1,6 @@
 package com.sysu.edu.academic;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +15,8 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentQueryBinding;
+import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.preference.FilterPreference;
 import com.sysu.edu.preference.PreferenceUtil;
 import com.sysu.edu.preference.RangeSliderPreference;
@@ -30,139 +25,119 @@ import com.sysu.edu.preference.SliderPreference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 public class CourseQueryFilterFragment extends PreferenceFragmentCompat {
-
-    HttpManager http;
-    FragmentQueryBinding binding;
-
+    
+    JwxtModel model;
+    
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.course_query_filter, rootKey);
     }
-
+    
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-//        if (binding == null) {
-        binding = FragmentQueryBinding.inflate(inflater, container, false);
+        model = new JwxtModel(requireContext());
+        FragmentQueryBinding binding = FragmentQueryBinding.inflate(inflater, container, false);
         binding.getRoot().addView(super.onCreateView(inflater, container, savedInstanceState));
         binding.fab.setOnClickListener(_ -> {
             Bundle bundle = new Bundle();
             bundle.putString("params", getParams().toString());
             Navigation.findNavController(binding.getRoot()).navigate(R.id.query_to_result, bundle, new NavOptions.Builder().build());
         });
-        Params params = new Params(this);
-        params.setCallback(() -> getData(0));
-        http = new HttpManager(new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                super.handleMessage(msg);
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                } else {
-                    JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    Integer code = response.getInteger("code");
-                    if (code == 200) {
-                        ArrayList<String> option = new ArrayList<>();
-                        ArrayList<String> number = new ArrayList<>();
-                        JSONArray data = response.getJSONArray("data");
-                        if (msg.what < 6) {
-                            option.add("");
-                            number.add("");
-                            data.forEach(e -> {
-                                JSONObject item = (JSONObject) e;
-                                option.add(item.getString(List.of(
-                                        "acadYearSemester", "campusName", "dataName", "dataName", "name", "departmentName"
-                                ).get(msg.what)));
-                                number.add(item.getString(List.of(
-                                        "acadYearSemester", "id", "dataNumber", "dataNumber", "id", "departmentNumber"
-                                ).get(msg.what)));
-                            });
-                            ListPreference preference = Objects.requireNonNull(findPreference(List.of(
-                                    "yearSemester", "campus", "classLevel", "teachingType", "teachingBuilding", "department"
-                            ).get(msg.what)));
-                            preference.setEntries(option.toArray(new String[]{}));
-                            preference.setEntryValues(number.toArray(new String[]{}));
-                            if (msg.what == 0) {
-                                preference = Objects.requireNonNull(findPreference("endYear"));
-                                preference.setEntries(option.toArray(new String[]{}));
-                                preference.setEntryValues(number.toArray(new String[]{}));
-                            }
-                            if (msg.what < 5) getData(msg.what + 1);
-                        } else {
-                            data.forEach(e -> {
-                                JSONObject item = (JSONObject) e;
-                                option.add(item.getString("number"));
-                                number.add(item.getString("id"));
-                            });
-                            ListPreference preference = Objects.requireNonNull(findPreference("classroom"));
-                            preference.setEntries(option.toArray(new String[]{}));
-                            preference.setEntryValues(number.toArray(new String[]{}));
-                        }
-                    } else if (code == 53000007) {
-                        params.toast(R.string.login_warning);
-                        params.gotoLogin(TargetUrl.JWXT);
-                    } else {
-                        params.toast(response.getString("message"));
-                    }
-                }
-            }
-        });
-        http.setParams(params);
-        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/");
-        getData(0);
         FilterPreference department = Objects.requireNonNull(findPreference("department"));
         FilterPreference classroom = Objects.requireNonNull(findPreference("classroom"));
         department.getValueLiveData().observe(requireActivity(), this::getTeachingBuilding);
-//        }
         classroom.getValueLiveData().observe(requireActivity(), this::getClassroom);
+        IntStream.range(0, 6).forEach(this::getData);
+        model.getMessage().observe(requireActivity(), message -> {
+            JSONObject response = (JSONObject) message.getSecond();
+            Integer code = response.getInteger("code");
+            if (code == 200) {
+                ArrayList<String> option = new ArrayList<>();
+                ArrayList<String> number = new ArrayList<>();
+                JSONArray data = response.getJSONArray("data");
+                Integer what = message.getFirst();
+                switch (what) {
+                    case 0, 1, 2, 3, 4, 5 -> {
+                        option.add("");
+                        number.add("");
+                        data.forEach(e -> {
+                            JSONObject item = (JSONObject) e;
+                            option.add(item.getString(List.of(
+                                    "acadYearSemester", "campusName", "dataName", "dataName", "name", "departmentName"
+                            ).get(what)));
+                            number.add(item.getString(List.of(
+                                    "acadYearSemester", "id", "dataNumber", "dataNumber", "id", "departmentNumber"
+                            ).get(what)));
+                        });
+                        ListPreference preference = Objects.requireNonNull(findPreference(List.of(
+                                "yearSemester", "campus", "classLevel", "teachingType", "teachingBuilding", "department"
+                        ).get(what)));
+                        preference.setEntries(option.toArray(new String[]{}));
+                        preference.setEntryValues(number.toArray(new String[]{}));
+                        if (what == 0) {
+                            preference = Objects.requireNonNull(findPreference("endYear"));
+                            preference.setEntries(option.toArray(new String[]{}));
+                            preference.setEntryValues(number.toArray(new String[]{}));
+                        }
+                    }
+                    case 6 -> {
+                        data.forEach(e -> {
+                            JSONObject item = (JSONObject) e;
+                            option.add(item.getString("number"));
+                            number.add(item.getString("id"));
+                        });
+                        classroom.setEntries(option.toArray(new String[]{}));
+                        classroom.setEntryValues(number.toArray(new String[]{}));
+                    }
+                }
+                model.nextAll();
+            }
+        });
+        model.next();
         return binding.getRoot();
-
     }
 
-    public void getYearSemester() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0);
-    }
-
-    public void getCampus() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox", 1);
-    }
-
-    public void getDepartment() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/department/findCommonDepartmentPull", 2);
-    }
-
-    public void getLevel() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=216", 3);
-    }
-
-    public void getType() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=350", 4);
-    }
-
-    public void getTeachingBuilding() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/teaching-building/pull", 5);
-    }
-
+//    public void getYearSemester() {
+//        model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0);
+//    }
+//
+//    public void getCampus() {
+//        model.add("jwxt/base-info/campus/findCampusNamesBox", 1);
+//    }
+//
+//    public void getDepartment() {
+//        model.add("jwxt/base-info/department/findCommonDepartmentPull", 2);
+//    }
+//
+//    public void getLevel() {
+//        model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=216", 3);
+//    }
+//
+//    public void getType() {
+//        model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=350", 4);
+//    }
+    
     public void getTeachingBuilding(String text) {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/department/findCommonDepartmentPull?nameParm=" + text, 5);
+        model.add("jwxt/base-info/department/findCommonDepartmentPull?nameParm=" + text, 5);
     }
-
+    
     public void getClassroom(String text) {
-        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/classroom/getClassRoomAllPull", String.format("{\"queryParam\":\"%s\"}", text), 6);
+        model.add("jwxt/base-info/classroom/getClassRoomAllPull", String.format("{\"queryParam\":\"%s\"}", text), 6);
     }
-
+    
     public void getData(int pos) {
-        http.getRequest(List.of("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/findAcadyeartermNamesBox",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=216",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=350",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/teaching-building/pull",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/department/findCommonDepartmentPull").get(pos), pos);
+        model.add(List.of("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox",
+                "jwxt/base-info/campus/findCampusNamesBox",
+                "jwxt/base-info/codedata/findcodedataNames?datableNumber=216",
+                "jwxt/base-info/codedata/findcodedataNames?datableNumber=350",
+                "jwxt/base-info/teaching-building/pull",
+                "jwxt/base-info/department/findCommonDepartmentPull").get(pos), pos);
     }
-
+    
     public JSONObject getParams() {
         PreferenceUtil preferenceUtil = new PreferenceUtil(this);
         SliderPreference week = findPreference("week");

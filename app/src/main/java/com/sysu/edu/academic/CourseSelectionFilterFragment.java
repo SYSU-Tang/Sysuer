@@ -1,12 +1,10 @@
 package com.sysu.edu.academic;
 
 import static android.text.TextUtils.isEmpty;
+import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,81 +21,61 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.transition.MaterialContainerTransform;
-import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseFilterBinding;
+import com.sysu.edu.model.JwxtModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.IntStream;
 
 
 public class CourseSelectionFilterFragment extends Fragment {
-
-    HttpManager http;
+    
     HashMap<String, String> filterValue = new HashMap<>();
     HashMap<String, String> filterName = new HashMap<>();
     CourseSelectionViewModel vm;
     FragmentCourseFilterBinding binding;
-    Params params;
     NavController navController;
-
+    JwxtModel model;
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         if (binding == null) {
+            model = new JwxtModel(requireContext());
             vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
             filterValue = vm.getFilterValue();
             filterName = vm.getFilterName();
             binding = FragmentCourseFilterBinding.inflate(inflater, container, false);
             binding.container.setColumnCount(new Params(this).getColumn());
-            params = new Params(this);
-            params.setCallback(() -> getData(0));
-            http = new HttpManager(new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == -1) {
-                        params.toast(getString(R.string.no_net_connected));
-                        return;
+            model.getMessage().observe(requireActivity(), message -> {
+                JSONObject response = (JSONObject) message.getSecond();
+                int what = message.getFirst();
+                if (response.getInteger("code").equals(200)) {
+                    JSONArray data = response.getJSONArray("data");
+                    if (data != null) {
+                        ArrayList<String> items = new ArrayList<>();
+                        ArrayList<String> itemCodes = new ArrayList<>();
+                        items.add("");
+                        itemCodes.add("");
+                        data.forEach(a -> {
+                            items.add(((JSONObject) a).getString(new String[]{"campusName", "dataName", "minorName", "dataName", "dataName"}[what]));
+                            itemCodes.add(((JSONObject) a).getString(new String[]{"id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber"}[what]));
+                        });
+                        MaterialAutoCompleteTextView textView = new MaterialAutoCompleteTextView[]{binding.campus, binding.days, binding.sections, binding.languages, binding.special}[what];
+                        textView.setSimpleItems(items.toArray(new String[]{}));
+                        textView.setOnItemClickListener((_, _, i, _) -> {
+                            filterValue.put(new String[]{"campus", "day", "section", "language", "special"}[what], itemCodes.get(i));
+                            filterName.put(new String[]{"campus", "day", "section", "language", "special"}[what], items.get(i));
+                        });
                     }
-                    JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    if (response != null) {
-                        if (response.getInteger("code").equals(200)) {
-                            JSONArray data = response.getJSONArray("data");
-                            if (data != null) {
-                                if (msg.what < 4) getData(msg.what + 1);
-                                ArrayList<String> items = new ArrayList<>();
-                                ArrayList<String> itemCodes = new ArrayList<>();
-                                items.add("");
-                                itemCodes.add("");
-                                data.forEach(a -> {
-                                    items.add(((JSONObject) a).getString(new String[]{"campusName", "dataName", "minorName", "dataName", "dataName"}[msg.what]));
-                                    itemCodes.add(((JSONObject) a).getString(new String[]{"id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber"}[msg.what]));
-                                });
-                                MaterialAutoCompleteTextView v = new MaterialAutoCompleteTextView[]{binding.campus, binding.days, binding.sections, binding.languages, binding.special}[msg.what];
-                                v.setSimpleItems(items.toArray(new String[]{}));
-                                final int a = msg.what;
-                                v.setOnItemClickListener((_, _, i, _) -> {
-                                    filterValue.put(new String[]{"campus", "day", "section", "language", "special"}[a], itemCodes.get(i));
-                                    filterName.put(new String[]{"campus", "day", "section", "language", "special"}[a], items.get(i));
-                                });
-                            }
-                        } else if (response.getInteger("code").equals(50021000)) {
-                            params.toast(response.getString("message"));
-                        } else if (response.getInteger("code").equals(53000007)) {
-                            params.toast(R.string.login_warning);
-                            params.gotoLogin(TargetUrl.JWXT);
-                        }
-                    }
-                    super.handleMessage(msg);
                 }
+                model.nextAll();
             });
-            http.setParams(params);
-            http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE");
-            getData(0);
+            IntStream.range(0, 5).forEach(this::getData);
             load();
-
+            model.next();
         }
         requireActivity().getOnBackPressedDispatcher().addCallback(
                 getViewLifecycleOwner(),
@@ -110,7 +88,7 @@ public class CourseSelectionFilterFragment extends Fragment {
         );
         return binding.getRoot();
     }
-
+    
     void reset() {
         filterValue.clear();
         filterName.clear();
@@ -118,7 +96,7 @@ public class CourseSelectionFilterFragment extends Fragment {
         vm.setFilterValue(filterValue);
         load();
     }
-
+    
     void load() {
         filterName = vm.getFilterName();
         filterValue = vm.getFilterValue();
@@ -131,7 +109,7 @@ public class CourseSelectionFilterFragment extends Fragment {
         binding.school.setText(filterName.get("school"));
         binding.teacher.setText(filterName.get("teacher"));
     }
-
+    
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         view.setTransitionName("miniapp");
@@ -144,24 +122,23 @@ public class CourseSelectionFilterFragment extends Fragment {
         setSharedElementEnterTransition(transition);
         setSharedElementReturnTransition(transition);
     }
-
-
-
+    
+    
     void submit() {
         vm.setReturnData(parseFilter(getMap()));
         vm.setFilterName(filterName);
         vm.setFilterValue(filterValue);
         navController.navigateUp();
     }
-
+    
     void getData(int i) {
-        http.getRequest(new String[]{"https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=233",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=204",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/codedata/findcodedataNames?datableNumber=387"}[i], i);
+        model.add(new String[]{"jwxt/base-info/campus/findCampusNamesBox",
+                "jwxt/base-info/codedata/findcodedataNames?datableNumber=233",
+                "jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1",
+                "jwxt/base-info/codedata/findcodedataNames?datableNumber=204",
+                "jwxt/base-info/codedata/findcodedataNames?datableNumber=387"}[i], i);
     }
-
+    
     HashMap<String, String> getMap() {
         filterValue.put("course", getEditText(binding.course));
         filterValue.put("teacher", getEditText(binding.teacher));
@@ -171,18 +148,18 @@ public class CourseSelectionFilterFragment extends Fragment {
         filterName.put("school", getEditText(binding.school));
         return filterValue;
     }
-
-    String getEditText(EditText editText){
-        return editText.getText() == null ? "" : editText.getText().toString();
+    
+    String getEditText(EditText editText) {
+        return toStringOrDefault(editText.getText());
     }
-
+    
     String parseFilter(HashMap<String, String> filter) {
         StringBuilder str = new StringBuilder();
         String[] keys = new String[]{"course", "campus", "day", "section", "school", "teacher", "language", "special"};
         String[] key = new String[]{"courseName", "studyCampusId", "week", "classTimes", "courseUnitNum", "teachingTeacherNum", "teachingLanguageCode", "specialClassCode"};
         for (int i = 0; i < keys.length; i++) {
             String v = filter.getOrDefault(keys[i], "");
-            if (isEmpty(v)) str.append(String.format(",\"%s\":\"%s\"", key[i], v));
+            if (!isEmpty(v)) str.append(String.format(",\"%s\":\"%s\"", key[i], v));
         }
         return str.toString();
     }

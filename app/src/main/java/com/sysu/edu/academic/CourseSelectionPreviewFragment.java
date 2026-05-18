@@ -3,9 +3,6 @@ package com.sysu.edu.academic;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +21,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseSelectionPreviewBinding;
 import com.sysu.edu.databinding.ItemEvaluationBinding;
+import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.view.RecyclerAdapter;
 
 import org.commonmark.node.Node;
@@ -42,43 +38,22 @@ import io.noties.markwon.MarkwonVisitor;
 import io.noties.markwon.ext.tables.TablePlugin;
 
 public class CourseSelectionPreviewFragment extends Fragment {
-
+    
     final MutableLiveData<Integer> type = new MutableLiveData<>();
-    HttpManager http;
     CourseSelectionViewModel vm;
     FragmentCourseSelectionPreviewBinding binding;
     int page = 1;
     int total = -1;
     CourseSelectionPreviewAdapter previewAdapter;
-
+    JwxtModel model;
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
+            model = new JwxtModel(requireContext());
             binding = FragmentCourseSelectionPreviewBinding.inflate(inflater, container, false);
             Params params = new Params(this);
-            params.setCallback(this::regetList);
-            http = new HttpManager(new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    super.handleMessage(msg);
-                    if (msg.what == -1) {
-                        params.toast(R.string.no_net_connected);
-                    } else {
-                        System.out.println(msg.obj);
-                        JSONObject response = JSONObject.parse((String) msg.obj);
-                        if (response.getInteger("code") == 200) {
-                            JSONObject data = response.getJSONObject("data");
-                            total = data.getInteger("total");
-                            data.getJSONArray("rows").forEach(e -> previewAdapter.add((JSONObject) e));
-                        } else {
-                            params.gotoLogin( TargetUrl.JWXT);
-                        }
-                    }
-                }
-            });
-            http.setParams(params);
-            http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE");
             vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
             binding.list.recyclerView.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
             previewAdapter = new CourseSelectionPreviewAdapter();
@@ -86,25 +61,34 @@ public class CourseSelectionPreviewFragment extends Fragment {
             binding.list.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
                     if (!recyclerView.canScrollVertically(1) && dy > 0 && total / 10.0 > page - 1)
                         getList();
                 }
             });
             binding.type.addOnButtonCheckedListener((_, _, _) -> type.setValue(binding.major.isChecked() ? 1 : binding.collegePublicSelective.isChecked() ? 4 : 2));
+            model.getMessage().observe(requireActivity(), message -> {
+                JSONObject response = (JSONObject) message.getSecond();
+                if (response.getInteger("code") == 200) {
+                    if (message.getFirst() == 0) {
+                        JSONObject data = response.getJSONObject("data");
+                        total = data.getInteger("total");
+                        data.getJSONArray("rows").forEach(e -> previewAdapter.add((JSONObject) e));
+                    }
+                }
+            });
             type.observe(getViewLifecycleOwner(), _ -> regetList());
             vm.filterValue.observe(requireActivity(), _ -> regetList());
         }
         return binding.getRoot();
     }
-
+    
     private void regetList() {
         page = 1;
         total = -1;
         previewAdapter.clear();
         getList();
     }
-
+    
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -114,23 +98,25 @@ public class CourseSelectionPreviewFragment extends Fragment {
                 .setLaunchSingleTop(true)
                 .build(), new FragmentNavigator.Extras(Map.of(v, "miniapp"))));
     }
-
+    
     void getList() {
-        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/schoolCourse/pageList",
+        model.addAndNext("jwxt/choose-course-front-server/schoolCourse/pageList",
                 String.format("{\"pageNo\":%s,\"pageSize\":10,\"total\":false,\"param\":{\"hiddenSelectedStatus\":\"0\",\"type\":\"%s\"%s}}",
                         page++, type.getValue() == null ? 1 : type.getValue(), vm.getReturnData()), 0);
     }
-
+    
     static class CourseSelectionPreviewAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         final String[] key = new String[]{"courseName", "courseCategoryName", "courseUnitName", "scheduleExamTime", "examFormName", "credit", "teachingClassId", "teachingClassNum", "teachingClassName", "courseNum"};
         final String[] name = new String[]{"课程名称", "课程类别", "开设学院", "考试时间", "考核方式", "学分", "教学班ID", "教学班号", "教学班名", "课程号"};
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {};
+            return new RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
+            };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemEvaluationBinding binding = ItemEvaluationBinding.bind(holder.itemView);
@@ -150,12 +136,10 @@ public class CourseSelectionPreviewFragment extends Fragment {
                         @Override
                         public void blockStart(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
                         }
-
+                        
                         @Override
                         public void blockEnd(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
-                            if (visitor.hasNext(node)) {
-                                visitor.ensureNewLine();
-                            }
+                            if (visitor.hasNext(node)) visitor.ensureNewLine();
                         }
                     });
                 }

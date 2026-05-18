@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             Integer responseVersion = response.getInteger("version");
             if (version < responseVersion) {
                 path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + getString(R.string.app_name) + response.getString("versionName") + ".apk";
-                AlertDialog updateDialog = new MaterialAlertDialogBuilder(MainActivity.this)
+                AlertDialog updateDialog = new MaterialAlertDialogBuilder(this)
                         .setMessage("")
                         .setTitle(R.string.higher_version_detected)
                         .setPositiveButton(R.string.download_in_system, (_, _) -> downloadId = ((DownloadManager) getSystemService(DOWNLOAD_SERVICE))
@@ -188,10 +188,10 @@ public class MainActivity extends AppCompatActivity {
                                         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)))
                         .setNegativeButton(R.string.download_in_browser, (_, _) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(response.getString("link")))))
                         .setCancelable(response.getBoolean("enforce"))
-                        .setNeutralButton(R.string.download_in_app, (_, _) -> downloadFile(MainActivity.this, response.getString("link"), path))
+                        .setNeutralButton(R.string.download_in_app, (_, _) -> downloadFile(this, response.getString("link"), path))
                         .create();
                 updateDialog.show();
-                Markwon.builder(MainActivity.this).build().setMarkdown(Objects.requireNonNull(updateDialog.findViewById(android.R.id.message)), response.getString("description"));
+                Markwon.builder(this).build().setMarkdown(Objects.requireNonNull(updateDialog.findViewById(android.R.id.message)), response.getString("description"));
             }
         } catch (PackageManager.NameNotFoundException _) {
         }
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    void initActionMap(Map<Integer, View.OnClickListener> actionMap) {
+    void initActionMap(Map<? super Integer, View.OnClickListener> actionMap) {
         // 学术服务 (id: 1xx)
 //        actionMap.put(101, newActivity(SchoolEnrollmentActivity.class));           // 学籍
 //        actionMap.put(102, newActivity(CETActivity.class));          // 四六级
@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
         });
         actionMap.put(602, _ -> {
             try {
-                startActivity(Objects.requireNonNull(this.getPackageManager().getLaunchIntentForPackage("com.tencent.wework")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                startActivity(Objects.requireNonNull(getPackageManager().getLaunchIntentForPackage("com.tencent.wework")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             } catch (Exception e) {
                 //(requireContext(), R.string.no_app, Toast.LENGTH_LONG).show();
             }

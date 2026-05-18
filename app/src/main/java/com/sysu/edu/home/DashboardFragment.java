@@ -13,9 +13,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
@@ -60,16 +57,15 @@ import com.sysu.edu.academic.CourseScheduleActivity;
 import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.api.CalendarManager;
 import com.sysu.edu.api.ContextUtil;
-import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.PreferenceViewModel;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.browser.BrowserActivity;
 import com.sysu.edu.databinding.DialogServiceActionBinding;
 import com.sysu.edu.databinding.DialogServiceOrderBinding;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
 import com.sysu.edu.databinding.ItemCourseBinding;
 import com.sysu.edu.databinding.ItemExamBinding;
+import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.todo.TodoActivity;
 import com.sysu.edu.todo.TodoInfo;
 import com.sysu.edu.todo.TodoManager;
@@ -103,14 +99,14 @@ import io.noties.markwon.MarkwonVisitor;
 import io.noties.markwon.core.CoreProps;
 
 public class DashboardFragment extends Fragment {
-
+    
     final ArrayList<JSONObject> todayCourse = new ArrayList<>();
     final ArrayList<JSONObject> tomorrowCourse = new ArrayList<>();
     final LinkedList<JSONObject> thisWeekExams = new LinkedList<>();
     final LinkedList<JSONObject> nextWeekExams = new LinkedList<>();
     final MutableLiveData<String> todoDate = new MutableLiveData<>("");
-    HttpManager http;
     Params params;
+    JwxtModel model;
     HomeCollectionHelper db;
     FragmentDashboardBinding binding;
     boolean isRefreshRequired = true;
@@ -120,13 +116,14 @@ public class DashboardFragment extends Fragment {
     BottomSheetDialog actionDialog;
     DialogServiceActionBinding actionBinding;
     private TodoManager todoManager;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (isRefreshRequired) {
             binding = FragmentDashboardBinding.inflate(inflater, container, false);
             CalendarManager calendar = new CalendarManager();
+            model = new JwxtModel(requireContext());
             db = new HomeCollectionHelper(requireContext());
             viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
             viewModel.updateDashboardShortcut.observe(requireActivity(), _ -> getShortcutCollection());
@@ -150,11 +147,12 @@ public class DashboardFragment extends Fragment {
                         if (intent.resolveActivity(requireContext().getPackageManager()) != null)
                             startActivity(intent);
                     } catch (ActivityNotFoundException e) {
-                        params.toast("请在设置里配置逸仙码");
+                        params.toast(R.string.fix_sysu_code_warning);
                     }
-                } /*else {
+                } else {
+                    params.toast(R.string.set_sysu_code_warning);
                     //new LaunchMiniProgram(requireActivity()).launchMiniProgram("gh_85575b9f544e");
-                }*/
+                }
             });
             binding.agenda.setOnClickListener(gotoActivity(CourseScheduleActivity.class));
             binding.courseList.addItemDecoration(new DividerItemDecoration(requireContext(), 0));
@@ -168,7 +166,6 @@ public class DashboardFragment extends Fragment {
             binding.nextClassCard.setOnClickListener(gotoActivity(CourseScheduleActivity.class));
             binding.timeCard.setOnClickListener(gotoActivity(AgendaActivity.class));
             params = new Params(this);
-            params.setCallback(this::getTerm);
             CourseAdapter courseAdapter = new CourseAdapter();
             courseAdapter.setParams(params);
             courseAdapter.setOnClick((jsonObject, view) -> startActivity(new Intent(getContext(), CourseDetailActivity.class).putExtra("code", jsonObject.getString("courseNum")).putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp").toBundle()));
@@ -190,125 +187,112 @@ public class DashboardFragment extends Fragment {
             });
             String date = LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()));
             binding.date.setText(String.format("%s/%s", date, getResources().getStringArray(R.array.weeks)[LocalDate.now().getDayOfWeek().getValue() - 1]));
-            http = new HttpManager(new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == -1) {
-                        params.toast(R.string.no_net_connected);
-                        binding.nextClass.setText(R.string.no_net_connected);
-                        return;
-                    }
-                    JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    if (response.get("code").equals(200)) {
-                        switch (msg.what) {
-                            case 1:
-                                ArrayList<JSONObject> beforeArray = new ArrayList<>();
-                                ArrayList<JSONObject> afterArray = new ArrayList<>();
-                                response.getJSONArray("data").forEach(e -> {
-                                    JSONObject jsonObject = (JSONObject) e;
-                                    String status = getTimePosition(jsonObject.getString("teachingDate") + " " + jsonObject.getString("startTime"), jsonObject.getString("teachingDate") + " " + jsonObject.getString("endTime"));
-                                    jsonObject.put("status", status);
-                                    jsonObject.put("time", jsonObject.get("startTime") + "~" + jsonObject.get("endTime"));
-                                    jsonObject.put("course", "第" + jsonObject.get("startClassTimes") + "~" + jsonObject.get("endClassTimes") + "节课");
-                                    boolean isToday = "TD".equals(jsonObject.getString("useflag"));
-                                    if (isToday)
-                                        (Objects.equals(status, "before") ? beforeArray : afterArray).add(jsonObject);
-                                    (isToday ? todayCourse : tomorrowCourse).add(jsonObject);
-                                });
-                                ContextUtil contextUtil = new ContextUtil(requireContext());
-                                binding.progress.setMax(todayCourse.size());
-                                binding.progress.setProgress(beforeArray.size());
-                                binding.courseList.scrollToPosition(beforeArray.size());
-                                Markwon.builder(requireContext()).usePlugin(new AbstractMarkwonPlugin() {
-                                    @Override
-                                    public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder1) {
-                                        super.configureSpansFactory(builder1);
-                                        builder1.appendFactory(Heading.class, (_, configuration) -> {
-                                            if (CoreProps.HEADING_LEVEL.require(configuration) == 3)
-                                                return new ForegroundColorSpan(contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary));
-                                            return null;
-                                        });
-                                    }
-
-                                    @Override
-                                    public void configureVisitor(@NonNull MarkwonVisitor.Builder builder1) {
-                                        super.configureVisitor(builder1);
-                                        builder1.blockHandler(new MarkwonVisitor.BlockHandler() {
-                                            @Override
-                                            public void blockStart(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
-                                            }
-
-                                            @Override
-                                            public void blockEnd(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
-                                                if (visitor.hasNext(node))
-                                                    visitor.ensureNewLine();
-                                            }
-                                        });
-                                    }
-                                }).build().setMarkdown(binding.nextClass, afterArray.isEmpty() ? String.format("### %s\n\n%s：**%s**\n\n%s：**%s**\n\n%s：**%s**",
-                                        getString(R.string.noClass),
-                                        getString(R.string.next_class), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("courseName"),
-                                        getString(R.string.location), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("teachingPlace"),
-                                        getString(R.string.time), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("time")) :
-                                        String.format("### %s\n\n%s：**%s**\n\n%s：**%s**\n\n%s：**%s**",
-                                                todayCourse.get(beforeArray.size()).getString("courseName"),
-                                                getString(R.string.location), todayCourse.get(beforeArray.size()).getString("teachingPlace"),
-                                                getString(R.string.time), todayCourse.get(beforeArray.size()).getString("time"),
-                                                getString(R.string.date), todayCourse.get(beforeArray.size()).getString("teachingDate")));
-                                binding.toggle.clearChecked();
-                                binding.toggle.check(R.id.today);
-
-                                JSONObject array = afterArray.isEmpty() ? tomorrowCourse.get(0) : todayCourse.get(beforeArray.size());
-                                long delta = LocalDateTime.parse(String.format("%s %s", array.getString("teachingDate"), array.getString("startTime")), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis();
-                                if (delta > 0)
-                                    WorkManager.getInstance(requireContext().getApplicationContext())
-                                            .enqueueUniqueWork("next_class_notification_update",
-                                                    ExistingWorkPolicy.KEEP, new OneTimeWorkRequest.Builder(ClassNotificationWorker.class).setInputData(new Data.Builder().putString("courseName", array.getString("courseName")).putString("teachingPlace", array.getString("teachingPlace")).putString("time", array.getString("time")).build())
-                                                            .setInitialDelay(delta < 1000 * 60 * 15 ? 0 : delta - 1000 * 60 * 15, TimeUnit.MILLISECONDS).build());
-                                break;
-                            case 2:
-                                JSONArray dataArray = response.getJSONArray("data");
-                                if (!dataArray.isEmpty()) {
-                                    for (int i1 = 0; i1 < dataArray.size(); i1++) {
-                                        LinkedList<JSONObject> exams = List.of(thisWeekExams, nextWeekExams).get(i1);
-                                        TreeMap<Integer, JSONArray> sortedTimetable = new TreeMap<>();
-                                        dataArray.getJSONObject(i1).getJSONObject("timetable").forEach((s1, t) -> {
-                                            if (t != null)
-                                                sortedTimetable.put(Integer.parseInt(s1), (JSONArray) t);
-                                        });
-                                        sortedTimetable.forEach((key, value) -> {
-                                            if (key.equals(sortedTimetable.firstKey()))
-                                                value.forEach(c -> exams.addFirst((JSONObject) c));
-                                            else
-                                                value.forEach(c -> exams.addLast((JSONObject) c));
-                                        });
-                                    }
-                                    binding.toggle2.clearChecked();
-                                    binding.toggle2.check(R.id.week_18);
+            model.getMessage().observe(requireActivity(), message -> {
+                JSONObject response = (JSONObject) message.getSecond();
+                if (response.get("code").equals(200)) {
+                    switch (message.getFirst()) {
+                        case 1 -> {
+                            ArrayList<JSONObject> beforeArray = new ArrayList<>();
+                            ArrayList<JSONObject> afterArray = new ArrayList<>();
+                            response.getJSONArray("data").forEach(e -> {
+                                JSONObject jsonObject = (JSONObject) e;
+                                String status = getTimePosition(jsonObject.getString("teachingDate") + " " + jsonObject.getString("startTime"), jsonObject.getString("teachingDate") + " " + jsonObject.getString("endTime"));
+                                jsonObject.put("status", status);
+                                jsonObject.put("time", jsonObject.get("startTime") + "~" + jsonObject.get("endTime"));
+                                jsonObject.put("course", "第" + jsonObject.get("startClassTimes") + "~" + jsonObject.get("endClassTimes") + "节课");
+                                boolean isToday = "TD".equals(jsonObject.getString("useflag"));
+                                if (isToday)
+                                    (Objects.equals(status, "before") ? beforeArray : afterArray).add(jsonObject);
+                                (isToday ? todayCourse : tomorrowCourse).add(jsonObject);
+                            });
+                            ContextUtil contextUtil = new ContextUtil(requireContext());
+                            binding.progress.setMax(todayCourse.size());
+                            binding.progress.setProgress(beforeArray.size());
+                            binding.courseList.scrollToPosition(beforeArray.size());
+                            Markwon.builder(requireContext()).usePlugin(new AbstractMarkwonPlugin() {
+                                @Override
+                                public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder1) {
+                                    super.configureSpansFactory(builder1);
+                                    builder1.appendFactory(Heading.class, (_, configuration) -> {
+                                        if (CoreProps.HEADING_LEVEL.require(configuration) == 3)
+                                            return new ForegroundColorSpan(contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary));
+                                        return null;
+                                    });
                                 }
-                                break;
-                            case 3:
-                                String term = response.getJSONObject("data").getString("acadYearSemester");
-                                binding.date.setText(String.format("第%s学期\n%s\n%s", term, date, getResources().getStringArray(R.array.weeks)[LocalDate.now().getDayOfWeek().getValue() - 1]));
-                                getTodayCourses(term);
-                                getExams(term);
-                                getWeek(term);
-                                isRefreshRequired = false;
-                                break;
-                            case 4:
-                                String week = response.getJSONArray("data").getJSONObject(0).getString("weekTimes");
-                                binding.date.setText(String.format("第%s周\n%s", week, binding.date.getText().toString()));
-                                binding.toggle2.check("19".equals(week) ? R.id.week_19 : R.id.week_18);
-                                break;
+                                
+                                @Override
+                                public void configureVisitor(@NonNull MarkwonVisitor.Builder builder1) {
+                                    super.configureVisitor(builder1);
+                                    builder1.blockHandler(new MarkwonVisitor.BlockHandler() {
+                                        @Override
+                                        public void blockStart(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
+                                        }
+                                        
+                                        @Override
+                                        public void blockEnd(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
+                                            if (visitor.hasNext(node))
+                                                visitor.ensureNewLine();
+                                        }
+                                    });
+                                }
+                            }).build().setMarkdown(binding.nextClass, afterArray.isEmpty() ? String.format("### %s\n\n%s：**%s**\n\n%s：**%s**\n\n%s：**%s**",
+                                    getString(R.string.noClass),
+                                    getString(R.string.next_class), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("courseName"),
+                                    getString(R.string.location), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("teachingPlace"),
+                                    getString(R.string.time), tomorrowCourse.isEmpty() ? getString(R.string.none) : tomorrowCourse.get(0).getString("time")) :
+                                    String.format("### %s\n\n%s：**%s**\n\n%s：**%s**\n\n%s：**%s**",
+                                            todayCourse.get(beforeArray.size()).getString("courseName"),
+                                            getString(R.string.location), todayCourse.get(beforeArray.size()).getString("teachingPlace"),
+                                            getString(R.string.time), todayCourse.get(beforeArray.size()).getString("time"),
+                                            getString(R.string.date), todayCourse.get(beforeArray.size()).getString("teachingDate")));
+                            binding.toggle.clearChecked();
+                            binding.toggle.check(R.id.today);
+                            
+                            JSONObject array = afterArray.isEmpty() ? tomorrowCourse.get(0) : todayCourse.get(beforeArray.size());
+                            long delta = LocalDateTime.parse(String.format("%s %s", array.getString("teachingDate"), array.getString("startTime")), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis();
+                            if (delta > 0)
+                                WorkManager.getInstance(requireContext().getApplicationContext())
+                                        .enqueueUniqueWork("next_class_notification_update",
+                                                ExistingWorkPolicy.KEEP, new OneTimeWorkRequest.Builder(ClassNotificationWorker.class).setInputData(new Data.Builder().putString("courseName", array.getString("courseName")).putString("teachingPlace", array.getString("teachingPlace")).putString("time", array.getString("time")).build())
+                                                        .setInitialDelay(delta < 1000 * 60 * 15 ? 0 : delta - 1000 * 60 * 15, TimeUnit.MILLISECONDS).build());
                         }
-                    } else if (response.get("code").equals(53000007)) {
-                        params.gotoLogin(TargetUrl.JWXT);
-                    } else /*if (response.get("code").equals(50043000))*/ {
-                        params.toast(response.getString("message"));
+                        case 2 -> {
+                            JSONArray dataArray = response.getJSONArray("data");
+                            if (!dataArray.isEmpty()) {
+                                for (int i = 0; i < dataArray.size(); i++) {
+                                    LinkedList<JSONObject> exams = List.of(thisWeekExams, nextWeekExams).get(i);
+                                    TreeMap<Integer, JSONArray> sortedTimetable = new TreeMap<>();
+                                    dataArray.getJSONObject(i).getJSONObject("timetable").forEach((s1, t) -> {
+                                        if (t != null)
+                                            sortedTimetable.put(Integer.parseInt(s1), (JSONArray) t);
+                                    });
+                                    sortedTimetable.forEach((key, value) -> {
+                                        if (key.equals(sortedTimetable.firstKey()))
+                                            value.forEach(c -> exams.addFirst((JSONObject) c));
+                                        else
+                                            value.forEach(c -> exams.addLast((JSONObject) c));
+                                    });
+                                }
+                                binding.toggle2.clearChecked();
+                                binding.toggle2.check(R.id.week_18);
+                            }
+                        }
+                        case 3 -> {
+                            String term = response.getJSONObject("data").getString("acadYearSemester");
+                            binding.date.setText(String.format("第%s学期\n%s\n%s", term, date, getResources().getStringArray(R.array.weeks)[LocalDate.now().getDayOfWeek().getValue() - 1]));
+                            getTodayCourses(term);
+                            getExams(term);
+                            getWeek(term);
+                            isRefreshRequired = false;
+                        }
+                        case 4 -> {
+                            String week = response.getJSONArray("data").getJSONObject(0).getString("weekTimes");
+                            binding.date.setText(String.format("第%s周\n%s", week, binding.date.getText().toString()));
+                            binding.toggle2.check("19".equals(week) ? R.id.week_19 : R.id.week_18);
+                        }
                     }
                 }
             });
-            http.setParams(params);
             PreferenceViewModel preferenceViewModel = new ViewModelProvider(requireActivity()).get(PreferenceViewModel.class);
             preferenceViewModel.setPM(androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireActivity()));
             preferenceViewModel.getIsAgreeLiveData().observe(getViewLifecycleOwner(), a -> {
@@ -353,7 +337,7 @@ public class DashboardFragment extends Fragment {
                 return false;
             });
             todoDate.observe(getViewLifecycleOwner(), _ -> refresh());
-
+            
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) menu.setGroupDividerEnabled(true);
             binding.todoDate.setOnClickListener(_ -> pop.show());
             binding.toggle3.addOnButtonCheckedListener((_, checkedId, _) -> {
@@ -368,15 +352,14 @@ public class DashboardFragment extends Fragment {
             initOrder(inflater);
             initAction(inflater);
             getShortcutCollection();
-//            params.gotoLogin(TargetUrl.JWXT);
         }
         return binding.getRoot();
     }
-
+    
     private View.OnClickListener gotoActivity(Class<?> cls) {
         return v -> startActivity(new Intent(getContext(), cls), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle());
     }
-
+    
     void refresh() {
         String value = todoDate.getValue();
         boolean isAll = isEmpty(value);
@@ -387,34 +370,29 @@ public class DashboardFragment extends Fragment {
         });
         binding.todoDate.setText(isAll ? getString(R.string.all) : value);
     }
-
+    
     void getTerm() {
-//        System.out.println("getTerm");
-        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/");
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/showNewAcadlist", 3);
+        model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 3);
     }
-
+    
     void getWeek(String term) {
-        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/yd/index/");
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=" + term, 4);
+        model.addAndNext("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=" + term, 4);
     }
-
+    
     void getTodayCourses(String term) {
-        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/yd/index/");
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=" + term, 1);
+        model.addAndNext("jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=" + term, 1);
     }
-
+    
     void getExams(String term) {
-        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/");
-        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck" + term, String.format("{\"acadYear\":\"%s\",\"examWeekId\":\"1928284621349085186\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", term), 2);
+        model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck" + term, String.format("{\"acadYear\":\"%s\",\"examWeekId\":\"1928284621349085186\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", term), 2);
     }
-
+    
     String getTimePosition(String from, String to) {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return now.isBefore(LocalDateTime.parse(from, formatter)) ? "after" : now.isAfter(LocalDateTime.parse(to, formatter)) ? "before" : "in";
     }
-
+    
     void getShortcutCollection() {
         if (binding.shortcutGroup.getChildCount() > 4)
             IntStream.range(3, binding.shortcutGroup.getChildCount() - 1).forEach(_ -> binding.shortcutGroup.removeViewAt(3));
@@ -427,7 +405,6 @@ public class DashboardFragment extends Fragment {
                     MaterialButton button = new MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle);
                     button.setText(shortcut.getString("name"));
                     binding.shortcutGroup.addView(button);
-
                     String url = shortcut.getString("url");
                     String activity = shortcut.getString("activity");
                     if (viewModel.actionMap.containsKey(id))
@@ -447,7 +424,7 @@ public class DashboardFragment extends Fragment {
             }
         }
     }
-
+    
     void initOrder(@NonNull LayoutInflater inflater) {
         Context context = requireContext();
         orderDialog = new BottomSheetDialog(context);
@@ -466,33 +443,33 @@ public class DashboardFragment extends Fragment {
             public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
                 return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
             }
-
+            
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder source, @NonNull RecyclerView.ViewHolder target) {
                 collectionAdapter.swap(source.getBindingAdapterPosition(), target.getBindingAdapterPosition());
                 return true;
             }
-
+            
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             }
         }).attachToRecyclerView(orderBinding.recyclerView);
     }
-
+    
     void updateShortcut() {
         IntStream.range(0, collectionAdapter.getItemCount()).forEach(i -> {
             collectionAdapter.get(i);
             db.updateDashboardShortcutPosition(collectionAdapter.get(i).getInteger("id"), i);
         });
     }
-
+    
     void initAction(@NonNull LayoutInflater inflater) {
         actionDialog = new BottomSheetDialog(requireContext());
         actionBinding = DialogServiceActionBinding.inflate(inflater);
         actionBinding.order.setOnClickListener(_ -> orderDialog.show());
         actionDialog.setContentView(actionBinding.getRoot());
     }
-
+    
     boolean action(JSONObject item) {
         int itemId = item.getIntValue("id");
         MutableLiveData<Boolean> isServiceCollected = new MutableLiveData<>(db.isServiceCollected(itemId));
@@ -554,19 +531,19 @@ public class DashboardFragment extends Fragment {
 }
 
 class CourseAdapter extends RecyclerAdapter<JSONObject> {
-    BiConsumer<JSONObject, View> onClick;
-
+    BiConsumer<? super JSONObject, ? super View> onClick;
+    
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new RecyclerView.ViewHolder(ItemCourseBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
         };
     }
-
-    public void setOnClick(BiConsumer<JSONObject, View> onClick) {
+    
+    public void setOnClick(BiConsumer<? super JSONObject, ? super View> onClick) {
         this.onClick = onClick;
     }
-
+    
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemCourseBinding binding = ItemCourseBinding.bind(holder.itemView);
@@ -594,14 +571,14 @@ class CourseAdapter extends RecyclerAdapter<JSONObject> {
 }
 
 class ExamAdapter extends RecyclerAdapter<JSONObject> {
-
+    
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
         };
     }
-
+    
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemExamBinding binding = ItemExamBinding.bind(holder.itemView);

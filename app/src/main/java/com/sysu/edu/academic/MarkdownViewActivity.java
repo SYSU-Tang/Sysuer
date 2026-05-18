@@ -4,7 +4,6 @@ import static com.sysu.edu.api.CommonUtil.trim;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -14,16 +13,14 @@ import com.sysu.edu.databinding.ActivityMarkdownViewBinding;
 
 import org.commonmark.ext.gfm.tables.TableBlock;
 
-import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
-import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.inlineparser.NewLineInlineProcessor;
+import io.noties.markwon.SoftBreakAddsNewLinePlugin;
 import io.noties.markwon.recycler.MarkwonAdapter;
 import io.noties.markwon.recycler.table.TableEntry;
 import io.noties.markwon.recycler.table.TableEntryPlugin;
 
 public class MarkdownViewActivity extends AppCompatActivity {
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,15 +44,15 @@ public class MarkdownViewActivity extends AppCompatActivity {
         binding.recycler.setAdapter(adapter);
         adapter.setMarkdown(Markwon.builder(this)
                 .usePlugin(TableEntryPlugin.create(this))
-                .usePlugin(MarkwonInlineParserPlugin.create())
-                .usePlugin(new AbstractMarkwonPlugin() {
-                    @Override
-                    public void configure(@NonNull Registry registry) {
-                        registry.require(MarkwonInlineParserPlugin.class, markwonInlineParserPlugin ->
-                                markwonInlineParserPlugin.factoryBuilder().addInlineProcessor(new NewLineInlineProcessor()));
-                        super.configure(registry);
-                    }
-                })
+                .usePlugin(SoftBreakAddsNewLinePlugin.create())
+//                .usePlugin(new AbstractMarkwonPlugin() {
+//                    @Override
+//                    public void configure(@NonNull Registry registry) {
+//                        registry.require(MarkwonInlineParserPlugin.class, markwonInlineParserPlugin ->
+//                                markwonInlineParserPlugin.factoryBuilder().addInlineProcessor(new NewLineInlineProcessor()));
+//                        super.configure(registry);
+//                    }
+//                })
 //                .usePlugin(MarkwonInlineParserPlugin.create(factoryBuilder ->
 //                        factoryBuilder.addInlineProcessor(new NewLineInlineProcessor())))
                 .build(), trim(content));

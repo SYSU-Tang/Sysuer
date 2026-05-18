@@ -1,9 +1,6 @@
 package com.sysu.edu.academic;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,110 +21,86 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentQueryBinding;
+import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.preference.FilterPreference;
 import com.sysu.edu.preference.PreferenceUtil;
 
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import rikka.material.preference.MaterialSwitchPreference;
 import rikka.preference.SimpleMenuPreference;
 
 public class RoomQueryFilterFragment extends PreferenceFragmentCompat {
-
-    HttpManager http;
-    FragmentQueryBinding binding;
+    
+    JwxtModel model;
     MaterialDatePicker<Pair<Long, Long>> datePicker;
-
+    
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.room_query_filter, rootKey);
     }
-
+    
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         LinearLayout list = (LinearLayout) super.onCreateView(inflater, container, savedInstanceState);
 //        if (binding == null) {
-        binding = FragmentQueryBinding.inflate(inflater, container, false);
+        model = new JwxtModel(requireContext());
+        FragmentQueryBinding binding = FragmentQueryBinding.inflate(inflater, container, false);
         binding.getRoot().addView(list);
         binding.fab.setOnClickListener(_ -> {
             Bundle bundle = new Bundle();
             bundle.putString("params", getParams().toString());
             Navigation.findNavController(binding.getRoot()).navigate(R.id.query_to_result, bundle, new NavOptions.Builder().build());
         });
-        Params params = new Params(this);
-        params.setCallback(() -> getData(0));
         MaterialSwitchPreference isWeekPreference = Objects.requireNonNull(findPreference("isWeek"));
         SimpleMenuPreference campusPreference = Objects.requireNonNull(findPreference("campus"));
         SimpleMenuPreference buildingPreference = Objects.requireNonNull(findPreference("teachingBuilding"));
         FilterPreference classroomPreference = Objects.requireNonNull(findPreference("classroom"));
         PreferenceCategory weekSelection = Objects.requireNonNull(findPreference("weekSelection"));
         PreferenceCategory dateSelection = Objects.requireNonNull(findPreference("dateSelection"));
-        http = new HttpManager(new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                super.handleMessage(msg);
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
+        model.getMessage().observe(requireActivity(), message -> {
+            JSONObject response = (JSONObject) message.getSecond();
+            Integer code = response.getInteger("code");
+            if (code == 200) {
+                ArrayList<String> option = new ArrayList<>();
+                ArrayList<String> number = new ArrayList<>();
+                JSONArray data = response.getJSONArray("data");
+                Integer what = message.getFirst();
+                option.add("");
+                number.add("");
+                if (what < 4) {
+                    data.forEach(e -> {
+                        JSONObject item = (JSONObject) e;
+                        option.add(item.getString(List.of("campusName", "name", "acadYearSemester", "number").get(what)));
+                        number.add(item.getString(List.of("id", "id", "acadYearSemester", "id").get(what)));
+                    });
+                    ListPreference preference1 = Objects.requireNonNull(getPreferenceManager().findPreference(List.of("campus", "teachingBuilding", "yearSemester", "classroom").get(what)));
+                    preference1.setEntries(option.toArray(new String[]{}));
+                    preference1.setEntryValues(number.toArray(new String[]{}));
                 } else {
-                    JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    Integer code = response.getInteger("code");
-                    if (code == 200) {
-                        ArrayList<String> option = new ArrayList<>();
-                        ArrayList<String> number = new ArrayList<>();
-                        JSONArray data = response.getJSONArray("data");
-                        option.add("");
-                        number.add("");
-                        if (msg.what < 4) {
-                            data.forEach(e -> {
-                                JSONObject item = (JSONObject) e;
-                                option.add(item.getString(List.of(
-                                        "campusName", "name", "acadYearSemester", "number"
-                                ).get(msg.what)));
-                                number.add(item.getString(List.of(
-                                        "id", "id", "acadYearSemester", "id"
-                                ).get(msg.what)));
-                            });
-                            ListPreference preference1 = Objects.requireNonNull(getPreferenceManager().findPreference(List.of(
-                                    "campus", "teachingBuilding", "yearSemester", "classroom"
-                            ).get(msg.what)));
-                            preference1.setEntries(option.toArray(new String[]{}));
-                            preference1.setEntryValues(number.toArray(new String[]{}));
-                            if (msg.what < 3)
-                                getData(msg.what + 1);
-                        } else {
-                            data.forEach(e -> {
-                                JSONObject item = (JSONObject) e;
-                                option.add(item.getString(List.of("name", "number").get(msg.what - 4)));
-                                number.add(item.getString(List.of("id", "id").get(msg.what - 4)));
-                            });
-                            ListPreference preference1 = Objects.requireNonNull(getPreferenceManager().findPreference(List.of(
-                                    "teachingBuilding", "classroom"
-                            ).get(msg.what - 4)));
-                            preference1.setEntries(option.toArray(new String[]{}));
-                            preference1.setEntryValues(number.toArray(new String[]{}));
-                        }
-                    } else if (code == 53000007) {
-                        params.toast(R.string.login_warning);
-                        params.gotoLogin(TargetUrl.JWXT);
-                    } else {
-                        params.toast(response.getString("message"));
-                    }
+                    data.forEach(e -> {
+                        JSONObject item = (JSONObject) e;
+                        option.add(item.getString(List.of("name", "number").get(what - 4)));
+                        number.add(item.getString(List.of("id", "id").get(what - 4)));
+                    });
+                    ListPreference preference1 = Objects.requireNonNull(getPreferenceManager().findPreference(List.of(
+                            "teachingBuilding", "classroom"
+                    ).get(what - 4)));
+                    preference1.setEntries(option.toArray(new String[]{}));
+                    preference1.setEntryValues(number.toArray(new String[]{}));
                 }
+                model.nextAll();
             }
         });
-        http.setParams(params);
-        http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/");
-        getData(0);
+        IntStream.range(0, 4).forEach(this::getData);
         isWeekPreference.setOnPreferenceChangeListener((_, newValue) -> {
             boolean isWeek = (boolean) newValue;
             weekSelection.setVisible(isWeek);
@@ -154,22 +127,22 @@ public class RoomQueryFilterFragment extends PreferenceFragmentCompat {
 //        }
         return binding.getRoot();
     }
-
+    
     public void getData(int pos) {
-        http.getRequest(List.of("https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/teaching-building/pull",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/findAcadyeartermNamesBox",
-                "https://jwxt.sysu.edu.cn/jwxt/base-info/classroom/queryclassroombymulticondition").get(pos), pos);
+        model.add(List.of("jwxt/base-info/campus/findCampusNamesBox",
+                "jwxt/base-info/teaching-building/pull",
+                "jwxt/base-info/acadyearterm/findAcadyeartermNamesBox",
+                "jwxt/base-info/classroom/queryclassroombymulticondition").get(pos), pos);
     }
-
+    
     public void getTeachingBuilding(String campus) {
-        http.getRequest(String.format("https://jwxt.sysu.edu.cn/jwxt/base-info/teaching-building/pull?campusId=%s", campus == null ? "" : campus), 4);
+        model.addAndNext(String.format("jwxt/base-info/teaching-building/pull?campusId=%s", campus == null ? "" : campus), 4);
     }
-
+    
     public void getClassRoom(String campus, String building, String value) {
-        http.getRequest(String.format("https://jwxt.sysu.edu.cn/jwxt/base-info/classroom/queryclassroombymulticondition?campusId=%s&buildingId=%s&classroomCode=%s", campus == null ? "" : campus, building == null ? "" : building, value == null ? "" : value), 5);
+        model.addAndNext(String.format("jwxt/base-info/classroom/queryclassroombymulticondition?campusId=%s&buildingId=%s&classroomCode=%s", campus == null ? "" : campus, building == null ? "" : building, value == null ? "" : value), 5);
     }
-
+    
     /*
      * {"campusId":"5062201","teachingBuildID":"2513856","classroomID":"2514104","sectionA":"1","sectionB":"12","checkType":"2","yearTerm":"2025-1","weekA":"11","weekB":"11","singleOrDoubleWeek":"0","dayWeeks":["日","一","二"],"weekOrTime":"week"}
      * */
@@ -183,7 +156,6 @@ public class RoomQueryFilterFragment extends PreferenceFragmentCompat {
         preferenceUtil.insertMenuValue("checkType", "checkType");
         preferenceUtil.insertMenuValue("occupySource", "occupySource");
         preferenceUtil.insertEditValue("occupyReason", "occupyReason");
-
         boolean isWeek = ((MaterialSwitchPreference) Objects.requireNonNull(findPreference("isWeek"))).isChecked();
         preferenceUtil.getParams().put("weekOrTime", isWeek ? "week" : "time");
         if (isWeek) {
@@ -194,9 +166,9 @@ public class RoomQueryFilterFragment extends PreferenceFragmentCompat {
             preferenceUtil.insert("dayWeeks", (((MultiSelectListPreference) Objects.requireNonNull(findPreference("weekdays"))).getValues()));
         } else if (datePicker.getSelection() != null) {
             if (datePicker.getSelection().first != null)
-                preferenceUtil.insert("dateA", new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(datePicker.getSelection().first)));
+                preferenceUtil.insert("dateA", Instant.ofEpochMilli(datePicker.getSelection().first).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
             if (datePicker.getSelection().second != null)
-                preferenceUtil.insert("dateB", new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(datePicker.getSelection().second)));
+                preferenceUtil.insert("dateB", Instant.ofEpochMilli(datePicker.getSelection().second).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         }
         return preferenceUtil.getParams();
     }

@@ -1,6 +1,7 @@
 package com.sysu.edu.academic;
 
 import static com.sysu.edu.api.CommonUtil.bool2int;
+import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 import static com.sysu.edu.api.CommonUtil.trim;
 
 import android.animation.ValueAnimator;
@@ -13,9 +14,6 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,25 +38,24 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
+import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentCourseSelectionBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemCourseSelectionBinding;
+import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.view.RecyclerAdapter;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 public class CourseSelectionFragment extends Fragment {
-
+    
     final MutableLiveData<String> filter = new MutableLiveData<>();
     final MutableLiveData<Integer> type = new MutableLiveData<>(1);
     final MutableLiveData<Integer> category = new MutableLiveData<>(11);
-    final MediatorLiveData<List<Integer>> typeCate = new MediatorLiveData<>();
+    final MediatorLiveData<CommonUtil.Tuple2<Integer, Integer>> typeCate = new MediatorLiveData<>();
     FragmentCourseSelectionBinding binding;
     int tmp;
     int page = 1;
@@ -68,18 +65,15 @@ public class CourseSelectionFragment extends Fragment {
     CourseSelectionViewModel vm;
     GridLayoutManager gm;
     Params params;
-    HttpManager http;
-
+    JwxtModel model;
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (binding == null) {
             binding = FragmentCourseSelectionBinding.inflate(inflater, container, false);
+            model = new JwxtModel(requireContext());
             vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
             params = new Params(this);
-            params.setCallback(() -> {
-                clear();
-                getInfo();
-            });
             vm.filterValue.observe(requireActivity(), _ -> {
                 filter.setValue(vm.getReturnData());
                 binding.head.seniorFilter.removeAllViews();
@@ -95,11 +89,8 @@ public class CourseSelectionFragment extends Fragment {
             });
             binding.head.type.setOnCheckedStateChangeListener((chipGroup, _) -> {
                 int cid = chipGroup.getCheckedChipId();
-                if (cid == R.id.my_major) {
-                    selectCategory();
-                } else {
-                    type.setValue((cid == R.id.college_public_selective) ? 4 : 2);
-                }
+                if (cid == R.id.my_major) selectCategory();
+                else type.setValue((cid == R.id.college_public_selective) ? 4 : 2);
                 if (cid != R.id.my_major && binding.head.category.getHeight() != 0)
                     tmp = binding.head.category.getHeight();
                 ValueAnimator animator = ValueAnimator.ofInt(chipGroup.getCheckedChipId() == R.id.my_major ? new int[]{0, tmp} : new int[]{binding.head.category.getHeight() == 0 ? 0 : tmp, 0});
@@ -111,8 +102,8 @@ public class CourseSelectionFragment extends Fragment {
                 animator.start();
             });
             binding.zoom.setOnClickListener(_ -> binding.head.getRoot().setVisibility(binding.head.getRoot().getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
-            typeCate.addSource(type, s -> typeCate.setValue(List.of(type.getValue() == null ? 1 : type.getValue(), s)));
-            typeCate.addSource(category, s -> typeCate.setValue(List.of(type.getValue() == null ? 11 : type.getValue(), s)));
+            typeCate.addSource(type, s -> typeCate.setValue(new CommonUtil.Tuple2<>(CommonUtil.toIntegerOrDefault(type.getValue(), 1), s)));
+            typeCate.addSource(category, s -> typeCate.setValue(new CommonUtil.Tuple2<>(CommonUtil.toIntegerOrDefault(category.getValue(), 11), s)));
             typeCate.observe(requireActivity(), _ -> regetCourseList());
             binding.head.category.setOnCheckedStateChangeListener((_, _) -> selectCategory());
             binding.course.setLayoutManager(gm = new GridLayoutManager(requireContext(), params.getColumn()));
@@ -120,101 +111,76 @@ public class CourseSelectionFragment extends Fragment {
             binding.course.setAdapter(adp = new CourseAdapter());
             binding.head.filter.setOnCheckedStateChangeListener((_, _) -> regetCourseList());
             adp.setSelectAction(position -> {
-                if (adp.get(position).getInteger("selectedStatus") == 3 || adp.get(position).getInteger("selectedStatus") == 4) {
+                if (adp.get(position).getInteger("selectedStatus") == 3 || adp.get(position).getInteger("selectedStatus") == 4)
                     unselect(adp.convert(position, "courseId"), adp.convert(position, "teachingClassId"));
-                } else {
-                    select(adp.convert(position, "teachingClassId"));
-                }
+                else select(adp.convert(position, "teachingClassId"));
             });
             adp.setLikeAction(this::like);
-
             binding.course.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
                     if (!v.canScrollVertically(1) && total / 10 + 1 > page && dy > 0)
                         getCourseList();
                     binding.head.getRoot().setElevation(v.canScrollVertically(-1) ? params.dpToPx(2) : 0);
-                    super.onScrolled(v, dx, dy);
                 }
             });
-            http = new HttpManager(new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    if (msg.obj == null) {
-                        //params.toast(R.string.no_wifi_warning);
-                        return;
-                    }
-                    JSONObject response = JSONObject.parseObject((String) msg.obj);
-                    Integer code = response.getInteger("code");
-                    if (Objects.equals(code, 200)) {
-                        switch (msg.what) {
-                            case -1 -> params.toast(R.string.no_net_connected);
-                            case 0 -> {
-                                term = response.getJSONObject("data").getString("semesterYear");
-                                getCourseList();
-                            }
-                            case 1 -> {
-                                if (response.getJSONObject("data") != null) {
-                                    total = response.getJSONObject("data").getInteger("total");
-                                    response.getJSONObject("data").getJSONArray("rows").forEach(e -> adp.add((JSONObject) e));
-                                }
-                            }
-                            case 3 -> {
-                                params.toast(response.getString("data"));
-                                regetCourseList();
+            model.getMessage().observe(requireActivity(), message -> {
+                JSONObject response = (JSONObject) message.getSecond();
+                Integer code = response.getInteger("code");
+                if (Objects.equals(code, 200)) {
+                    switch (message.getFirst()) {
+                        case 0 -> {
+                            term = response.getJSONObject("data").getString("semesterYear");
+                            getCourseList();
+                        }
+                        case 1 -> {
+                            JSONObject data = response.getJSONObject("data");
+                            if (data != null) {
+                                total = data.getInteger("total");
+                                data.getJSONArray("rows").forEach(e -> adp.add((JSONObject) e));
                             }
                         }
-                    } else if (Objects.equals(code, 50021000) || Objects.equals(code, 52021104) || Objects.equals(code, 52021100) || Objects.equals(code, 52021133) || Objects.equals(code, 52021170)) {
-                        params.toast(response.getString("message"));
-                    } else {
-                        params.toast(R.string.login_warning);
-                        params.gotoLogin(TargetUrl.JWXT);
+                        case 3 -> {
+                            params.toast(response.getString("data"));
+                            regetCourseList();
+                        }
                     }
-                    super.handleMessage(msg);
+                    model.nextAll();
                 }
             });
-            http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%E9%80%89%E8%AF%BE");
-            http.setParams(params);
             getInfo();
         }
         return binding.getRoot();
     }
-
+    
     private void regetCourseList() {
         clear();
         getCourseList();
     }
-
+    
     private void selectCategory() {
         int cid = binding.head.category.getCheckedChipId();
-        if (cid == R.id.major_compulsory) {
-            typeCate.setValue(List.of(1, 11));
-        } else if (cid == R.id.major_selective) {
-            typeCate.setValue(List.of(1, 21));
-        } else if (cid == R.id.school_public_selective) {
-            typeCate.setValue(List.of(1, 30));
-        } else if (cid == R.id.pe) {
-            typeCate.setValue(List.of(3, 10));
-        } else if (cid == R.id.en) {
-            typeCate.setValue(List.of(5, 1));
-        } else if (cid == R.id.public_compulsory) {
-            typeCate.setValue(List.of(1, 10));
-        } else if (cid == R.id.honor) {
-            typeCate.setValue(List.of(1, 31));
-        }
-
+        if (cid == R.id.major_compulsory) typeCate.setValue(new CommonUtil.Tuple2<>(1, 11));
+        else if (cid == R.id.major_selective) typeCate.setValue(new CommonUtil.Tuple2<>(1, 21));
+        else if (cid == R.id.school_public_selective)
+            typeCate.setValue(new CommonUtil.Tuple2<>(1, 30));
+        else if (cid == R.id.pe) typeCate.setValue(new CommonUtil.Tuple2<>(3, 10));
+        else if (cid == R.id.en) typeCate.setValue(new CommonUtil.Tuple2<>(5, 1));
+        else if (cid == R.id.public_compulsory) typeCate.setValue(new CommonUtil.Tuple2<>(1, 10));
+        else if (cid == R.id.honor) typeCate.setValue(new CommonUtil.Tuple2<>(1, 31));
+        
     }
-
+    
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             binding.head.addFilter.setOnClickListener(v ->
-                    Navigation.findNavController(view).navigate(R.id.selection_to_filter1, null, new NavOptions.Builder()
+                            Navigation.findNavController(view).navigate(R.id.selection_to_filter1, null, new NavOptions.Builder()
 //                                            .setExitAnim(androidx.navigation.ui.R.anim.nav_default_pop_enter_anim)
 //                            .setEnterAnim()
 //                            .setExitAnim(android.R.animator.fade_out)
-
-                            .build(), new FragmentNavigator.Extras.Builder().addSharedElement(v, "miniapp").build())
+                                    
+                                    .build(), new FragmentNavigator.Extras.Builder().addSharedElement(v, "miniapp").build())
             );
         }
         MaterialContainerTransform transition = new MaterialContainerTransform();
@@ -224,71 +190,71 @@ public class CourseSelectionFragment extends Fragment {
         setSharedElementReturnTransition(transition);
         super.onViewCreated(view, savedInstanceState);
     }
-
+    
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         gm.setSpanCount(params.getColumn());
     }
-
+    
     void clear() {
         if (adp != null) adp.clear();
         page = 0;
         total = -1;
     }
-
+    
     void getCourseList() {
-        if (type.getValue() == null || category.getValue() == null || term == null)
-            return;
-        getCourseList(getType(), getCategory(), term, filter.getValue() == null ? "" : filter.getValue());
+        if (type.getValue() != null && category.getValue() != null && term != null)
+            getCourseList(getType(), getCategory(), term, toStringOrDefault(filter.getValue()));
+        
     }
-
+    
     void getCourseList(int selectedType, int selectedCate, String term, String filterText) {
-        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list",
+        model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/list",
                 String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"param\":{\"semesterYear\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"hiddenConflictStatus\":\"0\",\"hiddenSelectedStatus\":\"%d\",\"hiddenEmptyStatus\":\"%d\",\"vacancySortStatus\":\"%d\",\"collectionStatus\":\"%d\"%s}}", ++page, term, selectedType, selectedCate,
                         bool2int(binding.head.hideSelected.isChecked()), bool2int(binding.head.hideVacancy.isChecked()), bool2int(binding.head.vacancy.isChecked()), bool2int(binding.head.onlyCollection.isChecked()),
                         filterText), 1);
     }
-
+    
     void like(String code) {
-        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/stuCollectedCourse/create",
+        model.addAndNext("jwxt/choose-course-front-server/stuCollectedCourse/create",
                 String.format("{\"classesID\":\"%s\",\"selectedType\":\"1\"}", code),
                 3);
     }
-
+    
     void getInfo() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0);
+        model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0);
     }
-
+    
     void select(String code) {
-        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/choose",
+        model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose",
                 String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, getType(), getCategory()),
                 3);
-
+        
     }
-
+    
     int getType() {
-        return Objects.requireNonNull(typeCate.getValue()).get(0) == null ? 1 : typeCate.getValue().get(0);
+        return CommonUtil.toIntegerOrDefault(typeCate.getValue().getFirst(), 1);
     }
-
+    
     int getCategory() {
-        return Objects.requireNonNull(typeCate.getValue()).get(1) == null ? 11 : typeCate.getValue().get(1);
+        return CommonUtil.toIntegerOrDefault(typeCate.getValue().getSecond(), 11);
     }
-
+    
     void unselect(String classId, String code) {
-        http.postRequest("https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/back",
+        model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/back",
                 String.format(Locale.getDefault(), "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}", classId, code, getType()),
                 3);
-
+        
     }
-
+    
     static class SpacesItemDecoration extends RecyclerView.ItemDecoration {
         private final int space;
-
+        
         public SpacesItemDecoration(int i) {
-            this.space = i;
+            space = i;
         }
-
+        
         @Override
         public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
             outRect.top = space / 2;
@@ -297,12 +263,12 @@ public class CourseSelectionFragment extends Fragment {
             outRect.bottom = space / 2;
         }
     }
-
+    
     public static class CourseAdapter extends RecyclerAdapter<JSONObject> {
         final String[] info = new String[]{"credit", "clazzNum", "scheduleExamTime", "examFormName", "statusName"};
-        Consumer<Integer> selectAction;
-        Consumer<String> likeAction;
-
+        Consumer<? super Integer> selectAction;
+        Consumer<? super String> likeAction;
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -320,15 +286,15 @@ public class CourseSelectionFragment extends Fragment {
             return new RecyclerView.ViewHolder(binding.getRoot()) {
             };
         }
-
-        public void setSelectAction(Consumer<Integer> action) {
-            this.selectAction = action;
+        
+        public void setSelectAction(Consumer<? super Integer> action) {
+            selectAction = action;
         }
-
-        public void setLikeAction(Consumer<String> action) {
-            this.likeAction = action;
+        
+        public void setLikeAction(Consumer<? super String> action) {
+            likeAction = action;
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.bind(holder.itemView);
@@ -364,7 +330,7 @@ public class CourseSelectionFragment extends Fragment {
                 (new MaterialButton[]{binding.left, binding.filtering, binding.selected}[i]).setText(String.format("%s\n%s", seatInfoLabels[i], content));
             }
         }
-
+        
         public String convert(int position, String key) {
             return trim(get(position).getString(key)).replace("\n\n", "\n");
         }

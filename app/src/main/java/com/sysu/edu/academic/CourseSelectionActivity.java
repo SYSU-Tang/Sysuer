@@ -15,12 +15,10 @@ import java.util.stream.IntStream;
 
 public class CourseSelectionActivity extends AppCompatActivity {
 
-    ActivityCourseSelectionBinding binding;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityCourseSelectionBinding.inflate(getLayoutInflater());
+        ActivityCourseSelectionBinding binding = ActivityCourseSelectionBinding.inflate(getLayoutInflater());
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         setContentView(binding.getRoot());
         Pager2Adapter pager2Adapter = new Pager2Adapter(this);

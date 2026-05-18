@@ -1,9 +1,6 @@
 package com.sysu.edu.academic;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,19 +14,17 @@ import androidx.navigation.Navigation;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentAssistantInfoFilterBinding;
 import com.sysu.edu.databinding.ItemFilterChipBinding;
+import com.sysu.edu.model.JwxtModel;
 
 public class AssistantInfoFilterFragment extends Fragment {
-
+    
     final MutableLiveData<String> term = new MutableLiveData<>();
     final MutableLiveData<String> campus = new MutableLiveData<>();
-    HttpManager http;
     FragmentAssistantInfoFilterBinding binding;
-
+    JwxtModel model;
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -38,8 +33,7 @@ public class AssistantInfoFilterFragment extends Fragment {
         if (binding == null) {
             binding = FragmentAssistantInfoFilterBinding.inflate(inflater, container, false);
             PopupMenu pop = new PopupMenu(requireContext(), binding.term.getRoot());
-            Params params = new Params(this);
-            params.setCallback(this::getTerms);
+            model = new JwxtModel(requireContext());
             binding.term.itemTitle.setText(R.string.term);
             binding.term.itemIcon.setImageResource(R.drawable.calendar);
             binding.term.getRoot().setOnClickListener(_ -> pop.show());
@@ -57,58 +51,44 @@ public class AssistantInfoFilterFragment extends Fragment {
                     binding.term.itemContent.setText(acadYearSemester);
                 }
             });
-            Handler handler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    super.handleMessage(msg);
-                    if (msg.what == -1) {
-                        params.toast(R.string.login_warning);
-                    } else {
-                        JSONObject response = JSONObject.parseObject((String) msg.obj);
-                        if (response.getInteger("code") == 200) {
-                            switch (msg.what) {
-                                case 0:
-                                    response.getJSONArray("data").forEach(t -> pop.getMenu().add(((JSONObject) t).getString("acadYearSemester")).setOnMenuItemClickListener(_ -> {
-                                        term.setValue(((JSONObject) t).getString("acadYearSemester"));
-                                        return false;
-                                    }));
-                                    getCampuses();
-                                    break;
-                                case 1:
-                                    response.getJSONArray("data").forEach(c -> {
-                                        ItemFilterChipBinding item = ItemFilterChipBinding.inflate(inflater, binding.campus, false);
-                                        item.getRoot().setText(((JSONObject) c).getString("campusName"));
-                                        item.getRoot().setOnCheckedChangeListener((_, isChecked) -> {
-                                            if (isChecked) {
-                                                campus.setValue(((JSONObject) c).getString("id"));
-                                            }
-                                        });
-                                        binding.campus.addView(item.getRoot());
-                                    });
-                                    break;
-                            }
-                        } else {
-                            params.toast(R.string.login_warning);
-                            params.gotoLogin(TargetUrl.JWXT);
+            model.getMessage().observe(requireActivity(), message -> {
+                JSONObject response = (JSONObject) message.getSecond();
+                if (response.getInteger("code") == 200) {
+                    switch (message.getFirst()) {
+                        case 0 -> {
+                            response.getJSONArray("data").forEach(t -> pop.getMenu().add(((JSONObject) t).getString("acadYearSemester")).setOnMenuItemClickListener(_ -> {
+                                term.setValue(((JSONObject) t).getString("acadYearSemester"));
+                                return false;
+                            }));
+                            getCampuses();
                         }
+                        case 1 -> response.getJSONArray("data").forEach(c -> {
+                            ItemFilterChipBinding item = ItemFilterChipBinding.inflate(inflater, binding.campus, false);
+                            item.getRoot().setText(((JSONObject) c).getString("campusName"));
+                            item.getRoot().setOnCheckedChangeListener((_, isChecked) -> {
+                                if (isChecked) {
+                                    campus.setValue(((JSONObject) c).getString("id"));
+                                }
+                            });
+                            binding.campus.addView(item.getRoot());
+                        });
                     }
+                    model.nextAll();
                 }
-            };
-            http = new HttpManager(handler);
-            http.setParams(params);
-            http.setReferrer("https://jwxt.sysu.edu.cn/jwxt/mk/zjgl/");
+            });
             getTerms();
+            model.next();
         }
         return binding.getRoot();
     }
-
-
+    
+    
     void getTerms() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0);
+        model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0);
     }
-
-
+    
+    
     void getCampuses() {
-        http.getRequest("https://jwxt.sysu.edu.cn/jwxt/base-info/campus/findCampusNamesBox", 1);
+        model.add("jwxt/base-info/campus/findCampusNamesBox", 1);
     }
 }

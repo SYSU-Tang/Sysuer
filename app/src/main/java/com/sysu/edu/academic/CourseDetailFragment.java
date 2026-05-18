@@ -1,5 +1,6 @@
 package com.sysu.edu.academic;
 
+import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 import static com.sysu.edu.api.CommonUtil.trim;
 
 import android.os.Bundle;
@@ -20,44 +21,40 @@ import com.sysu.edu.databinding.FragmentCourseDetailBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 
 public class CourseDetailFragment extends Fragment {
-
+    
     FragmentCourseDetailBinding binding;
     JSONObject data;
     Params params;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCourseDetailBinding.inflate(inflater);
         params = new Params(this);
         return binding.getRoot();
     }
-
+    
     @Override
     public void setArguments(@Nullable Bundle args) {
         if (args != null) {
-            JSONObject data = JSONObject.parse(args.getString("data"));
-            if (data != null) {
+            JSONObject jsonData = JSONObject.parse(args.getString("data"));
+            if (jsonData != null) {
                 switch (args.getInt("what")) {
-                    case 1:
-                        this.data = data;
-                        break;
-                    case 2:
+                    case 1 -> data = jsonData;
+                    case 2 -> {
                         try {
-                            binding.intro.setText(trim(this.data.getString("courseContentInChinese")));
-                            binding.goal.setText(trim(this.data.getString("courseObjectiveAndRequirement")));
-                            binding.method.setText(trim(this.data.getString("teachMethod")));
-                            binding.evaluationMethod.setText(trim(this.data.getString("evaluationMethod")));
-                            binding.reference.setText(trim(this.data.getString("referenceBook")));
-                            binding.resource.setText(trim(this.data.getString("courseResource")));
+                            binding.intro.setText(trim(data.getString("courseContentInChinese")));
+                            binding.goal.setText(trim(data.getString("courseObjectiveAndRequirement")));
+                            binding.method.setText(trim(data.getString("teachMethod")));
+                            binding.evaluationMethod.setText(trim(data.getString("evaluationMethod")));
+                            binding.reference.setText(trim(data.getString("referenceBook")));
+                            binding.resource.setText(trim(data.getString("courseResource")));
                             String[] info = new String[]{"courseName", "faceProfessionName", "courseTypeName", "courseNum", "courseId", "subCourseTypeName", "subTypeModuleName", "courseTextBook", "credit", "totalHours", "lecturesCreHours", "labCreHours", "weekHours", "totalHoursComment", "languageName", "establishUnitNumberName", "planClassSize", "teacherName", "intendedAcadYear", "intendedCampusName"};
                             for (int i = 0; i < info.length; i++) {
-                                String content = (i == 9 | i == 10 ? data : this.data).getString(info[i]);
-                                if (content == null) content = "";
+                                String content = toStringOrDefault((i == 9 | i == 10 ? jsonData : data).getString(info[i]));
                                 Chip chip = ItemActionChipBinding.inflate(getLayoutInflater()).getRoot();
                                 chip.setText(String.format("%s：%s", getResources().getStringArray(R.array.course_outline)[i], content));
-                                String finalContent = content;
                                 chip.setOnLongClickListener(_ -> {
-                                    params.copy("courseId", finalContent);
+                                    params.copy("courseId", content);
                                     params.toast(R.string.copy_successfully);
                                     return false;
                                 });
@@ -66,9 +63,8 @@ public class CourseDetailFragment extends Fragment {
                             }
                         } catch (Exception _) {
                         }
-                        break;
+                    }
                 }
-
             }
         }
         super.setArguments(args);
