@@ -1,6 +1,7 @@
 package com.sysu.edu.browser;
 
 import static android.text.TextUtils.isEmpty;
+import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 import static com.sysu.edu.api.CommonUtil.trim;
 import static com.sysu.edu.api.DownloadManager.downloadFile;
 import static com.sysu.edu.api.DownloadManager.openFile;
@@ -128,8 +129,8 @@ public class BrowserActivity extends AppCompatActivity {
                                 .build()).execute();
                         MediaType mediaType = response.body().contentType();
                         return new WebResourceResponse(mediaType == null ? "application/octet-stream" : mediaType.type(), "utf-8", response.body().byteStream());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    } catch (IOException _) {
+                    
                     }
                 }
                 return super.shouldInterceptRequest(view, request);
@@ -149,7 +150,14 @@ public class BrowserActivity extends AppCompatActivity {
                 } else if (Pattern.compile("://appgw.sysu.edu.cn/").matcher(link).find()) {
                     web.stopLoading();
                     web.loadUrl(url.replace(".sysu.edu.cn/", "-443.webvpn.sysu.edu.cn/"));
-                } else if (preference.isPC()) {
+                } else if (Pattern.compile("://cas.*?sysu.edu.cn/login/mfaLogin.html").matcher(link).find()) {
+                    cookie.setCookie("https://cas.sysu.edu.cn","device_trust_Cookie=true; Path=/esc-sso; Domain=cas.sysu.edu.cn;");
+                    try {
+                        web.loadUrl(toStringOrDefault(Uri.parse(URLDecoder.decode(link, "utf-8")).getQueryParameter("appUrl")));
+                    } catch (UnsupportedEncodingException _) {
+                    }
+                }
+                else if (preference.isPC()) {
                     view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
                 }
                 js.searchJS(link, true).forEach(a -> view.evaluateJavascript(a.getString("script"), null));
@@ -235,11 +243,11 @@ public class BrowserActivity extends AppCompatActivity {
             downloadDialog.getMenu(1).setText(path);
             downloadDialog.setPositiveButton(R.string.download, (_, _) -> {
                 if (url1.contains("jwxt.sysu.edu.cn"))
-                    downloadFile(BrowserActivity.this, new Request.Builder()
+                    downloadFile(this, new Request.Builder()
                             .url(url1)
                             .header("Cookie", cookie.getCookie(url1))
                             .header("Referer", "https://jwxt.sysu.edu.cn/jwxt/").build(), path);
-                else downloadFile(BrowserActivity.this, url1, path);
+                else downloadFile(this, url1, path);
             });
             downloadDialog.show();
         });
@@ -264,7 +272,7 @@ public class BrowserActivity extends AppCompatActivity {
         /*
          * 长按菜单
          * */
-        final View anchorView = new View(BrowserActivity.this);
+        final View anchorView = new View(this);
         anchorView.setLayoutParams(new FrameLayout.LayoutParams(1, 1));
         ((FrameLayout) web.getParent()).addView(anchorView);
         GestureDetector gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -296,7 +304,7 @@ public class BrowserActivity extends AppCompatActivity {
         /*
          * 脚本弹窗
          * */
-        BottomSheetDialog jsDialog = new BottomSheetDialog(BrowserActivity.this);
+        BottomSheetDialog jsDialog = new BottomSheetDialog(this);
         DialogJsBinding JSBinding = DialogJsBinding.inflate(getLayoutInflater());
         jsDialog.setContentView(JSBinding.getRoot());
         jsDialog.setTitle(R.string.js);
@@ -349,12 +357,12 @@ public class BrowserActivity extends AppCompatActivity {
         });
         
         RecyclerView jsList = JSBinding.recyclerView.getRoot();
-        jsList.setLayoutManager(new LinearLayoutManager(BrowserActivity.this));
+        jsList.setLayoutManager(new LinearLayoutManager(this));
         jsList.setAdapter(jsAdapter);
-        JSBinding.manage.setOnClickListener(v -> startActivity(new Intent(BrowserActivity.this, JSActivity.class),
-                ActivityOptionsCompat.makeSceneTransitionAnimation(BrowserActivity.this, v, "miniapp").toBundle()));
-        JSBinding.add.setOnClickListener(v -> startActivity(new Intent(BrowserActivity.this, JSActivity.class).putExtra("operation", "add"),
-                ActivityOptionsCompat.makeSceneTransitionAnimation(BrowserActivity.this, v, "miniapp").toBundle()));
+        JSBinding.manage.setOnClickListener(v -> startActivity(new Intent(this, JSActivity.class),
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, v, "miniapp").toBundle()));
+        JSBinding.add.setOnClickListener(v -> startActivity(new Intent(this, JSActivity.class).putExtra("operation", "add"),
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, v, "miniapp").toBundle()));
         
         /*
          * 菜单弹窗
@@ -383,7 +391,7 @@ public class BrowserActivity extends AppCompatActivity {
         uaNames.add(getString(R.string.follow_system));
         uaIcons.add(R.drawable.setting);
         uaAction.add(_ -> {
-            this.webSettings.setUserAgentString(WebSettings.getDefaultUserAgent(this));
+            webSettings.setUserAgentString(WebSettings.getDefaultUserAgent(this));
             preference.setUA(-1);
             web.reload();
         });
@@ -394,7 +402,7 @@ public class BrowserActivity extends AppCompatActivity {
                 uaIcons.add(List.of(R.drawable.laptop, R.drawable.laptop, R.drawable.laptop, R.drawable.mac, R.drawable.android, R.drawable.tablet, R.drawable.iphone, R.drawable.ipad, R.drawable.ua, R.drawable.laptop, R.drawable.laptop, R.drawable.android).get(uaId));
                 String ua = cursor.getString(cursor.getColumnIndexOrThrow("ua"));
                 uaAction.add(_ -> {
-                    this.webSettings.setUserAgentString(ua);
+                    webSettings.setUserAgentString(ua);
                     preference.setUA(uaId);
                     web.reload();
                 });
@@ -566,7 +574,7 @@ public class BrowserActivity extends AppCompatActivity {
             if (web.canGoForward()) web.goForward();
         });
         if (getIntent().hasExtra("data") && getIntent().getStringExtra("data") != null) {
-            this.webSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36");
+            webSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36");
             web.loadDataWithBaseURL("https://jwxt.sysu.edu.cn", Objects.requireNonNull(getIntent().getStringExtra("data")), "text/html", "utf-8", "https://jwxt.sysu.edu.cn");
         } else web.loadUrl(url);
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
