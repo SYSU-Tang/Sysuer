@@ -599,6 +599,7 @@
     <string name="add_to_launcher">Add to Launcher</string>
     <string name="tomorrow_class">Tomorrow Class</string>
     <string name="fail_to_add_shortcut">Fail to add to the launcher. Please enable the perssion in the system setting</string>
+    <string name="widget_date">Mar. 5th 2025 Thu.</string>
     <string name="reserve_success">Succeed Reserving</string>
     <string name="venue">Venue</string>
     <string name="start_time">Start Time</string>
@@ -655,4 +656,14 @@
     <string name="name_helper_text">Anonymous submissions are supported for tracking progress. \\nStatistics show that submitting reports using WeCom with real-name verification improves response efficiency, while anonymous submissions tend to have longer average response times.</string>
     <string name="phone">Phone Number</string>
     <string name="subject_helper_text">Example: Comments/suggestions/requests regarding XX matter at the XX campus</string>
+    <string name="login_success">Login Successful</string>
+    <string name="set_sysu_code_warning">Please configure SYSU Code in the settings.</string>
+    <string name="fix_sysu_code_warning">Please configure the correct SYSU code link.</string>
+    <string name="registration">Registration</string>
+    <string name="loading">Loading</string>
+    <string name="route">Route</string>
+    <string name="start">Begin</string>
+    <string name="end">End</string>
+    <string name="passenger">Passenger</string>
+    <string name="vehicles">Vehicle</string>
 </resources>

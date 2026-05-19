@@ -5,17 +5,6 @@
     <style name="Theme.SYSUER.Light" parent="Theme.SYSUER.Base" />
 
     <style name="Theme.SYSUER.Base" parent="Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <!--        <item name="colorPrimary">@color/purple_500</item>-->
-        <!--        <item name="colorPrimaryVariant">@color/purple_700</item>-->
-        <!--        <item name="colorOnPrimary">@color/white</item>-->
-        <!--        &lt;!&ndash; Secondary brand color. &ndash;&gt;-->
-        <!--        <item name="colorSecondary">@color/teal_200</item>-->
-        <!--        <item name="colorSecondaryVariant">@color/teal_700</item>-->
-        <!--        <item name="colorOnSecondary">@color/black</item>-->
-        <!--        &lt;!&ndash; Status bar color. &ndash;&gt;-->
-        <!--        <item name="android:statusBarColor">@color/white</item>-->
-
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
         <item name="editTextPreferenceStyle">@style/Preference.Rikka.EditTextPreference.Material3
         </item>

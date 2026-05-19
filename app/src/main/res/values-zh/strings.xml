@@ -656,11 +656,11 @@
     <string name="optional">可选</string>
     <string name="login_success">登录成功</string>
     <string name="set_sysu_code_warning">请在设置里配置逸仙码</string>
-    <string name="fix_sysu_code_warning">请配置正确的逸仙码链接</string>
+    <string name="fix_sysu_code_warning">请修正正确的逸仙码链接</string>
     <string name="registration">登记</string>
-    <string name="loading">加载中</string>
     <string name="route">路线</string>
     <string name="start">起点</string>
+    <string name="loading">加载中</string>
     <string name="end">终点</string>
     <string name="passenger">乘客</string>
     <string name="vehicles">车辆</string>
