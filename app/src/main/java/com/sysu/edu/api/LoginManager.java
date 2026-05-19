@@ -40,7 +40,7 @@ import okhttp3.Response;
 
 public class LoginManager {
     
-    private static final int TIMEOUT = 30;
+    private static final int TIMEOUT = 15;
     private static CookieManager cookieManager;
     private final ArrayDeque<Long> timestamps = new ArrayDeque<>();
     private final CookieStore cookieJar = new CookieStore();
@@ -177,8 +177,10 @@ public class LoginManager {
                     request(redirect + "?service=https%3A%2F%2Fwebvpn.sysu.edu.cn%2Fusers%2Fauth%2Fcas%2Fcallback%3Furl");
                     request("https://webvpn.sysu.edu.cn/vpn_key/update");
                     List<Cookie> webvpnKey = cookieJar.loadForRequest(HttpUrl.get("https://webvpn.sysu.edu.cn/vpn_key/update")).stream().filter(e -> "_webvpn_key".equals(e.name())).collect(Collectors.toList());
-                    cookieJar.saveFromResponse(HttpUrl.get(service), webvpnKey);
-                    cookieJar.saveFromResponse(HttpUrl.get(casAuthorizationManager.getBaseUrl()), webvpnKey);
+                    if(!webvpnKey.isEmpty()) {
+                        cookieJar.saveFromResponse(HttpUrl.get(service), webvpnKey);
+                        cookieJar.saveFromResponse(HttpUrl.get(casAuthorizationManager.getBaseUrl()), webvpnKey);
+                    }
                     switch (service) {
                         case TargetUrl.NEWS_WEBVPN ->
                                 setAuthorization(host, getNewsAuthorization(service));
@@ -188,7 +190,8 @@ public class LoginManager {
                             setAuthorization(host, getGymAuthorization(targetBaseUrl));
                         }
                         case TargetUrl.PORTAL -> {
-                            cookieJar.saveFromResponse(HttpUrl.get("https://mportal.sysu.edu.cn"), webvpnKey);
+                            if(!webvpnKey.isEmpty())
+                                cookieJar.saveFromResponse(HttpUrl.get("https://mportal.sysu.edu.cn"), webvpnKey);
                             loginForPortal();
                             cookieJar.copy("https://portal.sysu.edu.cn", "https://mportal.sysu.edu.cn");
                         }

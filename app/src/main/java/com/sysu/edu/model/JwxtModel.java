@@ -116,8 +116,7 @@ public class JwxtModel {
     public CommonUtil.Tuple2<Integer, JSONObject> execute(CommonUtil.Tuple2<Request, Integer> request) {
         try {
             Response response = http.getClient().newCall(request.getFirst()).execute();
-            handleResponse(request, response);
-            return message.getValue();
+            return handleResponse(request, response);
         } catch (IOException e) {
             handleFailure();
             return null;
@@ -135,7 +134,7 @@ public class JwxtModel {
         }
     }
     
-    private void handleResponse(CommonUtil.Tuple2<Request, Integer> request, Response response) throws IOException {
+    private CommonUtil.Tuple2<Integer, JSONObject> handleResponse(CommonUtil.Tuple2<Request, Integer> request, Response response) throws IOException {
         String type = response.header("Content-Type");
         String content = response.body().string();
         if (type != null && type.contains("application/json")) {
@@ -146,14 +145,17 @@ public class JwxtModel {
             else {
                 if (!code.equals(200))
                     http.getHandler().post(() -> contextUtil.toast(toStringOrDefault(contentJSON.getString("message"))));
-                message.postValue(new CommonUtil.Tuple2<>(request.getSecond(), contentJSON));
+                CommonUtil.Tuple2<Integer, JSONObject> result = new CommonUtil.Tuple2<>(request.getSecond(), contentJSON);
+                message.postValue(result);
                 afterLoginRequest.remove(request);
+                return result;
             }
         } else {
             if (!authorizationManager.isAuthorized(content))
                 login(request);
             else if (!authorizationManager.isAccessible(content)) retry(request);
         }
+        return null;
     }
     
     protected void retry(CommonUtil.Tuple2<Request, Integer> request) {
