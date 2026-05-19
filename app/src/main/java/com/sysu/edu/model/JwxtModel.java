@@ -59,8 +59,11 @@ public class JwxtModel {
     }
     
     public void next() {
-        CommonUtil.Tuple2<Request, Integer> request = queue.poll();
+        CommonUtil.Tuple2<Request, Integer> request = getNextRequest();
         if (request != null) request(request);
+    }
+    public CommonUtil.Tuple2<Request, Integer> getNextRequest() {
+        return queue.poll();
     }
     
     public void nextAll() {
@@ -96,34 +99,64 @@ public class JwxtModel {
         http.getClient().newCall(request.getFirst()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                http.getHandler().post(() -> contextUtil.toast(R.string.no_net_connected));
+                handleFailure();
             }
             
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String type = response.header("Content-Type");
-                String content = response.body().string();
-                if (type != null && type.contains("application/json")) {
-                    JSONObject contentJSON = JSONObject.parse(content);
-                    Integer code = contentJSON.getInteger("code");
-                    if (code.equals(53000007))
-                        login(request);
-                    else {
-                        if (!code.equals(200))
-                            http.getHandler().post(() -> contextUtil.toast(toStringOrDefault(contentJSON.getString("message"))));
-                        message.postValue(new CommonUtil.Tuple2<>(request.getSecond(), contentJSON));
-                        afterLoginRequest.remove(request);
-                    }
-                } else {
-                    if (!authorizationManager.isAuthorized(content))
-                        login(request);
-                    else if (!authorizationManager.isAccessible(content)) retry(request);
-                }
+                handleResponse(request, response);
             }
         });
     }
     
-    private void retry(CommonUtil.Tuple2<Request, Integer> request) {
+    private void handleFailure() {
+        http.getHandler().post(() -> contextUtil.toast(R.string.no_net_connected));
+    }
+    
+    public CommonUtil.Tuple2<Integer, JSONObject> execute(CommonUtil.Tuple2<Request, Integer> request) {
+        try {
+            Response response = http.getClient().newCall(request.getFirst()).execute();
+            handleResponse(request, response);
+            return message.getValue();
+        } catch (IOException e) {
+            handleFailure();
+            return null;
+        }
+    }
+    
+    public CommonUtil.Tuple2<Integer, JSONObject> execute(Request request, Integer code) {
+        try {
+            Response response = http.getClient().newCall(request).execute();
+            handleResponse(new CommonUtil.Tuple2<>(request, code), response);
+            return message.getValue();
+        } catch (IOException e) {
+            handleFailure();
+            return null;
+        }
+    }
+    
+    private void handleResponse(CommonUtil.Tuple2<Request, Integer> request, Response response) throws IOException {
+        String type = response.header("Content-Type");
+        String content = response.body().string();
+        if (type != null && type.contains("application/json")) {
+            JSONObject contentJSON = JSONObject.parse(content);
+            Integer code = contentJSON.getInteger("code");
+            if (code.equals(53000007))
+                login(request);
+            else {
+                if (!code.equals(200))
+                    http.getHandler().post(() -> contextUtil.toast(toStringOrDefault(contentJSON.getString("message"))));
+                message.postValue(new CommonUtil.Tuple2<>(request.getSecond(), contentJSON));
+                afterLoginRequest.remove(request);
+            }
+        } else {
+            if (!authorizationManager.isAuthorized(content))
+                login(request);
+            else if (!authorizationManager.isAccessible(content)) retry(request);
+        }
+    }
+    
+    protected void retry(CommonUtil.Tuple2<Request, Integer> request) {
         request.setFirst(updateRequest(request.getFirst()));
         request(request);
     }
