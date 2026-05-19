@@ -27,7 +27,7 @@ public class LeaveReturnRegistrationActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         LeaveReturnRegistrationViewModel viewModel = new ViewModelProvider(this).get(LeaveReturnRegistrationViewModel.class);
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response != null && response.getInteger("code") == 200) {
                 if (message.getFirst() == 0) {
                     JSONArray data;

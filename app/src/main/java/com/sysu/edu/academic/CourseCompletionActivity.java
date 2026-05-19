@@ -49,7 +49,7 @@ public class CourseCompletionActivity extends AppCompatActivity {
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(List.of("学分学时情况", "课程完成情况").get(position))).attach();
         getCreditHours();
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code").equals(200) && response.get("data") != null) {
                 if (message.getFirst() == 0) response.getJSONArray("data").forEach(a -> {
                     JSONObject item = (JSONObject) a;

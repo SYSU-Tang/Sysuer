@@ -67,7 +67,7 @@ public class RoomQueryFilterFragment extends PreferenceFragmentCompat {
         PreferenceCategory weekSelection = Objects.requireNonNull(findPreference("weekSelection"));
         PreferenceCategory dateSelection = Objects.requireNonNull(findPreference("dateSelection"));
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             Integer code = response.getInteger("code");
             if (code == 200) {
                 ArrayList<String> option = new ArrayList<>();

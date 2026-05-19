@@ -57,7 +57,7 @@ public class AcademyNotification extends AppCompatActivity {
         binding.pager.setAdapter(pager2Adapter);
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new int[]{R.string.academic_affair_notice, R.string.school_affair_notice}[position])).attach();
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code").equals(200)) {
                 switch (message.getFirst()) {
                     case 0, 1 ->

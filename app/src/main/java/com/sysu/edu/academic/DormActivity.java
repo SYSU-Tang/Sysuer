@@ -45,7 +45,7 @@ public class DormActivity extends AppCompatActivity {
         });
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(tabs.get(position))).attach();
         model.getMessage().observe(this, message -> {
-            JSONObject data = (JSONObject) message.getSecond();
+            JSONObject data = message.getSecond();
             if (data.containsKey("code") && data.getInteger("code") == 200) {
                 data = data.getJSONObject("data");
                 StaggeredFragment list = new StaggeredFragment();

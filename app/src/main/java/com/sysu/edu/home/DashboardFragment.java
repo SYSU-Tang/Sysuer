@@ -188,7 +188,7 @@ public class DashboardFragment extends Fragment {
             String date = LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()));
             binding.date.setText(String.format("%s/%s", date, getResources().getStringArray(R.array.weeks)[LocalDate.now().getDayOfWeek().getValue() - 1]));
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = (JSONObject) message.getSecond();
+                JSONObject response = message.getSecond();
                 if (response.get("code").equals(200)) {
                     switch (message.getFirst()) {
                         case 1 -> {

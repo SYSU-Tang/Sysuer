@@ -117,7 +117,7 @@ public class GradeForLevelActivity extends AppCompatActivity {
         getGrade();
         IntStream.range(0, 3).forEach(this::getData);
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code") == 200) {
                 Integer what = message.getFirst();
                 switch (what) {

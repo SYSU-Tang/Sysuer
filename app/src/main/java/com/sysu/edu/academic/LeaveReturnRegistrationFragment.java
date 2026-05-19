@@ -81,7 +81,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
             dialogRegionBinding.county.recyclerView.setNestedScrollingEnabled(false);
             dialogRegionBinding.county.recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_ALWAYS);
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = (JSONObject) message.getSecond();
+                JSONObject response = message.getSecond();
                 if (response != null && response.getInteger("code") == 200) {
                     switch (message.getFirst()) {
                         case 0 -> {

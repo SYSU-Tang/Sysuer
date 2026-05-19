@@ -36,7 +36,7 @@ public class CourseDetailActivity extends AppCompatActivity {
         // code: EIT228, id: null, classNum: 202511441
         getDetail();
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code").equals(200)) {
                 JSONObject data = response.getJSONObject("data");
                 if (data != null) {

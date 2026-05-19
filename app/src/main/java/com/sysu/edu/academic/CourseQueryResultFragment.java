@@ -36,7 +36,7 @@ public class CourseQueryResultFragment extends StaggeredFragment {
                 getCourses();
         });
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             Integer code = response.getInteger("code");
             if (code == 200) {
                 if (total == -1)

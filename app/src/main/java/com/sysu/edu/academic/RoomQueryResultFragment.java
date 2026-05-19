@@ -30,7 +30,7 @@ public class RoomQueryResultFragment extends StaggeredFragment {
         courseQueryResultBinding.fab.setOnClickListener(_ -> export(courseQueryResultBinding.fab, getString(R.string.course)));
         model = new JwxtModel(requireContext());
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             Integer code = response.getInteger("code");
             if (code == 200) response.getJSONObject("data").getJSONArray("data").forEach(e -> {
                 JSONObject item = (JSONObject) e;

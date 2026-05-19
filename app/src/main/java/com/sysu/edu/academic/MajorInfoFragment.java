@@ -43,7 +43,7 @@ public class MajorInfoFragment extends StaggeredFragment {
             }
         });
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response != null && response.getInteger("code").equals(200)) {
                 if (response.get("data") != null) {
                     JSONObject data = response.getJSONObject("data");

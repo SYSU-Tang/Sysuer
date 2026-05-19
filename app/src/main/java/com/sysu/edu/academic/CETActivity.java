@@ -31,7 +31,7 @@ public class CETActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         getExchange();
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code").equals(200)) {
                 if (message.getFirst() == 0) {
                     JSONObject data = response.getJSONObject("data");

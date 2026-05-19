@@ -48,7 +48,7 @@ public class RecruitmentInfoFragment extends StaggeredFragment {
             if ((page - 1) * 10 < total) getRecruitment();
         });
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject data = (JSONObject) message.getSecond();
+            JSONObject data = message.getSecond();
             if (data.containsKey("code") && data.getInteger("code") == 200) {
                 switch (message.getFirst()) {
                     case 0 -> {

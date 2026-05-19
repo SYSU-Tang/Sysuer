@@ -37,7 +37,7 @@ public class MajorInfoActivity extends AppCompatActivity {
         });
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(categories.get(position))).attach();
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response != null && response.getInteger("code").equals(200)) {
                 if (response.get("data") != null) {
                     if (message.getFirst() == 0) {

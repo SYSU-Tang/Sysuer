@@ -36,7 +36,7 @@ public class LeaveReturnListFragment extends StaggeredFragment {
         LeaveReturnRegistrationViewModel viewModel = new ViewModelProvider(requireActivity()).get(LeaveReturnRegistrationViewModel.class);
         viewModel.year.observe(getViewLifecycleOwner(), this::getList);
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response != null && response.getInteger("code") == 200) {
                 clear();
                 response.getJSONArray("data").forEach(e -> add(((JSONObject) e).getString("gzmc"), ((JSONObject) e).getInteger("gzztm") == 1 ? R.drawable.uncheck : R.drawable.check, List.of(getResources().getStringArray(R.array.registration_keys)),

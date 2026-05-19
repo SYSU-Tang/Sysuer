@@ -137,7 +137,7 @@ public class GradeActivity extends AppCompatActivity {
             getScore();
         });
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code") == 200) {
                 switch (message.getFirst()) {
                     case 1 -> {

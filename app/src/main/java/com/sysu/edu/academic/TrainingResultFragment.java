@@ -35,7 +35,7 @@ public class TrainingResultFragment extends Fragment {
         });
         binding.export.setOnClickListener(v -> staggeredFragment.export(v, getString(R.string.result)));
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getIntValue("code") == 200) {
                 if (message.getFirst() == 1) {
                     JSONObject data = response.getJSONObject("data");

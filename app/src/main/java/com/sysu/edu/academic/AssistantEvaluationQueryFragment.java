@@ -55,7 +55,7 @@ public class AssistantEvaluationQueryFragment extends PreferenceFragmentCompat {
             FilterPreference unit = Objects.requireNonNull(findPreference("unit"));
             unit.getValueLiveData().observe(requireActivity(), this::getUnit);
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = (JSONObject) message.getSecond();
+                JSONObject response = message.getSecond();
                 if (response.getInteger("code") == 200) {
                     switch (message.getFirst()) {
                         case 0 -> {

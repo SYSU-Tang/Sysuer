@@ -70,7 +70,7 @@ public class ExamActivity extends AppCompatActivity {
             }));
         });
         model.getMessage().observe(this,message->{
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code").equals(200)) {
                 switch (message.getFirst()) {
                     case 1->{

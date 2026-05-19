@@ -32,7 +32,7 @@ public class AssistantEvaluationResultFragment extends StaggeredFragment {
             if ((page - 1) * 10 < total) getResult();
         });
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code") == 200) {
                 if (message.getFirst() == 0) {
                     JSONObject data = response.getJSONObject("data");

@@ -125,7 +125,7 @@ public class CourseSelectionFragment extends Fragment {
                 }
             });
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = (JSONObject) message.getSecond();
+                JSONObject response = message.getSecond();
                 Integer code = response.getInteger("code");
                 if (Objects.equals(code, 200)) {
                     switch (message.getFirst()) {

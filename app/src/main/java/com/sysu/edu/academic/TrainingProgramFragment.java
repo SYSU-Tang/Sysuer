@@ -80,7 +80,7 @@ public class TrainingProgramFragment extends Fragment {
                         arg, null, new FragmentNavigator.Extras(Map.of(v, "result")));
             });
             model.getMessage().observe(requireActivity(), message->{
-                JSONObject data = (JSONObject) message.getSecond();
+                JSONObject data = message.getSecond();
                 if (data.getInteger("code") == 200) {
                     int what = message.getFirst();
                     switch (what) {

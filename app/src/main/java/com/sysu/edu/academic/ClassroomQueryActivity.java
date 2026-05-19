@@ -111,7 +111,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
         binding.dateText.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
         getCampus();
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code") == 200) {
                 if (message.getFirst() == 3) {
                     JSONObject data = response.getJSONObject("data");

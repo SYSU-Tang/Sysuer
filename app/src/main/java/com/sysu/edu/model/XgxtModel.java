@@ -32,7 +32,7 @@ public class XgxtModel {
     private final AuthorizationManager authorizationManager = new AuthorizationManager("xgxt.sysu.edu.cn", "xgxt-443.webvpn.sysu.edu.cn");
     private final HttpManager http = new HttpManager(new Handler(Looper.getMainLooper()));
     private final ArrayDeque<CommonUtil.Tuple2<Request, Integer>> queue = new ArrayDeque<>();
-    private final MutableLiveData<CommonUtil.Tuple2<Integer, Object>> message = new MutableLiveData<>();
+    private final MutableLiveData<CommonUtil.Tuple2<Integer, JSONObject>> message = new MutableLiveData<>();
     private final HashSet<CommonUtil.Tuple2<Request, Integer>> afterLoginRequest = new HashSet<>();
     
     public XgxtModel(Context context) {
@@ -148,16 +148,12 @@ public class XgxtModel {
         return contextUtil;
     }
     
-    public MutableLiveData<CommonUtil.Tuple2<Integer, Object>> getMessage() {
+    public MutableLiveData<CommonUtil.Tuple2<Integer, JSONObject>> getMessage() {
         return message;
     }
     
     public String getHost() {
         return authorizationManager.getBaseUrl();
-    }
-    
-    public CookieManager getCookieManager() {
-        return http.getCookieManager();
     }
     
     public Request updateRequest(Request request) {

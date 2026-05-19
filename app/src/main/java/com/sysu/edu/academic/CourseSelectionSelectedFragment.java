@@ -106,7 +106,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
         });
         adapter.setLikeAction(this::setPNP);
         model.getMessage().observe(requireActivity(),message->{
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getIntValue("code") == 200) {
                 switch (message.getFirst()) {
                     case 0 -> {

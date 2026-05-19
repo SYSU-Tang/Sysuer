@@ -41,7 +41,7 @@ public class SchoolWorkWarning extends AppCompatActivity {
         binding.toolbar.setTitle(R.string.school_work_warning);
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response != null && response.getInteger("code").equals(200)) {
                 JSONObject data = response.getJSONObject("data");
                 if (data != null) {

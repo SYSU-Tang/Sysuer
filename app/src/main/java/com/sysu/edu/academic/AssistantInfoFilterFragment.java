@@ -52,7 +52,7 @@ public class AssistantInfoFilterFragment extends Fragment {
                 }
             });
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = (JSONObject) message.getSecond();
+                JSONObject response = message.getSecond();
                 if (response.getInteger("code") == 200) {
                     switch (message.getFirst()) {
                         case 0 -> {

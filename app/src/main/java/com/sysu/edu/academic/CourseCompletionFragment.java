@@ -28,7 +28,7 @@ public class CourseCompletionFragment extends StaggeredFragment {
         model = new JwxtModel(requireActivity());
         getStudentCourse();
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = (JSONObject) message.getSecond();
+            JSONObject response = message.getSecond();
             if (response.getInteger("code").equals(200)) {
                 if (response.get("data") != null) {
                     if (message.getFirst() == 0) {
