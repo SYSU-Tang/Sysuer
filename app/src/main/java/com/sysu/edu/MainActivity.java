@@ -32,6 +32,8 @@ import androidx.navigation.NavInflater;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -43,8 +45,8 @@ import com.sysu.edu.databinding.ActivityMainBinding;
 import com.sysu.edu.home.HomeViewModel;
 import com.sysu.edu.widget.NextClassWidget;
 import com.sysu.edu.widget.RecentClassWidget;
-import com.sysu.edu.widget.TodayClassWidget;
 import com.sysu.edu.widget.TomorrowClassWidget;
+import com.sysu.edu.widget.WidgetUpdateWorker;
 
 import java.io.File;
 import java.util.List;
@@ -153,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        List.of(NextClassWidget.class, TodayClassWidget.class, TomorrowClassWidget.class, RecentClassWidget.class).forEach(e -> sendBroadcast(new Intent(this, e)
+        List.of(NextClassWidget.class, /*TodayClassWidget.class, */TomorrowClassWidget.class, RecentClassWidget.class).forEach(e -> sendBroadcast(new Intent(this, e)
                 .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, AppWidgetManager.getInstance(this)
                         .getAppWidgetIds(new ComponentName(this, e)))));
@@ -167,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
             manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     System.currentTimeMillis() + 2 * 1000, piMorning);
         }*/
+        WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class).build());
         if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                 requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, PackageManager.PERMISSION_GRANTED);
