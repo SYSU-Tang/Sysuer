@@ -5,17 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingLeft="8dp"
     android:paddingTop="8dp"
-    android:paddingRight="8dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
     android:paddingBottom="8dp">
 
     <androidx.constraintlayout.helper.widget.Flow
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="notice,day,destination"
+        app:constraint_referenced_ids="date,destination,notice"
         app:flow_horizontalBias="0.0"
-        app:flow_horizontalGap="4dp"
         app:flow_horizontalStyle="packed"
         app:flow_verticalAlign="center"
         app:flow_wrapMode="chain2"
@@ -23,24 +22,44 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/day"
-        style="@style/Widget.Material3Expressive.Button.OutlinedButton"
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/date"
+        style="@style/Widget.Material3.MaterialButtonToggleGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/workday" />
+        app:checkedButton="@+id/workday"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/workday"
+            style="@style/Widget.Material3Expressive.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/workday" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/holiday"
+            style="@style/Widget.Material3Expressive.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/holiday" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/notice"
         style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/notice"
         app:icon="@drawable/notice" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/destination"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
+        android:hint="@string/route"
         android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView

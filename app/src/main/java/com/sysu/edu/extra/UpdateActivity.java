@@ -34,9 +34,9 @@ import java.util.Locale;
 import io.noties.markwon.Markwon;
 
 public class UpdateActivity extends AppCompatActivity {
-
+    
     HttpManager http;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,14 +57,17 @@ public class UpdateActivity extends AppCompatActivity {
                 .setName("下载进度通知").build();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.createNotificationChannel(channel);
-
+        
         Params params = new Params(this);
         int finalVersionCode = versionCode;
         http = new HttpManager(new Handler(getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 switch (msg.what) {
-                    case -1 -> params.toast(R.string.no_net_connected);
+                    case -1 -> {
+                        params.toast(R.string.no_net_connected);
+                        binding.updateButton.setText(R.string.no_net_connected);
+                    }
                     case 0 -> {
                         JSONObject response = JSONObject.parse((String) msg.obj);
                         Integer responseVersion = response.getInteger("version");
@@ -95,7 +98,7 @@ public class UpdateActivity extends AppCompatActivity {
                                         if (ActivityCompat.checkSelfPermission(UpdateActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
                                             notificationManager.notify(1002, builder.build());
                                     }
-
+                                    
                                     @Override
                                     public void onDownloadComplete(String path) {
                                         binding.updateButton.setText(R.string.install);
@@ -110,7 +113,7 @@ public class UpdateActivity extends AppCompatActivity {
                                             notificationManager.notify(1002, builder.build());
                                         openFile(UpdateActivity.this, path);
                                     }
-
+                                    
                                     @Override
                                     public void onDownloadError(int code, String message) {
                                         params.toast(message);
@@ -135,7 +138,7 @@ public class UpdateActivity extends AppCompatActivity {
         });
         getUpdate();
     }
-
+    
     public void getUpdate() {
         http.getRequest("https://sysu-tang.github.io/latest.json", 0);
     }
