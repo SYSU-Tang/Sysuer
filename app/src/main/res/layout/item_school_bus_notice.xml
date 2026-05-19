@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="8dp"
     android:paddingStart="4dp"
+    android:paddingTop="8dp"
     android:paddingEnd="4dp"
     android:paddingBottom="8dp">
 
@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="date,destination,notice"
         app:flow_horizontalBias="0.0"
+        app:flow_horizontalGap="4dp"
         app:flow_horizontalStyle="packed"
         app:flow_verticalAlign="center"
         app:flow_wrapMode="chain2"
@@ -29,6 +30,7 @@
         android:layout_height="wrap_content"
         app:checkedButton="@+id/workday"
         app:selectionRequired="true"
+        android:spacing="1dp"
         app:singleSelection="true">
 
         <com.google.android.material.button.MaterialButton
@@ -37,6 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:minWidth="0dp"
             android:text="@string/workday" />
 
         <com.google.android.material.button.MaterialButton
@@ -44,6 +47,7 @@
             style="@style/Widget.Material3Expressive.Button.TonalButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="0dp"
             android:text="@string/holiday" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -59,8 +63,8 @@
         android:id="@+id/destination"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
-        android:hint="@string/route"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:hint="@string/route">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/option"
