@@ -3,6 +3,7 @@ package com.sysu.edu.api;
 import static android.text.TextUtils.isEmpty;
 import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -180,7 +181,7 @@ public class ContextUtil {
                 @Override
                 public void onError(String code, String message) {
                     if ("SSO10002".equals(code))
-                        handler.post(() -> changeAccount(url, afterLogin));
+                        showAccountDialog(url, afterLogin);
                     else if ("SSO10093".equals(code))
                         handler.post(() -> toast(toStringOrDefault(JSONObject.parse(message).getString("msg"))));
                     else handler.post(() -> toast(message));
@@ -196,7 +197,15 @@ public class ContextUtil {
                 System.out.println("Login result: " + login);
                 if (login && afterLogin != null) afterLogin.run();
             }
-        } else changeAccount(url, afterLogin);
+        } else showAccountDialog(url, afterLogin);
+        
+        //else handler.post(() -> changeAccount(url, afterLogin));
+    }
+    
+    private void showAccountDialog(String url, Runnable afterLogin) {
+        if (context instanceof Activity activity)
+            if (!activity.isFinishing() && !activity.isDestroyed())
+                activity.runOnUiThread(() -> changeAccount(url, afterLogin));
     }
     
     public void changeAccount(String url, Runnable afterLogin) {

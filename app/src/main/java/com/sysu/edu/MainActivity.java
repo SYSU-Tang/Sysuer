@@ -179,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                 requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, PackageManager.PERMISSION_GRANTED);
         }
+//        ContextUtil contextUtil = new ContextUtil(this);
+//        contextUtil.changeAccount(null,null);
     }
     
     void showUpdateDialog(JSONObject response) {
