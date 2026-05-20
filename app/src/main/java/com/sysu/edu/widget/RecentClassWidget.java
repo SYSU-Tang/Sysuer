@@ -47,19 +47,18 @@ public class RecentClassWidget extends AppWidgetProvider {
                     RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_today_class);
                     for (int i = 0; i < cachedData.size(); i++)
                         handlerMessage(i, cachedData.getJSONObject(i), context, remoteViews);
-                    for (int appWidgetId : appWidgetIds) {
-                        WorkManager.getInstance(context).enqueueUniqueWork("widget_work_" + appWidgetId,
-                                ExistingWorkPolicy.KEEP, new OneTimeWorkRequest.Builder(RecentClassWidgetWorker.class)
-                                        .setConstraints(new Constraints.Builder()
-                                                .setRequiredNetworkType(NetworkType.CONNECTED)
-                                                .build())
-                                        .setInputData(new Data.Builder()
-                                                .putInt("widget_id", appWidgetId)
-                                                .build())
-                                        .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                                        .build());
+                    for (int appWidgetId : appWidgetIds)
                         appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
-                    }
+                    WorkManager.getInstance(context).enqueueUniqueWork("RecentClassWidget",
+                            ExistingWorkPolicy.KEEP, new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class)
+                                    .setConstraints(new Constraints.Builder()
+                                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                                            .build())
+                                    .setInputData(new Data.Builder()
+                                            .putString("component", "RecentClassWidget")
+                                            .build())
+                                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                                    .build());
                 } catch (Exception _) {
                 } finally {
                     pendingResult.finish();

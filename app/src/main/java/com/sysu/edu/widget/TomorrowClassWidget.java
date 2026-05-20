@@ -35,12 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class TomorrowClassWidget extends AppWidgetProvider {
 
     HttpManager http;
-
-    private static void update(AppWidgetManager appWidgetManager, int[] appWidgetIds, RemoteViews remoteViews) {
-        for (int appWidgetId : appWidgetIds)
-            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
-    }
-
+    
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
@@ -76,12 +71,12 @@ public class TomorrowClassWidget extends AppWidgetProvider {
                                         .build();
                                 WorkManager.getInstance(context).enqueue(workRequest);
                                 remoteViews.setTextViewText(R.id.week, String.format(Locale.getDefault(), "共%d节", list.size()));
-                            } else
-                                contextUtil.toast(context.getString(R.string.error) + ":" + msg.obj);
+                            }
                         }
                         remoteViews.setOnClickPendingIntent(android.R.id.background, PendingIntent.getActivity(context, 0, new Intent(context, AgendaActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
                         remoteViews.setTextViewText(R.id.widget_name, context.getString(R.string.tomorrow_class));
-                        update(appWidgetManager, appWidgetIds, remoteViews);
+                        for (int appWidgetId : appWidgetIds)
+                            appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
                     }
                 } else contextUtil.login(TargetUrl.PORTAL, () -> getTomorrowSchedule());
             }

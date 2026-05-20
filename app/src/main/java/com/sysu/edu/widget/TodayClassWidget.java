@@ -10,6 +10,8 @@ import android.widget.RemoteViews;
 
 import androidx.core.widget.RemoteViewsCompat;
 import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -46,6 +48,18 @@ public class TodayClassWidget extends AppWidgetProvider {
                         handlerMessage(i, cachedData.getJSONObject(i), context, remoteViews);
                     for (int appWidgetId : appWidgetIds)
                         appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+                    WorkManager.getInstance(context).enqueueUniqueWork(
+                            "TodayClassWidget",
+                            ExistingWorkPolicy.KEEP,
+                            new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class)
+                                    .setConstraints(new Constraints.Builder()
+                                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                                            .build())
+                                    .setInputData(new Data.Builder()
+                                            .putString("component", "TodayClassWidget")
+                                            .build())
+                                    .setInitialDelay(24 - LocalTime.now().getHour(), TimeUnit.HOURS)
+                                    .build());
                 } catch (Exception _) {
                 } finally {
                     pendingResult.finish();
@@ -85,13 +99,7 @@ public class TodayClassWidget extends AppWidgetProvider {
                     });
                     RemoteViewsCompat.setRemoteAdapter(context, remoteViews, R.layout.widget_item, R.id.list, items.build());
                     remoteViews.setScrollPosition(R.id.list, beforeArray.size());
-                    OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class)
-                            .setConstraints(new Constraints.Builder()
-                                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                                    .build())
-                            .setInitialDelay(24 - LocalTime.now().getHour(), TimeUnit.HOURS)
-                            .build();
-                    WorkManager.getInstance(context).enqueue(workRequest);
+                    
                 }
                 case 0 ->
                         remoteViews.setTextViewText(R.id.day, String.format("%s %s周%s", response.getJSONObject("data").getString("acadYearSemester"),

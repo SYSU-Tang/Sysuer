@@ -1,7 +1,6 @@
 package com.sysu.edu.widget;
 
 import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,20 +34,26 @@ public class WidgetUpdateWorker extends Worker {
         try {
             JSONArray networkData = getData();
             RxDataStore<Preferences> dataStore = DataStoreManager.getInstance(getApplicationContext());
-            Preferences p = dataStore.updateDataAsync(prefsIn -> {
+            dataStore.updateDataAsync(prefsIn -> {
                 MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
                 mutablePreferences.set(DataStoreManager.TODAY_CLASS, networkData.toJSONString());
                 return Single.just(mutablePreferences);
-            }).blockingGet();
-            int widgetId = getInputData().getInt("widget_id", -1);
-            if (widgetId != -1) {
-                AppWidgetProviderInfo info = AppWidgetManager.getInstance(getApplicationContext()).getAppWidgetInfo(widgetId);
-                if (info != null) updateWidget(info.provider.getClass());
-            }
+            });
+            String widgetName = getInputData().getString("component");
+            String[] widgetNames = getInputData().getStringArray("components");
+            if (widgetName != null)
+                updateWidget(widgetName);
+            else if (widgetNames != null)
+                for (String name : widgetNames)
+                    updateWidget(name);
             return Result.success();
         } catch (Exception e) {
             return Result.failure();
         }
+    }
+    
+    private void updateWidget(String name) throws ClassNotFoundException {
+        updateWidget(Class.forName(getApplicationContext().getPackageName() + ".widget." + name));
     }
     
     private void updateWidget(Class<?> widgetClass) {
