@@ -29,5 +29,4 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:navGraph="@navigation/room_query_nav" />
 
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

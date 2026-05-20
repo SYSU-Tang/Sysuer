@@ -42,6 +42,7 @@
                 style="@style/Widget.Material3.MaterialButtonToggleGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 app:checkedButton="@id/due_todo"
                 app:singleSelection="false">
 
@@ -50,6 +51,7 @@
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:minWidth="0dp"
                     android:text="@string/due" />
 
                 <com.google.android.material.button.MaterialButton
@@ -57,6 +59,7 @@
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:minWidth="0dp"
                     android:text="@string/ddl" />
 
             </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -73,6 +76,7 @@
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:minWidth="0dp"
                     android:text="@string/todo" />
 
                 <com.google.android.material.button.MaterialButton
@@ -80,6 +84,7 @@
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:minWidth="0dp"
                     android:text="@string/done" />
 
             </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -100,7 +105,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:contentDescription="@string/add_todo"
         app:srcCompat="@drawable/add" />
 

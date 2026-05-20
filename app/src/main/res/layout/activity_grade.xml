@@ -7,8 +7,7 @@
     <com.google.android.material.appbar.AppBarLayout
         style="@style/SYSUER.AppBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:elevation="3dp">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -25,8 +24,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
+            <com.google.android.material.button.MaterialButtonGroup
                 android:layout_width="wrap_content"
+                style="@style/Widget.Material3.MaterialButtonGroup"
+                android:paddingHorizontal="@dimen/horizontal_padding"
+                android:paddingVertical="@dimen/vertical_padding"
+                android:spacing="@dimen/horizontal_gap"
                 android:layout_height="match_parent">
 
                 <com.google.android.material.button.MaterialButton
@@ -34,7 +37,6 @@
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
                     android:text="@string/year" />
 
                 <com.google.android.material.button.MaterialButton
@@ -42,7 +44,6 @@
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
                     android:text="@string/term" />
 
                 <com.google.android.material.button.MaterialButton
@@ -50,9 +51,8 @@
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
                     android:text="@string/train_type" />
-            </LinearLayout>
+            </com.google.android.material.button.MaterialButtonGroup>
         </HorizontalScrollView>
     </com.google.android.material.appbar.AppBarLayout>
 

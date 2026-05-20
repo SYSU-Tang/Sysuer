@@ -34,25 +34,23 @@
                 app:constraint_referenced_ids="term_filter,exam_week_filter,date"
                 app:flow_horizontalAlign="start"
                 app:flow_horizontalBias="0"
-                app:flow_horizontalGap="8dp"
+                app:flow_horizontalGap="@dimen/horizontal_gap"
                 app:flow_horizontalStyle="packed"
                 app:flow_verticalGap="4dp"
                 app:flow_wrapMode="chain" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/exam_week_filter"
-                style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                android:layout_width="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/exam_week"
-                app:boxCornerRadiusBottomEnd="3dp"
-                app:boxCornerRadiusBottomStart="3dp"
-                app:boxStrokeWidth="0dp"
                 app:placeholderText="@string/exam">
 
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/exam_weeks"
-                    android:layout_width="wrap_content"
+                    style="@style/ThemeOverlay.Material3.AutoCompleteTextView.FilledBox"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     android:singleLine="true"
@@ -73,7 +71,7 @@
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/terms"
                     style="@style/ThemeOverlay.Material3.AutoCompleteTextView.FilledBox"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     android:lines="1" />
@@ -103,7 +101,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:contentDescription="@string/search"
         app:srcCompat="@drawable/search" />
 

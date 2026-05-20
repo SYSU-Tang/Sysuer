@@ -14,8 +14,8 @@
             style="?attr/collapsingToolbarLayoutMediumStyle"
             android:layout_width="match_parent"
             android:layout_height="?attr/collapsingToolbarLayoutMediumSize"
-            app:title="@string/classroom_query"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:title="@string/classroom_query">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -37,25 +37,28 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingBottom="12dp">
+            android:paddingBottom="@dimen/vertical_padding">
 
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
+                android:layout_marginStart="@dimen/horizontal_margin"
+                android:layout_marginTop="@dimen/vertical_margin"
+                android:layout_marginEnd="@dimen/horizontal_margin"
+                android:layout_marginBottom="@dimen/vertical_margin"
                 android:text="@string/campus" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/campusGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                app:chipSpacingVertical="0dp">
+                android:layout_marginStart="@dimen/horizontal_margin"
+                android:layout_marginTop="@dimen/zero_space"
+                android:layout_marginEnd="@dimen/horizontal_margin"
+                android:layout_marginBottom="@dimen/vertical_margin"
+                app:chipSpacingHorizontal="@dimen/horizontal_gap"
+                app:chipSpacingVertical="@dimen/zero_space">
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/campus_select_all"
@@ -69,19 +72,22 @@
                 style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
+                android:layout_marginStart="@dimen/horizontal_margin"
+                android:layout_marginTop="@dimen/vertical_margin"
+                android:layout_marginEnd="@dimen/horizontal_margin"
+                android:layout_marginBottom="@dimen/vertical_margin"
                 android:text="@string/office" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/officeGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                app:chipSpacingVertical="0dp">
+                android:layout_marginStart="@dimen/horizontal_margin"
+                android:layout_marginTop="@dimen/zero_space"
+                android:layout_marginEnd="@dimen/horizontal_margin"
+                android:layout_marginBottom="@dimen/vertical_margin"
+                app:chipSpacingHorizontal="@dimen/horizontal_gap"
+                app:chipSpacingVertical="@dimen/zero_space">
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/office_select_all"
@@ -95,19 +101,22 @@
                 style="@style/TextAppearance.Material3.BodyMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
+                android:layout_marginStart="@dimen/horizontal_margin"
+                android:layout_marginTop="@dimen/vertical_margin"
+                android:layout_marginEnd="@dimen/horizontal_margin"
+                android:layout_marginBottom="@dimen/vertical_margin"
                 android:text="@string/classroom_type" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/typeGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                app:chipSpacingVertical="0dp"
+                android:layout_marginStart="@dimen/horizontal_margin"
+                android:layout_marginTop="@dimen/zero_space"
+                android:layout_marginEnd="@dimen/horizontal_margin"
+                android:layout_marginBottom="@dimen/vertical_margin"
+                app:chipSpacingHorizontal="@dimen/horizontal_gap"
+                app:chipSpacingVertical="@dimen/zero_space"
                 app:selectionRequired="true">
 
                 <com.google.android.material.chip.Chip
@@ -140,13 +149,15 @@
                     android:id="@+id/date"
                     android:background="?android:selectableItemBackground"
                     android:gravity="center_vertical"
-                    android:minHeight="?attr/listPreferredItemHeight"
-                    android:paddingLeft="?attr/listPreferredItemPaddingRight"
-                    android:paddingRight="?attr/listPreferredItemPaddingRight">
+                    android:minHeight="?attr/listPreferredItemHeightSmall"
+                    android:paddingLeft="@dimen/horizontal_padding"
+                    android:paddingTop="@dimen/vertical_padding"
+                    android:paddingRight="@dimen/horizontal_padding"
+                    android:paddingBottom="@dimen/vertical_padding">
 
                     <com.google.android.material.textview.MaterialTextView
                         style="@style/Widget.Material3.TextView.ListItem.LabelText"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/date" />
@@ -163,13 +174,15 @@
                 <TableRow
                     android:background="?android:selectableItemBackground"
                     android:gravity="center_vertical"
-                    android:minHeight="?attr/listPreferredItemHeight"
-                    android:paddingLeft="?attr/listPreferredItemPaddingRight"
-                    android:paddingRight="?attr/listPreferredItemPaddingRight">
+                    android:minHeight="?attr/listPreferredItemHeightSmall"
+                    android:paddingLeft="@dimen/horizontal_padding"
+                    android:paddingTop="@dimen/vertical_padding"
+                    android:paddingRight="@dimen/horizontal_padding"
+                    android:paddingBottom="@dimen/vertical_padding">
 
                     <com.google.android.material.textview.MaterialTextView
                         style="@style/Widget.Material3.TextView.ListItem.LabelText"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/time" />
@@ -187,7 +200,6 @@
                     android:id="@+id/timeSlider"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="0dp"
                     android:stepSize="1"
                     android:text="@string/date"
                     android:valueFrom="1"
@@ -198,8 +210,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="@dimen/vertical_margin"
+                    android:layout_marginBottom="@dimen/vertical_margin"
                     android:background="?android:attr/listDivider" />
 
                 <TableRow>
@@ -209,8 +221,8 @@
                         style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="@dimen/horizontal_margin"
+                        android:layout_marginEnd="@dimen/horizontal_margin"
                         android:layout_weight="1"
                         android:text="@string/reset" />
 

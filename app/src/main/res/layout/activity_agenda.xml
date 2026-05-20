@@ -89,6 +89,4 @@
             app:fastScrollVerticalThumbDrawable="@drawable/thumb"
             app:fastScrollVerticalTrackDrawable="@drawable/track" />
     </com.haibin.calendarview.CalendarLayout>
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
