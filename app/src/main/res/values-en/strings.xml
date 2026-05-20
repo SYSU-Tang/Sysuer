@@ -666,4 +666,6 @@
     <string name="end">End</string>
     <string name="passenger">Passenger</string>
     <string name="vehicles">Vehicle</string>
+    <string name="login_too_frequently">Login Frequency Too High</string>
+    <string name="undeveloped_warning">This feature is not yet developed. Please use with caution.</string>
 </resources>

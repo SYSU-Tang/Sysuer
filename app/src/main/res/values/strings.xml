@@ -665,4 +665,5 @@
     <string name="passenger">乘客</string>
     <string name="vehicles">车辆</string>
     <string name="login_too_frequently">登录频率过快</string>
+    <string name="undeveloped_warning">该功能暂未完善，请谨慎使用！</string>
 </resources>
