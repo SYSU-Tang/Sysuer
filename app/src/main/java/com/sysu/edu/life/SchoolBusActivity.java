@@ -54,7 +54,6 @@ public class SchoolBusActivity extends AppCompatActivity {
         day.observe(this, b -> {
             String key = Boolean.TRUE.equals(b) ? "workDay" : "holiday";
             if (data != null) {
-//                routes.clear();
                 if (data.getJSONArray(key).isEmpty())
                     IntStream.range(0, pager2Adapter.getItemCount()).forEach(j -> ((StaggeredFragment) pager2Adapter.get(j)).clear());
                 else {

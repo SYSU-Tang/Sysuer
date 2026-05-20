@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 public class ContextUtil {
     private final Context context;
     private final SharedPreferences sharedPreferences;
-    private final LoginManager loginManager = new LoginManager();
+    private final LoginManager loginManager;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private DialogAccountBinding binding;
     private AlertDialog dialog;
@@ -37,8 +37,7 @@ public class ContextUtil {
     public ContextUtil(Context context) {
         this.context = context;
         sharedPreferences = context.getSharedPreferences("privacy", Context.MODE_PRIVATE);
-        loginManager.setCookieManager(new CookieManager(context));
-        loginManager.setAuthorization(new AuthorizationJar(context));
+        loginManager = new LoginManager(context);
     }
     
     public Context getContext() {
@@ -175,7 +174,6 @@ public class ContextUtil {
             loginManager.setOnLoginListener(new LoginManager.LoginListener() {
                 @Override
                 public void onSuccess() {
-//                    toast(R.string.login_success);
                 }
                 
                 @Override
@@ -198,8 +196,6 @@ public class ContextUtil {
                 if (login && afterLogin != null) afterLogin.run();
             }
         } else showAccountDialog(url, afterLogin);
-        
-        //else handler.post(() -> changeAccount(url, afterLogin));
     }
     
     private void showAccountDialog(String url, Runnable afterLogin) {
