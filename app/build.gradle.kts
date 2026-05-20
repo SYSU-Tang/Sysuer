@@ -18,7 +18,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1935
-        versionName = "1.1.3beta4"
+        versionName = "1.1.3beta5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -60,6 +60,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.datastore.preferences.rxjava3)
     implementation(libs.glide)
     implementation(libs.okhttp)
     implementation(libs.fastjson2)
@@ -115,6 +116,8 @@ dependencies {
     implementation(libs.language.textmate)
     implementation(project(":CalendarView"))
     implementation(libs.okhttp.java.net.cookiejar)
+//    implementation(libs.rxjava)
+//    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
     /*configurations.all {
         exclude("androidx.appcompat", "appcompat")
     }*/

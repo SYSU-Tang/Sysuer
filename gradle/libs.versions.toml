@@ -45,6 +45,7 @@ uiManifest = "1.11.1"
 languageTextmate = "0.24.5"
 coreRemoteviewsVersion = "1.1.0"
 fragment = "1.8.9"
+datastorePreferencesRxjava3 = "1.3.0-alpha09"
 #enroVersion = "2.9.0-kmp03"
 #enroAndroid = "2.9.0-kmp03"
 #enro = "2.9.0-kmp03"
@@ -113,6 +114,7 @@ okhttp-java-net-cookiejar = { group = "com.squareup.okhttp3", name = "okhttp-jav
 androidx-core-remoteviews = { group = "androidx.core", name = "core-remoteviews", version.ref = "coreRemoteviewsVersion" }
 #dev-enro = { group = "dev.enro", name = "enro", version.ref = "enroVersion" }
 androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
+androidx-datastore-preferences-rxjava3 = { group = "androidx.datastore", name = "datastore-preferences-rxjava3", version.ref = "datastorePreferencesRxjava3" }
 #enro-android = { group = "dev.enro", name = "enro-android", version.ref = "enroAndroid" }
 
 [plugins]
