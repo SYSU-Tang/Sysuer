@@ -18,28 +18,28 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:transitionName="miniapp"
                 android:layout_height="wrap_content"
+                android:transitionName="miniapp"
                 app:layout_scrollFlags="scroll|enterAlways"
                 app:title="@string/student_job" />
+
+            <include layout="@layout/item_undeveloped_warning" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/filter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="12dp"
-                android:paddingTop="4dp"
-                android:paddingEnd="4dp"
-                android:paddingBottom="8dp">
+                android:paddingHorizontal="@dimen/horizontal_padding"
+                android:paddingVertical="@dimen/vertical_padding">
 
                 <androidx.constraintlayout.helper.widget.Flow
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     app:constraint_referenced_ids="year,campus,job_type,job_name,unit"
                     app:flow_horizontalBias="0"
-                    app:flow_horizontalGap="8dp"
+                    app:flow_horizontalGap="@dimen/horizontal_gap"
                     app:flow_horizontalStyle="packed"
-                    app:flow_verticalGap="4dp"
+                    app:flow_verticalGap="@dimen/vertical_gap"
                     app:flow_wrapMode="chain2"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"

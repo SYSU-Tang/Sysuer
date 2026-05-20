@@ -17,6 +17,8 @@
             app:layout_scrollFlags="enterAlways|scroll"
             app:navigationIcon="?homeAsUpIndicator"
             app:title="@string/homework" />
+
+        <include layout="@layout/item_undeveloped_warning" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.fragment.app.FragmentContainerView
@@ -32,8 +34,8 @@
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:labelVisibilityMode="selected"
         android:layout_gravity="bottom"
+        app:labelVisibilityMode="selected"
         app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior"
         app:menu="@menu/homework_menu" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
