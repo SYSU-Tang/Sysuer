@@ -62,6 +62,7 @@ public class JwxtModel {
         CommonUtil.Tuple2<Request, Integer> request = getNextRequest();
         if (request != null) request(request);
     }
+    
     public CommonUtil.Tuple2<Request, Integer> getNextRequest() {
         return queue.poll();
     }
@@ -137,6 +138,7 @@ public class JwxtModel {
     private CommonUtil.Tuple2<Integer, JSONObject> handleResponse(CommonUtil.Tuple2<Request, Integer> request, Response response) throws IOException {
         String type = response.header("Content-Type");
         String content = response.body().string();
+        CommonUtil.Tuple2<Integer, JSONObject> result = null;
         if (type != null && type.contains("application/json")) {
             JSONObject contentJSON = JSONObject.parse(content);
             Integer code = contentJSON.getInteger("code");
@@ -145,17 +147,16 @@ public class JwxtModel {
             else {
                 if (!code.equals(200))
                     http.getHandler().post(() -> contextUtil.toast(toStringOrDefault(contentJSON.getString("message"))));
-                CommonUtil.Tuple2<Integer, JSONObject> result = new CommonUtil.Tuple2<>(request.getSecond(), contentJSON);
+                result = new CommonUtil.Tuple2<>(request.getSecond(), contentJSON);
                 message.postValue(result);
                 afterLoginRequest.remove(request);
-                return result;
             }
         } else {
             if (!authorizationManager.isAuthorized(content))
                 login(request);
             else if (!authorizationManager.isAccessible(content)) retry(request);
         }
-        return null;
+        return result;
     }
     
     protected void retry(CommonUtil.Tuple2<Request, Integer> request) {

@@ -506,7 +506,7 @@
       {
         "id": 907,
         "name": "Payment Hall",
-        "activity": ".life.Pay",
+        "activity": ".life.PayActivity",
         "url": "https://pay.sysu.edu.cn/#/",
         "description": "Campus online payment platform for paying various fees such as tuition, accommodation, and miscellaneous fees"
       },

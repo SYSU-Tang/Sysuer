@@ -32,6 +32,7 @@ import androidx.navigation.NavInflater;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.preference.PreferenceManager;
+import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
@@ -56,13 +57,13 @@ import java.util.Objects;
 import io.noties.markwon.Markwon;
 
 public class MainActivity extends AppCompatActivity {
-
+    
     long downloadId;
     BroadcastReceiver receiver;
     Params params;
     HttpManager http;
     String path;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
         navController.setGraph(graph);
         NavigationUI.setupWithNavController((NavigationBarView) binding.navView, navController);
-
+        
         PreferenceViewModel spm = new ViewModelProvider(this).get(PreferenceViewModel.class);
         spm.setPM(PreferenceManager.getDefaultSharedPreferences(this));
         spm.initLiveData();
@@ -169,13 +170,17 @@ public class MainActivity extends AppCompatActivity {
             manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     System.currentTimeMillis() + 2 * 1000, piMorning);
         }*/
-        WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class).build());
+        WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class)
+                .setInputData(new Data.Builder()
+                        .putStringArray("components", new String[]{"TodayClassWidget", "RecentClassWidget", "NextClassWidget"})
+                        .build())
+                .build());
         if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                 requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, PackageManager.PERMISSION_GRANTED);
         }
     }
-
+    
     void showUpdateDialog(JSONObject response) {
         try {
             int version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
@@ -199,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (PackageManager.NameNotFoundException _) {
         }
     }
-
+    
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -209,18 +214,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
+    
     void checkUpdate() {
         http.getRequest("https://sysu-tang.github.io/latest.json", 0);
     }
-
+    
     @Override
     protected void onDestroy() {
         unregisterReceiver(receiver);
         receiver = null;
         super.onDestroy();
     }
-
+    
     void initActionMap(Map<? super Integer, View.OnClickListener> actionMap) {
         // 学术服务 (id: 1xx)
 //        actionMap.put(101, newActivity(SchoolEnrollmentActivity.class));           // 学籍
@@ -233,15 +238,15 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(108, newActivity(DormActivity.class));     // 宿舍
 //        actionMap.put(109, newActivity(PersonalInformationActivity.class));     // 个人信息
 //        actionMap.put(110, newActivity(StudentPartTimeActivity.class));     // 勤工俭学
-
-
+        
+        
         // 学习服务 (id: 2xx)
 //        actionMap.put(201, newActivity(TodoActivity.class));         // 待办
 //        actionMap.put(202, browse("https://explore.sysu.edu.cn/"));         // 交叉探索平台
 //        actionMap.put(203, browse("https://aic.sysu.edu.cn/"));         // 逸仙智课平台
 //        actionMap.put(202, newActivity(AgendaActivity.class));         // 日程
-
-
+        
+        
         // 资讯门户 (id: 3xx)
 //        actionMap.put(301, newActivity(NewsActivity.class));                 // 资讯门户
         actionMap.put(302, _ -> {
@@ -254,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }); // 校园集市
 //        actionMap.put(303, newActivity(AcademyNotification.class));  // 教务通知
-
+        
         // 系统服务 (id: 4xx)
 //        actionMap.put(401, browse("https://gym.sysu.edu.cn/#/"));                   // 体育场馆预定系统
 //        actionMap.put(402, browse("https://xgxt.sysu.edu.cn/main/#/index"));        // 学工系统
@@ -262,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(404, browse("https://portal.sysu.edu.cn/newClient/#/newPortal/index"));  // 中山大学统一门户
 //        actionMap.put(405, browse("https://usc.sysu.edu.cn/taskcenter-v4/workflow/index"));    // 大学服务中心
 //        actionMap.put(406, browse("https://cwxt.webvpn.sysu.edu.cn/#/home/index"));        // 财务信息系统
-
+        
         // 官网服务 (id: 5xx)
 //        actionMap.put(501, browse("https://www.sysu.edu.cn/"));              // 中山大学官网
 //        actionMap.put(502, browse("https://admission.sysu.edu.cn/"));        // 本科招生
@@ -273,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(507, browse("https://library.sysu.edu.cn/"));          // 图书馆
 //        actionMap.put(508, browse("https://alumni.sysu.edu.cn/"));           // 校友会
 //        actionMap.put(509, browse("https://mail.sysu.edu.cn/"));             // 公务电子邮件系统
-
+        
         // 官方服务 (id: 6xx)
         actionMap.put(601, _ -> {    // 二维码
             String linking = PreferenceManager.getDefaultSharedPreferences(this).getString("qrcode", "");
@@ -295,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }); // 企业微信
         //actionMap.put(603, v -> startActivity(Objects.requireNonNull(this.getPackageManager().getLaunchIntentForPackage("com.tencent.wework")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))); // 中大招生
-
+        
         // 教务服务 (id: 7xx)
 //        actionMap.put(701, newActivity(EvaluationActivity.class));           // 评教
 //        actionMap.put(702, newActivity(CourseSelectionActivity.class));
@@ -313,8 +318,8 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(714, newActivity(GradeForLevelActivity.class));           // 等级制成绩
 //        actionMap.put(715, newActivity(RoomQueryActivity.class));           // 教室
 //        actionMap.put(716, newActivity(AssistantEvaluationActivity.class)); // 助教考核
-
-
+        
+        
         // 学习平台 (id: 8xx)
 //        actionMap.put(801, browse("http://seelight.net/html/homePage/homePagePhone.html"));             // SeeLight
 //        actionMap.put(802, browse("https://www.yuketang.cn/web"));           // 雨课堂
@@ -323,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(805, browse("https://www.icourse163.org/"));           // 中国大学（慕课）
 //        actionMap.put(806, browse("https://welearn.sflep.com/index.aspx"));  // WeLearn
 //        actionMap.put(807, browse("https://www.pigai.org/"));              // 批改网
-
+        
         // 生活服务 (id: 9xx)
 //        actionMap.put(902, newActivity(SchoolBusActivity.class));                    // 校车
 //        actionMap.put(903, browse("https://visitor.sysu.edu.cn/"));                 // 逸仙通行
@@ -332,8 +337,8 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(907, newActivity(PayActivity.class));                          // 缴费大厅
 //        actionMap.put(908, newActivity(GymReservationActivity.class));     // 体育馆预约
 //        actionMap.put(909, newActivity(NetPayActivity.class));              // 校园网
-
-
+        
+        
         // 人工智能服务 (id: 10xx)
 //        actionMap.put(1001, browse("https://chat.sysu.edu.cn/zntgc/agent"));     // Deepseek
 //        actionMap.put(1002, browse("https://chat.sysu.edu.cn/znt/chat/empty"));  // 逸闻

@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.HttpUrl;
 
@@ -240,6 +241,16 @@ public class CommonUtil {
         
         public void setSecond(T1 second) {
             this.second = second;
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Tuple2<?, ?> tuple2 && Objects.equals(first, tuple2.first) && Objects.equals(second, tuple2.second);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(first, second);
         }
     }
     

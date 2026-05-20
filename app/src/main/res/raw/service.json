@@ -504,7 +504,7 @@
       {
         "id": 907,
         "name": "缴费大厅",
-        "activity": ".life.Pay",
+        "activity": ".life.PayActivity",
         "url": "https://pay.sysu.edu.cn/#/",
         "description": "校园在线缴费平台，学费、住宿费、杂费等各类费用缴纳"
       },
