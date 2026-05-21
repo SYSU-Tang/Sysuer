@@ -219,7 +219,7 @@ public abstract class YearView extends View {
      * @param delegate delegate
      */
     final void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
+        mDelegate = delegate;
         updateStyle();
     }
 
@@ -227,21 +227,21 @@ public abstract class YearView extends View {
         if(mDelegate == null){
             return;
         }
-        this.mCurMonthTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
-        this.mSchemeTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
-        this.mOtherMonthTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
-        this.mCurDayTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
-        this.mSelectTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
+        mCurMonthTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
+        mSchemeTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
+        mOtherMonthTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
+        mCurDayTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
+        mSelectTextPaint.setTextSize(mDelegate.getYearViewDayTextSize());
 
-        this.mSchemeTextPaint.setColor(mDelegate.getYearViewSchemeTextColor());
-        this.mCurMonthTextPaint.setColor(mDelegate.getYearViewDayTextColor());
-        this.mOtherMonthTextPaint.setColor(mDelegate.getYearViewDayTextColor());
-        this.mCurDayTextPaint.setColor(mDelegate.getYearViewCurDayTextColor());
-        this.mSelectTextPaint.setColor(mDelegate.getYearViewSelectTextColor());
-        this.mMonthTextPaint.setTextSize(mDelegate.getYearViewMonthTextSize());
-        this.mMonthTextPaint.setColor(mDelegate.getYearViewMonthTextColor());
-        this.mWeekTextPaint.setColor(mDelegate.getYearViewWeekTextColor());
-        this.mWeekTextPaint.setTextSize(mDelegate.getYearViewWeekTextSize());
+        mSchemeTextPaint.setColor(mDelegate.getYearViewSchemeTextColor());
+        mCurMonthTextPaint.setColor(mDelegate.getYearViewDayTextColor());
+        mOtherMonthTextPaint.setColor(mDelegate.getYearViewDayTextColor());
+        mCurDayTextPaint.setColor(mDelegate.getYearViewCurDayTextColor());
+        mSelectTextPaint.setColor(mDelegate.getYearViewSelectTextColor());
+        mMonthTextPaint.setTextSize(mDelegate.getYearViewMonthTextSize());
+        mMonthTextPaint.setColor(mDelegate.getYearViewMonthTextColor());
+        mWeekTextPaint.setColor(mDelegate.getYearViewWeekTextColor());
+        mWeekTextPaint.setTextSize(mDelegate.getYearViewWeekTextSize());
     }
 
     /**

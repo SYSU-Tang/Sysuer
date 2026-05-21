@@ -68,8 +68,8 @@ public final class YearViewPager extends ViewPager {
     }
 
     void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
-        this.mYearCount = mDelegate.getMaxYear() - mDelegate.getMinYear() + 1;
+        mDelegate = delegate;
+        mYearCount = mDelegate.getMaxYear() - mDelegate.getMinYear() + 1;
         setAdapter(new PagerAdapter() {
             @Override
             public int getCount() {
@@ -119,7 +119,7 @@ public final class YearViewPager extends ViewPager {
      * 通知刷新
      */
     void notifyDataSetChanged() {
-        this.mYearCount = mDelegate.getMaxYear() - mDelegate.getMinYear() + 1;
+        mYearCount = mDelegate.getMaxYear() - mDelegate.getMinYear() + 1;
         if(getAdapter() != null){
             getAdapter().notifyDataSetChanged();
         }
@@ -177,7 +177,7 @@ public final class YearViewPager extends ViewPager {
     }
 
     void setOnMonthSelectedListener(YearRecyclerView.OnMonthSelectedListener listener) {
-        this.mListener = listener;
+        mListener = listener;
     }
 
     @Override

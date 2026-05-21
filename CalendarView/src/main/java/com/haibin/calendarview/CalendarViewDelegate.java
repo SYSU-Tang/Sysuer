@@ -510,32 +510,32 @@ final class CalendarViewDelegate {
 
     private void setRange(int minYear, int minYearMonth,
                           int maxYear, int maxYearMonth) {
-        this.mMinYear = minYear;
-        this.mMinYearMonth = minYearMonth;
-        this.mMaxYear = maxYear;
-        this.mMaxYearMonth = maxYearMonth;
-        if (this.mMaxYear < mCurrentDate.getYear()) {
-            this.mMaxYear = mCurrentDate.getYear();
+        mMinYear = minYear;
+        mMinYearMonth = minYearMonth;
+        mMaxYear = maxYear;
+        mMaxYearMonth = maxYearMonth;
+        if (mMaxYear < mCurrentDate.getYear()) {
+            mMaxYear = mCurrentDate.getYear();
         }
-        if (this.mMaxYearDay == -1) {
-            this.mMaxYearDay = CalendarUtil.getMonthDaysCount(this.mMaxYear, mMaxYearMonth);
+        if (mMaxYearDay == -1) {
+            mMaxYearDay = CalendarUtil.getMonthDaysCount(mMaxYear, mMaxYearMonth);
         }
-        int y = mCurrentDate.getYear() - this.mMinYear;
-        mCurrentMonthViewItem = 12 * y + mCurrentDate.getMonth() - this.mMinYearMonth;
+        int y = mCurrentDate.getYear() - mMinYear;
+        mCurrentMonthViewItem = 12 * y + mCurrentDate.getMonth() - mMinYearMonth;
     }
 
     void setRange(int minYear, int minYearMonth, int minYearDay,
                   int maxYear, int maxYearMonth, int maxYearDay) {
-        this.mMinYear = minYear;
-        this.mMinYearMonth = minYearMonth;
-        this.mMinYearDay = minYearDay;
-        this.mMaxYear = maxYear;
-        this.mMaxYearMonth = maxYearMonth;
-        this.mMaxYearDay = maxYearDay;
-        if (this.mMaxYearDay == -1)
-            this.mMaxYearDay = CalendarUtil.getMonthDaysCount(this.mMaxYear, mMaxYearMonth);
-        int y = mCurrentDate.getYear() - this.mMinYear;
-        mCurrentMonthViewItem = 12 * y + mCurrentDate.getMonth() - this.mMinYearMonth;
+        mMinYear = minYear;
+        mMinYearMonth = minYearMonth;
+        mMinYearDay = minYearDay;
+        mMaxYear = maxYear;
+        mMaxYearMonth = maxYearMonth;
+        mMaxYearDay = maxYearDay;
+        if (mMaxYearDay == -1)
+            mMaxYearDay = CalendarUtil.getMonthDaysCount(mMaxYear, mMaxYearMonth);
+        int y = mCurrentDate.getYear() - mMinYear;
+        mCurrentMonthViewItem = 12 * y + mCurrentDate.getMonth() - mMinYearMonth;
     }
 
     String getSchemeText() {
@@ -615,7 +615,7 @@ final class CalendarViewDelegate {
     }
 
     void setMonthViewClass(Class<?> monthViewClass) {
-        this.mMonthViewClass = monthViewClass;
+        mMonthViewClass = monthViewClass;
     }
 
     Class<?> getWeekViewClass() {
@@ -623,7 +623,7 @@ final class CalendarViewDelegate {
     }
 
     void setWeekViewClass(Class<?> weekViewClass) {
-        this.mWeekViewClass = weekViewClass;
+        mWeekViewClass = weekViewClass;
     }
 
     Class<?> getWeekBarClass() {
@@ -631,7 +631,7 @@ final class CalendarViewDelegate {
     }
 
     void setWeekBarClass(Class<?> weekBarClass) {
-        this.mWeekBarClass = weekBarClass;
+        mWeekBarClass = weekBarClass;
     }
 
     Class<?> getYearViewClass() {
@@ -756,7 +756,7 @@ final class CalendarViewDelegate {
     }
 
     void setMonthViewShowMode(int monthViewShowMode) {
-        this.mMonthViewShowMode = monthViewShowMode;
+        mMonthViewShowMode = monthViewShowMode;
     }
 
     void setTextColor(int curDayTextColor, int curMonthTextColor, int otherMonthTextColor, int curMonthLunarTextColor, int otherMonthLunarTextColor) {
@@ -768,26 +768,26 @@ final class CalendarViewDelegate {
     }
 
     void setSchemeColor(int schemeColor, int schemeTextColor, int schemeLunarTextColor) {
-        this.mSchemeThemeColor = schemeColor;
-        this.mSchemeTextColor = schemeTextColor;
-        this.mSchemeLunarTextColor = schemeLunarTextColor;
+        mSchemeThemeColor = schemeColor;
+        mSchemeTextColor = schemeTextColor;
+        mSchemeLunarTextColor = schemeLunarTextColor;
     }
 
     void setYearViewTextColor(int yearViewMonthTextColor, int yearViewDayTextColor, int yarViewSchemeTextColor) {
-        this.mYearViewMonthTextColor = yearViewMonthTextColor;
-        this.mYearViewDayTextColor = yearViewDayTextColor;
-        this.mYearViewSchemeTextColor = yarViewSchemeTextColor;
+        mYearViewMonthTextColor = yearViewMonthTextColor;
+        mYearViewDayTextColor = yearViewDayTextColor;
+        mYearViewSchemeTextColor = yarViewSchemeTextColor;
     }
 
     void setSelectColor(int selectedColor, int selectedTextColor, int selectedLunarTextColor) {
-        this.mSelectedThemeColor = selectedColor;
-        this.mSelectedTextColor = selectedTextColor;
-        this.mSelectedLunarTextColor = selectedLunarTextColor;
+        mSelectedThemeColor = selectedColor;
+        mSelectedTextColor = selectedTextColor;
+        mSelectedLunarTextColor = selectedLunarTextColor;
     }
 
     void setThemeColor(int selectedThemeColor, int schemeColor) {
-        this.mSelectedThemeColor = selectedThemeColor;
-        this.mSchemeThemeColor = schemeColor;
+        mSelectedThemeColor = selectedThemeColor;
+        mSchemeThemeColor = schemeColor;
     }
 
     boolean isMonthViewScrollable() {
@@ -795,7 +795,7 @@ final class CalendarViewDelegate {
     }
 
     void setMonthViewScrollable(boolean monthViewScrollable) {
-        this.mMonthViewScrollable = monthViewScrollable;
+        mMonthViewScrollable = monthViewScrollable;
     }
 
     boolean isWeekViewScrollable() {
@@ -803,7 +803,7 @@ final class CalendarViewDelegate {
     }
 
     void setWeekViewScrollable(boolean weekViewScrollable) {
-        this.mWeekViewScrollable = weekViewScrollable;
+        mWeekViewScrollable = weekViewScrollable;
     }
 
     boolean isYearViewScrollable() {
@@ -811,7 +811,7 @@ final class CalendarViewDelegate {
     }
 
     void setYearViewScrollable(boolean yearViewScrollable) {
-        this.mYearViewScrollable = yearViewScrollable;
+        mYearViewScrollable = yearViewScrollable;
     }
 
     int getWeekStart() {
@@ -827,7 +827,7 @@ final class CalendarViewDelegate {
     }
 
     void setDefaultCalendarSelectDay(int defaultCalendarSelect) {
-        this.mDefaultCalendarSelectDay = defaultCalendarSelect;
+        mDefaultCalendarSelectDay = defaultCalendarSelect;
     }
 
     int getWeekTextSize() {
@@ -865,7 +865,7 @@ final class CalendarViewDelegate {
     }
 
     void setMaxMultiSelectSize(int maxMultiSelectSize) {
-        this.mMaxMultiSelectSize = maxMultiSelectSize;
+        mMaxMultiSelectSize = maxMultiSelectSize;
     }
 
     void setSelectRange(int minRange, int maxRange) {
@@ -1040,16 +1040,16 @@ final class CalendarViewDelegate {
         if (mSchemeDates == null || mSchemeDates.isEmpty()) {
             return;
         }
-        if (this.mSchemeDatesMap == null) {
-            this.mSchemeDatesMap = new HashMap<>();
+        if (mSchemeDatesMap == null) {
+            mSchemeDatesMap = new HashMap<>();
         }
         for (String key : mSchemeDates.keySet()) {
-            this.mSchemeDatesMap.remove(key);
+            mSchemeDatesMap.remove(key);
             Calendar calendar = mSchemeDates.get(key);
             if (calendar == null) {
                 continue;
             }
-            this.mSchemeDatesMap.put(key, calendar);
+            mSchemeDatesMap.put(key, calendar);
         }
     }
 

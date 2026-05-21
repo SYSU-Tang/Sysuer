@@ -33,13 +33,13 @@ final class YearViewAdapter extends BaseRecyclerAdapter<Month> {
     }
 
     void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
+        mDelegate = delegate;
     }
 
 
     void setYearViewSize(int width, int height) {
-        this.mItemWidth = width;
-        this.mItemHeight = height;
+        mItemWidth = width;
+        mItemHeight = height;
     }
 
     @Override

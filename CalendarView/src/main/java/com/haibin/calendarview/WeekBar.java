@@ -41,7 +41,7 @@ public class WeekBar extends LinearLayout {
      * @param delegate delegate
      */
     void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
+        mDelegate = delegate;
         if ("com.haibin.calendarview.WeekBar".equalsIgnoreCase(getClass().getName())) {
             setTextSize(mDelegate.getWeekTextSize());
             setTextColor(delegate.getWeekTextColor());

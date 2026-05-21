@@ -57,7 +57,7 @@ public final class WeekViewPager extends ViewPager {
     }
 
     void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
+        mDelegate = delegate;
         init();
     }
 

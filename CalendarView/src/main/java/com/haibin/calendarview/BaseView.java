@@ -222,7 +222,7 @@ public abstract class BaseView extends View implements View.OnClickListener, Vie
      * @param delegate delegate
      */
     final void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
+        mDelegate = delegate;
         mWeekStartWidth = mDelegate.getWeekStart();
         updateStyle();
         updateItemHeight();
@@ -235,36 +235,36 @@ public abstract class BaseView extends View implements View.OnClickListener, Vie
         if (mDelegate == null) {
             return;
         }
-        this.mCurDayTextPaint.setColor(mDelegate.getCurDayTextColor());
-        this.mCurDayLunarTextPaint.setColor(mDelegate.getCurDayLunarTextColor());
-        this.mCurMonthTextPaint.setColor(mDelegate.getCurrentMonthTextColor());
-        this.mOtherMonthTextPaint.setColor(mDelegate.getOtherMonthTextColor());
-        this.mCurMonthLunarTextPaint.setColor(mDelegate.getCurrentMonthLunarTextColor());
-        this.mSelectedLunarTextPaint.setColor(mDelegate.getSelectedLunarTextColor());
-        this.mSelectTextPaint.setColor(mDelegate.getSelectedTextColor());
-        this.mOtherMonthLunarTextPaint.setColor(mDelegate.getOtherMonthLunarTextColor());
-        this.mSchemeLunarTextPaint.setColor(mDelegate.getSchemeLunarTextColor());
-        this.mSchemePaint.setColor(mDelegate.getSchemeThemeColor());
-        this.mSchemeTextPaint.setColor(mDelegate.getSchemeTextColor());
-        this.mCurMonthTextPaint.setTextSize(mDelegate.getDayTextSize());
-        this.mOtherMonthTextPaint.setTextSize(mDelegate.getDayTextSize());
-        this.mCurDayTextPaint.setTextSize(mDelegate.getDayTextSize());
-        this.mSchemeTextPaint.setTextSize(mDelegate.getDayTextSize());
-        this.mSelectTextPaint.setTextSize(mDelegate.getDayTextSize());
+        mCurDayTextPaint.setColor(mDelegate.getCurDayTextColor());
+        mCurDayLunarTextPaint.setColor(mDelegate.getCurDayLunarTextColor());
+        mCurMonthTextPaint.setColor(mDelegate.getCurrentMonthTextColor());
+        mOtherMonthTextPaint.setColor(mDelegate.getOtherMonthTextColor());
+        mCurMonthLunarTextPaint.setColor(mDelegate.getCurrentMonthLunarTextColor());
+        mSelectedLunarTextPaint.setColor(mDelegate.getSelectedLunarTextColor());
+        mSelectTextPaint.setColor(mDelegate.getSelectedTextColor());
+        mOtherMonthLunarTextPaint.setColor(mDelegate.getOtherMonthLunarTextColor());
+        mSchemeLunarTextPaint.setColor(mDelegate.getSchemeLunarTextColor());
+        mSchemePaint.setColor(mDelegate.getSchemeThemeColor());
+        mSchemeTextPaint.setColor(mDelegate.getSchemeTextColor());
+        mCurMonthTextPaint.setTextSize(mDelegate.getDayTextSize());
+        mOtherMonthTextPaint.setTextSize(mDelegate.getDayTextSize());
+        mCurDayTextPaint.setTextSize(mDelegate.getDayTextSize());
+        mSchemeTextPaint.setTextSize(mDelegate.getDayTextSize());
+        mSelectTextPaint.setTextSize(mDelegate.getDayTextSize());
 
-        this.mCurMonthLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        this.mSelectedLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        this.mCurDayLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        this.mOtherMonthLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        this.mSchemeLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
+        mCurMonthLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
+        mSelectedLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
+        mCurDayLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
+        mOtherMonthLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
+        mSchemeLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
 
-        this.mSelectedPaint.setStyle(Paint.Style.FILL);
-        this.mSelectedPaint.setColor(mDelegate.getSelectedThemeColor());
+        mSelectedPaint.setStyle(Paint.Style.FILL);
+        mSelectedPaint.setColor(mDelegate.getSelectedThemeColor());
     }
 
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     void updateItemHeight() {
-        this.mItemHeight = mDelegate.getCalendarItemHeight();
+        mItemHeight = mDelegate.getCalendarItemHeight();
         Paint.FontMetrics metrics = mCurMonthTextPaint.getFontMetrics();
         mTextBaseLine = mItemHeight / 2 - metrics.descent + (metrics.bottom - metrics.top) / 2;
     }

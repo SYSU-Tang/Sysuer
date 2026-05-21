@@ -64,8 +64,8 @@ public final class YearRecyclerView extends RecyclerView {
      * @param delegate delegate
      */
     void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
-        this.mAdapter.setup(delegate);
+        mDelegate = delegate;
+        mAdapter.setup(delegate);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class YearRecyclerView extends RecyclerView {
      * @param listener listener
      */
     void setOnMonthSelectedListener(OnMonthSelectedListener listener) {
-        this.mListener = listener;
+        mListener = listener;
     }
 
 

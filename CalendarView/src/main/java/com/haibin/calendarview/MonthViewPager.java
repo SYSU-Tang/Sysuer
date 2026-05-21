@@ -61,7 +61,7 @@ public final class MonthViewPager extends ViewPager {
      * @param delegate delegate
      */
     void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
+        mDelegate = delegate;
 
         updateMonthViewHeight(mDelegate.getCurrentDay().getYear(),
                 mDelegate.getCurrentDay().getMonth());

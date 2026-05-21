@@ -40,7 +40,7 @@ abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<RecyclerView.
 
     BaseRecyclerAdapter(Context context) {
         mContext = context;
-        this.mItems = new ArrayList<>();
+        mItems = new ArrayList<>();
         mInflater = LayoutInflater.from(context);
         onClickListener = new OnClickListener() {
             @Override
@@ -83,7 +83,7 @@ abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<RecyclerView.
     }
 
     @SuppressWarnings("unused")
-    void addAll(List<T> items) {
+    void addAll(List<? extends T> items) {
         if (items != null && !items.isEmpty()) {
             mItems.addAll(items);
             notifyItemRangeInserted(mItems.size(), items.size());
@@ -92,7 +92,7 @@ abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<RecyclerView.
 
     final void addItem(T item) {
         if (item != null) {
-            this.mItems.add(item);
+            mItems.add(item);
             notifyItemChanged(mItems.size());
         }
     }

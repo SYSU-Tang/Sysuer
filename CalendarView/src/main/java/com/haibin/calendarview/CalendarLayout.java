@@ -161,7 +161,7 @@ public class CalendarLayout extends LinearLayout {
      * @param delegate delegate
      */
     final void setup(CalendarViewDelegate delegate) {
-        this.mDelegate = delegate;
+        mDelegate = delegate;
         mItemHeight = mDelegate.getCalendarItemHeight();
         initCalendarPosition(delegate.mSelectedCalendar.isAvailable() ?
                 delegate.mSelectedCalendar :

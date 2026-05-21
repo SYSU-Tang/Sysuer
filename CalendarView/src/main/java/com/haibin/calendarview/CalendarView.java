@@ -37,11 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 日历布局
- * 各个类使用包权限，避免不必要的public
- */
-@SuppressWarnings({"unused"})
+
 public class CalendarView extends FrameLayout {
 
     /**
@@ -92,8 +88,8 @@ public class CalendarView extends FrameLayout {
     private void init(Context context) {
         LayoutInflater.from(context).inflate(R.layout.cv_layout_calendar_view, this, true);
         FrameLayout frameContent = findViewById(R.id.frameContent);
-        this.mWeekPager = findViewById(R.id.vp_week);
-        this.mWeekPager.setup(mDelegate);
+        mWeekPager = findViewById(R.id.vp_week);
+        mWeekPager.setup(mDelegate);
 
         try {
             Constructor<?> constructor = mDelegate.getWeekBarClass().getConstructor(Context.class);
@@ -105,19 +101,19 @@ public class CalendarView extends FrameLayout {
         mWeekBar.setup(mDelegate);
         mWeekBar.onWeekStartChange(mDelegate.getWeekStart());
 
-        this.mWeekLine = findViewById(R.id.line);
-        this.mWeekLine.setBackgroundColor(mDelegate.getWeekLineBackground());
-        LayoutParams lineParams = (LayoutParams) this.mWeekLine.getLayoutParams();
+        mWeekLine = findViewById(R.id.line);
+        mWeekLine.setBackgroundColor(mDelegate.getWeekLineBackground());
+        LayoutParams lineParams = (LayoutParams) mWeekLine.getLayoutParams();
         lineParams.setMargins(mDelegate.getWeekLineMargin(),
                 mDelegate.getWeekBarHeight(),
                 mDelegate.getWeekLineMargin(),
                 0);
-        this.mWeekLine.setLayoutParams(lineParams);
+        mWeekLine.setLayoutParams(lineParams);
 
-        this.mMonthPager = findViewById(R.id.vp_month);
-        this.mMonthPager.mWeekPager = mWeekPager;
-        this.mMonthPager.mWeekBar = mWeekBar;
-        LayoutParams params = (LayoutParams) this.mMonthPager.getLayoutParams();
+        mMonthPager = findViewById(R.id.vp_month);
+        mMonthPager.mWeekPager = mWeekPager;
+        mMonthPager.mWeekBar = mWeekBar;
+        LayoutParams params = (LayoutParams) mMonthPager.getLayoutParams();
         params.setMargins(0, mDelegate.getWeekBarHeight() + CalendarUtil.dipToPx(context, 1), 0, 0);
         mWeekPager.setLayoutParams(params);
 
@@ -798,7 +794,7 @@ public class CalendarView extends FrameLayout {
         frameContent.addView(mWeekBar, 2);
         mWeekBar.setup(mDelegate);
         mWeekBar.onWeekStartChange(mDelegate.getWeekStart());
-        this.mMonthPager.mWeekBar = mWeekBar;
+        mMonthPager.mWeekBar = mWeekBar;
         mWeekBar.onDateSelected(mDelegate.mSelectedCalendar, mDelegate.getWeekStart(), false);
     }
 
@@ -846,7 +842,7 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public void setOnYearChangeListener(OnYearChangeListener listener) {
-        this.mDelegate.mYearChangeListener = listener;
+        mDelegate.mYearChangeListener = listener;
     }
 
     /**
@@ -855,7 +851,7 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public void setOnMonthChangeListener(OnMonthChangeListener listener) {
-        this.mDelegate.mMonthChangeListener = listener;
+        mDelegate.mMonthChangeListener = listener;
     }
 
 
@@ -865,7 +861,7 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public void setOnWeekChangeListener(OnWeekChangeListener listener) {
-        this.mDelegate.mWeekChangeListener = listener;
+        mDelegate.mWeekChangeListener = listener;
     }
 
     /**
@@ -874,7 +870,7 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public void setOnCalendarSelectListener(OnCalendarSelectListener listener) {
-        this.mDelegate.mCalendarSelectListener = listener;
+        mDelegate.mCalendarSelectListener = listener;
         if (mDelegate.mCalendarSelectListener == null) {
             return;
         }
@@ -894,7 +890,7 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public final void setOnCalendarRangeSelectListener(OnCalendarRangeSelectListener listener) {
-        this.mDelegate.mCalendarRangeSelectListener = listener;
+        mDelegate.mCalendarRangeSelectListener = listener;
     }
 
     /**
@@ -903,7 +899,7 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public final void setOnCalendarMultiSelectListener(OnCalendarMultiSelectListener listener) {
-        this.mDelegate.mCalendarMultiSelectListener = listener;
+        mDelegate.mCalendarMultiSelectListener = listener;
     }
 
     /**
@@ -1126,7 +1122,7 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public void setOnCalendarLongClickListener(OnCalendarLongClickListener listener) {
-        this.mDelegate.mCalendarLongClickListener = listener;
+        mDelegate.mCalendarLongClickListener = listener;
     }
 
     /**
@@ -1136,8 +1132,8 @@ public class CalendarView extends FrameLayout {
      * @param listener                 listener
      */
     public void setOnCalendarLongClickListener(OnCalendarLongClickListener listener, boolean preventLongPressedSelect) {
-        this.mDelegate.mCalendarLongClickListener = listener;
-        this.mDelegate.setPreventLongPressedSelected(preventLongPressedSelect);
+        mDelegate.mCalendarLongClickListener = listener;
+        mDelegate.setPreventLongPressedSelected(preventLongPressedSelect);
     }
 
     /**
@@ -1146,12 +1142,12 @@ public class CalendarView extends FrameLayout {
      * @param listener listener
      */
     public void setOnViewChangeListener(OnViewChangeListener listener) {
-        this.mDelegate.mViewChangeListener = listener;
+        mDelegate.mViewChangeListener = listener;
     }
 
 
     public void setOnYearViewChangeListener(OnYearViewChangeListener listener) {
-        this.mDelegate.mYearViewChangeListener = listener;
+        mDelegate.mYearViewChangeListener = listener;
     }
 
     /**
@@ -1233,19 +1229,19 @@ public class CalendarView extends FrameLayout {
      * @param mSchemeDates mSchemeDatesMap 通过自己的需求转换即可
      */
     public final void setSchemeDate(Map<String, Calendar> mSchemeDates) {
-        this.mDelegate.mSchemeDatesMap = mSchemeDates;
-        this.mDelegate.updateSelectCalendarScheme();
-        this.mYearViewPager.update();
-        this.mMonthPager.updateScheme();
-        this.mWeekPager.updateScheme();
+        mDelegate.mSchemeDatesMap = mSchemeDates;
+        mDelegate.updateSelectCalendarScheme();
+        mYearViewPager.update();
+        mMonthPager.updateScheme();
+        mWeekPager.updateScheme();
     }
 
     /**
      * 清空日期标记
      */
     public final void clearSchemeDate() {
-        this.mDelegate.mSchemeDatesMap = null;
-        this.mDelegate.clearSelectedScheme();
+        mDelegate.mSchemeDatesMap = null;
+        mDelegate.clearSelectedScheme();
         mYearViewPager.update();
         mMonthPager.updateScheme();
         mWeekPager.updateScheme();
@@ -1265,10 +1261,10 @@ public class CalendarView extends FrameLayout {
         }
         mDelegate.mSchemeDatesMap.remove(calendar.toString());
         mDelegate.mSchemeDatesMap.put(calendar.toString(), calendar);
-        this.mDelegate.updateSelectCalendarScheme();
-        this.mYearViewPager.update();
-        this.mMonthPager.updateScheme();
-        this.mWeekPager.updateScheme();
+        mDelegate.updateSelectCalendarScheme();
+        mYearViewPager.update();
+        mMonthPager.updateScheme();
+        mWeekPager.updateScheme();
     }
 
     /**
@@ -1277,17 +1273,17 @@ public class CalendarView extends FrameLayout {
      * @param mSchemeDates mSchemeDates
      */
     public final void addSchemeDate(Map<String, Calendar> mSchemeDates) {
-        if (this.mDelegate == null || mSchemeDates == null || mSchemeDates.isEmpty()) {
+        if (mDelegate == null || mSchemeDates == null || mSchemeDates.isEmpty()) {
             return;
         }
-        if (this.mDelegate.mSchemeDatesMap == null) {
-            this.mDelegate.mSchemeDatesMap = new HashMap<>();
+        if (mDelegate.mSchemeDatesMap == null) {
+            mDelegate.mSchemeDatesMap = new HashMap<>();
         }
-        this.mDelegate.addSchemes(mSchemeDates);
-        this.mDelegate.updateSelectCalendarScheme();
-        this.mYearViewPager.update();
-        this.mMonthPager.updateScheme();
-        this.mWeekPager.updateScheme();
+        mDelegate.addSchemes(mSchemeDates);
+        mDelegate.updateSelectCalendarScheme();
+        mYearViewPager.update();
+        mMonthPager.updateScheme();
+        mWeekPager.updateScheme();
     }
 
     /**
