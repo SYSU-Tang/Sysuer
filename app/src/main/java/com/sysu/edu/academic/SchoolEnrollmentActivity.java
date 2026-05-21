@@ -50,7 +50,7 @@ public class SchoolEnrollmentActivity extends AppCompatActivity {
         }[position])).attach();
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         model.getMessage().observe(this, massage -> {
-            JSONObject response = (JSONObject) massage.getSecond();
+            JSONObject response = massage.getSecond();
             if (response != null && response.getInteger("code").equals(200)) {
                 JSONObject data = response.getJSONObject("data");
                 if (data != null) {

@@ -33,7 +33,7 @@ public class TitleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public void setTitle(String title, int n) {
         this.title = title;
-        this.setHeader(n);
+        setHeader(n);
     }
 
     @NonNull

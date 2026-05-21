@@ -104,7 +104,7 @@ public class EnergyDashboardFragment extends Fragment {
                                 }
                             }
                             requestQueue.next();
-                        } else contextUtil.login(TargetUrl.ZHNY, () -> requestQueue.retry());
+                        } else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
                     }
                     super.handleMessage(msg);
                 }

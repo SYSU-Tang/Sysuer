@@ -56,7 +56,7 @@ public class LoginManager {
     private final OkHttpClient directClient = new OkHttpClient.Builder().followRedirects(false).cookieJar(cookieJar).build();
     private final AuthorizationManager casAuthorizationManager = new AuthorizationManager("https://cas.sysu.edu.cn", "https://cas.sysu.edu.cn");
     private final Context context;
-    AuthorizationJar authorizationJar;
+    final AuthorizationJar authorizationJar;
     LoginListener loginListener;
     boolean isLoginSuccess = false;
     

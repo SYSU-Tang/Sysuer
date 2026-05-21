@@ -346,7 +346,7 @@ public class GymDetailFragment extends Fragment {
     static class DateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         final HashMap<Integer, Integer> availableCapacity = new HashMap<>();
-        Consumer<Integer> action;
+        Consumer<? super Integer> action;
         int page = 7;
         int selected = -1;
 
@@ -365,7 +365,7 @@ public class GymDetailFragment extends Fragment {
             notifyItemChanged(tmp);
         }
 
-        public void setAction(Consumer<Integer> action) {
+        public void setAction(Consumer<? super Integer> action) {
             this.action = action;
         }
 
@@ -417,7 +417,7 @@ public class GymDetailFragment extends Fragment {
 
     static class FieldAdapter extends RecyclerAdapter<JSONObject> {
 
-        Consumer<Integer> action;
+        Consumer<? super Integer> action;
         HashSet<Integer> selected = new HashSet<>();
 
         @NonNull
@@ -427,7 +427,7 @@ public class GymDetailFragment extends Fragment {
             };
         }
 
-        void setAction(Consumer<Integer> action) {
+        void setAction(Consumer<? super Integer> action) {
             this.action = action;
         }
 

@@ -38,8 +38,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class CourseSelectionSelectedFragment extends Fragment {
-
-
+    
     CourseSelectedAdapter adapter;
     int page = 1;
     int success = 1;
@@ -70,7 +69,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
             }
         });
 
-        binding.list.getRoot().addItemDecoration(new CourseSelectionFragment.SpacesItemDecoration(params.dpToPx(8)));
+        binding.list.getRoot().addItemDecoration(new CourseSelectionMainFragment.SpacesItemDecoration(params.dpToPx(8)));
         binding.filter.setOnCheckedStateChangeListener((_, checkedId) -> {
             success = checkedId.contains(R.id.success) ? 1 : 0;
             failure = checkedId.contains(R.id.failure) ? 1 : 0;

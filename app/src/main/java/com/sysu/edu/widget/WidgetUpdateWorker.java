@@ -22,7 +22,7 @@ import okhttp3.Request;
 
 public class WidgetUpdateWorker extends Worker {
     
-    JwxtWidgetModel model = new JwxtWidgetModel(getApplicationContext());
+    final JwxtWidgetModel model = new JwxtWidgetModel(getApplicationContext());
     
     public WidgetUpdateWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);

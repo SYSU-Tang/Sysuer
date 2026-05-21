@@ -2,7 +2,7 @@ package com.sysu.edu.browser;
 
 public record BrowserCookieManager() {
     
-    static String clearAllCookies = """
+    static final String clearAllCookies = """
                                 (function clearAllCookies() {
                             let cookies = document.cookie.split(";");
                             cookies.forEach(cookie => {

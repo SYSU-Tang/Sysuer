@@ -9,20 +9,19 @@ import androidx.annotation.NonNull;
 
 import com.sysu.edu.R;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class TodoHelper extends SQLiteOpenHelper {
-
+    
     private static ContentValues value = new ContentValues();
     private final Context context;
-
+    
     public TodoHelper(Context context, int version) {
         super(context, "todo.db", null, version);
         this.context = context;
     }
-
+    
     @NonNull
     private static ContentValues setContentValues(TodoInfo todoInfo) {
         value.clear();
@@ -41,12 +40,12 @@ public class TodoHelper extends SQLiteOpenHelper {
         value.put("due_time", todoInfo.getDueTime().getValue());
         value.put("remind_time", todoInfo.getRemindTime().getValue());
         value.put("done_datetime", todoInfo.getDoneDate().getValue());
-        value.put("update_datetime", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+        value.put("update_datetime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         value.put("ddl", todoInfo.getDdlDate().getValue());
-
+        
         return value;
     }
-
+    
     @Override
     public void onCreate(SQLiteDatabase db) {
         //db = context.openOrCreateDatabase("todo.db", Context.MODE_PRIVATE, null);
@@ -58,12 +57,12 @@ public class TodoHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
         addType(db);
     }
-
+    
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
         if (i <= 6) addType(db);
     }
-
+    
     public void addType(SQLiteDatabase db) {
         db.beginTransaction();
         ContentValues value = new ContentValues();
@@ -78,7 +77,7 @@ public class TodoHelper extends SQLiteOpenHelper {
         db.setTransactionSuccessful();
         db.endTransaction();
     }
-
+    
     public void addType() {
         addType(getWritableDatabase());
     }
@@ -98,22 +97,22 @@ public class TodoHelper extends SQLiteOpenHelper {
         value.put("label", "#标签");
         db.insert("todos", null, value);
     }*/
-
+    
     public void deleteTodo(String id) {
         getWritableDatabase().delete("todos", "id  = ?", new String[]{id});
         close();
     }
-
+    
     public void deleteTodo(TodoInfo todoInfo) {
         deleteTodo(String.valueOf(todoInfo.getId().getValue()));
     }
-
+    
     public void addTodo(TodoInfo todoInfo) {
         value = setContentValues(todoInfo);
         getWritableDatabase().insert("todos", null, value);
         close();
     }
-
+    
     public void updateTodo(TodoInfo todoInfo) {
         value = setContentValues(todoInfo);
         getWritableDatabase().update("todos", value, "id = ?", new String[]{String.valueOf(todoInfo.getId().getValue())});

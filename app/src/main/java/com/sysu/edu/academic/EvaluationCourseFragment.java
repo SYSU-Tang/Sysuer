@@ -104,7 +104,6 @@ public class EvaluationCourseFragment extends Fragment {
         int nav;
 
         public CourseEvaluationAdapter() {
-            super();
         }
 
         @NonNull

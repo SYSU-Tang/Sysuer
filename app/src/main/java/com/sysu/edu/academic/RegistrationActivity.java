@@ -48,7 +48,7 @@ public class RegistrationActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         binding.toolbar.setTitle(R.string.register_info);
         model.getMessage().observe(this, msg -> {
-            JSONObject response = (JSONObject) msg.getSecond();
+            JSONObject response = msg.getSecond();
             if (response != null && response.getInteger("code").equals(200)) {
                 if (response.get("data") != null) {
                     Integer what = msg.getFirst();

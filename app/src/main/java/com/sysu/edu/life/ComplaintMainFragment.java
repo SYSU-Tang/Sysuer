@@ -76,7 +76,7 @@ public class ComplaintMainFragment extends Fragment {
     /*
      * 上传附件
      * */
-    void pickAttachment(ActivityResultLauncher<Intent> fileLauncher) {
+    void pickAttachment(ActivityResultLauncher<? super Intent> fileLauncher) {
         fileLauncher.launch(new Intent(Intent.ACTION_GET_CONTENT)
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .setType("*/*"));

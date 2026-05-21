@@ -63,8 +63,8 @@ import com.sysu.edu.browser.BrowserActivity;
 import com.sysu.edu.databinding.DialogServiceActionBinding;
 import com.sysu.edu.databinding.DialogServiceOrderBinding;
 import com.sysu.edu.databinding.FragmentDashboardBinding;
-import com.sysu.edu.databinding.ItemCourseBinding;
 import com.sysu.edu.databinding.ItemExamBinding;
+import com.sysu.edu.databinding.ItemHomeCourseBinding;
 import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.todo.TodoActivity;
 import com.sysu.edu.todo.TodoInfo;
@@ -536,7 +536,7 @@ class CourseAdapter extends RecyclerAdapter<JSONObject> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(ItemCourseBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
+        return new RecyclerView.ViewHolder(ItemHomeCourseBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
         };
     }
     
@@ -546,7 +546,7 @@ class CourseAdapter extends RecyclerAdapter<JSONObject> {
     
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ItemCourseBinding binding = ItemCourseBinding.bind(holder.itemView);
+        ItemHomeCourseBinding binding = ItemHomeCourseBinding.bind(holder.itemView);
         JSONObject item = get(position);
         holder.itemView.setOnClickListener(v -> onClick.accept(item, v));
         Map.of(binding.courseTitle, "courseName", binding.location, "teachingPlace", binding.time, "time", binding.teacher, "teacherName", binding.course, "course").forEach((v, s) -> {

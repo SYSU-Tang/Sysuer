@@ -44,12 +44,12 @@ public class CalendarManager {
     }
 
     public Calendar getFirstOfMonth() {
-        calendar.set(Calendar.DAY_OF_MONTH, this.calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
         return calendar;
     }
 
     public Calendar getEndOfMonth() {
-        calendar.set(Calendar.DAY_OF_MONTH, this.calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         return calendar;
     }
 }

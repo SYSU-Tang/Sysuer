@@ -39,7 +39,7 @@ public class AcademyNotification extends AppCompatActivity {
             @Override
             public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
                 holder.itemView.setOnClickListener(_ -> {
-                    JSONObject item = ((NewsFragment.NewsAdp) adapter).data.get(position);
+                    JSONObject item = ((NewsFragment.NewsAdapter) adapter).get(position);
                     dialog.setTitle(item.getString("title"));
                     getContent(item.getString("id"));
                 });

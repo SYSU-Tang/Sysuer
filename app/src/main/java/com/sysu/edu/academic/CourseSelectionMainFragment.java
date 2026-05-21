@@ -50,7 +50,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class CourseSelectionFragment extends Fragment {
+public class CourseSelectionMainFragment extends Fragment {
     
     final MutableLiveData<String> filter = new MutableLiveData<>();
     final MutableLiveData<Integer> type = new MutableLiveData<>(1);
@@ -234,11 +234,13 @@ public class CourseSelectionFragment extends Fragment {
     }
     
     int getType() {
-        return CommonUtil.toIntegerOrDefault(typeCate.getValue().getFirst(), 1);
+        CommonUtil.Tuple2<Integer, Integer> value = typeCate.getValue();
+        return value == null ? 2 : value.getFirst();
     }
     
     int getCategory() {
-        return CommonUtil.toIntegerOrDefault(typeCate.getValue().getSecond(), 11);
+        CommonUtil.Tuple2<Integer, Integer> value = typeCate.getValue();
+        return value == null ? 2 : value.getSecond();
     }
     
     void unselect(String classId, String code) {
@@ -275,7 +277,7 @@ public class CourseSelectionFragment extends Fragment {
             Context context = parent.getContext();
             ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context), parent, false);
             for (int i = 0; i < info.length; i++) {
-                Chip chip = (Chip) LayoutInflater.from(context).inflate(R.layout.item_action_chip, binding.courseInfo, false);
+                Chip chip = ItemActionChipBinding.inflate(LayoutInflater.from(context), binding.courseInfo, false).getRoot();
                 chip.setOnLongClickListener(a -> {
                     ((ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("", ((Chip) a).getText()));
                     return false;
@@ -299,8 +301,8 @@ public class CourseSelectionFragment extends Fragment {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.bind(holder.itemView);
             Context context = binding.getRoot().getContext();
-            binding.courseName.setText(String.format("%s-%s", convert(position, "courseNum"), convert(position, "courseName")));
             JSONObject item = data.get(position);
+            binding.courseName.setText(String.format("%s-%s", convert(position, "courseNum"), convert(position, "courseName")));
             Integer selectedStatus = item.getInteger("selectedStatus");
             item.fluentPut("statusName", context.getString(selectedStatus == 4 ? R.string.status_selected : selectedStatus == 3 ? R.string.filtering : selectedStatus == 1 ? R.string.retired : R.string.unselected));
             binding.like.setSelected(item.containsKey("collectionStatus") && item.getInteger("collectionStatus") == 1);

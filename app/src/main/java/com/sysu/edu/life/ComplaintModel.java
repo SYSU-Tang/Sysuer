@@ -31,8 +31,8 @@ public class ComplaintModel {
     private long lastSmsSendTime = -1;
 
     public ComplaintModel(MessageCallback callback) {
-        this.messageCallback = callback;
-        this.httpClient = new OkHttpClient.Builder()
+        messageCallback = callback;
+        httpClient = new OkHttpClient.Builder()
                 .build();
     }
 

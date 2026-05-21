@@ -126,7 +126,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                         switch (message.getFirst()) {
                             case 1 -> {
                                 String id = ((JSONObject) campusInfo).getString("id");
-                                Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_filter_chip, binding.campusGroup, false);
+                                Chip chip = ItemFilterChipBinding.inflate(getLayoutInflater(), binding.campusGroup, false).getRoot();
                                 binding.campusGroup.addView(chip);
                                 chip.setOnCheckedChangeListener((_, isChecked) -> {
                                     if (isChecked) {

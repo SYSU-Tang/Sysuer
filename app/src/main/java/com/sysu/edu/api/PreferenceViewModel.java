@@ -24,7 +24,7 @@ public class PreferenceViewModel extends ViewModel {
     private SharedPreferences pm;
 
     public void setPM(SharedPreferences oldPM) {
-        this.pm = oldPM;
+        pm = oldPM;
     }
 
     public String getString(String key, String defValue) {

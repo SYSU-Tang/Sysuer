@@ -343,7 +343,7 @@ public class TodoManager {
     }
 
 
-    void loadItemList(String table, List<String> target) {
+    void loadItemList(String table, List<? super String> target) {
         try (Cursor cursor = todoDB.getWritableDatabase().query(table, null, null, null, null, null, null)) {
             while (cursor.moveToNext()) {
                 target.add(cursor.getString(cursor.getColumnIndexOrThrow("name")));

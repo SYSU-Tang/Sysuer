@@ -27,9 +27,9 @@ import com.sysu.edu.academic.MarkdownViewActivity;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ItemCardBinding;
+import com.sysu.edu.databinding.ItemTwoColumnRowBinding;
 import com.sysu.edu.databinding.RecyclerViewBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
-import com.sysu.edu.databinding.TwoColumnBinding;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -193,17 +193,17 @@ public class StaggeredFragment extends Fragment {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            TwoColumnBinding twoColumnBinding = TwoColumnBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+            ItemTwoColumnRowBinding binding = ItemTwoColumnRowBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
             if (rowListener != null) {
-                rowListener.onCreate(this, twoColumnBinding);
+                rowListener.onCreate(this, binding);
             }
-            return new RecyclerView.ViewHolder(twoColumnBinding.getRoot()) {
+            return new RecyclerView.ViewHolder(binding.getRoot()) {
             };
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            TwoColumnBinding b = TwoColumnBinding.bind(holder.itemView);
+            ItemTwoColumnRowBinding b = ItemTwoColumnRowBinding.bind(holder.itemView);
             b.key.setText(key.get(position));
             holder.itemView.setOnClickListener(_ -> {
                 ClipboardManager clip = (ClipboardManager) b.getRoot().getContext().getSystemService(Context.CLIPBOARD_SERVICE);

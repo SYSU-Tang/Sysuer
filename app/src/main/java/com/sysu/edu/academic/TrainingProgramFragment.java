@@ -19,6 +19,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.chip.Chip;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.FragmentTrainingScheduleBinding;
+import com.sysu.edu.databinding.ItemFilterChipBinding;
 import com.sysu.edu.model.JwxtModel;
 
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class TrainingProgramFragment extends Fragment {
                         } // 处理年级
                         case 3 -> {
                             data.getJSONArray("data").forEach(e -> {
-                                Chip chip = (Chip) inflater.inflate(R.layout.item_filter_chip, binding.types, false);
+                                Chip chip = ItemFilterChipBinding.inflate(inflater, binding.types, false).getRoot();
                                 chip.setOnCheckedChangeListener((_, isChecked) -> {
                                     if (isChecked)
                                         type.setValue(((JSONObject) e).getString("dataNumber"));

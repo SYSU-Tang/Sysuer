@@ -17,11 +17,10 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ItemNewsBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
 import com.sysu.edu.view.AdapterListener;
-
-import java.util.ArrayList;
+import com.sysu.edu.view.RecyclerAdapter;
 
 public class NewsFragment extends Fragment {
-    final NewsAdp newsAdapter = new NewsAdp();
+    final NewsAdapter newsAdapter = new NewsAdapter();
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     Params params;
 
@@ -49,8 +48,7 @@ public class NewsFragment extends Fragment {
         staggeredGridLayoutManager.setSpanCount(params.getColumn());
     }
 
-    public static class NewsAdp extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        final ArrayList<JSONObject> data = new ArrayList<>();
+    public static class NewsAdapter extends RecyclerAdapter<JSONObject> {
 
         AdapterListener listener;
 
@@ -61,23 +59,11 @@ public class NewsFragment extends Fragment {
             };
         }
 
-        public void add(JSONObject json) {
-            data.add(json);
-            notifyItemInserted(getItemCount() - 1);
-        }
-
-        public void setListener(AdapterListener l) {
-            this.listener = l;
-        }
-
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemNewsBinding binding = ItemNewsBinding.bind(holder.itemView);
-
             // AppCompatImageView image = holder.itemView.findViewById(R.id.image);
-            if (listener != null) {
-                listener.onBind(this, holder, position);
-            }
+            if (listener != null) listener.onBind(this, holder, position);
             //        if(Objects.equals(data.get(position).getString("newDeliveryMark"), "1")){
             //            Drawable latest = AppCompatResources.getDrawable(context,R.drawable.latest);
             //            if (latest != null) {
@@ -96,11 +82,7 @@ public class NewsFragment extends Fragment {
             //                    .override(400).fitCenter().transform(new RoundedCorners(16))
             //                    .into(image);
             //        }
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
+            super.onBindViewHolder(holder, position);
         }
     }
 }

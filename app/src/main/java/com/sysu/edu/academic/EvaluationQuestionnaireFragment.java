@@ -194,7 +194,6 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     JSONArray answer;
     
     public OptionAdapter(Context context) {
-        super();
         this.context = context;
     }
     
@@ -268,13 +267,12 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     JSONArray answer;
     
     public RankAdapter(Context context) {
-        super();
         this.context = context;
     }
     
     public void setAnswer(JSONArray answers) {
-        this.answer = answers;
-        this.rank = answers.isEmpty() ? 100 : Integer.parseInt(answers.getString(0));
+        answer = answers;
+        rank = answers.isEmpty() ? 100 : Integer.parseInt(answers.getString(0));
         notifyItemChanged(0);
     }
     

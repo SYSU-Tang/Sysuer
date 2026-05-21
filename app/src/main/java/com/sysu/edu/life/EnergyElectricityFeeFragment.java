@@ -147,7 +147,7 @@ public class EnergyElectricityFeeFragment extends Fragment {
                     } else if (response.getInteger("errorCode") == 500) {
 //                        params.toast(R.string.pay_fail);
                         params.toast(response.getString("msg"));
-                    } else contextUtil.login(TargetUrl.ZHNY, () -> requestQueue.retry());
+                    } else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
                 }
                 super.handleMessage(msg);
             }

@@ -124,7 +124,7 @@ public class CourseScheduleActivity extends AppCompatActivity {
         detailBinding.open.setOnClickListener(v -> startActivity(new Intent(this, CourseDetailActivity.class).putExtra("id", id.getValue()), ActivityOptionsCompat.makeSceneTransitionAnimation(this, v, "miniapp").toBundle())); // 初始化打开链接
         detailDialog.setContentView(detailBinding.getRoot());
         model.getMessage().observe(this, message -> {
-            JSONObject response = (JSONObject) message.second;
+            JSONObject response = message.second;
             if (response.getInteger("code").equals(200)) {
                 switch (message.getFirst()) {
                     case 1 -> {
