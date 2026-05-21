@@ -1,55 +1,48 @@
 package com.sysu.edu.api;
 
-import android.icu.text.SimpleDateFormat;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 
 public class CalendarManager {
-
-    final Calendar calendar = Calendar.getInstance();
-
-    final Date now = new Date();
-
-    private final SimpleDateFormat dateString = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault());
-
-    public CalendarManager() {
-        calendar.setTime(now);
-    }
-
+    
+    final LocalDate today = LocalDate.now();
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    
     public int getYear() {
-        return calendar.get(Calendar.YEAR);
+        return today.getYear();
     }
-
-    public String toDateString(Date date) {
-        return dateString.format(date);
+    
+    public String toDateString(LocalDate date) {
+        return dateFormatter.format(date);
     }
-
-    public String toDateStringAdd(int days) {
-        calendar.add(Calendar.DATE, days);
-        String dateString = toDateString(calendar.getTime());
-        calendar.setTime(now);
-        return dateString;
+    
+    public String toDateStringPLus(int days) {
+        return toDateString(today.plusDays(days));
     }
-
-    public String getDateTime(Calendar calendar) {
-        return getDateTime(calendar.getTime());
+    
+    public String toDateTimeString(LocalDateTime date) {
+        return dateTimeFormatter.format(date);
     }
-
-    public String getDateTime(Date date) {
-        return dateTimeFormat.format(date);
+    
+    
+    public LocalDate getFirstOfMonth() {
+        return today.with(TemporalAdjusters.firstDayOfMonth());
     }
-
-    public Calendar getFirstOfMonth() {
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-        return calendar;
+    
+    public LocalDate getEndOfMonth() {
+        return today.with(TemporalAdjusters.lastDayOfMonth());
     }
-
-    public Calendar getEndOfMonth() {
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-        return calendar;
+    
+    public LocalDate toDate(long millis) {
+        return Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+    
+    public long toMillis(LocalDate date) {
+        return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 }

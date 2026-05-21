@@ -313,11 +313,11 @@ public class DashboardFragment extends Fragment {
                 return false;
             });
             menu.add(0, Menu.NONE, 0, R.string.today).setOnMenuItemClickListener(_ -> {
-                todoDate.setValue(calendar.toDateStringAdd(0));
+                todoDate.setValue(calendar.toDateStringPLus(0));
                 return false;
             });
             menu.add(0, Menu.NONE, 0, R.string.tomorrow).setOnMenuItemClickListener(_ -> {
-                todoDate.setValue(calendar.toDateStringAdd(1));
+                todoDate.setValue(calendar.toDateStringPLus(1));
                 return false;
             });
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());

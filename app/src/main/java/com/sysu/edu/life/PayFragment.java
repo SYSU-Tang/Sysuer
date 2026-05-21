@@ -35,8 +35,8 @@ import com.sysu.edu.databinding.FragmentPaySituationBinding;
 import com.sysu.edu.databinding.ItemFilterChipBinding;
 import com.sysu.edu.view.StaggeredFragment;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class PayFragment extends StaggeredFragment {
@@ -100,8 +100,8 @@ public class PayFragment extends StaggeredFragment {
                 break;
             case 3:
                 DateManager dm = new DateManager();
-                dm.fromDate = calendarManager.getFirstOfMonth().getTime();
-                dm.toDate = calendarManager.getEndOfMonth().getTime();
+                dm.fromDate = calendarManager.getFirstOfMonth();
+                dm.toDate = calendarManager.getEndOfMonth();
                 FragmentPayRecordBinding fragmentPayRecordBinding = FragmentPayRecordBinding.inflate(inflater);
                 fragmentPayRecordBinding.getRoot().addView(view);
                 view = fragmentPayRecordBinding.getRoot();
@@ -110,7 +110,7 @@ public class PayFragment extends StaggeredFragment {
                     MaterialDatePicker<Long> fromDatePicker = MaterialDatePicker.Builder.datePicker().setSelection(dm.getFromDateTimeMillis()).setCalendarConstraints(new CalendarConstraints.Builder()
                             .setValidator(CompositeDateValidator.allOf(List.of(DateValidatorPointBackward.before(dm.getToDateTimeMillis())))).build()).build();
                     fromDatePicker.addOnPositiveButtonClickListener(selection -> {
-                        dm.fromDate = new Date(selection);
+                        dm.setFromDateTimeMillis(selection);
                         fromDatePicker.dismissAllowingStateLoss();
                         fragmentPayRecordBinding.from.setText(dm.getFromDateString());
                         dm.getData();
@@ -121,7 +121,7 @@ public class PayFragment extends StaggeredFragment {
                 fragmentPayRecordBinding.to.setOnClickListener(_ -> {
                     MaterialDatePicker<Long> toDatePicker = MaterialDatePicker.Builder.datePicker().setSelection(dm.getToDateTimeMillis()).setCalendarConstraints(new CalendarConstraints.Builder().setValidator(CompositeDateValidator.allOf(List.of(DateValidatorPointForward.from(dm.getFromDateTimeMillis())))).build()).build();
                     toDatePicker.addOnPositiveButtonClickListener(selection -> {
-                        dm.toDate = new Date(selection);
+                        dm.setToDateTimeMillis(selection);
                         toDatePicker.dismissAllowingStateLoss();
                         fragmentPayRecordBinding.to.setText(dm.getToDateString());
                         dm.getData();
@@ -136,13 +136,11 @@ public class PayFragment extends StaggeredFragment {
                 });
                 break;
         }
-        View finalView = view;
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == -1) {
-                    params.toast(getString(R.string.no_net_connected));
-                } else {
+                if (msg.what == -1) params.toast(getString(R.string.no_net_connected));
+                else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
                         if (response.get("data") != null) {
@@ -221,19 +219,17 @@ public class PayFragment extends StaggeredFragment {
     }
 
     void getPaymentList() {
-        getPaymentList(calendarManager.getDateTime(calendarManager.getFirstOfMonth()), calendarManager.getDateTime(calendarManager.getEndOfMonth()));
+        getPaymentList(calendarManager.toDateTimeString(calendarManager.getFirstOfMonth().atStartOfDay()), calendarManager.toDateTimeString(calendarManager.getEndOfMonth().atStartOfDay()));
     }
 
     void getRefundList() {
         http.postRequest("https://pay.sysu.edu.cn/client/api/client/refund/list", "{}", 4);
     }
 
-    /*Accept-language: zh-CN*/
-
     class DateManager {
 
-        Date fromDate;
-        Date toDate;
+        LocalDate fromDate;
+        LocalDate toDate;
 
         public String getFromDateString() {
             return calendarManager.toDateString(fromDate);
@@ -244,15 +240,23 @@ public class PayFragment extends StaggeredFragment {
         }
 
         public long getFromDateTimeMillis() {
-            return fromDate.getTime();
+            return calendarManager.toMillis(fromDate);
+        }
+
+        public void setFromDateTimeMillis(long from) {
+            fromDate = calendarManager.toDate(from);
         }
 
         public long getToDateTimeMillis() {
-            return toDate.getTime();
+            return calendarManager.toMillis(toDate);
         }
-
+        
+        public void setToDateTimeMillis(long to) {
+            toDate = calendarManager.toDate(to);
+        }
+        
         public void getData() {
-            getPaymentList(calendarManager.getDateTime(fromDate), calendarManager.getDateTime(toDate));
+            getPaymentList(calendarManager.toDateTimeString(fromDate.atStartOfDay()), calendarManager.toDateTimeString(toDate.atStartOfDay()));
         }
     }
 }
