@@ -12,7 +12,6 @@
     <string name="classroom_query">Classroom Query</string>
     <string name="office">Teaching Building</string>
     <string name="date">Date</string>
-    <string name="query">Query</string>
     <string name="classroom_type">Classroom Type</string>
     <string name="course_schedule">Agenda</string>
     <string name="evaluation">Teaching Evaluation</string>
@@ -105,7 +104,8 @@
     <string name="between">~</string>
     <string name="student_job">Student Job</string>
     <string name="close">close</string>
-    <string name="search">Query</string>
+    <string name="query">Query</string>
+    <string name="search">Search</string>
     <string name="exam_week">Exam Week</string>
     <string name="project">Project</string>
     <string name="version">Version</string>
