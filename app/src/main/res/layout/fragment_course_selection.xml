@@ -32,7 +32,7 @@
         android:id="@+id/zoom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@string/hide_filter"
         android:src="@drawable/zoom"
         android:text="@string/hide_filter"

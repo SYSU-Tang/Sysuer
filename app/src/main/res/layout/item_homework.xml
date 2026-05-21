@@ -4,7 +4,8 @@
     style="@style/Widget.Material3.CardView.Elevated"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginHorizontal="@dimen/horizontal_margin"
+    android:layout_marginVertical="@dimen/vertical_margin"
     app:contentPadding="?listPreferredItemPaddingLeft">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -68,7 +69,7 @@
             style="@style/Widget.Material3.TextView.ListItem.SupportingText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/icon_padding"
             android:background="?selectableItemBackground"
             android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
             android:textIsSelectable="true"
@@ -76,36 +77,34 @@
             app:layout_constraintStart_toEndOf="@id/block"
             app:layout_constraintTop_toBottomOf="@id/description" />
 
-        <com.google.android.material.floatingtoolbar.FloatingToolbarLayout
+        <com.google.android.material.button.MaterialButtonGroup
             android:id="@+id/toolbar"
+            style="@style/Widget.Material3.MaterialButtonGroup"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/vertical_margin"
+            android:gravity="end"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/detail">
+            app:layout_constraintTop_toBottomOf="@id/detail"
+            app:overflowMode="wrap">
 
-            <com.google.android.material.overflow.OverflowLinearLayout
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/view"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:text="@string/view_detail"
+                app:icon="@drawable/view" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/view"
-                    style="@style/Widget.Material3Expressive.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/view_detail"
-                    app:icon="@drawable/view" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/upload"
-                    style="@style/Widget.Material3Expressive.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/submit"
-                    app:icon="@drawable/up" />
-            </com.google.android.material.overflow.OverflowLinearLayout>
-        </com.google.android.material.floatingtoolbar.FloatingToolbarLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/upload"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/submit"
+                app:icon="@drawable/up" />
+        </com.google.android.material.button.MaterialButtonGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

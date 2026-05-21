@@ -5,13 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?android:attr/selectableItemBackground"
-    android:padding="6dp">
+    android:minHeight="?attr/listPreferredItemHeightSmall"
+    android:paddingHorizontal="@dimen/horizontal_padding"
+    android:paddingVertical="@dimen/vertical_padding">
 
     <TextView
         android:id="@+id/key"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/value"
@@ -23,7 +24,7 @@
         android:id="@+id/value"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="@dimen/horizontal_margin"
         android:ellipsize="end"
         android:maxLines="8"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"

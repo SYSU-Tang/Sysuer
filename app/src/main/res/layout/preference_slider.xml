@@ -7,10 +7,8 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingTop="8dp"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingBottom="8dp">
+    android:paddingHorizontal="@dimen/horizontal_padding"
+    android:paddingVertical="@dimen/vertical_padding">
 
     <FrameLayout
         android:id="@+id/icon_container"

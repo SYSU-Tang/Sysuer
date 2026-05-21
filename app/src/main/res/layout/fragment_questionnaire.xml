@@ -20,7 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/recycler_view">
 
-        <!-- floating toolbar sample content -->
         <com.google.android.material.overflow.OverflowLinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,7 +28,7 @@
 
             <Button
                 android:id="@+id/save"
-                style="?attr/materialIconButtonFilledStyle"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/save"
@@ -40,7 +39,7 @@
 
             <Button
                 android:id="@+id/reset"
-                style="?attr/materialIconButtonFilledStyle"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/reset"
@@ -51,7 +50,7 @@
 
             <Button
                 android:id="@+id/auto"
-                style="?attr/materialIconButtonFilledStyle"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/fill"
@@ -62,7 +61,7 @@
 
             <Button
                 android:id="@+id/submit"
-                style="?attr/materialIconButtonFilledStyle"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/submit"
@@ -71,6 +70,5 @@
                 app:layout_overflowIcon="@drawable/submit"
                 app:layout_overflowText="@string/submit" />
         </com.google.android.material.overflow.OverflowLinearLayout>
-
     </com.google.android.material.floatingtoolbar.FloatingToolbarLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

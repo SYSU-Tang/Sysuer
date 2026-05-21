@@ -5,10 +5,9 @@
     android:layout_height="wrap_content"
     android:background="?android:selectableItemBackground"
     android:minHeight="?android:listPreferredItemHeight"
+    android:paddingVertical="@dimen/vertical_padding"
     android:paddingStart="4dp"
-    android:paddingTop="4dp"
-    android:paddingEnd="?attr/listPreferredItemPaddingEnd"
-    android:paddingBottom="4dp">
+    android:paddingEnd="?attr/listPreferredItemPaddingEnd">
 
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/check"
@@ -92,14 +91,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:overflowMode="menu">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/view"
-            style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:icon="@drawable/view" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/copy"

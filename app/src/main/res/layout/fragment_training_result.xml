@@ -20,7 +20,7 @@
         android:id="@+id/export"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/fab_margin"
         android:text="@string/export"
         android:contentDescription="@string/export"
         android:transitionName="result"

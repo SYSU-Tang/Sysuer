@@ -5,10 +5,8 @@
     android:layout_height="wrap_content"
     android:background="?android:selectableItemBackground"
     android:minHeight="?android:listPreferredItemHeight"
-    android:paddingStart="4dp"
-    android:paddingTop="4dp"
-    android:paddingEnd="?attr/listPreferredItemPaddingEnd"
-    android:paddingBottom="4dp">
+    android:paddingHorizontal="@dimen/horizontal_padding"
+    android:paddingVertical="@dimen/vertical_padding">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/check"
@@ -19,13 +17,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="type,detail"/>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/type"
+        android:layout_height="0dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/round_rect"
-        android:padding="2dp"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="2dp"
         android:radius="4dp"
         android:text="@string/type"
         android:textAppearance="@style/TextAppearance.Material3.BodySmall"
@@ -47,19 +54,6 @@
         app:layout_constraintRight_toLeftOf="@id/menu"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!--<com.google.android.material.textview.MaterialTextView
-        android:id="@+id/description"
-        style="@style/Widget.Material3.TextView.ListItem.SupportingText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:text="@string/todo"
-        app:layout_constraintBottom_toTopOf="@id/detail"
-        app:layout_constraintEnd_toEndOf="@id/title"
-        app:layout_constraintStart_toStartOf="@+id/type"
-        app:layout_constraintTop_toBottomOf="@id/title" />-->
-
     <androidx.constraintlayout.helper.widget.Flow
         android:id="@+id/detail"
         android:layout_width="0dp"
@@ -77,7 +71,7 @@
         android:id="@+id/detail_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:drawablePadding="4dp"
+        android:drawablePadding="@dimen/icon_padding"
         android:text="@string/type"
         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
         app:drawableStartCompat="@drawable/round_rect" />

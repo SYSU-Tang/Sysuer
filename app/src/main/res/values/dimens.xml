@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <dimen name="horizontal_margin">16dp</dimen>
     <dimen name="button_margin">16dp</dimen>
     <dimen name="vertical_margin">8dp</dimen>
@@ -12,4 +12,5 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="zero_space">0dp</dimen>
+    <dimen name="m3e_searchview_appbarwithsearch_toolbar_height" tools:override="true">0dp</dimen>
 </resources>

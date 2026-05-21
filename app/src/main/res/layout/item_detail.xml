@@ -5,9 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_column="2"
     android:orientation="vertical"
-    android:paddingLeft="16dp"
     android:background="?selectableItemBackground"
-    android:paddingRight="16dp">
+    android:paddingHorizontal="@dimen/horizontal_padding">
 
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
         android:layout_row="0"

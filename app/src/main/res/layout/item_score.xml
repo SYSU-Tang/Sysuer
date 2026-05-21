@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
-    app:contentPadding="16dp">
+    app:contentPadding="@dimen/content_padding">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -21,13 +21,11 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <View
+        <com.google.android.material.divider.MaterialDivider
             android:id="@+id/divider"
             android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="?android:attr/listDivider"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/vertical_margin"
             app:layout_constraintBottom_toTopOf="@+id/info"
             app:layout_constraintLeft_toLeftOf="@+id/subject"
             app:layout_constraintRight_toRightOf="parent"

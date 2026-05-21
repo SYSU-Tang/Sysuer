@@ -18,7 +18,7 @@
 
         <include
             android:id="@+id/field"
-            layout="@layout/two_column"
+            layout="@layout/item_two_column_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -27,7 +27,7 @@
 
         <include
             android:id="@+id/date"
-            layout="@layout/two_column"
+            layout="@layout/item_two_column_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -36,7 +36,7 @@
 
         <include
             android:id="@+id/time"
-            layout="@layout/two_column"
+            layout="@layout/item_two_column_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -45,7 +45,7 @@
 
         <include
             android:id="@+id/fee"
-            layout="@layout/two_column"
+            layout="@layout/item_two_column_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -54,7 +54,7 @@
 
         <include
             android:id="@+id/type"
-            layout="@layout/two_column"
+            layout="@layout/item_two_column_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"

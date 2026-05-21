@@ -5,17 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-
     <LinearLayout
         android:id="@+id/head"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?colorSurfaceContainer"
         android:orientation="vertical"
-        android:paddingStart="8dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="4dp">
+        android:paddingHorizontal="@dimen/horizontal_margin"
+        android:paddingVertical="@dimen/vertical_margin">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/category"

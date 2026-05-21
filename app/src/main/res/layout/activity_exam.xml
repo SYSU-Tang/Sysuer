@@ -102,7 +102,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
-        android:contentDescription="@string/search"
+        android:contentDescription="@string/query"
         app:srcCompat="@drawable/search" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

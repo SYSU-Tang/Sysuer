@@ -36,7 +36,7 @@
         style="@style/TextAppearance.Material3.SearchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/search"
+        android:hint="@string/query"
         app:layout_anchor="@id/searchbar"
         app:layout_behavior="com.google.android.material.search.SearchView$Behavior">
 

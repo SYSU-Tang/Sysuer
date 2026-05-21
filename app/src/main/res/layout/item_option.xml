@@ -13,7 +13,7 @@
         android:layout_marginTop="2dp"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="2dp"
-        app:cardElevation="1dp">
+        app:cardElevation="@dimen/card_elevation">
 
         <RadioButton
             android:id="@+id/option"

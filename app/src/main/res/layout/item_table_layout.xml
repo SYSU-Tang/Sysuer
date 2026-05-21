@@ -4,10 +4,8 @@
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingLeft="16dip"
-    android:paddingTop="8dip"
-    android:paddingRight="16dip"
-    android:paddingBottom="8dip"
+    android:paddingHorizontal="@dimen/horizontal_padding"
+    android:paddingVertical="@dimen/vertical_padding"
     android:scrollIndicators="bottom"
     android:scrollbarStyle="outsideInset"
     android:scrollbars="horizontal">
