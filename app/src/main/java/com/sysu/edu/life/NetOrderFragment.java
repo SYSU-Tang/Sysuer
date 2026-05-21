@@ -106,8 +106,7 @@ public class NetOrderFragment extends StaggeredFragment {
                         try {
                             JSONObject json = JSONObject.parse(response);
                             if (!json.getBoolean("success")) {
-                                params.toast(R.string.login_warning);
-                                params.gotoLogin(TargetUrl.NETPAY);
+                                    params.gotoLogin(TargetUrl.NETPAY);
                             }
                         } catch (JSONException _) {
                             Matcher matcher = Pattern.compile("<tr .*?>(.+?)</tr>", Pattern.DOTALL).matcher(response);

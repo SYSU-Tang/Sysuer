@@ -174,6 +174,8 @@ public class ContextUtil {
             loginManager.setOnLoginListener(new LoginManager.LoginListener() {
                 @Override
                 public void onSuccess() {
+//                    System.out.println("Login result: success");
+                    if (afterLogin != null) afterLogin.run();
                 }
                 
                 @Override
@@ -185,15 +187,10 @@ public class ContextUtil {
                     else handler.post(() -> toast(message));
                 }
             });
-            if (!isEmpty(url)) {
-                boolean login = false;
-                try {
-                    login = loginManager.login(getUserName(), getPassword(), url);
-                } catch (ExecutionException | InterruptedException e) {
-                    Log.e("ContextUtil", "login: ", e);
-                }
-                System.out.println("Login result: " + login);
-                if (login && afterLogin != null) afterLogin.run();
+            if (!isEmpty(url)) try {
+                loginManager.login(getUserName(), getPassword(), url);
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e("ContextUtil", "login: ", e);
             }
         } else showAccountDialog(url, afterLogin);
     }
@@ -214,9 +211,8 @@ public class ContextUtil {
                     .setPositiveButton(android.R.string.ok, (_, _) -> {
                         Editable username = binding.username.edit.getText();
                         Editable password = binding.password.edit.getText();
-                        if (isEmpty(username) || isEmpty(password)) {
-                            toast(R.string.login_warning);
-                        } else {
+                        if (isEmpty(username) || isEmpty(password)) toast(R.string.login_warning);
+                        else {
                             setUserName(username.toString());
                             setPassword(password.toString());
                             login(url, afterLogin);

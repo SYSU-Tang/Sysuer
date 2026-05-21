@@ -44,6 +44,7 @@ public class LoginManager {
     
     private static final int TIMEOUT = 15;
     private static CookieManager cookieManager;
+    final AuthorizationJar authorizationJar;
     private final ArrayDeque<Long> timestamps = new ArrayDeque<>();
     private final CookieStore cookieJar = new CookieStore();
     private final OkHttpClient client = new OkHttpClient.Builder()
@@ -56,9 +57,8 @@ public class LoginManager {
     private final OkHttpClient directClient = new OkHttpClient.Builder().followRedirects(false).cookieJar(cookieJar).build();
     private final AuthorizationManager casAuthorizationManager = new AuthorizationManager("https://cas.sysu.edu.cn", "https://cas.sysu.edu.cn");
     private final Context context;
-    final AuthorizationJar authorizationJar;
     LoginListener loginListener;
-    boolean isLoginSuccess = false;
+    boolean isLoginSuccess = true;
     
     public LoginManager(Context context) {
         this.context = context;
@@ -126,6 +126,7 @@ public class LoginManager {
      */
     private String redirect(String response) {
         JSONObject json = JSONObject.parse(response);
+        System.out.println(json);
         if ("0".equals(json.getString("code")))
             return json.containsKey("data") ? json.getJSONObject("data").getString("redirect") : json.getString("redirect");
         else {
@@ -138,15 +139,13 @@ public class LoginManager {
      * 登录，使用 AuthorizationJar 中的用户名和密码登录
      *
      * @param service 登录服务
-     * @return 是否登录成功
      *
      */
-    public boolean login(String service) {
+    public void login(String service) {
         try {
-            return authorizationJar != null && login(authorizationJar.getUserName(), authorizationJar.getPassword(), service);
+            login(authorizationJar.getUserName(), authorizationJar.getPassword(), service);
         } catch (ExecutionException | InterruptedException e) {
             Log.e("LoginManager", "login: ", e);
-            return false;
         }
     }
     
@@ -156,10 +155,9 @@ public class LoginManager {
      * @param username 用户名
      * @param password 密码
      * @param service  登录服务
-     * @return 是否登录成功
      *
      */
-    public boolean login(String username, String password, String service) throws ExecutionException, InterruptedException {
+    public void login(String username, String password, String service) throws ExecutionException, InterruptedException {
         long now = System.currentTimeMillis();
         if (!timestamps.isEmpty()) {
             Long top = timestamps.getLast();
@@ -168,10 +166,10 @@ public class LoginManager {
         }
         if (timestamps.size() >= 5) {
             onError("503", context.getString(R.string.login_too_frequently));
-            return false;
+            return;
         }
         timestamps.add(now);
-        return CompletableFuture.supplyAsync(() -> {
+        CompletableFuture.supplyAsync(() -> {
             try {
                 String host = HttpUrl.get(service).host();
                 String targetBaseUrl = HttpUrl.get(service).scheme() + "://" + host + "/";
@@ -217,22 +215,22 @@ public class LoginManager {
                             setToken(host, token);
                             cookieJar.saveFromResponse(HttpUrl.get(service), List.of(new Cookie.Builder().name("ibps-1.0.1-token").value(token).domain("pay.sysu.edu.cn").build()));
                         }
-                        case TargetUrl.ZHNY -> {
-                            if (authorizationJar != null)
+                        case TargetUrl.ZHNY ->
                                 authorizationJar.setAuthorization(host, getZHNYAuthoritarian(service));
-                        }
                         case TargetUrl.XGXT -> getXGXTToken(service, targetBaseUrl);
                         case TargetUrl.NEWS ->
                                 setAuthorization(host, getNewsAuthorization(service));
                         case TargetUrl.LMS -> setToken(host, getLmsToken());
                     }
                 }
-                onSuccess();
             } catch (Exception e) {
                 Log.e("LoginManager", e.getMessage(), e);
             }
             return isLoginSuccess;
-        }).get();
+        }).thenAccept(b -> {
+            System.out.println("Login result: " + b);
+            if (b) onSuccess();
+        });
     }
     
     @NonNull
@@ -275,8 +273,7 @@ public class LoginManager {
     }
     
     private void setToken(String host, String token) {
-        if (authorizationJar != null)
-            authorizationJar.setToken(host, token);
+        authorizationJar.setToken(host, token);
     }
     
     /*
@@ -285,7 +282,7 @@ public class LoginManager {
      * @param auth 认证
      * */
     private void setAuthorization(String host, String auth) {
-        if (authorizationJar != null) authorizationJar.setAuthorization(host, "Bearer " + auth);
+        authorizationJar.setAuthorization(host, "Bearer " + auth);
     }
     
     private void getXGXTToken(String service, String targetBaseUrl) throws IOException {

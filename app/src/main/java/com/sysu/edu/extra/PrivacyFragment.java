@@ -62,7 +62,6 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                                 }
                             }
                         } else if (response != null && response.getInteger("code").equals(1003)) {
-                            params.toast(R.string.login_warning);
                             params.gotoLogin(TargetUrl.PAY);
                         } else if (response != null) {
                             params.toast(response.getString("message"));

@@ -45,19 +45,19 @@ import java.util.List;
 import java.util.Map;
 
 public class NewsFragment extends Fragment {
-
+    
     final int position;
     final AuthorizationManager authorizationManager = new AuthorizationManager("https://iportal.sysu.edu.cn/", "https://iportal-443.webvpn.sysu.edu.cn/");
+    final Runnable run;
     HttpManager http;
     RecyclerViewScrollBinding binding;
     int page = 1;
-    final Runnable run;
-
+    
     public NewsFragment(int pos) {
         position = pos;
         run = List.of((Runnable) this::getNews, this::getSubscription, this::getNotice, this::getDailyNews).get(position);
     }
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -79,20 +79,11 @@ public class NewsFragment extends Fragment {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     String json = (String) msg.obj;
-                    if (json == null || msg.what == -1) {
-                        params.toast(R.string.no_net_connected);
-                        return;
-                    }
-                    if (!msg.getData().getBoolean("isJSON")) {
-                        if (!authorizationManager.isAuthorized(json)) {
-                            params.toast(R.string.login_warning);
+                    if (json == null || msg.what == -1) params.toast(R.string.no_net_connected);
+                    else if (!msg.getData().getBoolean("isJSON")) {
+                        if (!authorizationManager.isAuthorized(json))
                             params.gotoLogin(authorizationManager.isAccessible() ? TargetUrl.NEWS : TargetUrl.NEWS_WEBVPN);
-                            return;
-                        }
-                        if (!authorizationManager.isAccessible(json)) {
-                            params.toast(R.string.educational_wifi_warning);
-                            run.run();
-                        }
+                        else if (!authorizationManager.isAccessible(json)) run.run();
                     } else {
                         JSONObject response = JSONObject.parseObject(json);
                         Integer code = response.getInteger("code");
@@ -122,37 +113,37 @@ public class NewsFragment extends Fragment {
         run.run();
         return binding.getRoot();
     }
-
+    
     void getNews() {
         http.postRequest(authorizationManager.getBaseUrl() + "ai_service/content-portal/recommend/query-recommend", "", 3);
     }
-
+    
     void getSubscription() {
         baseRequest("3ytr4e6c", 2);
     }
-
+    
     void getNotice() {
         baseRequest("3ytunvv6", 4);
     }
-
+    
     void getDailyNews() {
         baseRequest("4cef8rqw", 5);
     }
-
+    
     void baseRequest(String code, int what) {
         http.postRequest(authorizationManager.getBaseUrl() + "ai_service/content-portal/user/content/page", "{\"pageSize\":20,\"currentPage\":" + page++ + ",\"apiCode\":\"" + code + "\",\"notice\":false}", what);
     }
-
+    
     static class NewsAdapter extends RecyclerAdapter<HashMap<String, String>> {
-
-
+        
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(ItemNewsBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemNewsBinding binding = ItemNewsBinding.bind(holder.itemView);
@@ -168,11 +159,11 @@ public class NewsFragment extends Fragment {
                                 .addHeader("Cookie", toStringOrDefault(authorizationJar.getCookie(img)))
                                 .addHeader("Authorization", toStringOrDefault(authorizationJar.getAuthorization(CommonUtil.getHost(img))))
                                 .build()))
-                        .timeout(30000)
+                        .timeout(15000)
                         .override(params.dpToPx(120), params.dpToPx(120)).optionalFitCenter().transform(new RoundedCorners(16))
                         .into(binding.image);
             super.onBindViewHolder(holder, position);
         }
-
+        
     }
 }

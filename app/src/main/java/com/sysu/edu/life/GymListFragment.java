@@ -41,13 +41,13 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class GymListFragment extends Fragment {
-
+    
     static GymReservationViewModel viewModel;
     HttpManager http;
     Params params;
     StaggeredGridLayoutManager layoutManager;
     RecyclerViewScrollBinding binding;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -72,27 +72,16 @@ public class GymListFragment extends Fragment {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     String response = (String) msg.obj;
-                    System.out.println(response);
-                    System.out.println(msg.getData().getInt("code"));
                     switch (msg.getData().getInt("code")) {
-                        case 401 -> //                            viewModel.authorizationManager.setAccessible(false);
-                            //                            http.setAuthorizationRequired(true);
-                            //                            params.toast(R.string.educational_wifi_warning);
-                            //                            getInfo();
+                        case 401 ->
                                 params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                         case 200 -> {
                             if (!msg.getData().getBoolean("isJSON")) {
                                 if (!viewModel.authorizationManager.isAuthorized(response)) {
-                                    params.toast(R.string.login_warning);
-                                    params.gotoLogin( viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
-                                    return;
-                                }
-                                if (Pattern.compile("人机识别检测").matcher(response).find()) {
-                                    params.gotoLogin( viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
-                                    return;
-                                }
-                                if (!viewModel.authorizationManager.isAccessible(response)) {
-                                    params.toast(R.string.educational_wifi_warning);
+                                    params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                                } else if (Pattern.compile("人机识别检测").matcher(response).find())
+                                    params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                                else if (!viewModel.authorizationManager.isAccessible(response)) {
                                     getInfo();
                                 }
                             } else {
@@ -121,43 +110,43 @@ public class GymListFragment extends Fragment {
         }
         return binding.getRoot();
     }
-
+    
     private void getInfo() {
         if (Objects.equals(requireArguments().getInt("code"), 0)) getCampus();
         else getVenue();
     }
-
-
+    
+    
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         layoutManager.setSpanCount(params.getColumn());
     }
-
-
+    
+    
     void getCampus() {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/Campus/active", 1);
     }
-
+    
     void getVenue() {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/venuetype/all", 2);
     }
-
+    
     private static class FieldAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         Consumer<? super String> action;
-
+        
         public void setAction(Consumer<? super String> action) {
             this.action = action;
         }
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(ItemFieldBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemFieldBinding binding = ItemFieldBinding.bind(holder.itemView);

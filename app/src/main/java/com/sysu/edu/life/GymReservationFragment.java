@@ -67,12 +67,9 @@ public class GymReservationFragment extends Fragment {
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                super.handleMessage(msg);
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                } else {
+                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                else {
                     String response = (String) msg.obj;
-//                    System.out.println(response);
                     if (msg.getData().getBoolean("isJSON")) {
                         switch (msg.what) {
                             case 0 -> JSONArray.parseArray(response).forEach((i) -> {
@@ -109,12 +106,10 @@ public class GymReservationFragment extends Fragment {
                         }
                     } else {
                         if (!viewModel.authorizationManager.isAuthorized(response)) {
-                            params.toast(R.string.login_warning);
                             params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
-                        } else if (Pattern.compile("人机识别检测").matcher(response).find()) {
+                        } else if (Pattern.compile("人机识别检测").matcher(response).find())
                             params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
-                        } else if (!viewModel.authorizationManager.isAccessible(response)) {
-                            params.toast(R.string.educational_wifi_warning);
+                        else if (!viewModel.authorizationManager.isAccessible(response)) {
                             regetReservation();
                         }
                     }

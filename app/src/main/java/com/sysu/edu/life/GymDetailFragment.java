@@ -105,11 +105,9 @@ public class GymDetailFragment extends Fragment {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                } else {
+                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                else {
                     String response = (String) msg.obj;
-//                    System.out.println(response);
                     if (msg.getData().getBoolean("isJSON")) {
                         switch (msg.what) {
                             case 0:
@@ -123,7 +121,6 @@ public class GymDetailFragment extends Fragment {
                                     JSONArray timeslots = item.getJSONArray("Timeslots");
                                     if (timeslots != null) {
                                         if (rows.get() == -1) {
-                                            System.out.println("timeslots" + timeslots);
                                             field.add(JSONObject.of("Name", getString(R.string.time), "Type", 2));
                                             timeslots.forEach(o -> field.add(JSONObject.of("Name", String.format("%s\n%s", ((JSONObject) o).getString("Start"), ((JSONObject) o).getString("End")), "Type", 2)));
                                             name.setValue(true);
@@ -170,7 +167,6 @@ public class GymDetailFragment extends Fragment {
                                 }
                                 break;
                             case 4:
-//                                System.out.println(response);
                                 JSONObject result = JSONObject.parse(response);
                                 if (result.getInteger("Code") == 200) {
                                     params.toast(R.string.reserve_success);
@@ -200,9 +196,7 @@ public class GymDetailFragment extends Fragment {
         http.setAuthorizationRequired(true);
         http.setAuthorizationJar(new AuthorizationJar(requireContext()));
         date.select(viewModel.position.getValue() == null ? 0 : viewModel.position.getValue());
-//        System.out.println(viewModel.selected.getValue());
         viewModel.selected.observe(getViewLifecycleOwner(), selected -> {
-//            System.out.println("selected:"+selected);
             field.setSelected(selected);
             JSONObject studentFee = fee.get("学生");
             if (studentFee != null) {
@@ -212,7 +206,6 @@ public class GymDetailFragment extends Fragment {
                 } else {
                     StringBuilder info = new StringBuilder();
                     JSONArray items = new JSONArray();
-//                        System.out.println(field.getSelected());
                     field.getSelected().forEach(e -> {
                         info.append(field.get(e).getString("Venue")).append(" ").append(field.get(e).getString("Duration")).append("+");
                         items.add(field.get(e).getJSONObject("VenueBooking"));
@@ -309,16 +302,16 @@ public class GymDetailFragment extends Fragment {
         binding.type.key.setText(R.string.type);
     }
 
-    void updateReservationDialog(DialogGymReservationBinding binding, JSONObject item, JSONObject studentFee) {
-        binding.field.value.setText(item.getString("Venue"));
-        binding.date.value.setText(item.getString("Date"));
-        binding.time.value.setText(item.getString("Duration"));
-        Integer creditFee = studentFee.getInteger("CreditFee");
-        Integer cashFee = studentFee.getInteger("CashFee");
-        binding.fee.value.setText(String.format(Locale.getDefault(), "运动时￥%d或现金￥%d", creditFee, cashFee));
-        binding.type.value.setText(item.getString("Type"));
-        binding.reserve.setOnClickListener(_ -> reserve(item.getJSONArray("VenueBooking"), item.getString("VenueName"), creditFee));
-    }
+//    void updateReservationDialog(DialogGymReservationBinding binding, JSONObject item, JSONObject studentFee) {
+//        binding.field.value.setText(item.getString("Venue"));
+//        binding.date.value.setText(item.getString("Date"));
+//        binding.time.value.setText(item.getString("Duration"));
+//        Integer creditFee = studentFee.getInteger("CreditFee");
+//        Integer cashFee = studentFee.getInteger("CashFee");
+//        binding.fee.value.setText(String.format(Locale.getDefault(), "运动时￥%d或现金￥%d", creditFee, cashFee));
+//        binding.type.value.setText(item.getString("Type"));
+//        binding.reserve.setOnClickListener(_ -> reserve(item.getJSONArray("VenueBooking"), item.getString("VenueName"), creditFee));
+//    }
 
     private void reserve(JSONArray items, String venueName, Integer creditFee) {
         String uuid = generateUUID();
@@ -338,7 +331,7 @@ public class GymDetailFragment extends Fragment {
                 "IsCash", false,
                 "Charge", creditFee
         );
-        System.out.println(payload);
+//        System.out.println(payload);
         reserve(payload.toJSONString());
     }
 

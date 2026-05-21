@@ -40,8 +40,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class GymOrderFragment extends Fragment {
-
-
+    
     final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     HttpManager http;
     GymReservationViewModel viewModel;
@@ -56,13 +55,11 @@ public class GymOrderFragment extends Fragment {
         binding = FragmentGymOrderBinding.inflate(inflater, container, false);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         viewModel = new ViewModelProvider(requireActivity()).get(GymReservationViewModel.class);
-
         concatAdapter = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
         binding.recyclerView.setAdapter(concatAdapter);
         binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
                 if (dy > 0 && total > 0 && page * 10 < total)
                     getOrder();
             }
@@ -73,10 +70,9 @@ public class GymOrderFragment extends Fragment {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                    // 处理错误
-                } else {
+                // 处理错误
+                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                else {
                     String response = (String) msg.obj;
                     if (msg.getData().getBoolean("isJSON")) {
                         JSONObject json = JSONObject.parseObject(response);
@@ -102,7 +98,6 @@ public class GymOrderFragment extends Fragment {
                         } else if (Pattern.compile("人机识别检测").matcher(response).find()) {
                             params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                         } else if (!viewModel.authorizationManager.isAccessible(response)) {
-                            params.toast(R.string.educational_wifi_warning);
                             getOrder();
                         }
                     }
