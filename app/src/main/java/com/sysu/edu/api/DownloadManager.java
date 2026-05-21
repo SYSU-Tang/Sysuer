@@ -3,6 +3,8 @@ package com.sysu.edu.api;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -23,6 +25,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class DownloadManager {
+    
+    private static final Handler handler = new Handler(Looper.getMainLooper());
 
     /**
      * 下载网络文件到指定路径
@@ -64,12 +68,12 @@ public class DownloadManager {
      * @param path     本地文件保存路径
      * @param listener 下载监听器
      */
-    public static void downloadFile(Activity context, Request request, String path, DownloadListener listener) {
+    public static void downloadFile(Context context, Request request, String path, DownloadListener listener) {
         new OkHttpClient().newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.out.println("下载网络文件报错：" + e.getMessage());
-                context.runOnUiThread(() -> Toast.makeText(context, "下载网络文件报错：" + e.getMessage(), Toast.LENGTH_SHORT).show());
+                handler.post(() -> Toast.makeText(context, "下载网络文件报错：" + e.getMessage(), Toast.LENGTH_SHORT).show());
                 if (listener != null)
                     listener.onDownloadError(404, "下载网络文件报错：" + e.getMessage());
             }
@@ -102,7 +106,7 @@ public class DownloadManager {
 //                    openFile(context, path);
                 } catch (Exception e) {
                     System.out.println("下载网络文件报错：" + e.getMessage());
-                    context.runOnUiThread(() -> Toast.makeText(context, "下载网络文件报错：" + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    handler.post(() -> Toast.makeText(context, "下载网络文件报错：" + e.getMessage(), Toast.LENGTH_SHORT).show());
                 }
             }
         });

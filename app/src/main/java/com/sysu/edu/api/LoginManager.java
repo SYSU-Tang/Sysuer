@@ -87,19 +87,28 @@ public class LoginManager {
         return "";
     }
     
-    private void request(String path) {
-        String url = path.startsWith("http") ? path : casAuthorizationManager.getBaseUrl() + path;
+    private void request(String path, boolean isRedirect) {
         try {
-            Response response = client.newCall(new Request.Builder().url(url).build()).execute();
+            Response response = client.newCall(new Request.Builder().url(isRedirect ? casAuthorizationManager.getBaseUrl() + "/esc-sso/login?service=" + path : path).build()).execute();
             String body = response.body().string();
-//            System.out.println(body);
             if (Objects.requireNonNull(response.header("Content-Type", "")).contains("application/json")) {
-                String redirect = redirect(body);
-                if (redirect == null) return;
-                request(redirect);
+                JSONObject json = JSONObject.parse(body);
+                String code = json.getString("code");
+                if ("0".equals(code))
+                    request(json.containsKey("data") ? json.getJSONObject("data").getString("redirect") : json.getString("redirect"));
+                else if ("401".equals(code)) {
+//                    List<Cookie> list = getWebvpnKey(path);
+//                    if (!list.isEmpty())
+//                        cookieJar.saveFromResponse(HttpUrl.get("https://mportal.sysu.edu.cn"), list);
+//                    request(path, isRedirect);
+                } else onError(code, body);
             }
         } catch (IOException _) {
         }
+    }
+    
+    private void request(String path) {
+        request(path, false);
     }
     
     private String loginForGym(String path) throws IOException {
@@ -126,7 +135,6 @@ public class LoginManager {
      */
     private String redirect(String response) {
         JSONObject json = JSONObject.parse(response);
-        System.out.println(json);
         if ("0".equals(json.getString("code")))
             return json.containsKey("data") ? json.getJSONObject("data").getString("redirect") : json.getString("redirect");
         else {
@@ -179,7 +187,7 @@ public class LoginManager {
                     JSONObject publicKey = JSONObject.parse(getPublicKey()).getJSONObject("data").getJSONObject("param");
                     String redirect = redirect(doLogin(username, encrypt(publicKey.getString("publicKey"), password), publicKey.getString("publicKeyId")));
                     if (redirect == null) return false;
-                    request(redirect + "?service=https%3A%2F%2Fwebvpn.sysu.edu.cn%2Fusers%2Fauth%2Fcas%2Fcallback%3Furl");
+                    request("https://webvpn.sysu.edu.cn/users/auth/cas/callback?url", true);
                     getWebvpnKey(service);
                     switch (service) {
                         case TargetUrl.NEWS_WEBVPN ->
@@ -190,16 +198,16 @@ public class LoginManager {
                             setAuthorization(host, getGymAuthorization(targetBaseUrl));
                         }
                         case TargetUrl.XGXT_WEBVPN -> {
-                            request("/esc-sso/login?service=" + service);
+                            request(service, true);
                             getXGXTToken(service, targetBaseUrl);
                         }
-                        default -> request("/esc-sso/login?service=" + service);
+                        default -> request(service, true);
                     }
                 } else {
                     JSONObject publicKey = JSONObject.parse(getPublicKey()).getJSONObject("data").getJSONObject("param");
                     String redirect = redirect(doLogin(username, encrypt(publicKey.getString("publicKey"), password), publicKey.getString("publicKeyId")));
                     if (redirect == null) return false;
-                    request(redirect + "?service=" + service);
+                    request(service, true);
                     switch (service) {
                         case TargetUrl.PORTAL -> {
                             loginForPortal();

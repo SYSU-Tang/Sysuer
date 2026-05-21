@@ -4,21 +4,21 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-05-20T09:38:51.631726100Z">
+        <DropdownSelection timestamp="2026-05-21T16:01:10.764956300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=6LOJCITW9X8HY5GE" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Admin\.android\avd\Medium_Phone_2.avd" />
             </handle>
           </Target>
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="Release">
+      <SelectionState runConfigName="ExampleInstrumentedTest">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-05-20T04:21:26.332753700Z">
+        <DropdownSelection timestamp="2026-05-20T09:38:51.631726100Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Admin\.android\avd\35_1.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=6LOJCITW9X8HY5GE" />
             </handle>
           </Target>
         </DropdownSelection>

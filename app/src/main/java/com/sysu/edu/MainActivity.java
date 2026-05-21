@@ -161,15 +161,6 @@ public class MainActivity extends AppCompatActivity {
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, AppWidgetManager.getInstance(this)
                         .getAppWidgetIds(new ComponentName(this, e)))));
         ContextCompat.registerReceiver(this, receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED);
-        /*if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
-        } else {
-            AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            Intent intentMorning = new Intent(this, AlarmReceiver.class).setAction("VIDEO_TIMER");
-            PendingIntent piMorning = PendingIntent.getBroadcast(this, 0, intentMorning, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);     //设置事件
-            manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    System.currentTimeMillis() + 2 * 1000, piMorning);
-        }*/
         WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class)
                 .setInputData(new Data.Builder()
                         .putStringArray("components", new String[]{"TodayClassWidget", "RecentClassWidget", "NextClassWidget"})
@@ -179,8 +170,6 @@ public class MainActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                 requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, PackageManager.PERMISSION_GRANTED);
         }
-//        ContextUtil contextUtil = new ContextUtil(this);
-//        contextUtil.changeAccount(null,null);
     }
     
     void showUpdateDialog(JSONObject response) {
@@ -197,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                                         .setDestinationUri(Uri.fromFile(new File(path)))
                                         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)))
                         .setNegativeButton(R.string.download_in_browser, (_, _) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(response.getString("link")))))
-                        .setCancelable(response.getBoolean("enforce"))
+                        .setCancelable(!response.getBoolean("enforce"))
                         .setNeutralButton(R.string.download_in_app, (_, _) -> downloadFile(this, response.getString("link"), path))
                         .create();
                 updateDialog.show();

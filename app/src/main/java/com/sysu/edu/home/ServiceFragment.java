@@ -221,12 +221,11 @@ public class ServiceFragment extends Fragment {
         actionBinding.addToLauncher.setOnClickListener(_ -> {
             if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
                 Intent intent = new Intent(requireContext(), MainActivity.class);
-                if (item.containsKey("activity")) {
-                    try {
-                        intent = new Intent(requireContext(), Class.forName(requireContext().getPackageName() + item.getString("activity")));
-                    } catch (ClassNotFoundException _) {
-                    }
-                } else if (item.containsKey("url"))
+                if (item.containsKey("activity")) try {
+                    intent = new Intent(requireContext(), Class.forName(requireContext().getPackageName() + item.getString("activity")));
+                } catch (ClassNotFoundException _) {
+                }
+                else if (item.containsKey("url"))
                     intent = new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(trim(item.getString("url"))));
                 ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(requireContext(), String.valueOf(itemId))
                         .setShortLabel(item.getString("name"))
@@ -235,9 +234,7 @@ public class ServiceFragment extends Fragment {
                         .setIntent(intent.setAction(Intent.ACTION_VIEW))
                         .build();
                 ShortcutManagerCompat.requestPinShortcut(requireContext(), pinShortcutInfo, PendingIntent.getBroadcast(requireContext(), /* request code */ 0, ShortcutManagerCompat.createShortcutResultIntent(requireContext(), pinShortcutInfo), /* flags */ PendingIntent.FLAG_IMMUTABLE).getIntentSender());
-            } else {
-                params.toast(R.string.fail_to_add_shortcut);
-            }
+            } else params.toast(R.string.fail_to_add_shortcut);
         });
         actionBinding.collect.setOnClickListener(_ -> {
             boolean isServiceCollect = Boolean.TRUE.equals(isServiceCollected.getValue());
@@ -338,22 +335,21 @@ public class ServiceFragment extends Fragment {
         adapter.setListener(new AdapterListener() {
             @Override
             public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adp, RecyclerView.ViewHolder holder, int position) {
-                holder.itemView.setOnClickListener(v -> {
-                    JSONObject item = adapter.get(position);
-                    String url = item.getString("url");
-                    String activity = item.getString("activity");
+                JSONObject item = adapter.get(position);
+                View.OnClickListener action = viewModel.actionMap.get(item.getInteger("id"));
+                String url = item.getString("url");
+                String activity = item.getString("activity");
+                holder.itemView.setOnClickListener(action!=null? action : v -> {
                     if (!isEmpty(activity)) try {
                         Intent intent = new Intent(requireContext(), Class.forName(requireContext().getPackageName() + activity));
                         if (intent.resolveActivity(requireContext().getPackageManager()) != null)
                             startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle());
                     } catch (ClassNotFoundException _) {
-                        params.toast("未找到对应活动");
+                        params.toast(R.string.activity_not_found);
                     }
                     else if (!isEmpty(url))
                         startActivity(new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle());
-                    else {
-                        params.toast(R.string.undeveloped);
-                    }
+                    else params.toast(R.string.undeveloped);
                 });
             }
             
@@ -371,13 +367,13 @@ public class ServiceFragment extends Fragment {
                 .map(query -> {
                     if (query == null || ((String) query).trim().isEmpty()) return list;
                     String q = ((String) query).trim();
-                    return list.stream().filter(item -> (item.getString("name").contains(q) || item.getString("description").contains(q)))/*.sorted(
+                    return list.stream().filter(item -> (item.getString("name").contains(q) || item.getString("description").contains(q))).sorted(
                             (a, b) -> {
                                 boolean aNameMatch = a.getString("name").contains(q);
                                 boolean bNameMatch = b.getString("name").contains(q);
                                 return (aNameMatch && !bNameMatch) ? -1 : (!aNameMatch && bNameMatch) ? 1 : 0;
                             }
-                    )*/.collect(Collectors.toList());
+                    ).collect(Collectors.toList());
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(adapter::set, _ -> {
