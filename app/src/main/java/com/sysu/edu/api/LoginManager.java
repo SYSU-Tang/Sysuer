@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +31,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -154,6 +157,22 @@ public class LoginManager {
             login(authorizationJar.getUserName(), authorizationJar.getPassword(), service);
         } catch (ExecutionException | InterruptedException e) {
             Log.e("LoginManager", "login: ", e);
+        }
+    }
+    
+    public void loginForKTP(String username, String password) throws Exception {
+        password = AESCBCEncrypter.encryptByCBC(password, "ktp4567890123456", "ktp4567890123456");
+        String data = "{\"email\":\"" + username + "\",\"password\":\"" + password + "\",\"remember\":\"1\",\"code\":\"\",\"mobile\":\"\",\"type\":\"login\",\"encryption\":1}";
+        Response response = client.newCall(new Request.Builder()
+                .post(RequestBody.create(data, MediaType.parse("application/json")))
+                .url("https://openapiv5.ketangpai.com//UserApi/login").build()).execute();
+        if (response.header("Content-Type", "").contains("application/json")) {
+            JSONObject result = JSONObject.parse(response.body().string());
+            String code = result.getString("code");
+            Integer status = result.getInteger("status");
+            if ("1000".equals(code) || status == 1)
+                authorizationJar.setToken("www.ketangpai.com", result.getJSONObject("data").getString("token"));
+            else onError(code, "登录失败：" + result.getString("msg"));
         }
     }
     
@@ -411,10 +430,6 @@ public class LoginManager {
             saveFromResponse(HttpUrl.get(to), loadForRequest(HttpUrl.get(from)));
         }
         
-        public String toString(String url) {
-            return loadForRequest(HttpUrl.get(url)).stream().map(Cookie::toString).collect(Collectors.joining("; "));
-        }
-        
         public void add(String baseUrl, Cookie cookie) {
             saveFromResponse(HttpUrl.get(baseUrl), List.of(cookie));
         }
@@ -425,9 +440,7 @@ public class LoginManager {
          * 计算字符串的SHA1哈希值，返回十六进制字符串
          */
         public static String hexSha1(String input) throws NoSuchAlgorithmException {
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            byte[] hash = md.digest(input.getBytes());
-            return bytesToHex(hash);
+            return bytesToHex(MessageDigest.getInstance("SHA-1").digest(input.getBytes()));
         }
         
         /**
@@ -437,9 +450,7 @@ public class LoginManager {
             StringBuilder hexString = new StringBuilder();
             for (byte b : bytes) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
+                if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
             return hexString.toString();
@@ -450,13 +461,8 @@ public class LoginManager {
          */
         public static String hexToBinary(String hexStr) {
             StringBuilder binaryStr = new StringBuilder();
-            for (int i = 0; i < hexStr.length(); i++) {
-                char c = hexStr.charAt(i);
-                int value = Character.digit(c, 16);
-                // 转换为4位二进制，前面补0
-                String binary = String.format("%4s", Integer.toBinaryString(value)).replace(' ', '0');
-                binaryStr.append(binary);
-            }
+            for (int i = 0; i < hexStr.length(); i++)
+                binaryStr.append(String.format("%4s", Integer.toBinaryString(Character.digit(hexStr.charAt(i), 16))).replace(' ', '0'));
             return binaryStr.toString();
         }
         
@@ -464,8 +470,7 @@ public class LoginManager {
          * 模拟JS中的bin_sha1函数
          */
         public static String binSha1(String input) throws NoSuchAlgorithmException {
-            String hexHash = hexSha1(input);
-            return hexToBinary(hexHash);
+            return hexToBinary(hexSha1(input));
         }
         
         /**
@@ -476,10 +481,8 @@ public class LoginManager {
             while (true) {
                 String suffix = Integer.toHexString(cnt);
                 String hashBinary = binSha1(prefix + suffix);
-                // 检查前leadingZeroBit位是否全为0
-                if (hashBinary.substring(0, leadingZeroBit).equals("0".repeat(leadingZeroBit))) {
+                if (hashBinary.substring(0, leadingZeroBit).equals("0".repeat(leadingZeroBit)))
                     return suffix;
-                }
                 cnt++;
             }
         }
@@ -502,5 +505,70 @@ public class LoginManager {
             }
             return "";
         }
+    }
+    
+    static class AESCBCEncrypter {
+        
+        /**
+         * AES-CBC 加密，PKCS7 填充，输出 Base64 字符串
+         *
+         * @param plaintext 明文字符串
+         * @param key       密钥字符串（UTF-8 编码后长度必须为 16、24 或 32 字节）
+         * @param iv        初始向量字符串（UTF-8 编码后长度必须为 16 字节）
+         * @return Base64 编码的密文
+         * @throws Exception 加解密异常
+         */
+        public static String encryptByCBC(String plaintext, String key, String iv) throws Exception {
+            byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+            byte[] ivBytes = iv.getBytes(StandardCharsets.UTF_8);
+            if (!List.of(16, 24, 32).contains(keyBytes.length))
+                throw new IllegalArgumentException("密钥长度必须为 16、24 或 32 字节");
+            if (ivBytes.length != 16) throw new IllegalArgumentException("IV 长度必须为 16 字节");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // PKCS5Padding 在 AES 下等价于 PKCS7
+            cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(keyBytes, "AES"), new IvParameterSpec(ivBytes));
+            return Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8)));
+        }
+        
+        /**
+         * AES-CBC 解密，输入 Base64 密文，返回明文字符串
+         *
+         * @param ciphertextB64 Base64 编码的密文
+         * @param key           密钥字符串（UTF-8 编码后长度必须为 16、24 或 32 字节）
+         * @param iv            初始向量字符串（UTF-8 编码后长度必须为 16 字节）
+         * @return 明文字符串
+         * @throws Exception 加解密异常
+         */
+//        public static String decryptByCBC(String ciphertextB64, String key, String iv) throws Exception {
+//            byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+//            byte[] ivBytes = iv.getBytes(StandardCharsets.UTF_8);
+//
+//            if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
+//                throw new IllegalArgumentException("密钥长度必须为 16、24 或 32 字节");
+//            }
+//            if (ivBytes.length != 16) {
+//                throw new IllegalArgumentException("IV 长度必须为 16 字节");
+//            }
+//
+//            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
+//            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+//            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+//            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
+//
+//            byte[] ciphertext = Base64.getDecoder().decode(ciphertextB64);
+//            byte[] plaintext = cipher.doFinal(ciphertext);
+//            return new String(plaintext, StandardCharsets.UTF_8);
+//        }
+
+//        static void main(String[] args) throws Exception {
+//            String key = "1234567890123456";  // 16字节 → AES-128
+//            String iv = "1234567890123456";  // 16字节
+//            String plaintext = "Hello, world!";
+//
+//            String ciphertext = encryptByCBC(plaintext, key, iv);
+//            System.out.println("密文: " + ciphertext);
+//
+//            String decrypted = decryptByCBC(ciphertext, key, iv);
+//            System.out.println("解密: " + decrypted);
+//        }
     }
 }

@@ -40,6 +40,11 @@ public class CourseSelectionFilterFragment extends Fragment {
     JwxtModel model;
     
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         if (binding == null) {

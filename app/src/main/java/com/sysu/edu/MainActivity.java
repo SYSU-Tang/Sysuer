@@ -55,6 +55,10 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.noties.markwon.Markwon;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
     
@@ -63,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     Params params;
     HttpManager http;
     String path;
+    CompositeDisposable disposable = new CompositeDisposable();
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         PreferenceViewModel spm = new ViewModelProvider(this).get(PreferenceViewModel.class);
         spm.setPM(PreferenceManager.getDefaultSharedPreferences(this));
         spm.initLiveData();
-        AlertDialog dialog = new MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
+        AlertDialog agreementDialog = new MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
                 .setMessage("")
                 .setPositiveButton(R.string.agree, (_, _) -> {
                     spm.setIsAgree(true);
@@ -129,11 +134,9 @@ public class MainActivity extends AppCompatActivity {
                 .create();
         spm.getIsAgreeLiveData().observe(this, aBoolean -> {
             if (aBoolean) {
-                dialog.show();
-                Markwon.builder(this).build().setMarkdown(Objects.requireNonNull(dialog.findViewById(android.R.id.message)), "请阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)");
-            } else if (spm.getUpdate()) {
-                checkUpdate();
-            }
+                agreementDialog.show();
+                Markwon.builder(this).build().setMarkdown(Objects.requireNonNull(agreementDialog.findViewById(android.R.id.message)), "请阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)");
+            } else if (spm.getUpdate()) checkUpdate();
         });
         spm.setIsFirstLaunch(false);
         params = new Params(this);
@@ -142,7 +145,11 @@ public class MainActivity extends AppCompatActivity {
             public void handleMessage(@NonNull Message msg) {
                 switch (msg.what) {
                     case -1 -> params.toast(R.string.no_net_connected);
-                    case 0 -> showUpdateDialog(JSONObject.parseObject((String) msg.obj));
+                    case 0 ->
+                            disposable.add(Observable.just(JSONObject.parseObject((String) msg.obj))
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(MainActivity.this::showUpdateDialog));
                 }
             }
         });
@@ -214,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         unregisterReceiver(receiver);
         receiver = null;
+        disposable.dispose();
         super.onDestroy();
     }
     
@@ -335,4 +343,5 @@ public class MainActivity extends AppCompatActivity {
 //        actionMap.put(1002, browse("https://chat.sysu.edu.cn/znt/chat/empty"));  // 逸闻
 //        actionMap.put(1003, browse("https://xgxw.sysu.edu.cn/aicounsellor/agents/outlink/sunyatsenuniversity")); // 学工君
     }
+    
 }

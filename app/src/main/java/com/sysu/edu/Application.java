@@ -41,6 +41,7 @@ public class Application extends android.app.Application{
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
+            
             }
 
             @Override

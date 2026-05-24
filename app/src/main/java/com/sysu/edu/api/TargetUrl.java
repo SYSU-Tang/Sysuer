@@ -14,7 +14,7 @@ public class TargetUrl {
 //    public static final String XGXT_WEBVPN = "https://xgxt-443.webvpn.sysu.edu.cn/#/index"; // 学工系统 WebVPN URL
 //    public static final String TICE = "https://tice.sysu.edu.cn"; // 体测 URL
 //    public static final String PJXT = "https://pjxt.sysu.edu.cn"; // 评教系统 URL
-
+    
     public static final String JWXT = "https://jwxt.sysu.edu.cn/jwxt/api/sso/cas/login?pattern=student-login"; // 教务系统 URL
     public static final String JWXT_WEBVPN = "https://jwxt-443.webvpn.sysu.edu.cn/jwxt/api/sso/cas/login?pattern=student-login"; // 教务系统 WebVPN URL
     public static final String PORTAL = "https://portal.sysu.edu.cn/newClient/shiro-cas"; // 统一门户 URL
@@ -32,6 +32,8 @@ public class TargetUrl {
     public static final String ZHNY = "https://zhny.sysu.edu.cn/h5"; // 综合能源系统 URL
     public static final String PJXT_WEBVPN = "https://pjxt-443.webvpn.sysu.edu.cn/casLogin"; // 评教系统 WebVPN URL
     public static final String LMS = "https://lms.sysu.edu.cn/login/index.php?authCAS=CAS"; // 在线教学平台 URL
-
-
+    
+//    public static final String KETANGPIE = "https://www.ketangpai.com";
+    
+    
 }

@@ -96,4 +96,9 @@ public class AssistantEvaluationQueryFragment extends PreferenceFragmentCompat {
         preferenceUtil.insertFilterValue("unit", "openUnitNum");
         return preferenceUtil.getParams();
     }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
 }

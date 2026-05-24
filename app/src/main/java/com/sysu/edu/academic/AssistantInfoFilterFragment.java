@@ -25,6 +25,11 @@ public class AssistantInfoFilterFragment extends Fragment {
     FragmentAssistantInfoFilterBinding binding;
     JwxtModel model;
     
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,

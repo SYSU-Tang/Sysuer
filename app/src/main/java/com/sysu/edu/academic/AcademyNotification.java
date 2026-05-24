@@ -110,4 +110,10 @@ public class AcademyNotification extends AppCompatActivity {
     void getContent(String id) {
         model.addAndNext("jwxt/system-manage/info-delivery/noticeId?id=" + id, 2);
     }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
 }

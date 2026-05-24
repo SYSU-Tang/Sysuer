@@ -36,7 +36,11 @@ public class CourseSelectedActivity extends AppCompatActivity {
     
     int page = 0;
     JwxtModel model;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

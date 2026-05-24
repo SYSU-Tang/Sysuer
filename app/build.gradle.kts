@@ -61,6 +61,7 @@ android {
 dependencies {
 
     implementation(libs.androidx.datastore.preferences.rxjava3)
+//    implementation(libs.androidx.security.crypto)
     implementation(libs.glide)
     implementation(libs.okhttp)
     implementation(libs.fastjson2)
@@ -77,6 +78,7 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.rxandroid)
+    implementation(libs.tink.android)
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)

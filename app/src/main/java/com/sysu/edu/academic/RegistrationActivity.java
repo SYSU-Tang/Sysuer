@@ -25,7 +25,11 @@ public class RegistrationActivity extends AppCompatActivity {
     JwxtModel model;
     int page = 0;
     Pager2Adapter adp;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

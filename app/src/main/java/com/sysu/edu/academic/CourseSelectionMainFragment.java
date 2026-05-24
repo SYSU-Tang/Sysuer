@@ -68,6 +68,11 @@ public class CourseSelectionMainFragment extends Fragment {
     JwxtModel model;
     
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (binding == null) {
             binding = FragmentCourseSelectionBinding.inflate(inflater, container, false);

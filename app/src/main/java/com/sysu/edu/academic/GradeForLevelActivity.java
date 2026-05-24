@@ -47,7 +47,11 @@ public class GradeForLevelActivity extends AppCompatActivity {
     PopupMenu courseTypePop;
     MutableLiveData<String> input;
     JwxtModel model;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,7 +133,7 @@ public class GradeForLevelActivity extends AppCompatActivity {
                     }
                     case 0, 1, 2 -> {
                         Menu menu = List.of(trainTypePop, yearPop, courseTypePop).get(what).getMenu();
-//                        menu.clear();
+//                        menu.dispose();
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
                             menu.setGroupDividerEnabled(true);
                         MutableLiveData<String> realLiveDataValue = List.of(trainType, year, courseType).get(what);

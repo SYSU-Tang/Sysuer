@@ -26,18 +26,27 @@ import com.sysu.edu.databinding.DialogAccountBinding;
 
 import java.util.concurrent.ExecutionException;
 
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+
 public class ContextUtil {
     private final Context context;
     private final SharedPreferences sharedPreferences;
     private final LoginManager loginManager;
+    private final AccountManager accountManager;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final CompositeDisposable disposable = new CompositeDisposable();
     private DialogAccountBinding binding;
     private AlertDialog dialog;
+    private AccountViewModel accountViewModel;
     
     public ContextUtil(Context context) {
         this.context = context;
         sharedPreferences = context.getSharedPreferences("privacy", Context.MODE_PRIVATE);
         loginManager = new LoginManager(context);
+        accountManager = AccountManager.getInstance(context.getApplicationContext());
+        
+        if (!isEmpty(getUserName()) && !isEmpty(getPassword()))
+            disposable.add(accountManager.setAccountAsync("sysu.edu.cn", getUserName(), getPassword()).subscribe(() -> sharedPreferences.edit().remove("username").remove("password").apply()));
     }
     
     public Context getContext() {
@@ -61,15 +70,6 @@ public class ContextUtil {
     }
     
     /**
-     * 获取 Cookie
-     *
-     * @return Cookie
-     */
-    public String getCookie() {
-        return sharedPreferences.getString("Cookie", "");
-    }
-    
-    /**
      * 获取用户名
      *
      * @return 用户名
@@ -77,15 +77,16 @@ public class ContextUtil {
     public String getUserName() {
         return sharedPreferences.getString("username", "");
     }
-    
-    /**
-     * 设置用户名
-     *
-     * @param userName 用户名
-     */
-    public void setUserName(String userName) {
-        sharedPreferences.edit().putString("username", userName).apply();
-    }
+//
+//    /**
+//     * 设置用户名
+//     *
+//     * @param userName 用户名
+//     */
+//    public void setUserName(String userName) {
+//        sharedPreferences.edit().putString("username", userName).apply();
+//    }
+//
     
     /**
      * 获取密码
@@ -95,24 +96,24 @@ public class ContextUtil {
     public String getPassword() {
         return sharedPreferences.getString("password", "");
     }
-    
-    /**
-     * 设置密码
-     *
-     * @param password 密码
-     */
-    public void setPassword(String password) {
-        sharedPreferences.edit().putString("password", password).apply();
-    }
-    
-    /**
-     * 获取 SharedPreferences 对象
-     *
-     * @return SharedPreferences 对象
-     */
-    public SharedPreferences getSharedPreferences() {
-        return sharedPreferences;
-    }
+//
+//    /**
+//     * 设置密码
+//     *
+//     * @param password 密码
+//     */
+//    public void setPassword(String password) {
+//        sharedPreferences.edit().putString("password", password).apply();
+//    }
+
+//    /**
+//     * 获取 SharedPreferences 对象
+//     *
+//     * @return SharedPreferences 对象
+//     */
+//    public SharedPreferences getSharedPreferences() {
+//        return sharedPreferences;
+//    }
     
     /**
      * 获取是否为开发者
@@ -164,46 +165,49 @@ public class ContextUtil {
     /**
      * 登录
      *
-     * @param url        登录 URL,建议使用 TargeterURL 中的默认登录 URL
+     * @param service    登录 URL,建议使用 TargeterURL 中的默认登录 URL
      * @param afterLogin 登录成功后的回调 Runnable 对象
      *
      */
     
+    public void loginForUrl(String service, String host, Runnable afterLogin) {
+        disposable.add(accountManager.getActiveAccountAsync(host).subscribe(
+                activeAccount -> {
+                    System.out.println("loginForUrl " + activeAccount);
+                    if (activeAccount != null) {
+                        if (!isEmpty(service)) try {
+                            loginManager.setOnLoginListener(new LoginManager.LoginListener() {
+                                @Override
+                                public void onSuccess() {
+                                    if (afterLogin != null) afterLogin.run();
+                                }
+                                
+                                @Override
+                                public void onError(String code, String message) {
+                                    System.out.println("LoginManager onError " + code + " " + message);
+                                    if ("SSO10002".equals(code) || "30506".equals(code))
+                                        changeAccount(service, host, afterLogin);
+                                    else
+                                        handler.post(() -> toast(toStringOrDefault(JSONObject.parse(message).getString("msg"))));
+                                }
+                            });
+                            loginManager.login(activeAccount.first, activeAccount.second, service);
+                        } catch (ExecutionException | InterruptedException e) {
+                            Log.e("ContextUtil", "loginForUrl: ", e);
+                        }
+                    } else changeAccount(service, host, afterLogin);
+                }));
+    }
+    
     public void login(String url, Runnable afterLogin) {
-        if (!getPassword().isEmpty() && !getUserName().isEmpty()) {
-            loginManager.setOnLoginListener(new LoginManager.LoginListener() {
-                @Override
-                public void onSuccess() {
-//                    System.out.println("Login result: success");
-                    if (afterLogin != null) afterLogin.run();
-                }
-                
-                @Override
-                public void onError(String code, String message) {
-                    if ("SSO10002".equals(code))
-                        showAccountDialog(url, afterLogin);
-                    else if ("SSO10093".equals(code))
-                        handler.post(() -> toast(toStringOrDefault(JSONObject.parse(message).getString("msg"))));
-                    else handler.post(() -> toast(message));
-                }
-            });
-            if (!isEmpty(url)) try {
-                loginManager.login(getUserName(), getPassword(), url);
-            } catch (ExecutionException | InterruptedException e) {
-                Log.e("ContextUtil", "login: ", e);
-            }
-        } else showAccountDialog(url, afterLogin);
+        loginForUrl(url, "sysu.edu.cn", afterLogin);
     }
     
-    private void showAccountDialog(String url, Runnable afterLogin) {
-        if (context instanceof Activity activity)
-            if (!activity.isFinishing() && !activity.isDestroyed())
-                activity.runOnUiThread(() -> changeAccount(url, afterLogin));
-    }
-    
-    public void changeAccount(String url, Runnable afterLogin) {
-        if (binding == null)
+    public void changeAccount(String url, String host, Runnable afterLogin) {
+        if (binding == null) {
             binding = DialogAccountBinding.inflate(LayoutInflater.from(context));
+            binding.password.editLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
+        }
         if (dialog == null)
             dialog = new MaterialAlertDialogBuilder(context)
                     .setView(binding.getRoot())
@@ -211,18 +215,31 @@ public class ContextUtil {
                     .setPositiveButton(android.R.string.ok, (_, _) -> {
                         Editable username = binding.username.edit.getText();
                         Editable password = binding.password.edit.getText();
-                        if (isEmpty(username) || isEmpty(password)) toast(R.string.login_warning);
-                        else {
-                            setUserName(username.toString());
-                            setPassword(password.toString());
-                            login(url, afterLogin);
-                        }
+                        if (isEmpty(username) || isEmpty(password))
+                            toast(R.string.username_password_warning);
+                        else
+                            disposable.add(accountManager.setAccountAsync(host, username.toString(), password.toString()).subscribe(() -> loginForUrl(url, host, afterLogin)));
                     })
                     .setNegativeButton(android.R.string.cancel, null)
                     .create();
-        binding.username.edit.setText(getUserName());
-        binding.password.edit.setText(getPassword());
-        binding.password.editLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
-        dialog.show();
+        disposable.add(accountManager.getActiveAccountAsync(host).subscribe(account -> {
+            System.out.println("Account: " + account);
+            if (context instanceof Activity activity && !activity.isFinishing() && !activity.isDestroyed())
+                activity.runOnUiThread(() -> {
+                    if (account != null) {
+                        binding.password.edit.setText(account.second);
+                        binding.username.edit.setText(account.first);
+                    }
+                    dialog.show();
+                });
+        }));
+    }
+    
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
+    
+    public void dispose() {
+        disposable.dispose();
     }
 }

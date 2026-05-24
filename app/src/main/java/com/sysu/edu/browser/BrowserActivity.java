@@ -75,6 +75,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -90,6 +91,7 @@ public class BrowserActivity extends AppCompatActivity {
     BrowserHelper db;
     JavaScript js;
     Params params;
+    CompositeDisposable disposable = new CompositeDisposable();
     
     @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     @Override
@@ -138,28 +140,26 @@ public class BrowserActivity extends AppCompatActivity {
             
             @Override
             public void onPageFinished(WebView view, String link) {
-                if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page").matcher(link).find()) {
-                    web.evaluateJavascript(String.format("""
+                if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page").matcher(link).find())
+                    disposable.add(params.getContextUtil().getAccountManager().getActiveAccountAsync("sysu.edu.cn").subscribe(account -> web.evaluateJavascript(String.format("""
                             javascript:(function(){\
                             function waitElement(selector, callback) {\
                             const element = document.querySelector(selector);\
                             if (element) {callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}\
                             waitElement('.para-widget-account-psw', () => {\
-                            var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click();});})()""", params.getUserName(), params.getPassword()), _ -> {
-                    });
-                } else if (Pattern.compile("://appgw.sysu.edu.cn/").matcher(link).find()) {
+                            var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click();});})()""", account.first, account.second), _ -> {
+                    })));
+                else if (Pattern.compile("://appgw.sysu.edu.cn/").matcher(link).find()) {
                     web.stopLoading();
                     web.loadUrl(url.replace(".sysu.edu.cn/", "-443.webvpn.sysu.edu.cn/"));
                 } else if (Pattern.compile("://cas.*?sysu.edu.cn/login/mfaLogin.html").matcher(link).find()) {
-                    cookie.setCookie("https://cas.sysu.edu.cn","device_trust_Cookie=true; Path=/esc-sso; Domain=cas.sysu.edu.cn;");
+                    cookie.setCookie("https://cas.sysu.edu.cn", "device_trust_Cookie=true; Path=/esc-sso; Domain=cas.sysu.edu.cn;");
                     try {
                         web.loadUrl(toStringOrDefault(Uri.parse(URLDecoder.decode(link, "utf-8")).getQueryParameter("appUrl")));
                     } catch (UnsupportedEncodingException _) {
                     }
-                }
-                else if (preference.isPC()) {
+                } else if (preference.isPC())
                     view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
-                }
                 js.searchJS(link, true).forEach(a -> view.evaluateJavascript(a.getString("script"), null));
                 super.onPageFinished(view, link);
             }
@@ -613,6 +613,7 @@ public class BrowserActivity extends AppCompatActivity {
     }
     
     protected void onDestroy() {
+        disposable.dispose();
         if (web != null) {
             web.stopLoading();
             ((ViewGroup) web.getParent()).removeView(web);

@@ -19,29 +19,34 @@ import com.sysu.edu.api.TargetUrl;
 
 import java.util.Objects;
 
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+
 public class PrivacyFragment extends PreferenceFragmentCompat {
-
+    
     HttpManager http;
-
+    
+    CompositeDisposable disposable = new CompositeDisposable();
+    
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         if (savedInstanceState == null) {
             setPreferencesFromResource(R.xml.privacy, rootKey);
             Params params = new Params(this);
-            ((Preference) Objects.requireNonNull(findPreference("netId"))).setSummary(params.getUserName());
-            ((Preference) Objects.requireNonNull(findPreference("password"))).setOnPreferenceClickListener(_ -> {
-                params.toast(params.getPassword());
-                return false;
-            });
+            disposable.add(params.getContextUtil().getAccountManager().getActiveAccountAsync("sysu.edu.cn").subscribe(
+                    activeAccount -> {
+                        ((Preference) Objects.requireNonNull(findPreference("netId"))).setSummary(activeAccount.first);
+                        ((Preference) Objects.requireNonNull(findPreference("password"))).setOnPreferenceClickListener(_ -> {
+                            params.toast(activeAccount.second);
+                            return false;
+                        });
+                    }));
             params.setCallback(this::getInfo);
             http = new HttpManager(new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == -1) {
-                        params.toast(R.string.no_net_connected);
-                    } else {
+                    if (msg.what == -1) params.toast(R.string.no_net_connected);
+                    else {
                         JSONObject response = JSONObject.parseObject((String) msg.obj);
-//                        System.out.println("response = " + response);
                         if (response != null && response.getInteger("code").equals(200)) {
                             if (response.get("data") != null) {
                                 if (msg.what == 0) {
@@ -61,11 +66,9 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
                                     }
                                 }
                             }
-                        } else if (response != null && response.getInteger("code").equals(1003)) {
+                        } else if (response != null && response.getInteger("code").equals(1003))
                             params.gotoLogin(TargetUrl.PAY);
-                        } else if (response != null) {
-                            params.toast(response.getString("message"));
-                        }
+                        else if (response != null) params.toast(response.getString("message"));
                     }
                 }
             });
@@ -76,8 +79,14 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
             getInfo();
         }
     }
-
+    
     void getInfo() {
         http.postRequest("https://pay.sysu.edu.cn/client/api/client/person/get", "{}", 0);
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        disposable.clear();
     }
 }

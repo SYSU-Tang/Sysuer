@@ -23,6 +23,11 @@ public class AssistantInfoResultFragment extends StaggeredFragment {
     int total = -1;
     JwxtModel model;
     
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

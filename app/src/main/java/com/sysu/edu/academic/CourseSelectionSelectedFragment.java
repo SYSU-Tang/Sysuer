@@ -50,7 +50,12 @@ public class CourseSelectionSelectedFragment extends Fragment {
     StaggeredGridLayoutManager layoutManager;
     Params params;
     JwxtModel model;
-
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

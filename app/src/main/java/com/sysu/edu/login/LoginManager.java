@@ -34,28 +34,28 @@ public class LoginManager {
      * @param afterLogin 登录成功后的回调
      */
     public static void initLoginModel(FragmentActivity activity, LoginViewModel model, String target, Runnable afterLogin) {
-        Params params = new Params(activity);
-        model.getPassword().observe(activity, params::setPassword);
-        model.getAccount().observe(activity, params::setUserName);
-        model.setAccount(params.getUserName());
-        model.setPassword(params.getPassword());
-        model.setTarget(target);
-        model.setUrl(TargetUrl.LOGIN);
-        model.getLogin().observe(activity, b -> {
-            if (b) {
-                SharedPreferences.Editor edit = params.getSharedPreferences().edit();
-                String cookie = model.getCookie().getValue();
-                Matcher token = Pattern.compile("ibps-1.0.1-token=(.+?);").matcher(cookie + ";");
-                Matcher authorization = Pattern.compile("authorization=(.+?);").matcher(cookie + ";");
-                if (token.find()) edit.putString("token", token.group(1));
-                if (authorization.find())
-                    edit.putString("authorization", Objects.requireNonNull(authorization.group(1)).replace("%20", " "));
-                edit.putString("Cookie", cookie);
-                edit.apply();
-                if (afterLogin != null)
-                    afterLogin.run();
-            }
-        });
+//        Params params = new Params(activity);
+//        model.getPassword().observe(activity, params::setPassword);
+//        model.getAccount().observe(activity, params::setUserName);
+//        model.setAccount(params.getUserName());
+//        model.setPassword(params.getPassword());
+//        model.setTarget(target);
+//        model.setUrl(TargetUrl.LOGIN);
+//        model.getLogin().observe(activity, b -> {
+//            if (b) {
+//                SharedPreferences.Editor edit = params.getSharedPreferences().edit();
+//                String cookie = model.getCookie().getValue();
+//                Matcher token = Pattern.compile("ibps-1.0.1-token=(.+?);").matcher(cookie + ";");
+//                Matcher authorization = Pattern.compile("authorization=(.+?);").matcher(cookie + ";");
+//                if (token.find()) edit.putString("token", token.group(1));
+//                if (authorization.find())
+//                    edit.putString("authorization", Objects.requireNonNull(authorization.group(1)).replace("%20", " "));
+//                edit.putString("Cookie", cookie);
+//                edit.apply();
+//                if (afterLogin != null)
+//                    afterLogin.run();
+//            }
+//        });
     }
 
     /**
@@ -91,19 +91,19 @@ public class LoginManager {
                     //System.out.println("登录中");
                     model.setLogin(false);
                     if (isAutoLogin)
-                        web.evaluateJavascript(String.format("""
-                                (function(){\
-                                function waitElement(selector, callback) {\
-                                const element = document.querySelector(selector);\
-                                if (element){callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}\
-                                waitElement('.para-widget-account-psw', () => {\
-                                var component=document.querySelector('.para-widget-account-psw');
-                                var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;
-                                data.loginModel.dataField.username='%s';
-                                data.loginModel.dataField.password='%s';
-                                data.passwordInputVal='password';
-                                data.$loginBtn.click();});})()""", params.getUserName(), params.getPassword()), _ -> {
-                        });
+//                        web.evaluateJavascript(String.format("""
+//                                (function(){\
+//                                function waitElement(selector, callback) {\
+//                                const element = document.querySelector(selector);\
+//                                if (element){callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}\
+//                                waitElement('.para-widget-account-psw', () => {\
+//                                var component=document.querySelector('.para-widget-account-psw');
+//                                var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;
+//                                data.loginModel.dataField.username='%s';
+//                                data.loginModel.dataField.password='%s';
+//                                data.passwordInputVal='password';
+//                                data.$loginBtn.click();});})()""", params.getUserName(), params.getPassword()), _ -> {
+//                        });
                     return;
                 }
                 if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/selfcare/#").matcher(url).find()) {

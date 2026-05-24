@@ -25,6 +25,11 @@ public class CourseQueryResultFragment extends StaggeredFragment {
     JwxtModel model;
     
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         FragmentCourseQueryResultBinding courseQueryResultBinding = FragmentCourseQueryResultBinding.inflate(inflater, container, false);

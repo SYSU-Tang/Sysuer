@@ -24,6 +24,11 @@ public class AssistantEvaluationResultFragment extends StaggeredFragment {
     JwxtModel model;
     
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentResultBinding resultBinding = FragmentResultBinding.inflate(inflater, container, false);
         resultBinding.getRoot().addView(super.onCreateView(inflater, resultBinding.getRoot(), savedInstanceState));
@@ -52,7 +57,7 @@ public class AssistantEvaluationResultFragment extends StaggeredFragment {
 //        page = 1;
 //        total = -1;
 //        order = 1;
-//        clear();
+//        dispose();
 //    }
     
     void getResult() {

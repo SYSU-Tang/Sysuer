@@ -23,6 +23,11 @@ public class CourseCompletionFragment extends StaggeredFragment {
     JwxtModel model;
     
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         model = new JwxtModel(requireActivity());

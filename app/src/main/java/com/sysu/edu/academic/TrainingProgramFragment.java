@@ -33,7 +33,11 @@ public class TrainingProgramFragment extends Fragment {
     final MutableLiveData<String> grade = new MutableLiveData<>();
     FragmentTrainingScheduleBinding binding;
     JwxtModel model;
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (binding == null) {

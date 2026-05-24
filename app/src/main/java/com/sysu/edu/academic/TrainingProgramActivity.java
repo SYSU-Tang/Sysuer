@@ -12,8 +12,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityTrainingScheduleBinding;
 
 public class TrainingProgramActivity extends AppCompatActivity {
-
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

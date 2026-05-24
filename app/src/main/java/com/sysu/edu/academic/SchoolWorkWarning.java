@@ -25,7 +25,11 @@ public class SchoolWorkWarning extends AppCompatActivity {
     int total = -1;
     StaggeredFragment fragment;
     JwxtModel model;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,10 +60,10 @@ public class SchoolWorkWarning extends AppCompatActivity {
         getWarning();
     }
 
-//    void clear() {
+//    void dispose() {
 //        page = 0;
 //        total = -1;
-//        fragment.clear();
+//        fragment.dispose();
 //    }
     
     void getWarning() {

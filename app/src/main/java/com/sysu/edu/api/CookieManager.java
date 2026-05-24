@@ -12,10 +12,6 @@ import java.util.stream.Collectors;
 
 import okhttp3.Cookie;
 
-/*
- * Cookie管理类
- * 用于管理host的Cookie
- * */
 public class CookieManager {
     private final SharedPreferences cookiePreference;
 

@@ -52,7 +52,11 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     int page = 1;
     int total = 0;
     ActivityClassroomQueryBinding binding;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

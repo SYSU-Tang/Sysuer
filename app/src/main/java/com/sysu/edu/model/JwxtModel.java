@@ -89,7 +89,6 @@ public class JwxtModel {
         afterLoginRequest.add(request);
         if (empty)
             contextUtil.login(authorizationManager.isAccessible() ? TargetUrl.JWXT : TargetUrl.JWXT_WEBVPN, () -> afterLoginRequest.forEach(this::retry));
-        
     }
     
     public AuthorizationManager getAuthorizationManager() {
@@ -138,6 +137,7 @@ public class JwxtModel {
     private CommonUtil.Tuple2<Integer, JSONObject> handleResponse(CommonUtil.Tuple2<Request, Integer> request, Response response) throws IOException {
         String type = response.header("Content-Type");
         String content = response.body().string();
+        System.out.println(request.getFirst().url() + " " + content);
         CommonUtil.Tuple2<Integer, JSONObject> result = null;
         if (type != null && type.contains("application/json")) {
             JSONObject contentJSON = JSONObject.parse(content);
@@ -186,5 +186,9 @@ public class JwxtModel {
     
     public Request updateRequest(Request request) {
         return request.newBuilder().url(request.url().newBuilder().host(authorizationManager.getBaseUrl()).build()).header("Cookie", http.getCookieManager().toSimpleString(authorizationManager.getBaseUrl())).build();
+    }
+    
+    public void dispose(){
+        contextUtil.dispose();
     }
 }

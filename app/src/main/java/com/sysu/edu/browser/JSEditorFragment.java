@@ -47,7 +47,7 @@ public class JSEditorFragment extends Fragment {
 //        toolbar.getMenu().setGroupVisible(R.id.editor_group, true);
 //        toolbar.setOnMenuItemClickListener(item -> {
 //            if (item.getItemId() == R.id.save) {
-//                value.clear();
+//                value.dispose();
 //                value.put("script", binding.editor.getText().toString());
 //                if (fragment != null)
 //                    fragment.getData().forEach((k, v) -> {

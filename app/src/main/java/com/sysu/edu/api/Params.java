@@ -3,7 +3,6 @@ package com.sysu.edu.api;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -16,6 +15,7 @@ import com.sysu.edu.browser.BrowserActivity;
 public class Params {
 
     final FragmentActivity activity; // 关联的 FragmentActivity 对象
+//    private AccountViewModel accountViewModel;
     Fragment fragment; // 关联的 Fragment 对象
     Runnable afterLogin; // 登录成功后的回调 Runnable 对象
     private ContextUtil contextUtil;
@@ -28,6 +28,7 @@ public class Params {
     public Params(FragmentActivity activity) {
         this.activity = activity;
         contextUtil = new ContextUtil(activity);
+//        accountViewModel = new ViewModelProvider(activity).get(AccountViewModel.class);
     }
 
     /**
@@ -39,6 +40,7 @@ public class Params {
         this.fragment = fragment;
         contextUtil = new ContextUtil(fragment.requireContext());
         this(fragment.requireActivity());
+//        accountViewModel = new ViewModelProvider(fragment).get(AccountViewModel.class);
     }
 
     /**
@@ -86,9 +88,9 @@ public class Params {
      *
      * @return Cookie
      */
-    public String getCookie() {
-        return contextUtil.getCookie();
-    }
+//    public String getCookie() {
+//        return contextUtil.getCookie();
+//    }
 
     public ContextUtil getContextUtil() {
         return contextUtil;
@@ -111,50 +113,50 @@ public class Params {
 //        contextUtil.setAuthorization(auth);
 //    }
 
-    /**
-     * 获取用户名
-     *
-     * @return 用户名
-     */
-    public String getUserName() {
-        return contextUtil.getUserName();
-    }
+//    /**
+//     * 获取用户名
+//     *
+//     * @return 用户名
+//     */
+//    public String getUserName() {
+//        return contextUtil.getUserName();
+//    }
+//
+//    /**
+//     * 设置用户名
+//     *
+//     * @param userName 用户名
+//     */
+//    public void setUserName(String userName) {
+//        contextUtil.setUserName(userName);
+//    }
+//
+//    /**
+//     * 获取密码
+//     *
+//     * @return 密码
+//     */
+//    public String getPassword() {
+//        return contextUtil.getPassword();
+//    }
+//
+//    /**
+//     * 设置密码
+//     *
+//     * @param password 密码
+//     */
+//    public void setPassword(String password) {
+//        contextUtil.setPassword(password);
+//    }
 
-    /**
-     * 设置用户名
-     *
-     * @param userName 用户名
-     */
-    public void setUserName(String userName) {
-        contextUtil.setUserName(userName);
-    }
-
-    /**
-     * 获取密码
-     *
-     * @return 密码
-     */
-    public String getPassword() {
-        return contextUtil.getPassword();
-    }
-
-    /**
-     * 设置密码
-     *
-     * @param password 密码
-     */
-    public void setPassword(String password) {
-        contextUtil.setPassword(password);
-    }
-
-    /**
-     * 获取 SharedPreferences 对象
-     *
-     * @return SharedPreferences 对象
-     */
-    public SharedPreferences getSharedPreferences() {
-        return contextUtil.getSharedPreferences();
-    }
+//    /**
+//     * 获取 SharedPreferences 对象
+//     *
+//     * @return SharedPreferences 对象
+//     */
+//    public SharedPreferences getSharedPreferences() {
+//        return contextUtil.getSharedPreferences();
+//    }
 
 //    /**
 //     * 获取 Token
@@ -237,36 +239,5 @@ public class Params {
      */
     public void gotoLogin(String url) {
         contextUtil.login(url, afterLogin);
-//        Intent intent = new Intent(activity, LoginActivity.class);
-//        if (url != null) intent.putExtra("url", url);
-//        switch (getLoginMode()) {
-//            case "0" ->
-//                    Snackbar.make(view, R.string.login_warning, Snackbar.LENGTH_LONG).setAction(R.string.login, _ -> launcher.launch(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, "miniapp"))).show();
-//            case "1" -> {
-//                if (activity instanceof MainActivity)
-//                    Snackbar.make(view, R.string.login_warning, Snackbar.LENGTH_LONG).setAction(R.string.login, _ -> launcher.launch(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(activity, view, "miniapp"))).show();
-//                else gotoLogin(view, intent);
-//            }
-//            case "3" -> {
-//                String account = getUserName();
-//                String password = getPassword();
-//                if (account.isEmpty() || password.isEmpty()) {
-//                    toast(R.string.require_netid_password);
-//                    gotoLogin(view, intent);
-//                    break;
-//                }
-//                toast(R.string.logging_in);
-//                LoginViewModel model = new ViewModelProvider(activity).get(LoginViewModel.class);
-//                WebView web = initLoginWebView(activity, model, true);
-//                initLoginModel(activity, model, url, () -> {
-//                    afterLogin.run();
-//                    System.out.println("Login Successfully");
-//                    web.destroy();
-//                    toast(R.string.login_successfully);
-//                });
-//                ((FrameLayout) activity.findViewById(android.R.id.content)).addView(web);
-//            }
-//            default -> gotoLogin(view, intent);
-//        }
     }
 }

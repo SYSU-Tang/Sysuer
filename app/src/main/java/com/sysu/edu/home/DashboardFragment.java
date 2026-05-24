@@ -56,7 +56,6 @@ import com.sysu.edu.academic.CourseDetailActivity;
 import com.sysu.edu.academic.CourseScheduleActivity;
 import com.sysu.edu.academic.ExamActivity;
 import com.sysu.edu.api.CalendarManager;
-import com.sysu.edu.api.ContextUtil;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.api.PreferenceViewModel;
 import com.sysu.edu.browser.BrowserActivity;
@@ -205,19 +204,15 @@ public class DashboardFragment extends Fragment {
                                     (Objects.equals(status, "before") ? beforeArray : afterArray).add(jsonObject);
                                 (isToday ? todayCourse : tomorrowCourse).add(jsonObject);
                             });
-                            ContextUtil contextUtil = new ContextUtil(requireContext());
+//                            ContextUtil contextUtil = new ContextUtil(requireContext());
                             binding.progress.setMax(todayCourse.size());
                             binding.progress.setProgress(beforeArray.size());
                             binding.courseList.scrollToPosition(beforeArray.size());
                             Markwon.builder(requireContext()).usePlugin(new AbstractMarkwonPlugin() {
                                 @Override
-                                public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder1) {
-                                    super.configureSpansFactory(builder1);
-                                    builder1.appendFactory(Heading.class, (_, configuration) -> {
-                                        if (CoreProps.HEADING_LEVEL.require(configuration) == 3)
-                                            return new ForegroundColorSpan(contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary));
-                                        return null;
-                                    });
+                                public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
+                                    super.configureSpansFactory(builder);
+                                    builder.appendFactory(Heading.class, (_, configuration) -> CoreProps.HEADING_LEVEL.require(configuration) == 3 ? new ForegroundColorSpan(model.getContextUtil().getColorFromAttr(androidx.appcompat.R.attr.colorPrimary)) : null);
                                 }
                                 
                                 @Override
@@ -355,7 +350,11 @@ public class DashboardFragment extends Fragment {
         }
         return binding.getRoot();
     }
-    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
     private View.OnClickListener gotoActivity(Class<?> cls) {
         return v -> startActivity(new Intent(getContext(), cls), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle());
     }

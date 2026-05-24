@@ -28,6 +28,12 @@ public class RecruitmentInfoFragment extends StaggeredFragment {
     Integer page = 1;
     XgxtModel model;
     
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

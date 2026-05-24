@@ -25,7 +25,11 @@ import java.util.Objects;
 public class DormActivity extends AppCompatActivity {
     
     XgxtModel model;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

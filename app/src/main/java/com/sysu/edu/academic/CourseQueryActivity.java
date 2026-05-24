@@ -29,6 +29,5 @@ public class CourseQueryActivity extends AppCompatActivity {
             supportFinishAfterTransition();
             return false;
         }).build());
-
     }
 }

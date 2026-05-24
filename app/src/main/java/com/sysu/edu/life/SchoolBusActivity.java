@@ -30,7 +30,11 @@ public class SchoolBusActivity extends AppCompatActivity {
     final MutableLiveData<Boolean> day = new MutableLiveData<>(true);
     JSONObject data;
     PortalModel model;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

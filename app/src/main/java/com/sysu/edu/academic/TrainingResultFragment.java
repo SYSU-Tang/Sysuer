@@ -24,6 +24,12 @@ public class TrainingResultFragment extends Fragment {
     JwxtModel model;
     
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentTrainingResultBinding binding = FragmentTrainingResultBinding.inflate(inflater, container, false);
         model = new JwxtModel(requireActivity());

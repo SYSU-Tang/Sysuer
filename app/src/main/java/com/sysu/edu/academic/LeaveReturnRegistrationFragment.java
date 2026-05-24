@@ -55,7 +55,11 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     ArrayList<String> stay;
     String id;
     XgxtModel model;
-    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {

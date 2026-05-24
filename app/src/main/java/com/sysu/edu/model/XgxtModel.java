@@ -159,4 +159,7 @@ public class XgxtModel {
     public Request updateRequest(Request request) {
         return request.newBuilder().url(request.url().newBuilder().host(authorizationManager.getBaseUrl()).build()).header("Cookie", http.getCookieManager().toSimpleString(authorizationManager.getBaseUrl())).build();
     }
+    public void dispose(){
+        contextUtil.dispose();
+    }
 }

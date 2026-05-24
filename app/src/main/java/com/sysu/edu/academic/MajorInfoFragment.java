@@ -23,7 +23,11 @@ public class MajorInfoFragment extends StaggeredFragment {
     int total = -1;
     String code;
     JwxtModel model;
-    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
     public static MajorInfoFragment newInstance(Bundle args) {
         MajorInfoFragment fragment = new MajorInfoFragment();
         fragment.setArguments(args);

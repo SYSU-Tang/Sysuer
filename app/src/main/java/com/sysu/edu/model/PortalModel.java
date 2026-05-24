@@ -147,4 +147,7 @@ public class PortalModel {
     public Request updateRequest(Request request) {
         return request.newBuilder().header("Cookie", http.getCookieManager().toSimpleString("portal.sysu.edu.cn")).build();
     }
+    public void dispose(){
+    
+    }
 }

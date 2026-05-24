@@ -50,7 +50,11 @@ public class CourseScheduleActivity extends AppCompatActivity {
     ActivityCourseScheduleBinding binding;
     ItemDetailBinding detailBinding;
     JwxtModel model;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

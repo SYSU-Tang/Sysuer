@@ -3,7 +3,6 @@
     <Preference
         app:icon="@drawable/web"
         app:key="netId"
-        app:summary="NetID"
         app:title="NetID" />
     <Preference
         app:icon="@drawable/password"

@@ -20,9 +20,13 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PersonalInformationActivity extends AppCompatActivity {
-    
-    
     XgxtModel model;
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -32,6 +32,11 @@ public class CourseQueryFilterFragment extends PreferenceFragmentCompat {
     JwxtModel model;
     
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        model.dispose();
+    }
+    @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.course_query_filter, rootKey);
     }

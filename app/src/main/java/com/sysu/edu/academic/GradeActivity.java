@@ -47,7 +47,11 @@ public class GradeActivity extends AppCompatActivity {
     ArrayList<String> years;
     JwxtModel model;
     Params params;
-    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        model.dispose();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
