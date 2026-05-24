@@ -60,6 +60,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.datastore.preferences.rxjava3)
 //    implementation(libs.androidx.security.crypto)
     implementation(libs.glide)

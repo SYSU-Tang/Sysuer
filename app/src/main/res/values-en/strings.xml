@@ -669,4 +669,6 @@
     <string name="login_too_frequently">Login Frequency Too High</string>
     <string name="undeveloped_warning">This feature is not yet developed. Please use with caution.</string>
     <string name="activity_not_found">Activity Not Found</string>
+    <string name="username_password_warning">Please check the NetID and Password</string>
+    <string name="apk_next_step_notice">Download complete. Click to update</string>
 </resources>

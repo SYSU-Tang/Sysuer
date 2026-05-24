@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.noties.markwon.Markwon;
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -135,7 +136,10 @@ public class MainActivity extends AppCompatActivity {
         spm.getIsAgreeLiveData().observe(this, aBoolean -> {
             if (aBoolean) {
                 agreementDialog.show();
-                Markwon.builder(this).build().setMarkdown(Objects.requireNonNull(agreementDialog.findViewById(android.R.id.message)), "请阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)");
+                Markwon.builder(this)
+                        .usePlugin(StrikethroughPlugin.create()).build()
+                        .setMarkdown(Objects.requireNonNull(agreementDialog.findViewById(android.R.id.message)),
+                                "请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)");
             } else if (spm.getUpdate()) checkUpdate();
         });
         spm.setIsFirstLaunch(false);

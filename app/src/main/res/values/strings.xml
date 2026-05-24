@@ -668,4 +668,5 @@
     <string name="undeveloped_warning">该功能暂未完善，请谨慎使用！</string>
     <string name="activity_not_found">未找到对应活动！</string>
     <string name="username_password_warning">请输入正确的NetID和密码</string>
+    <string name="apk_next_step_notice">下载完成，点击安装更新</string>
 </resources>

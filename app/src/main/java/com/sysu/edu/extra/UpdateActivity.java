@@ -32,10 +32,18 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import io.noties.markwon.Markwon;
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
+import io.noties.markwon.html.HtmlPlugin;
+import io.noties.markwon.recycler.table.TableEntryPlugin;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class UpdateActivity extends AppCompatActivity {
     
     HttpManager http;
+    CompositeDisposable disposable = new CompositeDisposable();
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,60 +76,66 @@ public class UpdateActivity extends AppCompatActivity {
                         params.toast(R.string.no_net_connected);
                         binding.updateButton.setText(R.string.no_net_connected);
                     }
-                    case 0 -> {
-                        JSONObject response = JSONObject.parse((String) msg.obj);
-                        Integer responseVersion = response.getInteger("version");
-                        String responseVersionName = response.getString("versionName");
-                        Markwon.create(UpdateActivity.this).setMarkdown(binding.changeLog, "### " + responseVersionName + "(" + responseVersion + ")\n" + response.getString("description"));
-                        binding.updateButton.setText(responseVersion > finalVersionCode ? R.string.update : R.string.app_latest_installed);
-                        binding.updateButton.setOnClickListener(_ -> {
-                            if (responseVersion > finalVersionCode) {
-                                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + getString(R.string.app_name) + responseVersionName + ".apk";
-                                File file = new File(path);
-                                if (file.exists() && file.getTotalSpace() > 0) {
-                                    openFile(UpdateActivity.this, path);
-                                    return;
-                                }
-                                downloadFile(UpdateActivity.this, response.getString("link"), path, new DownloadManager.DownloadListener() {
-                                    @Override
-                                    public void onDownloadProgress(long progress, long total) {
-                                        String progressString = String.format(Locale.getDefault(), "%.2fMB/%.2fMB", progress / 1024.0f / 1024.0f, total / 1024.0f / 1024.0f);
-                                        binding.updateButton.setText(progressString);
-                                        NotificationCompat.Builder builder = new NotificationCompat.Builder(UpdateActivity.this, "update")
-                                                .setContentTitle(getString(R.string.download))
-                                                .setContentText(progressString)
-                                                .setSmallIcon(R.drawable.down)
-                                                .setStyle(new NotificationCompat.BigTextStyle()
-                                                        .bigText(progressString))
-                                                .setProgress((int) (total), (int) progress, false)
-                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                                        if (ActivityCompat.checkSelfPermission(UpdateActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
-                                            notificationManager.notify(1002, builder.build());
-                                    }
-                                    
-                                    @Override
-                                    public void onDownloadComplete(String path) {
-                                        binding.updateButton.setText(R.string.install);
-                                        NotificationCompat.Builder builder = new NotificationCompat.Builder(UpdateActivity.this, "update")
-                                                .setContentTitle(getString(R.string.download))
-                                                .setContentText("下载完成，点击安装更新")
-                                                .setSmallIcon(R.drawable.down)
-                                                .setContentIntent(PendingIntentCompat.getActivity(UpdateActivity.this, 0, getOpenFileIntent(UpdateActivity.this, path), PendingIntent.FLAG_ONE_SHOT, true))
-                                                .setProgress(1, 1, false)
-                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                                        if (ActivityCompat.checkSelfPermission(UpdateActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
-                                            notificationManager.notify(1002, builder.build());
-                                        openFile(UpdateActivity.this, path);
-                                    }
-                                    
-                                    @Override
-                                    public void onDownloadError(int code, String message) {
-                                        params.toast(message);
-                                    }
-                                });
-                            }
-                        });
-                    }
+                    case 0 ->
+                            disposable.add(Observable.just((String) msg.obj).map(JSONObject::parse).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(
+                                    response -> {
+                                        Integer responseVersion = response.getInteger("version");
+                                        String responseVersionName = response.getString("versionName");
+                                        Markwon.builder(UpdateActivity.this)
+                                                .usePlugin(StrikethroughPlugin.create())
+                                                .usePlugin(TableEntryPlugin.create(UpdateActivity.this))
+                                                .usePlugin(HtmlPlugin.create())
+                                                .build()
+                                                .setMarkdown(binding.changeLog, "### " + responseVersionName + "(" + responseVersion + ")\n" + response.getString("description"));
+                                        binding.updateButton.setText(responseVersion > finalVersionCode ? R.string.update : R.string.app_latest_installed);
+                                        binding.updateButton.setOnClickListener(_ -> {
+                                            if (responseVersion > finalVersionCode) {
+                                                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + getString(R.string.app_name) + responseVersionName + ".apk";
+                                                File file = new File(path);
+                                                if (file.exists() && file.getTotalSpace() > 0) {
+                                                    openFile(UpdateActivity.this, path);
+                                                    return;
+                                                }
+                                                downloadFile(UpdateActivity.this, response.getString("link"), path, new DownloadManager.DownloadListener() {
+                                                    @Override
+                                                    public void onDownloadProgress(long progress, long total) {
+                                                        String progressString = String.format(Locale.getDefault(), "%.2fMB/%.2fMB", progress / 1024.0f / 1024.0f, total / 1024.0f / 1024.0f);
+                                                        binding.updateButton.setText(progressString);
+                                                        NotificationCompat.Builder builder = new NotificationCompat.Builder(UpdateActivity.this, "update")
+                                                                .setContentTitle(getString(R.string.download))
+                                                                .setContentText(progressString)
+                                                                .setSmallIcon(R.drawable.down)
+                                                                .setStyle(new NotificationCompat.BigTextStyle()
+                                                                        .bigText(progressString))
+                                                                .setProgress((int) (total), (int) progress, false)
+                                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                                                        if (ActivityCompat.checkSelfPermission(UpdateActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+                                                            notificationManager.notify(1002, builder.build());
+                                                    }
+                                                    
+                                                    @Override
+                                                    public void onDownloadComplete(String path) {
+                                                        binding.updateButton.setText(R.string.install);
+                                                        NotificationCompat.Builder builder = new NotificationCompat.Builder(UpdateActivity.this, "update")
+                                                                .setContentTitle(getString(R.string.download))
+                                                                .setContentText(getString(R.string.apk_next_step_notice))
+                                                                .setSmallIcon(R.drawable.down)
+                                                                .setContentIntent(PendingIntentCompat.getActivity(UpdateActivity.this, 0, getOpenFileIntent(UpdateActivity.this, path), PendingIntent.FLAG_ONE_SHOT, true))
+                                                                .setProgress(1, 1, false)
+                                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                                                        if (ActivityCompat.checkSelfPermission(UpdateActivity.this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+                                                            notificationManager.notify(1002, builder.build());
+                                                        openFile(UpdateActivity.this, path);
+                                                    }
+                                                    
+                                                    @Override
+                                                    public void onDownloadError(int code, String message) {
+                                                        params.toast(message);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }));
                 }
             }
         });
@@ -141,5 +155,11 @@ public class UpdateActivity extends AppCompatActivity {
     
     public void getUpdate() {
         http.getRequest("https://sysu-tang.github.io/latest.json", 0);
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposable.dispose();
     }
 }
