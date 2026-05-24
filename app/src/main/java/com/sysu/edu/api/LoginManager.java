@@ -166,7 +166,8 @@ public class LoginManager {
         Response response = client.newCall(new Request.Builder()
                 .post(RequestBody.create(data, MediaType.parse("application/json")))
                 .url("https://openapiv5.ketangpai.com//UserApi/login").build()).execute();
-        if (response.header("Content-Type", "").contains("application/json")) {
+        String type = response.header("Content-Type", "");
+        if (!isEmpty(type) && type.contains("application/json")) {
             JSONObject result = JSONObject.parse(response.body().string());
             String code = result.getString("code");
             Integer status = result.getInteger("status");
@@ -529,15 +530,15 @@ public class LoginManager {
             return Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8)));
         }
         
-        /**
-         * AES-CBC 解密，输入 Base64 密文，返回明文字符串
-         *
-         * @param ciphertextB64 Base64 编码的密文
-         * @param key           密钥字符串（UTF-8 编码后长度必须为 16、24 或 32 字节）
-         * @param iv            初始向量字符串（UTF-8 编码后长度必须为 16 字节）
-         * @return 明文字符串
-         * @throws Exception 加解密异常
-         */
+//        /**
+//         * AES-CBC 解密，输入 Base64 密文，返回明文字符串
+//         *
+//         * @param ciphertextB64 Base64 编码的密文
+//         * @param key           密钥字符串（UTF-8 编码后长度必须为 16、24 或 32 字节）
+//         * @param iv            初始向量字符串（UTF-8 编码后长度必须为 16 字节）
+//         * @return 明文字符串
+//         * @throws Exception 加解密异常
+//         */
 //        public static String decryptByCBC(String ciphertextB64, String key, String iv) throws Exception {
 //            byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
 //            byte[] ivBytes = iv.getBytes(StandardCharsets.UTF_8);
@@ -559,16 +560,5 @@ public class LoginManager {
 //            return new String(plaintext, StandardCharsets.UTF_8);
 //        }
 
-//        static void main(String[] args) throws Exception {
-//            String key = "1234567890123456";  // 16字节 → AES-128
-//            String iv = "1234567890123456";  // 16字节
-//            String plaintext = "Hello, world!";
-//
-//            String ciphertext = encryptByCBC(plaintext, key, iv);
-//            System.out.println("密文: " + ciphertext);
-//
-//            String decrypted = decryptByCBC(ciphertext, key, iv);
-//            System.out.println("解密: " + decrypted);
-//        }
     }
 }

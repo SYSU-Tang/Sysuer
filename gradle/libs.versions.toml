@@ -27,7 +27,7 @@ activityCompose = "1.13.0"
 composeBom = "2026.05.01"
 preference = "1.2.1"
 recyclerview = "1.4.0"
-rxjava = "4.0.0-alpha-13"
+#rxjava = "4.0.0-alpha-13"
 workRuntime = "2.11.2"
 materialPreference = "2.0.0"
 materialVersion = "2.7.2"
@@ -47,8 +47,8 @@ coreRemoteviewsVersion = "1.1.0"
 fragment = "1.8.9"
 datastorePreferencesRxjava3 = "1.3.0-alpha09"
 rxandroid = "3.0.2"
-securityCrypto = "1.1.0"
-tinkAndroid = "1.18.0"
+#securityCrypto = "1.1.0"
+tinkAndroid = "1.21.0"
 #enroVersion = "2.9.0-kmp03"
 #enroAndroid = "2.9.0-kmp03"
 #enro = "2.9.0-kmp03"
@@ -89,7 +89,7 @@ activity-compose = { group = "androidx.activity", name = "activity-compose", ver
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 provider = { module = "dev.rikka.shizuku:provider", version.ref = "api" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
-rxjava = { module = "io.reactivex.rxjava4:rxjava", version.ref = "rxjava" }
+#rxjava = { module = "io.reactivex.rxjava4:rxjava", version.ref = "rxjava" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -119,7 +119,7 @@ androidx-core-remoteviews = { group = "androidx.core", name = "core-remoteviews"
 androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 androidx-datastore-preferences-rxjava3 = { group = "androidx.datastore", name = "datastore-preferences-rxjava3", version.ref = "datastorePreferencesRxjava3" }
 rxandroid = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxandroid" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+#androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 tink-android = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tinkAndroid" }
 #enro-android = { group = "dev.enro", name = "enro-android", version.ref = "enroAndroid" }
 
