@@ -221,6 +221,7 @@ public class LoginManager {
                             request(service, true);
                             getXGXTToken(service, targetBaseUrl);
                         }
+                        case TargetUrl.XINFANG_WEBVPN -> {}
                         default -> request(service, true);
                     }
                 } else {

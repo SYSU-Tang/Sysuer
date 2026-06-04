@@ -102,18 +102,6 @@
         <item>@string/exam</item>
         <item>@string/todo</item>
     </string-array>
-    <string-array name="login_mode">
-        <item>仅提示</item>
-        <item>仅主页提示</item>
-        <item>手动登录</item>
-        <item>无感登录</item>
-    </string-array>
-    <string-array name="values_4">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
     <string-array name="terms">
         <item>第一学期</item>
         <item>第二学期</item>

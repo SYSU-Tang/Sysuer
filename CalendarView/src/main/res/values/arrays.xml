@@ -149,20 +149,6 @@
         <item>DEC</item>
     </string-array>
 
-    <integer-array name="trunk_integer_array">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-
-    </integer-array>
-
     <string-array name="trunk_string_array">
         <item>辛</item>
         <item>壬</item>
@@ -175,21 +161,6 @@
         <item>己</item>
         <item>庚</item>
     </string-array>
-
-    <integer-array name="branch_integer_array">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
-    </integer-array>
 
     <string-array name="branch_string_array">
         <item>酉</item>

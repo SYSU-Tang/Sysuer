@@ -1,7 +1,6 @@
-apply(plugin = "com.android.application")
-apply(plugin = "com.google.gms.google-services")
 plugins {
     alias(libs.plugins.android.application)
+//    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
@@ -55,15 +54,34 @@ android {
         }
     }
     buildToolsVersion = "37.0.0"
-    ndkVersion = "28.0.12674087 rc2"
+    ndkVersion = "30.0.14904198 rc1"
+    compileSdkMinor = 0
 }
-
+kotlin {
+    sourceSets {
+        dependencies {
+//            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
+            // 可选：添加 miuix-preference 以获取 Preference 组件
+//            implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
+            // 可选：添加 miuix-icons 以获取更多图标
+//            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+            // 可选：添加 miuix-blur 以获取模糊效果
+            implementation(libs.miuix.blur)
+            // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
+            implementation(libs.miuix.navigation3.ui)
+        }
+    }
+}
 dependencies {
 
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.datastore.preferences.rxjava3)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.runtime.livedata)
 //    implementation(libs.androidx.security.crypto)
     implementation(libs.glide)
+    implementation(libs.multiplatform.markdown.renderer.android)
+    implementation(libs.multiplatform.markdown.renderer.m3)
     implementation(libs.okhttp)
     implementation(libs.fastjson2)
     implementation(libs.appcompat)
@@ -120,6 +138,7 @@ dependencies {
     implementation(libs.language.textmate)
     implementation(project(":CalendarView"))
     implementation(libs.okhttp.java.net.cookiejar)
+    implementation(libs.miuix.blur.android)
 //    implementation(libs.rxjava)
 //    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
     /*configurations.all {

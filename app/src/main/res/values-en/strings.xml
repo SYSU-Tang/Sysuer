@@ -20,14 +20,12 @@
     <string name="self_study_room">Self Study Room</string>
     <string name="term">Term</string>
     <string name="week1">Week 1</string>
-    <string name="login">Login</string>
     <string name="username">User Name</string>
     <string name="password">Password</string>
     <string name="captcha">Captcha</string>
     <string name="today">Today</string>
     <string name="noClass">😁NO Courses Today😁</string>
     <string name="noExam">😁NO Exams Today😁</string>
-    <string name="noTodo">😒NO Todos Today😒</string>
     <string name="classTime">Section</string>
     <string name="name">Label</string>
     <string name="college">School</string>
@@ -185,9 +183,6 @@
     <string name="dashboard">Dashboard</string>
     <string name="next_class">Next Class</string>
     <string name="shortcut">Shortcut</string>
-    <string name="logging_in">LoggingIn…</string>
-    <string name="login_successfully">Login Successfully</string>
-    <string name="require_netid_password">NetID and Password Required</string>
     <string name="copy_successfully">Copy Successfully</string>
     <string name="course_selected">Selected Courses</string>
     <string name="last_week_warning">This is the last week</string>
@@ -546,7 +541,6 @@
     <string name="download_in_app">Downlaod in APP</string>
     <string name="download_in_system">Download in System</string>
     <string name="download_in_browser">Download in Browser</string>
-    <string name="app_modified_detected">APP Modified Detected</string>
     <string name="app_latest_installed">Latest APP Installed</string>
     <string name="developer_enabled">Developer Mode Enabled</string>
     <string name="developer_disabled">Developer Mode Disabled</string>
@@ -582,7 +576,6 @@
     <string name="agenda">Agenda</string>
     <string name="delete_warning">Are You to Delete?</string>
     <string name="due">Due</string>
-    <string name="view">View</string>
     <string name="auto_update_when_launched">Auto Update Check when Launching</string>
     <string name="balance">Balance</string>
     <string name="money">Amount</string>
@@ -610,7 +603,6 @@
     <string name="cancel_reservation">Cancel Reservation</string>
     <string name="old_out_date">Old Expiration Date</string>
     <string name="new_out_date">New Expiration Date</string>
-    <string name="month">Month</string>
     <string name="order_success">Order Placed Successfully</string>
     <string name="order_fail">Order Failed</string>
     <string name="order_time">Order Time</string>
@@ -626,17 +618,12 @@
     <string name="paid_fee">Paid Fee</string>
     <string name="pay_time">Pay Time</string>
     <string name="remark">Remark</string>
-    <string name="paid">Paid</string>
-    <string name="unpaid">Unpaid</string>
     <string name="default_remark">Balance Top-up</string>
     <string name="recharge">Recharge</string>
     <string name="water_consumption">Water Consumption</string>
     <string name="unpaid_fee">Unpaid Fee</string>
-    <string name="pay_success">Pay Successfully</string>
-    <string name="pay_fail">Fail to Pay</string>
     <string name="left_time">Left Time</string>
     <string name="pause_time">Pause Time</string>
-    <string name="error">Error</string>
     <string name="click_to_select">Click to Select</string>
     <string name="content_helper_text">Please be sure to clearly state the key details of your request, including but not limited to the time, location, and reason. The text should not exceed 1,000 characters.</string>
     <string name="attachment">Attachment</string>
@@ -646,7 +633,6 @@
     <string name="message_code">Message Verification Code</string>
     <string name="send">Send</string>
     <string name="content">Content</string>
-    <string name="expand">Expand</string>
     <string name="homework">Homework</string>
     <string name="update">Update</string>
     <string name="install">Install</string>
@@ -656,7 +642,6 @@
     <string name="name_helper_text">Anonymous submissions are supported for tracking progress. \\nStatistics show that submitting reports using WeCom with real-name verification improves response efficiency, while anonymous submissions tend to have longer average response times.</string>
     <string name="phone">Phone Number</string>
     <string name="subject_helper_text">Example: Comments/suggestions/requests regarding XX matter at the XX campus</string>
-    <string name="login_success">Login Successful</string>
     <string name="set_sysu_code_warning">Please configure SYSU Code in the settings.</string>
     <string name="fix_sysu_code_warning">Please configure the correct SYSU code link.</string>
     <string name="registration">Registration</string>

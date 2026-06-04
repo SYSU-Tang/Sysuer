@@ -14,8 +14,8 @@
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="true" />
+        <option name="myGradleHome" value="D:\Gradle\gradle-9.5.1" />
       </GradleProjectSettings>
     </option>
-    <option name="offlineMode" value="true" />
   </component>
 </project>

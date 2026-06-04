@@ -3,7 +3,6 @@
 <!--    <color name="teal_700">#018786</color>-->
     <color name="black">#000000</color>
     <color name="logo_background">?colorSurfaceContainer</color>
-    <color name="color_on_background">?attr/colorOnBackground</color>
     <color name="sysu_color">#005826</color>
     <color name="widget_background">#f1f1f1</color>
     <color name="widget_on_background">#231815</color>
