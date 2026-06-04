@@ -16,13 +16,14 @@ material = "1.14.0"
 constraintlayout = "2.2.1"
 lifecycleLivedataKtx = "2.10.0"
 lifecycleViewmodelKtx = "2.10.0"
+miuixNavigation3Ui = "0.9.1"
 navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
 legacySupportV4 = "1.0.0"
 activity = "1.13.0"
 okhttp = "5.3.2"
 annotation = "1.10.0"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 activityCompose = "1.13.0"
 composeBom = "2026.05.01"
 preference = "1.2.1"
@@ -50,6 +51,11 @@ rxandroid = "3.0.2"
 #securityCrypto = "1.1.0"
 tinkAndroid = "1.21.0"
 activityKtx = "1.13.0"
+#multiplatformMarkdownRenderer = "0.41.0"
+multiplatformMarkdownRendererAndroid = "0.41.0"
+multiplatformMarkdownRendererM3 = "0.41.0"
+material3 = "1.5.0-alpha21"
+runtimeLivedata = "1.12.0-alpha03"
 #enroVersion = "2.9.0-kmp03"
 #enroAndroid = "2.9.0-kmp03"
 #enro = "2.9.0-kmp03"
@@ -79,6 +85,9 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 language-textmate = { module = "io.github.rosemoe:language-textmate", version.ref = "languageTextmate" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+miuix-blur = { module = "top.yukonga.miuix.kmp:miuix-blur", version.ref = "miuixNavigation3Ui" }
+miuix-blur-android = { module = "top.yukonga.miuix.kmp:miuix-blur-android", version.ref = "miuixNavigation3Ui" }
+miuix-navigation3-ui = { module = "top.yukonga.miuix.kmp:miuix-navigation3-ui", version.ref = "miuixNavigation3Ui" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
@@ -123,6 +132,11 @@ rxandroid = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = 
 #androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 tink-android = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tinkAndroid" }
 androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
+#multiplatform-markdown-renderer = { group = "com.mikepenz", name = "multiplatform-markdown-renderer", version.ref = "multiplatformMarkdownRenderer" }
+multiplatform-markdown-renderer-android = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-android", version.ref = "multiplatformMarkdownRendererAndroid" }
+multiplatform-markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "multiplatformMarkdownRendererM3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 #enro-android = { group = "dev.enro", name = "enro-android", version.ref = "enroAndroid" }
 
 [plugins]

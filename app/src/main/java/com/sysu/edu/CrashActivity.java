@@ -215,7 +215,7 @@ public class CrashActivity extends AppCompatActivity {
         
         // 崩溃时间
         markdown.append("## ⏰ 崩溃时间\n");
-        markdown.append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))).append("\n\n");
+        markdown.append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n\n");
         
         return markdown.toString();
     }

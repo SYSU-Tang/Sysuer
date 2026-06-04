@@ -74,13 +74,12 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/change_log"
+            <com.sysu.edu.view.MarkdownView
+                android:id="@+id/changelog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/horizontal_margin"
-                android:layout_marginVertical="@dimen/vertical_margin"
-                android:textIsSelectable="true" />
+                android:layout_marginVertical="@dimen/vertical_margin" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

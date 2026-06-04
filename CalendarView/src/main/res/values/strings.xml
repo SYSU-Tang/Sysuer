@@ -1,5 +1,4 @@
 <resources>
-    <string name="cv_app_name">CalendarView</string>
     <string name="sun">Sun</string>
     <string name="mon">Mon</string>
     <string name="tue">Tue</string>

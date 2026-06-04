@@ -31,10 +31,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import io.noties.markwon.Markwon;
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
-import io.noties.markwon.html.HtmlPlugin;
-import io.noties.markwon.recycler.table.TableEntryPlugin;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -65,7 +61,6 @@ public class UpdateActivity extends AppCompatActivity {
                 .setName("下载进度通知").build();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.createNotificationChannel(channel);
-        
         Params params = new Params(this);
         int finalVersionCode = versionCode;
         http = new HttpManager(new Handler(getMainLooper()) {
@@ -81,12 +76,7 @@ public class UpdateActivity extends AppCompatActivity {
                                     response -> {
                                         Integer responseVersion = response.getInteger("version");
                                         String responseVersionName = response.getString("versionName");
-                                        Markwon.builder(UpdateActivity.this)
-                                                .usePlugin(StrikethroughPlugin.create())
-                                                .usePlugin(TableEntryPlugin.create(UpdateActivity.this))
-                                                .usePlugin(HtmlPlugin.create())
-                                                .build()
-                                                .setMarkdown(binding.changeLog, "### " + responseVersionName + "(" + responseVersion + ")\n" + response.getString("description"));
+                                        binding.changelog.setMarkdown("# " + responseVersionName + "(" + responseVersion + ")\n" + response.getString("description"));
                                         binding.updateButton.setText(responseVersion > finalVersionCode ? R.string.update : R.string.app_latest_installed);
                                         binding.updateButton.setOnClickListener(_ -> {
                                             if (responseVersion > finalVersionCode) {

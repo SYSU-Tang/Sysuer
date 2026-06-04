@@ -20,14 +20,12 @@
     <string name="self_study_room">自习室</string>
     <string name="term">学期</string>
     <string name="week1">第1周</string>
-    <string name="login">登录</string>
     <string name="username">用户名</string>
     <string name="password">密码</string>
     <string name="captcha">验证码</string>
     <string name="today">今天</string>
     <string name="noClass">😁今天没课😁</string>
     <string name="noExam">😁没有考试😁</string>
-    <string name="noTodo">😒没有待办😒</string>
     <string name="classTime">节次</string>
     <string name="name">名称</string>
     <string name="college">学院</string>
@@ -184,9 +182,6 @@
     <string name="dashboard">面板</string>
     <string name="next_class">下一节课</string>
     <string name="shortcut">快捷方式</string>
-    <string name="logging_in">登录中…</string>
-    <string name="login_successfully">登录成功</string>
-    <string name="require_netid_password">需要提供NetID和密码</string>
     <string name="copy_successfully">成功复制</string>
     <string name="course_selected">已选课程</string>
     <string name="last_week_warning">这是最后一周</string>
@@ -544,7 +539,6 @@
     <string name="download_in_app">APP内下载</string>
     <string name="download_in_system">系统下载</string>
     <string name="download_in_browser">浏览器下载</string>
-    <string name="app_modified_detected">APP 被篡改</string>
     <string name="app_latest_installed">已安装最新版本</string>
     <string name="developer_enabled">已开启开发者模式</string>
     <string name="developer_disabled">开发者模式关闭</string>
@@ -580,7 +574,6 @@
     <string name="agenda">日程</string>
     <string name="delete_warning">确定删除吗？</string>
     <string name="due">预定</string>
-    <string name="view">查看</string>
     <string name="auto_update_when_launched">应用启动时自动检测更新</string>
     <string name="balance">余额</string>
     <string name="money">金额</string>
@@ -608,7 +601,6 @@
     <string name="cancel_reservation">取消预约</string>
     <string name="old_out_date">原过期时间</string>
     <string name="new_out_date">新过期时间</string>
-    <string name="month">月份</string>
     <string name="order_success">下单成功</string>
     <string name="order_fail">下单失败</string>
     <string name="order_time">下单时间</string>
@@ -624,17 +616,12 @@
     <string name="paid_fee">已付费用</string>
     <string name="pay_time">支付时间</string>
     <string name="remark">备注</string>
-    <string name="paid">已支付</string>
-    <string name="unpaid">未支付</string>
     <string name="default_remark">余额充值</string>
     <string name="recharge">充值</string>
     <string name="water_consumption">用水量</string>
     <string name="unpaid_fee">待付费用</string>
-    <string name="pay_success">支付成功</string>
-    <string name="pay_fail">支付失败</string>
     <string name="left_time">剩余时长</string>
     <string name="pause_time">暂停时长</string>
-    <string name="error">错误</string>
     <string name="click_to_select">点击选择</string>
     <string name="homework">作业</string>
     <string name="update">更新</string>
@@ -647,14 +634,12 @@
     <string name="message_code">短信验证码</string>
     <string name="send">发送</string>
     <string name="content">内容</string>
-    <string name="expand">展开</string>
     <string name="invalid_phone">号码错误</string>
     <string name="upload_attachment">上传附件</string>
     <string name="subject_helper_text">示例：关于反映XX校区/校园XX事项的意见/建议/诉求</string>
     <string name="content_helper_text">请务必点明诉求的关键要素，包括但不限于时间、地点、缘由,字数不能多于1000个。</string>
     <string name="attachment">附件</string>
     <string name="optional">可选</string>
-    <string name="login_success">登录成功</string>
     <string name="set_sysu_code_warning">请在设置里配置逸仙码</string>
     <string name="fix_sysu_code_warning">请配置正确的逸仙码链接</string>
     <string name="registration">登记</string>
@@ -669,4 +654,5 @@
     <string name="activity_not_found">未找到对应活动！</string>
     <string name="username_password_warning">请输入正确的NetID和密码</string>
     <string name="apk_next_step_notice">下载完成，点击安装更新</string>
+    <string name="title_activity_markdown">Markdown</string>
 </resources>
