@@ -35,6 +35,7 @@ import com.sysu.edu.databinding.DialogEditTextBinding;
 import com.sysu.edu.databinding.FragmentQuestionnaireBinding;
 import com.sysu.edu.databinding.ItemOptionBinding;
 import com.sysu.edu.todo.TitleAdapter;
+import com.sysu.edu.view.RecyclerViewHolder;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -67,15 +68,6 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                 Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
                 requireArguments().getString("bpmc")));
         //{"rwid", "wjid","sxz","pjrdm","bpdm","kcdm","rwh"};
-        getEvaluation(requireArguments().getString("rwid"),
-                requireArguments().getString("wjid"),
-                requireArguments().getString("sxz"),
-                requireArguments().getString("pjrdm"),
-                requireArguments().getString("bpdm"),
-                requireArguments().getString("kcdm"),
-                requireArguments().getString("rwh"),
-                Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
-                requireArguments().getString("bpmc"));
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -153,6 +145,15 @@ public class EvaluationQuestionnaireFragment extends Fragment {
             }
         });
         http.setParams(params);
+        getEvaluation(requireArguments().getString("rwid"),
+                requireArguments().getString("wjid"),
+                requireArguments().getString("sxz"),
+                requireArguments().getString("pjrdm"),
+                requireArguments().getString("bpdm"),
+                requireArguments().getString("kcdm"),
+                requireArguments().getString("rwh"),
+                Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
+                requireArguments().getString("bpmc"));
         binding.save.setOnClickListener(_ -> saveEvaluation());
         binding.submit.setOnClickListener(_ -> Snackbar.make(binding.getRoot(), "提交后不可更改", Snackbar.LENGTH_LONG).setAction(R.string.confirm, _ -> submitEvaluation()).show());
         binding.reset.setOnClickListener(_ -> adp.getAdapters().forEach(adapter -> {
@@ -313,14 +314,12 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 }
 
-@SuppressWarnings("ALL")
-class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditTextBinding>> {
     final Context context;
     String content;
     JSONArray answer;
     
     public BlanketAdapter(Context context) {
-        super();
         this.context = context;
     }
     
@@ -340,10 +339,11 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(DialogEditTextBinding.inflate(LayoutInflater.from(context), parent, false).getRoot()) {
+    public RecyclerViewHolder<DialogEditTextBinding> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new RecyclerViewHolder<>(DialogEditTextBinding.inflate(LayoutInflater.from(context), parent, false)) {
         };
     }
+    
     
     public void setText(String text) {
         this.content = text;
@@ -356,8 +356,8 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
     
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        DialogEditTextBinding binding = DialogEditTextBinding.bind(holder.itemView);
+    public void onBindViewHolder(@NonNull RecyclerViewHolder<DialogEditTextBinding> holder, int position) {
+        DialogEditTextBinding binding = holder.binding;
         binding.editLayout.setHint(R.string.please_enter_content);
         if (!isEmpty(content)) {
             answer.set(0, content);
@@ -377,11 +377,10 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 if (isEmpty(s)) {
                     if (!answer.isEmpty())
                         answer.remove(0);
-                } else {
-                    answer.set(0, s.toString());
-                }
+                } else answer.set(0, s.toString());
             }
         });
+        binding.executePendingBindings();
     }
     
     @Override

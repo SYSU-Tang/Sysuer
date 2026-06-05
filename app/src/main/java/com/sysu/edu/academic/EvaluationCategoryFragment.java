@@ -37,7 +37,7 @@ public class EvaluationCategoryFragment extends Fragment {
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     Params params;
     EvaluationViewModel vm;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -56,68 +56,70 @@ public class EvaluationCategoryFragment extends Fragment {
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == -1) params.toast(R.string.no_net_connected);
-                else if(msg.getData().getBoolean("isJSON")){
-                    if (msg.what == 1) {
-                        JSONObject data = JSON.parseObject((String) msg.obj);
-                        if (data != null && Objects.equals(data.get("code"), "200")) {
-                            data.getJSONObject("result").getJSONArray("list").forEach(e -> categoryAdapter.add((JSONObject) e));
-                        } else {
-                            params.gotoLogin(vm.authorizationManager.isAccessible()? TargetUrl.PJXT:TargetUrl.PJXT_WEBVPN);
+                if (msg.getData().getInt("code") == 200) {
+                    if (msg.what == -1) params.toast(R.string.no_net_connected);
+                    else if (msg.getData().getBoolean("isJSON")) {
+                        if (msg.what == 1) {
+                            JSONObject data = JSON.parseObject((String) msg.obj);
+                            if (data != null && Objects.equals(data.get("code"), "200"))
+                                data.getJSONObject("result").getJSONArray("list").forEach(e -> categoryAdapter.add((JSONObject) e));
+                            else
+                                params.gotoLogin(vm.authorizationManager.isAccessible() ? TargetUrl.PJXT : TargetUrl.PJXT_WEBVPN);
                         }
+                    } else {
+                        vm.authorizationManager.isAccessible((String) msg.obj);
+                        getEvaluation();
                     }
-                }else{
-                    vm.authorizationManager.isAccessible((String)msg.obj);
-                    getEvaluation();
-                }
+                } else
+                    params.gotoLogin(vm.authorizationManager.isAccessible() ? TargetUrl.PJXT : TargetUrl.PJXT_WEBVPN);
             }
         });
         http.setParams(params);
         getEvaluation();
         return binding.getRoot();
     }
-
-
+    
+    
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         staggeredGridLayoutManager.setSpanCount(params.getColumn());
     }
-
+    
     public void getEvaluation() {
         http.getRequest(vm.authorizationManager.getBaseUrl() + "personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10", 1);
     }
-
+    
     public static class CategoryAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         String[] keys;
         String[] values;
         String[] params;
         int nav;
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
-
+        
         public void setKeys(String[] keys) {
             this.keys = keys;
         }
-
+        
         public void setValues(String[] values) {
             this.values = values;
         }
-
+        
         public void setParams(String[] params) {
             this.params = params;
         }
-
+        
         public void setNavigation(int nav) {
             this.nav = nav;
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemEvaluationBinding binding = ItemEvaluationBinding.bind(holder.itemView);

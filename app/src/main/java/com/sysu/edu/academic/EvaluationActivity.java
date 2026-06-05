@@ -20,7 +20,6 @@ public class EvaluationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityEvaluationBinding binding = ActivityEvaluationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         NavigationUI.setupWithNavController(binding.toolbar, ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController(), new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
             supportFinishAfterTransition();
             return true;
