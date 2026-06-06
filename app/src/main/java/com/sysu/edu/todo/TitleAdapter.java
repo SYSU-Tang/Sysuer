@@ -66,9 +66,8 @@ public class TitleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public int getItemCount() {
         return 1;
     }
-
-    @Override
-    public int getItemViewType(int position) {
-        return 2;
+    
+    public int getHeader() {
+        return n;
     }
 }
