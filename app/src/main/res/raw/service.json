@@ -362,7 +362,7 @@
       {
         "id": 711,
         "name": "专业",
-        "activity": ".academic.MajorInfo",
+        "activity": ".academic.MajorInfoActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/majorInfoView?code=jwxsd_bkzycx&resourceName=%25E6%259C%25AC%25E7%25A7%2591%25E4%25B8%2593%25E4%25B8%259A%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "专业信息查询系统，专业介绍、师资力量、就业方向等详细信息"
       },
