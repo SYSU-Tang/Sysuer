@@ -133,7 +133,7 @@
                 android:orientation="vertical">
 
                 <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/date"
+                    android:id="@+id/date_view"
                     style="@style/TextAppearance.Material3.TitleMedium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -308,7 +308,7 @@
                         app:icon="@drawable/add" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/todo_date"
+                        android:id="@+id/todo_date_button"
                         style="@style/Widget.Material3Expressive.Button.TonalButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -328,7 +328,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/todo_list"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false" />
 
             </LinearLayout>
