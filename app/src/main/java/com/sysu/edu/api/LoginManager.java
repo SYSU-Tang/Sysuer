@@ -224,6 +224,7 @@ public class LoginManager {
                         case TargetUrl.XINFANG_WEBVPN -> {}
                         default -> request(service, true);
                     }
+                    
                 } else {
                     JSONObject publicKey = JSONObject.parse(getPublicKey()).getJSONObject("data").getJSONObject("param");
                     String redirect = redirect(doLogin(username, encrypt(publicKey.getString("publicKey"), password), publicKey.getString("publicKeyId")));

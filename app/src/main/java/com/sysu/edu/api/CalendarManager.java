@@ -10,17 +10,19 @@ import java.time.temporal.TemporalAdjusters;
 public class CalendarManager {
     
     final LocalDate today = LocalDate.now();
-    final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
     final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
     public int getYear() {
         return today.getYear();
     }
     
+    public String toDateString(long millis) {
+        return dateFormatter.format(toDate(millis));
+    }
     public String toDateString(LocalDate date) {
         return dateFormatter.format(date);
     }
-    
     public String toDateStringPLus(int days) {
         return toDateString(today.plusDays(days));
     }
@@ -44,5 +46,11 @@ public class CalendarManager {
     
     public long toMillis(LocalDate date) {
         return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+    public long toMillis(LocalDateTime date) {
+        return date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+    public long toMillis(String date) {
+        return LocalDate.parse(date).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 }

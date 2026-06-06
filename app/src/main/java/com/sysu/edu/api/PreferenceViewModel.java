@@ -21,7 +21,7 @@ public class PreferenceViewModel extends ViewModel {
     private final MutableLiveData<Boolean> isAgreeLiveData = new MutableLiveData<>();
     private final MutableLiveData<Set<String>> dashboardLiveData = new MutableLiveData<>();
 
-    private SharedPreferences pm;
+    SharedPreferences pm;
 
     public void setPM(SharedPreferences oldPM) {
         pm = oldPM;

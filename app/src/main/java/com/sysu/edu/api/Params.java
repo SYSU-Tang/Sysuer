@@ -15,7 +15,6 @@ import com.sysu.edu.browser.BrowserActivity;
 public class Params {
 
     final FragmentActivity activity; // 关联的 FragmentActivity 对象
-//    private AccountViewModel accountViewModel;
     Fragment fragment; // 关联的 Fragment 对象
     Runnable afterLogin; // 登录成功后的回调 Runnable 对象
     private ContextUtil contextUtil;
@@ -28,7 +27,6 @@ public class Params {
     public Params(FragmentActivity activity) {
         this.activity = activity;
         contextUtil = new ContextUtil(activity);
-//        accountViewModel = new ViewModelProvider(activity).get(AccountViewModel.class);
     }
 
     /**
@@ -40,7 +38,6 @@ public class Params {
         this.fragment = fragment;
         contextUtil = new ContextUtil(fragment.requireContext());
         this(fragment.requireActivity());
-//        accountViewModel = new ViewModelProvider(fragment).get(AccountViewModel.class);
     }
 
     /**
