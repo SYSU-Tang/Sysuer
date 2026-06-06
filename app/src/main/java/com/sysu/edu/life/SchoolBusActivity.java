@@ -30,11 +30,13 @@ public class SchoolBusActivity extends AppCompatActivity {
     final MutableLiveData<Boolean> day = new MutableLiveData<>(true);
     JSONObject data;
     PortalModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,15 +87,17 @@ public class SchoolBusActivity extends AppCompatActivity {
             }
         });
         binding.toolbar.getMenu().add(R.string.export).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setIcon(R.drawable.export).setOnMenuItemClickListener(_ -> {
-            int currentItem = binding.pager.getCurrentItem();
-            ((StaggeredFragment) pager2Adapter.get(currentItem)).export(binding.toolbar, Objects.requireNonNull(Objects.requireNonNull(binding.tabs.getTabAt(currentItem)).getText()).toString());
+            if (pager2Adapter.getItemCount() > 0) {
+                int currentItem = binding.pager.getCurrentItem();
+                ((StaggeredFragment) pager2Adapter.get(currentItem)).export(binding.toolbar, Objects.requireNonNull(Objects.requireNonNull(binding.tabs.getTabAt(currentItem)).getText()).toString());
+            }
             return true;
         });
         binding.appBarLayout.addView(header.getRoot());
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(routes.get(position))).attach();
         model.getMessage().observe(this, message -> {
             JSONObject response = message.getSecond();
-            if (response != null && response.getJSONObject("meta").getInteger("statusCode").equals(200)) {
+            if (response.getJSONObject("meta").getInteger("statusCode").equals(200)) {
                 if (message.getFirst() == 0) {
                     data = response.getJSONObject("data");
                     day.setValue(Boolean.TRUE);

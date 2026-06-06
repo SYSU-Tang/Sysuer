@@ -65,7 +65,7 @@ public class AccountManager {
         if (encoded == null) return null;
         try {
             return new String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null));
-        } catch (Exception e) {
+        } catch (Exception _) {
             return null;
         }
     }
@@ -74,11 +74,10 @@ public class AccountManager {
         return dataStore.data().firstOrError()
                 .map(prefs -> {
                     String username = prefs.get(PreferencesKeys.stringKey("active:" + domain));
-                    if (username == null) throw new Exception("No active account");
+                    if (username == null) return new Pair<>("", "");
                     String encoded = prefs.get(PreferencesKeys.stringKey(domain + ":" + username));
-                    if (encoded == null) throw new Exception("Password not found");
+                    if (encoded == null) return new Pair<>("", "");
                     String password = new String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null));
-                    System.out.println("Username " + username + " Decrypted password: " + password);
                     return new Pair<>(username, password);
                 })
                 .subscribeOn(Schedulers.io())
@@ -86,9 +85,15 @@ public class AccountManager {
     }
     
     public Completable setAccountAsync(String domain, String username, String password) {
+        return setAccountAsync(domain, username, password, false);
+    }
+    
+    public Completable setAccountAsync(String domain, String username, String password, boolean active) {
         return Completable.fromAction(() -> dataStore.updateDataAsync(prefs -> {
             MutablePreferences mutable = prefs.toMutablePreferences();
             mutable.set(PreferencesKeys.stringKey(domain + ":" + username), Base64.encodeToString(aead.encrypt(password.getBytes(), null), Base64.DEFAULT));
+            if (active || !mutable.contains(PreferencesKeys.stringKey("active:" + domain)))
+                mutable.set(PreferencesKeys.stringKey("active:" + domain), username);
             return Single.just(mutable);
         })).subscribeOn(Schedulers.io());
     }

@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.sysu.edu.R;
@@ -37,16 +36,14 @@ public class ContextUtil {
     private final CompositeDisposable disposable = new CompositeDisposable();
     private DialogAccountBinding binding;
     private AlertDialog dialog;
-    private AccountViewModel accountViewModel;
     
     public ContextUtil(Context context) {
         this.context = context;
         sharedPreferences = context.getSharedPreferences("privacy", Context.MODE_PRIVATE);
         loginManager = new LoginManager(context);
         accountManager = AccountManager.getInstance(context.getApplicationContext());
-        
         if (!isEmpty(getUserName()) && !isEmpty(getPassword()))
-            disposable.add(accountManager.setAccountAsync("sysu.edu.cn", getUserName(), getPassword()).subscribe(() -> sharedPreferences.edit().remove("username").remove("password").apply()));
+            disposable.add(accountManager.setAccountAsync("sysu.edu.cn", getUserName(), getPassword(), true).subscribe(() -> sharedPreferences.edit().remove("username").remove("password").apply()));
     }
     
     public Context getContext() {
@@ -173,9 +170,8 @@ public class ContextUtil {
     public void loginForUrl(String service, String host, Runnable afterLogin) {
         disposable.add(accountManager.getActiveAccountAsync(host).subscribe(
                 activeAccount -> {
-                    System.out.println("loginForUrl " + activeAccount);
-                    if (activeAccount != null) {
-                        if (!isEmpty(service)) try {
+                    if (!isEmpty(activeAccount.first) && !isEmpty(activeAccount.second) && !isEmpty(service)) {
+                        try {
                             loginManager.setOnLoginListener(new LoginManager.LoginListener() {
                                 @Override
                                 public void onSuccess() {
@@ -188,7 +184,7 @@ public class ContextUtil {
                                     if ("SSO10002".equals(code) || "30506".equals(code))
                                         changeAccount(service, host, afterLogin);
                                     else
-                                        handler.post(() -> toast(toStringOrDefault(JSONObject.parse(message).getString("msg"))));
+                                        handler.post(() -> toast(toStringOrDefault(message)));
                                 }
                             });
                             loginManager.login(activeAccount.first, activeAccount.second, service);
@@ -204,35 +200,34 @@ public class ContextUtil {
     }
     
     public void changeAccount(String url, String host, Runnable afterLogin) {
-        if (binding == null) {
-            binding = DialogAccountBinding.inflate(LayoutInflater.from(context));
-            binding.password.editLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
+        if (context instanceof Activity activity && !activity.isFinishing() && !activity.isDestroyed()) {
+            if (binding == null) {
+                binding = DialogAccountBinding.inflate(LayoutInflater.from(context));
+                binding.password.editLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
+            }
+            if (dialog == null)
+                dialog = new MaterialAlertDialogBuilder(context)
+                        .setView(binding.getRoot())
+                        .setTitle(R.string.privacy)
+                        .setPositiveButton(android.R.string.ok, (_, _) -> {
+                            Editable username = binding.username.edit.getText();
+                            Editable password = binding.password.edit.getText();
+                            if (isEmpty(username) || isEmpty(password))
+                                toast(R.string.username_password_warning);
+                            else
+                                disposable.add(accountManager.setAccountAsync(host, username.toString(), password.toString(), true)
+                                        .subscribe(() -> loginForUrl(url, host, afterLogin)));
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .create();
+            disposable.add(accountManager.getActiveAccountAsync(host).subscribe(account -> activity.runOnUiThread(() -> {
+                if (!isEmpty(account.first) && !isEmpty(account.second)) {
+                    binding.password.edit.setText(account.second);
+                    binding.username.edit.setText(account.first);
+                }
+                dialog.show();
+            })));
         }
-        if (dialog == null)
-            dialog = new MaterialAlertDialogBuilder(context)
-                    .setView(binding.getRoot())
-                    .setTitle(R.string.privacy)
-                    .setPositiveButton(android.R.string.ok, (_, _) -> {
-                        Editable username = binding.username.edit.getText();
-                        Editable password = binding.password.edit.getText();
-                        if (isEmpty(username) || isEmpty(password))
-                            toast(R.string.username_password_warning);
-                        else
-                            disposable.add(accountManager.setAccountAsync(host, username.toString(), password.toString()).subscribe(() -> loginForUrl(url, host, afterLogin)));
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .create();
-        disposable.add(accountManager.getActiveAccountAsync(host).subscribe(account -> {
-            System.out.println("Account: " + account);
-            if (context instanceof Activity activity && !activity.isFinishing() && !activity.isDestroyed())
-                activity.runOnUiThread(() -> {
-                    if (account != null) {
-                        binding.password.edit.setText(account.second);
-                        binding.username.edit.setText(account.first);
-                    }
-                    dialog.show();
-                });
-        }));
     }
     
     public AccountManager getAccountManager() {

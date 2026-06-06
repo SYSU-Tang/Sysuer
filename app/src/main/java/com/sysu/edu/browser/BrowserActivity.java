@@ -141,14 +141,18 @@ public class BrowserActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String link) {
                 if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page").matcher(link).find())
-                    disposable.add(params.getContextUtil().getAccountManager().getActiveAccountAsync("sysu.edu.cn").subscribe(account -> web.evaluateJavascript(String.format("""
-                            javascript:(function(){\
-                            function waitElement(selector, callback) {\
-                            const element = document.querySelector(selector);\
-                            if (element) {callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}\
-                            waitElement('.para-widget-account-psw', () => {\
-                            var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click();});})()""", account.first, account.second), _ -> {
-                    })));
+                    disposable.add(params.getContextUtil().getAccountManager().getActiveAccountAsync("sysu.edu.cn").subscribe(account ->
+                    {
+                        if (!isEmpty(account.first) && !isEmpty(account.second))
+                            web.evaluateJavascript(String.format("""
+                                    javascript:(function(){\
+                                    function waitElement(selector, callback) {\
+                                    const element = document.querySelector(selector);\
+                                    if (element) {callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}\
+                                    waitElement('.para-widget-account-psw', () => {\
+                                    var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='%s';data.loginModel.dataField.password='%s';data.passwordInputVal='password';data.$loginBtn.click();});})()""", account.first, account.second), _ -> {
+                            });
+                    }));
                 else if (Pattern.compile("://appgw.sysu.edu.cn/").matcher(link).find()) {
                     web.stopLoading();
                     web.loadUrl(url.replace(".sysu.edu.cn/", "-443.webvpn.sysu.edu.cn/"));
