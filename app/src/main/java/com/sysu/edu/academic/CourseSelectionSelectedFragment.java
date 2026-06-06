@@ -109,7 +109,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
                         adapter.get(position).getString("courseCateCode"));
         });
         adapter.setLikeAction(this::setPNP);
-        model.getMessage().observe(requireActivity(),message->{
+        model.getMessage().observe(requireActivity(), message->{
             JSONObject response = message.getSecond();
             if (response.getIntValue("code") == 200) {
                 switch (message.getFirst()) {
