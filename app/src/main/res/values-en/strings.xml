@@ -656,4 +656,8 @@
     <string name="activity_not_found">Activity Not Found</string>
     <string name="username_password_warning">Please check the NetID and Password</string>
     <string name="apk_next_step_notice">Download complete. Click to update</string>
+    <string name="title_activity_markdown">Markdown</string>
+    <string name="dashboard_time">Year-Term%1$s\n%2$s\n%3$s</string>
+    <string name="dashboard_week">Week%1$s\n%2$s</string>
+    <string name="dashboard_day">%1$s/%2$s</string>
 </resources>

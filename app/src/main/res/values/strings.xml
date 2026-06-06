@@ -655,4 +655,7 @@
     <string name="username_password_warning">请输入正确的NetID和密码</string>
     <string name="apk_next_step_notice">下载完成，点击安装更新</string>
     <string name="title_activity_markdown">Markdown</string>
+    <string name="dashboard_time">第%1$s学期\n%2$s\n%3$s</string>
+    <string name="dashboard_week">第%1$s周\n%2$s</string>
+    <string name="dashboard_day">%1$s/%2$s</string>
 </resources>
