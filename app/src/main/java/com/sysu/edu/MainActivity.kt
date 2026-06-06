@@ -17,6 +17,8 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Message
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat

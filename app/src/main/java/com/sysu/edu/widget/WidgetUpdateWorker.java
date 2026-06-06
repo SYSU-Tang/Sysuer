@@ -17,6 +17,8 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.model.JwxtModel;
 
+import java.util.Objects;
+
 import io.reactivex.rxjava3.core.Single;
 import okhttp3.Request;
 
@@ -36,7 +38,8 @@ public class WidgetUpdateWorker extends Worker {
             RxDataStore<Preferences> dataStore = DataStoreManager.getInstance(getApplicationContext());
             dataStore.updateDataAsync(prefsIn -> {
                 MutablePreferences mutablePreferences = prefsIn.toMutablePreferences();
-                mutablePreferences.set(DataStoreManager.TODAY_CLASS, networkData.toJSONString());
+                if (networkData != null)
+                    mutablePreferences.set(DataStoreManager.TODAY_CLASS, networkData.toJSONString());
                 return Single.just(mutablePreferences);
             });
             String widgetName = getInputData().getString("component");
@@ -65,13 +68,17 @@ public class WidgetUpdateWorker extends Worker {
     
     private JSONArray getData() {
         getTerm();
-        CommonUtil.Tuple2<Integer, JSONObject> r1 = model.execute(model.getNextRequest());
-        String term = r1.getSecond().getJSONObject("data").getString("acadYearSemester");
+        CommonUtil.Tuple2<Integer, JSONObject> r1 = model.execute(Objects.requireNonNull(model.getNextRequest()));
+        String term = null;
+        if (r1 != null) {
+            term = r1.getSecond().getJSONObject("data").getString("acadYearSemester");
+        }
         getWeek(term);
         CommonUtil.Tuple2<Integer, JSONObject> r2 = model.execute(model.getNextRequest());
         getTodayCourses(term);
         CommonUtil.Tuple2<Integer, JSONObject> r3 = model.execute(model.getNextRequest());
-        return JSONArray.of(r1.getSecond(), r2.getSecond(), r3.getSecond());
+        return (r1 != null && r2 != null && r3 != null)
+                ? JSONArray.of(r1.getSecond(), r2.getSecond(), r3.getSecond()) : null;
     }
     
     void getTerm() {
@@ -92,7 +99,7 @@ public class WidgetUpdateWorker extends Worker {
         }
         
         @Override
-        protected void retry(CommonUtil.Tuple2<Request, Integer> request) {
+        protected void retry(@NonNull CommonUtil.Tuple2<Request, Integer> request) {
             execute(request);
         }
     }

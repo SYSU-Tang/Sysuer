@@ -25,6 +25,8 @@ import com.sysu.edu.databinding.DialogAccountBinding;
 
 import java.util.concurrent.ExecutionException;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class ContextUtil {
@@ -170,6 +172,8 @@ public class ContextUtil {
     public void loginForUrl(String service, String host, Runnable afterLogin) {
         disposable.add(accountManager.getActiveAccountAsync(host).subscribe(
                 activeAccount -> {
+                    System.out.println("activeAccount " + activeAccount);
+                    System.out.println(service);
                     if (!isEmpty(activeAccount.first) && !isEmpty(activeAccount.second) && !isEmpty(service)) {
                         try {
                             loginManager.setOnLoginListener(new LoginManager.LoginListener() {
@@ -216,7 +220,7 @@ public class ContextUtil {
                                 toast(R.string.username_password_warning);
                             else
                                 disposable.add(accountManager.setAccountAsync(host, username.toString(), password.toString(), true)
-                                        .subscribe(() -> loginForUrl(url, host, afterLogin)));
+                                        .subscribe( () -> loginForUrl(url, host, afterLogin)));
                         })
                         .setNegativeButton(android.R.string.cancel, null)
                         .create();
