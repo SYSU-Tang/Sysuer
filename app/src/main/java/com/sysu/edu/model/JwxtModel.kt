@@ -1,194 +1,185 @@
-package com.sysu.edu.model;
+package com.sysu.edu.model
 
-import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import androidx.lifecycle.MutableLiveData
+import com.alibaba.fastjson2.JSONObject
+import com.sysu.edu.R
+import com.sysu.edu.api.AuthorizationManager
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.ContextUtil
+import com.sysu.edu.api.CookieManager
+import com.sysu.edu.api.HttpManager
+import com.sysu.edu.api.TargetUrl
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Request
+import okhttp3.Response
+import java.io.IOException
+import java.util.ArrayDeque
+import java.util.function.Consumer
 
-import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
+open class JwxtModel(context: Context) {
+    val contextUtil: ContextUtil = ContextUtil(context)
+    val authorizationManager: AuthorizationManager = AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn")
+    private val http = HttpManager(Handler(Looper.getMainLooper())).apply {
+        setCookieManager(CookieManager(context))
+        setReferrer("https://jwxt.sysu.edu.cn/")
+    }
+    private val queue = ArrayDeque<CommonUtil.Tuple2<Request?, Int?>?>()
+    val message: MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>> = MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>>()
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
+    private val afterLoginRequest = mutableSetOf<CommonUtil.Tuple2<Request?, Int?>?>()
 
-import com.alibaba.fastjson2.JSONObject;
-import com.sysu.edu.R;
-import com.sysu.edu.api.AuthorizationManager;
-import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.ContextUtil;
-import com.sysu.edu.api.CookieManager;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.TargetUrl;
+    fun add(request: Request?, what: Int) {
+        queue.add(CommonUtil.Tuple2<Request?, Int?>(request, what))
+    }
 
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.HashSet;
+    fun add(path: String?, what: Int) {
+        add(path, null, null, what)
+    }
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
+    fun add(path: String?, data: String?, what: Int) {
+        add(path, data, null, what)
+    }
 
-public class JwxtModel {
-    
-    private final ContextUtil contextUtil;
-    private final AuthorizationManager authorizationManager = new AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn");
-    private final HttpManager http = new HttpManager(new Handler(Looper.getMainLooper()));
-    private final ArrayDeque<CommonUtil.Tuple2<Request, Integer>> queue = new ArrayDeque<>();
-    private final MutableLiveData<CommonUtil.Tuple2<Integer, JSONObject>> message = new MutableLiveData<>();
-    private final HashSet<CommonUtil.Tuple2<Request, Integer>> afterLoginRequest = new HashSet<>();
-    
-    public JwxtModel(Context context) {
-        contextUtil = new ContextUtil(context);
-        http.setCookieManager(new CookieManager(context));
-        http.setReferrer("https://jwxt.sysu.edu.cn/");
+    fun add(path: String?, data: String? = null, type: String? = null, what: Int) {
+        queue.add(
+            CommonUtil.Tuple2<Request?, Int?>(
+                http.generateRequest(
+                    "https://${authorizationManager.baseUrl}/${path}",
+                    data,
+                    type
+                ).build(), what
+            )
+        )
     }
-    
-    public void add(Request request, int what) {
-        queue.add(new CommonUtil.Tuple2<>(request, what));
+
+    fun next() {
+        val request = this.nextRequest
+        if (request != null) request(request)
     }
-    
-    public void add(String path, int what) {
-        add(path, null, null, what);
+
+    val nextRequest: CommonUtil.Tuple2<Request?, Int?>?
+        get() = queue.poll()
+
+    fun nextAll() {
+        while (!queue.isEmpty()) next()
     }
-    
-    public void add(String path, String data, int what) {
-        add(path, data, null, what);
+
+    fun addAndNext(path: String?, data: String? = null, type: String? = null, code: Int) {
+        add(path, data, type, code)
+        next()
     }
-    
-    public void add(String path, String data, String type, int what) {
-        queue.add(new CommonUtil.Tuple2<>(http.generateRequest("https://" + authorizationManager.getBaseUrl() + "/" + path, data, type).build(), what));
+
+    fun addAndNext(path: String?, data: String?, code: Int) {
+        addAndNext(path, data, null, code)
     }
-    
-    public void next() {
-        CommonUtil.Tuple2<Request, Integer> request = getNextRequest();
-        if (request != null) request(request);
+
+    fun addAndNext(path: String?, code: Int) {
+        addAndNext(path, null, code)
     }
-    
-    public CommonUtil.Tuple2<Request, Integer> getNextRequest() {
-        return queue.poll();
-    }
-    
-    public void nextAll() {
-        while (!queue.isEmpty()) next();
-    }
-    
-    public void addAndNext(String path, String data, String type, int code) {
-        add(path, data, type, code);
-        next();
-    }
-    
-    public void addAndNext(String path, String data, int code) {
-        addAndNext(path, data, null, code);
-    }
-    
-    public void addAndNext(String path, int code) {
-        addAndNext(path, null, code);
-    }
-    
-    public void login(CommonUtil.Tuple2<Request, Integer> request) {
-        boolean empty = afterLoginRequest.isEmpty();
-        afterLoginRequest.add(request);
-        if (empty)
-            contextUtil.login(authorizationManager.isAccessible() ? TargetUrl.JWXT : TargetUrl.JWXT_WEBVPN, () -> afterLoginRequest.forEach(this::retry));
-    }
-    
-    public AuthorizationManager getAuthorizationManager() {
-        return authorizationManager;
-    }
-    
-    public void request(CommonUtil.Tuple2<Request, Integer> request) {
-        http.getClient().newCall(request.getFirst()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                handleFailure();
-            }
-            
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                handleResponse(request, response);
-            }
-        });
-    }
-    
-    private void handleFailure() {
-        http.getHandler().post(() -> contextUtil.toast(R.string.no_net_connected));
-    }
-    
-    public CommonUtil.Tuple2<Integer, JSONObject> execute(CommonUtil.Tuple2<Request, Integer> request) {
-        try {
-            Response response = http.getClient().newCall(request.getFirst()).execute();
-            return handleResponse(request, response);
-        } catch (IOException e) {
-            handleFailure();
-            return null;
+
+    fun login(request: CommonUtil.Tuple2<Request?, Int?>?) {
+        val empty = afterLoginRequest.isEmpty()
+        afterLoginRequest.add(request)
+        if (empty) contextUtil.login(
+            if (authorizationManager.isAccessible()) TargetUrl.JWXT else TargetUrl.JWXT_WEBVPN
+        ) {
+            afterLoginRequest.forEach(
+                Consumer { request: CommonUtil.Tuple2<Request?, Int?>? -> this.retry(request!!) })
         }
     }
-    
-    public CommonUtil.Tuple2<Integer, JSONObject> execute(Request request, Integer code) {
+
+    fun request(request: CommonUtil.Tuple2<Request?, Int?>) {
+        http.client.newCall(request.getFirst()!!).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                handleFailure()
+            }
+
+            @Throws(IOException::class)
+            override fun onResponse(call: Call, response: Response) {
+                handleResponse(request, response)
+            }
+        })
+    }
+
+    private fun handleFailure() {
+        http.handler.post { contextUtil.toast(R.string.no_net_connected) }
+    }
+
+    fun execute(request: CommonUtil.Tuple2<Request?, Int?>): CommonUtil.Tuple2<Int, JSONObject>? {
         try {
-            Response response = http.getClient().newCall(request).execute();
-            handleResponse(new CommonUtil.Tuple2<>(request, code), response);
-            return message.getValue();
-        } catch (IOException e) {
-            handleFailure();
-            return null;
+            return request.getFirst()?.let{
+                return handleResponse(request,http.client.newCall(it).execute())
+            }
+        } catch (_: IOException) {
+            handleFailure()
+        }
+        return null
+    }
+
+    fun execute(request: Request, code: Int?): CommonUtil.Tuple2<Int, JSONObject>? {
+        try {
+            handleResponse(CommonUtil.Tuple2<Request?, Int?>(request, code),
+                http.client.newCall(request).execute())
+            return message.getValue()
+        } catch (_: IOException) {
+            handleFailure()
+            return null
         }
     }
-    
-    private CommonUtil.Tuple2<Integer, JSONObject> handleResponse(CommonUtil.Tuple2<Request, Integer> request, Response response) throws IOException {
-        String type = response.header("Content-Type");
-        String content = response.body().string();
-        System.out.println(request.getFirst().url() + " " + content);
-        CommonUtil.Tuple2<Integer, JSONObject> result = null;
-        if (type != null && type.contains("application/json")) {
-            JSONObject contentJSON = JSONObject.parse(content);
-            Integer code = contentJSON.getInteger("code");
-            if (code.equals(53000007))
-                login(request);
+
+    private fun handleResponse(
+        request: CommonUtil.Tuple2<Request?, Int?>,
+        response: Response
+    ): CommonUtil.Tuple2<Int, JSONObject>? {
+        val content = response.body.string()
+        var result: CommonUtil.Tuple2<Int, JSONObject>? = null
+        response.header("Content-Type")?.takeIf { it.contains("application/json")}?.let {
+            val contentJSON = JSONObject.parse(content)
+            val code = contentJSON.getInteger("code")
+            if (code == 53000007) login(request)
             else {
-                if (!code.equals(200))
-                    http.getHandler().post(() -> contextUtil.toast(toStringOrDefault(contentJSON.getString("message"))));
-                result = new CommonUtil.Tuple2<>(request.getSecond(), contentJSON);
-                message.postValue(result);
-                afterLoginRequest.remove(request);
+                if (code != 200) http.getHandler().post {
+                    contextUtil.toast(CommonUtil.toStringOrDefault(contentJSON.getString("message")))
+                }
+                result = CommonUtil.Tuple2<Int, JSONObject>(request.getSecond(), contentJSON)
+                message.postValue(result)
+                afterLoginRequest.remove(request)
             }
-        } else {
-            if (!authorizationManager.isAuthorized(content))
-                login(request);
-            else if (!authorizationManager.isAccessible(content)) retry(request);
+        } ?: run{
+            if (!authorizationManager.isAuthorized(content)) login(request)
+            else if (!authorizationManager.isAccessible(content)) retry(request)
         }
-        return result;
+        return result
     }
-    
-    protected void retry(CommonUtil.Tuple2<Request, Integer> request) {
-        request.setFirst(updateRequest(request.getFirst()));
-        request(request);
+
+    protected open fun retry(request: CommonUtil.Tuple2<Request?, Int?>) {
+        request.setFirst(updateRequest(request.getFirst()!!))
+        request(request)
     }
-    
-    public void request(Request request, int code) {
-        request(new CommonUtil.Tuple2<>(request, code));
+
+    fun request(request: Request?, code: Int) {
+        request(CommonUtil.Tuple2<Request?, Int?>(request, code))
     }
-    
-    public ContextUtil getContextUtil() {
-        return contextUtil;
+
+    val host: String?
+        get() = authorizationManager.baseUrl
+
+    val cookieManager: CookieManager
+        get() = http.getCookieManager()
+
+    fun updateRequest(request: Request): Request {
+        return request.newBuilder()
+            .url(request.url.newBuilder().host(authorizationManager.baseUrl).build()).header(
+                "Cookie",
+                cookieManager.toSimpleString(authorizationManager.baseUrl)
+            ).build()
     }
-    
-    public MutableLiveData<CommonUtil.Tuple2<Integer, JSONObject>> getMessage() {
-        return message;
-    }
-    
-    public String getHost() {
-        return authorizationManager.getBaseUrl();
-    }
-    
-    public CookieManager getCookieManager() {
-        return http.getCookieManager();
-    }
-    
-    public Request updateRequest(Request request) {
-        return request.newBuilder().url(request.url().newBuilder().host(authorizationManager.getBaseUrl()).build()).header("Cookie", http.getCookieManager().toSimpleString(authorizationManager.getBaseUrl())).build();
-    }
-    
-    public void dispose(){
-        contextUtil.dispose();
+
+    fun dispose() {
+        contextUtil.dispose()
     }
 }
