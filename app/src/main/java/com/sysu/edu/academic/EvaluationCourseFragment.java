@@ -1,33 +1,32 @@
 package com.sysu.edu.academic;
 
+import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
+
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.viewbinding.ViewBinding;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ItemEvaluationBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
+import com.sysu.edu.model.PjxtModel;
+import com.sysu.edu.view.AdapterListener;
 import com.sysu.edu.view.RecyclerAdapter;
 
 import java.util.Locale;
@@ -35,117 +34,88 @@ import java.util.Map;
 import java.util.Objects;
 
 public class EvaluationCourseFragment extends Fragment {
-    HttpManager http;
+    
     int page = 1;
     EvaluationViewModel vm;
-
+    PjxtModel model;
+    StaggeredGridLayoutManager sgm;
+    Params params;
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        page = 1;
         RecyclerViewScrollBinding binding = RecyclerViewScrollBinding.inflate(inflater, container, false);
-        Params params = new Params(this);
+        params = new Params(this);
+        model = new PjxtModel(requireContext());
         vm = new ViewModelProvider(this).get(EvaluationViewModel.class);
-        StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
+        sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
         binding.getRoot().setLayoutManager(sgm);
+        String[] keys = new String[]{"kcmc", "skjsmc", "kcdlmc", "kkyxmc", "bjmc", "kcdm", "xnxqmc", "lsjgzt"};
+        String[] values = new String[]{"%s", "教师：%s", "课程类型：%s", "开课院系：%s", "教学班号：%s", "课程代码：%s", "学期：%s", "评价状态：%s"};
+        String[] arguments = new String[]{"rwid", "wjid", "sxz", "pjrdm", "bpdm", "kcdm", "rwh", "lsjgzt", "bpmc"};
         CourseEvaluationAdapter adp = new CourseEvaluationAdapter();
-        binding.getRoot().setAdapter(adp);
-        adp.setKeys(new String[]{"kcmc", "skjsmc", "kcdlmc", "kkyxmc", "bjmc", "kcdm", "xnxqmc", "lsjgzt"});
-        adp.setValues(new String[]{"%s", "教师：%s", "课程类型：%s", "开课院系：%s", "教学班号：%s", "课程代码：%s", "学期：%s", "评价状态：%s"});
-        adp.setParams(new String[]{"rwid", "wjid", "sxz", "pjrdm", "bpdm", "kcdm", "rwh", "lsjgzt", "bpmc"});
-        adp.setNavigation(R.id.from_course_to_evaluation);
-        String type = requireArguments().getString("firstwjid");
-        String rwid = requireArguments().getString("rwid");
-        String account = requireArguments().getString("pjrdm");
-        params.setCallback(() -> {
-            page = 1;
-            adp.clear();
-            getEvaluation(type, rwid, account);
-        });
-        http = new HttpManager(new Handler(Looper.getMainLooper()) {
+        adp.setListener(new AdapterListener() {
             @Override
-            public void handleMessage(@NonNull Message msg) {
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                    params.gotoLogin(vm.authorizationManager.isAccessible()? TargetUrl.PJXT:TargetUrl.PJXT_WEBVPN);
-                } else if(msg.getData().getBoolean("isJSON")){
-                    if (msg.what == 1) {
-                        JSONObject response = JSON.parseObject((String) msg.obj);
-                        if (response.get("code").equals("200")) {
-                            JSONObject result = response.getJSONObject("result");
-                            result.getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
-                            if (result.getInteger("total") / 20.0 > page)
-                                getEvaluation(type, rwid, account);
-                        } else {
-                            params.gotoLogin(vm.authorizationManager.isAccessible() ? TargetUrl.PJXT : TargetUrl.PJXT_WEBVPN);
-                        }
-                    }
-                }else{
-                    vm.authorizationManager.isAccessible((String)msg.obj);
-                    if (type != null && rwid != null && account != null)
-                        getEvaluation(type, rwid, account);
-                }
+            public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
+                ItemEvaluationBinding bind = ItemEvaluationBinding.bind(holder.itemView);
+                Bundle args = new Bundle();
+                Context context = holder.itemView.getContext();
+                JSONObject item = adp.get(position);
+                for (String arg : arguments)
+                    args.putString(arg, item.getString(arg));
+                Drawable drawable = AppCompatResources.getDrawable(context, Objects.equals(item.getString("lsjgzt"), "2") ? R.drawable.submit : R.drawable.window);
+                if (drawable != null) drawable.setBounds(0, 0, 72, 72);
+                bind.title.setCompoundDrawables(drawable, null, null, null);
+                bind.title.setCompoundDrawablePadding(36);
+                View.OnClickListener action = _ -> Navigation.findNavController(binding.getRoot()).navigate(R.id.from_course_to_evaluation, args);
+                bind.open.setOnClickListener(action);
+                holder.itemView.setOnClickListener(action);
+                bind.title.setText(String.format(values[0], toStringOrDefault(item.getString(keys[0]))));
+                StringBuilder val = new StringBuilder();
+                for (int i = 1; i < keys.length; i++)
+                    val.append(String.format(values[i], Objects.equals(keys[i], "lsjgzt") ? Map.of("0", "待评价", "2", "已评价", "3", "已保存").getOrDefault(item.getString(keys[i]), "未知") : toStringOrDefault(item.getString(keys[i]), ""))).append("\n");
+                bind.startTime.setText(val.toString().trim());
+            }
+            
+            @Override
+            public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
             }
         });
-        http.setParams(params);
-        if (type != null && rwid != null && account != null)
-            getEvaluation(type, rwid, account);
+        binding.getRoot().setAdapter(adp);
+        String type = requireArguments().getString("firstwjid");
+        String rwid = requireArguments().getString("rwid");
+        String pjrdm = requireArguments().getString("pjrdm");
+        model.getMessage().observe(requireActivity(), message -> {
+            JSONObject response = message.getSecond();
+            if (response.get("code").equals("200")) if (message.getFirst() == 1) {
+                JSONObject result = response.getJSONObject("result");
+                result.getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
+                if (result.getInteger("total") / 20.0 > page)
+                    getEvaluation(type, rwid, pjrdm);
+            }
+        });
+        if (type != null && rwid != null && pjrdm != null)
+            getEvaluation(type, rwid, pjrdm);
         return binding.getRoot();
     }
-
-    public void getEvaluation(String wjid, String rwid, String account) {
-        http.getRequest(vm.authorizationManager.getBaseUrl() + String.format(Locale.getDefault(), "personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", account, wjid, rwid, page++), 1);
+    
+    public void getEvaluation(String wjid, String rwid, String pjrdm) {
+        model.addAndNext(String.format(Locale.getDefault(), "personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", pjrdm, wjid, rwid, page++), 1);
     }
-
-
+    
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        sgm.setSpanCount(params.getColumn());
+    }
+    
     static class CourseEvaluationAdapter extends RecyclerAdapter<JSONObject> {
-        String[] keys;
-        String[] values;
-        String[] params;
-        int nav;
-
-        public CourseEvaluationAdapter() {
-        }
-
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {};
-        }
-
-        public void setKeys(String[] keys) {
-            this.keys = keys;
-        }
-
-        public void setValues(String[] values) {
-            this.values = values;
-        }
-
-        public void setParams(String[] params) {
-            this.params = params;
-        }
-
-        public void setNavigation(int nav) {
-            this.nav = nav;
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            ItemEvaluationBinding binding = ItemEvaluationBinding.bind(holder.itemView);
-            Bundle args = new Bundle();
-            Context context = holder.itemView.getContext();
-            for (String param : params) args.putString(param, data.get(position).getString(param));
-            Drawable drawable = AppCompatResources.getDrawable(context, Objects.equals(data.get(position).getString("lsjgzt"), "2") ? R.drawable.submit : R.drawable.window);
-            if (drawable != null) drawable.setBounds(0, 0, 72, 72);
-            binding.title.setCompoundDrawables(drawable, null, null, null);
-            binding.title.setCompoundDrawablePadding(36);
-            binding.open.setOnClickListener(_ -> ((NavHostFragment) Objects.requireNonNull(((AppCompatActivity) context).getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController().navigate(nav, args));
-            holder.itemView.setOnClickListener(_ -> {
-            });
-            binding.title.setText(String.format(values[0], data.get(position).getString(keys[0]) == null ? "" : data.get(position).getString(keys[0])));
-            StringBuilder val = new StringBuilder();
-            for (int i = 1; i < keys.length; i++)
-                val.append(String.format(values[i], Objects.equals(keys[i], "lsjgzt") ? Map.of("0", "待评价", "2", "已评价", "3", "已保存").getOrDefault(data.get(position).getString(keys[i]), "未知") : data.get(position).getString(keys[i]) == null ? "" : data.get(position).getString(keys[i]))).append("\n");
-            binding.startTime.setText(val.toString().trim());
+            return new RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
+            };
         }
     }
 }

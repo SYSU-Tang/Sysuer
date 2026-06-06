@@ -2,38 +2,32 @@ package com.sysu.edu.academic;
 
 import static android.text.TextUtils.isEmpty;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.slider.LabelFormatter;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.DialogEditTextBinding;
 import com.sysu.edu.databinding.FragmentQuestionnaireBinding;
 import com.sysu.edu.databinding.ItemOptionBinding;
+import com.sysu.edu.model.PjxtModel;
 import com.sysu.edu.todo.TitleAdapter;
 import com.sysu.edu.view.RecyclerViewHolder;
 
@@ -44,107 +38,92 @@ import java.util.Objects;
 public class EvaluationQuestionnaireFragment extends Fragment {
     
     final JSONObject answers = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}");
-    Params params;
-    HttpManager http;
-    EvaluationViewModel vm;
+    PjxtModel model;
     
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FragmentQuestionnaireBinding binding = FragmentQuestionnaireBinding.inflate(inflater, container, false);
-        params = new Params(this);
-        vm = new ViewModelProvider(this).get(EvaluationViewModel.class);
-        //StaggeredGridLayoutManager sgm = new StaggeredGridLayoutManager(params.getColumn(), 1);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        model = new PjxtModel(requireContext());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+        binding.recyclerView.setLayoutManager(layoutManager);
         ConcatAdapter adp = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
         binding.recyclerView.setAdapter(adp);
-        params.setCallback(() -> getEvaluation(requireArguments().getString("rwid"),
-                requireArguments().getString("wjid"),
-                requireArguments().getString("sxz"),
-                requireArguments().getString("pjrdm"),
-                requireArguments().getString("bpdm"),
-                requireArguments().getString("kcdm"),
-                requireArguments().getString("rwh"),
-                Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
-                requireArguments().getString("bpmc")));
-        //{"rwid", "wjid","sxz","pjrdm","bpdm","kcdm","rwh"};
-        http = new HttpManager(new Handler(Looper.getMainLooper()) {
+        binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void handleMessage(@NonNull Message msg) {
-                if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
-                    params.gotoLogin(vm.authorizationManager.isAccessible() ? TargetUrl.PJXT : TargetUrl.PJXT_WEBVPN);
-                } else if (msg.getData().getBoolean("isJSON")) {
-                    JSONObject data = JSON.parseObject((String) msg.obj);
-                    
-                    switch (msg.what) {
-                        case 1 -> {
-                            if (data.get("code").equals("200")) {
-                                data.getJSONObject("result").getJSONArray("assessedObjList").forEach(l ->
-                                        ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->
-                                        {
-                                            JSONObject pjjglist = ((JSONObject) list).clone();
-                                            pjjglist.remove("dtjgList");
-                                            pjjglist.put("pjxxlist", new JSONArray());
-                                            answers.getJSONArray("pjjglist").add(pjjglist);
-                                            String bprmc = ((JSONObject) list).getString("bprmc");
-                                            // 被评名称
-                                            if (!isEmpty(bprmc))
-                                                adp.addAdapter(new TitleAdapter(bprmc, 1));
-                                            ((JSONObject) list).getJSONArray("dtjgList").forEach(e ->
-                                            {
-                                                JSONObject pjxxlist = JSONObject.parse(String.format(
-                                                        "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
-                                                        ((JSONObject) list).getString("wjid"),
-                                                        ((JSONObject) list).getString("wjssrwid"),
-                                                        ((JSONObject) e).getString("tmid")
-                                                ));
-                                                JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
-                                                pjxxlist.put("xxdalist", da);
-                                                pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
-                                                
-                                                adp.addAdapter(new TitleAdapter(((JSONObject) e).getString("tgmc"))); // 题目标题
-                                                
-                                                switch (((JSONObject) e).getString("tmlx")) {
-                                                    case "1" -> {
-                                                        OptionAdapter optionAdapter = new OptionAdapter(requireContext());
-                                                        ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
-                                                        optionAdapter.setAnswer(da);
-                                                        adp.addAdapter(optionAdapter);
-                                                    }
-                                                    case "6" -> {
-                                                        BlanketAdapter blanketAdapter = new BlanketAdapter(requireContext());
-                                                        blanketAdapter.setAnswer(da);
-                                                        adp.addAdapter(blanketAdapter);
-                                                    }
-                                                    case "5" -> {
-                                                        RankAdapter rankAdapter = new RankAdapter(requireContext());
-                                                        rankAdapter.setAnswer(da);
-                                                        adp.addAdapter(rankAdapter);
-                                                    }
-                                                }
-                                            });
-                                        }));
-                            } else
-                                params.gotoLogin(vm.authorizationManager.isAccessible() ? TargetUrl.PJXT : TargetUrl.PJXT_WEBVPN);
-                        }
-                        case 2 -> {
-                            if (data.get("code").equals("200"))
-                                params.toast(R.string.save_successfully);
-                            else
-                                params.toast(String.format("%s：%s", getString(R.string.save_fail), data.getString("msg")));
-                        }
-                        case 3 -> {
-                            if (data.get("code").equals("200"))
-                                params.toast(R.string.submit_successfully);
-                            else
-                                params.toast(String.format("%s：%s", getString(R.string.submit_fail), data.getString("msg")));
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (layoutManager.findFirstVisibleItemPosition() <= 0)
+                    binding.title.setVisibility(View.GONE);
+                else {
+                    binding.title.setVisibility(View.VISIBLE);
+                    for (int pos = layoutManager.findFirstVisibleItemPosition() - 1; pos >= 0; pos--) {
+                        Pair<RecyclerView.Adapter<? extends RecyclerView.ViewHolder>, Integer> adapterPair = adp.getWrappedAdapterAndPosition(pos);
+                        if (adapterPair.first instanceof TitleAdapter wrappedAdapter && wrappedAdapter.getHeader() == 1) {
+                            String targetTitle = wrappedAdapter.getTitle();
+                            binding.title.setText(targetTitle);
+                            break;
                         }
                     }
-                } else vm.authorizationManager.isAccessible((String) msg.obj);
+                }
+                super.onScrolled(recyclerView, dx, dy);
             }
         });
-        http.setParams(params);
+        requireActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        model.getMessage().observe(requireActivity(), message -> {
+            JSONObject data = message.getSecond();
+            if (data.get("code").equals("200")) {
+                switch (message.getFirst()) {
+                    case 1 ->
+                            data.getJSONObject("result").getJSONArray("assessedObjList").forEach(l ->
+                                    ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->
+                                    {
+                                        JSONObject list1 = (JSONObject) list;
+                                        JSONObject pjjglist = list1.clone();
+                                        pjjglist.remove("dtjgList");
+                                        pjjglist.put("pjxxlist", new JSONArray());
+                                        answers.getJSONArray("pjjglist").add(pjjglist);
+                                        String bprmc = list1.getString("bprmc");// 被评人名称
+                                        if (!isEmpty(bprmc))
+                                            adp.addAdapter(new TitleAdapter(bprmc, 1));
+                                        list1.getJSONArray("dtjgList").forEach(e ->
+                                        {
+                                            JSONObject pjxxlist = JSONObject.parse(String.format(
+                                                    "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
+                                                    list1.getString("wjid"),
+                                                    list1.getString("wjssrwid"),
+                                                    ((JSONObject) e).getString("tmid")
+                                            ));
+                                            JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
+                                            pjxxlist.put("xxdalist", da);
+                                            pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
+                                            
+                                            adp.addAdapter(new TitleAdapter(((JSONObject) e).getString("tgmc"))); // 题目标题
+                                            
+                                            switch (((JSONObject) e).getString("tmlx")) {
+                                                case "1" -> {
+                                                    OptionAdapter optionAdapter = new OptionAdapter();
+                                                    ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
+                                                    optionAdapter.setAnswer(da);
+                                                    adp.addAdapter(optionAdapter);
+                                                }
+                                                case "6" -> {
+                                                    BlanketAdapter blanketAdapter = new BlanketAdapter();
+                                                    blanketAdapter.setAnswer(da);
+                                                    adp.addAdapter(blanketAdapter);
+                                                }
+                                                case "5" -> {
+                                                    RankAdapter rankAdapter = new RankAdapter();
+                                                    rankAdapter.setAnswer(da);
+                                                    adp.addAdapter(rankAdapter);
+                                                }
+                                            }
+                                        });
+                                    }));
+                    case 2 -> model.getContextUtil().toast(R.string.save_successfully);
+                    case 3 -> model.getContextUtil().toast(R.string.submit_successfully);
+                }
+            }
+        });
         getEvaluation(requireArguments().getString("rwid"),
                 requireArguments().getString("wjid"),
                 requireArguments().getString("sxz"),
@@ -164,13 +143,12 @@ public class EvaluationQuestionnaireFragment extends Fragment {
         binding.auto.setOnClickListener(_ -> adp.getAdapters().forEach(adapter -> {
             if (adapter instanceof OptionAdapter) ((OptionAdapter) adapter).setLastOption();
             else if (adapter instanceof RankAdapter) ((RankAdapter) adapter).setLastRank();
-            else if (adapter instanceof BlanketAdapter) ((BlanketAdapter) adapter).setLastContent();
         }));
         return binding.getRoot();
     }
     
     public void getEvaluation(String rwid, String wjid, String sxz, String pjrdm, String bpdm, String kcdm, String rwh, String pjzt, String bpmc) {
-        http.getRequest(String.format(vm.authorizationManager.getBaseUrl() + "evaluationPattern/getQuestionnaireTopic?rwid=%s&wjid=%s&sxz=%s&pjrdm=%s&bpdm=%s&kcdm=%s&rwh=%s&pjzt=%s&bpmc=%s", rwid, wjid, sxz, pjrdm, bpdm, kcdm, rwh, pjzt, bpmc), 1);
+        model.addAndNext(String.format("evaluationPattern/getQuestionnaireTopic?rwid=%s&wjid=%s&sxz=%s&pjrdm=%s&bpdm=%s&kcdm=%s&rwh=%s&pjzt=%s&bpmc=%s", rwid, wjid, sxz, pjrdm, bpdm, kcdm, rwh, pjzt, bpmc), 1);
     }
     
     public void saveEvaluation() {
@@ -183,20 +161,15 @@ public class EvaluationQuestionnaireFragment extends Fragment {
     
     public void postEvaluation(String mode, int what) {
         answers.put("pjzt", mode);
-        http.postRequest(vm.authorizationManager.getBaseUrl() + "evaluationPattern/submitSaveEvaluation", answers.toString(), what);
+        model.addAndNext("evaluationPattern/submitSaveEvaluation", answers.toString(), what);
     }
 }
 
 class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final Context context;
     final ArrayList<JSONObject> data = new ArrayList<>();
     int selected = -1;
     String option;
     JSONArray answer;
-    
-    public OptionAdapter(Context context) {
-        this.context = context;
-    }
     
     public void setOption(int pos) {
         if (selected != pos) {
@@ -205,6 +178,8 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             notifyItemChanged(old);
             notifyItemChanged(selected);
             answer.set(0, data.get(pos).getString("tmxxid"));
+        } else {
+            clearAnswer();
         }
     }
     
@@ -234,7 +209,7 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(ItemOptionBinding.inflate(LayoutInflater.from(context), parent, false).getRoot()) {
+        return new RecyclerView.ViewHolder(ItemOptionBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
         };
     }
     
@@ -255,21 +230,12 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public int getItemCount() {
         return data.size();
     }
-    
-    @Override
-    public int getItemViewType(int position) {
-        return 6;
-    }
 }
 
 class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final Context context;
+    
     int rank;
     JSONArray answer;
-    
-    public RankAdapter(Context context) {
-        this.context = context;
-    }
     
     public void setAnswer(JSONArray answers) {
         answer = answers;
@@ -292,12 +258,13 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Slider p = new Slider(context);
+        Slider p = new Slider(parent.getContext());
         p.setValue(rank == 0 ? 100 : rank);
         p.setStepSize(1);
         p.setValueFrom(0);
         p.setValueTo(100);
-        p.setLabelBehavior(LabelFormatter.LABEL_FLOATING);
+        p.setLabelBehavior(LabelFormatter.LABEL_VISIBLE);
+        p.setThumbHeight(96);
         p.addOnChangeListener((_, value, _) -> answer.set(0, String.valueOf((int) value)));
         return new RecyclerView.ViewHolder(p) {
         };
@@ -305,7 +272,6 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-    
     }
     
     @Override
@@ -315,13 +281,8 @@ class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 }
 
 class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditTextBinding>> {
-    final Context context;
     String content;
     JSONArray answer;
-    
-    public BlanketAdapter(Context context) {
-        this.context = context;
-    }
     
     public void setAnswer(JSONArray answers) {
         this.answer = answers;
@@ -329,18 +290,10 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditT
         notifyItemChanged(0);
     }
     
-    public void setLastContent() {
-        /*content = null;
-        if (!answer.isEmpty()) {
-            answer.remove(0);
-            notifyItemChanged(0);
-        }*/
-    }
-    
     @NonNull
     @Override
     public RecyclerViewHolder<DialogEditTextBinding> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerViewHolder<>(DialogEditTextBinding.inflate(LayoutInflater.from(context), parent, false)) {
+        return new RecyclerViewHolder<>(DialogEditTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false)) {
         };
     }
     
@@ -386,10 +339,5 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditT
     @Override
     public int getItemCount() {
         return 1;
-    }
-    
-    @Override
-    public int getItemViewType(int position) {
-        return 5;
     }
 }
