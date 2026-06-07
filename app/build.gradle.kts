@@ -11,13 +11,13 @@ plugins {
 android {
     namespace = "com.sysu.edu"
     compileSdk = 37
-
+    
     defaultConfig {
         applicationId = "com.sysu.edu"
         minSdk = 26
         targetSdk = 37
         versionCode = 1936
-        versionName = "1.1.6beta1"
+        versionName = "1.1.6beta3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
