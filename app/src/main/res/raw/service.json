@@ -295,14 +295,16 @@
         "name": "评教",
         "activity": ".academic.EvaluationActivity",
         "url": "https://pjxt.sysu.edu.cn/authentication/main",
-        "description": "教学评价系统，学生对课程教学质量、教师授课效果进行评价反馈"
+        "description": "教学评价系统，学生对课程教学质量、教师授课效果进行评价反馈",
+        "doc": "/docs/user/service/evaluation"
       },
       {
         "id": 702,
         "name": "选课",
         "activity": ".academic.CourseSelectionActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE",
-        "description": "在线选课系统，学生自主选择课程、调整课表、查看选课结果"
+        "description": "在线选课系统，学生自主选择课程、调整课表、查看选课结果",
+        "doc": "/docs/user/service/course_selection"
       },
       {
         "id": 703,
@@ -521,7 +523,8 @@
         "name": "校园网",
         "url": "https://netpay.sysu.edu.cn/",
         "description": "校园网管理系统"
-      },{
+      },
+      {
         "id": 910,
         "name": "接诉即办",
         "activity": ".life.ComplaintActivity",

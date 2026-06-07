@@ -1,412 +1,414 @@
-package com.sysu.edu.home;
+package com.sysu.edu.home
 
-import static android.text.TextUtils.isEmpty;
-import static com.sysu.edu.api.CommonUtil.trim;
+import android.app.PendingIntent
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.WindowManager
+import android.widget.TextView
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
+import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
+import com.alibaba.fastjson2.JSONReader
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.sysu.edu.MainActivity
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.ContextUtil
+import com.sysu.edu.api.Params
+import com.sysu.edu.browser.BrowserActivity
+import com.sysu.edu.databinding.DialogServiceActionBinding
+import com.sysu.edu.databinding.DialogServiceOrderBinding
+import com.sysu.edu.databinding.FragmentServiceBinding
+import com.sysu.edu.databinding.ItemActionChipBinding
+import com.sysu.edu.databinding.ItemServiceBoxBinding
+import com.sysu.edu.view.AdapterListener
+import com.sysu.edu.view.RecyclerAdapter
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.MarkwonSpansFactory
+import io.noties.markwon.MarkwonVisitor
+import io.noties.markwon.MarkwonVisitor.BlockHandler
+import io.noties.markwon.RenderProps
+import io.noties.markwon.SpanFactory
+import io.noties.markwon.core.CoreProps
+import io.noties.markwon.core.spans.LastLineSpacingSpan
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.PublishSubject
+import org.commonmark.node.Heading
+import org.commonmark.node.Node
+import java.lang.Boolean
+import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
+import kotlin.CharSequence
+import kotlin.Int
+import kotlin.String
+import kotlin.apply
+import kotlin.let
+import kotlin.run
+import kotlin.takeIf
 
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.text.style.ForegroundColorSpan;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.content.pm.ShortcutInfoCompat;
-import androidx.core.content.pm.ShortcutManagerCompat;
-import androidx.core.graphics.drawable.IconCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewbinding.ViewBinding;
-
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.sysu.edu.MainActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.api.ContextUtil;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.browser.BrowserActivity;
-import com.sysu.edu.databinding.DialogServiceActionBinding;
-import com.sysu.edu.databinding.DialogServiceOrderBinding;
-import com.sysu.edu.databinding.FragmentServiceBinding;
-import com.sysu.edu.databinding.ItemActionChipBinding;
-import com.sysu.edu.databinding.ItemServiceBoxBinding;
-import com.sysu.edu.view.AdapterListener;
-import com.sysu.edu.view.RecyclerAdapter;
-
-import org.commonmark.node.Heading;
-import org.commonmark.node.Node;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import io.noties.markwon.AbstractMarkwonPlugin;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonSpansFactory;
-import io.noties.markwon.MarkwonVisitor;
-import io.noties.markwon.core.CoreProps;
-import io.noties.markwon.core.spans.LastLineSpacingSpan;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-import io.reactivex.rxjava3.subjects.PublishSubject;
-
-public class ServiceFragment extends Fragment {
-    
-    final ArrayList<JSONObject> list = new ArrayList<>();
-    FragmentServiceBinding binding;
-    Params params;
-    BottomSheetDialog actionDialog;
-    HomeCollectionHelper db;
-    DialogServiceActionBinding actionBinding;
-    BottomSheetDialog orderDialog;
-    CollectionAdapter collectionAdapter;
-    ItemServiceBoxBinding collectionBinding;
-    HomeViewModel viewModel;
-    private final CompositeDisposable disposables = new CompositeDisposable();
-    
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (binding == null) {
-            binding = FragmentServiceBinding.inflate(inflater);
-            params = new Params(this);
-            viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
-            initAction(inflater);
-            initOrder(inflater);
-            initSearch();
-            JSONReader reader = JSONReader.of(getResources().openRawResource(R.raw.service), StandardCharsets.UTF_8);
-            JSONArray array = reader.readJSONArray();
-            reader.close();
-            db = new HomeCollectionHelper(requireContext());
-            addCollection(inflater);
-            IntStream.range(0, array.size()).forEach(i -> {
-                JSONObject serviceGroup = array.getJSONObject(i);
-                binding.serviceContainer.addView(initBoxWithHashMap(inflater, serviceGroup.getString("name"), serviceGroup.getJSONArray("items")));
-            });
-        }
-        return binding.getRoot();
-    }
-    
-    void initAction(@NonNull LayoutInflater inflater) {
-        actionDialog = new BottomSheetDialog(requireContext());
-        actionBinding = DialogServiceActionBinding.inflate(inflater);
-        actionBinding.order.setOnClickListener(_ -> orderDialog.show());
-        actionDialog.setContentView(actionBinding.getRoot());
-    }
-    
-    void initOrder(@NonNull LayoutInflater inflater) {
-        Context context = requireContext();
-        orderDialog = new BottomSheetDialog(context);
-        DialogServiceOrderBinding orderBinding = DialogServiceOrderBinding.inflate(inflater);
-        orderBinding.recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        collectionAdapter = new CollectionAdapter();
-        orderBinding.recyclerView.setAdapter(collectionAdapter);
-        orderBinding.confirm.setOnClickListener(_ -> {
-            updateService();
-            updateServiceCollection();
-            orderDialog.dismiss();
-        });
-        orderDialog.setContentView(orderBinding.getRoot());
-        new ItemTouchHelper(new ItemTouchHelper.Callback() {
-            @Override
-            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
-            }
-            
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder source, @NonNull RecyclerView.ViewHolder target) {
-                collectionAdapter.swap(source.getBindingAdapterPosition(), target.getBindingAdapterPosition());
-                return true;
-            }
-            
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            
-            }
-        }).attachToRecyclerView(orderBinding.recyclerView);
-        binding.searchView.setupWithSearchBar(binding.searchBar);
-    }
-    
-    void addCollection(@NonNull LayoutInflater inflater) {
-        JSONArray collection = getCollection();
-        ViewGroup container = initBoxWithHashMap(inflater, getString(R.string.collect), collection);
-        collectionBinding = ItemServiceBoxBinding.bind(container);
-        if (collection.isEmpty()) container.setVisibility(View.GONE);
-        container.getChildAt(0).setOnClickListener(_ -> orderDialog.show());
-        binding.serviceContainer.addView(container, 0);
-    }
-    
-    void updateServiceCollection() {
-        JSONArray collection = getCollection();
-        if (collection.isEmpty()) collectionBinding.getRoot().setVisibility(View.GONE);
-        else {
-            collectionBinding.getRoot().setVisibility(View.VISIBLE);
-            collectionBinding.serviceBoxItems.removeAllViews();
-            addItems(getLayoutInflater(), collection, collectionBinding);
-        }
-    }
-    
-    @NonNull
-    private JSONArray getCollection() {
-        Cursor cursor = db.getWritableDatabase().query("service_collection", null, null, null, null, null, "position ASC");
-        JSONArray collection = new JSONArray();
-        collectionAdapter.clear();
-        while (cursor.moveToNext()) {
-            JSONObject serviceJson = JSONObject.parse(cursor.getString(cursor.getColumnIndexOrThrow("serviceJson")));
-            collection.add(serviceJson);
-            collectionAdapter.add(serviceJson);
-        }
-        cursor.close();
-        return collection;
-    }
-    
-    ViewGroup initBoxWithHashMap(LayoutInflater inflater, String box_title, JSONArray items) {
-        ItemServiceBoxBinding binding = ItemServiceBoxBinding.inflate(inflater);
-        binding.serviceBoxTitle.setText(box_title);
-        addItems(inflater, items, binding);
-        return binding.getRoot();
-    }
-    
-    void addItems(LayoutInflater inflater, JSONArray items, ItemServiceBoxBinding binding) {
-        IntStream.range(0, items.size()).forEach(index -> {
-            JSONObject item = items.getJSONObject(index);
-            list.add(item);
-            int itemId = item.getIntValue("id");
-            ItemActionChipBinding chip = ItemActionChipBinding.inflate(inflater, binding.serviceBoxItems, false);
-            View.OnClickListener action = viewModel.actionMap.get(itemId);
-            String url = item.getString("url");
-            String activity = item.getString("activity");
-            chip.getRoot().setOnClickListener(action != null ? action : isEmpty(activity) ? isEmpty(url) ? _ -> params.toast(R.string.undeveloped) : v -> startActivity(new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle()) : v -> {
-                try {
-                    Intent intent = new Intent(requireContext(), Class.forName(requireContext().getPackageName() + activity));
-                    if (intent.resolveActivity(requireContext().getPackageManager()) != null)
-                        startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle());
-                } catch (ClassNotFoundException _) {
-                    params.toast("未找到对应活动");
-                }
-            });
-            chip.getRoot().setOnLongClickListener(_ -> showActionDialog(item));
-            chip.getRoot().setText(item.getString("name"));
-            binding.serviceBoxItems.addView(chip.getRoot());
-        });
-    }
-    
-    boolean showActionDialog(JSONObject item) {
-        int itemId = item.getIntValue("id");
-        MutableLiveData<Boolean> isServiceCollected = new MutableLiveData<>(db.isServiceCollected(itemId));
-        MutableLiveData<Boolean> isShortcutCollected = new MutableLiveData<>(db.isDashboardShortcutCollected(itemId));
-        actionBinding.collect.setText(Boolean.TRUE.equals(isServiceCollected.getValue()) ? R.string.cancel_collect : R.string.collect);
-        actionBinding.addToDashboard.setText(Boolean.TRUE.equals(isShortcutCollected.getValue()) ? R.string.cancel_add_shortcut : R.string.add_to_dashboard);
-        actionBinding.addToLauncher.setOnClickListener(_ -> {
-            if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
-                Intent intent = new Intent(requireContext(), MainActivity.class);
-                if (item.containsKey("activity")) try {
-                    intent = new Intent(requireContext(), Class.forName(requireContext().getPackageName() + item.getString("activity")));
-                } catch (ClassNotFoundException _) {
-                }
-                else if (item.containsKey("url"))
-                    intent = new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(trim(item.getString("url"))));
-                ShortcutInfoCompat pinShortcutInfo = new ShortcutInfoCompat.Builder(requireContext(), String.valueOf(itemId))
-                        .setShortLabel(item.getString("name"))
-                        .setLongLabel(item.getString("name"))
-                        .setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
-                        .setIntent(intent.setAction(Intent.ACTION_VIEW))
-                        .build();
-                ShortcutManagerCompat.requestPinShortcut(requireContext(), pinShortcutInfo, PendingIntent.getBroadcast(requireContext(), /* request code */ 0, ShortcutManagerCompat.createShortcutResultIntent(requireContext(), pinShortcutInfo), /* flags */ PendingIntent.FLAG_IMMUTABLE).getIntentSender());
-            } else params.toast(R.string.fail_to_add_shortcut);
-        });
-        actionBinding.collect.setOnClickListener(_ -> {
-            boolean isServiceCollect = Boolean.TRUE.equals(isServiceCollected.getValue());
-            if (isServiceCollect) {
-                db.deleteService(itemId);
-                params.toast(R.string.cancel_collect_success);
-            } else {
-                db.addService(itemId, item.toJSONString(), collectionAdapter.getItemCount());
-                params.toast(R.string.collect_success);
-            }
-            updateServiceCollection();
-            actionBinding.collect.setText(isServiceCollect ? R.string.collect : R.string.cancel_collect);
-            isServiceCollected.setValue(!isServiceCollect);
-        });
-        actionBinding.addToDashboard.setOnClickListener(_ -> {
-            boolean isShortcutCollect = Boolean.TRUE.equals(isShortcutCollected.getValue());
-            if (isShortcutCollect) {
-                db.deleteDashboardShortcut(itemId);
-                params.toast(R.string.cancel_add_shortcut_success);
-            } else {
-                db.addDashboardShortcut(itemId, item.toJSONString(), null);
-                params.toast(R.string.add_shortcut_success);
-            }
-            viewModel.updateDashboardShortcut.setValue(true);
-            actionBinding.addToDashboard.setText(isShortcutCollect ? R.string.add_to_dashboard : R.string.cancel_add_shortcut);
-            isShortcutCollected.setValue(!isShortcutCollect);
-        });
-        actionBinding.feedback.setOnClickListener(_ -> startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(String.format("https://github.com/%s/%s/issues/new?title=反馈：服务->%s&labels=bug,crash-report", "SYSU-Tang", "Sysuer", item.getString("name")))).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)));
-        actionBinding.openAsUrl.setOnClickListener(_ -> {
-            String url = item.getString("url");
-            if (!isEmpty(url))
-                startActivity(new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(url)));
-        });
-        ContextUtil contextUtil = new ContextUtil(requireContext());
-        Markwon.builder(requireContext()).usePlugin(new AbstractMarkwonPlugin() {
-            @Override
-            public void configureSpansFactory(@NonNull MarkwonSpansFactory.Builder builder) {
-                super.configureSpansFactory(builder);
-                builder.appendFactory(Heading.class, (_, configuration) -> {
-                    if (CoreProps.HEADING_LEVEL.require(configuration) == 3)
-                        return new ForegroundColorSpan(contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary));
-                    return null;
-                });
-                builder.appendFactory(Heading.class, (_, _) -> new LastLineSpacingSpan(24));
-            }
-            
-            @Override
-            public void configureVisitor(@NonNull MarkwonVisitor.Builder builder) {
-                super.configureVisitor(builder);
-                builder.blockHandler(new MarkwonVisitor.BlockHandler() {
-                    @Override
-                    public void blockStart(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
-                    }
-                    
-                    @Override
-                    public void blockEnd(@NonNull MarkwonVisitor visitor, @NonNull Node node) {
-                        if (visitor.hasNext(node))
-                            visitor.ensureNewLine();
-                    }
-                });
-            }
-        }).build().setMarkdown(actionBinding.description, String.format("### %s\n%s\n\n%s", item.getString("name"), item.getString("description"), trim(item.getString("url"))));
-        actionDialog.show();
-        return true;
-    }
-    
-    void updateService() {
-        IntStream.range(0, collectionAdapter.getItemCount()).forEach(i -> {
-            collectionAdapter.get(i);
-            db.updateServicePosition(collectionAdapter.get(i).getInteger("id"), i);
-        });
-    }
-    
-    @Override
-    public void onDestroy() {
-        disposables.clear();
-        super.onDestroy();
-    }
-    
-    void initSearch() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.searchView, (v, insets) -> {
-            int left = insets.getInsets(WindowInsetsCompat.Type.systemBars()).left;
-            int right = insets.getInsets(WindowInsetsCompat.Type.systemBars()).right;
-            int bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-            v.setPadding(left, 0, right, bottom);
-            return WindowInsetsCompat.CONSUMED;
-        });
-        binding.searchBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                binding.searchBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.searchBar.getLayoutParams();
-                binding.serviceContainer.setPadding(0, binding.searchBar.getHeight() + params.topMargin + params.bottomMargin, 0, 0);
-            }
-        });
-        binding.sugList.setLayoutManager(new LinearLayoutManager(requireContext()));
-        CollectionAdapter adapter = new CollectionAdapter();
-        adapter.setListener(new AdapterListener() {
-            @Override
-            public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adp, RecyclerView.ViewHolder holder, int position) {
-                JSONObject item = adapter.get(position);
-                View.OnClickListener action = viewModel.actionMap.get(item.getInteger("id"));
-                String url = item.getString("url");
-                String activity = item.getString("activity");
-                holder.itemView.setOnClickListener(action!=null? action : v -> {
-                    if (!isEmpty(activity)) try {
-                        Intent intent = new Intent(requireContext(), Class.forName(requireContext().getPackageName() + activity));
-                        if (intent.resolveActivity(requireContext().getPackageManager()) != null)
-                            startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle());
-                    } catch (ClassNotFoundException _) {
-                        params.toast(R.string.activity_not_found);
-                    }
-                    else if (!isEmpty(url))
-                        startActivity(new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v, "miniapp").toBundle());
-                    else params.toast(R.string.undeveloped);
-                });
-            }
-            
-            @Override
-            public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
-            
-            }
-        });
-        binding.sugList.setAdapter(adapter);
-        PublishSubject<Object> objectPublishSubject = PublishSubject.create();
-        disposables.add(objectPublishSubject
-                .debounce(300, TimeUnit.MILLISECONDS)
-                .distinctUntilChanged()
-                .observeOn(Schedulers.computation())
-                .map(query -> {
-                    if (query == null || ((String) query).trim().isEmpty()) return list;
-                    String q = ((String) query).trim();
-                    return list.stream().filter(item -> (item.getString("name").contains(q) || item.getString("description").contains(q))).sorted(
-                            (a, b) -> {
-                                boolean aNameMatch = a.getString("name").contains(q);
-                                boolean bNameMatch = b.getString("name").contains(q);
-                                return (aNameMatch && !bNameMatch) ? -1 : (!aNameMatch && bNameMatch) ? 1 : 0;
-                            }
-                    ).collect(Collectors.toList());
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(adapter::set, _ -> {
-                }));
-        binding.searchView.getEditText().addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                objectPublishSubject.onNext(s.toString());
-            }
-            
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-    }
-    
-    static class CollectionAdapter extends RecyclerAdapter<JSONObject> {
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sug, parent, false)) {
-            };
-        }
-        
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            ((TextView) holder.itemView).setText(get(position).getString("name"));
-            super.onBindViewHolder(holder, position);
-        }
-    }
-    
+class ServiceFragment : Fragment() {
+	val list = mutableListOf<JSONObject?>()
+	private val disposables = CompositeDisposable()
+	var binding: FragmentServiceBinding? = null
+	var params: Params? = null
+	var actionDialog: BottomSheetDialog? = null
+	var db: HomeCollectionHelper? = null
+	var actionBinding: DialogServiceActionBinding? = null
+	var orderDialog: BottomSheetDialog? = null
+	var collectionAdapter: CollectionAdapter? = null
+	var collectionBinding: ItemServiceBoxBinding? = null
+	var viewModel: HomeViewModel? = null
+	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+		if (binding == null) {
+			binding = FragmentServiceBinding.inflate(inflater)
+			params = Params(this)
+			requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+			viewModel =
+				ViewModelProvider(requireActivity())[HomeViewModel::class.java]
+			initAction(inflater)
+			initOrder(inflater)
+			initSearch()
+			val reader =
+				JSONReader.of(resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
+			val array = reader.readJSONArray()
+			reader.close()
+			db = HomeCollectionHelper(requireContext())
+			addCollection(inflater)
+			array.indices.forEach { i: Int ->
+				val serviceGroup = array.getJSONObject(i)
+				binding!!.serviceContainer.addView(initBoxWithHashMap(inflater, serviceGroup.getString("name"), serviceGroup.getJSONArray("items")).root)
+			}
+		}
+		return binding!!.root
+	}
+	
+	fun initAction(inflater: LayoutInflater) {
+		actionDialog = BottomSheetDialog(requireContext())
+		actionBinding = DialogServiceActionBinding.inflate(inflater).apply {
+			order.setOnClickListener { _: View? -> orderDialog!!.show() }
+			actionDialog?.setContentView(root)
+		}
+	}
+	
+	fun initOrder(inflater: LayoutInflater) {
+		orderDialog = context?.let { BottomSheetDialog(it) }
+		collectionAdapter = CollectionAdapter()
+		DialogServiceOrderBinding.inflate(inflater).apply {
+			recyclerView.setLayoutManager(LinearLayoutManager(context))
+			recyclerView.setAdapter(collectionAdapter)
+			confirm.setOnClickListener { _: View? ->
+				updateService()
+				updateServiceCollection()
+				orderDialog!!.dismiss()
+			}
+			orderDialog!!.setContentView(root)
+			ItemTouchHelper(object : ItemTouchHelper.Callback() {
+				override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+					return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
+				}
+				
+				override fun onMove(recyclerView: RecyclerView, source: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): kotlin.Boolean {
+					collectionAdapter!!.swap(source.getBindingAdapterPosition(), target.getBindingAdapterPosition())
+					return true
+				}
+				
+				override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+				}
+			}).attachToRecyclerView(recyclerView)
+		}
+	}
+	
+	fun addCollection(inflater: LayoutInflater) {
+		val collection = this.collection
+		initBoxWithHashMap(inflater, getString(R.string.collect), collection).apply {
+			collectionBinding = this
+			serviceBoxTitle.setOnClickListener { _: View? -> orderDialog!!.show() }
+			binding!!.serviceContainer.addView(root, 0)
+			if (collection.isEmpty()) root.visibility = View.GONE
+		}
+	}
+	
+	fun updateServiceCollection() {
+		val collection = this.collection
+		collectionBinding!!.apply {
+			if (collection.isEmpty()) root.visibility = View.GONE
+			else {
+				root.visibility = View.VISIBLE
+				serviceBoxItems.removeAllViews()
+				addItems(getLayoutInflater(), collection, this)
+			}
+		}
+	}
+	
+	private val collection: JSONArray
+		get() {
+			val cursor =
+				db!!.writableDatabase.query("service_collection", null, null, null, null, null, "position ASC")
+			val collection = JSONArray()
+			collectionAdapter!!.clear()
+			while (cursor.moveToNext())
+				JSONObject.parse(cursor.getString(cursor.getColumnIndexOrThrow("serviceJson")))
+					.apply {
+						collection.add(this)
+						collectionAdapter!!.add(this)
+					}
+			cursor.close()
+			return collection
+		}
+	
+	fun initBoxWithHashMap(inflater: LayoutInflater, boxTitle: String?, items: JSONArray): ItemServiceBoxBinding {
+		val binding = ItemServiceBoxBinding.inflate(inflater)
+		binding.serviceBoxTitle.text = boxTitle
+		addItems(inflater, items, binding)
+		return binding
+	}
+	
+	fun addItems(inflater: LayoutInflater, items: JSONArray, binding: ItemServiceBoxBinding) {
+		items.indices.forEach { index: Int ->
+			items.getJSONObject(index).let { item ->
+				list.add(item)
+				ItemActionChipBinding.inflate(inflater, binding.serviceBoxItems, false).root
+					.apply {
+						setOnClickListener(viewModel!!.actionMap[item.getIntValue("id")] ?: View.OnClickListener {
+							getItemIntent(item, null)?.let { it1 ->
+								startActivity(it1, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), it, "miniapp").toBundle())
+							} ?: params!!.toast(R.string.activity_not_found)
+						})
+						setOnLongClickListener { _: View? -> showActionDialog(item) }
+						text = item.getString("name")
+						binding.serviceBoxItems.addView(this)
+					}
+			}
+		}
+	}
+	
+	fun showActionDialog(item: JSONObject): kotlin.Boolean {
+		val itemId = item.getIntValue("id")
+		val isServiceCollected = MutableLiveData(db!!.isServiceCollected(itemId))
+		val isShortcutCollected =
+			MutableLiveData(db!!.isDashboardShortcutCollected(itemId))
+		actionBinding?.run {
+			collect.setText(if (Boolean.TRUE == isServiceCollected.value) R.string.cancel_collect else R.string.collect)
+			addToDashboard.setText(if (Boolean.TRUE == isShortcutCollected.value) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
+			addToLauncher.setOnClickListener { _: View? ->
+				if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
+					getItemIntent(item, Intent(requireContext(), MainActivity::class.java))?.let {
+						ShortcutInfoCompat.Builder(requireContext(), itemId.toString())
+							.setShortLabel(item.getString("name"))
+							.setLongLabel(item.getString("name"))
+							.setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
+							.setIntent(it.setAction(Intent.ACTION_VIEW))
+					}?.build()?.let {
+						ShortcutManagerCompat.requestPinShortcut(requireContext(), it, PendingIntent.getBroadcast(requireContext(),  /* request code */0, ShortcutManagerCompat.createShortcutResultIntent(requireContext(), it),  /* flags */PendingIntent.FLAG_IMMUTABLE).intentSender)
+					}
+				} else params!!.toast(R.string.fail_to_add_shortcut)
+			}
+			collect.setOnClickListener { _: View? ->
+				val isServiceCollect = Boolean.TRUE == isServiceCollected.value
+				if (isServiceCollect) {
+					db!!.deleteService(itemId)
+					params!!.toast(R.string.cancel_collect_success)
+				} else {
+					db!!.addService(itemId, item.toJSONString(), collectionAdapter!!.itemCount)
+					params!!.toast(R.string.collect_success)
+				}
+				updateServiceCollection()
+				collect.setText(if (isServiceCollect) R.string.collect else R.string.cancel_collect)
+				isServiceCollected.value = !isServiceCollect
+			}
+			addToDashboard.setOnClickListener { _: View? ->
+				val isShortcutCollect = true == isShortcutCollected.value
+				if (isShortcutCollect) {
+					db!!.deleteDashboardShortcut(itemId)
+					params!!.toast(R.string.cancel_add_shortcut_success)
+				} else {
+					db!!.addDashboardShortcut(itemId, item.toJSONString(), null)
+					params!!.toast(R.string.add_shortcut_success)
+				}
+				viewModel!!.updateDashboardShortcut.value = true
+				addToDashboard.setText(if (isShortcutCollect) R.string.add_to_dashboard else R.string.cancel_add_shortcut)
+				isShortcutCollected.value = !isShortcutCollect
+			}
+			feedback.setOnClickListener { _: View? -> startActivity(Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${item.getString("name")}&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+			openAsUrl.setOnClickListener { _: View? ->
+				val url = item.getString("url")
+				if (!TextUtils.isEmpty(url)) startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(url)))
+			}
+			guide.setOnClickListener { _: View? ->
+				if (item.containsKey("doc")) startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.getString("doc"))}").toUri()))
+				else params!!.toast(R.string.undeveloped_warning)
+			}
+			val contextUtil = ContextUtil(requireContext())
+			Markwon.builder(requireContext()).usePlugin(object : AbstractMarkwonPlugin() {
+				override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+					super.configureSpansFactory(builder)
+					builder.appendFactory(Heading::class.java, SpanFactory { _: MarkwonConfiguration?, configuration: RenderProps? ->
+						if (CoreProps.HEADING_LEVEL.require(configuration!!) == 3) return@SpanFactory ForegroundColorSpan(contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary))
+						null
+					})
+					builder.appendFactory(Heading::class.java) { _: MarkwonConfiguration?, _: RenderProps? -> LastLineSpacingSpan(24) }
+				}
+				
+				override fun configureVisitor(builder: MarkwonVisitor.Builder) {
+					super.configureVisitor(builder)
+					builder.blockHandler(object : BlockHandler {
+						override fun blockStart(visitor: MarkwonVisitor, node: Node) {
+						}
+						
+						override fun blockEnd(visitor: MarkwonVisitor, node: Node) {
+							if (visitor.hasNext(node)) visitor.ensureNewLine()
+						}
+					})
+				}
+			}).build().setMarkdown(description, "### ${item.getString("name")}\n${item.getString("description")}\n\n`${CommonUtil.trim(item.getString("url"))}`")
+		}
+		actionDialog!!.show()
+		return true
+	}
+	
+	fun updateService() {
+		(0 until collectionAdapter!!.itemCount).forEach { i: Int ->
+			db!!.updateServicePosition(collectionAdapter!!.get(i).getInteger("id"), i)
+		}
+	}
+	
+	override fun onDestroy() {
+		disposables.clear()
+		super.onDestroy()
+	}
+	
+	fun initSearch() {
+		binding?.run {
+			ViewCompat.setOnApplyWindowInsetsListener(searchView) { v: View?, insets: WindowInsetsCompat? ->
+				val left = insets!!.getInsets(WindowInsetsCompat.Type.systemBars()).left
+				val right = insets.getInsets(WindowInsetsCompat.Type.systemBars()).right
+				val bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+				v!!.setPadding(left, 0, right, bottom)
+				WindowInsetsCompat.CONSUMED
+			}
+			searchBar.getViewTreeObserver().addOnGlobalLayoutListener(object :
+																		  OnGlobalLayoutListener {
+				override fun onGlobalLayout() {
+					searchBar.getViewTreeObserver().removeOnGlobalLayoutListener(this)
+					val layoutParams = searchBar.layoutParams as MarginLayoutParams
+					serviceContainer.setPadding(0, searchBar.height + layoutParams.topMargin + layoutParams.bottomMargin, 0, 0)
+				}
+			})
+			sugList.setLayoutManager(LinearLayoutManager(requireContext()))
+			val adapter = CollectionAdapter()
+			adapter.setListener(object : AdapterListener {
+				override fun onBind(adp: RecyclerView.Adapter<RecyclerView.ViewHolder?>?, holder: RecyclerView.ViewHolder, position: Int) {
+					val item = adapter.get(position)
+					val action = viewModel!!.actionMap[item.getInteger("id")]
+					val url = item.getString("url")
+					val activity = item.getString("activity")
+					holder.itemView.setOnClickListener(action
+														   ?: View.OnClickListener { v: View? ->
+															   if (!TextUtils.isEmpty(activity)) try {
+																   val intent =
+																	   Intent(requireContext(), Class.forName(requireContext().packageName + activity))
+																   if (intent.resolveActivity(requireContext().packageManager) != null) startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp").toBundle())
+															   } catch (_: ClassNotFoundException) {
+																   params!!.toast(R.string.activity_not_found)
+															   }
+															   else if (!TextUtils.isEmpty(url)) startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp").toBundle())
+															   else params!!.toast(R.string.undeveloped)
+														   })
+				}
+				
+				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?, binding: ViewBinding?) {
+				}
+			})
+			sugList.setAdapter(adapter)
+			val objectPublishSubject = PublishSubject.create<String>()
+			disposables.add(objectPublishSubject
+								.debounce(300, TimeUnit.MILLISECONDS)
+								.distinctUntilChanged()
+								.observeOn(Schedulers.computation())
+								.map { query ->
+									if (query.trim { it <= ' ' }.isEmpty()) return@map list
+									val q = query.trim { it <= ' ' }
+									list.filter { item ->
+										item?.getString("name")?.contains(q) == true || item?.getString("description")?.contains(q) == true
+									}.sortedWith { a: JSONObject?, b: JSONObject? ->
+										val aNameMatch =
+											a!!.getString("name").contains(q)
+										val bNameMatch =
+											b!!.getString("name").contains(q)
+										if (aNameMatch && !bNameMatch) -1 else if (!aNameMatch && bNameMatch) 1 else 0
+									} as MutableList<JSONObject?>
+//									list.stream().filter { item -> item?.getString("name")?.contains(q) == true || item?.getString("description")?.contains(q) == true }
+//										.sorted { a: JSONObject?, b: JSONObject? ->
+//											val aNameMatch =
+//												a!!.getString("name").contains(q)
+//											val bNameMatch =
+//												b!!.getString("name").contains(q)
+//											if (aNameMatch && !bNameMatch) -1 else if (!aNameMatch && bNameMatch) 1 else 0
+//										} .collect(Collectors.toList())
+								}
+								.observeOn(AndroidSchedulers.mainThread())
+								.subscribe { d: MutableList<JSONObject?>? -> adapter.set(d) })
+			searchView.editText.addTextChangedListener(object : TextWatcher {
+				override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+				}
+				
+				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+					objectPublishSubject.onNext(s.toString())
+				}
+				
+				override fun afterTextChanged(s: Editable?) {
+				}
+			})
+			searchView.setupWithSearchBar(searchBar)
+		}
+	}
+	
+	fun ServiceFragment.getItemIntent(item: JSONObject, intent: Intent?): Intent? =
+		if (item.containsKey("activity"))
+			Intent(requireContext(), Class.forName(requireContext().packageName + item.getString("activity")))
+				.takeIf { it.resolveActivity(requireContext().packageManager) != null }
+				?: if (item.containsKey("url"))
+					Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(CommonUtil.trim(item.getString("url"))))
+				else intent
+		else intent
+	
+	class CollectionAdapter : RecyclerAdapter<JSONObject>() {
+		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+			return object :
+				RecyclerView.ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_sug, parent, false)) {
+			}
+		}
+		
+		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+			(holder.itemView as TextView).text = get(position).getString("name")
+			super.onBindViewHolder(holder, position)
+		}
+	}
 }

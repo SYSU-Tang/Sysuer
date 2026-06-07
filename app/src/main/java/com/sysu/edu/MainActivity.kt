@@ -3,7 +3,6 @@ package com.sysu.edu
 import android.Manifest
 import android.app.DownloadManager
 import android.appwidget.AppWidgetManager
-import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -11,17 +10,17 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Message
 import android.view.View
-import android.view.ViewGroup.MarginLayoutParams
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -51,7 +50,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.schedulers.Schedulers
-import java.util.Objects
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 	var downloadId: Long = 0
@@ -195,13 +194,51 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	fun showUpdateDialog(response: JSONObject) {
-		if (this.packageManager.getPackageInfo(this.packageName, 0).run {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) longVersionCode else versionCode
-			}.toLong() < response.getInteger("version"))
+		if (PackageInfoCompat.getLongVersionCode(this.packageManager.getPackageInfo(this.packageName, 0))
+			< response.getInteger("version")) {
 			path =
 				"${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${
 					getString(R.string.app_name)
 				}${response.getString("versionName")}.apk"
+			val updateDialog = MaterialAlertDialogBuilder(this)
+				.setMessage("")
+				.setTitle(R.string.higher_version_detected)
+				.setPositiveButton(
+					R.string.download_in_system
+				) { _: DialogInterface?, _: Int ->
+					downloadId = (getSystemService(
+						DOWNLOAD_SERVICE
+					) as DownloadManager)
+						.enqueue(
+							DownloadManager.Request(Uri.parse(response.getString("link")))
+								.setDestinationUri(Uri.fromFile(File(path)))
+								.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+						)
+				}
+				.setNegativeButton(
+					R.string.download_in_browser
+				) { _: DialogInterface?, _: Int ->
+					startActivity(
+						Intent(Intent.ACTION_VIEW, Uri.parse(response.getString("link")))
+					)
+				}
+				.setCancelable(!response.getBoolean("enforce"))
+				.setNeutralButton(
+					R.string.download_in_app
+				) { _: DialogInterface?, _: Int ->
+					com.sysu.edu.api.DownloadManager.downloadFile(
+						this,
+						response.getString("link"),
+						path
+					)
+				}
+				.create()
+			updateDialog.show()
+			updateDialog.findViewById<TextView>(android.R.id.message)?.let {
+				Markwon.builder(this).build().setMarkdown(it, response.getString("description")
+				)
+			}
+		}
 	}
 	
 	override fun onRequestPermissionsResult(
@@ -227,27 +264,18 @@ class MainActivity : AppCompatActivity() {
 		super.onDestroy()
 	}
 	
-	fun initActionMap(actionMap: MutableMap<in Int?, View.OnClickListener?>) {         // 资讯门户
+	fun initActionMap(actionMap: MutableMap<in Int?, View.OnClickListener?>) {
 		actionMap[302] = View.OnClickListener { _: View? ->
-			try {
-				val launchIntentForPackage =
-					packageManager.getLaunchIntentForPackage("com.comingx.zanao")
-				if (launchIntentForPackage != null) startActivity(
-					Objects.requireNonNull(launchIntentForPackage).setFlags(
-						Intent.FLAG_ACTIVITY_NEW_TASK
-					)
-				)
-			} catch (_: ActivityNotFoundException) {
-				params?.toast(R.string.no_app)
-			}
+			packageManager.getLaunchIntentForPackage("com.comingx.zanao")?.let {
+				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+			} ?: params?.toast(R.string.no_app)
 		} // 校园集市
-		// 官方服务 (id: 6xx)
-		actionMap[601] = View.OnClickListener { _: View? ->     // 二维码
+		actionMap[601] = View.OnClickListener { _: View? ->
 			PreferenceManager.getDefaultSharedPreferences(this).getString("qrcode", "")
 				?.let {//new LaunchMiniProgram(this).launchMiniProgram("gh_85575b9f544e");
 					startActivity(Intent(Intent.ACTION_VIEW, it.toUri()))
 				} ?: params?.toast(R.string.no_app)
-		}
+		}// 二维码
 		actionMap[602] = View.OnClickListener { _: View? ->
 			packageManager.getLaunchIntentForPackage("com.tencent.wework")?.let {
 				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

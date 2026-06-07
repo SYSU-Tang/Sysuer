@@ -33,6 +33,11 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/sug_list"
+            app:fastScrollEnabled="true"
+            app:fastScrollHorizontalThumbDrawable="@drawable/thumb"
+            app:fastScrollHorizontalTrackDrawable="@drawable/track"
+            app:fastScrollVerticalThumbDrawable="@drawable/thumb"
+            app:fastScrollVerticalTrackDrawable="@drawable/track"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </com.google.android.material.search.SearchView>

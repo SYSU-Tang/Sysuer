@@ -40,11 +40,11 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/horizontal_margin"
         android:layout_marginVertical="@dimen/vertical_margin"
-        app:constraint_referenced_ids="collect,feedback,delete,order,add_to_dashboard,add_to_launcher,open_as_url"
+        app:constraint_referenced_ids="guide,collect,feedback,delete,order,add_to_dashboard,add_to_launcher,open_as_url"
         app:flow_horizontalBias="0"
         app:flow_horizontalGap="@dimen/horizontal_gap"
-        app:flow_verticalGap="@dimen/vertical_gap"
         app:flow_horizontalStyle="packed"
+        app:flow_verticalGap="@dimen/vertical_gap"
         app:flow_wrapMode="chain2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -83,6 +83,14 @@
         android:layout_height="wrap_content"
         android:text="@string/service_order"
         app:icon="@drawable/menu" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/guide"
+        style="@style/Widget.Material3Expressive.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/guide"
+        app:icon="@drawable/book" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/add_to_dashboard"
