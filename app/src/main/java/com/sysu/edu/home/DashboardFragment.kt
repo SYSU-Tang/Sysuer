@@ -450,7 +450,7 @@ class DashboardFragment : Fragment() {
 					add(1, Menu.NONE, 0, R.string.select)
 						.setOnMenuItemClickListener { _: MenuItem? ->
 							val builder = MaterialDatePicker.Builder.datePicker()
-							builder.setSelection(	todoDate.value?.takeIf { it.isNotEmpty() }?.let {
+							builder.setSelection(todoDate.value?.takeIf { it.isNotEmpty() }?.let {
 								calendar.toMillis(it) + 86400000
 							} ?: System.currentTimeMillis())
 							val datePicker = builder.build()
@@ -755,8 +755,8 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 		holder.itemView.setOnClickListener { v: View? -> onClick!!.accept(item, v) }
 		Map.of(binding.courseTitle, "courseName", binding.location, "teachingPlace", binding.time,
 		       "time", binding.teacher, "teacherName", binding.course, "course")
-			.forEach { (v: TextView?, s: String?) ->
-				v!!.text = item.getString(s)
+			.forEach { (v: TextView, s: String) ->
+				v.text = item.getString(s)
 				v.setOnLongClickListener { _: View? ->
 					params.copy(s, item.getString(s))
 					params.toast(R.string.copy_successfully)
@@ -813,12 +813,12 @@ internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
 			arrayOf<TextView>(binding.examName, binding.examLocation, binding.examDate,
 			                  binding.examDuration, binding.examTime, binding.examClassTime,
 			                  binding.examMode, binding.examStage)
-		for (i in 0..7) {
-			materialTextButtons[i].text = text[i]
-			materialTextButtons[i].setOnClickListener { _: View? ->
-				params.copy("exam", text[i])
-				params.toast(R.string.copy_successfully)
-			}
+		(0..7).forEach { i ->
+				materialTextButtons[i].text = text[i]
+				materialTextButtons[i].setOnClickListener { _: View? ->
+					params.copy("exam", text[i])
+					params.toast(R.string.copy_successfully)
+				}
 		}
 		super.onBindViewHolder(holder, position)
 	}

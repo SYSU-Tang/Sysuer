@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class FileManager {
-
-
-
+    
     public static String readAssets(Context context, String file) {
         StringBuilder jsJSON = new StringBuilder();
         try {

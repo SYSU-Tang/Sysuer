@@ -97,14 +97,12 @@ class ServiceFragment : Fragment() {
 			initSearch()
 			val reader =
 				JSONReader.of(resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
-			val array = reader.readJSONArray()
-			reader.close()
 			db = HomeCollectionHelper(requireContext())
 			addCollection(inflater)
-			array.indices.forEach { i: Int ->
-				val serviceGroup = array.getJSONObject(i)
-				binding!!.serviceContainer.addView(initBoxWithHashMap(inflater, serviceGroup.getString("name"), serviceGroup.getJSONArray("items")).root)
+			reader.readJSONArray().forEach { i: Any ->
+				binding!!.serviceContainer.addView(initBoxWithHashMap(inflater, (i as JSONObject).getString("name"), i.getJSONArray("items")).root)
 			}
+			reader.close()
 		}
 		return binding!!.root
 	}
@@ -118,7 +116,7 @@ class ServiceFragment : Fragment() {
 	}
 	
 	fun initOrder(inflater: LayoutInflater) {
-		orderDialog = context?.let { BottomSheetDialog(it) }
+		orderDialog = BottomSheetDialog(requireContext())
 		collectionAdapter = CollectionAdapter()
 		DialogServiceOrderBinding.inflate(inflater).apply {
 			recyclerView.setLayoutManager(LinearLayoutManager(context))
