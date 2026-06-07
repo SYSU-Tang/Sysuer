@@ -658,4 +658,7 @@
     <string name="dashboard_time">第%1$s学期\n%2$s\n%3$s</string>
     <string name="dashboard_week">第%1$s周\n%2$s</string>
     <string name="dashboard_day">%1$s/%2$s</string>
+    <string name="guide">指南</string>
+    <string name="querying">查询中…</string>
+    <string name="please_select_exam_week">请选择考试周</string>
 </resources>

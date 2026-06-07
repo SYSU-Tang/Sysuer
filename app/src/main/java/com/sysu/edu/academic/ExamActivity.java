@@ -21,13 +21,15 @@ import java.util.List;
 import java.util.Objects;
 
 public class ExamActivity extends AppCompatActivity {
-
+    
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,10 +48,10 @@ public class ExamActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         binding.fab.setOnClickListener(view -> {
             if (examViewModel.getTerm().getValue() == null || examViewModel.getExamWeekId().getValue() == null)
-                Snackbar.make(view, "请选择考试周", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, R.string.please_select_exam_week, Snackbar.LENGTH_LONG)
                         .setAnchorView(R.id.fab).show();
             else {
-                Snackbar.make(view, "查询中...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, R.string.querying, Snackbar.LENGTH_LONG)
                         .setAnchorView(R.id.fab).show();
                 getResult(examViewModel.getTerm().getValue(), examViewModel.getExamWeekId().getValue());
             }
@@ -62,28 +64,29 @@ public class ExamActivity extends AppCompatActivity {
         });
         examViewModel.getExamResult().observe(this, result -> {
             ((StaggeredFragment) binding.examFragment.getFragment()).clear();
-            JSONArray.parse(result).forEach(a -> ((JSONObject) a).getJSONObject("timetable").forEach((time, detail) -> {
+            JSONArray.parse(result).forEach(a -> ((JSONObject) a).getJSONObject("timetable").forEach((_, detail) -> {
                 if (detail != null) {
                     ArrayList<String> values = new ArrayList<>();
                     ((JSONArray) detail).forEach(o -> {
                         for (String i : new String[]{"examSubjectName", "classroomNumber", "durationTime", "examDate", "acadYear"})
                             values.add(((JSONObject) o).getString(i));
                     });
-                    ((StaggeredFragment) binding.examFragment.getFragment()).add(time, List.of("科目", "考场", "时长", "日期", "学年"),
+                    ((StaggeredFragment) binding.examFragment.getFragment()).add(values.get(0), List.of("科目", "考场", "时长", "日期", "学年"),
                             values);
                 }
             }));
         });
-        model.getMessage().observe(this, message->{
+        model.getMessage().observe(this, message -> {
             JSONObject response = message.getSecond();
             if (response.getInteger("code").equals(200)) {
                 switch (message.getFirst()) {
-                    case 1->{
+                    case 1 -> {
                         examViewModel.setTermList(extractValue(response.getJSONArray("data"), "acadYearSemester"));
                         getTerm();
                     }
-                    case 2-> examViewModel.setTerm(response.getJSONObject("data").getString("acadYearSemester"));
-                    case 3->{   
+                    case 2 ->
+                            examViewModel.setTerm(response.getJSONObject("data").getString("acadYearSemester"));
+                    case 3 -> {
                         ArrayList<String> examWeeks = new ArrayList<>();
                         ArrayList<JSONObject> examWeekInfo = new ArrayList<>();
                         response.getJSONArray("data").forEach(item -> {
@@ -94,25 +97,26 @@ public class ExamActivity extends AppCompatActivity {
                         examViewModel.setExamWeekList(examWeeks);
                         //binding.examWeek.setText(response.getJSONObject("data").getString("examWeekName"),false);
                     }
-                    case 4-> examViewModel.setExamResult(response.getJSONArray("data").toJSONString());
+                    case 4 ->
+                            examViewModel.setExamResult(response.getJSONArray("data").toJSONString());
                 }
             }
         });
         getTerms();
     }
-
+    
     void getTerms() {
         model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1);
     }
-
+    
     void getTerm() {
         model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 2);
     }
-
+    
     void getExamWeek(String term) {
         model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=" + term, 3);
     }
-
+    
     void getResult(String term, String examWeek) {
         String body = "";
         if (term != null) body += "\"acadYear\":\"" + term + "\"";

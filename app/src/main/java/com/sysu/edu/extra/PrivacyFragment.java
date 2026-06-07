@@ -32,7 +32,7 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
         if (savedInstanceState == null) {
             setPreferencesFromResource(R.xml.privacy, rootKey);
             Params params = new Params(this);
-            disposable.add(params.getContextUtil().accountManager.getActiveAccountAsync("sysu.edu.cn").subscribe(
+            disposable.add(params.getContextUtil().getAccountManager().getActiveAccountAsync("sysu.edu.cn").subscribe(
                     activeAccount -> {
                         ((Preference) Objects.requireNonNull(findPreference("netId"))).setSummary(activeAccount.first);
                         ((Preference) Objects.requireNonNull(findPreference("password"))).setOnPreferenceClickListener(_ -> {
