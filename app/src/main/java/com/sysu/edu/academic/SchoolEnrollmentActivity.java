@@ -58,7 +58,7 @@ public class SchoolEnrollmentActivity extends AppCompatActivity {
             if (response != null && response.getInteger("code").equals(200)) {
                 JSONObject data = response.getJSONObject("data");
                 if (data != null) {
-                    Integer what = massage.getFirst();
+                    int what = massage.getFirst();
                     if (what == 0) {
                         dataMap.forEach((title, keyName) -> ((StaggeredFragment) pager2Adapter.get(0)).add(getString(title), R.drawable.calendar, List.of(CommonUtil.getString(this, keyName)),
                                 extractValue(data, keys.get(List.of(R.string.school_enrollment_personal_info, R.string.school_enrollment_roll_info, R.string.school_enrollment_contact_info).indexOf(title)))));

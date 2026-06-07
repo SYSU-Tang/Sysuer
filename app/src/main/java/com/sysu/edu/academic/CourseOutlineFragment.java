@@ -64,7 +64,7 @@ public class CourseOutlineFragment extends Fragment {
         }
 
         String convert(int position, String key) {
-            return trim(data.get(position).getString(key)).replaceAll("\n\n", "\n");
+            return trim(data.get(position).getString(key)).replace("\n\n", "\n");
         }
 
         public String toMarkdown() {

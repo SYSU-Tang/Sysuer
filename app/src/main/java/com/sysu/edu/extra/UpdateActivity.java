@@ -39,7 +39,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class UpdateActivity extends AppCompatActivity {
     
     HttpManager http;
-    CompositeDisposable disposable = new CompositeDisposable();
+    final CompositeDisposable disposable = new CompositeDisposable();
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

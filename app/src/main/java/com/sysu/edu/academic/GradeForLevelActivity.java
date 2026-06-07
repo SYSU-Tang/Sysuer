@@ -123,7 +123,7 @@ public class GradeForLevelActivity extends AppCompatActivity {
         model.getMessage().observe(this, message -> {
             JSONObject response = message.getSecond();
             if (response.getInteger("code") == 200) {
-                Integer what = message.getFirst();
+                int what = message.getFirst();
                 switch (what) {
                     case 3 -> {
                         if (total == -1)

@@ -77,7 +77,7 @@ public class RoomQueryFilterFragment extends PreferenceFragmentCompat {
                 ArrayList<String> option = new ArrayList<>();
                 ArrayList<String> number = new ArrayList<>();
                 JSONArray data = response.getJSONArray("data");
-                Integer what = message.getFirst();
+                int what = message.getFirst();
                 option.add("");
                 number.add("");
                 if (what < 4) {

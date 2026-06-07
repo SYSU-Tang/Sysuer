@@ -103,7 +103,7 @@ public class PhysicalFitnessTestResultActivity extends AppCompatActivity {
                         case 3 -> {
                             Matcher matcher = Pattern.compile("<a class=\"weui-cell\">.*?<div class=\"weui-cell__bd\">(.+?)</div>.*?<div class=\"weui-cell__ft\">(.+?)</div>.*?</a>", Pattern.DOTALL).matcher((String) msg.obj);
                             while (matcher.find())
-                                page1.getStaggeredAdapter().addRow(position, Objects.requireNonNull(matcher.group(1)).replaceAll("</span>", "~").replaceAll("<.+?>", "").replaceAll("\\s", "").trim(), Objects.requireNonNull(matcher.group(2)).replaceAll("</span>", "~").replaceAll("<.+?>", "").replaceAll("%s", "").trim());
+                                page1.getStaggeredAdapter().addRow(position, Objects.requireNonNull(matcher.group(1)).replace("</span>", "~").replaceAll("<.+?>", "").replaceAll("\\s", "").trim(), Objects.requireNonNull(matcher.group(2)).replace("</span>", "~").replaceAll("<.+?>", "").replace("%s", "").trim());
                         }
                         case 4 -> {
                             Matcher matcher = Pattern.compile("<a class=\"weui-cell\">.+?</a>", Pattern.DOTALL).matcher((String) msg.obj);

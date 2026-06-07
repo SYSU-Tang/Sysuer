@@ -25,8 +25,6 @@ import com.sysu.edu.databinding.DialogAccountBinding;
 
 import java.util.concurrent.ExecutionException;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class ContextUtil {
@@ -175,26 +173,22 @@ public class ContextUtil {
                     System.out.println("activeAccount " + activeAccount);
                     System.out.println(service);
                     if (!isEmpty(activeAccount.first) && !isEmpty(activeAccount.second) && !isEmpty(service)) {
-                        try {
-                            loginManager.setOnLoginListener(new LoginManager.LoginListener() {
-                                @Override
-                                public void onSuccess() {
-                                    if (afterLogin != null) afterLogin.run();
-                                }
-                                
-                                @Override
-                                public void onError(String code, String message) {
-                                    System.out.println("LoginManager onError " + code + " " + message);
-                                    if ("SSO10002".equals(code) || "30506".equals(code))
-                                        changeAccount(service, host, afterLogin);
-                                    else
-                                        handler.post(() -> toast(toStringOrDefault(message)));
-                                }
-                            });
-                            loginManager.login(activeAccount.first, activeAccount.second, service);
-                        } catch (ExecutionException | InterruptedException e) {
-                            Log.e("ContextUtil", "loginForUrl: ", e);
-                        }
+                        loginManager.setOnLoginListener(new LoginManager.LoginListener() {
+                            @Override
+                            public void onSuccess() {
+                                if (afterLogin != null) afterLogin.run();
+                            }
+                            
+                            @Override
+                            public void onError(String code, String message) {
+                                System.out.println("LoginManager onError " + code + " " + message);
+                                if ("SSO10002".equals(code) || "30506".equals(code))
+                                    changeAccount(service, host, afterLogin);
+                                else
+                                    handler.post(() -> toast(toStringOrDefault(message)));
+                            }
+                        });
+                        loginManager.login(activeAccount.first, activeAccount.second, service);
                     } else changeAccount(service, host, afterLogin);
                 }));
     }

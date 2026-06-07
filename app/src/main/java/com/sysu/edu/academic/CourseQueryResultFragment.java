@@ -50,7 +50,7 @@ public class CourseQueryResultFragment extends StaggeredFragment {
                     JSONObject row = (JSONObject) e;
                     ArrayList<String> values = extractValue(row, new String[]{"yearTerm", "courseName", "courseNum", "openingUnitName", "courseCategoryName", "score", "teachingName", "limitNumber", "selectedNumber", "examMode", "teachingTimePlaceStr", "openingSchoolName", "readObj", "classNumber"});
                     if (values.get(10) != null)
-                        values.set(10, values.get(10).replaceAll(",", "\n").replaceAll("/", " | "));
+                        values.set(10, values.get(10).replace(",", "\n").replace("/", " | "));
                     add(values.get(1), List.of("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values);
                 });
             } 

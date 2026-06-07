@@ -25,7 +25,7 @@ public class PrivacyFragment extends PreferenceFragmentCompat {
     
     HttpManager http;
     
-    CompositeDisposable disposable = new CompositeDisposable();
+    final CompositeDisposable disposable = new CompositeDisposable();
     
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {

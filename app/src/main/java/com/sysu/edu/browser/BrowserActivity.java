@@ -91,7 +91,7 @@ public class BrowserActivity extends AppCompatActivity {
     BrowserHelper db;
     JavaScript js;
     Params params;
-    CompositeDisposable disposable = new CompositeDisposable();
+    final CompositeDisposable disposable = new CompositeDisposable();
     
     @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     @Override

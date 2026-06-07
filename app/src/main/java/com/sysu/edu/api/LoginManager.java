@@ -153,11 +153,7 @@ public class LoginManager {
      *
      */
     public void login(String service) {
-        try {
-            login(authorizationJar.getUserName(), authorizationJar.getPassword(), service);
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e("LoginManager", "login: ", e);
-        }
+        login(authorizationJar.getUserName(), authorizationJar.getPassword(), service);
     }
     
     public void loginForKTP(String username, String password) throws Exception {
@@ -185,7 +181,7 @@ public class LoginManager {
      * @param service  登录服务
      *
      */
-    public void login(String username, String password, String service) throws ExecutionException, InterruptedException {
+    public void login(String username, String password, String service) {
         long now = System.currentTimeMillis();
         if (!timestamps.isEmpty()) {
             Long top = timestamps.getLast();

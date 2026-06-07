@@ -64,7 +64,7 @@ public class CourseQueryFilterFragment extends PreferenceFragmentCompat {
                 ArrayList<String> option = new ArrayList<>();
                 ArrayList<String> number = new ArrayList<>();
                 JSONArray data = response.getJSONArray("data");
-                Integer what = message.getFirst();
+                int what = message.getFirst();
                 switch (what) {
                     case 0, 1, 2, 3, 4, 5 -> {
                         option.add("");
