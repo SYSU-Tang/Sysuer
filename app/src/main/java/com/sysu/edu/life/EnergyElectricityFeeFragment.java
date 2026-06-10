@@ -139,6 +139,7 @@ public class EnergyElectricityFeeFragment extends Fragment {
                                 detailDialog.show();
                             }
                             case 5 -> {
+                                System.out.println(response);
                                 params.toast(response.getString("msg"));
                                 requestQueue.addAndNext(() -> getElectricityBill(roomCode.getValue()));
                             }

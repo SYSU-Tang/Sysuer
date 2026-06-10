@@ -1,6 +1,7 @@
 package com.sysu.edu.life;
 
 import static com.sysu.edu.api.CommonUtil.extractValue;
+import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,14 +46,14 @@ import java.util.List;
 import java.util.Locale;
 
 public class EnergyWaterFeeFragment extends Fragment {
-
-    HttpManager http;
-    String name = "";
+    
     final RequestQueue requestQueue = new RequestQueue();
     final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
     final MutableLiveData<String> roomCode = new MutableLiveData<>();
+    HttpManager http;
+    String name = "";
     ConcatAdapter adapter;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -73,9 +74,8 @@ public class EnergyWaterFeeFragment extends Fragment {
                     params.toast(R.string.no_net_connected);
                 else if (msg.getData().getBoolean("isJSON")) {
                     JSONObject response = JSONObject.parse((String) msg.obj);
-                    if(msg.what == 5 && response.getInteger("status") == 404)
-                        params.toast(response.getString("error"));
-                    else if (response.getInteger("code") == 200) {
+                    System.out.println(response);
+                    if (response.getInteger("code") == 200) {
                         switch (msg.what) {
                             case 0 -> name = response.getJSONObject("data").getString("username");
                             case 1 -> {
@@ -125,10 +125,9 @@ public class EnergyWaterFeeFragment extends Fragment {
                                         switch (position) {
                                             case 0 ->
                                                     button.setOnClickListener(_ -> requestQueue.addAndNext(() -> getDetail(item.getString("id"))));
-                                            case 1 ->
-                                                    button.setOnClickListener(_ ->
-                                                        requestQueue.addAndNext(() -> recharge(item.getString("id"), roomCode.getValue(), item.getFloat("waterPayment")))
-                                                    );
+                                            case 1 -> button.setOnClickListener(_ ->
+                                                    requestQueue.addAndNext(() -> recharge(item.getString("id"), roomCode.getValue(), item.getFloat("waterPayment")))
+                                            );
                                         }
                                     });
                                     adapter.addAdapter(preferenceAdapter);
@@ -155,7 +154,10 @@ public class EnergyWaterFeeFragment extends Fragment {
                             }
                         }
                         requestQueue.next();
-                    } else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
+                    } else if (response.getInteger("code") == 201)
+                        params.toast(toStringOrDefault(response.getString("msg")));
+                    else
+                        contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
                 }
                 super.handleMessage(msg);
             }
@@ -183,40 +185,41 @@ public class EnergyWaterFeeFragment extends Fragment {
                 reset();
                 roomCode.setValue(rooms.valueAt(position).getSecond());
             }
-
+            
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
         requestQueue.next();
-
+        
         return binding.getRoot();
     }
-
+    
     void reset() {
         adapter.getAdapters().forEach(adapter::removeAdapter);
     }
-
+    
     void getUserInfo() {
         http.getRequest("https://zhny.sysu.edu.cn/kbp/auth/userInfo", 0);
     }
-
+    
     void getRoom(String username) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/admin/sys/personRoom/list", "{\"username\":\"" + username + "\"}", 1);
     }
-
+    
     void getWaterConsumption(String room, String date) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/cwbs/month/usage/stats", String.format("{\"roomCode\":\"%s\",\"staticsMonth\":\"%s\"}", room, date), 2);
     }
-
+    
     void getWaterBill(String room) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/cwbs/mobile/room/bill/list", String.format("{\"roomCode\":\"%s\"}", room), 3);
     }
-
+    
     void getDetail(String billId) {
         http.getRequest("https://zhny.sysu.edu.cn/kbp/cwbs/mobile/room/bill/get/" + billId, 4);
     }
+    
     void recharge(String billId, String room, float amount) {
-        http.postRequest("https://zhny.sysu.edu.cn/kbp/cwbs/mobile/room/bill/pay", String.format(Locale.getDefault(), "{\"roomCode\":\"%s\",\"billAmount\":%.2f,\"idList\":[\"%s\"],\"isMobile\":true,\"rechargeChannel\":6,\"rechargeMethod\":16}", room,amount,billId), 5);
+        http.postRequest("https://zhny.sysu.edu.cn/kbp/cwbs/mobile/room/bill/pay", String.format(Locale.getDefault(), "{\"roomCode\":\"%s\",\"billAmount\":%.2f,\"idList\":[\"%s\"],\"isMobile\":true,\"rechargeChannel\":6,\"rechargeMethod\":16}", room, amount, billId), 5);
     }
 }
