@@ -179,7 +179,7 @@ public class CalendarActivity extends AppCompatActivity {
                                     PopupMenu pop = new PopupMenu(CalendarActivity.this, image, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow);
                                     Menu menu = pop.getMenu();
                                     menu.add(R.string.save).setOnMenuItemClickListener(_ -> {
-                                        params.toast(saveImage(url, System.currentTimeMillis() + ".jpg") ? R.string.save_successfully : R.string.save_fail);
+                                        params.toast(saveImage(url, System.currentTimeMillis() + ".jpg") ? R.string.save_successful : R.string.save_fail);
                                         return true;
                                     });
                                     menu.add(R.string.share).setOnMenuItemClickListener(_ -> {

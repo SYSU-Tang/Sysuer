@@ -65,6 +65,7 @@ import org.commonmark.node.Node
 import java.lang.Boolean
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
+import kotlin.Any
 import kotlin.CharSequence
 import kotlin.Int
 import kotlin.String
@@ -194,11 +195,12 @@ class ServiceFragment : Fragment() {
 				list.add(item)
 				ItemActionChipBinding.inflate(inflater, binding.serviceBoxItems, false).root
 					.apply {
-						setOnClickListener(viewModel!!.actionMap[item.getIntValue("id")] ?: View.OnClickListener {
-							getItemIntent(item, null)?.let { it1 ->
-								startActivity(it1, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), it, "miniapp").toBundle())
-							} ?: params!!.toast(R.string.activity_not_found)
-						})
+						setOnClickListener(viewModel!!.actionMap[item.getIntValue("id")]
+											   ?: View.OnClickListener {
+												   getItemIntent(item, null)?.let { it1 ->
+													   startActivity(it1, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), it, "miniapp").toBundle())
+												   } ?: params!!.toast(R.string.activity_not_found)
+											   })
 						setOnLongClickListener { _: View? -> showActionDialog(item) }
 						text = item.getString("name")
 						binding.serviceBoxItems.addView(this)
@@ -324,20 +326,12 @@ class ServiceFragment : Fragment() {
 			adapter.setListener(object : AdapterListener {
 				override fun onBind(adp: RecyclerView.Adapter<RecyclerView.ViewHolder?>?, holder: RecyclerView.ViewHolder, position: Int) {
 					val item = adapter.get(position)
-					val action = viewModel!!.actionMap[item.getInteger("id")]
-					val url = item.getString("url")
-					val activity = item.getString("activity")
-					holder.itemView.setOnClickListener(action
+					holder.itemView.setOnClickListener(viewModel!!.actionMap[item.getInteger("id")]
 														   ?: View.OnClickListener { v: View? ->
-															   if (!TextUtils.isEmpty(activity)) try {
-																   val intent =
-																	   Intent(requireContext(), Class.forName(requireContext().packageName + activity))
-																   if (intent.resolveActivity(requireContext().packageManager) != null) startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp").toBundle())
-															   } catch (_: ClassNotFoundException) {
-																   params!!.toast(R.string.activity_not_found)
+															   getItemIntent(item, null)?.let {
+																   startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp").toBundle())
 															   }
-															   else if (!TextUtils.isEmpty(url)) startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp").toBundle())
-															   else params!!.toast(R.string.undeveloped)
+																   ?: params!!.toast(R.string.activity_not_found)
 														   })
 				}
 				
@@ -361,7 +355,7 @@ class ServiceFragment : Fragment() {
 										val bNameMatch =
 											b!!.getString("name").contains(q)
 										if (aNameMatch && !bNameMatch) -1 else if (!aNameMatch && bNameMatch) 1 else 0
-									} as MutableList<JSONObject?>
+									}
 //									list.stream().filter { item -> item?.getString("name")?.contains(q) == true || item?.getString("description")?.contains(q) == true }
 //										.sorted { a: JSONObject?, b: JSONObject? ->
 //											val aNameMatch =
@@ -372,7 +366,7 @@ class ServiceFragment : Fragment() {
 //										} .collect(Collectors.toList())
 								}
 								.observeOn(AndroidSchedulers.mainThread())
-								.subscribe { d: MutableList<JSONObject?>? -> adapter.set(d) })
+								.subscribe { d: List<JSONObject?> -> adapter.set(d) })
 			searchView.editText.addTextChangedListener(object : TextWatcher {
 				override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 				}

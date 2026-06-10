@@ -105,6 +105,7 @@ class DashboardFragment : Fragment() {
 	var actionBinding: DialogServiceActionBinding? = null
 	private var todoManager: TodoManager? = null
 	var termString: String? = null
+	var week: Int? = null
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
 	                          savedInstanceState: Bundle?): NestedScrollView {
 		if (isRefreshRequired) {
@@ -120,35 +121,20 @@ class DashboardFragment : Fragment() {
 								val afterArray = ArrayList<JSONObject?>()
 								response.getJSONArray("data")
 									.forEach { e: Any? ->
-										val jsonObject = e as JSONObject
 										val status = getTimePosition(
-											jsonObject.getString(
-												"teachingDate") + " " + jsonObject.getString(
-												"startTime"),
-											jsonObject.getString(
-												"teachingDate") + " " + jsonObject.getString(
-												"endTime"))
-										jsonObject["status"] = status
-										jsonObject["time"] = jsonObject.get(
-											"startTime")
-											.toString() + "~" + jsonObject.get(
-											"endTime")
-										jsonObject["course"] = "第${
-											jsonObject.get(
-												"startClassTimes")
+											"${(e as JSONObject).getString("teachingDate")} ${e.getString("startTime")}",
+											"${e.getString("teachingDate")} ${e.getString("endTime")}")
+										e["status"] = status
+										e["time"] = "${e.getString("startTime")}~${e.getString("endTime")}"
+										e["course"] = "第${
+											e.getString("startClassTimes")
 										}~${
-											jsonObject.get(
-												"endClassTimes")
+											e.getString("endClassTimes")
 										}节课"
-										val isToday =
-											"TD" == jsonObject.getString(
-												"useflag")
-										if (isToday) (if (status == "before") beforeArray else afterArray).add(
-											jsonObject)
-										(if (isToday) todayCourse else tomorrowCourse).add(
-											jsonObject)
+										val isToday = "TD" == e.getString("useflag")
+										if (isToday) (if (status == "before") beforeArray else afterArray).add(e)
+										(if (isToday) todayCourse else tomorrowCourse).add(e)
 									}
-								//                            ContextUtil contextUtil = new ContextUtil(requireContext());
 								binding!!.progress.setMax(todayCourse.size)
 								binding!!.progress.progress = beforeArray.size
 								binding!!.courseList.scrollToPosition(
@@ -247,13 +233,9 @@ class DashboardFragment : Fragment() {
 									(if (afterArray.isEmpty()) tomorrowCourse[0] else todayCourse[beforeArray.size])
 								val delta = LocalDateTime.parse(
 									"${
-										array.getString(
-											"teachingDate")
+										array.getString("teachingDate")
 									} ${array.getString("startTime")}",
-									DateTimeFormatter.ofPattern(
-										"yyyy-MM-dd HH:mm")).atZone(
-									ZoneId.systemDefault()).toInstant()
-									.toEpochMilli() - System.currentTimeMillis()
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()
 								if (delta > 0) getInstance(
 									requireContext().applicationContext)
 									.enqueueUniqueWork(
@@ -279,31 +261,24 @@ class DashboardFragment : Fragment() {
 							}
 							2 -> {
 								val dataArray = response.getJSONArray("data")
-								if (!dataArray.isEmpty()) {
-									for (i in dataArray.indices) {
-										val exams =
-											listOf(
-												thisWeekExams, nextWeekExams)[i]
-										val sortedTimetable =
-											TreeMap<Int?, JSONArray?>()
-										dataArray.getJSONObject(i)
-											.getJSONObject("timetable")
-											.forEach { (s1: String?, t: Any?) ->
-												if (t != null) sortedTimetable[s1!!.toInt()] =
-													t as JSONArray
-											}
-										sortedTimetable.forEach { (key: Int?, value: JSONArray?) ->
-											if (key == sortedTimetable.firstKey()) value?.forEach { c: Any? ->
-												exams.addFirst(c as JSONObject?)
-											}
-											else value?.forEach { c: Any? ->
-												exams.addLast(c as JSONObject?)
-											}
+								dataArray.indices.forEach { i ->
+									val exams = listOf(thisWeekExams, nextWeekExams)[i]
+									val sortedTimetable =
+										TreeMap<Int?, JSONArray?>()
+									dataArray.getJSONObject(i)
+										.getJSONObject("timetable")
+										.forEach { (s1: String?, t: Any?) ->
+											if (t != null) sortedTimetable[s1!!.toInt()] =
+												t as JSONArray
+										}
+									sortedTimetable.forEach { (key: Int?, value: JSONArray?) ->
+										value?.forEach { c: Any? ->
+											(if (key == sortedTimetable.firstKey()) exams::addFirst else exams::addLast)(c as JSONObject?)
 										}
 									}
-									binding!!.toggle2.clearChecked()
-									binding!!.toggle2.check(R.id.week_18)
 								}
+								binding!!.toggle2.clearChecked()
+								binding!!.toggle2.check(R.id.week_18)
 							}
 							3 -> {
 								response.getJSONObject("data")
@@ -328,13 +303,12 @@ class DashboardFragment : Fragment() {
 											getString(R.string.dashboard_week, it, binding!!.dateView.getText())
 										binding!!.toggle2.check(if ("19" == it) R.id.week_19 else R.id.week_18)
 									}
-							5 -> {
+							5 ->
 								response.getJSONArray("data").first {
 									(it as JSONObject).getString("examWeekName") == "18-19周期末考"
 								}?.let {
 									termString?.let { it1 -> getExams(it1, (it as JSONObject).getString("examWeekId")) }
 								}
-							}
 						}
 					}
 				}
@@ -814,11 +788,11 @@ internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
 			                  binding.examDuration, binding.examTime, binding.examClassTime,
 			                  binding.examMode, binding.examStage)
 		(0..7).forEach { i ->
-				materialTextButtons[i].text = text[i]
-				materialTextButtons[i].setOnClickListener { _: View? ->
-					params.copy("exam", text[i])
-					params.toast(R.string.copy_successfully)
-				}
+			materialTextButtons[i].text = text[i]
+			materialTextButtons[i].setOnClickListener { _: View? ->
+				params.copy("exam", text[i])
+				params.toast(R.string.copy_successfully)
+			}
 		}
 		super.onBindViewHolder(holder, position)
 	}

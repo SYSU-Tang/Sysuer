@@ -173,9 +173,9 @@
     <string name="save">保存</string>
     <string name="submit">提交</string>
     <string name="please_enter_content">请输入内容</string>
-    <string name="save_successfully">保存成功</string>
+    <string name="save_successful">保存成功</string>
     <string name="save_fail">保存失败</string>
-    <string name="submit_successfully">提交成功</string>
+    <string name="submit_successful">提交成功</string>
     <string name="submit_fail">提交失败</string>
     <string name="fill">填充</string>
     <string name="assistant">助教</string>
@@ -661,4 +661,5 @@
     <string name="guide">指南</string>
     <string name="querying">查询中…</string>
     <string name="please_select_exam_week">请选择考试周</string>
+    <string name="unchangeable_after_submission">提交后不可更改</string>
 </resources>
