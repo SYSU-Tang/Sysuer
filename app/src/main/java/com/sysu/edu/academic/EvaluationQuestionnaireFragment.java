@@ -65,7 +65,6 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                         }
                     }
                 }
-                super.onScrolled(recyclerView, dx, dy);
             }
         });
         requireActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
@@ -85,32 +84,44 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                                         String bprmc = list1.getString("bprmc");// 被评人名称
                                         if (!isEmpty(bprmc))
                                             adp.addAdapter(new TitleAdapter(bprmc, 1));
+                                        
                                         list1.getJSONArray("dtjgList").forEach(e ->
                                         {
-                                            JSONObject pjxxlist = JSONObject.parse(String.format(
-                                                    "{\"sjly\": \"1\",\"stlx\": \"1\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
-                                                    list1.getString("wjid"),
-                                                    list1.getString("wjssrwid"),
-                                                    ((JSONObject) e).getString("tmid")
-                                            ));
-                                            JSONArray da = ((JSONObject) e).getJSONArray("tmxxda");
+                                            JSONObject question = (JSONObject) e;
+                                            JSONObject pjxxlist =
+                                                    JSONObject.parse(String.format(
+                                                            "{\"sjly\": \"1\",\"stlx\": \"%s\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
+                                                            question.getString("tmlx", "1"),
+                                                            list1.getString("wjid"),
+                                                            list1.getString("wjssrwid"),
+                                                            question.getString("tmid")
+                                                    ));
+                                            JSONArray da = question.getJSONArray("tmxxda");
                                             pjxxlist.put("xxdalist", da);
                                             pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
                                             
-                                            adp.addAdapter(new TitleAdapter(((JSONObject) e).getString("tgmc"))); // 题目标题
+                                            adp.addAdapter(new TitleAdapter(question.getString("tgmc"))); // 题目标题
                                             
-                                            switch (((JSONObject) e).getString("tmlx")) {
+                                            switch (question.getString("tmlx")) {
                                                 case "1" -> {
                                                     OptionAdapter optionAdapter = new OptionAdapter();
-                                                    ((JSONObject) e).getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
+                                                    question.getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
                                                     optionAdapter.setAnswer(da);
                                                     adp.addAdapter(optionAdapter);
                                                 }
-                                                case "6" -> {
-                                                    BlanketAdapter blanketAdapter = new BlanketAdapter();
-                                                    blanketAdapter.setAnswer(da);
-                                                    adp.addAdapter(blanketAdapter);
-                                                }
+                                                case "6" ->
+                                                        question.getJSONArray("tmxxlist").forEach(
+                                                                o -> {
+                                                                    BlanketAdapter blanketAdapter = new BlanketAdapter();
+                                                                    JSONObject tmxxlist = (JSONObject) o;
+                                                                    pjxxlist.put("wjstctid", tmxxlist.getString("tmxxid"));
+                                                                    pjxxlist.put("wjstid", tmxxlist.getString("tmid"));
+                                                                    JSONArray xxda = tmxxlist.getJSONArray("xxda");
+                                                                    pjxxlist.put("xxdalist", xxda);
+                                                                    blanketAdapter.setAnswer(xxda);
+                                                                    adp.addAdapter(blanketAdapter);
+                                                                }
+                                                        );
                                                 case "5" -> {
                                                     RankAdapter rankAdapter = new RankAdapter();
                                                     rankAdapter.setAnswer(da);
@@ -119,8 +130,8 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                                             }
                                         });
                                     }));
-                    case 2 -> model.getContextUtil().toast(R.string.save_successfully);
-                    case 3 -> model.getContextUtil().toast(R.string.submit_successfully);
+                    case 2 -> model.getContextUtil().toast(R.string.save_successful);
+                    case 3 -> model.getContextUtil().toast(R.string.submit_successful);
                 }
             }
         });
@@ -134,12 +145,13 @@ public class EvaluationQuestionnaireFragment extends Fragment {
                 Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
                 requireArguments().getString("bpmc"));
         binding.save.setOnClickListener(_ -> saveEvaluation());
-        binding.submit.setOnClickListener(_ -> Snackbar.make(binding.getRoot(), "提交后不可更改", Snackbar.LENGTH_LONG).setAction(R.string.confirm, _ -> submitEvaluation()).show());
-        binding.reset.setOnClickListener(_ -> adp.getAdapters().forEach(adapter -> {
+        binding.submit.setOnClickListener(_ -> Snackbar.make(binding.floatingToolbar, R.string.unchangeable_after_submission, Snackbar.LENGTH_LONG).setAction(R.string.confirm, _ -> submitEvaluation()).show());
+        binding.reset.setOnClickListener(_ -> Snackbar.make(binding.floatingToolbar, R.string.reset, Snackbar.LENGTH_SHORT).setAction(R.string.confirm, _ -> adp.getAdapters().forEach(adapter -> {
             if (adapter instanceof OptionAdapter) ((OptionAdapter) adapter).clearAnswer();
             else if (adapter instanceof RankAdapter) ((RankAdapter) adapter).clearAnswer();
-            else if (adapter instanceof BlanketAdapter) ((BlanketAdapter) adapter).clearAnswer();
-        }));
+            else if (adapter instanceof BlanketAdapter)
+                ((BlanketAdapter) adapter).clearAnswer();
+        })).show());
         binding.auto.setOnClickListener(_ -> adp.getAdapters().forEach(adapter -> {
             if (adapter instanceof OptionAdapter) ((OptionAdapter) adapter).setLastOption();
             else if (adapter instanceof RankAdapter) ((RankAdapter) adapter).setLastRank();
@@ -161,6 +173,7 @@ public class EvaluationQuestionnaireFragment extends Fragment {
     
     public void postEvaluation(String mode, int what) {
         answers.put("pjzt", mode);
+        System.out.println(answers);
         model.addAndNext("evaluationPattern/submitSaveEvaluation", answers.toString(), what);
     }
 }
@@ -178,9 +191,7 @@ class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             notifyItemChanged(old);
             notifyItemChanged(selected);
             answer.set(0, data.get(pos).getString("tmxxid"));
-        } else {
-            clearAnswer();
-        }
+        } else clearAnswer();
     }
     
     public void setLastOption() {
@@ -285,8 +296,8 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditT
     JSONArray answer;
     
     public void setAnswer(JSONArray answers) {
-        this.answer = answers;
-        this.content = answers.isEmpty() ? null : answers.getString(0);
+        answer = answers;
+        content = answers.isEmpty() ? null : answers.getString(0);
         notifyItemChanged(0);
     }
     
@@ -299,7 +310,7 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditT
     
     
     public void setText(String text) {
-        this.content = text;
+        content = text;
     }
     
     public void clearAnswer() {
