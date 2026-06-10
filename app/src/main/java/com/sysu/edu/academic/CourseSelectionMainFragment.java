@@ -72,6 +72,7 @@ public class CourseSelectionMainFragment extends Fragment {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (binding == null) {

@@ -17,6 +17,7 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 		setCookieManager(CookieManager(context))
 		setReferrer("https://jwxt.sysu.edu.cn/")
 	}
+	
 	override fun handleResponse(
 		request: CommonUtil.Tuple2<Request, Int>,
 		response: Response

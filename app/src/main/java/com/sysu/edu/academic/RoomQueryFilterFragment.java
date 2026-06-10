@@ -41,11 +41,13 @@ public class RoomQueryFilterFragment extends PreferenceFragmentCompat {
     
     JwxtModel model;
     MaterialDatePicker<Pair<Long, Long>> datePicker;
+    
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.room_query_filter, rootKey);

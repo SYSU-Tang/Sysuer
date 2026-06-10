@@ -4,11 +4,10 @@ import static com.sysu.edu.api.CommonUtil.extractValue;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.model.JwxtModel;
@@ -20,16 +19,18 @@ import java.util.Locale;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class RegistrationActivity extends AppCompatActivity {
+public class RegistrationActivity extends BaseActivity {
     
     JwxtModel model;
     int page = 0;
     Pager2Adapter adp;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,8 +65,9 @@ public class RegistrationActivity extends AppCompatActivity {
                                     extractValue((JSONObject) a, new String[]{"academicYearTerm", "campusName", "collegeName", "gradeMajorName", "payedStatusName", "checkInStatusName", "registerStatusName", "checkInDate", "registerDate"})));
                             if (total / 10 > page - 1) getList();
                         }
-                        case 0 -> ((StaggeredFragment) adp.get(0)).add("学生报到信息", R.drawable.calendar, List.of("学号", "注册学年学期", "报到状态", "注册状态", "缴费状态"),
-                                extractValue(response.getJSONObject("data"), new String[]{"stuNum", "academicYearTerm", "checkInStatusName", "registerStatusName", "payedStatusName"}));
+                        case 0 ->
+                                ((StaggeredFragment) adp.get(0)).add("学生报到信息", R.drawable.calendar, List.of("学号", "注册学年学期", "报到状态", "注册状态", "缴费状态"),
+                                        extractValue(response.getJSONObject("data"), new String[]{"stuNum", "academicYearTerm", "checkInStatusName", "registerStatusName", "payedStatusName"}));
                         case 1 -> {
                             JSONArray d = response.getJSONArray("data");
                             d.forEach(v -> {

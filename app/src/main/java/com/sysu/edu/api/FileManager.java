@@ -17,7 +17,8 @@ public class FileManager {
             while ((line = buffer.readLine()) != null) jsJSON.append(line);
             input.close();
             buffer.close();
-        } catch (IOException _) {}
+        } catch (IOException _) {
+        }
         return jsJSON.toString();
     }
 }

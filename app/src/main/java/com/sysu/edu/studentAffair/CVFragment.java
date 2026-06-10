@@ -20,11 +20,13 @@ import java.util.List;
 public class CVFragment extends StaggeredFragment {
     View view;
     XgxtModel model;
+    
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

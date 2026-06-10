@@ -17,19 +17,19 @@ public class SliderPreference extends SeekBarPreference {
         super(context, attrs, defStyleAttr, defStyleRes);
         setLayoutResource(R.layout.preference_slider);
     }
-
+    
     public SliderPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
-
+    
     public SliderPreference(@NonNull Context context) {
         this(context, null);
     }
-
+    
     public SliderPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.attr.sliderPreferenceStyle);
     }
-
+    
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         PreferenceSliderBinding binding = PreferenceSliderBinding.bind(holder.itemView);
@@ -48,15 +48,15 @@ public class SliderPreference extends SeekBarPreference {
         binding.seekbar.addOnChangeListener((slider, v, b) -> setValue((int) v));
         binding.getRoot().setOnClickListener(v -> onClick());
     }
-
+    
     @Override
     protected void onClick() {
         super.onClick();
     }
-
+    
     @Override
     public int getValue() {
         return super.getValue() == 0 ? getMin() : super.getValue();
     }
-
+    
 }

@@ -28,6 +28,7 @@ public class AssistantEvaluationResultFragment extends StaggeredFragment {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentResultBinding resultBinding = FragmentResultBinding.inflate(inflater, container, false);

@@ -5,10 +5,9 @@ import static com.sysu.edu.api.CommonUtil.extractValue;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.databinding.ActivityPagerBinding;
@@ -22,15 +21,17 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-public class SchoolEnrollmentActivity extends AppCompatActivity {
+public class SchoolEnrollmentActivity extends BaseActivity {
     
     int page = 0;
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

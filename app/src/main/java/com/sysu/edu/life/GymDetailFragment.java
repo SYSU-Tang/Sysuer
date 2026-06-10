@@ -52,7 +52,7 @@ import java.util.stream.IntStream;
 
 
 public class GymDetailFragment extends Fragment {
-
+    
     final HashMap<String, JSONObject> fee = new HashMap<>();
     HttpManager http;
     GymReservationViewModel viewModel;
@@ -62,7 +62,7 @@ public class GymDetailFragment extends Fragment {
     String userId;
     String type;
     FragmentGymDetailBinding binding;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class GymDetailFragment extends Fragment {
         DialogGymReservationBinding dialogBinding = DialogGymReservationBinding.inflate(inflater, container, false);
         binding.date.recyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         date = new DateAdapter();
-
+        
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         dialog.setContentView(dialogBinding.getRoot());
         initReservationDialog(dialogBinding);
@@ -138,7 +138,7 @@ public class GymDetailFragment extends Fragment {
                                         });
                                         if (field.getItemCount() % rows.get() != 0)
                                             IntStream.range(0, rows.get() - field.getItemCount() % rows.get()).forEach(_ -> field.add(JSONObject.of("Type", 3)));
-
+                                        
                                     }
                                 });
                                 if (viewModel.position.getValue() != null)
@@ -179,14 +179,14 @@ public class GymDetailFragment extends Fragment {
                         }
                     } else if (!viewModel.authorizationManager.isAuthorized(response)) {
                         params.toast(R.string.login_warning);
-                        params.gotoLogin( viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                        params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                     } else if (Pattern.compile("人机识别检测").matcher(response).find()) {
                         params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                     } else if (!viewModel.authorizationManager.isAccessible(response)) {
                         params.toast(R.string.educational_wifi_warning);
                         getInfo();
                     }
-
+                    
                 }
             }
         });
@@ -219,39 +219,39 @@ public class GymDetailFragment extends Fragment {
         });
         return binding.getRoot();
     }
-
+    
     void reset(FieldAdapter field) {
         field.clear();
         field.clearSelected();
         viewModel.selected.setValue(new HashSet<>());
     }
-
+    
     void getInfo() {
         Integer positionValue = viewModel.position.getValue();
         if (positionValue != null)
             getInfo(id, date.getFormattedDate(positionValue), date.getFormattedDate(positionValue));
     }
-
+    
     void getInfo(String id, String from, String to) {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/venue/available-slots/range?venueTypeId=%s&start=%s&end=%s", id, from, to), 0);
     }
-
+    
     void getFee(String id) {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/venuetype/%s/feetemplates", id), 1);
     }
-
+    
     void getMe() {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/swimmer/me", 2);
     }
-
+    
     void getType(String id) {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/venue/type/" + id, 3);
     }
-
+    
     public void reserve(String payload) {
         http.postRequest(viewModel.authorizationManager.getBaseUrl() + "api/BookingRequestVenue", payload, 4);
     }
-
+    
     /**
      * 生成 UUID
      *
@@ -261,7 +261,7 @@ public class GymDetailFragment extends Fragment {
     String generateUUID() {
         return UUID.randomUUID().toString();
     }
-
+    
     /**
      * 生成 Token
      *
@@ -273,7 +273,7 @@ public class GymDetailFragment extends Fragment {
         long timestamp = System.currentTimeMillis() / 1000L;
         return md5("SYSUBOOKING-" + uuid + timestamp) + "." + timestamp + "." + hash;
     }
-
+    
     /**
      * 计算 MD5 哈希值
      *
@@ -293,7 +293,7 @@ public class GymDetailFragment extends Fragment {
             throw new RuntimeException("MD5 algorithm not available", e);
         }
     }
-
+    
     void initReservationDialog(DialogGymReservationBinding binding) {
         binding.field.key.setText(R.string.field);
         binding.date.key.setText(R.string.date);
@@ -312,7 +312,7 @@ public class GymDetailFragment extends Fragment {
 //        binding.type.value.setText(item.getString("Type"));
 //        binding.reserve.setOnClickListener(_ -> reserve(item.getJSONArray("VenueBooking"), item.getString("VenueName"), creditFee));
 //    }
-
+    
     private void reserve(JSONArray items, String venueName, Integer creditFee) {
         String uuid = generateUUID();
         String time = LocalDateTime.now().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toString();
@@ -334,22 +334,22 @@ public class GymDetailFragment extends Fragment {
 //        System.out.println(payload);
         reserve(payload.toJSONString());
     }
-
-
+    
+    
     static class DateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
+        
         final HashMap<Integer, Integer> availableCapacity = new HashMap<>();
         Consumer<? super Integer> action;
         int page = 7;
         int selected = -1;
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(ItemDateBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
-
+        
         void select(int position) {
             int tmp = selected;
             selected = position;
@@ -357,11 +357,11 @@ public class GymDetailFragment extends Fragment {
             notifyItemChanged(position);
             notifyItemChanged(tmp);
         }
-
+        
         public void setAction(Consumer<? super Integer> action) {
             this.action = action;
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemDateBinding binding = ItemDateBinding.bind(holder.itemView);
@@ -373,74 +373,74 @@ public class GymDetailFragment extends Fragment {
             binding.getRoot().setChecked(position == selected);
             binding.availableCapacity.setText(capacity != null && capacity >= 0 ? String.format(Locale.getDefault(), "%d", capacity) : "");
         }
-
+        
         public void setAvailableCapacity(int position, int i) {
             availableCapacity.put(position, i);
             notifyItemChanged(position);
         }
-
+        
         @Override
         public int getItemCount() {
             return page;
         }
-
+        
         public void offset(int offset) {
             page += offset;
             notifyItemRangeInserted(page - 1, offset);
         }
-
+        
         private String getDate(int distanceDay, String pattern) {
             return LocalDate.now().plusDays(distanceDay).format(DateTimeFormatter.ofPattern(pattern));
         }
-
+        
         public String getDate(int distanceDay) {
             return getDate(distanceDay, "M月dd日");
         }
-
+        
         public String getFormattedDate(int distanceDay) {
             return getDate(distanceDay, "M-dd");
         }
-
+        
         String getWeek(Context context, int distanceDay) {
             int week = LocalDate.now().plusDays(distanceDay).getDayOfWeek().getValue();
             return context.getResources().getStringArray(R.array.weeks)[week - 1];
         }
-
+        
     }
-
+    
     static class FieldAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         Consumer<? super Integer> action;
         HashSet<Integer> selected = new HashSet<>();
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(ItemFieldDetailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
-
+        
         void setAction(Consumer<? super Integer> action) {
             this.action = action;
         }
-
+        
         void clearSelected() {
             HashSet<Integer> s = new HashSet<>(selected);
             selected.clear();
             s.forEach(this::notifyItemChanged);
         }
-
+        
         HashSet<Integer> getSelected() {
             return selected;
         }
-
+        
         public void setSelected(HashSet<Integer> selected) {
             if (!this.selected.equals(selected)) {
                 this.selected = selected;
                 selected.forEach(this::notifyItemChanged);
             }
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int pos) {
             int position = holder.getBindingAdapterPosition();

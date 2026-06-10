@@ -4,9 +4,9 @@ import static com.sysu.edu.api.CommonUtil.trim;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityMarkdownViewBinding;
@@ -19,7 +19,7 @@ import io.noties.markwon.recycler.MarkwonAdapter;
 import io.noties.markwon.recycler.table.TableEntry;
 import io.noties.markwon.recycler.table.TableEntryPlugin;
 
-public class MarkdownViewActivity extends AppCompatActivity {
+public class MarkdownViewActivity extends BaseActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

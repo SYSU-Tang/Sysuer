@@ -2,16 +2,16 @@ package com.sysu.edu.academic;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityHomeWorkBinding;
 
-public class HomeworkActivity extends AppCompatActivity {
-
+public class HomeworkActivity extends BaseActivity {
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

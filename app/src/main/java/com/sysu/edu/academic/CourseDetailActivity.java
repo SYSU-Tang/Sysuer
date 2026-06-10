@@ -3,26 +3,27 @@ package com.sysu.edu.academic;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityCourseDetailBinding;
 import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.view.Pager2Adapter;
 
-public class CourseDetailActivity extends AppCompatActivity {
+public class CourseDetailActivity extends BaseActivity {
     
     JwxtModel model;
     String code;
     String id;
     String classNum;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

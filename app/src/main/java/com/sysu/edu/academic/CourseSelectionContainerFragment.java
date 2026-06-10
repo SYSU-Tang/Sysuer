@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class CourseSelectionContainerFragment extends Fragment {
-
+    
     NavController nav;
-
+    
     public static CourseSelectionContainerFragment newInstance(int position) {
         Bundle args = new Bundle();
         args.putInt("position", position);
@@ -30,14 +30,14 @@ public class CourseSelectionContainerFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FragmentContainerBinding binding = FragmentContainerBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
-
+    
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -49,7 +49,7 @@ public class CourseSelectionContainerFragment extends Fragment {
             return true;
         }).build());
     }
-
+    
     @Override
     public void onResume() {
         NavigationUI.setupWithNavController(requireActivity().findViewById(R.id.toolbar), nav, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {

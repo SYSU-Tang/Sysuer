@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.PopupMenu;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.lifecycle.MutableLiveData;
 
@@ -19,6 +18,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textview.MaterialTextView;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.databinding.ActivityCourseScheduleBinding;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 
-public class CourseScheduleActivity extends AppCompatActivity {
+public class CourseScheduleActivity extends BaseActivity {
     
     final ArrayList<String> terms = new ArrayList<>();
     final ArrayList<Integer> weeks = new ArrayList<>();
@@ -50,11 +50,13 @@ public class CourseScheduleActivity extends AppCompatActivity {
     ActivityCourseScheduleBinding binding;
     ItemDetailBinding detailBinding;
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -210,7 +212,7 @@ public class CourseScheduleActivity extends AppCompatActivity {
                     }
                 }
                 model.nextAll();
-            } 
+            }
         });
         getTerm();
         model.next();

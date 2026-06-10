@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import com.sysu.edu.databinding.FragmentHomeworkMainBinding;
 
 public class HomeworkSettingFragment extends Fragment {
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

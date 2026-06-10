@@ -7,7 +7,8 @@ import io.reactivex.rxjava3.disposables.Disposable;
 
 public class AccountViewModel extends ViewModel {
     private final CompositeDisposable disposables = new CompositeDisposable();
-//    private final MutableLiveData<String> domainTrigger = new MutableLiveData<>();
+    
+    //    private final MutableLiveData<String> domainTrigger = new MutableLiveData<>();
 //    private AccountManager accountManager;
 //    private final LiveData<Pair<String, String>> activeAccount = Transformations.switchMap(
 //            domainTrigger,

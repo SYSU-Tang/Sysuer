@@ -35,11 +35,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class GymAccountFragment extends Fragment {
-
+    
     HttpManager http;
     GymReservationViewModel viewModel;
     RecyclerViewScrollBinding binding;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -69,19 +69,19 @@ public class GymAccountFragment extends Fragment {
                                 preferenceAdapter.set(List.of(R.string.type, R.string.name, R.string.student_id, R.string.net_id), extractValue(json, new String[]{"Type", "Name", "HostKey", "UserId"}), List.of(R.drawable.help, R.drawable.text, R.drawable.school, R.drawable.id), requireContext());
                                 concatAdapter.addAdapter(new TitleAdapter(getString(R.string.account)));
                                 concatAdapter.addAdapter(preferenceAdapter);
-
+                                
                                 PreferenceAdapter cashAdapter = new PreferenceAdapter();
                                 cashAdapter.set(List.of(R.string.sport_credit, R.string.wallet), extractValue(json, new String[]{"Credits", "CashWallet"}), List.of(R.drawable.dashboard, R.drawable.money), requireContext());
                                 concatAdapter.addAdapter(new TitleAdapter(getString(R.string.wallet)));
                                 concatAdapter.addAdapter(cashAdapter);
-
+                                
                                 String[] id_keys = {"validSwimmer", "IsAdmin"};
                                 PreferenceAdapter idAdapter = new PreferenceAdapter();
                                 for (int i = 0; i < id_keys.length; i++)
                                     idAdapter.add(getString(List.of(R.string.is_swimmer_valid, R.string.admin).get(i)), json.getBoolean(id_keys[i]) ? getString(R.string.yes) : getString(R.string.no), R.drawable.help);
                                 concatAdapter.addAdapter(new TitleAdapter(getString(R.string.other)));
                                 concatAdapter.addAdapter(idAdapter);
-
+                                
                                 getSwimmer();
                             }
                             case 1 -> JSONArray.parseArray(response).forEach(i -> {
@@ -112,17 +112,17 @@ public class GymAccountFragment extends Fragment {
         http.setUA(viewModel.ua);
         http.setAuthorizationRequired(true);
         http.setAuthorizationJar(new AuthorizationJar(requireContext()));
-
+        
         getAccount();
         return binding.getRoot();
     }
-
+    
     void getAccount() {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/Credit/Me", 0);
     }
-
+    
     void getSwimmer() {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/swimmer/me", 1);
     }
-
+    
 }

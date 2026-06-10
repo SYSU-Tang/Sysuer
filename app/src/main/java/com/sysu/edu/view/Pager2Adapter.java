@@ -8,35 +8,35 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import java.util.ArrayList;
 
 public class Pager2Adapter extends FragmentStateAdapter {
-
+    
     final ArrayList<Fragment> fragments = new ArrayList<>();
-
+    
     public Pager2Adapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
     }
-
+    
     @NonNull
     @Override
     public Fragment createFragment(int position) {
         return fragments.get(position);
     }
-
+    
     public Pager2Adapter add(@NonNull Fragment e) {
         fragments.add(e);
         notifyItemInserted(getItemCount() - 1);
         return this;
     }
-
+    
     public Fragment get(int position) {
         return fragments.get(position);
     }
-
+    
     @Override
     public int getItemCount() {
         return fragments.size();
     }
-
-    public boolean isEmpty(){
+    
+    public boolean isEmpty() {
         return fragments.isEmpty();
     }
 }

@@ -14,14 +14,14 @@ import com.sysu.edu.databinding.ItemButtonOutlineBinding;
 import java.util.ArrayList;
 
 public class ButtonAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
+    
     private final ArrayList<String> data = new ArrayList<>();
     private onBindListener onBindListener;
-
+    
     public void setListener(onBindListener onBindListener) {
         this.onBindListener = onBindListener;
     }
-
+    
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -35,21 +35,21 @@ public class ButtonAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return new RecyclerView.ViewHolder(itemView) {
         };
     }
-
+    
     public void add(String text) {
         data.add(text);
         notifyItemChanged(0);
     }
-
+    
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
     }
-
+    
     @Override
     public int getItemCount() {
         return 1;
     }
-
+    
     public interface onBindListener {
         void onBind(Button button, int position);
     }

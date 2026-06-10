@@ -37,9 +37,9 @@ import com.sysu.edu.view.AdapterListener;
 import com.sysu.edu.view.RecyclerAdapter;
 
 public class HomeworkMainFragment extends Fragment {
-
+    
     HttpManager http;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -82,7 +82,7 @@ public class HomeworkMainFragment extends Fragment {
                                         binding.view.setOnClickListener(_ -> startActivity(new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(homeworkAdapter.get(position).getString("url")))));
                                         binding.upload.setOnClickListener(_ -> startActivity(new Intent(requireContext(), BrowserActivity.class).setData(Uri.parse(homeworkAdapter.get(position).getString("viewurl")))));
                                     }
-
+                                    
                                     @Override
                                     public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
                                     }
@@ -100,23 +100,23 @@ public class HomeworkMainFragment extends Fragment {
         getLmsTask(authorizationJar.getToken("lms.sysu.edu.cn"));
         return binding.getRoot();
     }
-
+    
     public void getLmsTask(String key) {
-
+        
         http.postRequest(String.format("https://lms.sysu.edu.cn/lib/ajax/service.php?sesskey=%s&info=core_calendar_get_calendar_upcoming_view", key), "[{\"index\":0,\"methodname\":\"core_calendar_get_calendar_upcoming_view\",\"args\":{\"courseid\":\"1\",\"categoryid\":\"0\"}}]", 0);
     }
-
-
+    
+    
     static class HomeworkAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
+            
             return new RecyclerView.ViewHolder(ItemHomeworkBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemHomeworkBinding binding = ItemHomeworkBinding.bind(holder.itemView);

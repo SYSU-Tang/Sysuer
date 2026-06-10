@@ -19,14 +19,14 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.ServiceCompat;
 
 public class CourseService extends Service {
-
+    
     Handler serviceHandler;
-
+    
     @Override
     public IBinder onBind(Intent intent) {
         return new MyBinder();
     }
-
+    
     @Override
     public void onCreate() {
         System.out.println("CourseService onCreate");
@@ -51,8 +51,8 @@ public class CourseService extends Service {
             type = ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
         }
         ServiceCompat.startForeground(this, 1, notification, type);
-
-
+        
+        
         HandlerThread thread = new HandlerThread("ServiceStartArguments", android.os.Process.THREAD_PRIORITY_FOREGROUND);
         thread.start();
         serviceHandler = new Handler(thread.getLooper()) {
@@ -68,23 +68,23 @@ public class CourseService extends Service {
             }
         };
     }
-
+    
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         System.out.println("CourseService onStartCommand");
-
+        
         Message msg = serviceHandler.obtainMessage();
         msg.arg1 = startId;
         serviceHandler.sendMessage(msg);
         return START_STICKY;
     }
-
+    
     @Override
     public void onDestroy() {
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE);
         super.onDestroy();
     }
-
+    
     class MyBinder extends Binder {
         /**
          * 获取Service的方法

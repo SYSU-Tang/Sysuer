@@ -22,10 +22,10 @@ import com.sysu.edu.databinding.ItemCourseOutlineBinding;
 import com.sysu.edu.view.RecyclerAdapter;
 
 public class CourseOutlineFragment extends Fragment {
-
+    
     JSONArray data;
     View root;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (root == null) {
@@ -41,20 +41,21 @@ public class CourseOutlineFragment extends Fragment {
         }
         return root;
     }
-
+    
     @Override
     public void setArguments(@Nullable Bundle args) {
         if (args != null) data = JSONArray.parse(args.getString("data"));
         super.setArguments(args);
     }
-
+    
     static class CourseOutlineAdapter extends RecyclerAdapter<JSONObject> {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(ItemCourseOutlineBinding.inflate(LayoutInflater.from(parent.getContext())).getRoot()) {};
+            return new RecyclerView.ViewHolder(ItemCourseOutlineBinding.inflate(LayoutInflater.from(parent.getContext())).getRoot()) {
+            };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemCourseOutlineBinding binding = ItemCourseOutlineBinding.bind(holder.itemView);
@@ -62,11 +63,11 @@ public class CourseOutlineFragment extends Fragment {
             binding.intro.setText(String.format("教学内容：%s\n育人元素：%s\n重点、难点：%s", convert(position, "teachingMainContent"), convert(position, "courseElements"), convert(position, "keyPoints")));
             super.onBindViewHolder(holder, position);
         }
-
+        
         String convert(int position, String key) {
             return trim(data.get(position).getString(key)).replace("\n\n", "\n");
         }
-
+        
         public String toMarkdown() {
             StringBuilder md = new StringBuilder();
             md.append("|章节|学时|教学内容|育人元素|重点、难点|\n|---|---|---|---|---|\n");

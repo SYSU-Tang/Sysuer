@@ -1,35 +1,30 @@
-package com.sysu.edu.extra;
+package com.sysu.edu.extra
 
-import android.os.Bundle;
+import android.os.Bundle
+import android.view.View
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.api.Params
+import com.sysu.edu.databinding.ActivityInfoBinding
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.sysu.edu.R;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.ActivityInfoBinding;
-
-import java.util.ArrayList;
-
-public class AboutActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityInfoBinding binding = ActivityInfoBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        final ArrayList<Long> click = new ArrayList<>();
-        Params params = new Params(this);
-        binding.toolbar.setNavigationOnClickListener(_ -> finishAfterTransition());
-        binding.icon.setOnClickListener(_ -> {
-            if (click.isEmpty() || System.currentTimeMillis() - click.get(click.size() - 1) < 500) {
-                if (click.size() == 4) {
-                    params.toast(params.isDeveloper() ? R.string.developer_disabled : R.string.developer_enabled);
-                    params.setDeveloper(!params.isDeveloper());
-                    click.clear();
-                } else click.add(System.currentTimeMillis());
-            } else click.clear();
-        });
-    }
+class AboutActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityInfoBinding.inflate(layoutInflater)
+		setContentView(binding.getRoot())
+		val click = ArrayList<Long?>()
+		val params = Params(this)
+		binding.toolbar.setNavigationOnClickListener { _: View? -> finishAfterTransition() }
+		binding.icon.setOnClickListener { _: View? ->
+			if (click.isEmpty() || System.currentTimeMillis() - click[click.size - 1]!! < 500) {
+				if (click.size == 4) {
+					params.toast(if (params.isDeveloper) R.string.developer_disabled else R.string.developer_enabled)
+					params.isDeveloper = !params.isDeveloper
+					click.clear()
+				} else click.add(System.currentTimeMillis())
+			} else click.clear()
+		}
+	}
 }
 
 

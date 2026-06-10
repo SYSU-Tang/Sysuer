@@ -5,9 +5,8 @@ import static com.sysu.edu.api.CommonUtil.isEmpty;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityListBinding;
 import com.sysu.edu.model.JwxtModel;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SchoolWorkWarning extends AppCompatActivity {
+public class SchoolWorkWarning extends BaseActivity {
     
     String alarmOperationTerm;
     String alarmTerm;
@@ -25,11 +24,13 @@ public class SchoolWorkWarning extends AppCompatActivity {
     int total = -1;
     StaggeredFragment fragment;
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

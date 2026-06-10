@@ -4,24 +4,26 @@ import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.databinding.ActivityLeaveReturnRegistrationBinding;
 import com.sysu.edu.model.XgxtModel;
 
 import java.util.ArrayList;
 
-public class LeaveReturnRegistrationActivity extends AppCompatActivity {
+public class LeaveReturnRegistrationActivity extends BaseActivity {
     
     XgxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

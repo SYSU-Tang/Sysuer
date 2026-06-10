@@ -12,12 +12,12 @@ import com.alibaba.fastjson2.JSONObject;
 
 public class BrowserHelper extends SQLiteOpenHelper {
     private final Context context;
-
+    
     public BrowserHelper(Context context) {
         super(context, "browser.db", null, 12);
         this.context = context;
     }
-
+    
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS ua (id INTEGER PRIMARY KEY AUTOINCREMENT, uaId INTEGER UNIQUE, position INTEGER, title TEXT, ua TEXT, description TEXT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
@@ -31,7 +31,7 @@ public class BrowserHelper extends SQLiteOpenHelper {
             db.execSQL("INSERT OR IGNORE INTO ua (uaId, position, title, ua, description) VALUES (?, ?, ?, ?, ?)", new Object[]{item.getInteger("uaId"), item.getInteger("position"), item.getString("title"), item.getString("ua"), item.getString("description")});
         });
     }
-
+    
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
@@ -87,13 +87,13 @@ public class BrowserHelper extends SQLiteOpenHelper {
 //            value.put("description", "在线教学平台，视频一键通关");
 //            value.put("matches", "[\"://lms.sysu.edu.cn/mod/fsresource/view.php\"]");
 //            value.put("script", "var sourceData = playerdata && playerdata.source ? JSON.parse(playerdata.source) : {};\nvar sources = {};\nif (sourceData?.FD) {\n    sources.FD = [{\n        src: sourceData.FD\n    }];\n}\nif (sourceData?.LD) {\n    sources.LD = [{\n        src: sourceData.LD\n    }];\n}\nif (sourceData?.SD) {\n    sources.SD = [{\n        src: sourceData.SD\n    }];\n    defaultRes = 'SD';\n}\nif (sourceData?.HD) {\n    sources.HD = [{\n        src: sourceData.HD\n    }];\n}\nif (sourceData?.OD) {\n    sources.FHD = [{\n        src: sourceData.OD\n    }];\n}\nvar playerWrapper = new TCPlayerWrapper(\n    \"fsplayer-container-id_html5_api\",\n    sources,\n    playerdata.siteUrl + \"/lib/ajax/service.php?sesskey=\" + playerdata.sesskey,\n    `fs_${playerdata.userid}_${playerdata.fsresourceid || 0}`,\n    15 * 1000,\n    playerdata.progress == 1\n);\nfor (let i = 0; i < playerWrapper.player.duration()/4+1 ; i++){setTimeout(()=>{playerWrapper.viewTotalTime = 4000 ;playerWrapper.ajaxOrder()},i*10);\n}");
-            db.update("js",  value, "title LIKE  ?", new String[]{"%新心理健康视频速通%"});
+            db.update("js", value, "title LIKE  ?", new String[]{"%新心理健康视频速通%"});
         }
-
+        
     }
-
+    
     public Context getContext() {
         return context;
     }
-
+    
 }

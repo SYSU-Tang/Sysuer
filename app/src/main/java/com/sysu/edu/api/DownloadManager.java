@@ -27,7 +27,7 @@ import okhttp3.Response;
 public class DownloadManager {
     
     private static final Handler handler = new Handler(Looper.getMainLooper());
-
+    
     /**
      * 下载网络文件到指定路径
      *
@@ -38,7 +38,7 @@ public class DownloadManager {
     public static void downloadFile(Activity context, String url, String path, DownloadListener listener) {
         downloadFile(context, new Request.Builder().url(url).build(), path, listener);
     }
-
+    
     /**
      * 下载网络文件到指定路径
      *
@@ -49,17 +49,17 @@ public class DownloadManager {
     public static void downloadFile(Activity context, String url, String path) {
         downloadFile(context, new Request.Builder().url(url).build(), path, null);
     }
-
+    
     /**
-    * 下载网络文件到指定路径
+     * 下载网络文件到指定路径
      *
-    * @param context 上下文对象
-    * @param request 网络请求对象
-    */
+     * @param context 上下文对象
+     * @param request 网络请求对象
+     */
     public static void downloadFile(Activity context, Request request, String path) {
         downloadFile(context, request, path, null);
     }
-
+    
     /**
      * 下载网络文件到指定路径
      *
@@ -77,7 +77,7 @@ public class DownloadManager {
                 if (listener != null)
                     listener.onDownloadError(404, "下载网络文件报错：" + e.getMessage());
             }
-
+            
             @Override
             public void onResponse(@NonNull Call call, @NonNull final Response response) {
 //                MediaType type = response.body().contentType();
@@ -111,7 +111,7 @@ public class DownloadManager {
             }
         });
     }
-
+    
     /**
      * 打开文件
      *
@@ -121,7 +121,7 @@ public class DownloadManager {
     public static void openFile(Context context, String path) {
         context.startActivity(getOpenFileIntent(context, path));
     }
-
+    
     /**
      * 获取打开文件的 Intent
      *
@@ -138,7 +138,7 @@ public class DownloadManager {
                 context.getString(R.string.share)
         );
     }
-
+    
     /**
      * 下载监听器
      */
@@ -149,14 +149,14 @@ public class DownloadManager {
          * @param progress 下载进度
          */
         void onDownloadProgress(long progress, long total);
-
+        
         /**
          * 下载完成回调
          *
          * @param path 下载完成的文件路径
          */
         void onDownloadComplete(String path);
-
+        
         /**
          * 下载错误回调
          *

@@ -12,11 +12,11 @@ import androidx.work.WorkerParameters;
 import java.util.List;
 
 public class DailyWidgetWorker extends Worker {
-
+    
     public DailyWidgetWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
-
+    
     @NonNull
     @Override
     public Result doWork() {

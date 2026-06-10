@@ -29,6 +29,7 @@ public class CourseQueryResultFragment extends StaggeredFragment {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -53,7 +54,7 @@ public class CourseQueryResultFragment extends StaggeredFragment {
                         values.set(10, values.get(10).replace(",", "\n").replace("/", " | "));
                     add(values.get(1), List.of("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values);
                 });
-            } 
+            }
         });
         getCourses();
         return courseQueryResultBinding.getRoot();

@@ -3,9 +3,8 @@ package com.sysu.edu.browser;
 import android.content.ContentValues;
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityJsEdiitorBinding;
 
@@ -21,10 +20,10 @@ import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry;
 import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel;
 import io.github.rosemoe.sora.langs.textmate.registry.provider.AssetsFileResolver;
 
-public class JSEditorActivity extends AppCompatActivity {
-
+public class JSEditorActivity extends BaseActivity {
+    
     BrowserHelper db;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

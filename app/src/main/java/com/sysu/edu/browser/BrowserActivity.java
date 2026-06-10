@@ -40,7 +40,6 @@ import android.widget.ImageView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.lifecycle.MutableLiveData;
@@ -54,6 +53,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.DownloadManager;
 import com.sysu.edu.api.Params;
@@ -69,6 +69,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -81,8 +82,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class BrowserActivity extends AppCompatActivity {
+public class BrowserActivity extends BaseActivity {
     final MutableLiveData<Integer> progress = new MutableLiveData<>();
+    final CompositeDisposable disposable = new CompositeDisposable();
     WebView web;
     ActivityBrowserBinding binding;
     WebSettings webSettings;
@@ -91,7 +93,6 @@ public class BrowserActivity extends AppCompatActivity {
     BrowserHelper db;
     JavaScript js;
     Params params;
-    final CompositeDisposable disposable = new CompositeDisposable();
     
     @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     @Override
@@ -158,13 +159,13 @@ public class BrowserActivity extends AppCompatActivity {
                     web.loadUrl(url.replace(".sysu.edu.cn/", "-443.webvpn.sysu.edu.cn/"));
                 } else if (Pattern.compile("://cas.*?sysu.edu.cn/login/mfaLogin.html").matcher(link).find()) {
                     cookie.setCookie("https://cas.sysu.edu.cn", "device_trust_Cookie=true; Path=/esc-sso; Domain=cas.sysu.edu.cn;");
-                    try {
-                        web.loadUrl(toStringOrDefault(Uri.parse(URLDecoder.decode(link, "utf-8")).getQueryParameter("appUrl")));
-                    } catch (UnsupportedEncodingException _) {
-                    }
+                    web.loadUrl(toStringOrDefault(Uri.parse(URLDecoder.decode(link, StandardCharsets.UTF_8)).getQueryParameter("appUrl")));
                 } else if (preference.isPC())
                     view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null);
-                js.searchJS(link, true).forEach(a -> view.evaluateJavascript(a.getString("script"), null));
+                js.searchJS(link, true).forEach(a -> {
+                    System.out.println(a);
+                    view.evaluateJavascript(a.getString("script"), null);
+                });
                 super.onPageFinished(view, link);
             }
         });
@@ -707,13 +708,9 @@ public class BrowserActivity extends AppCompatActivity {
     }
     
     String getFileName(String url) {
-        try {
-            String path = URLDecoder.decode(URI.create(url).getPath(), "UTF-8");
-            int i = path.lastIndexOf("/");
-            return i >= 0 ? path.substring(i + 1) : path;
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        String path = URLDecoder.decode(URI.create(url).getPath(), StandardCharsets.UTF_8);
+        int i = path.lastIndexOf("/");
+        return i >= 0 ? path.substring(i + 1) : path;
     }
     
     @Override

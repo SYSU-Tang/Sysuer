@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +22,7 @@ import androidx.viewbinding.ViewBinding;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.AuthorizationManager;
@@ -38,12 +38,12 @@ import com.sysu.edu.view.RecyclerAdapter;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class NewsActivity extends AppCompatActivity {
-
+public class NewsActivity extends BaseActivity {
+    
     HttpManager http;
     AuthorizationManager authorizationManager;
     EditText edit;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,16 +55,16 @@ public class NewsActivity extends AppCompatActivity {
         binding.pager.setAdapter(adapter);
         new TabLayoutMediator(binding.tabLayout, binding.pager, (tab, position) -> tab.setText(new String[]{"资讯", "公众号", "通知", "今日中大"}[position])).attach();
         SuggestionAdapter suggestionAdapter = new SuggestionAdapter();
-
+        
         suggestionAdapter.setListener(new AdapterListener() {
             @Override
             public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
                 holder.itemView.setOnClickListener(v -> startActivity(new Intent(NewsActivity.this, BrowserActivity.class).setData(Uri.parse(String.format("https://iportal.sysu.edu.cn/searchWeb/#/index?searchWord=%s&module=default&size=10&current=1&sortType=score&searchType=3", suggestionAdapter.get(position)))), ActivityOptionsCompat.makeSceneTransitionAnimation(NewsActivity.this, v, "miniapp").toBundle()));
             }
-
+            
             @Override
             public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
-
+            
             }
         });
         Params params = new Params(this);
@@ -93,7 +93,7 @@ public class NewsActivity extends AppCompatActivity {
                         getSuggestions();
                         return;
                     }
-
+                    
                 }
                 JSONObject data = Objects.requireNonNull(JSONObject.parseObject(json));
                 Object code = data.get("code");
@@ -122,43 +122,43 @@ public class NewsActivity extends AppCompatActivity {
         edit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+            
             }
-
+            
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (!edit.getText().toString().isEmpty()) getSuggestions(edit.getText().toString());
             }
-
+            
             @Override
             public void afterTextChanged(Editable editable) {
-
+            
             }
         });
     }
-
+    
     void getSuggestions() {
         getSuggestions(edit.getText().toString());
     }
-
+    
     void getSuggestions(String keyword) {
         http.postRequest(authorizationManager.getBaseUrl() + "ai_service/search-server/needle/suggest", String.format("{\"aliasName\":\"collection_data\",\"keyWord\":\"%s\"}", keyword), 1);
     }
-
+    
     static class SuggestionAdapter extends RecyclerAdapter<String> {
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sug, parent, false)) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ((TextView) holder.itemView).setText(trim(get(position)));
             super.onBindViewHolder(holder, position);
         }
-
+        
     }
 }

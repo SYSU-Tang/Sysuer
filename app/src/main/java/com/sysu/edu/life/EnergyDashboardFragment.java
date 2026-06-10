@@ -37,14 +37,14 @@ import java.util.List;
 import java.util.Locale;
 
 public class EnergyDashboardFragment extends Fragment {
-
-    HttpManager http;
-    String name;
+    
     final RequestQueue requestQueue = new RequestQueue();
     final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
     final ConcatAdapter adapter = new ConcatAdapter();
+    HttpManager http;
+    String name;
     FragmentEnergyDashboardBinding binding;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -124,27 +124,27 @@ public class EnergyDashboardFragment extends Fragment {
         }
         return binding.getRoot();
     }
-
+    
     void getUserInfo() {
         http.getRequest("https://zhny.sysu.edu.cn/kbp/auth/userInfo", 0);
     }
-
+    
     void getElectricityInfo(String username) {
         http.getRequest("https://zhny.sysu.edu.cn/kbp/ele/wechat/eleSituation?username=" + username, 1);
     }
-
+    
     void getWaterInfo() {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/cwbs/user/usage/stats", "", 2);
     }
-
+    
     void getOrderInfo(String room, String date) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/record/roomBalance/detail", String.format("{\"dateType\":\"month\",\"roomCode\":\"%s\",\"dateRange\":\"%s\",\"id\":null,\"tradeTime\":\"\"}", room, date), 3);
     }
-
+    
     void getRoom(String username) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/admin/sys/personRoom/list", "{\"username\":\"" + username + "\"}", 4);
     }
-
+    
     void reset() {
         adapter.getAdapters().forEach(adapter::removeAdapter);
     }

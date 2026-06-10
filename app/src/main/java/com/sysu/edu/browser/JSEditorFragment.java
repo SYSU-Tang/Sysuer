@@ -17,10 +17,10 @@ import com.sysu.edu.R;
 import com.sysu.edu.databinding.FragmentJsEditorBinding;
 
 public class JSEditorFragment extends Fragment {
-
-
+    
+    
     BrowserHelper db;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -64,10 +64,10 @@ public class JSEditorFragment extends Fragment {
             binding.editor.setText(data.getString("script"));
             if (fragment != null) fragment.setData(data);
         }
-
+        
         return binding.getRoot();
     }
-
+    
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -78,5 +78,5 @@ public class JSEditorFragment extends Fragment {
         setSharedElementEnterTransition(transition);
         setSharedElementReturnTransition(transition);
     }
-
+    
 }

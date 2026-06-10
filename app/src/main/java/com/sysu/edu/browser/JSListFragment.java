@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class JSListFragment extends Fragment {
-
+    
     BrowserHelper db;
     FragmentRecyclerFabBinding binding;
     private BrowserActivity.JSAdapter jsAdapter;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -79,15 +79,15 @@ public class JSListFragment extends Fragment {
                 });
                 holder.itemView.setAlpha(jsAdapter.get(position).getInteger("state") == 1 ? 1f : 0.5f);
             }
-
+            
             @Override
             public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
-
+            
             }
         });
         binding.recyclerViewScroll.getRoot().setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerViewScroll.getRoot().setAdapter(jsAdapter);
-
+        
         getJSList();
         binding.fab.setIconResource(R.drawable.add);
         binding.fab.setText(R.string.add);
@@ -96,7 +96,7 @@ public class JSListFragment extends Fragment {
         binding.fab.setTransitionName("miniapp");
         return binding.getRoot();
     }
-
+    
     void getJSList() {
         Cursor cursor = db.getReadableDatabase().query("js", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
@@ -113,8 +113,8 @@ public class JSListFragment extends Fragment {
         }
         cursor.close();
     }
-
-
+    
+    
     void add() {
         ContentValues values = new ContentValues();
         values.put("title", "新脚本");
@@ -127,7 +127,7 @@ public class JSListFragment extends Fragment {
         bundle.putString("item", JSONObject.of("title", "新脚本", "description", "", "matches", "[]", "author", "", "run", 0, "script", "", "state", 1, "id", id).toString());
         Navigation.findNavController(binding.getRoot()).navigate(R.id.list_to_info, bundle, null, new FragmentNavigator.Extras(Map.of(binding.fab, "miniapp")));
     }
-
+    
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -141,7 +141,7 @@ public class JSListFragment extends Fragment {
             requireActivity().getIntent().removeExtra("operation");
         }
     }
-
+    
     @Override
     public void onResume() {
         super.onResume();

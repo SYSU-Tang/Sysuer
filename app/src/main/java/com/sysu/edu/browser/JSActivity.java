@@ -2,16 +2,16 @@ package com.sysu.edu.browser;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityJsActivityBinding;
 
-public class JSActivity extends AppCompatActivity {
-
+public class JSActivity extends BaseActivity {
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +23,6 @@ public class JSActivity extends AppCompatActivity {
                 supportFinishAfterTransition();
                 return false;
             }).build());
-        getMenuInflater().inflate(R.menu.editor,binding.toolbar.getMenu());
+        getMenuInflater().inflate(R.menu.editor, binding.toolbar.getMenu());
     }
 }

@@ -24,18 +24,18 @@ import java.util.Map;
 
 public class TodoAdapter extends RecyclerAdapter<TodoInfo> {
     private final TodoManager todoManager;
-
+    
     public TodoAdapter(TodoManager todoManager) {
         this.todoManager = todoManager;
     }
-
+    
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new RecyclerView.ViewHolder(ItemTodoBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
         };
     }
-
+    
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ItemTodoBinding binding = ItemTodoBinding.bind(holder.itemView);
@@ -46,7 +46,7 @@ public class TodoAdapter extends RecyclerAdapter<TodoInfo> {
         String description = item.getDescription().getValue();
         if (isEmpty(description)) binding.description.setVisibility(View.GONE);
         else binding.description.setText(description);
-
+        
         String type = item.getType().getValue();
         if (isEmpty(type)) binding.type.setVisibility(View.GONE);
         else binding.type.setText(type);
@@ -82,7 +82,7 @@ public class TodoAdapter extends RecyclerAdapter<TodoInfo> {
         super.onBindViewHolder(holder, position);
         //binding.dueDate.setText(item.get("due_date"));
     }
-
+    
     @Override
     public int getItemViewType(int position) {
         return 1;

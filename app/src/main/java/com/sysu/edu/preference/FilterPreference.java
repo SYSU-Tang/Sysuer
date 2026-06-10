@@ -18,25 +18,25 @@ import com.sysu.edu.R;
 import com.sysu.edu.databinding.PreferenceFilterBinding;
 
 public class FilterPreference extends ListPreference {
-
-
+    
+    
     final MutableLiveData<String> valueLiveData = new MutableLiveData<>();
     boolean isFilter;
     boolean canEdit;
     TextWatcher textWatcher;
-
+    
     public FilterPreference(@NonNull Context context) {
         this(context, null);
     }
-
+    
     public FilterPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.attr.filterPreferenceStyle);
     }
-
+    
     public FilterPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
-
+    
     public FilterPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setLayoutResource(R.layout.preference_filter);
@@ -50,7 +50,7 @@ public class FilterPreference extends ListPreference {
 //            throw new RuntimeException(e);
         }
     }
-
+    
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
@@ -74,11 +74,11 @@ public class FilterPreference extends ListPreference {
                 @Override
                 public void afterTextChanged(Editable s) {
                 }
-
+                
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 }
-
+                
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (!s.toString().equals(valueLiveData.getValue()))
@@ -88,23 +88,23 @@ public class FilterPreference extends ListPreference {
             binding.textField.addTextChangedListener(textWatcher);
         }
         binding.getRoot().setOnClickListener(_ -> binding.textField.showDropDown());
-
+        
     }
-
+    
     @Override
     protected void onClick() {
-
+    
     }
-
+    
     public MutableLiveData<String> getValueLiveData() {
         return valueLiveData;
     }
-
+    
     public void setIsFilter(boolean filter) {
         isFilter = filter;
         notifyChanged();
     }
-
+    
     @Override
     public void setEntries(CharSequence[] entries) {
         super.setEntries(entries);

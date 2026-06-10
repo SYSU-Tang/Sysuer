@@ -3,9 +3,8 @@ package com.sysu.edu.academic;
 import android.os.Bundle;
 import android.view.WindowManager;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityCourseSelectionBinding;
 import com.sysu.edu.view.Pager2Adapter;
@@ -13,8 +12,8 @@ import com.sysu.edu.view.Pager2Adapter;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class CourseSelectionActivity extends AppCompatActivity {
-
+public class CourseSelectionActivity extends BaseActivity {
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -9,11 +9,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 public class ClassIsland {
-
+    
     private static final String CHANNEL_ID = "course_schedule_channel";
     private static final String CHANNEL_NAME = "课程表通知";
     private static final int NOTIFICATION_ID = 1001;
-
+    
     /**
      * 发送课程表灵动岛通知
      **/
@@ -21,7 +21,7 @@ public class ClassIsland {
                                               String className,
                                               String timeRemaining,
                                               String classroom) {
-
+        
         createNotificationChannel(context);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID);
         builder.setSmallIcon(R.drawable.book)
@@ -34,7 +34,7 @@ public class ClassIsland {
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build());
     }
-
+    
     /**
      * 创建通知渠道
      */

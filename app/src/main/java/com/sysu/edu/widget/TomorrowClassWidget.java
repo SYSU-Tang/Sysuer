@@ -33,7 +33,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class TomorrowClassWidget extends AppWidgetProvider {
-
+    
     HttpManager http;
     
     @Override
@@ -83,7 +83,7 @@ public class TomorrowClassWidget extends AppWidgetProvider {
         });
         getTomorrowSchedule();
     }
-
+    
     void getTomorrowSchedule() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         http.postRequest("https://mportal.sysu.edu.cn/newClient/api/schedule/newSchedule/getNextDaySchedule", String.format("{\"types\":[],\"startTime\":\"%s\",\"endTime\":\"%s\"}", tomorrow, tomorrow.plusDays(1)), 0);

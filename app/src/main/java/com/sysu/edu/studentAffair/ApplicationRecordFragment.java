@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment;
 import com.sysu.edu.R;
 
 public class ApplicationRecordFragment extends Fragment {
-
-
+    
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,

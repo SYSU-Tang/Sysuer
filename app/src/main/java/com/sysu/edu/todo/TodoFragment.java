@@ -25,17 +25,17 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class TodoFragment extends Fragment {
-
+    
     final androidx.recyclerview.widget.ConcatAdapter concatAdapter = new androidx.recyclerview.widget.ConcatAdapter(new androidx.recyclerview.widget.ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
-    FragmentTodoBinding binding;
     final TodoInfo todoInfo = new TodoInfo();
+    FragmentTodoBinding binding;
     String date;
     boolean due = true;
     boolean ddl = false;
     boolean todo = true;
     boolean done = true;
     private TodoManager todoManager;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentTodoBinding.inflate(inflater, container, false);
@@ -46,7 +46,7 @@ public class TodoFragment extends Fragment {
             @Override
             public void onCalendarOutOfRange(Calendar calendar) {
             }
-
+            
             @Override
             public void onCalendarSelect(Calendar calendar, boolean isClick) {
                 date = simpleDateFormat.format(calendar.getTimeInMillis());
@@ -63,10 +63,10 @@ public class TodoFragment extends Fragment {
             todoManager.showTodoAddDialog();
             todoManager.getTodoInfo().setDueDate(getDate(simpleDateFormat));
         });
-
+        
         todoInfo.setStatus(null);
         date = getDate(simpleDateFormat);
-
+        
         ((MaterialButtonToggleGroup) requireActivity().findViewById(R.id.todo_date)).addOnButtonCheckedListener((_, checkedId, isChecked) -> {
             if (checkedId == R.id.due_todo) due = isChecked;
             else if (checkedId == R.id.ddl_todo) ddl = isChecked;
@@ -83,17 +83,17 @@ public class TodoFragment extends Fragment {
         refresh();
         return binding.getRoot();
     }
-
+    
     private String getDate(SimpleDateFormat simpleDateFormat) {
         return simpleDateFormat.format(binding.calendarView.getSelectedCalendar().getTimeInMillis());
     }
-
+    
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
-
+    
     public void refresh() {
         ArrayList<String> a = new ArrayList<>();
         ArrayList<String> b = new ArrayList<>();
@@ -145,7 +145,7 @@ public class TodoFragment extends Fragment {
         }
         todoManager.refresh(String.join(" AND ", a), b.toArray(new String[0]));
     }
-
+    
     public TodoManager getTodoManager() {
         return todoManager;
     }

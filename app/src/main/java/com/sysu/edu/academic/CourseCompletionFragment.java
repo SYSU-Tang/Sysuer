@@ -27,6 +27,7 @@ public class CourseCompletionFragment extends StaggeredFragment {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
@@ -49,7 +50,7 @@ public class CourseCompletionFragment extends StaggeredFragment {
                         });
                     }
                 }
-            } 
+            }
         });
         model.next();
         return view;

@@ -17,7 +17,6 @@ import android.os.StatFs;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.installations.BuildConfig;
@@ -32,13 +31,12 @@ import java.util.TimeZone;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.ext.tables.TablePlugin;
 
-public class CrashActivity extends AppCompatActivity {
+public class CrashActivity extends BaseActivity {
     
     final MutableLiveData<String> crash = new MutableLiveData<>();
     ActivityCrashBinding binding;
     String crashInfo;
     Params params;
-    
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

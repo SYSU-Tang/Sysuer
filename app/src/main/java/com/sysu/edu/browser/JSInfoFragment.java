@@ -27,15 +27,15 @@ import rikka.material.preference.MaterialSwitchPreference;
 import rikka.preference.SimpleMenuPreference;
 
 public class JSInfoFragment extends PreferenceFragmentCompat {
-
-
+    
+    
     BrowserHelper db;
-
+    
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.js_info, rootKey);
     }
-
+    
     void save(ContentValues value, String id) {
         value.clear();
         getData().forEach((k, v) -> {
@@ -44,7 +44,7 @@ public class JSInfoFragment extends PreferenceFragmentCompat {
         });
         db.getWritableDatabase().update("js", value, "id = ?", new String[]{id});
     }
-
+    
     public JSONObject getData() {
         PreferenceUtil preferenceUtil = new PreferenceUtil(this);
         preferenceUtil.insertEditValue("title", "title");
@@ -55,7 +55,7 @@ public class JSInfoFragment extends PreferenceFragmentCompat {
         preferenceUtil.insertSwitchValue("state", "state", 0, 1);
         return preferenceUtil.getParams();
     }
-
+    
     public void setData(JSONObject info) {
         ((EditPreference) Objects.requireNonNull(findPreference("title"))).setValue(info.getString("title"));
         ((EditPreference) Objects.requireNonNull(findPreference("description"))).setValue(info.getString("description"));
@@ -64,7 +64,7 @@ public class JSInfoFragment extends PreferenceFragmentCompat {
         ((MaterialSwitchPreference) Objects.requireNonNull(findPreference("state"))).setChecked(info.getInteger("state") == 0);
         ((SimpleMenuPreference) Objects.requireNonNull(findPreference("run"))).setValue(info.getString("run"));
     }
-
+    
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         db = new BrowserHelper(requireContext());

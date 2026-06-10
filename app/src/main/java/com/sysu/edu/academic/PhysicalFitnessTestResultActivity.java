@@ -5,11 +5,11 @@ import android.os.Handler;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.HttpManager;
 import com.sysu.edu.api.Params;
@@ -25,12 +25,12 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PhysicalFitnessTestResultActivity extends AppCompatActivity {
-
+public class PhysicalFitnessTestResultActivity extends BaseActivity {
+    
     Params params;
     HttpManager http;
     int position;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,17 +84,17 @@ public class PhysicalFitnessTestResultActivity extends AppCompatActivity {
                                                 }
                                             });
                                         }
-
+                                        
                                         @Override
                                         public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
-
+                                        
                                         }
                                     });
                                 }
-
+                                
                                 @Override
                                 public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
-
+                                
                                 }
                             });
                             if (msg.what == 0) getCredit();
@@ -125,23 +125,23 @@ public class PhysicalFitnessTestResultActivity extends AppCompatActivity {
         http.setUA("Mozilla/5.0 (Linux; Android 15.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36");
         getResult();
     }
-
+    
     void getDetail(String url) {
         http.getRequest("https://tice.sysu.edu.cn" + url, 3);
     }
-
+    
     void getCreditDetail(String url) {
         http.getRequest("https://tice.sysu.edu.cn" + url, 4);
     }
-
+    
     void getResult() {
         http.getRequest("https://tice.sysu.edu.cn/m/tice", 0);
     }
-
+    
     void getCredit() {
         http.getRequest("https://tice.sysu.edu.cn/m/kwjfList", 1);
     }
-
+    
     void getSwim() {
         http.getRequest("https://tice.sysu.edu.cn/m/tice/studentSwim", 2);
     }

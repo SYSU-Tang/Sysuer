@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityGradeBinding;
@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 
 import io.noties.markwon.Markwon;
 
-public class GradeActivity extends AppCompatActivity {
+public class GradeActivity extends BaseActivity {
     
     final MutableLiveData<String> trainType = new MutableLiveData<>();
     final MutableLiveData<String> year = new MutableLiveData<>();
@@ -47,11 +47,13 @@ public class GradeActivity extends AppCompatActivity {
     ArrayList<String> years;
     JwxtModel model;
     Params params;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -214,7 +216,7 @@ public class GradeActivity extends AppCompatActivity {
                         header.add(getString(R.string.total_year), List.of(getString(R.string.total_rank), getString(R.string.total_credit), getString(R.string.total_point)), List.of(String.format("%s/%s", totalRank, total), totalCredit, totalPoint));
                         header.add(terms[term.getValue() == null ? 1 : term.getValue() - 1], List.of(getString(R.string.current_rank), getString(R.string.current_point)), List.of(String.format("%s/%s", rank, total), point));
                         header.add(getString(R.string.credit), List.of(getString(R.string.term_credit), getString(R.string.public_compulsory_credit), getString(R.string.public_select_credit), getString(R.string.major_compulsory_credit), getString(R.string.major_select_credit), getString(R.string.honor_credit)),
-                                extractValue(pull.getJSONObject("stuCredit"),new String[]{"allGetCredit", "publicGetCredit", "publicSelectGetCredit", "majorGetCredit", "majorSelectGetCredit", "honorCourseGetCredit"}));
+                                extractValue(pull.getJSONObject("stuCredit"), new String[]{"allGetCredit", "publicGetCredit", "publicSelectGetCredit", "majorGetCredit", "majorSelectGetCredit", "honorCourseGetCredit"}));
                     }
                     case 5 -> {
                         if (response.containsKey("data") && !response.getJSONObject("data").getInteger("total").equals(0))

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
@@ -12,6 +11,7 @@ import androidx.viewbinding.ViewBinding;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.browser.BrowserActivity;
 import com.sysu.edu.databinding.ActivityPagerBinding;
@@ -21,7 +21,7 @@ import com.sysu.edu.view.Pager2Adapter;
 
 import java.util.stream.IntStream;
 
-public class AcademyNotification extends AppCompatActivity {
+public class AcademyNotification extends BaseActivity {
     JwxtModel model;
     
     @Override

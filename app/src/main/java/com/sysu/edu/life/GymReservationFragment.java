@@ -53,7 +53,7 @@ public class GymReservationFragment extends Fragment {
     Handler handler;
     private ConcatAdapter concatAdapter;
     private FragmentGymOrderBinding binding;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -100,7 +100,7 @@ public class GymReservationFragment extends Fragment {
                                         value,
                                         List.of(R.drawable.location, R.drawable.time, R.drawable.alarm, R.drawable.money));
                                 preferenceAdapter.add(getString(R.string.pay_way), item.getBoolean("IsCash") ? getString(R.string.cash) : getString(R.string.pe_credit), R.drawable.money);
-
+                                
                             });
                             case 1 -> regetReservation();
                         }
@@ -154,23 +154,23 @@ public class GymReservationFragment extends Fragment {
         });
         return binding.getRoot();
     }
-
+    
     private void regetReservation() {
         reset();
         getReservation();
     }
-
+    
     void reset() {
         concatAdapter.getAdapters().forEach(adapter -> concatAdapter.removeAdapter(adapter));
     }
-
+    
     void getReservation() {
         if (viewModel.reservationFromTo.getValue() != null && viewModel.reservationFromTo.getValue().getSecond() != null && viewModel.reservationFromTo.getValue().getFirst() != null)
             http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/BookingRequestVenue?all=false&startDate=%s&endDate=%s&waitingList=false", dateFormat.format(viewModel.reservationFromTo.getValue().getFirst()), dateFormat.format(viewModel.reservationFromTo.getValue().getSecond())), 0);
     }
-
+    
     void deleteReservation(String bookingId) {
         http.deleteRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/BookingRequestVenue/%s", bookingId), 1);
     }
-
+    
 }

@@ -46,14 +46,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
 public class EnergyAccountFragment extends Fragment {
-
+    
+    final RequestQueue requestQueue = new RequestQueue();
+    final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
     HttpManager http;
     String roomCode;
     String username;
     FragmentEnergyOrderBinding binding;
-    final RequestQueue requestQueue = new RequestQueue();
-    final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -145,23 +145,23 @@ public class EnergyAccountFragment extends Fragment {
         }
         return binding.getRoot();
     }
-
+    
     void getUserInfo() {
         http.getRequest("https://zhny.sysu.edu.cn/kbp/auth/userInfo", 0);
     }
-
+    
     void getRoom(String username) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/admin/sys/personRoom/list", "{\"username\":\"" + username + "\"}", 1);
     }
-
+    
     void getBalance(String room) {
         http.getRequest("https://zhny.sysu.edu.cn/kbp/pay/roomBalance?roomCode=" + room, 2);
     }
-
+    
     void recharge(int amount, String room, String remark) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/pay/recharge/zdPay", String.format("{\"payAmount\":%s,\"body\":\"房间钱包充值\",\"rechargeChannel\":6,\"accountType\":7,\"rechargeType\":7,\"params\":{\"roomCode\":\"%s\"},\"remark\":\"%s\"}", amount, room, remark), 3);
     }
-
+    
     void gotoWechat(JSONObject data) {
 //        data.put("scene", "web");
         StringBuilder info = new StringBuilder();
@@ -171,7 +171,7 @@ public class EnergyAccountFragment extends Fragment {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 http.sendFailure();
             }
-
+            
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 response.header("Location");

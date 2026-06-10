@@ -19,7 +19,6 @@ import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
 import com.bumptech.glide.Glide;
@@ -27,6 +26,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.tabs.TabLayout;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityCalendarBinding;
@@ -45,17 +45,17 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class CalendarActivity extends AppCompatActivity {
-
+public class CalendarActivity extends BaseActivity {
+    
     int top = 0;
-
+    
     public boolean saveImage(String url, String fileName) {
         return saveImage(url, Environment.DIRECTORY_PICTURES + "/SYSUER", fileName, true);
     }
-
+    
     public boolean saveImage(String url, String parentDir, String fileName, boolean defaultDir) {
         try {
-
+            
             Uri fileUri;
             if (defaultDir) {
                 ContentValues values = new ContentValues();
@@ -66,11 +66,11 @@ public class CalendarActivity extends AppCompatActivity {
             } else {
                 fileUri = Uri.fromFile(new File(parentDir, fileName));
             }
-
+            
             if (fileUri == null) {
                 return false;
             }
-
+            
             OutputStream outStream = getContentResolver().openOutputStream(fileUri);
             Glide.with(this)
                     .asFile()
@@ -81,7 +81,7 @@ public class CalendarActivity extends AppCompatActivity {
                             if (outStream != null) {
                                 try {
                                     FileInputStream fileInputStream = new FileInputStream(resource);
-
+                                    
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                         FileUtils.copy(fileInputStream, outStream);
                                     } else {
@@ -98,21 +98,21 @@ public class CalendarActivity extends AppCompatActivity {
                                 }
                             }
                         }
-
+                        
                         @Override
                         public void onLoadCleared(@Nullable Drawable placeholder) {
-
+                        
                         }
                     });
 //            sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", fileUri));
-
+            
             return true;
-
+            
         } catch (IOException _) {
         }
         return false;
     }
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,14 +146,14 @@ public class CalendarActivity extends AppCompatActivity {
                         break;
                 }
             }
-
+            
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
             }
-
+            
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
+            
             }
         });
         Handler handler = new Handler(getMainLooper()) {
@@ -206,7 +206,7 @@ public class CalendarActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 handler.sendEmptyMessage(-1);
             }
-
+            
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 Message msg = new Message();

@@ -7,17 +7,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class UserService extends IUserService.Stub {
-
+    
     @Override
     public void destroy() {
         System.exit(0);
     }
-
+    
     @Override
     public void exit() {
         destroy();
     }
-
+    
     @Override
     public String execLine(String command) throws RemoteException {
         try {
@@ -29,7 +29,7 @@ public class UserService extends IUserService.Stub {
             throw new RemoteException();
         }
     }
-
+    
     @Override
     public String execArr(String[] command) {
         try {
@@ -41,7 +41,7 @@ public class UserService extends IUserService.Stub {
             throw new RuntimeException(e);
         }
     }
-
+    
     /**
      * 读取执行结果，如果有异常会向上抛
      */

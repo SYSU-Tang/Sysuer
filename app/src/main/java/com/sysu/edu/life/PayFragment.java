@@ -40,18 +40,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PayFragment extends StaggeredFragment {
-
+    
     public View view;
     int order = 0;
     HttpManager http;
     CalendarManager calendarManager;
-
+    
     public static PayFragment newInstance(int position) {
         PayFragment payFragment = new PayFragment();
         payFragment.position = position;
         return payFragment;
     }
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
@@ -150,15 +150,15 @@ public class PayFragment extends StaggeredFragment {
                                 case 0, 1 ->
                                         data.forEach(a -> add(((JSONObject) a).getString("itemName"), List.of("学号", "交费区间", "当前应交", "本次交费"),
                                                 extractValue((JSONObject) a, new String[]{"personCode", "intervalName", "nowMoney", "needMoney"})));
-
+                                
                                 case 2 ->
                                         data.forEach(a -> add(((JSONObject) a).getString("itemName"), List.of("学号", "收费项目", "交费区间", "应交", "缓交", "实交"),
                                                 extractValue((JSONObject) a, new String[]{"personCode", "itemName", "intervalName", "needPay", "laterPay", "realPay"})));
-
+                                
                                 case 3 ->
                                         data.forEach(a -> add(String.valueOf(++order), List.of("订单编号", "金额", "支付方式", "支付时间", "支付编号"),
                                                 extractValue((JSONObject) a, new String[]{"orderNo", "money", "payTypeName", "payTime", "outPayNo"})));
-
+                                
                                 case 4 ->
                                         data.forEach(a -> add(String.valueOf(++order), List.of("收费项目", "收费区间", "退费金额", "退费日期", "退费状态"),
                                                 extractValue((JSONObject) a, new String[]{"itemName", "intervalName", "refundMoney", "refundDate", "refundStateStr"})));
@@ -180,7 +180,7 @@ public class PayFragment extends StaggeredFragment {
         getPage();
         return view;
     }
-
+    
     @Override
     public void add(String title, @Nullable Integer icon, List<String> keys, List<String> values) {
         super.add(title, icon, keys, values);
@@ -191,7 +191,7 @@ public class PayFragment extends StaggeredFragment {
             chips.addView(chip, chips.getChildCount() - 1);
         }
     }
-
+    
     void getPage() {
         switch (position) {
             case 0 -> getToPayList();
@@ -201,52 +201,52 @@ public class PayFragment extends StaggeredFragment {
             case 4 -> getRefundList();
         }
     }
-
+    
     void getToPayList() {
         http.postRequest("https://pay.sysu.edu.cn/client/api/client/necessary/list", "{}", 0);
     }
-
+    
     void getSelectivePayList() {
         http.postRequest("https://pay.sysu.edu.cn/client/api/client/chooce/list", "{}", 1);
     }
-
+    
     void getFeeList(String year) {
         http.postRequest("https://pay.sysu.edu.cn/client/api/client/record/feelist", String.format("{\"year\":%s}", year), 2);
     }
-
+    
     void getPaymentList(String from, String to) {
         http.postRequest("https://pay.sysu.edu.cn/client/api/client/record/paymentlist", String.format("{\"startTime\":\"%s\",\"overTime\":\"%s\"}", from, to), 3);
     }
-
+    
     void getPaymentList() {
         getPaymentList(calendarManager.toDateTimeString(calendarManager.getFirstOfMonth().atStartOfDay()), calendarManager.toDateTimeString(calendarManager.getEndOfMonth().atStartOfDay()));
     }
-
+    
     void getRefundList() {
         http.postRequest("https://pay.sysu.edu.cn/client/api/client/refund/list", "{}", 4);
     }
-
+    
     class DateManager {
-
+        
         LocalDate fromDate;
         LocalDate toDate;
-
+        
         public String getFromDateString() {
             return calendarManager.toDateString(fromDate);
         }
-
+        
         public String getToDateString() {
             return calendarManager.toDateString(toDate);
         }
-
+        
         public long getFromDateTimeMillis() {
             return calendarManager.toMillis(fromDate);
         }
-
+        
         public void setFromDateTimeMillis(long from) {
             fromDate = calendarManager.toDate(from);
         }
-
+        
         public long getToDateTimeMillis() {
             return calendarManager.toMillis(toDate);
         }

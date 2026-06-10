@@ -42,9 +42,9 @@ import okio.BufferedSink;
 import okio.Okio;
 
 public class ComplaintMainFragment extends Fragment {
-
+    
     HttpManager http;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentComplaintMainBinding binding = FragmentComplaintMainBinding.inflate(inflater, container, false);
@@ -72,7 +72,7 @@ public class ComplaintMainFragment extends Fragment {
         http.setParams(params);
         return binding.getRoot();
     }
-
+    
     /*
      * 上传附件
      * */
@@ -81,7 +81,7 @@ public class ComplaintMainFragment extends Fragment {
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .setType("*/*"));
     }
-
+    
     void uploadAttachment(Uri uri) {
         ContentResolver resolver = requireContext().getContentResolver();
         String type = resolver.getType(uri);
@@ -92,7 +92,7 @@ public class ComplaintMainFragment extends Fragment {
                 public void writeTo(@NonNull BufferedSink bufferedSink) throws IOException {
                     if (inputStream != null) bufferedSink.writeAll(Okio.source(inputStream));
                 }
-
+                
                 @Nullable
                 @Override
                 public MediaType contentType() {
@@ -102,7 +102,7 @@ public class ComplaintMainFragment extends Fragment {
             if (inputStream != null) inputStream.close();
             http.sendRequest(http.generateRequest("https://xinfang.sysu.edu.cn/jsp_api/upload", null, null).post(new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("file", uri.getLastPathSegment(), requestBody).build()).build(), 1);
-
+            
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -124,21 +124,21 @@ public class ComplaintMainFragment extends Fragment {
 //        }
 //        if (file != null && type != null)
     }
-
-
+    
+    
     void loadCaptcha(ShapeableImageView imageView) {
         Glide.with(requireContext()).load(Uri.parse("https://xinfang.sysu.edu.cn/servlet/checkcode")).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).override(300, 120).into(imageView);
     }
-
+    
     static class FileAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_todo, parent, false)) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             JSONObject item = get(position);

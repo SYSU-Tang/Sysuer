@@ -56,6 +56,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -73,7 +74,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
                 binding.head.setElevation(v.canScrollVertically(-1) ? params.dpToPx(2) : 0);
             }
         });
-
+        
         binding.list.getRoot().addItemDecoration(new CourseSelectionMainFragment.SpacesItemDecoration(params.dpToPx(8)));
         binding.filter.setOnCheckedStateChangeListener((_, checkedId) -> {
             success = checkedId.contains(R.id.success) ? 1 : 0;
@@ -109,7 +110,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
                         adapter.get(position).getString("courseCateCode"));
         });
         adapter.setLikeAction(this::setPNP);
-        model.getMessage().observe(requireActivity(), message->{
+        model.getMessage().observe(requireActivity(), message -> {
             JSONObject response = message.getSecond();
             if (response.getIntValue("code") == 200) {
                 switch (message.getFirst()) {
@@ -128,22 +129,22 @@ public class CourseSelectionSelectedFragment extends Fragment {
         getSelectedCourses();
         return binding.getRoot();
     }
-
-
+    
+    
     void unselect(String classId, String code, String type) {
         model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/back",
                 String.format("{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%s\"}", classId, code, type),
                 1);
-
+        
     }
-
+    
     void select(String code, String type, String category) {
         model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose",
                 String.format("{\"clazzId\":\"%s\",\"selectedType\":\"%s\",\"selectedCate\":\"%s\",\"check\":true}", code, type, category),
                 1);
-
+        
     }
-
+    
     void getSelectedCourses() {
         JSONObject args = new JSONObject().fluentPut("successStatus", String.valueOf(success))
                 .fluentPut("failureStatus", String.valueOf(failure))
@@ -153,30 +154,30 @@ public class CourseSelectionSelectedFragment extends Fragment {
             args.put("courseCateCode", category);
         model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format("{\"pageNo\":%s,\"pageSize\":10,\"total\":true,\"param\":%s}", page++, args.toJSONString()), 0);
     }
-
+    
     void regetSelectedCourses() {
         page = 1;
         total = -1;
         adapter.clear();
         getSelectedCourses();
     }
-
+    
     void setPNP(String type, String id) {
         model.addAndNext("jwxt/choose-course-front-server/selectedCourse/setTwoTier?type=" + type, String.format("{\"clazzId\":\"%s\"}", id), 1);
     }
-
+    
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         layoutManager.setSpanCount(params.getColumn());
     }
-
+    
     static class CourseSelectedAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         final String[] info = new String[]{"credit", "teachingClassNum", "scheduleExamTime", "examFormName"};
         Consumer<? super Integer> selectAction;
         BiConsumer<? super String, ? super String> likeAction;
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -194,11 +195,11 @@ public class CourseSelectionSelectedFragment extends Fragment {
             return new RecyclerView.ViewHolder(binding.getRoot()) {
             };
         }
-
+        
         public void setSelectAction(Consumer<? super Integer> action) {
             selectAction = action;
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemCourseSelectionBinding binding = ItemCourseSelectionBinding.bind(holder.itemView);
@@ -232,11 +233,11 @@ public class CourseSelectionSelectedFragment extends Fragment {
             for (int i = 0; i < seats.length; i++)
                 (new MaterialButton[]{binding.left, binding.selected}[i]).setText(String.format("%s\n%s", infoList.get(i), convert(position, seats[i])));
         }
-
+        
         public String convert(int position, String key) {
             return trim(data.get(position).getString(key)).replace("\n\n", "\n");
         }
-
+        
         public void setLikeAction(BiConsumer<? super String, ? super String> action) {
             likeAction = action;
         }

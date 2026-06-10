@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +16,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.haibin.calendarview.Calendar;
 import com.haibin.calendarview.CalendarView;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityAgendaBinding;
 import com.sysu.edu.databinding.ItemPreferenceBinding;
@@ -27,7 +27,7 @@ import com.sysu.edu.view.RecyclerAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class AgendaActivity extends AppCompatActivity {
+public class AgendaActivity extends BaseActivity {
     
     ActivityAgendaBinding binding;
     PortalModel model;

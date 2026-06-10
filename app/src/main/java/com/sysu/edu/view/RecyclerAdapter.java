@@ -90,7 +90,7 @@ abstract class Recycler2Adapter<T, V extends ViewDataBinding> extends RecyclerVi
     public int getItemCount() {
         return data.size();
     }
-    
+
 //    @NonNull
 //    @Override
 //    public RecyclerViewHolder<V> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

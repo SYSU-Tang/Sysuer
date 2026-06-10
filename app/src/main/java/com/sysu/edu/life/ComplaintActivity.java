@@ -2,17 +2,17 @@ package com.sysu.edu.life;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityComplaintBinding;
 import com.sysu.edu.view.Pager2Adapter;
 
 import java.util.List;
 
-public class ComplaintActivity extends AppCompatActivity {
-
+public class ComplaintActivity extends BaseActivity {
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

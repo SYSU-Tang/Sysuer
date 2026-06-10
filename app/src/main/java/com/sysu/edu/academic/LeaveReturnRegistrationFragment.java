@@ -55,11 +55,13 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     ArrayList<String> stay;
     String id;
     XgxtModel model;
+    
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
@@ -92,7 +94,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                             clear();
                             JSONObject data = response.getJSONObject("data");
                             add("基本信息", List.of("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段")
-                                    , extractValue(data,new String[]{"xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj"}));
+                                    , extractValue(data, new String[]{"xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj"}));
                             isStay = data.getString("sflx");
                             leaveDate.postValue(LocalDate.parse(toStringOrDefault(data.getString("yjlxsj"))).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
                             returnDate.postValue(LocalDate.parse(toStringOrDefault(data.getString("yjfxsj"))).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -103,7 +105,8 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                             leave = new ArrayList<>(List.of("离校", data.getString("yjlxsj"), data.getString("yjfxsj"),
                                     data.getString("qxlx"), data.getString("jtgj"), country + " " + province + " " + city));
                             stay = new ArrayList<>(List.of("留校", toStringOrDefault(reason)));
-                            if ("0".equals(isStay)) add(getString(R.string.registration), leaveKeys, leave);
+                            if ("0".equals(isStay))
+                                add(getString(R.string.registration), leaveKeys, leave);
                             else add(getString(R.string.registration), stayKeys, stay);
                             getDestination();
                             getTransportation();

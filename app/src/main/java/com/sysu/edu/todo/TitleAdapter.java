@@ -13,36 +13,52 @@ public class TitleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public static final int[] headers = {com.google.android.material.R.style.TextAppearance_Material3_TitleMedium, com.google.android.material.R.style.TextAppearance_Material3_TitleLarge_Emphasized, com.google.android.material.R.style.TextAppearance_Material3_TitleLarge};
     String title = "";
     int n = 0;
-
+    
     public TitleAdapter(String title) {
         setTitle(title);
     }
-
+    
     public TitleAdapter(String title, int n) {
         setTitle(title, n);
     }
-
+    
     public String getTitle() {
         return title;
     }
-
+    
     public void setTitle(String title) {
         this.title = title;
         notifyItemInserted(0);
     }
-
+    
     public void setTitle(String title, int n) {
         this.title = title;
         setHeader(n);
     }
-
+    
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new RecyclerView.ViewHolder(ItemTitleBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
         };
     }
-
+    
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        MaterialTextView titleView = ItemTitleBinding.bind(holder.itemView).title;
+        titleView.setText(title);
+        titleView.setTextAppearance(0 <= n && n < headers.length ? headers[n] : 0);
+    }
+    
+    @Override
+    public int getItemCount() {
+        return 1;
+    }
+    
+    public int getHeader() {
+        return n;
+    }
+    
     /**
      * 设置标题样式
      * 0: TextAppearance_Material3_TitleMedium
@@ -53,21 +69,5 @@ public class TitleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void setHeader(int n) {
         this.n = n;
         notifyItemChanged(0);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        MaterialTextView titleView = ItemTitleBinding.bind(holder.itemView).title;
-        titleView.setText(title);
-        titleView.setTextAppearance(0 <= n && n < headers.length ? headers[n] : 0);
-    }
-
-    @Override
-    public int getItemCount() {
-        return 1;
-    }
-    
-    public int getHeader() {
-        return n;
     }
 }

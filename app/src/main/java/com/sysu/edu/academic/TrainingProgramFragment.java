@@ -26,18 +26,20 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class TrainingProgramFragment extends Fragment {
-
+    
     final MutableLiveData<String> unit = new MutableLiveData<>();
     final MutableLiveData<String> profession = new MutableLiveData<>();
     final MutableLiveData<String> type = new MutableLiveData<>();
     final MutableLiveData<String> grade = new MutableLiveData<>();
     FragmentTrainingScheduleBinding binding;
     JwxtModel model;
+    
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (binding == null) {
@@ -47,32 +49,32 @@ public class TrainingProgramFragment extends Fragment {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 }
-
+                
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     getColleges(s.toString());
                     model.nextAll();
                 }
-
+                
                 @Override
                 public void afterTextChanged(Editable s) {
-
+                
                 }
             });
             binding.profession.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 }
-
+                
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     getProfessions(s.toString());
                     model.nextAll();
                 }
-
+                
                 @Override
                 public void afterTextChanged(Editable s) {
-
+                
                 }
             });
             binding.query.setOnClickListener(v -> {
@@ -84,7 +86,7 @@ public class TrainingProgramFragment extends Fragment {
                 Navigation.findNavController(binding.getRoot()).navigate(R.id.confirmationAction,
                         arg, null, new FragmentNavigator.Extras(Map.of(v, "result")));
             });
-            model.getMessage().observe(requireActivity(), message->{
+            model.getMessage().observe(requireActivity(), message -> {
                 JSONObject data = message.getSecond();
                 if (data.getInteger("code") == 200) {
                     int what = message.getFirst();
@@ -151,19 +153,19 @@ public class TrainingProgramFragment extends Fragment {
         }
         return binding.getRoot();
     }
-
+    
     void getProfessions(String keyword) {
         model.add("jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode=" + keyword, 4);
     }
-
+    
     void getTypes() {
         model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 3);
     }
-
+    
     void getColleges(String keyword) {
         model.add("jwxt/base-info/department/recruitUnitPull", "{\"departmentName\":\"" + keyword + "\",\"subordinateDepartmentNumber\":null,\"id\":null}", 1);
     }
-
+    
     void getGrades() {
         model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=127", 2);
     }

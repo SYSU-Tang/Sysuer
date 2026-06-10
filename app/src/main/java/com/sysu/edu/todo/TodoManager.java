@@ -240,7 +240,7 @@ public class TodoManager {
     public void performRefresh() {
         if (listener != null) listener.onRefresh();
     }
-    
+
 //    /**
 //     * 过滤 TodoFragment 中的数据，根据状态
 //     *

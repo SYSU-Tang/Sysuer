@@ -3,10 +3,9 @@ package com.sysu.edu.academic;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.model.JwxtModel;
@@ -16,13 +15,15 @@ import com.sysu.edu.view.StaggeredFragment;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MajorInfoActivity extends AppCompatActivity {
+public class MajorInfoActivity extends BaseActivity {
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

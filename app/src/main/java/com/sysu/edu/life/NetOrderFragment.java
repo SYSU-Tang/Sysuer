@@ -50,12 +50,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
 public class NetOrderFragment extends StaggeredFragment {
-
+    
     HttpManager http;
     LocalDate oldDate;
     int fee;
     Number time;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
@@ -106,7 +106,7 @@ public class NetOrderFragment extends StaggeredFragment {
                         try {
                             JSONObject json = JSONObject.parse(response);
                             if (!json.getBoolean("success")) {
-                                    params.gotoLogin(TargetUrl.NETPAY);
+                                params.gotoLogin(TargetUrl.NETPAY);
                             }
                         } catch (JSONException _) {
                             Matcher matcher = Pattern.compile("<tr .*?>(.+?)</tr>", Pattern.DOTALL).matcher(response);
@@ -135,11 +135,11 @@ public class NetOrderFragment extends StaggeredFragment {
                                                 final Matcher actionMatcher = Pattern.compile("(.+?),(.+?),").matcher((action.group(2) + ",").replace("\"", ""));
                                                 if (actionMatcher.find()) {
                                                     staggeredAdapter.setListener(new AdapterListener() {
-
+                                                        
                                                         @Override
                                                         public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
                                                         }
-
+                                                        
                                                         @Override
                                                         public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding b) {
                                                             MaterialButtonGroup line = ItemButtonGroupBinding.inflate(inflater, ((ItemCardBinding) b).getRoot(), false).getRoot();
@@ -176,11 +176,11 @@ public class NetOrderFragment extends StaggeredFragment {
                                             if (action.find()) {
                                                 String serviceId = action.group(1);
                                                 staggeredAdapter.setListener(new AdapterListener() {
-
+                                                    
                                                     @Override
                                                     public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
                                                     }
-
+                                                    
                                                     @Override
                                                     public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding b) {
                                                         MaterialButtonGroup line = ItemButtonGroupBinding.inflate(inflater, ((ItemCardBinding) b).getRoot(), false).getRoot();
@@ -206,7 +206,7 @@ public class NetOrderFragment extends StaggeredFragment {
                                             "订单状态",
                                             "服务",
                                             "代支付者") : keys, orderDetail);
-
+                                    
                                 }
                             }
                         }
@@ -247,42 +247,42 @@ public class NetOrderFragment extends StaggeredFragment {
         getInfo();
         return view;
     }
-
+    
     private void getMaterialButton(LayoutInflater inflater, MaterialButtonGroup parent, String fun, View.OnClickListener onClick) {
         MaterialButton button = ItemButtonOutlineBinding.inflate(inflater, parent, false).getRoot();
         button.setText(fun);
         MaterialButtonGroup.LayoutParams lp = new MaterialButtonGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.setMargins(0, 0, params.dpToPx(16), params.dpToPx(16));
-
+        
         button.setLayoutParams(lp);
         button.setOnClickListener(onClick);
         parent.addView(button);
     }
-
+    
     void getOrder() {
         http.postRequest("https://netpay.sysu.edu.cn/netpay/c/site/orders", "", 0);
     }
-
+    
     void getNet() {
         http.postRequest("https://netpay.sysu.edu.cn/netpay/c/site/stopAndResumeList", "personal=1", "application/x-www-form-urlencoded", 1);
     }
-
+    
     void getInfo() {
         new Runnable[]{this::getOrder, this::getNet}[requireArguments().getInt("code")].run();
     }
-
+    
     void stop(String serviceId) {
         http.postRequest("https://netpay.sysu.edu.cn/netpay/c/site/stop", "serviceId=" + serviceId, "application/x-www-form-urlencoded", 2);
     }
-
+    
     void resume(String serviceId) {
         http.postRequest("https://netpay.sysu.edu.cn/netpay/c/site/resume", "serviceId=" + serviceId, "application/x-www-form-urlencoded", 3);
     }
-
+    
     void order(Number time, int fee, String serviceId) {
         http.postRequest("https://netpay.sysu.edu.cn/netpay/c/site/prepareOrder", String.format(Locale.getDefault(), "type=web&months=%s&moneys=%d&serviceIds=%s", time.floatValue() < 1 ? time.floatValue() : time.intValue(), fee, serviceId), "application/x-www-form-urlencoded", 4);
     }
-
+    
     void gotoWechat(JSONObject data) {
         StringBuilder info = new StringBuilder();
         data.forEach((key, value) -> info.append(key).append("=").append(value).append("&"));
@@ -291,7 +291,7 @@ public class NetOrderFragment extends StaggeredFragment {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 http.sendFailure();
             }
-
+            
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 response.header("Location");
@@ -304,7 +304,7 @@ public class NetOrderFragment extends StaggeredFragment {
             }
         });
     }
-
+    
     void getServiceId() {
         http.postRequest("https://netpay.sysu.edu.cn/netpay/c/site/bills", "personal=1", "application/x-www-form-urlencoded", 6);
     }

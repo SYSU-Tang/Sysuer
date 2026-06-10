@@ -12,7 +12,7 @@ public class DataStoreManager {
     public static final Preferences.Key<String> TODAY_CLASS =
             PreferencesKeys.stringKey("today_class");
     private static RxDataStore<Preferences> dataStore = null;
-
+    
     public static synchronized RxDataStore<Preferences> getInstance(Context context) {
         if (dataStore == null) dataStore = new RxPreferenceDataStoreBuilder(
                 context.getApplicationContext(),

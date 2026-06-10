@@ -1,31 +1,26 @@
-package com.sysu.edu.extra;
+package com.sysu.edu.extra
 
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
+import android.content.pm.PackageManager
+import android.os.Bundle
+import androidx.core.content.pm.PackageInfoCompat
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import com.sysu.edu.R
+import java.util.Objects
 
-import androidx.annotation.Nullable;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-
-import com.sysu.edu.R;
-
-import java.util.Objects;
-
-public class AboutFragment extends PreferenceFragmentCompat {
-    @Override
-    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
-        setPreferencesFromResource(R.xml.about, rootKey);
-        try {
-            PackageInfo version = requireContext().getPackageManager().getPackageInfo(requireContext().getPackageName(), 0);
-            Preference versionPreference = Objects.requireNonNull(findPreference("version"));
-            versionPreference.setSummary(String.format("%s(%s)", version.versionName, version.versionCode));
-//            versionPreference.setOnPreferenceClickListener(_ -> {
+class AboutFragment : PreferenceFragmentCompat() {
+	override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+		setPreferencesFromResource(R.xml.about, rootKey)
+		try {
+			val version = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+			val versionPreference = Objects.requireNonNull<Preference>(findPreference("version"))
+			versionPreference.setSummary("${version.versionName}(${PackageInfoCompat.getLongVersionCode(version)})")
+			//            versionPreference.setOnPreferenceClickListener(_ -> {
 //                ((AboutActivity) requireActivity()).checkUpdate();
 //                return false;
 //            });
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+		} catch (e: PackageManager.NameNotFoundException) {
+			throw RuntimeException(e)
+		}
+	}
 }

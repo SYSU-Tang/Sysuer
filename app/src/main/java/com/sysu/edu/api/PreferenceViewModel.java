@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PreferenceViewModel extends ViewModel {
-
-
+    
+    
     private final static String Theme = "theme";
     private final static String Home = "home";
     private final static String Language = "language";
@@ -20,85 +20,85 @@ public class PreferenceViewModel extends ViewModel {
     private final static String IsAgree = "agree";
     private final MutableLiveData<Boolean> isAgreeLiveData = new MutableLiveData<>();
     private final MutableLiveData<Set<String>> dashboardLiveData = new MutableLiveData<>();
-
+    
     SharedPreferences pm;
-
+    
     public void setPM(SharedPreferences oldPM) {
         pm = oldPM;
     }
-
+    
     public String getString(String key, String defValue) {
         return pm.getString(key, defValue);
     }
-
+    
     public boolean getBoolean(String key, boolean defValue) {
         return pm.getBoolean(key, defValue);
     }
-
+    
     public SharedPreferences getPm() {
         return pm;
     }
-
+    
     public String getTheme() {
         return getString(Theme, "2");
     }
-
+    
     private Set<String> getSet(String key) {
         return pm.getStringSet(key, new HashSet<>());
     }
-
+    
     public Set<String> getDashboard() {
         return getSet("dashboard");
     }
-
+    
     public MutableLiveData<Set<String>> getDashboardLiveData() {
         return dashboardLiveData;
     }
-
+    
     public void setDashboardLiveData(Set<String> dashboard) {
         dashboardLiveData.setValue(dashboard);
     }
-
+    
     public String getHome() {
         return getString(Home, "2");
     }
-
+    
     public String getLanguage() {
         return getString(Language, "2");
     }
-
+    
     public String getQrcode() {
         return getString(Qrcode, "");
     }
-
+    
     public boolean getIsAgree() {
         return !getBoolean(IsAgree, false);
     }
-
+    
     public void setIsAgree(boolean isAgree) {
         pm.edit().putBoolean(IsAgree, isAgree).apply();
     }
-
+    
     public boolean getIsFirstLaunch() {
         return getBoolean(IsFirstLaunch, false);
     }
-
+    
     public void setIsFirstLaunch(boolean isFirstLaunch) {
         pm.edit().putBoolean(IsFirstLaunch, isFirstLaunch).apply();
     }
-
+    
     public boolean getUpdate() {
         return getBoolean(Update, true);
     }
-
+    
     public MutableLiveData<Boolean> getIsAgreeLiveData() {
         return isAgreeLiveData;
     }
-
+    
     public void setIsAgreeLiveData(boolean isAgree) {
         isAgreeLiveData.setValue(isAgree);
     }
-
+    
     public void initLiveData() {
         isAgreeLiveData.setValue(getIsAgree());
         dashboardLiveData.setValue(getDashboard());

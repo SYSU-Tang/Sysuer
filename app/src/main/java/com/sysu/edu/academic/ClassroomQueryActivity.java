@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -21,6 +20,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityClassroomQueryBinding;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class ClassroomQueryActivity extends AppCompatActivity {
+public class ClassroomQueryActivity extends BaseActivity {
     
     final HashMap<Integer, String> office = new HashMap<>();
     final MutableLiveData<String> campusLiveData = new MutableLiveData<>();
@@ -52,11 +52,13 @@ public class ClassroomQueryActivity extends AppCompatActivity {
     int page = 1;
     int total = 0;
     ActivityClassroomQueryBinding binding;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,7 +156,7 @@ public class ClassroomQueryActivity extends AppCompatActivity {
                     });
                 }
                 model.nextAll();
-            } 
+            }
         });
         model.next();
     }

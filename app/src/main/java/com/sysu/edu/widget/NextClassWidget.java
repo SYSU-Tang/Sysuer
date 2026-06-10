@@ -48,7 +48,7 @@ public class NextClassWidget extends AppWidgetProvider {
                         handlerMessage(i, cachedData.getJSONObject(i), context, remoteViews);
                     for (int appWidgetId : appWidgetIds)
                         appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
-                    WorkManager.getInstance(context).enqueueUniqueWork("NextClassWidget" ,
+                    WorkManager.getInstance(context).enqueueUniqueWork("NextClassWidget",
                             ExistingWorkPolicy.KEEP, new OneTimeWorkRequest.Builder(WidgetUpdateWorker.class)
                                     .setConstraints(new Constraints.Builder()
                                             .setRequiredNetworkType(NetworkType.CONNECTED)

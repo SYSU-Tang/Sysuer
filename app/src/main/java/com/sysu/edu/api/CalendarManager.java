@@ -20,9 +20,11 @@ public class CalendarManager {
     public String toDateString(long millis) {
         return dateFormatter.format(toDate(millis));
     }
+    
     public String toDateString(LocalDate date) {
         return dateFormatter.format(date);
     }
+    
     public String toDateStringPLus(int days) {
         return toDateString(today.plusDays(days));
     }
@@ -47,9 +49,11 @@ public class CalendarManager {
     public long toMillis(LocalDate date) {
         return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
+    
     public long toMillis(LocalDateTime date) {
         return date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
+    
     public long toMillis(String date) {
         return LocalDate.parse(date).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }

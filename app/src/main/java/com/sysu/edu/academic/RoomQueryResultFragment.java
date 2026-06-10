@@ -22,11 +22,13 @@ import java.util.List;
 public class RoomQueryResultFragment extends StaggeredFragment {
     FragmentCourseQueryResultBinding courseQueryResultBinding;
     JwxtModel model;
+    
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         model.dispose();
     }
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         courseQueryResultBinding = FragmentCourseQueryResultBinding.inflate(inflater, container, false);

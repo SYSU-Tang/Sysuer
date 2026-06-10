@@ -24,9 +24,9 @@ import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.FragmentComplaintResponseBinding;
 
 public class ComplaintResponseFragment extends Fragment {
-
+    
     HttpManager http;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentComplaintResponseBinding binding = FragmentComplaintResponseBinding.inflate(inflater, container, false);
@@ -46,14 +46,14 @@ public class ComplaintResponseFragment extends Fragment {
             binding.phone.getEditText().addTextChangedListener(new TextWatcher() {
                 @Override
                 public void afterTextChanged(Editable s) {
-
+                
                 }
-
+                
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                
                 }
-
+                
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (ComplaintModel.isInvalidPhone(toStringOrDefault(s)))
@@ -67,7 +67,7 @@ public class ComplaintResponseFragment extends Fragment {
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-
+                
                 if (msg.what == -1) {
                     params.toast(R.string.no_net_connected);
                 } else if (msg.getData().getBoolean("isJSON")) {
@@ -100,7 +100,7 @@ public class ComplaintResponseFragment extends Fragment {
 //    void getCode(String phone) {
 //        http.postRequest("https://xinfang.sysu.edu.cn/jsp_api/code_send", "{\"m\":\"" + phone + "\",\"t\":\"jsjb\"}", 0);
 //    }
-
+    
     void getResponse(String phone) {
         http.postRequest("https://xinfang.sysu.edu.cn/jsp_api/jsjb_list", "{\"mobile\":\"" + phone + "\"}", 1);
     }

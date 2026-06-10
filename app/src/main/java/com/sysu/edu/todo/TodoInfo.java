@@ -26,7 +26,7 @@ public class TodoInfo {
     final MutableLiveData<String> tag;
     final MutableLiveData<Integer> id;
     int function = ADD;
-
+    
     public TodoInfo() {
         title = new MutableLiveData<>();
         description = new MutableLiveData<>();
@@ -47,79 +47,79 @@ public class TodoInfo {
         id = new MutableLiveData<>(0);
         reset();
     }
-
+    
     public int getFunction() {
         return function;
     }
-
+    
     public void setFunction(int function) {
         this.function = function;
     }
-
+    
     public MutableLiveData<String> getDdlDate() {
         return ddlDate;
     }
-
+    
     public void setDdlDate(String ddlDate) {
         this.ddlDate.setValue(ddlDate);
     }
-
+    
     public MutableLiveData<String> getDueTime() {
         return dueTime;
     }
-
+    
     public void setDueTime(String dueTime) {
         this.dueTime.setValue(dueTime);
     }
-
+    
     public MutableLiveData<String> getRemindTime() {
         return remindTime;
     }
-
+    
     public void setRemindTime(String remindTime) {
         this.remindTime.setValue(remindTime);
     }
-
+    
     public MutableLiveData<String> getType() {
         return type;
     }
-
+    
     public void setType(String type) {
         this.type.setValue(type);
     }
-
+    
     public MutableLiveData<String> getLocation() {
         return location;
     }
-
+    
     public void setLocation(String location) {
         this.location.setValue(location);
     }
-
+    
     public MutableLiveData<String> getTitle() {
         return title;
     }
-
+    
     public void setTitle(String title) {
         this.title.setValue(title);
     }
-
+    
     public MutableLiveData<String> getDescription() {
         return description;
     }
-
+    
     public void setDescription(String description) {
         this.description.setValue(description);
     }
-
+    
     public MutableLiveData<String> getDueDate() {
         return dueDate;
     }
-
+    
     public void setDueDate(String dueDate) {
         this.dueDate.setValue(dueDate);
     }
-
+    
     /**
      * 获取优先级
      * 0: 无优先级
@@ -134,7 +134,7 @@ public class TodoInfo {
     public MutableLiveData<Integer> getPriority() {
         return priority;
     }
-
+    
     /**
      * 设置优先级
      * 0: 无优先级
@@ -148,71 +148,71 @@ public class TodoInfo {
     public void setPriority(Integer priority) {
         this.priority.setValue(priority);
     }
-
+    
     public MutableLiveData<String> getSubject() {
         return subject;
     }
-
+    
     public void setSubject(String subject) {
         this.subject.setValue(subject);
     }
-
+    
     public MutableLiveData<String> getSubtask() {
         return subtask;
     }
-
+    
     public void setSubtask(String subtask) {
         this.subtask.setValue(subtask);
     }
-
+    
     public MutableLiveData<String> getAttachment() {
         return attachment;
     }
-
+    
     public void setAttachment(String attachment) {
         this.attachment.setValue(attachment);
     }
-
+    
     public MutableLiveData<Integer> getStatus() {
         return status;
     }
-
+    
     public void setStatus(Integer status) {
         this.status.setValue(status);
     }
-
+    
     public MutableLiveData<String> getColor() {
         return color;
     }
-
+    
     public void setColor(String color) {
         this.color.setValue(color);
     }
-
+    
     public MutableLiveData<String> getTag() {
         return tag;
     }
-
+    
     public void setTag(String tag) {
         this.tag.setValue(tag);
     }
-
+    
     public MutableLiveData<String> getDoneDate() {
         return doneDate;
     }
-
+    
     public void setDoneDate(String doneDate) {
         this.doneDate.setValue(doneDate);
     }
-
+    
     public MutableLiveData<Integer> getId() {
         return id;
     }
-
+    
     public void setId(Integer id) {
         this.id.setValue(id);
     }
-
+    
     public void reset() {
         setTitle("");
         setDescription("");
@@ -232,7 +232,7 @@ public class TodoInfo {
         setTag("");
         function = ADD;
     }
-
+    
     public void copyFrom(TodoInfo todoInfo) {
         title.setValue(todoInfo.getTitle().getValue());
         description.setValue(todoInfo.getDescription().getValue());

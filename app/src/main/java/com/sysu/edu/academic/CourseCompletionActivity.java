@@ -6,13 +6,13 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityPagerBinding;
@@ -25,14 +25,16 @@ import com.sysu.edu.view.StaggeredFragment;
 import java.util.List;
 import java.util.Objects;
 
-public class CourseCompletionActivity extends AppCompatActivity {
+public class CourseCompletionActivity extends BaseActivity {
     
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +81,7 @@ public class CourseCompletionActivity extends AppCompatActivity {
                     page1.add(item.getString("courseCategoryName"), List.of("课程类别", "培养方案学分要求", "免修课程学分", "实际毕业学分要求", "实得"),
                             extractValue(item, new String[]{"courseCategoryName", "trainingCredit", "exemptCredit", "actualCredit", "earnedCredit"}));
                 });
-            } 
+            }
         });
         model.next();
     }

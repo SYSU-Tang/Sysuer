@@ -28,9 +28,9 @@ import io.noties.markwon.Markwon;
 import io.noties.markwon.html.HtmlPlugin;
 
 public class ComplaintSquareFragment extends Fragment {
-
+    
     HttpManager http;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -61,20 +61,20 @@ public class ComplaintSquareFragment extends Fragment {
         getSquare();
         return binding.getRoot();
     }
-
+    
     void getSquare() {
         http.postRequest("https://xinfang.sysu.edu.cn/jsp_api/hsgc", "", 0);
     }
-
+    
     static class SquareAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_complaint_square, parent, false)) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             JSONObject item = get(position);

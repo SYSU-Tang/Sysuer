@@ -6,10 +6,9 @@ import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.databinding.ActivityPagerBinding;
@@ -22,14 +21,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class DormActivity extends AppCompatActivity {
+public class DormActivity extends BaseActivity {
     
     XgxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

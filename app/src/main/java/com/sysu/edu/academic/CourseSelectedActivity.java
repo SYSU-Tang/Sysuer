@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityOptionsCompat;
@@ -21,6 +20,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.button.MaterialButton;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityCourseSelectedBinding;
@@ -32,15 +32,17 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-public class CourseSelectedActivity extends AppCompatActivity {
+public class CourseSelectedActivity extends BaseActivity {
     
     int page = 0;
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

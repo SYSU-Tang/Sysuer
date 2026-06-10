@@ -14,34 +14,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.sysu.edu.browser.theme.SysuerTheme
 
 class MarkdownActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SysuerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
-    }
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		enableEdgeToEdge()
+		setContent {
+			SysuerTheme {
+				Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+					Greeting(
+						name = "Android",
+						modifier = Modifier.padding(innerPadding)
+					)
+				}
+			}
+		}
+	}
 }
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+	Text(
+		text = "Hello $name!",
+		modifier = modifier
+	)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    SysuerTheme {
-        Greeting("Android")
-    }
+	SysuerTheme {
+		Greeting("Android")
+	}
 }

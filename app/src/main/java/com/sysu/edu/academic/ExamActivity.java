@@ -4,12 +4,12 @@ import static com.sysu.edu.api.CommonUtil.extractValue;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.snackbar.Snackbar;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityExamBinding;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ExamActivity extends AppCompatActivity {
+public class ExamActivity extends BaseActivity {
     
     JwxtModel model;
     

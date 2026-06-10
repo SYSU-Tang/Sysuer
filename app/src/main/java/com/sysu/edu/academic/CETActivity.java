@@ -4,9 +4,8 @@ import static com.sysu.edu.api.CommonUtil.extractValue;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.databinding.ActivityListBinding;
 import com.sysu.edu.model.JwxtModel;
 import com.sysu.edu.view.StaggeredFragment;
@@ -15,15 +14,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CETActivity extends AppCompatActivity {
+public class CETActivity extends BaseActivity {
     
     int page = 0;
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +49,7 @@ public class CETActivity extends AppCompatActivity {
                     }
                 }
                 model.nextAll();
-            } 
+            }
         });
         model.next();
     }

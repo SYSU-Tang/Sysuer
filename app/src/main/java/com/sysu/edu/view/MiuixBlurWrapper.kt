@@ -11,18 +11,18 @@ import top.yukonga.miuix.kmp.blur.textureBlur
 
 @Composable
 fun BlurContainer(
-    blurRadius: Float = 20f,
-    content: @Composable () -> Unit
+	blurRadius: Float = 20f,
+	content: @Composable () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .textureBlur(
-                backdrop = rememberLayerBackdrop(),
-                shape = RoundedCornerShape(12.dp),
-                blurRadius = blurRadius
-            )
-    ) {
-        content()
-    }
+	Box(
+		modifier = Modifier
+			.fillMaxSize()
+			.textureBlur(
+				backdrop = rememberLayerBackdrop(),
+				shape = RoundedCornerShape(12.dp),
+				blurRadius = blurRadius
+			)
+	) {
+		content()
+	}
 }

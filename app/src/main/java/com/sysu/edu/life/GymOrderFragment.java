@@ -48,7 +48,7 @@ public class GymOrderFragment extends Fragment {
     private int page = 0;
     private ConcatAdapter concatAdapter;
     private FragmentGymOrderBinding binding;
-
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -140,18 +140,18 @@ public class GymOrderFragment extends Fragment {
         getOrder();
         return binding.getRoot();
     }
-
+    
     private void regetOrder() {
         reset();
         getOrder();
     }
-
+    
     void reset() {
         total = -1;
         page = 0;
         concatAdapter.getAdapters().forEach(adapter -> concatAdapter.removeAdapter(adapter));
     }
-
+    
     void getOrder() {
         http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/transaction/Me?StartDate=%s&EndDate=%s&Page=%s&PageSize=10",
                 dateFormat.format(viewModel.from), dateFormat.format(viewModel.to), ++page), 0);

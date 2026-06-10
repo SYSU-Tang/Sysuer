@@ -10,10 +10,11 @@ import okhttp3.Response
 class PortalModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager =
 		AuthorizationManager("portal.sysu.edu.cn", "portal.sysu.edu.cn")
+	
 	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>, response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
 		val content = response.body.string()
 		val code = response.code
-	    var result: CommonUtil.Tuple2<Int, JSONObject>? = null
+		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
 		when (code) {
 			302 -> login(request)
 			200 ->

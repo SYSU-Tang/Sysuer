@@ -17,10 +17,10 @@ import java.util.Locale;
 
 @SuppressWarnings("ALL")
 public class RangeSliderPreference extends SeekBarPreference {
-
-
+    
+    
     private float[] mValue;
-
+    
     public RangeSliderPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setLayoutResource(R.layout.preference_range_slider);
@@ -35,19 +35,19 @@ public class RangeSliderPreference extends SeekBarPreference {
 //            throw new RuntimeException(e);
         }
     }
-
+    
     public RangeSliderPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
-
+    
     public RangeSliderPreference(@NonNull Context context) {
         this(context, null);
     }
-
+    
     public RangeSliderPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.attr.rangeSliderPreferenceStyle);
     }
-
+    
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         PreferenceRangeSliderBinding binding = PreferenceRangeSliderBinding.bind(holder.itemView);
@@ -64,11 +64,11 @@ public class RangeSliderPreference extends SeekBarPreference {
         binding.seekbar.addOnChangeListener((slider, v, b) -> setValues(new float[]{slider.getValues().get(0), slider.getValues().get(1)}));
         binding.getRoot().setOnClickListener(v -> onClick());
     }
-
+    
     public float[] getValues() {
         return mValue;
     }
-
+    
     public void setValues(float[] values) {
         mValue = values;
         notifyChanged();

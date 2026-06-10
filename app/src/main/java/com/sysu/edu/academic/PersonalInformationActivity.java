@@ -5,10 +5,9 @@ import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.model.XgxtModel;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PersonalInformationActivity extends AppCompatActivity {
+public class PersonalInformationActivity extends BaseActivity {
     XgxtModel model;
     
     @Override

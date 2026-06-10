@@ -14,19 +14,19 @@ public class MutiListPreference extends MultiSelectListPreference {
     public MutiListPreference(@NonNull Context context) {
         this(context, null);
     }
-
+    
     public MutiListPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.attr.dialogPreferenceStyle);
     }
-
+    
     public MutiListPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
-
+    
     public MutiListPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
-
+    
     @Override
     protected void onClick() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(getContext());
@@ -46,5 +46,5 @@ public class MutiListPreference extends MultiSelectListPreference {
             });
         dialogBuilder.show();
     }
-
+    
 }

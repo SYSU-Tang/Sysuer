@@ -12,13 +12,13 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.button.MaterialButton;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.Params;
 import com.sysu.edu.databinding.ActivityGradeForLevelBinding;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class GradeForLevelActivity extends AppCompatActivity {
+public class GradeForLevelActivity extends BaseActivity {
     
     final MutableLiveData<String> trainType = new MutableLiveData<>();
     final MutableLiveData<String> year = new MutableLiveData<>();
@@ -47,11 +47,13 @@ public class GradeForLevelActivity extends AppCompatActivity {
     PopupMenu courseTypePop;
     MutableLiveData<String> input;
     JwxtModel model;
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
         model.dispose();
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

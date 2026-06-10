@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -217,7 +216,8 @@ public class LoginManager {
                             request(service, true);
                             getXGXTToken(service, targetBaseUrl);
                         }
-                        case TargetUrl.XINFANG_WEBVPN -> {}
+                        case TargetUrl.XINFANG_WEBVPN -> {
+                        }
                         default -> request(service, true);
                     }
                     
@@ -342,7 +342,7 @@ public class LoginManager {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyBase64))));
-        return Base64.getEncoder().encodeToString(cipher.doFinal(plainText.getBytes("UTF-8")));
+        return Base64.getEncoder().encodeToString(cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8)));
     }
     
     public String getTicket(String service) throws IOException {
@@ -527,7 +527,7 @@ public class LoginManager {
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(keyBytes, "AES"), new IvParameterSpec(ivBytes));
             return Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8)));
         }
-        
+
 //        /**
 //         * AES-CBC 解密，输入 Base64 密文，返回明文字符串
 //         *
@@ -557,6 +557,6 @@ public class LoginManager {
 //            byte[] plaintext = cipher.doFinal(ciphertext);
 //            return new String(plaintext, StandardCharsets.UTF_8);
 //        }
-
+    
     }
 }

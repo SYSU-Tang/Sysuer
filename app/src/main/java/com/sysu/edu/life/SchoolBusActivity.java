@@ -6,12 +6,12 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.databinding.ItemSchoolBusNoticeBinding;
@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-public class SchoolBusActivity extends AppCompatActivity {
+public class SchoolBusActivity extends BaseActivity {
     
     final MutableLiveData<Boolean> day = new MutableLiveData<>(true);
     JSONObject data;

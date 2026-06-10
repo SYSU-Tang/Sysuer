@@ -3,6 +3,7 @@ package com.sysu.edu.life;
 import com.alibaba.fastjson2.JSONObject;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,40 +17,40 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ComplaintModel {
-
+    
     // 服务器地址（请根据实际环境配置）
     private static final String BASE_URL = "https://xinfang.sysu.edu.cn";  // 例如 "http://your-server.com"
-
+    
     // 接口路径
     private static final String SEND_CODE_URL = "/servlet/executeFun";
     private static final String CHECK_CODE_URL = "/servlet/checkcode";
     private static final String SUBMIT_URL = "/jsp_api/fywt";
-
+    
     private final OkHttpClient httpClient;
     private final MessageCallback messageCallback;
     // 短信验证码发送间隔控制（单位：毫秒）
     private long lastSmsSendTime = -1;
-
+    
     public ComplaintModel(MessageCallback callback) {
         messageCallback = callback;
         httpClient = new OkHttpClient.Builder()
                 .build();
     }
-
+    
     /**
      * 校验手机号格式（11位数字，1 开头，第二位3-9）
      */
     public static boolean isInvalidPhone(String phone) {
         return phone == null || !Pattern.matches("^1[3456789]\\d{9}$", phone);
     }
-
+    
     /**
      * 校验反映内容长度（不超过1000字）
      */
     public static boolean isValidDescription(String description) {
         return description == null || description.length() <= 1000;
     }
-
+    
     /**
      * 校验必填项
      *
@@ -59,8 +60,8 @@ public class ComplaintModel {
      * @return 是否通过校验
      */
     public boolean isValidateNotEmpty(Map<String, String> fields,
-                                    Set<String> requiredKeys,
-                                    Map<String, String> fieldLabels) {
+                                      Set<String> requiredKeys,
+                                      Map<String, String> fieldLabels) {
         for (String key : requiredKeys) {
             String value = fields.get(key);
             if (value == null || value.trim().isEmpty()) {
@@ -71,7 +72,7 @@ public class ComplaintModel {
         }
         return true;
     }
-
+    
     /**
      * 完整表单校验（手机号 + 反映内容长度）
      *
@@ -90,7 +91,7 @@ public class ComplaintModel {
         }
         return true;
     }
-
+    
     /**
      * 检查是否可以发送短信（间隔≥60秒）
      */
@@ -102,7 +103,7 @@ public class ComplaintModel {
         }
         return true;
     }
-
+    
     /**
      * 发送短信验证码（同步）
      *
@@ -117,18 +118,18 @@ public class ComplaintModel {
         if (!canSendSms()) {
             return;
         }
-
+        
         // 构造 URL
         String url = BASE_URL + SEND_CODE_URL
                 + "?className=MobileCode&ajaxType=get&function=sendMobileCode&type=mobile&subtype=jsjb"
-                + "&mobileNum=" + java.net.URLEncoder.encode(phone, "UTF-8");
-
+                + "&mobileNum=" + java.net.URLEncoder.encode(phone, StandardCharsets.UTF_8);
+        
         Request request = new Request.Builder()
                 .url(url)
                 .post(RequestBody.create(new byte[0]))  // POST 无 body
                 .addHeader("X-MC", "MC")
                 .build();
-
+        
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 showMessage("短信验证码发送失败! HTTP " + response.code(), "error");
@@ -149,7 +150,7 @@ public class ComplaintModel {
             throw e;
         }
     }
-
+    
     /**
      * 获取图形验证码图片的完整 URL（已带随机时间戳，避免缓存）
      */
@@ -157,7 +158,7 @@ public class ComplaintModel {
         long timestamp = System.currentTimeMillis();
         return BASE_URL + CHECK_CODE_URL + "?rand=photorand&random=" + timestamp;
     }
-
+    
     /**
      * 提交问题表单
      *
@@ -174,15 +175,15 @@ public class ComplaintModel {
         body.put("c", formFields == null ? new JSONObject() : new JSONObject(formFields));
         body.put("h", hiddenFields == null ? new JSONObject() : new JSONObject(hiddenFields));
         body.put("f", attachments == null ? new ArrayList<>() : attachments);
-
+        
         String jsonBody = body.toJSONString();
         System.out.println("Request Body: " + jsonBody);
-
+        
         Request request = new Request.Builder()
                 .url(BASE_URL + SUBMIT_URL)
-                .post(RequestBody.create(jsonBody,MediaType.parse("application/json; charset=utf-8")))
+                .post(RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8")))
                 .build();
-
+        
         try (Response response = httpClient.newCall(request).execute()) {
             String respBody = response.body().string();
             if (response.isSuccessful()) {
@@ -204,8 +205,8 @@ public class ComplaintModel {
             throw e;
         }
     }
-
-
+    
+    
     private void showMessage(String msg, String type) {
         if (messageCallback != null) {
             messageCallback.onMessage(msg, type);
@@ -213,7 +214,7 @@ public class ComplaintModel {
             System.out.println("[" + type.toUpperCase() + "] " + msg);
         }
     }
-
+    
     // 消息回调接口
     public interface MessageCallback {
         void onMessage(String msg, String type); // type: "success", "warning", "error"

@@ -15,7 +15,6 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.datastore.preferences.core.MutablePreferences;
 import androidx.datastore.preferences.core.Preferences;
 import androidx.datastore.preferences.core.PreferencesKeys;
@@ -23,6 +22,7 @@ import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder;
 import androidx.datastore.rxjava3.RxDataStore;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityHtmlViewBinding;
 
@@ -35,7 +35,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class HtmlViewActivity extends AppCompatActivity {
+public class HtmlViewActivity extends BaseActivity {
     
     
     @Override
@@ -48,7 +48,7 @@ public class HtmlViewActivity extends AppCompatActivity {
         cookie.setAcceptCookie(true);
         cookie.setAcceptThirdPartyCookies(web, true);
         cookie.acceptThirdPartyCookies(web);
-        
+
 //        @NonNull Observable<String> d = Observable.fromCallable(() -> {
 //            // 解码 Base64
 //            File file = new File(getCacheDir(), String.valueOf(System.currentTimeMillis()));

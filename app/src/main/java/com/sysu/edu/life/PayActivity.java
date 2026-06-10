@@ -2,20 +2,19 @@ package com.sysu.edu.life;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityPagerBinding;
 import com.sysu.edu.view.Pager2Adapter;
 
 import java.util.stream.IntStream;
 
-public class PayActivity extends AppCompatActivity {
-
+public class PayActivity extends BaseActivity {
+    
     Pager2Adapter adp;
     ActivityPagerBinding binding;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -7,7 +7,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.view.GravityCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -15,13 +14,14 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.databinding.ActivityStudentPartTimeBinding;
 import com.sysu.edu.view.EditTextDialog;
 
 import java.util.Objects;
 
-public class StudentPartTimeActivity extends AppCompatActivity {
+public class StudentPartTimeActivity extends BaseActivity {
     StudentPartTimeViewModel viewModel;
     
     @Override

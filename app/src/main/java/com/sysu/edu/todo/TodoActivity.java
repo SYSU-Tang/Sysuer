@@ -2,12 +2,11 @@ package com.sysu.edu.todo;
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import com.sysu.edu.BaseActivity;
 import com.sysu.edu.databinding.ActivityTodoBinding;
 
-public class TodoActivity extends AppCompatActivity {
-
+public class TodoActivity extends BaseActivity {
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

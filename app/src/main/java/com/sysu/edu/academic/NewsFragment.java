@@ -23,7 +23,7 @@ public class NewsFragment extends Fragment {
     final NewsAdapter newsAdapter = new NewsAdapter();
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     Params params;
-
+    
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         RecyclerViewScrollBinding binding = RecyclerViewScrollBinding.inflate(inflater);
@@ -33,32 +33,32 @@ public class NewsFragment extends Fragment {
         binding.getRoot().setAdapter(newsAdapter);
         return binding.getRoot();
     }
-
+    
     public void add(JSONObject json) {
         newsAdapter.add(json);
     }
-
+    
     public void setListener(AdapterListener listener) {
         newsAdapter.setListener(listener);
     }
-
+    
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         staggeredGridLayoutManager.setSpanCount(params.getColumn());
     }
-
+    
     public static class NewsAdapter extends RecyclerAdapter<JSONObject> {
-
+        
         AdapterListener listener;
-
+        
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new RecyclerView.ViewHolder(ItemNewsBinding.inflate(LayoutInflater.from(parent.getContext())).getRoot()) {
             };
         }
-
+        
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             ItemNewsBinding binding = ItemNewsBinding.bind(holder.itemView);
