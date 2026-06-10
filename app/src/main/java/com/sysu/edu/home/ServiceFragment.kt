@@ -75,7 +75,7 @@ import kotlin.run
 import kotlin.takeIf
 
 class ServiceFragment : Fragment() {
-	val list = mutableListOf<JSONObject?>()
+	val list: MutableList<JSONObject?> = mutableListOf()
 	private val disposables = CompositeDisposable()
 	var binding: FragmentServiceBinding? = null
 	var params: Params? = null
@@ -220,7 +220,7 @@ class ServiceFragment : Fragment() {
 			addToLauncher.setOnClickListener { _: View? ->
 				if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
 					getItemIntent(item, Intent(requireContext(), MainActivity::class.java))?.let {
-						ShortcutInfoCompat.Builder(requireContext(), itemId.toString())
+						ShortcutInfoCompat.Builder(requireContext(), "$itemId")
 							.setShortLabel(item.getString("name"))
 							.setLongLabel(item.getString("name"))
 							.setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
@@ -356,14 +356,6 @@ class ServiceFragment : Fragment() {
 											b!!.getString("name").contains(q)
 										if (aNameMatch && !bNameMatch) -1 else if (!aNameMatch && bNameMatch) 1 else 0
 									}
-//									list.stream().filter { item -> item?.getString("name")?.contains(q) == true || item?.getString("description")?.contains(q) == true }
-//										.sorted { a: JSONObject?, b: JSONObject? ->
-//											val aNameMatch =
-//												a!!.getString("name").contains(q)
-//											val bNameMatch =
-//												b!!.getString("name").contains(q)
-//											if (aNameMatch && !bNameMatch) -1 else if (!aNameMatch && bNameMatch) 1 else 0
-//										} .collect(Collectors.toList())
 								}
 								.observeOn(AndroidSchedulers.mainThread())
 								.subscribe { d: List<JSONObject?> -> adapter.set(d) })
@@ -372,7 +364,7 @@ class ServiceFragment : Fragment() {
 				}
 				
 				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-					objectPublishSubject.onNext(s.toString())
+					objectPublishSubject.onNext("$s")
 				}
 				
 				override fun afterTextChanged(s: Editable?) {
@@ -382,13 +374,12 @@ class ServiceFragment : Fragment() {
 		}
 	}
 	
-	fun ServiceFragment.getItemIntent(item: JSONObject, intent: Intent?): Intent? =
+	fun getItemIntent(item: JSONObject, intent: Intent?): Intent? =
 		if (item.containsKey("activity"))
 			Intent(requireContext(), Class.forName(requireContext().packageName + item.getString("activity")))
-				.takeIf { it.resolveActivity(requireContext().packageManager) != null }
-				?: if (item.containsKey("url"))
-					Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(CommonUtil.trim(item.getString("url"))))
-				else intent
+				.takeIf { it.resolveActivity(requireContext().packageManager) != null } ?: intent
+		else if (item.containsKey("url"))
+			Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(CommonUtil.trim(item.getString("url"))))
 		else intent
 	
 	class CollectionAdapter : RecyclerAdapter<JSONObject>() {

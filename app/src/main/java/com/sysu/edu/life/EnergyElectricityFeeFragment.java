@@ -44,20 +44,21 @@ import java.util.List;
 import java.util.Locale;
 
 public class EnergyElectricityFeeFragment extends Fragment {
-
-    HttpManager http;
-    String name = "";
+    
     final RequestQueue requestQueue = new RequestQueue();
     final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
     final MutableLiveData<String> roomCode = new MutableLiveData<>();
-
+    HttpManager http;
+    String name = "";
+    ConcatAdapter adapter = new ConcatAdapter();
+    
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Params params = new Params(this);
         ContextUtil contextUtil = new ContextUtil(requireContext());
         FragmentWaterFeeBinding binding = FragmentWaterFeeBinding.inflate(inflater, container, false);
-        ConcatAdapter adapter = new ConcatAdapter();
+        
         String[] paymentStatus = getResources().getStringArray(R.array.payment_status);
         binding.list.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.list.setAdapter(adapter);
@@ -94,35 +95,36 @@ public class EnergyElectricityFeeFragment extends Fragment {
                                         calendar.setDay(date.getDayOfMonth());
                                         binding.calendarView.addSchemeDate(calendar);
                                     });
-                            case 3 ->
-                                    response.getJSONObject("data").getJSONArray("list").forEach(e -> {
-                                        JSONObject item = (JSONObject) e;
-                                        adapter.addAdapter(new TitleAdapter(item.getString("billPeriod")));
-                                        PreferenceAdapter preferenceAdapter = new PreferenceAdapter();
-                                        ArrayList<String> value = extractValue(item, new String[]{"billPeriod", "billStatus", "remark", "useElectric", "name", "campusName", "areaInfo", "unitPrice", "totalUseAmount", "payedUseAmount", "billTime"});
-                                        Integer billStatus = item.getInteger("billStatus");
-                                        value.set(1, paymentStatus[billStatus - 1]);
-                                        value.set(3, String.format("%s-%s=%s", item.getString("currReportElectric"), item.getString("lastReportElectric"), item.getString("useElectric")));
-                                        preferenceAdapter.set(List.of(R.string.bill_period, R.string.status, R.string.remark, R.string.electricity_consumption, R.string.payer, R.string.campus, R.string.dorm, R.string.price, R.string.fee, R.string.paid_fee, R.string.pay_time),
-                                                value,
-                                                List.of(R.drawable.calendar, billStatus == 3 || billStatus == 5 ? R.drawable.check : R.drawable.uncheck, R.drawable.text, R.drawable.flash, R.drawable.account, R.drawable.location, R.drawable.home, R.drawable.money, R.drawable.money, R.drawable.money, R.drawable.time), requireContext());
-                                        preferenceAdapter.setHideNull(true);
-                                        ButtonAdapter buttonAdapter = new ButtonAdapter();
-                                        buttonAdapter.add(getString(R.string.view_detail));
-                                        if (billStatus == 1)
-                                            buttonAdapter.add(getString(R.string.pay));
-                                        buttonAdapter.setListener((button, position) -> {
-                                            switch (position) {
-                                                case 0 ->
-                                                        button.setOnClickListener(_ -> requestQueue.addAndNext(() -> getDetail(item.getString("id"), roomCode.getValue())));
-                                                case 1 ->
-                                                        button.setOnClickListener(_ -> requestQueue.addAndNext(() -> recharge(item.getString("id"), roomCode.getValue(), item.getFloat("totalUseAmount"))));
-                                            }
-                                        });
-                                        adapter.addAdapter(preferenceAdapter);
-                                        adapter.addAdapter(buttonAdapter);
+                            case 3 -> {
+                                reset();
+                                response.getJSONObject("data").getJSONArray("list").forEach(e -> {
+                                    JSONObject item = (JSONObject) e;
+                                    adapter.addAdapter(new TitleAdapter(item.getString("billPeriod")));
+                                    PreferenceAdapter preferenceAdapter = new PreferenceAdapter();
+                                    ArrayList<String> value = extractValue(item, new String[]{"billPeriod", "billStatus", "remark", "useElectric", "name", "campusName", "areaInfo", "unitPrice", "totalUseAmount", "payedUseAmount", "billTime"});
+                                    Integer billStatus = item.getInteger("billStatus");
+                                    value.set(1, paymentStatus[billStatus - 1]);
+                                    value.set(3, String.format("%s-%s=%s", item.getString("currReportElectric"), item.getString("lastReportElectric"), item.getString("useElectric")));
+                                    preferenceAdapter.set(List.of(R.string.bill_period, R.string.status, R.string.remark, R.string.electricity_consumption, R.string.payer, R.string.campus, R.string.dorm, R.string.price, R.string.fee, R.string.paid_fee, R.string.pay_time),
+                                            value,
+                                            List.of(R.drawable.calendar, billStatus == 3 || billStatus == 5 ? R.drawable.check : R.drawable.uncheck, R.drawable.text, R.drawable.flash, R.drawable.account, R.drawable.location, R.drawable.home, R.drawable.money, R.drawable.money, R.drawable.money, R.drawable.time), requireContext());
+                                    preferenceAdapter.setHideNull(true);
+                                    ButtonAdapter buttonAdapter = new ButtonAdapter();
+                                    buttonAdapter.add(getString(R.string.view_detail));
+                                    if (billStatus == 1)
+                                        buttonAdapter.add(getString(R.string.pay));
+                                    buttonAdapter.setListener((button, position) -> {
+                                        switch (position) {
+                                            case 0 ->
+                                                    button.setOnClickListener(_ -> requestQueue.addAndNext(() -> getDetail(item.getString("id"), roomCode.getValue())));
+                                            case 1 ->
+                                                    button.setOnClickListener(_ -> requestQueue.addAndNext(() -> recharge(item.getString("id"), roomCode.getValue(), item.getFloat("totalUseAmount"))));
+                                        }
                                     });
-
+                                    adapter.addAdapter(preferenceAdapter);
+                                    adapter.addAdapter(buttonAdapter);
+                                });
+                            }
                             case 4 -> {
                                 detailDialog.clear();
                                 response.getJSONObject("data").getJSONArray("list").forEach(e -> {
@@ -139,18 +141,15 @@ public class EnergyElectricityFeeFragment extends Fragment {
                                 detailDialog.show();
                             }
                             case 5 -> {
-                                System.out.println(response);
                                 params.toast(response.getString("msg"));
                                 requestQueue.addAndNext(() -> getElectricityBill(roomCode.getValue()));
                             }
                         }
                         requestQueue.next();
-                    } else if (response.getInteger("errorCode") == 500) {
-//                        params.toast(R.string.pay_fail);
+                    } else if (response.getInteger("errorCode") == 500)
                         params.toast(response.getString("msg"));
-                    } else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
+                    else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
                 }
-                super.handleMessage(msg);
             }
         });
         http.setAuthorizationRequired(true);
@@ -177,35 +176,39 @@ public class EnergyElectricityFeeFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 requestQueue.addAndNext(() -> roomCode.setValue(rooms.valueAt(position).getSecond()));
             }
-
+            
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+            
             }
         });
         return binding.getRoot();
     }
-
+    
+    void reset() {
+        adapter.getAdapters().forEach(adapter::removeAdapter);
+    }
+    
     void getUserInfo() {
         http.getRequest("https://zhny.sysu.edu.cn/kbp/auth/userInfo", 0);
     }
-
+    
     void getRoom(String username) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/admin/sys/personRoom/list", "{\"username\":\"" + username + "\"}", 1);
     }
-
+    
     void getElectricityConsumption(String roomCode, String startDate, String endDate) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/ele/wechat/eleConsume", String.format("{\"roomCode\":\"%s\",\"startDate\":\"%s\",\"endDate\":\"%s\"}", roomCode, startDate, endDate), 2);
     }
-
+    
     void getElectricityBill(String roomCode) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/ele/mobile/billRecord", String.format("{\"roomCode\":\"%s\",\"billType\":1}", roomCode), 3);
     }
-
+    
     void getDetail(String id, String room) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/ele/mobile/billRecord", String.format("{\"id\":\"%s\",\"roomCode\":\"%s\"}", id, room), 4);
     }
-
+    
     void recharge(String id, String roomCode, float amount) {
         http.postRequest("https://zhny.sysu.edu.cn/kbp/ele/mobile/pay/bill/recharge", String.format(Locale.getDefault(), "{\"roomCode\":\"%s\",\"actualBillAmount\":%.2f,\"useTypeEleAndMoneyList\":[{\"billAmount\":%.2f,\"useEleType\":1,\"idList\":[\"%s\"]}],\"rechargeType\":16}", roomCode, amount, amount, id), 5);
     }
