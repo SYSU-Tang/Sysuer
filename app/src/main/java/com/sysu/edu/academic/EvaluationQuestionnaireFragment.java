@@ -340,7 +340,7 @@ class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditT
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (isEmpty(s)) {
                     if (!answer.isEmpty())
-                        answer.remove(0);
+                        answer.removeFirst();
                 } else answer.set(0, s.toString());
             }
         });
