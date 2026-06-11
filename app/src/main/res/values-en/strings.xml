@@ -664,4 +664,6 @@
     <string name="querying">Querying...</string>
     <string name="please_select_exam_week">Please Select the Exam Week</string>
     <string name="unchangeable_after_submission">Cannot be changed after submission.</string>
+    <string name="developer_mode">Developer Mode</string>
+    <string name="beta_check">Update Beta</string>
 </resources>
