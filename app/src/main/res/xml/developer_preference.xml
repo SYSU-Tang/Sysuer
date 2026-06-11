@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <rikka.material.preference.MaterialSwitchPreference
+        android:defaultValue="false"
+        android:key="developer_mode"
+        android:title="@string/developer_mode"
+        app:icon="@drawable/developer" />
+    <rikka.material.preference.MaterialSwitchPreference
+        android:defaultValue="false"
+        android:key="beta_check"
+        android:title="@string/beta_check"
+        app:icon="@drawable/flask" />
+</androidx.preference.PreferenceScreen>

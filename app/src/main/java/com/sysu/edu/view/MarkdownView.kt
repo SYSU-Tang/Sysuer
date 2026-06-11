@@ -3,6 +3,7 @@ package com.sysu.edu.view
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -14,6 +15,8 @@ import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
+import com.sysu.edu.api.SettingManager
+import com.sysu.edu.browser.theme.SysuerTheme
 
 class MarkdownView @JvmOverloads constructor(
 	context: Context,
@@ -25,15 +28,20 @@ class MarkdownView @JvmOverloads constructor(
 	
 	init {
 		addView(composeView)
+		val settingManager = SettingManager(context)
 		composeView.setContent({
-								   MaterialTheme {
+								   SysuerTheme(darkTheme = when (settingManager.getTheme()) {
+									   0 -> false
+									   1 -> true
+									   else -> isSystemInDarkTheme()
+								   }
+								   ) {
 									   CompositionLocalProvider(LocalInspectionMode provides true) {
 										   val markdownText by content.observeAsState("")
 										   markdownText?.let {
 											   Markdown(
 												   rememberMarkdownState(it),
-							                       colors = markdownColor(
-												   ),
+							                       colors = markdownColor(),
 							                       typography = markdownTypography(
 													   h1 = MaterialTheme.typography.headlineMedium,
 								                       h2 = MaterialTheme.typography.titleLargeEmphasized,

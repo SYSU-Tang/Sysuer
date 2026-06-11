@@ -30,7 +30,7 @@ class ContextUtil(val context: Context) {
 	private val loginManager: LoginManager = LoginManager(context)
 	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
 	private val handler = Handler(Looper.getMainLooper())
-	private val disposable = CompositeDisposable()
+	val disposable: CompositeDisposable = CompositeDisposable()
 	private var binding: DialogAccountBinding? = null
 	private var dialog: AlertDialog? = null
 	
@@ -74,13 +74,13 @@ class ContextUtil(val context: Context) {
 		 * 
 		 * @return 是否为开发者
 		 */
-		get() = sharedPreferences.getBoolean("developer", false)
+		get() = sharedPreferences.getBoolean("developer_mode", false)
 		/**
 		 * 设置是否为开发者
 		 * 
 		 */
 		set(developer) {
-			sharedPreferences.edit { putBoolean("developer", developer) }
+			sharedPreferences.edit { putBoolean("developer_mode", developer) }
 		}
 	
 	/**

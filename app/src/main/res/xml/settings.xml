@@ -103,6 +103,16 @@
             app:key="update"
             app:title="@string/launch_update" />
         <Preference
+            app:icon="@drawable/developer"
+            app:isPreferenceVisible="false"
+            app:persistent="false"
+            app:key="developer_mode"
+            app:title="@string/developer_mode" >
+            <intent
+                android:targetClass="com.sysu.edu.extra.DeveloperActivity"
+                android:targetPackage="com.sysu.edu" />
+        </Preference>
+        <Preference
             app:icon="@drawable/info"
             app:title="@string/about">
             <intent

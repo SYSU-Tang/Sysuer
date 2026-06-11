@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.sysu.edu.R
 import com.sysu.edu.browser.BrowserPreference
 import com.sysu.edu.preference.MenuPreference
@@ -61,5 +62,6 @@ class SettingFragment : PreferenceFragmentCompat() {
 			browserPreference.isSaveMobileDataMode = newValue as Boolean
 			true
 		}
+		(findPreference("developer_mode") as Preference?)?.isVisible = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("developer_mode", false)
 	}
 }

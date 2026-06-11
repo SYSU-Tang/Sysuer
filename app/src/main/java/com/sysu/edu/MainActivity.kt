@@ -18,6 +18,9 @@ import android.os.Handler
 import android.os.Message
 import android.view.View
 import android.widget.TextView
+import androidx.activity.BackEventCompat
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
@@ -52,6 +55,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 
 class MainActivity : BaseActivity() {
+	lateinit var params: Params
 	var downloadId: Long = 0
 	var receiver: BroadcastReceiver? = object : BroadcastReceiver() {
 		override fun onReceive(context: Context?, intent: Intent) {
@@ -59,7 +63,7 @@ class MainActivity : BaseActivity() {
 					DownloadManager.EXTRA_DOWNLOAD_ID, -1
 				) == downloadId
 			) {
-				sysuerParams?.toast(getString(R.string.download_complete))
+				params.toast(getString(R.string.download_complete))
 				com.sysu.edu.api.DownloadManager.openFile(this@MainActivity, path)
 			}
 		}
@@ -69,11 +73,11 @@ class MainActivity : BaseActivity() {
 	var disposable: CompositeDisposable = CompositeDisposable()
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		sysuerParams = Params(this)
+		params = Params(this)
 		http = HttpManager(object : Handler(mainLooper) {
 			override fun handleMessage(msg: Message) {
 				when (msg.what) {
-					-1 -> sysuerParams?.toast(R.string.no_net_connected)
+					-1 -> params.toast(R.string.no_net_connected)
 					0 -> disposable.add(
 						Observable.just(JSONObject.parseObject(msg.obj as String?))
 							.subscribeOn(Schedulers.io())
@@ -85,7 +89,7 @@ class MainActivity : BaseActivity() {
 				}
 			}
 		}).apply {
-			setParams(sysuerParams)
+			setParams(params)
 		}
 		val binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.getRoot())
@@ -247,7 +251,7 @@ class MainActivity : BaseActivity() {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 		if (requestCode == PackageManager.PERMISSION_GRANTED) {
 			if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-				sysuerParams?.toast(R.string.permission_granted)
+				params.toast(R.string.permission_granted)
 		}
 	}
 	
@@ -266,18 +270,18 @@ class MainActivity : BaseActivity() {
 		actionMap[302] = View.OnClickListener { _: View? ->
 			packageManager.getLaunchIntentForPackage("com.comingx.zanao")?.let {
 				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-			} ?: sysuerParams?.toast(R.string.no_app)
+			} ?: params.toast(R.string.no_app)
 		} // 校园集市
 		actionMap[601] = View.OnClickListener { _: View? ->
 			PreferenceManager.getDefaultSharedPreferences(this).getString("qrcode", "")
 				?.let {//new LaunchMiniProgram(this).launchMiniProgram("gh_85575b9f544e");
 					startActivity(Intent(Intent.ACTION_VIEW, it.toUri()))
-				} ?: sysuerParams?.toast(R.string.no_app)
+				} ?: params.toast(R.string.no_app)
 		}// 二维码
 		actionMap[602] = View.OnClickListener { _: View? ->
 			packageManager.getLaunchIntentForPackage("com.tencent.wework")?.let {
 				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-			} ?: sysuerParams?.toast(R.string.no_app)
+			} ?: params.toast(R.string.no_app)
 		} // 企业微信
 	}
 }

@@ -1,10 +1,10 @@
-package com.sysu.edu.preference
+package com.sysu.edu.api
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.app.AppCompatDelegate.setApplicationLocales
-import androidx.core.os.LocaleListCompat.forLanguageTags
+import androidx.core.content.edit
+import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceManager
 
 class SettingManager(val context: Context) {
@@ -26,7 +26,7 @@ class SettingManager(val context: Context) {
 	* 2: 系统语言
 	* */
 	fun setLanguage() {
-		setApplicationLocales(forLanguageTags(getLanguageCode()))
+		AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(getLanguageCode()))
 	}
 	
 	/*
@@ -36,8 +36,15 @@ class SettingManager(val context: Context) {
 	* 2: 系统主题
 	* */
 	fun setTheme() {
-		preferences.getString("theme", "2")?.toInt()?.let { AppCompatDelegate.setDefaultNightMode((intArrayOf(AppCompatDelegate.MODE_NIGHT_NO, AppCompatDelegate.MODE_NIGHT_YES, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))[it]) }
+		AppCompatDelegate.setDefaultNightMode((intArrayOf(AppCompatDelegate.MODE_NIGHT_NO, AppCompatDelegate.MODE_NIGHT_YES, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))[getTheme()])
 	}
+	/*
+	* 获取主题
+	* 0: 浅色主题
+	* 1: 深色主题
+	* 2: 系统主题
+	* */
+	fun getTheme(): Int = preferences.getString("theme", "2")?.toInt() ?: 2
 	
 	companion object {
 		@JvmStatic var defaultFontSize: Float = 0.0f
@@ -53,4 +60,13 @@ class SettingManager(val context: Context) {
 		context.resources.configuration.fontScale = fontSize
 		return context.createConfigurationContext(context.resources.configuration)
 	}
+	
+	var developerMode: Boolean = false
+		get() {
+			return preferences.getBoolean("developer_mode", false)
+		}
+		set(value) {
+			field = value
+			preferences.edit { putBoolean("developer_mode", value) }
+		}
 }

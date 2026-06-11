@@ -23,14 +23,13 @@ import com.sysu.edu.api.Params
 import com.sysu.edu.databinding.ActivityUpdateBinding
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 import java.util.Locale
 
 class UpdateActivity : BaseActivity() {
+	private lateinit var sysuerParams: Params
 	var http: HttpManager? = null
-	val disposable: CompositeDisposable = CompositeDisposable()
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		var versionCode: Long = 0
@@ -45,19 +44,20 @@ class UpdateActivity : BaseActivity() {
 			} catch (_: PackageManager.NameNotFoundException) {
 			}
 		}
+		sysuerParams = Params(this)
+		
 		val notificationManager = NotificationManagerCompat.from(this)
 		notificationManager.createNotificationChannel(NotificationChannelCompat.Builder("update", NotificationManagerCompat.IMPORTANCE_DEFAULT)
 														  .setDescription("APP下载通知")
 														  .setName("下载进度通知").build())
-		val params = Params(this)
 		http = HttpManager(object : Handler(mainLooper) {
 			override fun handleMessage(msg: Message) {
 				when (msg.what) {
 					-1 -> {
-						params.toast(R.string.no_net_connected)
+						sysuerParams.toast(R.string.no_net_connected)
 						binding.updateButton.setText(R.string.no_net_connected)
 					}
-					0 -> disposable.add(Observable.just<Any>(msg.obj).map<Any> { text -> JSONObject.parse(text as String) }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { response: Any ->
+					0 -> sysuerParams.contextUtil.disposable.add(Observable.just<Any>(msg.obj).map<Any> { text -> JSONObject.parse(text as String) }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { response: Any ->
 						val responseVersion = (response as JSONObject).getInteger("version")
 						val responseVersionName = response.getString("versionName")
 						binding.changelog.setMarkdown("# " + responseVersionName + "(" + responseVersion + ")\n" + response.getString("description"))
@@ -102,7 +102,7 @@ class UpdateActivity : BaseActivity() {
 									}
 									
 									override fun onDownloadError(code: Int, message: String?) {
-										params.toast(message)
+										sysuerParams.toast(message)
 									}
 								})
 							}
@@ -111,12 +111,12 @@ class UpdateActivity : BaseActivity() {
 				}
 			}
 		}).apply {
-			setParams(params)
+			setParams(sysuerParams)
 		}
 		binding.icon.setOnClickListener { _: View? ->
 			if (click.isEmpty() || System.currentTimeMillis() - click[click.size - 1]!! < 500) if (click.size == 4) {
-				params.toast(if (params.isDeveloper) R.string.developer_disabled else R.string.developer_enabled)
-				params.isDeveloper = !params.isDeveloper
+				sysuerParams.toast(if (settingManager.developerMode) R.string.developer_disabled else R.string.developer_enabled)
+				settingManager.developerMode = !settingManager.developerMode
 				click.clear()
 			} else click.add(System.currentTimeMillis())
 			else click.clear()
@@ -128,9 +128,4 @@ class UpdateActivity : BaseActivity() {
 		get() {
 			http!!.getRequest("https://sysu-tang.github.io/latest.json", 0)
 		}
-	
-	override fun onDestroy() {
-		super.onDestroy()
-		disposable.dispose()
-	}
 }
