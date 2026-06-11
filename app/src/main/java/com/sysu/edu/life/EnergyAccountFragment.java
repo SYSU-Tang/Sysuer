@@ -113,12 +113,8 @@ public class EnergyAccountFragment extends Fragment {
                                     buttonAdapter.setListener((button, _) -> button.setOnClickListener(_ -> rechargeDialog.show()));
                                     adapter.addAdapter(buttonAdapter);
                                 }
-                                case 3 -> {
-                                    System.out.println(response);
-                                    gotoWechat(response.getJSONObject("data").getJSONObject("data"));
-                                    /*https://fee.sysu.edu.cn/gateway/cashier/app/order?orderno=1487527133151629312&scene=wx&showwxpaytitle=1&response_type=code&scope=snsapi_base&state=1&connect_redirect=1#wechat_redirect*/
-                                    /*{"code":200,"msg":"操作成功","data":{"data":{"page_url":"https://zhny.sysu.edu.cn/h5/#/pages/indexModule/pages/electricityRecharge/electricityRecharge","charset":"utf-8","pay_info":"{\"items\":[{\"item_code\":\"138\",\"item_money\":0.01}],\"total_money\":0.01}","sign":"FCE7FB5850452D14095B03D0456E6AF0","mch_id":"sysuZHNYGLPT","notify_url":"https://zhny.sysu.edu.cn/kbp/pay/notify/zdpay","person_code":"24308152","version":"2.0","scene":"wx","out_trade_no":"75892026032818574230884387233138","timestamp":"20260328185742309"},"url":"https://fee.sysu.edu.cn/gateway/unifiedorder/pagepay","outTradeNo":"75892026032818574230884387233138"}}*/
-                                }
+                                case 3 -> /*https://fee.sysu.edu.cn/gateway/cashier/app/order?orderno=1487527133151629312&scene=wx&showwxpaytitle=1&response_type=code&scope=snsapi_base&state=1&connect_redirect=1#wechat_redirect*/
+                                        gotoWechat(response.getJSONObject("data").getJSONObject("data"));
                             }
                             requestQueue.next();
                         } else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
