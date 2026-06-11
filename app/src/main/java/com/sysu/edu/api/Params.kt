@@ -84,6 +84,7 @@ class Params {
 			} ?: 1
 	val context: Context
 		get() = this.contextUtil.context
+	
 	var isDeveloper: Boolean
 		/**
 		 * 获取是否为开发者
@@ -91,11 +92,6 @@ class Params {
 		 * @return 是否为开发者
 		 */
 		get() = contextUtil.isDeveloper
-		/**
-		 * 设置是否为开发者
-		 *
-		 * @param isDeveloper 是否为开发者
-		 */
 		set(isDeveloper) {
 			contextUtil.isDeveloper = isDeveloper
 		}

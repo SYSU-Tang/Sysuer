@@ -71,7 +71,7 @@ public class LoginManager {
     private String getPublicKey() {
         try {
             return client.newCall(new Request.Builder()
-                    .url(casAuthorizationManager.getBaseUrl() + "/esc-sso/api/v3/auth/policy").build()).execute().body().string();
+                    .url(casAuthorizationManager.getHost() + "/esc-sso/api/v3/auth/policy").build()).execute().body().string();
         } catch (IOException _) {
             return "";
         }
@@ -91,7 +91,7 @@ public class LoginManager {
     
     private void request(String path, boolean isRedirect) {
         try {
-            Response response = client.newCall(new Request.Builder().url(isRedirect ? casAuthorizationManager.getBaseUrl() + "/esc-sso/login?service=" + path : path).build()).execute();
+            Response response = client.newCall(new Request.Builder().url(isRedirect ? casAuthorizationManager.getHost() + "/esc-sso/login?service=" + path : path).build()).execute();
             String body = response.body().string();
             if (Objects.requireNonNull(response.header("Content-Type", "")).contains("application/json")) {
                 JSONObject json = JSONObject.parse(body);
@@ -114,7 +114,7 @@ public class LoginManager {
     }
     
     private String loginForGym(String path) throws IOException {
-        String url = path.startsWith("http") ? path : casAuthorizationManager.getBaseUrl() + path;
+        String url = path.startsWith("http") ? path : casAuthorizationManager.getHost() + path;
         Response response = client.newCall(new Request.Builder().header("Accept", "application/json, text/plain, */*")
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36")
                 .url(url).build()).execute();
@@ -145,15 +145,15 @@ public class LoginManager {
         }
     }
     
-    /**
-     * 登录，使用 AuthorizationJar 中的用户名和密码登录
-     *
-     * @param service 登录服务
-     *
-     */
-    public void login(String service) {
-        login(authorizationJar.getUserName(), authorizationJar.getPassword(), service);
-    }
+//    /**
+//     * 登录，使用 AuthorizationJar 中的用户名和密码登录
+//     *
+//     * @param service 登录服务
+//     *
+//     */
+//    public void login(String service) {
+//        login(authorizationJar.getUserName(), authorizationJar.getPassword(), service);
+//    }
     
     public void loginForKTP(String username, String password) throws Exception {
         password = AESCBCEncrypter.encryptByCBC(password, "ktp4567890123456", "ktp4567890123456");
@@ -265,7 +265,7 @@ public class LoginManager {
         List<Cookie> webvpnKey = cookieJar.loadForRequest(HttpUrl.get("https://webvpn.sysu.edu.cn/vpn_key/update")).stream().filter(e -> "_webvpn_key".equals(e.name())).collect(Collectors.toList());
         if (!webvpnKey.isEmpty()) {
             cookieJar.saveFromResponse(HttpUrl.get(service), webvpnKey);
-            cookieJar.saveFromResponse(HttpUrl.get(casAuthorizationManager.getBaseUrl()), webvpnKey);
+            cookieJar.saveFromResponse(HttpUrl.get(casAuthorizationManager.getHost()), webvpnKey);
         }
         return webvpnKey;
     }
@@ -346,7 +346,7 @@ public class LoginManager {
     }
     
     public String getTicket(String service) throws IOException {
-        String location = directClient.newCall(new Request.Builder().url(casAuthorizationManager.getBaseUrl() + "/esc-sso/login?service=" + service).build()).execute().header("Location");
+        String location = directClient.newCall(new Request.Builder().url(casAuthorizationManager.getHost() + "/esc-sso/login?service=" + service).build()).execute().header("Location");
         return location == null ? "" : HttpUrl.get(location).queryParameter("ticket");
     }
     
@@ -360,7 +360,7 @@ public class LoginManager {
     }
     
     public String getNewsAuthorization(String url) {
-        return getAuthorization(new Request.Builder().url(casAuthorizationManager.getBaseUrl() + "/esc-sso/login?service=" + url).build());
+        return getAuthorization(new Request.Builder().url(casAuthorizationManager.getHost() + "/esc-sso/login?service=" + url).build());
     }
     
     public String getGymAuthorization(String targetBaseUrl) {

@@ -87,8 +87,8 @@ public class EvaluationCourseFragment extends Fragment {
         String rwid = requireArguments().getString("rwid");
         String pjrdm = requireArguments().getString("pjrdm");
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = message.getSecond();
-            if (response.get("code").equals("200")) if (message.getFirst() == 1) {
+            JSONObject response = message.second;
+            if (response.get("code").equals("200")) if (message.first == 1) {
                 JSONObject result = response.getJSONObject("result");
                 result.getJSONArray("list").forEach(e -> adp.add((JSONObject) e));
                 if (result.getInteger("total") / 20.0 > page)

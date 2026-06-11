@@ -49,7 +49,7 @@ public class PersonalInformationActivity extends BaseActivity {
         binding.pager.setAdapter(pager2Adapter);
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(tabs.get(position))).attach();
         model.getMessage().observe(this, message -> {
-            JSONObject data = message.getSecond();
+            JSONObject data = message.second;
             if (data.containsKey("code") && data.getInteger("code") == 200) {
                 HashMap<String, String> dict = new HashMap<>();
                 dict.put("bmmc", "部门");

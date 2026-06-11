@@ -8,13 +8,16 @@ import com.sysu.edu.api.AuthorizationManager
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CookieManager
 import com.sysu.edu.api.HttpManager
+import com.sysu.edu.api.TargetUrl
 import okhttp3.Request
 import okhttp3.Response
 
 open class JwxtModel(context: Context) : BaseModel(context) {
-	override val authorizationManager: AuthorizationManager = AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn")
+	override val authorizationManager: AuthorizationManager = AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn").also {
+		it.setTargetUrl(TargetUrl.JWXT, TargetUrl.JWXT_WEBVPN)
+	}
 	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
-		setCookieManager(CookieManager(context))
+		cookieManager = CookieManager(context)
 		setReferrer("https://jwxt.sysu.edu.cn/")
 	}
 	
@@ -29,10 +32,10 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 			val code = contentJSON.getInteger("code")
 			if (code == 53000007) login(request)
 			else {
-				if (code != 200) http.getHandler().post {
+				if (code != 200) http.handler.post {
 					contextUtil.toast(CommonUtil.toStringOrDefault(contentJSON.getString("message")))
 				}
-				result = CommonUtil.Tuple2<Int, JSONObject>(request.getSecond(), contentJSON)
+				result = CommonUtil.Tuple2<Int, JSONObject>(request.second, contentJSON)
 				message.postValue(result)
 				afterLoginRequest.remove(request)
 			}

@@ -57,11 +57,11 @@ public class AcademyNotification extends BaseActivity {
         binding.pager.setAdapter(pager2Adapter);
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new int[]{R.string.academic_affair_notice, R.string.school_affair_notice}[position])).attach();
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code").equals(200)) {
-                switch (message.getFirst()) {
+                switch (message.first) {
                     case 0, 1 ->
-                            response.getJSONObject("data").getJSONArray("list").forEach(a -> ((NewsFragment) pager2Adapter.get(message.getFirst())).add((JSONObject) a));
+                            response.getJSONObject("data").getJSONArray("list").forEach(a -> ((NewsFragment) pager2Adapter.get(message.first)).add((JSONObject) a));
                     case 2 ->
                             startActivity(new Intent(this, BrowserActivity.class).putExtra("data", ("""
                                             <!DOCTYPE html><html><head><style>

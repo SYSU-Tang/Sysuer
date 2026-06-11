@@ -69,9 +69,9 @@ public class EvaluationQuestionnaireFragment extends Fragment {
         });
         requireActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject data = message.getSecond();
+            JSONObject data = message.second;
             if (data.get("code").equals("200")) {
-                switch (message.getFirst()) {
+                switch (message.first) {
                     case 1 ->
                             data.getJSONObject("result").getJSONArray("assessedObjList").forEach(l ->
                                     ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->

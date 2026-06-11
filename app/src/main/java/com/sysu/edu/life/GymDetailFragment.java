@@ -233,23 +233,23 @@ public class GymDetailFragment extends Fragment {
     }
     
     void getInfo(String id, String from, String to) {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/venue/available-slots/range?venueTypeId=%s&start=%s&end=%s", id, from, to), 0);
+        http.getRequest(viewModel.authorizationManager.getHost() + String.format("api/venue/available-slots/range?venueTypeId=%s&start=%s&end=%s", id, from, to), 0);
     }
     
     void getFee(String id) {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/venuetype/%s/feetemplates", id), 1);
+        http.getRequest(viewModel.authorizationManager.getHost() + String.format("api/venuetype/%s/feetemplates", id), 1);
     }
     
     void getMe() {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/swimmer/me", 2);
+        http.getRequest(viewModel.authorizationManager.getHost() + "api/swimmer/me", 2);
     }
     
     void getType(String id) {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/venue/type/" + id, 3);
+        http.getRequest(viewModel.authorizationManager.getHost() + "api/venue/type/" + id, 3);
     }
     
     public void reserve(String payload) {
-        http.postRequest(viewModel.authorizationManager.getBaseUrl() + "api/BookingRequestVenue", payload, 4);
+        http.postRequest(viewModel.authorizationManager.getHost() + "api/BookingRequestVenue", payload, 4);
     }
     
     /**

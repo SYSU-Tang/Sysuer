@@ -74,7 +74,7 @@ public class CourseSelectedActivity extends BaseActivity {
         binding.list.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
         binding.list.setAdapter(courseAdapter);
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code") == 200) {
                 JSONObject data = response.getJSONObject("data");
                 data.getJSONArray("rows").forEach(o -> courseAdapter.add((JSONObject) o));

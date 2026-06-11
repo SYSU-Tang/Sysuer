@@ -115,7 +115,7 @@ public class NewsFragment extends Fragment {
     }
     
     void getNews() {
-        http.postRequest(authorizationManager.getBaseUrl() + "ai_service/content-portal/recommend/query-recommend", "", 3);
+        http.postRequest(authorizationManager.getHost() + "ai_service/content-portal/recommend/query-recommend", "", 3);
     }
     
     void getSubscription() {
@@ -131,7 +131,7 @@ public class NewsFragment extends Fragment {
     }
     
     void baseRequest(String code, int what) {
-        http.postRequest(authorizationManager.getBaseUrl() + "ai_service/content-portal/user/content/page", "{\"pageSize\":20,\"currentPage\":" + page++ + ",\"apiCode\":\"" + code + "\",\"notice\":false}", what);
+        http.postRequest(authorizationManager.getHost() + "ai_service/content-portal/user/content/page", "{\"pageSize\":20,\"currentPage\":" + page++ + ",\"apiCode\":\"" + code + "\",\"notice\":false}", what);
     }
     
     static class NewsAdapter extends RecyclerAdapter<HashMap<String, String>> {

@@ -93,11 +93,12 @@ class UpdateActivity : BaseActivity() {
 											.setContentTitle(getString(R.string.download))
 											.setContentText(getString(R.string.apk_next_step_notice))
 											.setSmallIcon(R.drawable.down)
-											.setContentIntent(PendingIntentCompat.getActivity(this@UpdateActivity, 0, DownloadManager.getOpenFileIntent(this@UpdateActivity, path), PendingIntent.FLAG_ONE_SHOT, true))
+											.setContentIntent(DownloadManager.getOpenFileIntent(this@UpdateActivity, path)?.let { PendingIntentCompat.getActivity(this@UpdateActivity, 0, it, PendingIntent.FLAG_ONE_SHOT, true) })
 											.setProgress(1, 1, false)
 											.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-										if (ActivityCompat.checkSelfPermission(this@UpdateActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
-										DownloadManager.openFile(this@UpdateActivity, path)
+										if (ActivityCompat.checkSelfPermission(this@UpdateActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+											notificationManager.notify(1002, builder.build())
+										path?.let { DownloadManager.openFile(this@UpdateActivity, it) }
 									}
 									
 									override fun onDownloadError(code: Int, message: String?) {

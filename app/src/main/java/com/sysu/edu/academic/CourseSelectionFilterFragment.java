@@ -56,8 +56,8 @@ public class CourseSelectionFilterFragment extends Fragment {
             binding = FragmentCourseFilterBinding.inflate(inflater, container, false);
             binding.container.setColumnCount(new Params(this).getColumn());
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = message.getSecond();
-                int what = message.getFirst();
+                JSONObject response = message.second;
+                int what = message.first;
                 if (response.getInteger("code").equals(200)) {
                     JSONArray data = response.getJSONArray("data");
                     if (data != null) {

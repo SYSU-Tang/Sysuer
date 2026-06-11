@@ -34,7 +34,7 @@ public class CVFragment extends StaggeredFragment {
             view = super.onCreateView(inflater, container, savedInstanceState);
             model = new XgxtModel(requireContext());
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject data = message.getSecond();
+                JSONObject data = message.second;
                 if (data.containsKey("code") && data.getInteger("code") == 200) {
                     data = data.getJSONObject("data");
                     add(getString(R.string.cv), List.of("学号", "姓名", "培养单位", "专业", "培养层次", "电话号码", "邮箱", "最后修改时间", "家庭人均月收入(元)", "在校每月平均消费(元)", "爱好特长", "勤工助学经历", /*"", */"工作时间", "性别", "住宿地址"),

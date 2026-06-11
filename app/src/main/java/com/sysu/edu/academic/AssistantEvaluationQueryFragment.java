@@ -55,9 +55,9 @@ public class AssistantEvaluationQueryFragment extends PreferenceFragmentCompat {
             FilterPreference unit = Objects.requireNonNull(findPreference("unit"));
             unit.getValueLiveData().observe(requireActivity(), this::getUnit);
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = message.getSecond();
+                JSONObject response = message.second;
                 if (response.getInteger("code") == 200) {
-                    switch (message.getFirst()) {
+                    switch (message.first) {
                         case 0 -> {
                             String[] years = extractValue(response.getJSONArray("data"), "acadYearSemester").toArray(new String[0]);
                             SimpleMenuPreference yearTerm = Objects.requireNonNull(findPreference("yearTerm"));

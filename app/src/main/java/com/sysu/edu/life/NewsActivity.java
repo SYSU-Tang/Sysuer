@@ -142,7 +142,7 @@ public class NewsActivity extends BaseActivity {
     }
     
     void getSuggestions(String keyword) {
-        http.postRequest(authorizationManager.getBaseUrl() + "ai_service/search-server/needle/suggest", String.format("{\"aliasName\":\"collection_data\",\"keyWord\":\"%s\"}", keyword), 1);
+        http.postRequest(authorizationManager.getHost() + "ai_service/search-server/needle/suggest", String.format("{\"aliasName\":\"collection_data\",\"keyWord\":\"%s\"}", keyword), 1);
     }
     
     static class SuggestionAdapter extends RecyclerAdapter<String> {

@@ -73,9 +73,9 @@ public class CourseSelectionPreviewFragment extends Fragment {
             });
             binding.type.addOnButtonCheckedListener((_, _, _) -> type.setValue(binding.major.isChecked() ? 1 : binding.collegePublicSelective.isChecked() ? 4 : 2));
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = message.getSecond();
+                JSONObject response = message.second;
                 if (response.getInteger("code") == 200) {
-                    if (message.getFirst() == 0) {
+                    if (message.first == 0) {
                         JSONObject data = response.getJSONObject("data");
                         total = data.getInteger("total");
                         data.getJSONArray("rows").forEach(e -> previewAdapter.add((JSONObject) e));

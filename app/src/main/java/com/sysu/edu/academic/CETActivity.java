@@ -36,9 +36,9 @@ public class CETActivity extends BaseActivity {
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         getExchange();
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code").equals(200)) {
-                if (message.getFirst() == 0) {
+                if (message.first == 0) {
                     JSONObject data = response.getJSONObject("data");
                     if (data != null) {
                         int total = data.getInteger("total");

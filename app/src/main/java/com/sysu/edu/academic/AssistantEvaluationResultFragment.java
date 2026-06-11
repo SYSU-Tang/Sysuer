@@ -38,9 +38,9 @@ public class AssistantEvaluationResultFragment extends StaggeredFragment {
             if ((page - 1) * 10 < total) getResult();
         });
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code") == 200) {
-                if (message.getFirst() == 0) {
+                if (message.first == 0) {
                     JSONObject data = response.getJSONObject("data");
                     if (total == -1) total = data.getInteger("total");
                     data.getJSONArray("rows").forEach(

@@ -113,202 +113,203 @@ class DashboardFragment : Fragment() {
 				LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
 			model = JwxtModel(requireContext()).apply {
 				message.observe(requireActivity()) { message: CommonUtil.Tuple2<Int, JSONObject> ->
-					val response = message.getSecond()
-					if (response.get("code") == 200) {
-						when (message.getFirst()) {
-							1 -> {
-								val beforeArray = ArrayList<JSONObject?>()
-								val afterArray = ArrayList<JSONObject?>()
-								response.getJSONArray("data")
-									.forEach { e: Any? ->
-										val status = getTimePosition(
-											"${(e as JSONObject).getString("teachingDate")} ${e.getString("startTime")}",
-											"${e.getString("teachingDate")} ${e.getString("endTime")}")
-										e["status"] = status
-										e["time"] = "${e.getString("startTime")}~${e.getString("endTime")}"
-										e["course"] = "第${
-											e.getString("startClassTimes")
-										}~${
-											e.getString("endClassTimes")
-										}节课"
-										val isToday = "TD" == e.getString("useflag")
-										if (isToday) (if (status == "before") beforeArray else afterArray).add(e)
-										(if (isToday) todayCourse else tomorrowCourse).add(e)
-									}
-								binding!!.progress.setMax(todayCourse.size)
-								binding!!.progress.progress = beforeArray.size
-								binding!!.courseList.scrollToPosition(
-									beforeArray.size)
-								Markwon.builder(requireContext())
-									.usePlugin(object :
-												   AbstractMarkwonPlugin() {
-										override fun configureSpansFactory(
-											builder: MarkwonSpansFactory.Builder) {
-											super.configureSpansFactory(builder)
-											builder.appendFactory(
-												Heading::class.java
-											) { _: MarkwonConfiguration?, configuration: RenderProps? ->
-												if (CoreProps.HEADING_LEVEL.require(
-														configuration!!) == 3)
-													model?.contextUtil?.getColorFromAttr(
-														androidx.appcompat.R.attr.colorPrimary)?.let {
-														ForegroundColorSpan(it)
-													}
+					message.second?.run {
+						if (getInteger("code") == 200) {
+							when (message.first) {
+								1 -> {
+									val beforeArray = ArrayList<JSONObject?>()
+									val afterArray = ArrayList<JSONObject?>()
+									getJSONArray("data")
+										.forEach { e: Any? ->
+											val status = getTimePosition(
+												"${(e as JSONObject).getString("teachingDate")} ${e.getString("startTime")}",
+												"${e.getString("teachingDate")} ${e.getString("endTime")}")
+											e["status"] = status
+											e["time"] = "${e.getString("startTime")}~${e.getString("endTime")}"
+											e["course"] = "第${
+												e.getString("startClassTimes")
+											}~${
+												e.getString("endClassTimes")
+											}节课"
+											val isToday = "TD" == e.getString("useflag")
+											if (isToday) (if (status == "before") beforeArray else afterArray).add(e)
+											(if (isToday) todayCourse else tomorrowCourse).add(e)
+										}
+									binding!!.progress.setMax(todayCourse.size)
+									binding!!.progress.progress = beforeArray.size
+									binding!!.courseList.scrollToPosition(
+										beforeArray.size)
+									Markwon.builder(requireContext())
+										.usePlugin(object :
+													   AbstractMarkwonPlugin() {
+											override fun configureSpansFactory(
+												builder: MarkwonSpansFactory.Builder) {
+												super.configureSpansFactory(builder)
+												builder.appendFactory(
+													Heading::class.java
+												) { _: MarkwonConfiguration?, configuration: RenderProps? ->
+													if (CoreProps.HEADING_LEVEL.require(
+															configuration!!) == 3)
+														model?.contextUtil?.getColorFromAttr(
+															androidx.appcompat.R.attr.colorPrimary)?.let {
+															ForegroundColorSpan(it)
+														}
+												}
 											}
-										}
-										
-										override fun configureVisitor(
-											builder1: MarkwonVisitor.Builder) {
-											super.configureVisitor(builder1)
-											builder1.blockHandler(object :
-																	  BlockHandler {
-												override fun blockStart(
-													visitor: MarkwonVisitor,
-													node: Node) {
-												}
-												
-												override fun blockEnd(
-													visitor: MarkwonVisitor,
-													node: Node) {
-													if (visitor.hasNext(
-															node)) visitor.ensureNewLine()
-												}
-											})
-										}
-									}).build().setMarkdown(binding!!.nextClass,
-								                           if (afterArray.isEmpty())
-															   "### ${
-																   getString(
-																	   R.string.noClass)
+											
+											override fun configureVisitor(
+												builder1: MarkwonVisitor.Builder) {
+												super.configureVisitor(builder1)
+												builder1.blockHandler(object :
+																		  BlockHandler {
+													override fun blockStart(
+														visitor: MarkwonVisitor,
+														node: Node) {
+													}
+													
+													override fun blockEnd(
+														visitor: MarkwonVisitor,
+														node: Node) {
+														if (visitor.hasNext(
+																node)) visitor.ensureNewLine()
+													}
+												})
+											}
+										}).build().setMarkdown(binding!!.nextClass,
+									                           if (afterArray.isEmpty())
+																   "### ${
+																	   getString(
+																		   R.string.noClass)
+																   }\n\n${
+																	   getString(
+																		   R.string.next_class)
+																   }：**${
+																	   if (tomorrowCourse.isEmpty()) getString(
+																		   R.string.none) else tomorrowCourse[0].getString(
+																		   "courseName")
+																   }**\n\n${
+																	   getString(
+																		   R.string.location)
+																   }：**${
+																	   if (tomorrowCourse.isEmpty()) getString(
+																		   R.string.none) else tomorrowCourse[0].getString(
+																		   "teachingPlace")
+																   }**\n\n${
+																	   getString(
+																		   R.string.time)
+																   }：**${
+																	   if (tomorrowCourse.isEmpty()) getString(
+																		   R.string.none) else tomorrowCourse[0].getString(
+																		   "time")
+																   }**" else "### ${
+																   todayCourse[beforeArray.size]
+																	   .getString(
+																		   "courseName")
 															   }\n\n${
-																   getString(
-																	   R.string.next_class)
-															   }：**${
-																   if (tomorrowCourse.isEmpty()) getString(
-																	   R.string.none) else tomorrowCourse[0].getString(
-																	   "courseName")
-															   }**\n\n${
 																   getString(
 																	   R.string.location)
 															   }：**${
-																   if (tomorrowCourse.isEmpty()) getString(
-																	   R.string.none) else tomorrowCourse[0].getString(
-																	   "teachingPlace")
+																   todayCourse[beforeArray.size]
+																	   .getString(
+																		   "teachingPlace")
 															   }**\n\n${
 																   getString(
 																	   R.string.time)
 															   }：**${
-																   if (tomorrowCourse.isEmpty()) getString(
-																	   R.string.none) else tomorrowCourse[0].getString(
-																	   "time")
-															   }**" else "### ${
-															   todayCourse[beforeArray.size]
-																   .getString(
-																	   "courseName")
-														   }\n\n${
-															   getString(
-																   R.string.location)
-														   }：**${
-															   todayCourse[beforeArray.size]
-																   .getString(
-																	   "teachingPlace")
-														   }**\n\n${
-															   getString(
-																   R.string.time)
-														   }：**${
-															   todayCourse[beforeArray.size]
-																   .getString(
-																	   "time")
-														   }**\n\n${
-															   getString(
-																   R.string.date)
-														   }：**${
-															   todayCourse[beforeArray.size]
-																   .getString(
-																	   "teachingDate")
-														   }**")
-								binding!!.toggle.clearChecked()
-								binding!!.toggle.check(R.id.today)
-								val array =
-									(if (afterArray.isEmpty()) tomorrowCourse[0] else todayCourse[beforeArray.size])
-								val delta = LocalDateTime.parse(
-									"${
-										array.getString("teachingDate")
-									} ${array.getString("startTime")}",
-									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()
-								if (delta > 0) getInstance(
-									requireContext().applicationContext)
-									.enqueueUniqueWork(
-										"next_class_notification_update",
-										ExistingWorkPolicy.KEEP,
-										OneTimeWorkRequest.Builder(
-											ClassNotificationWorker::class.java)
-											.setInputData(
-												Data.Builder()
-													.putString("courseName",
-													           array.getString(
-																   "courseName"))
-													.putString("teachingPlace",
-													           array.getString(
-																   "teachingPlace"))
-													.putString("time",
-													           array.getString(
-																   "time"))
-													.build())
-											.setInitialDelay(
-												if (delta < 1000 * 60 * 15) 0 else delta - 1000 * 60 * 15,
-												TimeUnit.MILLISECONDS).build())
-							}
-							2 -> {
-								val dataArray = response.getJSONArray("data")
-								dataArray.indices.forEach { i ->
-									val exams = listOf(thisWeekExams, nextWeekExams)[i]
-									val sortedTimetable =
-										TreeMap<Int?, JSONArray?>()
-									dataArray.getJSONObject(i)
-										.getJSONObject("timetable")
-										.forEach { (s1: String?, t: Any?) ->
-											if (t != null) sortedTimetable[s1!!.toInt()] =
-												t as JSONArray
-										}
-									sortedTimetable.forEach { (key: Int?, value: JSONArray?) ->
-										value?.forEach { c: Any? ->
-											(if (key == sortedTimetable.firstKey()) exams::addFirst else exams::addLast)(c as JSONObject?)
+																   todayCourse[beforeArray.size]
+																	   .getString(
+																		   "time")
+															   }**\n\n${
+																   getString(
+																	   R.string.date)
+															   }：**${
+																   todayCourse[beforeArray.size]
+																	   .getString(
+																		   "teachingDate")
+															   }**")
+									binding!!.toggle.clearChecked()
+									binding!!.toggle.check(R.id.today)
+									val array =
+										(if (afterArray.isEmpty()) tomorrowCourse[0] else todayCourse[beforeArray.size])
+									val delta = LocalDateTime.parse(
+										"${
+											array.getString("teachingDate")
+										} ${array.getString("startTime")}",
+										DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()
+									if (delta > 0) getInstance(
+										requireContext().applicationContext)
+										.enqueueUniqueWork(
+											"next_class_notification_update",
+											ExistingWorkPolicy.KEEP,
+											OneTimeWorkRequest.Builder(
+												ClassNotificationWorker::class.java)
+												.setInputData(
+													Data.Builder()
+														.putString("courseName",
+														           array.getString(
+																	   "courseName"))
+														.putString("teachingPlace",
+														           array.getString(
+																	   "teachingPlace"))
+														.putString("time",
+														           array.getString(
+																	   "time"))
+														.build())
+												.setInitialDelay(
+													if (delta < 1000 * 60 * 15) 0 else delta - 1000 * 60 * 15,
+													TimeUnit.MILLISECONDS).build())
+								}
+								2 -> {
+									val dataArray = getJSONArray("data")
+									dataArray.indices.forEach { i ->
+										val exams = listOf(thisWeekExams, nextWeekExams)[i]
+										val sortedTimetable =
+											TreeMap<Int?, JSONArray?>()
+										dataArray.getJSONObject(i)
+											.getJSONObject("timetable")
+											.forEach { (s1: String?, t: Any?) ->
+												if (t != null) sortedTimetable[s1!!.toInt()] =
+													t as JSONArray
+											}
+										sortedTimetable.forEach { (key: Int?, value: JSONArray?) ->
+											value?.forEach { c: Any? ->
+												(if (key == sortedTimetable.firstKey()) exams::addFirst else exams::addLast)(c as JSONObject?)
+											}
 										}
 									}
+									binding!!.toggle2.clearChecked()
+									binding!!.toggle2.check(R.id.week_18)
 								}
-								binding!!.toggle2.clearChecked()
-								binding!!.toggle2.check(R.id.week_18)
-							}
-							3 -> {
-								response.getJSONObject("data")
-									.getString("acadYearSemester").let {
-										termString = it
-										binding!!.dateView.text =
-											getString(R.string.dashboard_time, it, date, resources.getStringArray(
-												R.array.weeks)[LocalDate.now()
-												.getDayOfWeek()
-												.value - 1])
-										getTodayCourses(it)
-										getFinalExam(it)
-										getWeek(it)
-									}
-								isRefreshRequired = false
-							}
-							4 ->
-								response.getJSONArray("data")
-									.getJSONObject(0).getString("weekTimes")
-									.let {
-										binding!!.dateView.text =
-											getString(R.string.dashboard_week, it, binding!!.dateView.getText())
-										binding!!.toggle2.check(if ("19" == it) R.id.week_19 else R.id.week_18)
-									}
-							5 ->
-								response.getJSONArray("data").first {
-									(it as JSONObject).getString("examWeekName") == "18-19周期末考"
-								}?.let {
-									termString?.let { it1 -> getExams(it1, (it as JSONObject).getString("examWeekId")) }
+								3 -> {
+									getJSONObject("data")
+										.getString("acadYearSemester").let {
+											termString = it
+											binding!!.dateView.text =
+												getString(R.string.dashboard_time, it, date, resources.getStringArray(
+													R.array.weeks)[LocalDate.now()
+													.getDayOfWeek()
+													.value - 1])
+											getTodayCourses(it)
+											getFinalExam(it)
+											getWeek(it)
+										}
+									isRefreshRequired = false
 								}
+								4 ->
+									getJSONArray("data")
+										.getJSONObject(0).getString("weekTimes")
+										.let {
+											binding!!.dateView.text =
+												getString(R.string.dashboard_week, it, binding!!.dateView.getText())
+											binding!!.toggle2.check(if ("19" == it) R.id.week_19 else R.id.week_18)
+										}
+								5 ->
+									getJSONArray("data").first {
+										(it as JSONObject).getString("examWeekName") == "18-19周期末考"
+									}?.let {
+										termString?.let { it1 -> getExams(it1, (it as JSONObject).getString("examWeekId")) }
+									}
+							}
 						}
 					}
 				}
@@ -644,7 +645,7 @@ class DashboardFragment : Fragment() {
 						}
 					} else if (item.containsKey("url")) intent =
 						Intent(requireContext(), BrowserActivity::class.java).setData(
-							Uri.parse(CommonUtil.trim(item.getString("url"))))
+							CommonUtil.trim(item.getString("url")).toUri())
 					val pinShortcutInfo =
 						ShortcutInfoCompat.Builder(requireContext(), "$itemId")
 							.setShortLabel(item.getString("name"))

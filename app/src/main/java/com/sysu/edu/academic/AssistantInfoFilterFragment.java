@@ -58,9 +58,9 @@ public class AssistantInfoFilterFragment extends Fragment {
                 }
             });
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = message.getSecond();
+                JSONObject response = message.second;
                 if (response.getInteger("code") == 200) {
-                    switch (message.getFirst()) {
+                    switch (message.first) {
                         case 0 -> {
                             response.getJSONArray("data").forEach(t -> pop.getMenu().add(((JSONObject) t).getString("acadYearSemester")).setOnMenuItemClickListener(_ -> {
                                 term.setValue(((JSONObject) t).getString("acadYearSemester"));

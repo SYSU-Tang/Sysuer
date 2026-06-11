@@ -41,9 +41,9 @@ public class TrainingResultFragment extends Fragment {
         });
         binding.export.setOnClickListener(v -> staggeredFragment.export(v, getString(R.string.result)));
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getIntValue("code") == 200) {
-                if (message.getFirst() == 1) {
+                if (message.first == 1) {
                     JSONObject data = response.getJSONObject("data");
                     total = data.getInteger("total");
                     data.getJSONArray("rows").forEach(o -> staggeredFragment.add(((JSONObject) o).getString("name"), R.drawable.book, List.of("专业", "年级", "学院", "培养类别", "修业年限", "学科门类", "学位", "专业代码", "专业ID"),

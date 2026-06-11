@@ -49,11 +49,11 @@ public class MajorInfoFragment extends StaggeredFragment {
             }
         });
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response != null && response.getInteger("code").equals(200)) {
                 if (response.get("data") != null) {
                     JSONObject data = response.getJSONObject("data");
-                    if (message.getFirst() == 0) {
+                    if (message.first == 0) {
                         if (total == -1) total = data.getInteger("total");
                         data.getJSONArray("rows").forEach(a -> add(((JSONObject) a).getString("name"), List.of("专业代码", "专业名称", "学制", "修业年限", "学科门类", "学位授予门类"),
                                 extractValue((JSONObject) a, new String[]{"code", "name", "educationalSystem", "maxStudyYear", "disciplineCateName", "degreeGrantName"})));

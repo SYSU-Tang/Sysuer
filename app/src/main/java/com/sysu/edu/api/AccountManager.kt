@@ -1,124 +1,123 @@
-package com.sysu.edu.api;
+package com.sysu.edu.api
 
-import android.content.Context;
-import android.util.Base64;
-import android.util.Pair;
+import android.content.Context
+import android.util.Base64
+import android.util.Pair
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder
+import com.google.crypto.tink.Aead
+import com.google.crypto.tink.KeyTemplates
+import com.google.crypto.tink.RegistryConfiguration
+import com.google.crypto.tink.aead.AeadConfig
+import com.google.crypto.tink.integration.android.AndroidKeysetManager
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlin.concurrent.Volatile
 
-import androidx.datastore.preferences.core.MutablePreferences;
-import androidx.datastore.preferences.core.Preferences;
-import androidx.datastore.preferences.core.PreferencesKeys;
-import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder;
-import androidx.datastore.rxjava3.RxDataStore;
-
-import com.google.crypto.tink.Aead;
-import com.google.crypto.tink.KeyTemplates;
-import com.google.crypto.tink.RegistryConfiguration;
-import com.google.crypto.tink.aead.AeadConfig;
-import com.google.crypto.tink.integration.android.AndroidKeysetManager;
-
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-
-public class AccountManager {
-    
-    private static volatile AccountManager INSTANCE;
-    private final RxDataStore<Preferences> dataStore;
-    private final Aead aead;
-    
-    private AccountManager(Context context) {
-        try {
-            AeadConfig.register();
-            aead = new AndroidKeysetManager.Builder()
-                    .withSharedPref(context, "master_keyset", "secure_keys")
-                    .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
-                    .withMasterKeyUri("android-keystore://master_key")
-                    .build()
-                    .getKeysetHandle()
-                    .getPrimitive(RegistryConfiguration.get(), Aead.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Tink 初始化失败", e);
-        }
-        dataStore = new RxPreferenceDataStoreBuilder(context, "accounts").build();
-    }
-    
-    public static AccountManager getInstance(Context context) {
-        if (INSTANCE == null) {
-            synchronized (AccountManager.class) {
-                if (INSTANCE == null)
-                    INSTANCE = new AccountManager(context.getApplicationContext());
-            }
-        }
-        return INSTANCE;
-    }
-    
-    public Pair<String, String> getActiveAccountSync(String domain) {
-        String username = dataStore.data().blockingFirst().get(PreferencesKeys.stringKey("active:" + domain));
-        if (username == null) return null;
-        String password = getPasswordSync(domain, username);
-        return new Pair<>(username, password);
-    }
-    
-    public String getPasswordSync(String domain, String username) {
-        String encoded = dataStore.data().blockingFirst().get(PreferencesKeys.stringKey(domain + ":" + username));
-        if (encoded == null) return null;
-        try {
-            return new String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null));
-        } catch (Exception _) {
-            return null;
-        }
-    }
-    
-    public Single<Pair<String, String>> getActiveAccountAsync(String domain) {
-        return dataStore.data().firstOrError()
-                .map(prefs -> {
-                    String username = prefs.get(PreferencesKeys.stringKey("active:" + domain));
-                    if (username == null) return new Pair<>("", "");
-                    String encoded = prefs.get(PreferencesKeys.stringKey(domain + ":" + username));
-                    if (encoded == null) return new Pair<>("", "");
-                    String password = new String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null));
-                    return new Pair<>(username, password);
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-    
-    public Completable setAccountAsync(String domain, String username, String password) {
-        return setAccountAsync(domain, username, password, false);
-    }
-    
-    public Completable setAccountAsync(String domain, String username, String password, boolean active) {
-        return Completable.fromAction(() -> dataStore.updateDataAsync(prefs -> {
-            MutablePreferences mutable = prefs.toMutablePreferences();
-            mutable.set(PreferencesKeys.stringKey(domain + ":" + username), Base64.encodeToString(aead.encrypt(password.getBytes(), null), Base64.DEFAULT));
-            if (active || !mutable.contains(PreferencesKeys.stringKey("active:" + domain)))
-                mutable.set(PreferencesKeys.stringKey("active:" + domain), username);
-            return Single.just(mutable);
-        })).subscribeOn(Schedulers.io());
-    }
-    
-    public Completable setActiveAccountAsync(String domain, String username) {
-        return Completable.fromAction(() -> dataStore.updateDataAsync(prefs -> {
-            MutablePreferences mutable = prefs.toMutablePreferences();
-            mutable.set(PreferencesKeys.stringKey("active:" + domain), username);
-            return Single.just(mutable);
-        })).subscribeOn(Schedulers.io());
-    }
-    
-    public Completable removeAccountAsync(String domain, String username) {
-        return Completable.fromAction(() -> dataStore.updateDataAsync(prefs -> {
-            MutablePreferences mutable = prefs.toMutablePreferences();
-            mutable.remove(PreferencesKeys.stringKey(domain + ":" + username));
-            return Single.just(mutable);
-        })).subscribeOn(Schedulers.io());
-    }
-    
-    public Completable removeActiveAccountAsync(String domain) {
-        return Completable.fromAction(() -> dataStore.updateDataAsync(prefs -> {
-            MutablePreferences mutable = prefs.toMutablePreferences();
-            mutable.remove(PreferencesKeys.stringKey("active:" + domain));
-            return Single.just(mutable);
-        })).subscribeOn(Schedulers.io());
-    }
+@OptIn(ExperimentalCoroutinesApi::class)
+class AccountManager private constructor(context: Context) {
+	private val dataStore = RxPreferenceDataStoreBuilder(context, "accounts").build()
+	private val aead: Aead
+	
+	init {
+		try {
+			AeadConfig.register()
+			aead = AndroidKeysetManager.Builder()
+				.withSharedPref(context, "master_keyset", "secure_keys")
+				.withKeyTemplate(KeyTemplates.get("AES256_GCM"))
+				.withMasterKeyUri("android-keystore://master_key")
+				.build()
+				.keysetHandle
+				.getPrimitive(RegistryConfiguration.get(), Aead::class.java)
+		} catch (e: Exception) {
+			throw RuntimeException("Tink 初始化失败", e)
+		}
+	}
+	
+	fun getActiveAccountSync(domain: String?): Pair<String?, String?>? {
+		val username = dataStore.data().blockingFirst()[stringPreferencesKey("active:$domain")] ?: return null
+		val password = getPasswordSync(domain, username)
+		return Pair<String?, String?>(username, password)
+	}
+	
+	fun getPasswordSync(domain: String?, username: String?): String? {
+		val encoded = dataStore.data().blockingFirst()[stringPreferencesKey("$domain:$username")] ?: return null
+		return try {
+			String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null))
+		} catch (_: Exception) {
+			null
+		}
+	}
+	
+	fun getActiveAccountAsync(domain: String): Single<Pair<String?, String?>> {
+		return dataStore.data().firstOrError()
+			.map<Pair<String?, String?>> { prefs: Preferences ->
+				val username = prefs[stringPreferencesKey("active:$domain")] ?: return@map Pair<String?, String?>("", "")
+				val encoded = prefs[stringPreferencesKey("$domain:$username")] ?: return@map Pair<String?, String?>("", "")
+				val password = String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null))
+				Pair<String?, String?>(username, password)
+			}
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+	}
+	
+	fun setAccountAsync(domain: String, username: String, password: String): Completable {
+		return setAccountAsync(domain, username, password, false)
+	}
+	
+	fun setAccountAsync(domain: String, username: String, password: String, active: Boolean): Completable {
+		return Completable.fromAction {
+			dataStore.updateDataAsync { prefs: Preferences? ->
+				Single.just(prefs!!.toMutablePreferences()
+								.also { it[stringPreferencesKey("$domain:$username")] = Base64.encodeToString(aead.encrypt(password.toByteArray(), null), Base64.DEFAULT) }
+								.also {
+									if (active || !it.contains(stringPreferencesKey("active:$domain")))
+										it[stringPreferencesKey("active:$domain")] = username
+								})
+			}
+		}.subscribeOn(Schedulers.io())
+	}
+	
+	fun setActiveAccountAsync(domain: String?, username: String?): Completable {
+		return Completable.fromAction {
+			dataStore.updateDataAsync { prefs: Preferences? ->
+				Single.just(prefs!!.toMutablePreferences()
+								.also { it[stringPreferencesKey("active:$domain")] = username as String })
+			}
+		}.subscribeOn(Schedulers.io())
+	}
+	
+	fun removeAccountAsync(domain: String, username: String): Completable {
+		return Completable.fromAction {
+			dataStore.updateDataAsync { prefs: Preferences? ->
+				Single.just(prefs!!.toMutablePreferences()
+								.also { it.remove(stringPreferencesKey("$domain:$username")) })
+			}
+		}.subscribeOn(Schedulers.io())
+	}
+	
+	fun removeActiveAccountAsync(domain: String): Completable {
+		return Completable.fromAction {
+			dataStore.updateDataAsync { prefs: Preferences? ->
+				Single.just(prefs!!.toMutablePreferences()
+								.also { it.remove(stringPreferencesKey("active:$domain")) })
+			}
+		}.subscribeOn(Schedulers.io())
+	}
+	
+	companion object {
+		@Volatile
+		private var INSTANCE: AccountManager? = null
+		fun getInstance(context: Context): AccountManager {
+			if (INSTANCE == null) synchronized(AccountManager::class.java) {
+				if (INSTANCE == null)
+					INSTANCE = AccountManager(context.applicationContext)
+			}
+			return INSTANCE!!
+		}
+	}
 }

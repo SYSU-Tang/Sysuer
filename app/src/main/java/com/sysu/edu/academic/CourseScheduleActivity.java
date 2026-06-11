@@ -40,7 +40,7 @@ public class CourseScheduleActivity extends BaseActivity {
     final ArrayList<Integer> weeks = new ArrayList<>();
     final ArrayList<View> views = new ArrayList<>();
     final MutableLiveData<String> id = new MutableLiveData<>();
-    final CommonUtil.Tuple2<String, Integer> realTime = new CommonUtil.Tuple2<>();
+    final CommonUtil.Tuple2<String, Integer> realTime = new CommonUtil.Tuple2<>(null,null);
     PopupMenu termPop;
     PopupMenu weekPop;
     String currentTerm = "";
@@ -132,7 +132,7 @@ public class CourseScheduleActivity extends BaseActivity {
         model.getMessage().observe(this, message -> {
             JSONObject response = message.second;
             if (response.getInteger("code").equals(200)) {
-                switch (message.getFirst()) {
+                switch (message.first) {
                     case 1 -> {
                         views.forEach(e -> binding.day.removeView(e));
                         views.clear();
@@ -183,7 +183,7 @@ public class CourseScheduleActivity extends BaseActivity {
                         getAvailableTerms();
                         getAvailableWeeks(currentTerm);
                         getTable(currentTerm, currentWeek);
-                        realTime.setFirst(currentTerm);
+                        realTime.first = currentTerm;
                     }// 获取 Term
                     case 3 -> {
                         JSONObject data = response.getJSONObject("data");
@@ -208,7 +208,7 @@ public class CourseScheduleActivity extends BaseActivity {
                         currentWeekIndex = weeks.indexOf(currentWeek);
                         binding.weekTime.setText(String.format(getString(R.string.week_d), currentWeek));
                         getTable(currentTerm, currentWeek);
-                        realTime.setSecond(currentWeekIndex);
+                        realTime.second = currentWeekIndex;
                     }
                 }
                 model.nextAll();

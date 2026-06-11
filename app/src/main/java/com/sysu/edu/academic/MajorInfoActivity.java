@@ -42,10 +42,10 @@ public class MajorInfoActivity extends BaseActivity {
         });
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(categories.get(position))).attach();
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response != null && response.getInteger("code").equals(200)) {
                 if (response.get("data") != null) {
-                    if (message.getFirst() == 0) {
+                    if (message.first == 0) {
                         categories.clear();
                         response.getJSONArray("data").forEach(a -> {
                             categories.add(((JSONObject) a).getString("dataName"));

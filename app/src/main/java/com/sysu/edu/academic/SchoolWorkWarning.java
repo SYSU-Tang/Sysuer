@@ -46,7 +46,7 @@ public class SchoolWorkWarning extends BaseActivity {
         binding.toolbar.setTitle(R.string.school_work_warning);
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response != null && response.getInteger("code").equals(200)) {
                 JSONObject data = response.getJSONObject("data");
                 if (data != null) {

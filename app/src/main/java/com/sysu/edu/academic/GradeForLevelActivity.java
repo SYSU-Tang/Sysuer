@@ -123,9 +123,9 @@ public class GradeForLevelActivity extends BaseActivity {
         getGrade();
         IntStream.range(0, 3).forEach(this::getData);
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code") == 200) {
-                int what = message.getFirst();
+                int what = message.first;
                 switch (what) {
                     case 3 -> {
                         if (total == -1)

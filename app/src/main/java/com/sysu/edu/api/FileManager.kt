@@ -1,24 +1,22 @@
-package com.sysu.edu.api;
+package com.sysu.edu.api
 
-import android.content.Context;
+import android.content.Context
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
-public class FileManager {
-    
-    public static String readAssets(Context context, String file) {
-        StringBuilder jsJSON = new StringBuilder();
-        try {
-            InputStreamReader input = new InputStreamReader(context.getAssets().open(file));
-            BufferedReader buffer = new BufferedReader(input);
-            String line;
-            while ((line = buffer.readLine()) != null) jsJSON.append(line);
-            input.close();
-            buffer.close();
-        } catch (IOException _) {
-        }
-        return jsJSON.toString();
-    }
+object FileManager {
+	@JvmStatic fun readAssets(context: Context, file: String): String {
+		val jsJSON = StringBuilder()
+		try {
+			val input = InputStreamReader(context.assets.open(file))
+			val buffer = BufferedReader(input)
+			var line: String?
+			while ((buffer.readLine().also { line = it }) != null) jsJSON.append(line)
+			input.close()
+			buffer.close()
+		} catch (_: IOException) {
+		}
+		return "$jsJSON"
+	}
 }

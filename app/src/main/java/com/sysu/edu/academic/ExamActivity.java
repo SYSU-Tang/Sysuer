@@ -77,9 +77,9 @@ public class ExamActivity extends BaseActivity {
             }));
         });
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code").equals(200)) {
-                switch (message.getFirst()) {
+                switch (message.first) {
                     case 1 -> {
                         examViewModel.setTermList(extractValue(response.getJSONArray("data"), "acadYearSemester"));
                         getTerm();

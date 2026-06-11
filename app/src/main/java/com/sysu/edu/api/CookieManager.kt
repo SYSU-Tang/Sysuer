@@ -1,80 +1,63 @@
-package com.sysu.edu.api;
+package com.sysu.edu.api
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.content.edit
+import okhttp3.Cookie
+import java.net.HttpCookie
+import java.util.stream.Collectors
 
-import androidx.annotation.NonNull;
-
-import java.net.HttpCookie;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import okhttp3.Cookie;
-
-public class CookieManager {
-    private final SharedPreferences cookiePreference;
-
-//    private final Set<String> toDelete = new HashSet<>();
-    
-    public CookieManager(Context context) {
-        cookiePreference = context.getSharedPreferences("cookie", Context.MODE_PRIVATE);
-    }
-    
-    public Set<String> get(String host) {
-        return cookiePreference.getStringSet(host, new java.util.HashSet<>());
-    }
-    
-    @NonNull
-    public String toString(String host) {
-        Set<String> strings = get(host);
-        return strings.isEmpty() ? "" : String.join(";", strings);
-    }
-    
-    @NonNull
-    public String toSimpleString(String host) {
-        return get(host).stream().map(c -> c.split(";")[0]).collect(Collectors.joining(";"));
-    }
-    
-    public void set(String host, Set<String> cookieSet) {
-        cookiePreference.edit().putStringSet(host, cookieSet.stream().filter(c -> !c.startsWith("rememberMe=")).collect(Collectors.toSet())).apply();
-    }
-    
-    public void clear(String host) {
-        cookiePreference.edit().remove(host).apply();
-    }
-    
-    public void clearAll() {
-        cookiePreference.edit().clear().apply();
-    }
-    
-    public void add(String host, Cookie cookie) {
-        if (!"rememberMe".equals(cookie.name())) {
-            Set<String> cookieSet = get(host);
-            if (cookieSet == null) cookieSet = new java.util.HashSet<>();
-            for (String o : cookieSet) {
-                HttpCookie c = HttpCookie.parse(o).get(0);
-                if (Objects.equals(c.getName(), cookie.name())) cookieSet.remove(o);
-            }
-            cookieSet.add(cookie.toString());
-            set(host, cookieSet);
-        }
-    }
-    
-    public void add(String host, String cookie) {
-        String[] parts = cookie.split("=");
-        if (!"rememberMe".equals(parts[0]))
-            add(host, new Cookie.Builder().domain(host).name(parts[0]).value(parts[1]).build());
-    }
-    
-    public void remove(String host, String cookieName) {
-        Set<String> cookieSet = get(host);
-        if (cookieSet != null) {
-            for (String o : cookieSet) {
-                HttpCookie c = HttpCookie.parse(o).get(0);
-                if (Objects.equals(c.getName(), cookieName)) cookieSet.remove(o);
-            }
-            set(host, cookieSet);
-        }
-    }
+class CookieManager(context: Context) {
+	private val cookiePreference: SharedPreferences = context.getSharedPreferences("cookie", Context.MODE_PRIVATE)
+	fun get(host: String?): MutableSet<String?> {
+		return cookiePreference.getStringSet(host, HashSet<String?>())!!
+	}
+	
+	fun toString(host: String?): String {
+		val strings = get(host)
+		return if (strings.isEmpty()) "" else strings.joinToString(separator = ";")
+	}
+	
+	fun toSimpleString(host: String?): String {
+		return get(host).stream().map { c: String? -> c!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] }.collect(Collectors.joining(";"))
+	}
+	
+	fun set(host: String?, cookieSet: MutableSet<String?>) {
+		cookiePreference.edit { putStringSet(host, cookieSet.stream().filter { c: String? -> !c!!.startsWith("rememberMe=") }.collect(Collectors.toSet())) }
+	}
+	
+	fun clear(host: String?) {
+		cookiePreference.edit { remove(host) }
+	}
+	
+	//	fun clearAll() {
+//		cookiePreference.edit { clear() }
+//	}
+	fun add(host: String?, cookie: Cookie) {
+		if ("rememberMe" != cookie.name) {
+			get(host)
+				.let {
+					it.forEach { o ->
+						val c = HttpCookie.parse(o)[0]
+						if (c.name == cookie.name) it.remove(o)
+					}
+					it.add("$cookie")
+					set(host, it)
+				}
+		}
+	}
+	
+	fun add(host: String, cookie: String) {
+		val parts: Array<String?> = cookie.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+		if ("rememberMe" != parts[0]) add(host, Cookie.Builder().domain(host).name(parts[0]!!).value(parts[1]!!).build())
+	}
+	
+	fun remove(host: String?, cookieName: String?) {
+		val cookieSet = get(host)
+		for (o in cookieSet) {
+			val c = HttpCookie.parse(o)[0]
+			if (c.name == cookieName) cookieSet.remove(o)
+		}
+		set(host, cookieSet)
+	}
 }

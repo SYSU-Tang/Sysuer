@@ -125,11 +125,11 @@ public class GymListFragment extends Fragment {
     
     
     void getCampus() {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/Campus/active", 1);
+        http.getRequest(viewModel.authorizationManager.getHost() + "api/Campus/active", 1);
     }
     
     void getVenue() {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/venuetype/all", 2);
+        http.getRequest(viewModel.authorizationManager.getHost() + "api/venuetype/all", 2);
     }
     
     private static class FieldAdapter extends RecyclerAdapter<JSONObject> {

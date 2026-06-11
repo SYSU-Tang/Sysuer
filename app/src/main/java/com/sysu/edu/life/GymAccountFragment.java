@@ -118,11 +118,11 @@ public class GymAccountFragment extends Fragment {
     }
     
     void getAccount() {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/Credit/Me", 0);
+        http.getRequest(viewModel.authorizationManager.getHost() + "api/Credit/Me", 0);
     }
     
     void getSwimmer() {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + "api/swimmer/me", 1);
+        http.getRequest(viewModel.authorizationManager.getHost() + "api/swimmer/me", 1);
     }
     
 }

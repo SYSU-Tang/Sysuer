@@ -118,7 +118,7 @@ class ContextUtil(val context: Context) {
 	 * @param service    登录 URL,建议使用 TargeterURL 中的默认登录 URL
 	 * @param afterLogin 登录成功后的回调 Runnable 对象
 	 */
-	fun loginForUrl(service: String?, host: String?, afterLogin: Runnable?) {
+	fun loginForUrl(service: String?, host: String, afterLogin: Runnable?) {
 		disposable.add(accountManager.getActiveAccountAsync(host).subscribe { activeAccount: Pair<String?, String?> ->
 			if (!TextUtils.isEmpty(activeAccount.first) && !TextUtils.isEmpty(activeAccount.second) && !TextUtils.isEmpty(service)) {
 				loginManager.setOnLoginListener(object : LoginListener {
@@ -140,7 +140,7 @@ class ContextUtil(val context: Context) {
 		loginForUrl(url, TargetHost.SYSU, afterLogin)
 	}
 	
-	fun changeAccount(url: String?, host: String?, afterLogin: Runnable?) {
+	fun changeAccount(url: String?, host: String, afterLogin: Runnable?) {
 		if (context is Activity && !context.isFinishing && !context.isDestroyed) {
 			if (binding == null) {
 				binding = DialogAccountBinding.inflate(LayoutInflater.from(context))
@@ -153,7 +153,7 @@ class ContextUtil(val context: Context) {
 					val username = binding!!.username.edit.getText()
 					val password = binding!!.password.edit.getText()
 					if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) toast(R.string.username_password_warning)
-					else disposable.add(accountManager.setAccountAsync(host, username.toString(), password.toString(), true)
+					else disposable.add(accountManager.setAccountAsync(host, "$username", "$password", true)
 											.subscribe { loginForUrl(url, host, afterLogin) })
 				}
 				.setNegativeButton(android.R.string.cancel, null)

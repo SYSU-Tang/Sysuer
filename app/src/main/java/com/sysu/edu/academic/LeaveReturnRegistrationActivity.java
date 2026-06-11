@@ -33,9 +33,9 @@ public class LeaveReturnRegistrationActivity extends BaseActivity {
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         LeaveReturnRegistrationViewModel viewModel = new ViewModelProvider(this).get(LeaveReturnRegistrationViewModel.class);
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response != null && response.getInteger("code") == 200) {
-                if (message.getFirst() == 0) {
+                if (message.first == 0) {
                     JSONArray data;
                     if ((data = response.getJSONArray("data")) != null && !data.isEmpty()) {
                         ArrayList<String> years = new ArrayList<>();

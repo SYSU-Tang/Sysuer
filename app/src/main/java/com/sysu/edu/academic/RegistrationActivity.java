@@ -53,10 +53,10 @@ public class RegistrationActivity extends BaseActivity {
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         binding.toolbar.setTitle(R.string.register_info);
         model.getMessage().observe(this, msg -> {
-            JSONObject response = msg.getSecond();
+            JSONObject response = msg.second;
             if (response != null && response.getInteger("code").equals(200)) {
                 if (response.get("data") != null) {
-                    Integer what = msg.getFirst();
+                    Integer what = msg.first;
                     switch (what) {
                         case 2 -> {
                             JSONObject data = response.getJSONObject("data");

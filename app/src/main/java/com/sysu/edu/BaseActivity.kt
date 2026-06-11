@@ -18,4 +18,8 @@ open class BaseActivity : AppCompatActivity() {
 		}
 		super.attachBaseContext(context.createConfigurationContext(configuration))
 	}
+	override fun onDestroy() {
+		super.onDestroy()
+		sysuerParams?.contextUtil?.dispose()
+	}
 }

@@ -143,9 +143,9 @@ public class GradeActivity extends BaseActivity {
             getScore();
         });
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code") == 200) {
-                switch (message.getFirst()) {
+                switch (message.first) {
                     case 1 -> {
                         adp.clear();
                         response.getJSONArray("data").forEach(a -> adp.add((JSONObject) a));

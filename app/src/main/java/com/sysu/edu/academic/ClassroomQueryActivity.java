@@ -117,9 +117,9 @@ public class ClassroomQueryActivity extends BaseActivity {
         binding.dateText.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
         getCampus();
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code") == 200) {
-                if (message.getFirst() == 3) {
+                if (message.first == 3) {
                     JSONObject data = response.getJSONObject("data");
                     total = data.getInteger("total");
                     data.getJSONArray("rows").forEach(a -> roomAdapter.add((JSONObject) a));
@@ -129,7 +129,7 @@ public class ClassroomQueryActivity extends BaseActivity {
                 } else {
                     binding.timeSlider.setValueFrom(1);
                     response.getJSONArray("data").forEach(campusInfo -> {
-                        switch (message.getFirst()) {
+                        switch (message.first) {
                             case 1 -> {
                                 String id = ((JSONObject) campusInfo).getString("id");
                                 Chip chip = ItemFilterChipBinding.inflate(getLayoutInflater(), binding.campusGroup, false).getRoot();

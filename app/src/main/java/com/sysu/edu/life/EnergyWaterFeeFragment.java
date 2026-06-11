@@ -183,7 +183,7 @@ public class EnergyWaterFeeFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 reset();
-                roomCode.setValue(rooms.valueAt(position).getSecond());
+                roomCode.setValue(rooms.valueAt(position).second);
             }
             
             @Override

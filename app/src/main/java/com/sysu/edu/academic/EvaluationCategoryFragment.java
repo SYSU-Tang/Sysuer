@@ -71,8 +71,8 @@ public class EvaluationCategoryFragment extends Fragment {
         });
         binding.getRoot().setAdapter(categoryAdapter);
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject data = message.getSecond();
-            if (Objects.equals(data.get("code"), "200")) if (message.getFirst() == 1)
+            JSONObject data = message.second;
+            if (Objects.equals(data.get("code"), "200")) if (message.first == 1)
                 data.getJSONObject("result").getJSONArray("list").forEach(e -> categoryAdapter.add((JSONObject) e));
         });
         getEvaluation();

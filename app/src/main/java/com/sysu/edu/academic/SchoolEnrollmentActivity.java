@@ -55,13 +55,13 @@ public class SchoolEnrollmentActivity extends BaseActivity {
         }[position])).attach();
         binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
         model.getMessage().observe(this, massage -> {
-            JSONObject response = massage.getSecond();
+            JSONObject response = massage.second;
             if (response != null && response.getInteger("code").equals(200)) {
                 JSONObject data = response.getJSONObject("data");
                 if (data != null) {
-                    int what = massage.getFirst();
+                    int what = massage.first;
                     if (what == 0) {
-                        dataMap.forEach((title, keyName) -> ((StaggeredFragment) pager2Adapter.get(0)).add(getString(title), R.drawable.calendar, List.of(CommonUtil.getString(this, keyName)),
+                        dataMap.forEach((title, keyName) -> ((StaggeredFragment) pager2Adapter.get(0)).add(getString(title), R.drawable.calendar, CommonUtil.getString(this, keyName),
                                 extractValue(data, keys.get(List.of(R.string.school_enrollment_personal_info, R.string.school_enrollment_roll_info, R.string.school_enrollment_contact_info).indexOf(title)))));
                         addNextPage(1);
                     } else {
@@ -77,7 +77,7 @@ public class SchoolEnrollmentActivity extends BaseActivity {
                                             {R.string.school_enrollment_academic_year, R.string.school_enrollment_checkin_status, R.string.school_enrollment_register_status, R.string.school_enrollment_payment_status},
                                             {R.string.school_enrollment_punish_date, R.string.school_enrollment_punish_brief, R.string.school_enrollment_punish_type, R.string.school_enrollment_punish_source, R.string.school_enrollment_punish_name, R.string.school_enrollment_punish_reason, R.string.school_enrollment_punish_time, R.string.school_enrollment_punish_proof, R.string.school_enrollment_punish_repeal_time, R.string.school_enrollment_punish_repeal_proof, R.string.school_enrollment_punish_graduate, R.string.school_enrollment_punish_degree, R.string.school_enrollment_punish_sponsor, R.string.school_enrollment_punish_department, R.string.school_enrollment_punish_clause, R.string.school_enrollment_punish_money, R.string.school_enrollment_punish_status, R.string.school_enrollment_punish_in_school}
                                     }[what - 1];
-                            ((StaggeredFragment) pager2Adapter.get(what)).add(String.valueOf(order.getAndIncrement()), R.drawable.calendar, List.of(CommonUtil.getString(this, keyName)),
+                            ((StaggeredFragment) pager2Adapter.get(what)).add(String.valueOf(order.getAndIncrement()), R.drawable.calendar, CommonUtil.getString(this, keyName),
                                     extractValue((JSONObject) a, new String[][]{
                                             {"familyRelationName", "familyMemberName", "familyWorkUnit", "jobName", "familyPhone", "familyBirthday"},
                                             {"experBeginTime", "experEndTime", "experStudyUnit", "experSite"},

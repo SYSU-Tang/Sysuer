@@ -41,11 +41,11 @@ public class CourseDetailActivity extends BaseActivity {
         // code: EIT228, id: null, classNum: 202511441
         getDetail();
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getInteger("code").equals(200)) {
                 JSONObject data = response.getJSONObject("data");
                 if (data != null) {
-                    switch (message.getFirst()) {
+                    switch (message.first) {
                         case 1 -> {
                             Bundle bundle = new Bundle();
                             bundle.putInt("what", 1);

@@ -125,9 +125,9 @@ public class GymReservationFragment extends Fragment {
         MaterialDatePicker.Builder<Long> picker = MaterialDatePicker.Builder.datePicker();
         binding.from.setOnClickListener(_ -> {
             Long value;
-            if (viewModel.reservationFromTo.getValue() != null && (value = viewModel.reservationFromTo.getValue().getSecond()) != null) {
+            if (viewModel.reservationFromTo.getValue() != null && (value = viewModel.reservationFromTo.getValue().second) != null) {
                 MaterialDatePicker<Long> datePicker = picker
-                        .setSelection(viewModel.reservationFromTo.getValue().getFirst())
+                        .setSelection(viewModel.reservationFromTo.getValue().first)
                         .setCalendarConstraints(new CalendarConstraints.Builder().setValidator(CompositeDateValidator.allOf(List.of(DateValidatorPointBackward.before(value)))).build())
                         .build();
                 datePicker.show(getParentFragmentManager(), "datePicker");
@@ -135,17 +135,17 @@ public class GymReservationFragment extends Fragment {
             }
         });
         viewModel.reservationFromTo.observe(getViewLifecycleOwner(), o -> {
-            if (o != null && o.getSecond() != null && o.getFirst() != null) {
-                binding.from.setText(dateFormat.format(o.getFirst()));
-                binding.to.setText(dateFormat.format(o.getSecond()));
+            if (o != null && o.second != null && o.first != null) {
+                binding.from.setText(dateFormat.format(o.first));
+                binding.to.setText(dateFormat.format(o.second));
                 regetReservation();
             }
         });
         binding.to.setOnClickListener(_ -> {
             Long value;
-            if (viewModel.reservationFromTo.getValue() != null && (value = viewModel.reservationFromTo.getValue().getFirst()) != null) {
+            if (viewModel.reservationFromTo.getValue() != null && (value = viewModel.reservationFromTo.getValue().first) != null) {
                 MaterialDatePicker<Long> datePicker = picker
-                        .setSelection(viewModel.reservationFromTo.getValue().getSecond())
+                        .setSelection(viewModel.reservationFromTo.getValue().second)
                         .setCalendarConstraints(new CalendarConstraints.Builder().setValidator(CompositeDateValidator.allOf(List.of(DateValidatorPointForward.from(value)))).build())
                         .build();
                 datePicker.show(getParentFragmentManager(), "datePicker");
@@ -165,12 +165,12 @@ public class GymReservationFragment extends Fragment {
     }
     
     void getReservation() {
-        if (viewModel.reservationFromTo.getValue() != null && viewModel.reservationFromTo.getValue().getSecond() != null && viewModel.reservationFromTo.getValue().getFirst() != null)
-            http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/BookingRequestVenue?all=false&startDate=%s&endDate=%s&waitingList=false", dateFormat.format(viewModel.reservationFromTo.getValue().getFirst()), dateFormat.format(viewModel.reservationFromTo.getValue().getSecond())), 0);
+        if (viewModel.reservationFromTo.getValue() != null && viewModel.reservationFromTo.getValue().second != null && viewModel.reservationFromTo.getValue().first != null)
+            http.getRequest(viewModel.authorizationManager.getHost() + String.format("api/BookingRequestVenue?all=false&startDate=%s&endDate=%s&waitingList=false", dateFormat.format(viewModel.reservationFromTo.getValue().first), dateFormat.format(viewModel.reservationFromTo.getValue().second)), 0);
     }
     
     void deleteReservation(String bookingId) {
-        http.deleteRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/BookingRequestVenue/%s", bookingId), 1);
+        http.deleteRequest(viewModel.authorizationManager.getHost() + String.format("api/BookingRequestVenue/%s", bookingId), 1);
     }
     
 }

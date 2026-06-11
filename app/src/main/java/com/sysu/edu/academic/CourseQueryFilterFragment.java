@@ -59,13 +59,13 @@ public class CourseQueryFilterFragment extends PreferenceFragmentCompat {
         classroom.getValueLiveData().observe(requireActivity(), this::getClassroom);
         IntStream.range(0, 6).forEach(this::getData);
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             Integer code = response.getInteger("code");
             if (code == 200) {
                 ArrayList<String> option = new ArrayList<>();
                 ArrayList<String> number = new ArrayList<>();
                 JSONArray data = response.getJSONArray("data");
-                int what = message.getFirst();
+                int what = message.first;
                 switch (what) {
                     case 0, 1, 2, 3, 4, 5 -> {
                         option.add("");

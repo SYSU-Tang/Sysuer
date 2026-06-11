@@ -131,10 +131,10 @@ public class CourseSelectionMainFragment extends Fragment {
                 }
             });
             model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = message.getSecond();
+                JSONObject response = message.second;
                 Integer code = response.getInteger("code");
                 if (Objects.equals(code, 200)) {
-                    switch (message.getFirst()) {
+                    switch (message.first) {
                         case 0 -> {
                             term = response.getJSONObject("data").getString("semesterYear");
                             getCourseList();
@@ -241,12 +241,12 @@ public class CourseSelectionMainFragment extends Fragment {
     
     int getType() {
         CommonUtil.Tuple2<Integer, Integer> value = typeCate.getValue();
-        return value == null ? 2 : value.getFirst();
+        return value == null ? 2 : value.first;
     }
     
     int getCategory() {
         CommonUtil.Tuple2<Integer, Integer> value = typeCate.getValue();
-        return value == null ? 2 : value.getSecond();
+        return value == null ? 2 : value.second;
     }
     
     void unselect(String classId, String code) {

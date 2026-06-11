@@ -118,7 +118,7 @@ public class EnergyDashboardFragment extends Fragment {
             requestQueue.add(() -> getRoom(name));
             requestQueue.add(() -> {
                 if (!rooms.isEmpty())
-                    getOrderInfo(rooms.valueAt(0).getSecond(), LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")));
+                    getOrderInfo(rooms.valueAt(0).second, LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")));
             });
             requestQueue.next();
         }

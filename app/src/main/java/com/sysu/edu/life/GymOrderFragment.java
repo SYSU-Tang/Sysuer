@@ -153,7 +153,7 @@ public class GymOrderFragment extends Fragment {
     }
     
     void getOrder() {
-        http.getRequest(viewModel.authorizationManager.getBaseUrl() + String.format("api/transaction/Me?StartDate=%s&EndDate=%s&Page=%s&PageSize=10",
+        http.getRequest(viewModel.authorizationManager.getHost() + String.format("api/transaction/Me?StartDate=%s&EndDate=%s&Page=%s&PageSize=10",
                 dateFormat.format(viewModel.from), dateFormat.format(viewModel.to), ++page), 0);
     }
 }

@@ -54,19 +54,19 @@ public class RecruitmentInfoFragment extends StaggeredFragment {
             if ((page - 1) * 10 < total) getRecruitment();
         });
         model.getMessage().observe(requireActivity(), message -> {
-            JSONObject data = message.getSecond();
+            JSONObject data = message.second;
             if (data.containsKey("code") && data.getInteger("code") == 200) {
-                switch (message.getFirst()) {
+                switch (message.first) {
                     case 0 -> {
                         total = data.getJSONObject("data").getInteger("total");
                         data.getJSONObject("data").getJSONArray("list").forEach(i -> add(((JSONObject) i).getString("qgzxgwmc"), List.of("岗位名称", "岗位类型", "所在校区", "岗位地址", "开始时间", "结束时间", "状态", "设岗单位"),
                                 extractValue((JSONObject) i, new String[]{"qgzxgwmc", "qgzxgwlxmc", "qgzxszxymc", "qgzxdwdz", "qgzxgwzpkssj", "qgzxgwzpjssj", "state", "sgdwmc"})));
                     }
                     case 1, 2, 3 -> {
-                        Menu menu = List.of(viewModel.yearPop, viewModel.campusPop, viewModel.typePop).get(message.getFirst() - 1).getMenu();
+                        Menu menu = List.of(viewModel.yearPop, viewModel.campusPop, viewModel.typePop).get(message.first - 1).getMenu();
                         if (menu.hasVisibleItems()) break;
-                        MutableLiveData<String> name = List.of(viewModel.yearName, viewModel.campusName, viewModel.jobTypeName).get(message.getFirst() - 1);
-                        MutableLiveData<String> liveData = List.of(viewModel.year, viewModel.campus, viewModel.jobType).get(message.getFirst() - 1);
+                        MutableLiveData<String> name = List.of(viewModel.yearName, viewModel.campusName, viewModel.jobTypeName).get(message.first - 1);
+                        MutableLiveData<String> liveData = List.of(viewModel.year, viewModel.campus, viewModel.jobType).get(message.first - 1);
                         menu.add(R.string.all).setOnMenuItemClickListener(_ -> {
                             liveData.setValue("");
                             name.setValue("");

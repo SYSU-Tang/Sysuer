@@ -71,14 +71,14 @@ public class WidgetUpdateWorker extends Worker {
         CommonUtil.Tuple2<Integer, JSONObject> r1 = model.execute(Objects.requireNonNull(model.getNextRequest()));
         String term = null;
         if (r1 != null) {
-            term = r1.getSecond().getJSONObject("data").getString("acadYearSemester");
+            term = r1.second.getJSONObject("data").getString("acadYearSemester");
         }
         getWeek(term);
         CommonUtil.Tuple2<Integer, JSONObject> r2 = model.execute(model.getNextRequest());
         getTodayCourses(term);
         CommonUtil.Tuple2<Integer, JSONObject> r3 = model.execute(model.getNextRequest());
         return (r1 != null && r2 != null && r3 != null)
-                ? JSONArray.of(r1.getSecond(), r2.getSecond(), r3.getSecond()) : null;
+                ? JSONArray.of(r1.second, r2.second, r3.second) : null;
     }
     
     void getTerm() {

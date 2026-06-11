@@ -11,7 +11,6 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.ContextUtil
 import com.sysu.edu.api.CookieManager
 import com.sysu.edu.api.HttpManager
-import com.sysu.edu.api.TargetUrl
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Request
@@ -19,17 +18,17 @@ import okhttp3.Response
 import java.io.IOException
 import java.util.ArrayDeque
 
-open class BaseModel(context: Context) {
+abstract class BaseModel(context: Context) {
 	val contextUtil: ContextUtil = ContextUtil(context)
-	open val authorizationManager: AuthorizationManager = AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn")
+	abstract val authorizationManager: AuthorizationManager //= AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn")
 	open val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
-		setCookieManager(CookieManager(context))
+		cookieManager = CookieManager(context)
 	}
 	private val queue = ArrayDeque<CommonUtil.Tuple2<Request, Int>>()
 	val message: MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>> = MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>>()
 	val afterLoginRequest: MutableSet<CommonUtil.Tuple2<Request, Int>?> = mutableSetOf()
 	fun add(request: Request, what: Int) {
-		queue.add(CommonUtil.Tuple2<Request, Int>(request, what))
+		queue.add(CommonUtil.Tuple2(request, what))
 	}
 	
 	fun add(path: String?, what: Int) {
@@ -42,9 +41,9 @@ open class BaseModel(context: Context) {
 	
 	fun add(path: String?, data: String? = null, type: String? = null, what: Int) {
 		queue.add(
-			CommonUtil.Tuple2<Request, Int>(
+			CommonUtil.Tuple2(
 				http.generateRequest(
-					"https://${authorizationManager.baseUrl}/$path",
+					"https://${authorizationManager.host}/$path",
 					data,
 					type
 				).build(), what
@@ -80,15 +79,13 @@ open class BaseModel(context: Context) {
 	fun login(request: CommonUtil.Tuple2<Request, Int>?) {
 		val empty = afterLoginRequest.isEmpty()
 		afterLoginRequest.add(request)
-		if (empty) contextUtil.login(
-			if (authorizationManager.isAccessible()) TargetUrl.JWXT else TargetUrl.JWXT_WEBVPN
-		) {
+		if (empty) contextUtil.login(authorizationManager.targetUrl) {
 			afterLoginRequest.forEach { request: CommonUtil.Tuple2<Request, Int>? -> this.retry(request!!) }
 		}
 	}
 	
 	fun request(request: CommonUtil.Tuple2<Request, Int>) {
-		http.client.newCall(request.getFirst()).enqueue(object : Callback {
+		http.client.newCall(request.first).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
 				handleFailure(request, e)
 			}
@@ -105,7 +102,7 @@ open class BaseModel(context: Context) {
 	}
 	
 	fun execute(request: CommonUtil.Tuple2<Request, Int>): CommonUtil.Tuple2<Int, JSONObject>? {
-		val call = http.client.newCall(request.getFirst())
+		val call = http.client.newCall(request.first)
 		try {
 			return handleResponse(request, call.execute())
 		} catch (e: IOException) {
@@ -114,12 +111,12 @@ open class BaseModel(context: Context) {
 		return null
 	}
 	
-	fun execute(request: Request, code: Int?): CommonUtil.Tuple2<Int, JSONObject>? {
+	fun execute(request: Request, code: Int): CommonUtil.Tuple2<Int, JSONObject>? {
 		try {
-			return handleResponse(CommonUtil.Tuple2<Request, Int>(request, code),
+			return handleResponse(CommonUtil.Tuple2(request, code),
 			                      http.client.newCall(request).execute())
 		} catch (e: IOException) {
-			handleFailure(CommonUtil.Tuple2<Request, Int>(request, code), e)
+			handleFailure(CommonUtil.Tuple2(request, code), e)
 			return null
 		}
 	}
@@ -135,10 +132,10 @@ open class BaseModel(context: Context) {
 			val code = contentJSON.getInteger("code")
 			if (code == 53000007) login(request)
 			else {
-				if (code != 200) http.getHandler().post {
+				if (code != 200) http.handler.post {
 					contextUtil.toast(CommonUtil.toStringOrDefault(contentJSON.getString("message")))
 				}
-				result = CommonUtil.Tuple2<Int, JSONObject>(request.getSecond(), contentJSON)
+				result = CommonUtil.Tuple2(request.second, contentJSON)
 				message.postValue(result)
 				afterLoginRequest.remove(request)
 			}
@@ -150,24 +147,24 @@ open class BaseModel(context: Context) {
 	}
 	
 	protected open fun retry(request: CommonUtil.Tuple2<Request, Int>) {
-		request.setFirst(updateRequest(request.getFirst()!!))
+		request.first = updateRequest(request.first)
 		request(request)
 	}
 	
 	fun request(request: Request, code: Int) {
-		request(CommonUtil.Tuple2<Request, Int>(request, code))
+		request(CommonUtil.Tuple2(request, code))
 	}
 	
-	val host: String?
-		get() = authorizationManager.baseUrl
-	val cookieManager: CookieManager
-		get() = http.getCookieManager()
+	val host: String
+		get() = authorizationManager.host
+	val cookieManager: CookieManager?
+		get() = http.cookieManager
 	
 	fun updateRequest(request: Request): Request {
 		return request.newBuilder()
-			.url(request.url.newBuilder().host(authorizationManager.baseUrl).build()).header(
+			.url(request.url.newBuilder().host(authorizationManager.host).build()).header(
 				"Cookie",
-				cookieManager.toSimpleString(authorizationManager.baseUrl)
+				cookieManager?.toSimpleString(authorizationManager.host) ?: ""
 			).build()
 	}
 	

@@ -56,9 +56,9 @@ public class AgendaActivity extends BaseActivity {
         binding.toolbar.setSubtitle(String.format(Locale.getDefault(), "%d年%d月", binding.calendarView.getCurYear(), binding.calendarView.getCurMonth()));
         binding.calendarView.setSelectSingleMode();
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response != null && response.getJSONObject("meta").getInteger("statusCode").equals(200) && response.get("data") != null) {
-                if (message.getFirst() == 0) {
+                if (message.first == 0) {
                     concatAdapter.getAdapters().forEach(concatAdapter::removeAdapter);
                     JSONArray data = response.getJSONArray("data");
                     if (!data.isEmpty())

@@ -1,312 +1,283 @@
-package com.sysu.edu.api;
+package com.sysu.edu.api
 
-import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
+import android.os.Bundle
+import android.os.Handler
+import android.os.Message
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import java.io.IOException
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+/**
+ * 构造函数
+ *
+ * @param handler 处理消息的 Handler 对象
+ */
+class HttpManager(val handler: Handler) {
+	
+	/**
+	 * 获取 OkHttpClient 客户端
+	 * 
+	 * @return OkHttpClient 客户端
+	 */
+	val client: OkHttpClient = OkHttpClient.Builder().build() // 全局 OkHttpClient 实例
+	
+	/**
+	 * 获取 CookieManager 管理器
+	 * 
+	 * @return CookieManager 管理器
+	 */
+	var cookieManager: CookieManager? = null // 全局 CookieManager 实例
+	@JvmField var referrer: String? = null // Referer 头字段值
+	@JvmField var cookie: String? = null // Cookie 头字段值
+	@JvmField var authorization: String? = null // Authorization 头字段值
+	@JvmField var params: Params? = null // 请求参数对象
+	@JvmField var ua: String? = null // User-Agent 头字段值
+	@JvmField var target: String? = null // 目标 URL
+	@JvmField var isAuthorizationRequired: Boolean = false // 是否需要 Authorization 头字段
+	@JvmField var isTokenRequired: Boolean = false // 是否需要 token 头字段
+	@JvmField var header: MutableMap<String?, String?>? = null // 自定义请求头字段
+	@JvmField var authorizationJar: AuthorizationJar? = null // 自定义 Authorization 头字段
+	
+	
+//	init {
+//		setHandler(handler)
+//	}
+//	/**
+//	 * 获取处理消息的 Handler 对象
+//	 *
+//	 * @return 处理消息的 Handler 对象
+//	 */
+//	fun getHandler(): Handler {
+//		return handler!!
+//	}
+//	/**
+//	 * 设置处理消息的 Handler 对象
+//	 *
+//	 * @param handler 处理消息的 Handler 对象
+//	 */
+//	fun setHandler(handler: Handler) {
+//		this.handler = handler
+//	}
+	
+	/**
+	 * 设置请求参数
+	 *
+	 * @param params 请求参数对象
+	 */
+	fun setParams(params: Params?) {
+		this.params = params
+		cookieManager = params?.let { CookieManager(it.context) }
+	}
 
-import androidx.annotation.NonNull;
+	/**
+	 * 设置 Referer 头字段
+	 *
+	 * @param referrer Referer 头字段值
+	 */
+	fun setReferrer(referrer: String?) {
+		this.referrer = referrer
+	}
 
-import java.io.IOException;
-import java.util.Map;
+	/**
+	 * 设置 Cookie 头字段，优先级最高
+	 *
+	 * @param cookie Cookie 头字段值
+	 */
+	fun setCookie(cookie: String?) {
+		this.cookie = cookie
+	}
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+	/**
+	 * 设置是否需要 Authorization 头字段
+	 *
+	 * @param isAuthorizationRequired 是否需要使用 Params 中的 Authorization 头字段
+	 */
+	fun setAuthorizationRequired(isAuthorizationRequired: Boolean) {
+		this.isAuthorizationRequired = isAuthorizationRequired
+	}
 
-public class HttpManager {
-    final OkHttpClient http = new OkHttpClient.Builder()
-            .build(); // 全局 OkHttpClient 实例
-    CookieManager cookieManager; // 全局 CookieManager 实例
-    Handler handler; // 处理消息的 Handler 对象
-    String referrer; // Referer 头字段值
-    String cookie; // Cookie 头字段值
-    String authorization; // Authorization 头字段值
-    Params params; // 请求参数对象
-    String ua; // User-Agent 头字段值
-    String target; // 目标 URL
-    boolean isAuthorizationRequired; // 是否需要 Authorization 头字段
-    boolean isTokenRequired; // 是否需要 token 头字段
-    Map<String, String> header;// 自定义请求头字段
-    AuthorizationJar authorizationJar;// 自定义 Authorization 头字段
-    
-    /**
-     * 构造函数
-     *
-     * @param handler 处理消息的 Handler 对象
-     */
-    public HttpManager(Handler handler) {
-        setHandler(handler);
-    }
-    
-    /**
-     * 获取处理消息的 Handler 对象
-     *
-     * @return 处理消息的 Handler 对象
-     */
-    public Handler getHandler() {
-        return handler;
-    }
-    
-    /**
-     * 设置处理消息的 Handler 对象
-     *
-     * @param handler 处理消息的 Handler 对象
-     */
-    public void setHandler(Handler handler) {
-        this.handler = handler;
-    }
-    
-    /**
-     * 设置请求参数
-     *
-     * @param params 请求参数对象
-     */
-    public void setParams(Params params) {
-        this.params = params;
-        cookieManager = new CookieManager(params.getContext());
-    }
-    
-    /**
-     * 设置 Referer 头字段
-     *
-     * @param referrer Referer 头字段值
-     */
-    public void setReferrer(String referrer) {
-        this.referrer = referrer;
-    }
-    
-    /**
-     * 设置 Cookie 头字段，优先级最高
-     *
-     * @param cookie Cookie 头字段值
-     */
-    public void setCookie(String cookie) {
-        this.cookie = cookie;
-    }
-    
-    /**
-     * 设置是否需要 Authorization 头字段
-     *
-     * @param isAuthorizationRequired 是否需要使用 Params 中的 Authorization 头字段
-     */
-    public void setAuthorizationRequired(boolean isAuthorizationRequired) {
-        this.isAuthorizationRequired = isAuthorizationRequired;
-    }
-    
-    /**
-     * 设置是否需要 token 头字段
-     *
-     * @param isTokenRequired 是否需要使用 Params 中的 token 头字段
-     */
-    public void setTokenRequired(boolean isTokenRequired) {
-        this.isTokenRequired = isTokenRequired;
-    }
-    
-    /**
-     * 设置 User-Agent 头字段
-     *
-     * @param ua User-Agent 头字段值
-     */
-    public void setUA(String ua) {
-        this.ua = ua;
-    }
-    
-    /**
-     * 设置请求目标 URL
-     *
-     * @param target 请求目标 URL作为Cookie的提供者
-     */
-    public void setTarget(String target) {
-        this.target = target;
-    }
-    
-    /**
-     * 设置请求头字段
-     *
-     * @param header 请求头字段映射
-     *
-     */
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
-    }
-    
-    /**
-     * 设置 AuthorizationJar 对象
-     *
-     * @param authorizationJar AuthorizationJar 对象
-     *
-     */
-    public void setAuthorizationJar(AuthorizationJar authorizationJar) {
-        this.authorizationJar = authorizationJar;
-    }
-    
-    /**
-     * 发送网络请求
-     *
-     * @param request 请求对象
-     * @param what    消息标识
-     */
-    public void sendRequest(Request request, int what) {
-        http.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+	/**
+	 * 设置是否需要 token 头字段
+	 *
+	 * @param isTokenRequired 是否需要使用 Params 中的 token 头字段
+	 */
+	fun setTokenRequired(isTokenRequired: Boolean) {
+		this.isTokenRequired = isTokenRequired
+	}
+
+	/**
+	 * 设置 User-Agent 头字段
+	 *
+	 * @param ua User-Agent 头字段值
+	 */
+	fun setUA(ua: String?) {
+		this.ua = ua
+	}
+
+	/**
+	 * 设置请求目标 URL
+	 *
+	 * @param target 请求目标 URL作为Cookie的提供者
+	 */
+	fun setTarget(target: String?) {
+		this.target = target
+	}
+
+	/**
+	 * 设置请求头字段
+	 *
+	 * @param header 请求头字段映射
+	 */
+	fun setHeader(header: MutableMap<String?, String?>?) {
+		this.header = header
+	}
+
+	/**
+	 * 设置 AuthorizationJar 对象
+	 *
+	 * @param authorizationJar AuthorizationJar 对象
+	 */
+	fun setAuthorizationJar(authorizationJar: AuthorizationJar?) {
+		this.authorizationJar = authorizationJar
+	}
+	
+	/**
+	 * 发送网络请求
+	 * 
+	 * @param request 请求对象
+	 * @param what    消息标识
+	 */
+	fun sendRequest(request: Request, what: Int) {
+		client.newCall(request).enqueue(object : Callback {
+			override fun onFailure(call: Call, e: IOException) {
 //                System.out.println(request.url());
-                sendFailure();
-            }
-            
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Message msg = new Message();
-                msg.what = what;
-                msg.obj = response.body().string();
-                Bundle bundle = new Bundle();
-                bundle.putInt("code", response.code());
-                String type = response.header("Content-Type");
-                bundle.putBoolean("isJSON", type != null && type.contains("application/json"));
-                bundle.putString("data", (String) msg.obj);
-                msg.setData(bundle);
-                handler.sendMessage(msg);
-            }
-        });
-    }
-    
-    /**
-     * 发送失败消息
-     */
-    public void sendFailure() {
-        handler.sendEmptyMessage(-1);
-    }
-    
-    /**
-     * 获取请求构建器
-     *
-     * @param url  请求 URL
-     * @param data 请求数据
-     * @param type 请求数据类型
-     * @return 请求构建器
-     */
-    public Request.Builder generateRequest(@NonNull String url, String data, String type) {
-        Request.Builder request = new Request.Builder().url(url);
-        String host = HttpUrl.get(toStringOrDefault(target, url)).host();
-//        if (params != null) request.header("Cookie", params.getCookie());
-        if (cookieManager != null)
-            request.header("Cookie", cookieManager.toSimpleString(host));
-        if (cookie != null) request.header("Cookie", cookie);
-        if (isAuthorizationRequired && authorizationJar != null)
-            request.header("Authorization", authorizationJar.getAuthorization(host));
-        if (authorization != null) request.header("Authorization", authorization);
-        if (referrer != null) request.header("Referer", referrer);
-        if (ua != null) request.header("User-Agent", ua);
-        if (data != null)
-            request.post(RequestBody.create(data, MediaType.get(toStringOrDefault(type, "application/json"))));
-        if (isTokenRequired && authorizationJar != null)
-            request.header("token", authorizationJar.getToken(host));
-        if (header != null) header.forEach(request::header);
-        return request;
-    }
-    
-    /**
-     * 生成 GET 请求构建器
-     *
-     * @param url 请求 URL
-     * @return 请求构建器
-     */
-    public Request.Builder generateGetRequest(String url) {
-        return generateRequest(url, null, null);
-    }
-    
-    /**
-     * 生成 POST 请求构建器
-     *
-     * @param url  请求 URL
-     * @param data 请求数据
-     * @param type 请求数据类型
-     * @return 请求构建器
-     */
-    public Request.Builder generatePostRequest(String url, String data, String type) {
-        return generateRequest(url, data, type);
-    }
-    
-    /**
-     * 生成 POST JSON 请求构建器
-     *
-     * @param url  请求 URL
-     * @param data 请求 JSON 数据
-     * @return 请求构建器
-     */
-    public Request.Builder generatePostRequest(String url, String data) {
-        return generateRequest(url, data, "application/json");
-    }
-    
-    /**
-     * 发送 POST 请求
-     *
-     * @param url  请求 URL
-     * @param data 请求 JSON 数据
-     * @param what 消息标识
-     */
-    public void postRequest(@NonNull String url, String data, int what) {
-        sendRequest(generatePostRequest(url, data).build(), what);
-    }
-    
-    /**
-     * 发送 POST 请求
-     *
-     * @param url  请求 URL
-     * @param data 请求数据
-     * @param type 请求数据类型
-     * @param what 消息标识
-     */
-    public void postRequest(@NonNull String url, String data, String type, int what) {
-        sendRequest(generatePostRequest(url, data, type).build(), what);
-    }
-    
-    /**
-     * 发送 GET 请求
-     *
-     * @param url  请求 URL
-     * @param what 消息标识
-     */
-    public void getRequest(@NonNull String url, int what) {
-        sendRequest(generateGetRequest(url).build(), what);
-    }
-    
-    /**
-     * 发送 DELETE 请求
-     *
-     * @param url  请求 URL
-     * @param what 消息标识
-     */
-    public void deleteRequest(@NonNull String url, int what) {
-        sendRequest(generateGetRequest(url).delete().build(), what);
-    }
-    
-    /**
-     * 获取 OkHttpClient 客户端
-     *
-     * @return OkHttpClient 客户端
-     */
-    public OkHttpClient getClient() {
-        return http;
-    }
-    
-    /**
-     * 获取 CookieManager 管理器
-     *
-     * @return CookieManager 管理器
-     */
-    public CookieManager getCookieManager() {
-        return cookieManager;
-    }
-    
-    public void setCookieManager(CookieManager cookieManager) {
-        this.cookieManager = cookieManager;
-    }
+				sendFailure()
+			}
+			
+			@Throws(IOException::class) override fun onResponse(call: Call, response: Response) {
+				val msg = Message()
+				msg.what = what
+				msg.obj = response.body.string()
+				val bundle = Bundle()
+				bundle.putInt("code", response.code)
+				val type = response.header("Content-Type")
+				bundle.putBoolean("isJSON", type != null && type.contains("application/json"))
+				bundle.putString("data", msg.obj as String?)
+				msg.data = bundle
+				handler.sendMessage(msg)
+			}
+		})
+	}
+	
+	/**
+	 * 发送失败消息
+	 */
+	fun sendFailure() {
+		handler.sendEmptyMessage(-1)
+	}
+	
+	/**
+	 * 获取请求构建器
+	 * 
+	 * @param url  请求 URL
+	 * @param data 请求数据
+	 * @param type 请求数据类型
+	 * @return 请求构建器
+	 */
+	fun generateRequest(url: String, data: String?, type: String?): Request.Builder {
+		val request = Request.Builder().url(url)
+		val host = url.toHttpUrl().host
+		if (cookieManager != null) request.header("Cookie", cookieManager!!.toSimpleString(host))
+		if (cookie != null) request.header("Cookie", cookie!!)
+		if (isAuthorizationRequired && authorizationJar != null) request.header("Authorization", authorizationJar!!.getAuthorization(host))
+		if (authorization != null) request.header("Authorization", authorization!!)
+		if (referrer != null) request.header("Referer", referrer!!)
+		if (ua != null) request.header("User-Agent", ua!!)
+		if (data != null) request.post(data.toRequestBody((type ?: "application/json").toMediaType()))
+		if (isTokenRequired && authorizationJar != null) request.header("token", authorizationJar!!.getToken(host))
+		header?.forEach { (name: String?, value: String?) -> request.header(name!!, value!!) }
+		return request
+	}
+	
+	/**
+	 * 生成 GET 请求构建器
+	 * 
+	 * @param url 请求 URL
+	 * @return 请求构建器
+	 */
+	fun generateGetRequest(url: String): Request.Builder {
+		return generateRequest(url, null, null)
+	}
+	
+	/**
+	 * 生成 POST 请求构建器
+	 * 
+	 * @param url  请求 URL
+	 * @param data 请求数据
+	 * @param type 请求数据类型
+	 * @return 请求构建器
+	 */
+	fun generatePostRequest(url: String, data: String?, type: String?): Request.Builder {
+		return generateRequest(url, data, type)
+	}
+	
+	/**
+	 * 生成 POST JSON 请求构建器
+	 * 
+	 * @param url  请求 URL
+	 * @param data 请求 JSON 数据
+	 * @return 请求构建器
+	 */
+	fun generatePostRequest(url: String, data: String?): Request.Builder {
+		return generateRequest(url, data, "application/json")
+	}
+	
+	/**
+	 * 发送 POST 请求
+	 * 
+	 * @param url  请求 URL
+	 * @param data 请求 JSON 数据
+	 * @param what 消息标识
+	 */
+	fun postRequest(url: String, data: String?, what: Int) {
+		sendRequest(generatePostRequest(url, data).build(), what)
+	}
+	
+	/**
+	 * 发送 POST 请求
+	 * 
+	 * @param url  请求 URL
+	 * @param data 请求数据
+	 * @param type 请求数据类型
+	 * @param what 消息标识
+	 */
+	fun postRequest(url: String, data: String?, type: String?, what: Int) {
+		sendRequest(generatePostRequest(url, data, type).build(), what)
+	}
+	
+	/**
+	 * 发送 GET 请求
+	 * 
+	 * @param url  请求 URL
+	 * @param what 消息标识
+	 */
+	fun getRequest(url: String, what: Int) {
+		sendRequest(generateGetRequest(url).build(), what)
+	}
+	
+	/**
+	 * 发送 DELETE 请求
+	 * 
+	 * @param url  请求 URL
+	 * @param what 消息标识
+	 */
+	fun deleteRequest(url: String, what: Int) {
+		sendRequest(generateGetRequest(url).delete().build(), what)
+	}
 }

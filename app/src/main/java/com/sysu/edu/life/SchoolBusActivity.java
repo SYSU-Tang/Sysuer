@@ -96,9 +96,9 @@ public class SchoolBusActivity extends BaseActivity {
         binding.appBarLayout.addView(header.getRoot());
         new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(routes.get(position))).attach();
         model.getMessage().observe(this, message -> {
-            JSONObject response = message.getSecond();
+            JSONObject response = message.second;
             if (response.getJSONObject("meta").getInteger("statusCode").equals(200)) {
-                if (message.getFirst() == 0) {
+                if (message.first == 0) {
                     data = response.getJSONObject("data");
                     day.setValue(Boolean.TRUE);
                 }
