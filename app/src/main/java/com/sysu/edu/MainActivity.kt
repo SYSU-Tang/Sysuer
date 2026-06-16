@@ -18,9 +18,6 @@ import android.os.Handler
 import android.os.Message
 import android.view.View
 import android.widget.TextView
-import androidx.activity.BackEventCompat
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
@@ -50,7 +47,6 @@ import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 
@@ -82,9 +78,9 @@ class MainActivity : BaseActivity() {
 						Observable.just(JSONObject.parseObject(msg.obj as String?))
 							.subscribeOn(Schedulers.io())
 							.observeOn(AndroidSchedulers.mainThread())
-							.subscribe(Consumer { response: JSONObject? ->
+							.subscribe { response: JSONObject? ->
 								this@MainActivity.showUpdateDialog(response!!)
-							})
+							}
 					)
 				}
 			}
@@ -187,9 +183,7 @@ class MainActivity : BaseActivity() {
 				)
 				if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
-						arrayOf(
-							Manifest.permission.POST_NOTIFICATIONS
-						), PackageManager.PERMISSION_GRANTED
+						arrayOf(Manifest.permission.POST_NOTIFICATIONS), PackageManager.PERMISSION_GRANTED
 					)
 			}
 		})
@@ -198,47 +192,75 @@ class MainActivity : BaseActivity() {
 	fun showUpdateDialog(response: JSONObject) {
 		if (PackageInfoCompat.getLongVersionCode(this.packageManager.getPackageInfo(this.packageName, 0))
 			< response.getInteger("version")) {
-			path =
-				"${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${
-					getString(R.string.app_name)
-				}${response.getString("versionName")}.apk"
-			val updateDialog = MaterialAlertDialogBuilder(this)
+			path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}${response.getString("versionName")}.apk"
+			val releaseLink = response.getString("link")
+			MaterialAlertDialogBuilder(this)
 				.setMessage("")
 				.setTitle(R.string.higher_version_detected)
-				.setPositiveButton(
-					R.string.download_in_system
-				) { _: DialogInterface?, _: Int ->
-					downloadId = (getSystemService(
-						DOWNLOAD_SERVICE
-					) as DownloadManager)
-						.enqueue(
-							DownloadManager.Request(Uri.parse(response.getString("link")))
-								.setDestinationUri(Uri.fromFile(File(path)))
-								.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-						)
+				.setPositiveButton(R.string.download_in_system) { _: DialogInterface?, _: Int ->
+					downloadId = (getSystemService(DOWNLOAD_SERVICE) as DownloadManager)
+						.enqueue(DownloadManager.Request(Uri.parse(releaseLink))
+									 .setDestinationUri(Uri.fromFile(File(path)))
+									 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
 				}
-				.setNegativeButton(
-					R.string.download_in_browser
-				) { _: DialogInterface?, _: Int ->
-					startActivity(
-						Intent(Intent.ACTION_VIEW, Uri.parse(response.getString("link")))
-					)
+				.setNegativeButton(R.string.download_in_browser) { _: DialogInterface?, _: Int ->
+					startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(releaseLink)))
 				}
 				.setCancelable(!response.getBoolean("enforce"))
-				.setNeutralButton(
-					R.string.download_in_app
-				) { _: DialogInterface?, _: Int ->
+				.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
 					com.sysu.edu.api.DownloadManager.downloadFile(
 						this,
-						response.getString("link"),
+						releaseLink,
 						path
 					)
 				}
-				.create()
-			updateDialog.show()
-			updateDialog.findViewById<TextView>(android.R.id.message)?.let {
-				Markwon.builder(this).build().setMarkdown(it, response.getString("description")
-				)
+				.create().apply {
+					setCancelable(!response.getBoolean("enforce"))
+					show()
+					findViewById<TextView>(android.R.id.message)?.let { Markwon.builder(this@MainActivity).build().setMarkdown(it, response.getString("description")) }
+				}
+		} else if (settingManager.developerMode && settingManager.betaCheck) {
+			if (response.containsKey("minorVersion") && response.containsKey("majorVersion") && response.containsKey("generationVersion")) {
+				val minorVersion = response.getInteger("minorVersion")
+				val majorVersion = response.getInteger("majorVersion")
+				val generationVersion = response.getInteger("generationVersion")
+				val isBeta = response.getBooleanValue("isBeta", true)
+				if (generationVersion > BuildConfig.VERSION_GENERATION ||
+					(generationVersion == BuildConfig.VERSION_GENERATION && majorVersion > BuildConfig.VERSION_MAJOR) ||
+					(generationVersion == BuildConfig.VERSION_GENERATION && majorVersion == BuildConfig.VERSION_MAJOR && minorVersion > BuildConfig.VERSION_MINOR)
+					&& isBeta
+				) {
+					val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
+					path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}-$versionName}apk"
+					val previewLink = response.getString("previewLink", "https://github.com/SYSU-Tang/Sysuer/releases/$versionName/download/app-release.apk")
+					MaterialAlertDialogBuilder(this)
+						.setMessage("")
+						.setTitle(R.string.beta_version_detected)
+						.setPositiveButton(R.string.download_in_system) { _: DialogInterface?, _: Int ->
+							downloadId = getSystemService(DownloadManager::class.java)
+								.enqueue(DownloadManager.Request(Uri.parse(previewLink))
+											 .setDestinationUri(Uri.fromFile(File(path)))
+											 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
+						}
+						.setNegativeButton(R.string.download_in_browser) { _: DialogInterface?, _: Int ->
+							startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(previewLink)))
+						}
+						.setCancelable(!response.getBoolean("enforce"))
+						.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
+							com.sysu.edu.api.DownloadManager.downloadFile(
+								this,
+								previewLink,
+								path
+							)
+						}
+						.create()
+						.apply {
+							show()
+							findViewById<TextView>(android.R.id.message)?.let {
+								Markwon.builder(this@MainActivity).build().setMarkdown(it, response.getString("previewDescription", "暂无更新描述"))
+							}
+						}
+				}
 			}
 		}
 	}

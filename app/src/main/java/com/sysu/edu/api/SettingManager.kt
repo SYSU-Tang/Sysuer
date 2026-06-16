@@ -50,16 +50,21 @@ class SettingManager(val context: Context) {
 		@JvmStatic var defaultFontSize: Float = 0.0f
 	}
 	
-	fun getFontSize(): Float {
-		return preferences.getString("fontSize", "0")?.takeIf { "0" != it }
-			?.let { floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)[it.toInt() - 1] }
-			?: defaultFontSize
-	}
-	
 	fun setFontSize(fontSize: Float): Context {
 		context.resources.configuration.fontScale = fontSize
 		return context.createConfigurationContext(context.resources.configuration)
 	}
+	var fontSize: Float = defaultFontSize
+		get() {
+			return preferences.getString("fontSize", "0")?.takeIf{ "0" != it }
+				?.let { floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)[it.toInt() - 1] }
+				?: defaultFontSize
+		}
+		set(value) {
+			field = value
+			preferences.edit { putString("fontSize", "$value") }
+		}
+	
 	
 	var developerMode: Boolean = false
 		get() {
@@ -68,5 +73,14 @@ class SettingManager(val context: Context) {
 		set(value) {
 			field = value
 			preferences.edit { putBoolean("developer_mode", value) }
+		}
+	
+	var betaCheck: Boolean = false
+		get() {
+			return preferences.getBoolean("beta_check", false)
+		}
+		set(value) {
+			field = value
+			preferences.edit { putBoolean("beta_check", value) }
 		}
 }

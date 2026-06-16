@@ -664,4 +664,5 @@
     <string name="unchangeable_after_submission">提交后不可更改</string>
     <string name="developer_mode">开发者模式</string>
     <string name="beta_check">检测测试版更新</string>
+    <string name="beta_version_detected">发现预览版</string>
 </resources>

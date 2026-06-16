@@ -80,7 +80,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.LinkedList
 import java.util.Locale
-import java.util.Map
 import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
@@ -113,35 +112,34 @@ class DashboardFragment : Fragment() {
 				LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
 			model = JwxtModel(requireContext()).apply {
 				message.observe(requireActivity()) { message: CommonUtil.Tuple2<Int, JSONObject> ->
-					message.second?.run {
+					message.second.run {
 						if (getInteger("code") == 200) {
 							when (message.first) {
 								1 -> {
 									val beforeArray = ArrayList<JSONObject?>()
 									val afterArray = ArrayList<JSONObject?>()
 									getJSONArray("data")
-										.forEach { e: Any? ->
+										.forEach { item: Any? ->
 											val status = getTimePosition(
-												"${(e as JSONObject).getString("teachingDate")} ${e.getString("startTime")}",
-												"${e.getString("teachingDate")} ${e.getString("endTime")}")
-											e["status"] = status
-											e["time"] = "${e.getString("startTime")}~${e.getString("endTime")}"
-											e["course"] = "第${
-												e.getString("startClassTimes")
+												"${(item as JSONObject).getString("teachingDate")} ${item.getString("startTime")}",
+												"${item.getString("teachingDate")} ${item.getString("endTime")}")
+											item["status"] = status
+											item["time"] = "${item.getString("startTime")}~${item.getString("endTime")}"
+											item["course"] = "第${
+												item.getString("startClassTimes")
 											}~${
-												e.getString("endClassTimes")
+												item.getString("endClassTimes")
 											}节课"
-											val isToday = "TD" == e.getString("useflag")
-											if (isToday) (if (status == "before") beforeArray else afterArray).add(e)
-											(if (isToday) todayCourse else tomorrowCourse).add(e)
+											val isToday = "TD" == item.getString("useflag")
+											if (isToday) (if (status == "before") beforeArray else afterArray).add(item)
+											(if (isToday) todayCourse else tomorrowCourse).add(item)
 										}
 									binding!!.progress.setMax(todayCourse.size)
 									binding!!.progress.progress = beforeArray.size
 									binding!!.courseList.scrollToPosition(
 										beforeArray.size)
 									Markwon.builder(requireContext())
-										.usePlugin(object :
-													   AbstractMarkwonPlugin() {
+										.usePlugin(object : AbstractMarkwonPlugin() {
 											override fun configureSpansFactory(
 												builder: MarkwonSpansFactory.Builder) {
 												super.configureSpansFactory(builder)
@@ -325,13 +323,10 @@ class DashboardFragment : Fragment() {
 				setParams(params)
 				setClick { jsonObject: JSONObject?, view: View? ->
 					startActivity(
-						Intent(context,
-						       CourseDetailActivity::class.java).putExtra(
+						Intent(context, CourseDetailActivity::class.java).putExtra(
 							"code",
-							jsonObject!!.getString(
-								"courseNum"))
-							.putExtra("class",
-							          jsonObject.getString("classesNum")),
+							jsonObject!!.getString("courseNum"))
+							.putExtra("class", jsonObject.getString("classesNum")),
 						ActivityOptionsCompat.makeSceneTransitionAnimation(
 							requireActivity(),
 							view ?: requireView(),
@@ -358,8 +353,7 @@ class DashboardFragment : Fragment() {
 						?.run {
 							Intent(Intent.ACTION_VIEW, toUri())
 								.takeIf { i ->
-									i.resolveActivity(
-										requireContext().packageManager) != null
+									i.resolveActivity(requireContext().packageManager) != null
 								}
 								?.let { startActivity(it) }
 								?: model?.contextUtil?.toast(R.string.fix_sysu_code_warning)
@@ -445,9 +439,7 @@ class DashboardFragment : Fragment() {
 			}
 			binding!!.toggle3.check(R.id.filter_todo)
 			todoDate.observe(viewLifecycleOwner) { refresh() }
-			todoManager?.setOnRefreshListener {
-				refresh()
-			}
+			todoManager?.setOnRefreshListener { refresh() }
 			initOrder(inflater)
 			initAction(inflater)
 			shortcutCollection
@@ -728,8 +720,8 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 		val binding = ItemHomeCourseBinding.bind(holder.itemView)
 		val item = get(position)
 		holder.itemView.setOnClickListener { v: View? -> onClick!!.accept(item, v) }
-		Map.of(binding.courseTitle, "courseName", binding.location, "teachingPlace", binding.time,
-		       "time", binding.teacher, "teacherName", binding.course, "course")
+		mapOf<TextView, String>(binding.courseTitle to "courseName", binding.location to "teachingPlace", binding.time to
+		       "time", binding.teacher to "teacherName", binding.course to "course")
 			.forEach { (v: TextView, s: String) ->
 				v.text = item.getString(s)
 				v.setOnLongClickListener { _: View? ->
