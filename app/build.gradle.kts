@@ -14,16 +14,17 @@ android {
 	
 	defaultConfig {
 		val generation = "1"
-		val minor = "1"
-		val major = "7"
+		val major = "2"
+		val minor = "0"
+		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
-		buildConfigField("int", "VERSION_MAIN", major)
+		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
 		applicationId = "com.sysu.edu"
 		minSdk = 26
 		targetSdk = 37
-		versionCode = 1936
-		versionName = "${generation}.${minor}.${major}"
+		versionCode = 1937
+		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled = true
 	}
@@ -56,33 +57,33 @@ android {
 					"src\\main\\java"
 				)
 			}
+			kotlin {
+				sourceSets {
+					dependencies {
+//            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
+						// 可选：添加 miuix-preference 以获取 Preference 组件
+//            implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
+						// 可选：添加 miuix-icons 以获取更多图标
+//            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+						// 可选：添加 miuix-blur 以获取模糊效果
+						implementation(libs.miuix.blur)
+						// 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
+						implementation(libs.miuix.navigation3.ui)
+					}
+				}
+			}
 		}
 	}
 	buildToolsVersion = "37.0.0"
 	ndkVersion = "30.0.14904198 rc1"
 	compileSdkMinor = 0
 }
-kotlin {
-	sourceSets {
-		dependencies {
-//            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
-			// 可选：添加 miuix-preference 以获取 Preference 组件
-//            implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
-			// 可选：添加 miuix-icons 以获取更多图标
-//            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-			// 可选：添加 miuix-blur 以获取模糊效果
-			implementation(libs.miuix.blur)
-			// 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
-			implementation(libs.miuix.navigation3.ui)
-		}
-	}
-}
+
 dependencies {
 	implementation(libs.androidx.activity.ktx)
 	implementation(libs.androidx.datastore.preferences.rxjava3)
 	implementation(libs.androidx.material3)
 	implementation(libs.androidx.runtime.livedata)
-//    implementation(libs.androidx.security.crypto)
 	implementation(libs.glide)
 	implementation(libs.multiplatform.markdown.renderer.android)
 	implementation(libs.multiplatform.markdown.renderer.m3)
