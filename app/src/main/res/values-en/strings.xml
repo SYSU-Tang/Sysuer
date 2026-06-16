@@ -666,4 +666,5 @@
     <string name="unchangeable_after_submission">Cannot be changed after submission.</string>
     <string name="developer_mode">Developer Mode</string>
     <string name="beta_check">Update Beta</string>
+    <string name="beta_version_detected">Preview Version Available</string>
 </resources>
