@@ -118,9 +118,9 @@ class CalendarActivity : BaseActivity() {
 			}
 		})
 		config.contextUtil.disposable.add(Observable.fromCallable<Any>(Callable {
-			Jsoup.connect("https://jwb.sysu.edu.cn/school-calendar").timeout(10000).get()
+			Jsoup.connect("https://jwb.sysu.edu.cn/school-calendar").timeout(3000).get()
 		})
-			                                  .retry(3)
+											  .retry(3)
 											  .subscribeOn(Schedulers.io())
 											  .observeOn(AndroidSchedulers.mainThread())
 											  .subscribe({ a: Any ->

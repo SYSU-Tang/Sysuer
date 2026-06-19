@@ -539,7 +539,7 @@
     <string name="download_in_app">APP内下载</string>
     <string name="download_in_system">系统下载</string>
     <string name="download_in_browser">浏览器下载</string>
-    <string name="app_latest_installed">已安装最新版本</string>
+    <string name="latest_version_installed">已安装最新版本</string>
     <string name="developer_enabled">已开启开发者模式</string>
     <string name="developer_disabled">开发者模式关闭</string>
     <string name="no_interval_year">无区间年度</string>

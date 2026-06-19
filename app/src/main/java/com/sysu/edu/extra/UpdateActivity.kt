@@ -18,7 +18,6 @@ import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.BuildConfig
 import com.sysu.edu.R
-import com.sysu.edu.api.Config
 import com.sysu.edu.api.DownloadManager
 import com.sysu.edu.api.HttpManager
 import com.sysu.edu.databinding.ActivityUpdateBinding
@@ -50,11 +49,11 @@ class UpdateActivity : BaseActivity() {
 				else click.clear()
 			}
 		}
-		val config = Config(this)
 		val notificationManager = NotificationManagerCompat.from(this)
 		notificationManager.createNotificationChannel(NotificationChannelCompat.Builder("update", NotificationManagerCompat.IMPORTANCE_DEFAULT)
-			                                              .setDescription("APP下载通知")
-			                                              .setName("下载进度通知").build())
+														  .setDescription("APP下载通知")
+														  .setName("下载进度通知")
+														  .build())
 		http = HttpManager(object : Handler(mainLooper) {
 			override fun handleMessage(msg: Message) {
 				when (msg.what) {
@@ -64,20 +63,37 @@ class UpdateActivity : BaseActivity() {
 					}
 					0 -> {
 						config.contextUtil.disposable.add(Observable.just(msg.obj)
-							                                  .map { JSONObject.parseObject(it as String?) }
-							                                  .subscribeOn(Schedulers.io())
-							                                  .observeOn(AndroidSchedulers.mainThread())
-							                                  .subscribe({ data: Any ->
-								                                             response = data as JSONObject
-								                                             val responseVersion = data.getInteger("version")
-								                                             val responseVersionName = data.getString("versionName")
-								                                             binding.changelog.setMarkdown("# $responseVersionName($responseVersion)\n${data.getString("description")}")
-								                                             binding.updateButton.setText(if (responseVersion > versionCode) R.string.update else R.string.app_latest_installed)
-							                                             }, {
-								                                             response = null
-								                                             config.toast(R.string.no_net_connected)
-								                                             binding.updateButton.setText(R.string.no_net_connected)
-							                                             }))
+															  .map { JSONObject.parseObject(it as String?) }
+															  .subscribeOn(Schedulers.io())
+															  .observeOn(AndroidSchedulers.mainThread())
+															  .subscribe({ data: Any ->
+																			 response = data as JSONObject
+																			 response?.apply {
+																				 val responseVersion = getIntValue("version", 0)
+																				 val responseVersionName = getString("versionName")
+																				 if (responseVersion > versionCode) {
+																					 binding.changelog.setMarkdown("# $responseVersionName($responseVersion)\n${data.getString("description", "")}")
+																					 binding.updateButton.setText(R.string.higher_version_detected)
+																				 } else if (settingManager.developerMode && settingManager.betaCheck && containsKey("minorVersion") && containsKey("majorVersion") && containsKey("generationVersion")) {
+																					 val minorVersion = getIntValue("minorVersion", 0)
+																					 val majorVersion = getIntValue("majorVersion", 0)
+																					 val generationVersion = getIntValue("generationVersion", 0)
+																					 val isBeta = getBooleanValue("isBeta", true)
+																					 if (generationVersion > BuildConfig.VERSION_GENERATION || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion > BuildConfig.VERSION_MAJOR) || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion == BuildConfig.VERSION_MAJOR && minorVersion > BuildConfig.VERSION_MINOR) && isBeta) {
+																						 val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
+																						 binding.changelog.setMarkdown("# $versionName($responseVersion)\n${data.getString("betaDescription", "")}")
+																						 binding.updateButton.setText(R.string.beta_version_detected)
+																					 } else {
+																						 binding.changelog.setMarkdown("# $responseVersionName($responseVersion)\n${data.getString("description", "")}")
+																						 binding.updateButton.setText(R.string.latest_version_installed)
+																					 }
+																				 }
+																			 }
+																		 }, {
+																			 response = null
+																			 config.toast(R.string.no_net_connected)
+																			 binding.updateButton.setText(R.string.no_net_connected)
+																		 }))
 					}
 				}
 			}
@@ -116,7 +132,8 @@ class UpdateActivity : BaseActivity() {
 					binding.updateButton.text = progressString
 					val builder = NotificationCompat.Builder(this@UpdateActivity, "update")
 						.setContentTitle(getString(R.string.download))
-						.setContentText(progressString).setSmallIcon(R.drawable.down)
+						.setContentText(progressString)
+						.setSmallIcon(R.drawable.down)
 						.setStyle(NotificationCompat.BigTextStyle().bigText(progressString))
 						.setProgress((total).toInt(), progress.toInt(), false)
 						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -130,8 +147,9 @@ class UpdateActivity : BaseActivity() {
 						.setContentText(getString(R.string.apk_next_step_notice))
 						.setSmallIcon(R.drawable.down)
 						.setContentIntent(DownloadManager.getOpenFileIntent(this@UpdateActivity, path)
-							                  ?.let { it1 -> PendingIntentCompat.getActivity(this@UpdateActivity, 0, it1, PendingIntent.FLAG_ONE_SHOT, true) })
-						.setProgress(1, 1, false).setPriority(NotificationCompat.PRIORITY_DEFAULT)
+											  ?.let { it1 -> PendingIntentCompat.getActivity(this@UpdateActivity, 0, it1, PendingIntent.FLAG_ONE_SHOT, true) })
+						.setProgress(1, 1, false)
+						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 					if (ActivityCompat.checkSelfPermission(this@UpdateActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
 					path?.let { it1 -> DownloadManager.openFile(this@UpdateActivity, it1) }
 				}
