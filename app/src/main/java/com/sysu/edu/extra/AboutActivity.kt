@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.Params
+import com.sysu.edu.api.Config
 import com.sysu.edu.databinding.ActivityInfoBinding
 
 class AboutActivity : BaseActivity() {
@@ -13,12 +13,12 @@ class AboutActivity : BaseActivity() {
 		val binding = ActivityInfoBinding.inflate(layoutInflater)
 		setContentView(binding.getRoot())
 		val click = ArrayList<Long?>()
-		val params = Params(this)
+		val config = Config(this)
 		binding.toolbar.setNavigationOnClickListener { _: View? -> finishAfterTransition() }
 		binding.icon.setOnClickListener { _: View? ->
 			if (click.isEmpty() || System.currentTimeMillis() - click[click.size - 1]!! < 500) {
 				if (click.size == 4) {
-					params.toast(if (settingManager.developerMode) R.string.developer_disabled else R.string.developer_enabled)
+					config.toast(if (settingManager.developerMode) R.string.developer_disabled else R.string.developer_enabled)
 					settingManager.developerMode = !settingManager.developerMode
 					click.clear()
 				} else click.add(System.currentTimeMillis())

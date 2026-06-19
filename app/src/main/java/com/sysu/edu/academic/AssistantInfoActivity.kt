@@ -1,29 +1,24 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.databinding.ActivityAssistantInfoBinding
 
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityAssistantInfoBinding;
-
-import java.util.Objects;
-
-public class AssistantInfoActivity extends BaseActivity {
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityAssistantInfoBinding binding = ActivityAssistantInfoBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        NavController navController = ((NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment))).getNavController();
-        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
-            supportFinishAfterTransition();
-            return false;
-        }).build());
-    }
+class AssistantInfoActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityAssistantInfoBinding.inflate(layoutInflater)
+		setContentView(binding.getRoot())
+		val navController = (supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment).navController
+		setupWithNavController(binding.toolbar, navController, AppBarConfiguration.Builder()
+			.setFallbackOnNavigateUpListener {
+				supportFinishAfterTransition()
+				false
+			}
+			.build())
+	}
 }

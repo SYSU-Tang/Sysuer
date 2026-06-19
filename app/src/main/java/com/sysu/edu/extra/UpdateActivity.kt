@@ -16,10 +16,11 @@ import androidx.core.app.PendingIntentCompat
 import androidx.core.content.pm.PackageInfoCompat
 import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.BaseActivity
+import com.sysu.edu.BuildConfig
 import com.sysu.edu.R
+import com.sysu.edu.api.Config
 import com.sysu.edu.api.DownloadManager
 import com.sysu.edu.api.HttpManager
-import com.sysu.edu.api.Params
 import com.sysu.edu.databinding.ActivityUpdateBinding
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -28,104 +29,123 @@ import java.io.File
 import java.util.Locale
 
 class UpdateActivity : BaseActivity() {
-	private lateinit var sysuerParams: Params
-	var http: HttpManager? = null
+	private lateinit var http: HttpManager
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		var versionCode: Long = 0
-		val click = ArrayList<Long?>()
+		val click = mutableListOf<Long?>()
+		var response: JSONObject? = null
 		val binding = ActivityUpdateBinding.inflate(layoutInflater).apply {
 			setContentView(getRoot())
 			toolbar.setNavigationOnClickListener { _: View? -> supportFinishAfterTransition() }
-			try {
-				val info = packageManager.getPackageInfo(packageName, 0)
-				versionCode = PackageInfoCompat.getLongVersionCode(info)
-				version.text = "${info.versionName}($versionCode)"
-			} catch (_: PackageManager.NameNotFoundException) {
+			val info = packageManager.getPackageInfo(packageName, 0)
+			versionCode = PackageInfoCompat.getLongVersionCode(info)
+			version.text = getString(R.string.version_info, info.versionName, versionCode)
+			icon.setOnClickListener { _: View? ->
+				if (click.isEmpty() || System.currentTimeMillis() - click[click.size - 1]!! < 500) if (click.size == 4) {
+					config.toast(if (settingManager.developerMode) R.string.developer_disabled else R.string.developer_enabled)
+					settingManager.developerMode = !settingManager.developerMode
+					click.clear()
+				} else click.add(System.currentTimeMillis())
+				else click.clear()
 			}
 		}
-		sysuerParams = Params(this)
-		
+		val config = Config(this)
 		val notificationManager = NotificationManagerCompat.from(this)
 		notificationManager.createNotificationChannel(NotificationChannelCompat.Builder("update", NotificationManagerCompat.IMPORTANCE_DEFAULT)
-														  .setDescription("APP下载通知")
-														  .setName("下载进度通知").build())
+			                                              .setDescription("APP下载通知")
+			                                              .setName("下载进度通知").build())
 		http = HttpManager(object : Handler(mainLooper) {
 			override fun handleMessage(msg: Message) {
 				when (msg.what) {
 					-1 -> {
-						sysuerParams.toast(R.string.no_net_connected)
+						config.toast(R.string.no_net_connected)
 						binding.updateButton.setText(R.string.no_net_connected)
 					}
-					0 -> sysuerParams.contextUtil.disposable.add(Observable.just<Any>(msg.obj).map<Any> { text -> JSONObject.parse(text as String) }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { response: Any ->
-						val responseVersion = (response as JSONObject).getInteger("version")
-						val responseVersionName = response.getString("versionName")
-						binding.changelog.setMarkdown("# " + responseVersionName + "(" + responseVersion + ")\n" + response.getString("description"))
-						binding.updateButton.setText(if (responseVersion > versionCode) R.string.update else R.string.app_latest_installed)
-						binding.updateButton.setOnClickListener(View.OnClickListener setOnClickListener@{ _: View? ->
-							if (responseVersion > versionCode) {
-								val path =
-									"${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}$responseVersionName.apk"
-								File(path).takeIf {
-									it.exists() && it.getTotalSpace() > 0
-								}?.let {
-									DownloadManager.openFile(this@UpdateActivity, path)
-									return@setOnClickListener
-								}
-								DownloadManager.downloadFile(this@UpdateActivity, response.getString("link"), path, object : DownloadManager.DownloadListener {
-									override fun onDownloadProgress(progress: Long, total: Long) {
-										val progressString = String.format(Locale.getDefault(), "%.2fMB/%.2fMB", progress / 1024.0f / 1024.0f, total / 1024.0f / 1024.0f)
-										binding.updateButton.text = progressString
-										val builder = NotificationCompat.Builder(this@UpdateActivity, "update")
-											.setContentTitle(getString(R.string.download))
-											.setContentText(progressString)
-											.setSmallIcon(R.drawable.down)
-											.setStyle(NotificationCompat.BigTextStyle()
-														  .bigText(progressString))
-											.setProgress((total).toInt(), progress.toInt(), false)
-											.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-										if (ActivityCompat.checkSelfPermission(this@UpdateActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
-									}
-									
-									override fun onDownloadComplete(path: String?) {
-										binding.updateButton.setText(R.string.install)
-										val builder = NotificationCompat.Builder(this@UpdateActivity, "update")
-											.setContentTitle(getString(R.string.download))
-											.setContentText(getString(R.string.apk_next_step_notice))
-											.setSmallIcon(R.drawable.down)
-											.setContentIntent(DownloadManager.getOpenFileIntent(this@UpdateActivity, path)?.let { PendingIntentCompat.getActivity(this@UpdateActivity, 0, it, PendingIntent.FLAG_ONE_SHOT, true) })
-											.setProgress(1, 1, false)
-											.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-										if (ActivityCompat.checkSelfPermission(this@UpdateActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
-											notificationManager.notify(1002, builder.build())
-										path?.let { DownloadManager.openFile(this@UpdateActivity, it) }
-									}
-									
-									override fun onDownloadError(code: Int, message: String?) {
-										sysuerParams.toast(message)
-									}
-								})
-							}
-						})
-					})
+					0 -> {
+						config.contextUtil.disposable.add(Observable.just(msg.obj)
+							                                  .map { JSONObject.parseObject(it as String?) }
+							                                  .subscribeOn(Schedulers.io())
+							                                  .observeOn(AndroidSchedulers.mainThread())
+							                                  .subscribe({ data: Any ->
+								                                             response = data as JSONObject
+								                                             val responseVersion = data.getInteger("version")
+								                                             val responseVersionName = data.getString("versionName")
+								                                             binding.changelog.setMarkdown("# $responseVersionName($responseVersion)\n${data.getString("description")}")
+								                                             binding.updateButton.setText(if (responseVersion > versionCode) R.string.update else R.string.app_latest_installed)
+							                                             }, {
+								                                             response = null
+								                                             config.toast(R.string.no_net_connected)
+								                                             binding.updateButton.setText(R.string.no_net_connected)
+							                                             }))
+					}
 				}
 			}
-		}).apply {
-			setParams(sysuerParams)
-		}
-		binding.icon.setOnClickListener { _: View? ->
-			if (click.isEmpty() || System.currentTimeMillis() - click[click.size - 1]!! < 500) if (click.size == 4) {
-				sysuerParams.toast(if (settingManager.developerMode) R.string.developer_disabled else R.string.developer_enabled)
-				settingManager.developerMode = !settingManager.developerMode
-				click.clear()
-			} else click.add(System.currentTimeMillis())
-			else click.clear()
-		}
-		this.update
+		})
+		binding.updateButton.setOnClickListener(View.OnClickListener setOnClickListener@{ _: View? ->
+			var link = ""
+			var path = ""
+			response?.apply {
+				if (getIntValue("version", 0) > versionCode) {
+					path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}${getString("versionName", "")}.apk"
+					link = getString("link", "https://github.com/SYSU-Tang/Sysuer/releases/latest/download/app-release.apk")
+				} else if (settingManager.developerMode && settingManager.betaCheck && containsKey("minorVersion") && containsKey("majorVersion") && containsKey("generationVersion")) {
+					val minorVersion = getIntValue("minorVersion", 0)
+					val majorVersion = getIntValue("majorVersion", 0)
+					val generationVersion = getIntValue("generationVersion", 0)
+					val isBeta = getBooleanValue("isBeta", true)
+					if (generationVersion > BuildConfig.VERSION_GENERATION || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion > BuildConfig.VERSION_MAJOR) || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion == BuildConfig.VERSION_MAJOR && minorVersion > BuildConfig.VERSION_MINOR) && isBeta) {
+						val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
+						path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}-$versionName}apk"
+						link = getString("previewLink", "https://github.com/SYSU-Tang/Sysuer/releases/$versionName/download/app-release.apk")
+					}
+				}
+			} ?: run {
+				if (http.client.dispatcher.runningCallsCount() == 0 && http.client.dispatcher.queuedCallsCount() == 0) update
+				return@setOnClickListener
+			}
+			if (link.isNotEmpty() && path.isNotEmpty()) File(path).takeIf {
+				it.exists() && it.getTotalSpace() > 0
+			}?.let {
+				DownloadManager.openFile(this@UpdateActivity, path)
+				return@setOnClickListener
+			} ?: DownloadManager.downloadFile(this@UpdateActivity, link, path, object :
+				DownloadManager.DownloadListener {
+				override fun onDownloadProgress(progress: Long, total: Long) {
+					val progressString = String.format(Locale.getDefault(), "%.2fMB/%.2fMB", progress / 1024.0f / 1024.0f, total / 1024.0f / 1024.0f)
+					binding.updateButton.text = progressString
+					val builder = NotificationCompat.Builder(this@UpdateActivity, "update")
+						.setContentTitle(getString(R.string.download))
+						.setContentText(progressString).setSmallIcon(R.drawable.down)
+						.setStyle(NotificationCompat.BigTextStyle().bigText(progressString))
+						.setProgress((total).toInt(), progress.toInt(), false)
+						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+					if (ActivityCompat.checkSelfPermission(this@UpdateActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
+				}
+				
+				override fun onDownloadComplete(path: String?) {
+					binding.updateButton.setText(R.string.install)
+					val builder = NotificationCompat.Builder(this@UpdateActivity, "update")
+						.setContentTitle(getString(R.string.download))
+						.setContentText(getString(R.string.apk_next_step_notice))
+						.setSmallIcon(R.drawable.down)
+						.setContentIntent(DownloadManager.getOpenFileIntent(this@UpdateActivity, path)
+							                  ?.let { it1 -> PendingIntentCompat.getActivity(this@UpdateActivity, 0, it1, PendingIntent.FLAG_ONE_SHOT, true) })
+						.setProgress(1, 1, false).setPriority(NotificationCompat.PRIORITY_DEFAULT)
+					if (ActivityCompat.checkSelfPermission(this@UpdateActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
+					path?.let { it1 -> DownloadManager.openFile(this@UpdateActivity, it1) }
+				}
+				
+				override fun onDownloadError(code: Int, message: String?) {
+					config.toast(message)
+				}
+			})
+		})
+		update
 	}
 	
 	val update: Unit
 		get() {
-			http!!.getRequest("https://sysu-tang.github.io/latest.json", 0)
+			http.getRequest("https://sysu-tang.github.io/latest.json", 0)
 		}
 }

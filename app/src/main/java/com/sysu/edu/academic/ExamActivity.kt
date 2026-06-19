@@ -1,126 +1,124 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import static com.sysu.edu.api.CommonUtil.extractValue;
+import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
+import com.google.android.material.snackbar.Snackbar
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.CommonUtil.extractValue
+import com.sysu.edu.databinding.ActivityExamBinding
+import com.sysu.edu.model.JwxtModel
+import com.sysu.edu.view.StaggeredFragment
 
-import android.os.Bundle;
-
-import androidx.lifecycle.ViewModelProvider;
-
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.snackbar.Snackbar;
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.api.Params;
-import com.sysu.edu.databinding.ActivityExamBinding;
-import com.sysu.edu.model.JwxtModel;
-import com.sysu.edu.view.StaggeredFragment;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-public class ExamActivity extends BaseActivity {
-    
-    JwxtModel model;
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        model.dispose();
-    }
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityExamBinding binding = ActivityExamBinding.inflate(getLayoutInflater());
-        Params params = new Params(this);
-        model = new JwxtModel(this);
-        params.setCallback(this::getTerms);
-        ExamViewModel examViewModel = new ViewModelProvider(this).get(ExamViewModel.class);
-        examViewModel.getTermList().observe(this, terms -> binding.terms.setSimpleItems(terms.toArray(new String[]{})));
-        examViewModel.getTerm().observe(this, term -> {
-            binding.terms.setText(term, false);
-            getExamWeek(term);
-        });
-        examViewModel.getExamWeekList().observe(this, examWeeks -> binding.examWeeks.setSimpleItems(examWeeks.toArray(new String[]{})));
-        setContentView(binding.getRoot());
-        binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
-        binding.fab.setOnClickListener(view -> {
-            if (examViewModel.getTerm().getValue() == null || examViewModel.getExamWeekId().getValue() == null)
-                Snackbar.make(view, R.string.please_select_exam_week, Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.fab).show();
-            else {
-                Snackbar.make(view, R.string.querying, Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.fab).show();
-                getResult(examViewModel.getTerm().getValue(), examViewModel.getExamWeekId().getValue());
-            }
-        });
-        binding.terms.setOnItemClickListener((_, _, _, _) -> examViewModel.setTerm(String.valueOf(binding.terms.getText())));
-        binding.examWeeks.setOnItemClickListener((_, _, i, _) -> {
-            examViewModel.setExamWeekId(Objects.requireNonNull(examViewModel.getExamWeekInfo().getValue()).get(i).getString("examWeekId"));
-            binding.date.setText(String.format("%s~%s", examViewModel.getExamWeekInfo().getValue().get(i).getString("startDate"), examViewModel.getExamWeekInfo().getValue().get(i).getString("endDate")));
-            examViewModel.setExamWeek(Objects.requireNonNull(examViewModel.getExamWeekList().getValue()).get(i));
-        });
-        examViewModel.getExamResult().observe(this, result -> {
-            ((StaggeredFragment) binding.examFragment.getFragment()).clear();
-            JSONArray.parse(result).forEach(a -> ((JSONObject) a).getJSONObject("timetable").forEach((_, detail) -> {
-                if (detail != null) {
-                    ArrayList<String> values = new ArrayList<>();
-                    ((JSONArray) detail).forEach(o -> {
-                        for (String i : new String[]{"examSubjectName", "classroomNumber", "durationTime", "examDate", "acadYear"})
-                            values.add(((JSONObject) o).getString(i));
-                    });
-                    ((StaggeredFragment) binding.examFragment.getFragment()).add(values.get(0), List.of("科目", "考场", "时长", "日期", "学年"),
-                            values);
-                }
-            }));
-        });
-        model.getMessage().observe(this, message -> {
-            JSONObject response = message.second;
-            if (response.getInteger("code").equals(200)) {
-                switch (message.first) {
-                    case 1 -> {
-                        examViewModel.setTermList(extractValue(response.getJSONArray("data"), "acadYearSemester"));
-                        getTerm();
-                    }
-                    case 2 ->
-                            examViewModel.setTerm(response.getJSONObject("data").getString("acadYearSemester"));
-                    case 3 -> {
-                        ArrayList<String> examWeeks = new ArrayList<>();
-                        ArrayList<JSONObject> examWeekInfo = new ArrayList<>();
-                        response.getJSONArray("data").forEach(item -> {
-                            examWeeks.add(((JSONObject) item).getString("examWeekName"));
-                            examWeekInfo.add((JSONObject) item);
-                        });
-                        examViewModel.setExamWeekInfo(examWeekInfo);
-                        examViewModel.setExamWeekList(examWeeks);
-                        //binding.examWeek.setText(response.getJSONObject("data").getString("examWeekName"),false);
-                    }
-                    case 4 ->
-                            examViewModel.setExamResult(response.getJSONArray("data").toJSONString());
-                }
-            }
-        });
-        getTerms();
-    }
-    
-    void getTerms() {
-        model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1);
-    }
-    
-    void getTerm() {
-        model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 2);
-    }
-    
-    void getExamWeek(String term) {
-        model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=" + term, 3);
-    }
-    
-    void getResult(String term, String examWeek) {
-        String body = "";
-        if (term != null) body += "\"acadYear\":\"" + term + "\"";
-        if (examWeek != null) body += ",\"examWeekName\":\"" + examWeek + "\"";
-        model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo", String.format("{%s}", body), 4);
-    }
+class ExamActivity : BaseActivity() {
+	lateinit var model: JwxtModel
+	override fun onDestroy() {
+		super.onDestroy()
+		model.dispose()
+	}
+	
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityExamBinding.inflate(layoutInflater).apply { }
+		model = JwxtModel(this)
+		val examViewModel = ViewModelProvider(this).get<ExamViewModel>(ExamViewModel::class.java)
+		examViewModel.termList.observe(this, Observer { terms: ArrayList<String?>? -> binding.terms.setSimpleItems(terms!!.toArray<String?>(arrayOf<String?>())) })
+		examViewModel.term.observe(this, Observer { term: String? ->
+			binding.terms.setText(term, false)
+			getExamWeek(term)
+		})
+		examViewModel.examWeekList.observe(this, Observer { examWeeks: ArrayList<String?>? -> binding.examWeeks.setSimpleItems(examWeeks!!.toArray<String?>(arrayOf<String?>())) })
+		setContentView(binding.getRoot())
+		binding.toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+		binding.fab.setOnClickListener {
+			if (examViewModel.term.value == null || examViewModel.examWeekId.value == null) Snackbar.make(binding.fab, R.string.please_select_exam_week, Snackbar.LENGTH_LONG)
+				.setAnchorView(R.id.fab)
+				.show()
+			else {
+				Snackbar.make(binding.fab, R.string.querying, Snackbar.LENGTH_LONG)
+					.setAnchorView(R.id.fab)
+					.show()
+				getResult(examViewModel.term.value, examViewModel.examWeekId.value)
+			}
+		}
+		binding.terms.setOnItemClickListener { _: AdapterView<*>?, _: View?, _: Int, _: Long ->
+			examViewModel.setTerm(binding.terms.getText().toString())
+		}
+		binding.examWeeks.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
+			examViewModel.setExamWeekId(examViewModel.examWeekInfo.value?.get(i)!!
+											.getString("examWeekId"))
+			binding.date.text = "${
+				examViewModel.examWeekInfo.value!![i]?.getString("startDate")
+			}~${
+				examViewModel.examWeekInfo.value!![i]?.getString("endDate")
+			}"
+			examViewModel.setExamWeek(examViewModel.examWeekList.value?.get(i))
+		}
+		examViewModel.examResult.observe(this, Observer { result: String? ->
+			(binding.examFragment.getFragment<Fragment?>() as StaggeredFragment).clear()
+			JSONArray.parse(result).forEach { a: Any? ->
+				(a as JSONObject).getJSONObject("timetable").forEach { (_: String?, detail: Any?) ->
+					detail?.let{
+						val values = ArrayList<String?>()
+						(detail as JSONArray).forEach { o: Any? ->
+							for (i in arrayOf("examSubjectName", "classroomNumber", "durationTime", "examDate", "acadYear")) values.add((o as JSONObject).getString(i))
+						}
+						(binding.examFragment.getFragment<Fragment?>() as StaggeredFragment).add(values[0], mutableListOf<String?>("科目", "考场", "时长", "日期", "学年"), values)
+					}
+				}
+			}
+		})
+		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			if (response.getInteger("code") == 200) {
+				when (message.first) {
+					1 -> {
+						examViewModel.setTermList(extractValue(response.getJSONArray("data"), "acadYearSemester"))
+						term
+					}
+					2 -> examViewModel.setTerm(response.getJSONObject("data")
+												   .getString("acadYearSemester"))
+					3 -> {
+						val examWeeks = ArrayList<String?>()
+						val examWeekInfo = ArrayList<JSONObject?>()
+						response.getJSONArray("data").forEach { item: Any? ->
+							examWeeks.add((item as JSONObject).getString("examWeekName"))
+							examWeekInfo.add(item)
+						}
+						examViewModel.setExamWeekInfo(examWeekInfo)
+						examViewModel.setExamWeekList(examWeeks) //binding.examWeek.setText(response.getJSONObject("data").getString("examWeekName"),false);
+					}
+					4 -> examViewModel.setExamResult(response.getJSONArray("data").toJSONString())
+				}
+			}
+		})
+		terms
+	}
+	
+	val terms: Unit
+		get() {
+			model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
+		}
+	val term: Unit
+		get() {
+			model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
+		}
+	
+	fun getExamWeek(term: String?) {
+		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 3)
+	}
+	
+	fun getResult(term: String?, examWeek: String?) {
+		val data = JSONObject()
+		if (term != null) data["acadYear"] = term
+		if (examWeek != null) data["examWeekName"] = examWeek
+		model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo", "$data", 4)
+	}
 }

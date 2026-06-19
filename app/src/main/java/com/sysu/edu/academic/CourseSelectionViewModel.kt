@@ -1,37 +1,36 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
-import java.util.HashMap;
-
-public class CourseSelectionViewModel extends ViewModel {
-    public final MutableLiveData<HashMap<String, String>> filterName = new MutableLiveData<>(new HashMap<>());
-    public final MutableLiveData<HashMap<String, String>> filterValue = new MutableLiveData<>(new HashMap<>());
-    String returnData;
-    
-    public HashMap<String, String> getFilterName() {
-        return filterName.getValue();
-    }
-    
-    public void setFilterName(HashMap<String, String> filter) {
-        filterName.postValue(filter);
-    }
-    
-    public HashMap<String, String> getFilterValue() {
-        return filterValue.getValue();
-    }
-    
-    public void setFilterValue(HashMap<String, String> filter) {
-        filterValue.postValue(filter);
-    }
-    
-    public String getReturnData() {
-        return returnData == null ? "" : returnData;
-    }
-    
-    public void setReturnData(String data) {
-        returnData = data;
-    }
-    
+class CourseSelectionViewModel : ViewModel() {
+	@JvmField val filterName: MutableLiveData<HashMap<String?, String?>?> = MutableLiveData<HashMap<String?, String?>?>(HashMap())
+	
+	@JvmField
+	val filterValue: MutableLiveData<HashMap<String?, String?>?> = MutableLiveData<HashMap<String?, String?>?>(HashMap())
+	var returnData: String? = null
+		get() {
+			return if (field == null) "" else field
+		}
+	
+	fun getFilterName(): HashMap<String?, String?>? {
+		return filterName.getValue()
+	}
+	
+	fun setFilterName(filter: HashMap<String?, String?>?) {
+		filterName.postValue(filter)
+	}
+	
+	fun getFilterValue(): HashMap<String?, String?>? {
+		return filterValue.getValue()
+	}
+	
+	fun setFilterValue(filter: HashMap<String?, String?>?) {
+		filterValue.postValue(filter)
+	} //	fun getReturnData(): String {	//		return (if (returnData == null) "" else returnData)!!
+	//	}
+	//
+	//	fun setReturnData(data: String?) {
+	//		returnData = data
+	//	}
 }

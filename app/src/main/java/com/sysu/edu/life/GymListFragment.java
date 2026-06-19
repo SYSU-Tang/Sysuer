@@ -29,7 +29,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.ItemFieldBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
@@ -44,7 +44,7 @@ public class GymListFragment extends Fragment {
     
     static GymReservationViewModel viewModel;
     HttpManager http;
-    Params params;
+    Config config;
     StaggeredGridLayoutManager layoutManager;
     RecyclerViewScrollBinding binding;
     
@@ -53,9 +53,9 @@ public class GymListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
             binding = RecyclerViewScrollBinding.inflate(inflater, container, false);
-            params = new Params(this);
-            params.setCallback(this::getInfo);
-            layoutManager = new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL);
+            config = new Config(this);
+            config.setCallback(this::getInfo);
+            layoutManager = new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL);
             binding.getRoot().setLayoutManager(layoutManager);
             viewModel = new ViewModelProvider(requireActivity()).get(GymReservationViewModel.class);
             FieldAdapter fieldAdapter = new FieldAdapter();
@@ -66,7 +66,7 @@ public class GymListFragment extends Fragment {
 //                viewModel.position.postValue(0);
                 Navigation.findNavController(binding.getRoot()).navigate(R.id.campus_to_field, bundle);
             });
-            fieldAdapter.setParams(params);
+            fieldAdapter.setParams(config);
             binding.getRoot().setAdapter(fieldAdapter);
             http = new HttpManager(new Handler(Looper.getMainLooper()) {
                 @Override
@@ -74,13 +74,13 @@ public class GymListFragment extends Fragment {
                     String response = (String) msg.obj;
                     switch (msg.getData().getInt("code")) {
                         case 401 ->
-                                params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                                config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                         case 200 -> {
                             if (!msg.getData().getBoolean("isJSON")) {
                                 if (!viewModel.authorizationManager.isAuthorized(response)) {
-                                    params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                                    config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                                 } else if (Pattern.compile("人机识别检测").matcher(response).find())
-                                    params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                                    config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                                 else if (!viewModel.authorizationManager.isAccessible(response)) {
                                     getInfo();
                                 }
@@ -102,7 +102,7 @@ public class GymListFragment extends Fragment {
                     }
                 }
             });
-            http.setParams(params);
+            http.setParams(config);
             http.setAuthorizationRequired(true);
             http.setAuthorizationJar(new AuthorizationJar(requireContext()));
             http.setHeader(Map.of("Accept", "application/json, text/plain, */*", "User-Agent", viewModel.ua));
@@ -120,7 +120,7 @@ public class GymListFragment extends Fragment {
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        layoutManager.setSpanCount(params.getColumn());
+        layoutManager.setSpanCount(config.getColumn());
     }
     
     

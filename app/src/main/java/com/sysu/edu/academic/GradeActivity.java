@@ -18,7 +18,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.ActivityGradeBinding;
 import com.sysu.edu.databinding.ItemScoreBinding;
 import com.sysu.edu.model.JwxtModel;
@@ -46,7 +46,7 @@ public class GradeActivity extends BaseActivity {
     GridLayoutManager gridLayoutManager;
     ArrayList<String> years;
     JwxtModel model;
-    Params params;
+    Config config;
     
     @Override
     protected void onDestroy() {
@@ -82,7 +82,7 @@ public class GradeActivity extends BaseActivity {
             binding.year.setText(R.string.all);
             return false;
         });
-        params = new Params(this);
+        config = new Config(this);
         ScoreAdapter adp = new ScoreAdapter();
         binding.scores.setAdapter(adp);
         class GradeManager {
@@ -108,7 +108,7 @@ public class GradeActivity extends BaseActivity {
             
             void setGrade() {
                 adp.setGrade(position, String.valueOf(grade));
-                params.toast(String.valueOf(grade));
+                config.toast(String.valueOf(grade));
                 grade = -1;
                 position = -1;
                 maxGrade = -1;
@@ -127,7 +127,7 @@ public class GradeActivity extends BaseActivity {
                 }
             }
         });
-        gridLayoutManager = new GridLayoutManager(this, params.getColumn());
+        gridLayoutManager = new GridLayoutManager(this, config.getColumn());
         binding.scores.setLayoutManager(gridLayoutManager);
         StaggeredFragment header = binding.header.getFragment();
         header.setNested(false);
@@ -232,7 +232,7 @@ public class GradeActivity extends BaseActivity {
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        gridLayoutManager.setSpanCount(params.getColumn());
+        gridLayoutManager.setSpanCount(config.getColumn());
     }
     
     void getNow() {

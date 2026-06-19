@@ -23,7 +23,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.DialogGymReservationBinding;
 import com.sysu.edu.databinding.FragmentGymDetailBinding;
@@ -76,7 +76,7 @@ public class GymDetailFragment extends Fragment {
         initReservationDialog(dialogBinding);
         viewModel = new ViewModelProvider(requireActivity()).get(GymReservationViewModel.class);
         date.setAction(viewModel.position::setValue);
-        Params params = new Params(this);
+        Config config = new Config(this);
         binding.date.recyclerView.setAdapter(date);
         binding.date.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -105,7 +105,7 @@ public class GymDetailFragment extends Fragment {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                if (msg.what == -1) config.toast(R.string.no_net_connected);
                 else {
                     String response = (String) msg.obj;
                     if (msg.getData().getBoolean("isJSON")) {
@@ -169,28 +169,28 @@ public class GymDetailFragment extends Fragment {
                             case 4:
                                 JSONObject result = JSONObject.parse(response);
                                 if (result.getInteger("Code") == 200) {
-                                    params.toast(R.string.reserve_success);
+                                    config.toast(R.string.reserve_success);
                                 } else {
-                                    params.toast(result.getString("Result"));
+                                    config.toast(result.getString("Result"));
                                 }
                                 // 订单编号
                                 /*{"Code":200,"Result":{"Identity":"6ae40ca4-392b-4ebc-8ba2-8ec1126f54bc","Name":"tangxb6","BookingId":"#RB-44U4HTRRQ4","UserId":"tangxb6","HostKey":"24308152","VenueTypeId":"802fbfda-f9f6-41c8-9c72-685247f07c73","VenueBookings":[{"VenueId":"d2c4c59a-1d00-4c44-9a6a-24f26390227e","VenueName":"东校园游泳池","TimeSlots":[{"Date":"2026-03-18T00:00:00","Start":"19:30","End":"21:00"}]}],"Participants":[],"Status":"Accepted","Description":"东校园游泳池","Charge":-5,"IsCash":false,"CreatedAt":"2026-03-17T21:30:19.8154563+08:00","UpdatedAt":"2026-03-17T13:30:19.611245Z","ActionedBy":"tangxb6","Token":null}}*/
                                 break;
                         }
                     } else if (!viewModel.authorizationManager.isAuthorized(response)) {
-                        params.toast(R.string.login_warning);
-                        params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                        config.toast(R.string.login_warning);
+                        config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                     } else if (Pattern.compile("人机识别检测").matcher(response).find()) {
-                        params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                        config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                     } else if (!viewModel.authorizationManager.isAccessible(response)) {
-                        params.toast(R.string.educational_wifi_warning);
+                        config.toast(R.string.educational_wifi_warning);
                         getInfo();
                     }
                     
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         http.setUA(viewModel.ua);
         http.setHeader(Map.of("Accept", "application/json, text/plain, */*"));
         http.setAuthorizationRequired(true);

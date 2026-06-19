@@ -27,7 +27,7 @@ import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.ContextUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.RequestQueue;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentWaterFeeBinding;
@@ -55,7 +55,7 @@ public class EnergyElectricityFeeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Params params = new Params(this);
+        Config config = new Config(this);
         ContextUtil contextUtil = new ContextUtil(requireContext());
         FragmentWaterFeeBinding binding = FragmentWaterFeeBinding.inflate(inflater, container, false);
         
@@ -67,7 +67,7 @@ public class EnergyElectricityFeeFragment extends Fragment {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1)
-                    params.toast(R.string.no_net_connected);
+                    config.toast(R.string.no_net_connected);
                 else if (msg.getData().getBoolean("isJSON")) {
                     JSONObject response = JSONObject.parse((String) msg.obj);
                     if (response.getInteger("code") == 200) {
@@ -141,19 +141,19 @@ public class EnergyElectricityFeeFragment extends Fragment {
                                 detailDialog.show();
                             }
                             case 5 -> {
-                                params.toast(response.getString("msg"));
+                                config.toast(response.getString("msg"));
                                 requestQueue.addAndNext(() -> getElectricityBill(roomCode.getValue()));
                             }
                         }
                         requestQueue.next();
                     } else if (response.getInteger("errorCode") == 500)
-                        params.toast(response.getString("msg"));
+                        config.toast(response.getString("msg"));
                     else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
                 }
             }
         });
         http.setAuthorizationRequired(true);
-        http.setParams(params);
+        http.setParams(config);
         http.setAuthorizationJar(new AuthorizationJar(requireContext()));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         requestQueue.add(this::getUserInfo);

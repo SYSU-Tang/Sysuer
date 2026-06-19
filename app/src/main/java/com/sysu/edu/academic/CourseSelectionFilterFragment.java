@@ -21,7 +21,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.transition.MaterialContainerTransform;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.FragmentCourseFilterBinding;
 import com.sysu.edu.model.JwxtModel;
 
@@ -54,7 +54,7 @@ public class CourseSelectionFilterFragment extends Fragment {
             filterValue = vm.getFilterValue();
             filterName = vm.getFilterName();
             binding = FragmentCourseFilterBinding.inflate(inflater, container, false);
-            binding.container.setColumnCount(new Params(this).getColumn());
+            binding.container.setColumnCount(new Config(this).getColumn());
             model.getMessage().observe(requireActivity(), message -> {
                 JSONObject response = message.second;
                 int what = message.first;

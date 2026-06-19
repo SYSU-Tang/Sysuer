@@ -27,7 +27,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.ContextUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.browser.BrowserActivity;
 import com.sysu.edu.databinding.FragmentHomeworkMainBinding;
@@ -46,7 +46,7 @@ public class HomeworkMainFragment extends Fragment {
         FragmentHomeworkMainBinding binding = FragmentHomeworkMainBinding.inflate(getLayoutInflater());
         binding.list.setLayoutManager(new LinearLayoutManager(requireContext()));
         ConcatAdapter adapter = new ConcatAdapter();
-        Params params = new Params(this);
+        Config config = new Config(this);
         ContextUtil contextUtil = new ContextUtil(requireContext());
         AuthorizationJar authorizationJar = new AuthorizationJar(requireContext());
         AlertDialog detailDialog = new MaterialAlertDialogBuilder(requireContext()).create();
@@ -56,14 +56,14 @@ public class HomeworkMainFragment extends Fragment {
             public void handleMessage(@NonNull Message msg) {
                 System.out.println(msg.obj);
                 if (msg.what == -1)
-                    params.toast(R.string.no_net_connected);
+                    config.toast(R.string.no_net_connected);
                 else if (msg.getData().getBoolean("isJSON")) {
                     boolean error = false;
                     for (Object i : JSONArray.parseArray((String) msg.obj)) {
                         JSONObject item = (JSONObject) i;
                         error = item.getBoolean("error");
                         if (error) {
-                            params.toast(item.getJSONObject("exception").getString("message"));
+                            config.toast(item.getJSONObject("exception").getString("message"));
                             break;
                         } else {
                             item.getJSONObject("data").getJSONArray("events").forEach(event -> {
@@ -96,7 +96,7 @@ public class HomeworkMainFragment extends Fragment {
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         getLmsTask(authorizationJar.getToken("lms.sysu.edu.cn"));
         return binding.getRoot();
     }

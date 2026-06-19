@@ -27,7 +27,7 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentGymOrderBinding;
 import com.sysu.edu.todo.TitleAdapter;
@@ -64,14 +64,14 @@ public class GymOrderFragment extends Fragment {
                     getOrder();
             }
         });
-        Params params = new Params(this);
-        params.setCallback(this::reset);
+        Config config = new Config(this);
+        config.setCallback(this::reset);
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
                 // 处理错误
-                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                if (msg.what == -1) config.toast(R.string.no_net_connected);
                 else {
                     String response = (String) msg.obj;
                     if (msg.getData().getBoolean("isJSON")) {
@@ -92,11 +92,11 @@ public class GymOrderFragment extends Fragment {
                         }
                     } else {
                         if (!viewModel.authorizationManager.isAuthorized(response)) {
-                            params.toast(R.string.login_warning);
+                            config.toast(R.string.login_warning);
 //                            viewModel.loginRequired.setValue(true);
-                            params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                            config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                         } else if (Pattern.compile("人机识别检测").matcher(response).find()) {
-                            params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                            config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                         } else if (!viewModel.authorizationManager.isAccessible(response)) {
                             getOrder();
                         }
@@ -104,7 +104,7 @@ public class GymOrderFragment extends Fragment {
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         http.setHeader(Map.of("Accept", "application/json, text/plain, */*"));
 //        http.setCookie(viewModel.cookie);
         http.setUA(viewModel.ua);

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +15,7 @@ public abstract class RecyclerAdapter<T> extends RecyclerView.Adapter<RecyclerVi
     protected final ArrayList<T> data = new ArrayList<>();
     
     protected AdapterListener listener;
-    protected Params params;
+    protected Config config;
     
     @Override
     public int getItemCount() {
@@ -73,8 +73,8 @@ public abstract class RecyclerAdapter<T> extends RecyclerView.Adapter<RecyclerVi
         notifyItemMoved(position1, position2);
     }
     
-    public void setParams(Params params) {
-        this.params = params;
+    public void setParams(Config config) {
+        this.config = config;
     }
     
 }
@@ -84,7 +84,7 @@ abstract class Recycler2Adapter<T, V extends ViewDataBinding> extends RecyclerVi
     protected final ArrayList<T> data = new ArrayList<>();
     
     protected Adapter2Listener<V> listener;
-    protected Params params;
+    protected Config config;
     
     @Override
     public int getItemCount() {
@@ -141,8 +141,8 @@ abstract class Recycler2Adapter<T, V extends ViewDataBinding> extends RecyclerVi
         notifyItemMoved(position1, position2);
     }
     
-    public void setParams(Params params) {
-        this.params = params;
+    public void setParams(Config config) {
+        this.config = config;
     }
     
 }

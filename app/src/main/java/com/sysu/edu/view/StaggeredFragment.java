@@ -25,7 +25,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.MarkdownViewActivity;
 import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.ItemCardBinding;
 import com.sysu.edu.databinding.ItemTwoColumnRowBinding;
 import com.sysu.edu.databinding.RecyclerViewBinding;
@@ -47,7 +47,7 @@ public class StaggeredFragment extends Fragment {
     final MutableLiveData<AdapterListener> staggeredListener = new MutableLiveData<>();
     public int position;
     protected RecyclerViewScrollBinding binding;
-    protected Params params;
+    protected Config config;
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     
     public static StaggeredFragment newInstance(int position) {
@@ -58,9 +58,9 @@ public class StaggeredFragment extends Fragment {
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        params = new Params(this);
+        config = new Config(this);
         binding = RecyclerViewScrollBinding.inflate(inflater);
-        staggeredGridLayoutManager = new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL);
+        staggeredGridLayoutManager = new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL);
         binding.recyclerView.setLayoutManager(staggeredGridLayoutManager);
         orientation.observe(getViewLifecycleOwner(), o -> {
             if (o != null) staggeredGridLayoutManager.setOrientation(o);
@@ -119,7 +119,7 @@ public class StaggeredFragment extends Fragment {
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        staggeredGridLayoutManager.setSpanCount(params.getColumn());
+        staggeredGridLayoutManager.setSpanCount(config.getColumn());
     }
     
     public void clear() {

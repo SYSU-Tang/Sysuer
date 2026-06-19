@@ -24,7 +24,7 @@ public class PayActivity extends BaseActivity {
         adp = new Pager2Adapter(this);
         IntStream.range(0, 5).forEach(i -> adp.add(PayFragment.newInstance(i)));
         binding.pager.setAdapter(adp);
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(new String[]{"待交费用", "选交费用", "交费情况", "付款记录", "退费记录"}[position])).attach();
+        new TabLayoutMediator(binding.tabLayout, binding.pager, (tab, position) -> tab.setText(new String[]{"待交费用", "选交费用", "交费情况", "付款记录", "退费记录"}[position])).attach();
         binding.toolbar.setNavigationOnClickListener(v -> supportFinishAfterTransition());
     }
 }

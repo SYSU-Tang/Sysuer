@@ -1,7 +1,7 @@
 package com.sysu.edu.academic;
 
 import static com.sysu.edu.api.CommonUtil.extractValue;
-import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
+import static com.sysu.edu.api.CommonUtil.isEmpty;
 
 import android.os.Bundle;
 import android.view.Gravity;
@@ -88,23 +88,26 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
             dialogRegionBinding.county.recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_ALWAYS);
             model.getMessage().observe(requireActivity(), message -> {
                 JSONObject response = message.second;
-                if (response != null && response.getInteger("code") == 200) {
+                if (response.getInteger("code") == 200) {
                     switch (message.first) {
                         case 0 -> {
                             clear();
                             JSONObject data = response.getJSONObject("data");
+                            System.out.println(response);
                             add("基本信息", List.of("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段")
                                     , extractValue(data, new String[]{"xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj"}));
                             isStay = data.getString("sflx");
-                            leaveDate.postValue(LocalDate.parse(toStringOrDefault(data.getString("yjlxsj"))).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
-                            returnDate.postValue(LocalDate.parse(toStringOrDefault(data.getString("yjfxsj"))).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
-                            country = data.getString("wcdgj");
-                            province = data.getString("wcdsf");
-                            city = data.getString("wcdcs");
-                            String reason = data.getString("lxyy");
-                            leave = new ArrayList<>(List.of("离校", data.getString("yjlxsj"), data.getString("yjfxsj"),
-                                    data.getString("qxlx"), data.getString("jtgj"), country + " " + province + " " + city));
-                            stay = new ArrayList<>(List.of("留校", toStringOrDefault(reason)));
+                            if (data.containsKey("yjlxsj") && !data.getString("yjlxsj", "").isEmpty())
+                                leaveDate.setValue(LocalDate.parse(data.getString("yjlxsj")).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+                            if (data.containsKey("yjfxsj") && !data.getString("yjfxsj", "").isEmpty())
+                                returnDate.setValue(LocalDate.parse(data.getString("yjfxsj")).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+                            country = data.getString("wcdgj", "");
+                            province = data.getString("wcdsf", "");
+                            city = data.getString("wcdcs", "");
+                            leave = new ArrayList<>(List.of("离校", data.getString("yjlxsj", ""), data.getString("yjfxsj", ""),
+                                    data.getString("qxlx", ""), data.getString("jtgj", ""), country + " " + province + " " + city));
+                            stay = new ArrayList<>(List.of("留校", data.getString("lxyy", "")));
+                            
                             if ("0".equals(isStay))
                                 add(getString(R.string.registration), leaveKeys, leave);
                             else add(getString(R.string.registration), stayKeys, stay);
@@ -145,7 +148,10 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                             cityAdapter.setAction(pos -> city = response.getJSONArray("data").getJSONObject(pos).getString("value"));
                             cityAdapter.setResult(city);
                         }
-                        default -> params.toast(response.getString("message"));
+                        default -> {
+                            System.out.println("response " + response);
+                            config.toast(response.getString("message"));
+                        }
                     }
                 }
             });
@@ -155,7 +161,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     staggeredAdapter.getTwoColumnsAdapter(position).setListener(new AdapterListener() {
                         @Override
                         public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int pos) {
-                            
                             holder.itemView.setOnClickListener(_ -> {
                                 if (position == 1) {
                                     if (pos == 0) {
@@ -183,7 +188,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                                                     .setSelection(pos == 2 ? returnDate.getValue() != null ? returnDate.getValue() : MaterialDatePicker.todayInUtcMilliseconds() : leaveDate.getValue() != null ? leaveDate.getValue() : MaterialDatePicker.todayInUtcMilliseconds())
                                                     .build();
                                             calendar.show(getParentFragmentManager(), "calendar");
-                                            
                                             calendar.addOnPositiveButtonClickListener(aLong -> {
                                                 leave.set(pos, calendar.getHeaderText());
                                                 ((TwoColumnsAdapter) adapter).setValue(leave);
@@ -217,7 +221,6 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                             
                         }
                     });
-                    
                     holder.itemView.findViewById(R.id.button).setVisibility(position == 0 ? View.GONE : View.VISIBLE);
                 }
                 
@@ -227,11 +230,11 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
                     button.setId(R.id.button);
                     LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     lp.gravity = Gravity.END;
-                    lp.setMargins(0, 0, params.dpToPx(16), params.dpToPx(16));
+                    lp.setMargins(0, 0, config.dpToPx(16), config.dpToPx(16));
                     button.setLayoutParams(lp);
                     button.setOnClickListener(_ -> {
                         if ("0".equals(isStay))
-                            save(id, isStay, leaveDate.getValue() == null ? "" : Instant.ofEpochMilli(leaveDate.getValue()).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), returnDate.getValue() == null ? "" : Instant.ofEpochMilli(returnDate.getValue()).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), leave.get(3), leave.get(4), country, province, city);
+                            save(id, isStay, isEmpty(leaveDate.getValue()) ? "" : Instant.ofEpochMilli(leaveDate.getValue()).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), isEmpty(returnDate.getValue()) ? "" : Instant.ofEpochMilli(returnDate.getValue()).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), leave.get(3), leave.get(4), country, province, city);
                         else save(id, isStay, stay.get(1));
                     });
                     button.setText(R.string.save);
@@ -246,7 +249,7 @@ public class LeaveReturnRegistrationFragment extends StaggeredFragment {
     void save(String id, String isStay, String leaveTime, String returnTime, String leaveType, String transportation, String country, String province, String city) {
         model.addAndNext("jjrlfx/api/sm-jjrlfx/student/register",
                 String.format(
-                        "{\"cjlfxgzId\":\"%s\",\"sflx\":\"%s\",\"yjlxsj\":\"%s\",\"yjfxsj\":\"%s\",\"qxlx\":\"%s\",\"jtgj\":\"%s\",\"wcd\":{\"gj\":\"%s\",\"sf\":\"%s\",\"cs\":\"%s\"},\"wcdgj\":\"%s\",\"wcdsf\":\"%s\",\"wcdcs\":\"%s\"}\n",
+                        "{\"cjlfxgzId\":\"%s\",\"sflx\":\"%s\",\"yjlxsj\":\"%s\",\"yjfxsj\":\"%s\",\"qxlx\":\"%s\",\"jtgj\":\"%s\",\"wcd\":{\"gj\":\"%s\",\"sf\":\"%s\",\"cs\":\"%s\"},\"wcdgj\":\"%s\",\"wcdsf\":\"%s\",\"wcdcs\":\"%s\"}",
                         id, isStay, leaveTime, returnTime, leaveType, transportation, country, province, city, country, province, city
                 ), 6);
     }

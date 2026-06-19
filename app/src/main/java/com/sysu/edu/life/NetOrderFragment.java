@@ -60,7 +60,7 @@ public class NetOrderFragment extends StaggeredFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
         View view = super.onCreateView(inflater, container, savedInstanceState);
-        params.setCallback(this::getInfo);
+        config.setCallback(this::getInfo);
         DialogNetPayBinding dialogNetBinding = DialogNetPayBinding.inflate(inflater);
         dialogNetBinding.service.key.setText(R.string.service);
         dialogNetBinding.oldOutDate.key.setText(R.string.old_out_date);
@@ -94,9 +94,9 @@ public class NetOrderFragment extends StaggeredFragment {
                 super.handleMessage(msg);
                 String response = (String) msg.obj;
                 switch (msg.what) {
-                    case -1 -> params.toast(R.string.no_net_connected);
+                    case -1 -> config.toast(R.string.no_net_connected);
                     case 5 -> {
-                        params.copy("recharge", (String) msg.obj);
+                        config.copy("recharge", (String) msg.obj);
                         Intent intent = Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, (String) msg.obj).putExtra(Intent.EXTRA_SUBJECT, getString(R.string.recharge)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), getString(R.string.share));
                         if (intent.resolveActivity(requireContext().getPackageManager()) != null)
                             startActivity(intent);
@@ -106,7 +106,7 @@ public class NetOrderFragment extends StaggeredFragment {
                         try {
                             JSONObject json = JSONObject.parse(response);
                             if (!json.getBoolean("success")) {
-                                params.gotoLogin(TargetUrl.NETPAY);
+                                config.gotoLogin(TargetUrl.NETPAY);
                             }
                         } catch (JSONException _) {
                             Matcher matcher = Pattern.compile("<tr .*?>(.+?)</tr>", Pattern.DOTALL).matcher(response);
@@ -223,14 +223,14 @@ public class NetOrderFragment extends StaggeredFragment {
                             System.out.println(response);
                             JSONObject json = JSONObject.parse(response);
                             if (json.getBoolean("success")) {
-                                params.toast(R.string.order_success);
+                                config.toast(R.string.order_success);
                                 clear();
                                 getInfo();
                             } else {
-                                params.toast(R.string.order_fail);
+                                config.toast(R.string.order_fail);
                             }
                         } catch (JSONException _) {
-                            params.toast(R.string.order_success);
+                            config.toast(R.string.order_success);
                             JSONObject data = new JSONObject();
                             Matcher matcher = Pattern.compile("<input.*?name='(.*?)' value='(.*?)'/>", Pattern.DOTALL).matcher(response);
                             while (matcher.find()) data.put(matcher.group(1), matcher.group(2));
@@ -243,7 +243,7 @@ public class NetOrderFragment extends StaggeredFragment {
             }
         });
         http.setHeader(Map.of("accept-language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"));
-        http.setParams(params);
+        http.setParams(config);
         getInfo();
         return view;
     }
@@ -252,7 +252,7 @@ public class NetOrderFragment extends StaggeredFragment {
         MaterialButton button = ItemButtonOutlineBinding.inflate(inflater, parent, false).getRoot();
         button.setText(fun);
         MaterialButtonGroup.LayoutParams lp = new MaterialButtonGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMargins(0, 0, params.dpToPx(16), params.dpToPx(16));
+        lp.setMargins(0, 0, config.dpToPx(16), config.dpToPx(16));
         
         button.setLayoutParams(lp);
         button.setOnClickListener(onClick);

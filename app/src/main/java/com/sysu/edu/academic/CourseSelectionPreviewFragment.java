@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.FragmentCourseSelectionPreviewBinding;
 import com.sysu.edu.databinding.ItemEvaluationBinding;
 import com.sysu.edu.model.JwxtModel;
@@ -59,9 +59,9 @@ public class CourseSelectionPreviewFragment extends Fragment {
         if (binding == null) {
             model = new JwxtModel(requireContext());
             binding = FragmentCourseSelectionPreviewBinding.inflate(inflater, container, false);
-            Params params = new Params(this);
+            Config config = new Config(this);
             vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
-            binding.list.recyclerView.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
+            binding.list.recyclerView.setLayoutManager(new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL));
             previewAdapter = new CourseSelectionPreviewAdapter();
             binding.list.recyclerView.setAdapter(previewAdapter);
             binding.list.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

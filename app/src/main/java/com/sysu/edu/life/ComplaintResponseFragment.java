@@ -20,7 +20,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.FragmentComplaintResponseBinding;
 
 public class ComplaintResponseFragment extends Fragment {
@@ -32,7 +32,7 @@ public class ComplaintResponseFragment extends Fragment {
         FragmentComplaintResponseBinding binding = FragmentComplaintResponseBinding.inflate(inflater, container, false);
         ComplaintSquareFragment.SquareAdapter adapter = new ComplaintSquareFragment.SquareAdapter();
         binding.recyclerView.setAdapter(adapter);
-        Params params = new Params(this);
+        Config config = new Config(this);
         binding.phone.setEndIconOnClickListener(_ -> {
             String phone = null;
             if (binding.phone.getEditText() != null)
@@ -63,13 +63,13 @@ public class ComplaintResponseFragment extends Fragment {
                 }
             });
         }
-        binding.recyclerView.setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
+        binding.recyclerView.setLayoutManager(new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL));
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 
                 if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
+                    config.toast(R.string.no_net_connected);
                 } else if (msg.getData().getBoolean("isJSON")) {
                     switch (msg.what) {
                         case 0 -> {
@@ -78,22 +78,22 @@ public class ComplaintResponseFragment extends Fragment {
                             if (response.getBoolean("ok"))
                                 code = response.getString("data").substring(0, 4);
                             else
-                                params.toast(response.getString("msg"));
+                                config.toast(response.getString("msg"));
                         }
                         case 1 -> {
                             JSONObject response = JSONObject.parse(msg.obj.toString());
                             if (response.getBoolean("ok"))
                                 response.getJSONArray("data").forEach(v -> adapter.add((JSONObject) v));
                             else
-                                params.toast(response.getString("msg"));
+                                config.toast(response.getString("msg"));
                         }
                     }
                 } else {
-                    params.toast(R.string.educational_wifi_warning);
+                    config.toast(R.string.educational_wifi_warning);
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         return binding.getRoot();
     }
 

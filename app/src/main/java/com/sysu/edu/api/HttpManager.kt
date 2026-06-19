@@ -36,7 +36,7 @@ class HttpManager(val handler: Handler) {
 	@JvmField var referrer: String? = null // Referer 头字段值
 	@JvmField var cookie: String? = null // Cookie 头字段值
 	@JvmField var authorization: String? = null // Authorization 头字段值
-	@JvmField var params: Params? = null // 请求参数对象
+	@JvmField var config: Config? = null // 请求参数对象
 	@JvmField var ua: String? = null // User-Agent 头字段值
 	@JvmField var target: String? = null // 目标 URL
 	@JvmField var isAuthorizationRequired: Boolean = false // 是否需要 Authorization 头字段
@@ -68,11 +68,11 @@ class HttpManager(val handler: Handler) {
 	/**
 	 * 设置请求参数
 	 *
-	 * @param params 请求参数对象
+	 * @param config 请求参数对象
 	 */
-	fun setParams(params: Params?) {
-		this.params = params
-		cookieManager = params?.let { CookieManager(it.context) }
+	fun setParams(config: Config?) {
+		this.config = config
+		cookieManager = config?.let { CookieManager(it.context) }
 	}
 
 	/**

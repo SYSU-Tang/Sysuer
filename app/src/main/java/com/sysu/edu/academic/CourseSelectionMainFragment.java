@@ -39,7 +39,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.sysu.edu.R;
 import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.FragmentCourseSelectionBinding;
 import com.sysu.edu.databinding.ItemActionChipBinding;
 import com.sysu.edu.databinding.ItemCourseSelectionBinding;
@@ -64,7 +64,7 @@ public class CourseSelectionMainFragment extends Fragment {
     String term;
     CourseSelectionViewModel vm;
     GridLayoutManager gm;
-    Params params;
+    Config config;
     JwxtModel model;
     
     @Override
@@ -79,7 +79,7 @@ public class CourseSelectionMainFragment extends Fragment {
             binding = FragmentCourseSelectionBinding.inflate(inflater, container, false);
             model = new JwxtModel(requireContext());
             vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
-            params = new Params(this);
+            config = new Config(this);
             vm.filterValue.observe(requireActivity(), _ -> {
                 filter.setValue(vm.getReturnData());
                 binding.head.seniorFilter.removeAllViews();
@@ -112,8 +112,8 @@ public class CourseSelectionMainFragment extends Fragment {
             typeCate.addSource(category, s -> typeCate.setValue(new CommonUtil.Tuple2<>(CommonUtil.toIntegerOrDefault(category.getValue(), 11), s)));
             typeCate.observe(requireActivity(), _ -> regetCourseList());
             binding.head.category.setOnCheckedStateChangeListener((_, _) -> selectCategory());
-            binding.course.setLayoutManager(gm = new GridLayoutManager(requireContext(), params.getColumn()));
-            binding.course.addItemDecoration(new SpacesItemDecoration(params.dpToPx(8)));
+            binding.course.setLayoutManager(gm = new GridLayoutManager(requireContext(), config.getColumn()));
+            binding.course.addItemDecoration(new SpacesItemDecoration(config.dpToPx(8)));
             binding.course.setAdapter(adp = new CourseAdapter());
             binding.head.filter.setOnCheckedStateChangeListener((_, _) -> regetCourseList());
             adp.setSelectAction(position -> {
@@ -127,7 +127,7 @@ public class CourseSelectionMainFragment extends Fragment {
                 public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
                     if (!v.canScrollVertically(1) && total / 10 + 1 > page && dy > 0)
                         getCourseList();
-                    binding.head.getRoot().setElevation(v.canScrollVertically(-1) ? params.dpToPx(2) : 0);
+                    binding.head.getRoot().setElevation(v.canScrollVertically(-1) ? config.dpToPx(2) : 0);
                 }
             });
             model.getMessage().observe(requireActivity(), message -> {
@@ -147,7 +147,7 @@ public class CourseSelectionMainFragment extends Fragment {
                             }
                         }
                         case 3 -> {
-                            params.toast(response.getString("data"));
+                            config.toast(response.getString("data"));
                             regetCourseList();
                         }
                     }
@@ -200,7 +200,7 @@ public class CourseSelectionMainFragment extends Fragment {
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        gm.setSpanCount(params.getColumn());
+        gm.setSpanCount(config.getColumn());
     }
     
     void clear() {

@@ -20,7 +20,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.google.android.material.button.MaterialButton;
 import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.ActivityGradeForLevelBinding;
 import com.sysu.edu.databinding.PreferenceEditBinding;
 import com.sysu.edu.model.JwxtModel;
@@ -60,8 +60,8 @@ public class GradeForLevelActivity extends BaseActivity {
         ActivityGradeForLevelBinding binding = ActivityGradeForLevelBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         model = new JwxtModel(this);
-        Params params = new Params(this);
-        params.setCallback(() -> {
+        Config config = new Config(this);
+        config.setCallback(() -> {
             getData(0);
             regetGrade();
         });

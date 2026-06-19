@@ -1,33 +1,26 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import android.os.Bundle;
-import android.view.WindowManager;
+import android.os.Bundle
+import android.view.WindowManager
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.databinding.ActivityCourseQueryBinding
 
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityCourseQueryBinding;
-
-import java.util.Objects;
-
-public class CourseQueryActivity extends BaseActivity {
-    
-    ActivityCourseQueryBinding binding;
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityCourseQueryBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
-        NavHostFragment nav = (NavHostFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentById(R.id.fragment));
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-        NavigationUI.setupWithNavController(binding.toolbar, nav.getNavController(), new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
-            supportFinishAfterTransition();
-            return false;
-        }).build());
-    }
+class CourseQueryActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityCourseQueryBinding.inflate(layoutInflater)
+		setContentView(binding.getRoot())
+		binding.toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+		window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+		setupWithNavController(binding.toolbar, (this.supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment).navController, AppBarConfiguration.Builder()
+			.setFallbackOnNavigateUpListener {
+				supportFinishAfterTransition()
+				false
+			}
+			.build())
+	}
 }

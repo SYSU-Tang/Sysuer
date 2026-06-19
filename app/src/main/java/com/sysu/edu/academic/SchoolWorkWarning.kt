@@ -1,79 +1,61 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import static com.sysu.edu.api.CommonUtil.extractValue;
-import static com.sysu.edu.api.CommonUtil.isEmpty;
+import android.os.Bundle
+import androidx.lifecycle.Observer
+import com.alibaba.fastjson2.JSONObject
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.CommonUtil.extractValue
+import com.sysu.edu.databinding.ActivityListBinding
+import com.sysu.edu.model.JwxtModel
+import com.sysu.edu.view.StaggeredFragment
+import java.util.Locale
 
-import android.os.Bundle;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityListBinding;
-import com.sysu.edu.model.JwxtModel;
-import com.sysu.edu.view.StaggeredFragment;
-
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
-
-public class SchoolWorkWarning extends BaseActivity {
-    
-    String alarmOperationTerm;
-    String alarmTerm;
-    int page = 0;
-    int total = -1;
-    StaggeredFragment fragment;
-    JwxtModel model;
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        model.dispose();
-    }
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityListBinding binding = ActivityListBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        model = new JwxtModel(this);
-        fragment = binding.list.getFragment();
-        fragment.setScrollBottom(() -> {
-            if (total > page * 10)
-                getWarning();
-        });
-        fragment.setViewTableMenu(binding.toolbar);
-        binding.toolbar.setTitle(R.string.school_work_warning);
-        binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
-        model.getMessage().observe(this, message -> {
-            JSONObject response = message.second;
-            if (response != null && response.getInteger("code").equals(200)) {
-                JSONObject data = response.getJSONObject("data");
-                if (data != null) {
-                    if (total == -1)
-                        total = data.getInteger("total");
-                    AtomicInteger order = new AtomicInteger(0);
-                    data.getJSONArray("rows").forEach(a -> fragment.add(String.valueOf(order.incrementAndGet()), R.drawable.warning, List.of(new String[]{"预警结果", "预警操作学期", "预警学期", "生成预警档案时间", "档案ID", "警告程度"}),
-                            extractValue((JSONObject) a, new String[]{"alarmResultName", "alarmOperationTerm", "alarmTerm", "createTime", "archivceID", "alarmResult"})));
-                }
-            }
-        });
-        getWarning();
-    }
-
-//    void dispose() {
-//        page = 0;
-//        total = -1;
-//        fragment.dispose();
-//    }
-    
-    void getWarning() {
-        model.addAndNext("jwxt/alarm/alarm-archives/student/archives",
-                String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"publicationStatus\":\"1\"%s%s}}", ++page, getTerm(alarmTerm), getTerm(alarmOperationTerm)),
-                0);
-    }
-    
-    String getTerm(String s) {
-        return isEmpty(s) ? "" : String.format(",\"alarmOperationTerm\":\"%s\"", s);
-    }
+class SchoolWorkWarning : BaseActivity() {
+	var alarmOperationTerm: String? = null
+	var alarmTerm: String? = null
+	var page: Int = 0
+	var total: Int = -1
+	lateinit var model: JwxtModel
+	override fun onDestroy() {
+		super.onDestroy()
+		model.dispose()
+	}
+	
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		model = JwxtModel(this)
+		val binding = ActivityListBinding.inflate(layoutInflater).apply {
+			toolbar.setTitle(R.string.school_work_warning)
+			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+		}
+		setContentView(binding.root)
+		val fragment = binding.list.getFragment<StaggeredFragment>().apply {
+			setScrollBottom {
+				if (total > page * 10) warning
+			}
+			setViewTableMenu(binding.toolbar)
+		}
+		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			if (response.getInteger("code") == 200) response.getJSONObject("data")?.let {
+				if (total == -1) total = it.getInteger("total")
+				var order = 0
+				it.getJSONArray("rows").forEach { a: Any? ->
+					fragment.add("${++order}", R.drawable.warning, mutableListOf("预警结果", "预警操作学期", "预警学期", "生成预警档案时间", "档案ID", "警告程度"), extractValue(a as JSONObject, arrayOf("alarmResultName", "alarmOperationTerm", "alarmTerm", "createTime", "archivceID", "alarmResult")))
+				}
+			}
+		})
+		warning
+	}
+	
+	val warning: Unit
+		get() {
+			model.addAndNext("jwxt/alarm/alarm-archives/student/archives", String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"publicationStatus\":\"1\"%s%s}}", ++page, getTerm(alarmTerm), getTerm(alarmOperationTerm)), 0)
+		}
+	
+	fun getTerm(s: String?): String {
+		return if (s.isNullOrEmpty()) "" else ",\"alarmOperationTerm\":\"$s\""
+	}
 }

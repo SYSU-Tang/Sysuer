@@ -1,72 +1,63 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import static com.sysu.edu.api.CommonUtil.extractValue;
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import com.alibaba.fastjson2.JSONObject
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.CommonUtil.extractValue
+import com.sysu.edu.databinding.FragmentCourseQueryResultBinding
+import com.sysu.edu.model.JwxtModel
+import com.sysu.edu.view.StaggeredFragment
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.FragmentCourseQueryResultBinding;
-import com.sysu.edu.model.JwxtModel;
-import com.sysu.edu.view.StaggeredFragment;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class CourseQueryResultFragment extends StaggeredFragment {
-    
-    int page = 1;
-    int total = -1;
-    JwxtModel model;
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        model.dispose();
-    }
-    
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        FragmentCourseQueryResultBinding courseQueryResultBinding = FragmentCourseQueryResultBinding.inflate(inflater, container, false);
-        courseQueryResultBinding.getRoot().addView(super.onCreateView(inflater, courseQueryResultBinding.getRoot(), savedInstanceState), -1, -1);
-        model = new JwxtModel(requireContext());
-        courseQueryResultBinding.fab.setOnClickListener(_ -> export(courseQueryResultBinding.fab, getString(R.string.course)));
-        setScrollBottom(() -> {
-            if ((page - 1) * 10 < total)
-                getCourses();
-        });
-        model.getMessage().observe(requireActivity(), message -> {
-            JSONObject response = message.second;
-            Integer code = response.getInteger("code");
-            if (code == 200) {
-                if (total == -1)
-                    total = response.getJSONObject("data").getInteger("total");
-                response.getJSONObject("data").getJSONArray("rows").forEach(e -> {
-                    JSONObject row = (JSONObject) e;
-                    ArrayList<String> values = extractValue(row, new String[]{"yearTerm", "courseName", "courseNum", "openingUnitName", "courseCategoryName", "score", "teachingName", "limitNumber", "selectedNumber", "examMode", "teachingTimePlaceStr", "openingSchoolName", "readObj", "classNumber"});
-                    if (values.get(10) != null)
-                        values.set(10, values.get(10).replace(",", "\n").replace("/", " | "));
-                    add(values.get(1), List.of("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values);
-                });
-            }
-        });
-        getCourses();
-        return courseQueryResultBinding.getRoot();
-    }
-    
-    void getCourses() {
-        model.addAndNext("jwxt/schedule/agg/schoolOpeningCoursesSchedule/querySchoolOpeningCourses", String.format("{\"pageNo\":%s,\"pageSize\":10,\"total\":true,\"param\":%s}", page++, requireArguments().getString("params")), 0);
-    }
-    
-    public void reset() {
-        clear();
-        page = 1;
-        total = -1;
-    }
+class CourseQueryResultFragment : StaggeredFragment() {
+	var page: Int = 1
+	var total: Int = -1
+	lateinit var model: JwxtModel
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+	
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): View {
+		model = JwxtModel(requireContext())
+		val courseQueryResultBinding = FragmentCourseQueryResultBinding.inflate(inflater, container, false)
+			.apply {
+				root.addView(super.onCreateView(inflater, container, savedInstanceState), -1, -1)
+				fab.setOnClickListener { export(fab, getString(R.string.course)) }
+			}
+		setScrollBottom {
+			if ((page - 1) * 10 < total) courses
+		}
+		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			if (response.getInteger("code") == 200) {
+				if (total == -1) total = response.getJSONObject("data").getInteger("total")
+				response.getJSONObject("data").getJSONArray("rows").forEach { e: Any? ->
+					val values: ArrayList<String?> = extractValue(e as JSONObject, arrayOf("yearTerm", "courseName", "courseNum", "openingUnitName", "courseCategoryName", "score", "teachingName", "limitNumber", "selectedNumber", "examMode", "teachingTimePlaceStr", "openingSchoolName", "readObj", "classNumber"))
+					if (values[10] != null) values[10] = values[10]!!.replace(",", "\n")
+						.replace("/", " | ")
+					add(e.getString("courseName"), mutableListOf<String?>("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values)
+				}
+			}
+		})
+		courses
+		return courseQueryResultBinding.getRoot()
+	}
+	
+	val courses: Unit
+		get() {
+			model.addAndNext("jwxt/schedule/agg/schoolOpeningCoursesSchedule/querySchoolOpeningCourses", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
+		}
+	
+	fun reset() {
+		clear()
+		page = 1
+		total = -1
+	}
 }

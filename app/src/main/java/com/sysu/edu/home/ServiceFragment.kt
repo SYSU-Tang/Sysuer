@@ -37,7 +37,7 @@ import com.sysu.edu.MainActivity
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.ContextUtil
-import com.sysu.edu.api.Params
+import com.sysu.edu.api.Config
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.databinding.DialogServiceActionBinding
 import com.sysu.edu.databinding.DialogServiceOrderBinding
@@ -78,7 +78,7 @@ class ServiceFragment : Fragment() {
 	val list: MutableList<JSONObject?> = mutableListOf()
 	private val disposables = CompositeDisposable()
 	var binding: FragmentServiceBinding? = null
-	var params: Params? = null
+	var config: Config? = null
 	var actionDialog: BottomSheetDialog? = null
 	var db: HomeCollectionHelper? = null
 	var actionBinding: DialogServiceActionBinding? = null
@@ -89,7 +89,7 @@ class ServiceFragment : Fragment() {
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		if (binding == null) {
 			binding = FragmentServiceBinding.inflate(inflater)
-			params = Params(this)
+			config = Config(this)
 			requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 			viewModel =
 				ViewModelProvider(requireActivity())[HomeViewModel::class.java]
@@ -199,7 +199,7 @@ class ServiceFragment : Fragment() {
 											   ?: View.OnClickListener {
 												   getItemIntent(item, null)?.let { it1 ->
 													   startActivity(it1, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), it, "miniapp").toBundle())
-												   } ?: params!!.toast(R.string.activity_not_found)
+												   } ?: config!!.toast(R.string.activity_not_found)
 											   })
 						setOnLongClickListener { _: View? -> showActionDialog(item) }
 						text = item.getString("name")
@@ -228,16 +228,16 @@ class ServiceFragment : Fragment() {
 					}?.build()?.let {
 						ShortcutManagerCompat.requestPinShortcut(requireContext(), it, PendingIntent.getBroadcast(requireContext(),  /* request code */0, ShortcutManagerCompat.createShortcutResultIntent(requireContext(), it),  /* flags */PendingIntent.FLAG_IMMUTABLE).intentSender)
 					}
-				} else params!!.toast(R.string.fail_to_add_shortcut)
+				} else config!!.toast(R.string.fail_to_add_shortcut)
 			}
 			collect.setOnClickListener { _: View? ->
 				val isServiceCollect = Boolean.TRUE == isServiceCollected.value
 				if (isServiceCollect) {
 					db!!.deleteService(itemId)
-					params!!.toast(R.string.cancel_collect_success)
+					config!!.toast(R.string.cancel_collect_success)
 				} else {
 					db!!.addService(itemId, item.toJSONString(), collectionAdapter!!.itemCount)
-					params!!.toast(R.string.collect_success)
+					config!!.toast(R.string.collect_success)
 				}
 				updateServiceCollection()
 				collect.setText(if (isServiceCollect) R.string.collect else R.string.cancel_collect)
@@ -247,10 +247,10 @@ class ServiceFragment : Fragment() {
 				val isShortcutCollect = true == isShortcutCollected.value
 				if (isShortcutCollect) {
 					db!!.deleteDashboardShortcut(itemId)
-					params!!.toast(R.string.cancel_add_shortcut_success)
+					config!!.toast(R.string.cancel_add_shortcut_success)
 				} else {
 					db!!.addDashboardShortcut(itemId, item.toJSONString(), null)
-					params!!.toast(R.string.add_shortcut_success)
+					config!!.toast(R.string.add_shortcut_success)
 				}
 				viewModel!!.updateDashboardShortcut.value = true
 				addToDashboard.setText(if (isShortcutCollect) R.string.add_to_dashboard else R.string.cancel_add_shortcut)
@@ -263,7 +263,7 @@ class ServiceFragment : Fragment() {
 			}
 			guide.setOnClickListener { _: View? ->
 				if (item.containsKey("doc")) startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.getString("doc"))}").toUri()))
-				else params!!.toast(R.string.undeveloped_warning)
+				else config!!.toast(R.string.undeveloped_warning)
 			}
 			val contextUtil = ContextUtil(requireContext())
 			Markwon.builder(requireContext()).usePlugin(object : AbstractMarkwonPlugin() {
@@ -331,7 +331,7 @@ class ServiceFragment : Fragment() {
 															   getItemIntent(item, null)?.let {
 																   startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp").toBundle())
 															   }
-																   ?: params!!.toast(R.string.activity_not_found)
+																   ?: config!!.toast(R.string.activity_not_found)
 														   })
 				}
 				

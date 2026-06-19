@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.ItemComplaintSquareBinding;
 import com.sysu.edu.databinding.RecyclerViewScrollBinding;
 import com.sysu.edu.view.RecyclerAdapter;
@@ -37,27 +37,27 @@ public class ComplaintSquareFragment extends Fragment {
         RecyclerViewScrollBinding binding = RecyclerViewScrollBinding.inflate(getLayoutInflater());
         SquareAdapter adapter = new SquareAdapter();
         binding.getRoot().setAdapter(adapter);
-        Params params = new Params(this);
-        binding.getRoot().setLayoutManager(new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL));
+        Config config = new Config(this);
+        binding.getRoot().setLayoutManager(new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL));
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 if (msg.what == -1) {
-                    params.toast(R.string.no_net_connected);
+                    config.toast(R.string.no_net_connected);
                 } else if (msg.getData().getBoolean("isJSON")) {
                     if (msg.what == 0) {
                         JSONObject response = JSONObject.parse(msg.obj.toString());
                         if (response.getBoolean("ok"))
                             response.getJSONArray("data").forEach(v -> adapter.add((JSONObject) v));
                         else
-                            params.toast(response.getString("msg"));
+                            config.toast(response.getString("msg"));
                     }
                 } else {
-                    params.toast(R.string.educational_wifi_warning);
+                    config.toast(R.string.educational_wifi_warning);
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         getSquare();
         return binding.getRoot();
     }

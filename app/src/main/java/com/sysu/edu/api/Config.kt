@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.sysu.edu.browser.BrowserActivity
 
-class Params {
+class Config {
 	var activity: FragmentActivity? = null // 关联的 FragmentActivity 对象
 	var fragment: Fragment? = null // 关联的 Fragment 对象
 	var afterLogin: Runnable? = null // 登录成功后的回调 Runnable 对象

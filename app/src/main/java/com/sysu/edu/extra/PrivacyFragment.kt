@@ -11,7 +11,7 @@ import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.R
 import com.sysu.edu.api.AuthorizationJar
 import com.sysu.edu.api.HttpManager
-import com.sysu.edu.api.Params
+import com.sysu.edu.api.Config
 import com.sysu.edu.api.TargetUrl
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -21,18 +21,18 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 	override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 		if (savedInstanceState == null) {
 			setPreferencesFromResource(R.xml.privacy, rootKey)
-			val params = Params(this)
-			disposable.add(params.contextUtil.accountManager.getActiveAccountAsync("sysu.edu.cn").subscribe { activeAccount: Pair<String?, String?>? ->
+			val config = Config(this)
+			disposable.add(config.contextUtil.accountManager.getActiveAccountAsync("sysu.edu.cn").subscribe { activeAccount: Pair<String?, String?>? ->
 				(findPreference("netId") as Preference?)?.setSummary(activeAccount!!.first)
 				(findPreference("password") as Preference?)?.setOnPreferenceClickListener { _: Preference? ->
-					params.toast(activeAccount?.second)
+					config.toast(activeAccount?.second)
 					false
 				}
 			})
-			params.setCallback { this.info }
+			config.setCallback { this.info }
 			http = HttpManager(object : Handler(Looper.getMainLooper()) {
 				override fun handleMessage(msg: Message) {
-					if (msg.what == -1) params.toast(R.string.no_net_connected)
+					if (msg.what == -1) config.toast(R.string.no_net_connected)
 					else {
 						val response = JSONObject.parseObject(msg.obj as String?)
 						if (response != null && response.getInteger("code") == 200) {
@@ -46,8 +46,8 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 											summary = data.getString(arrayOf("userName", "userCode", "idTypeStr", "idNum", "tele", "email")[i])
 											setIcon(intArrayOf(R.drawable.name, R.drawable.id, R.drawable.card, R.drawable.account, R.drawable.phone, R.drawable.email)[i])
 											setOnPreferenceClickListener { preference: Preference? ->
-												params.copy(preference!!.title as String?, preference.getSummary() as String?)
-												params.toast(R.string.copy_successfully)
+												config.copy(preference!!.title as String?, preference.getSummary() as String?)
+												config.toast(R.string.copy_successfully)
 												false
 											}
 										}
@@ -55,12 +55,12 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 									}
 								}
 							}
-						} else if (response != null && response.getInteger("code") == 1003) params.gotoLogin(TargetUrl.PAY)
-						else if (response != null) params.toast(response.getString("message"))
+						} else if (response != null && response.getInteger("code") == 1003) config.gotoLogin(TargetUrl.PAY)
+						else if (response != null) config.toast(response.getString("message"))
 					}
 				}
 			}).apply {
-				setParams(params)
+				setParams(config)
 				setAuthorizationJar(AuthorizationJar(requireContext()))
 				setTokenRequired(true)
 				setReferrer("https://pay.sysu.edu.cn/")

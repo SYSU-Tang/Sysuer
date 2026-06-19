@@ -28,7 +28,7 @@ import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.ContextUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.RequestQueue;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.DialogRechargeBinding;
@@ -59,7 +59,7 @@ public class EnergyAccountFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         if (binding == null) {
-            Params params = new Params(this);
+            Config config = new Config(this);
             ConcatAdapter adapter = new ConcatAdapter();
             ContextUtil contextUtil = new ContextUtil(requireContext());
             BottomSheetDialog rechargeDialog = new BottomSheetDialog(requireContext());
@@ -75,9 +75,9 @@ public class EnergyAccountFragment extends Fragment {
             http = new HttpManager(new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == -1) params.toast(R.string.no_net_connected);
+                    if (msg.what == -1) config.toast(R.string.no_net_connected);
                     else if (msg.what == 4) {
-                        params.copy("recharge", (String) msg.obj);
+                        config.copy("recharge", (String) msg.obj);
                         Intent intent = Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, (String) msg.obj).putExtra(Intent.EXTRA_SUBJECT, getString(R.string.recharge)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), getString(R.string.share));
                         if (intent.resolveActivity(requireContext().getPackageManager()) != null)
                             startActivity(intent);
@@ -123,7 +123,7 @@ public class EnergyAccountFragment extends Fragment {
                 }
             });
             http.setAuthorizationRequired(true);
-            http.setParams(params);
+            http.setParams(config);
             http.setAuthorizationJar(new AuthorizationJar(requireContext()));
             binding = FragmentEnergyOrderBinding.inflate(inflater, container, false);
             binding.recyclerViewScroll.getRoot().setLayoutManager(new LinearLayoutManager(requireContext()));

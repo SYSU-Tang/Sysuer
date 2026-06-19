@@ -24,7 +24,7 @@ import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.ContextUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.RequestQueue;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentEnergyDashboardBinding;
@@ -49,7 +49,7 @@ public class EnergyDashboardFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
-            Params params = new Params(this);
+            Config config = new Config(this);
             ContextUtil contextUtil = new ContextUtil(requireContext());
             binding = FragmentEnergyDashboardBinding.inflate(inflater, container, false);
             binding.list.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -58,7 +58,7 @@ public class EnergyDashboardFragment extends Fragment {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     if (msg.what == -1)
-                        params.toast(R.string.no_net_connected);
+                        config.toast(R.string.no_net_connected);
                     else if (msg.getData().getBoolean("isJSON")) {
                         JSONObject response = JSONObject.parse((String) msg.obj);
                         if (response.getInteger("code") == 200) {
@@ -110,7 +110,7 @@ public class EnergyDashboardFragment extends Fragment {
                 }
             });
             http.setAuthorizationRequired(true);
-            http.setParams(params);
+            http.setParams(config);
             http.setAuthorizationJar(new AuthorizationJar(requireContext()));
             requestQueue.add(this::getUserInfo);
             requestQueue.add(this::getWaterInfo);

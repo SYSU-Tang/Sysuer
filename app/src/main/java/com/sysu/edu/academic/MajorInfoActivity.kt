@@ -1,66 +1,63 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import android.os.Bundle;
-import android.view.MenuItem;
+import android.os.Bundle
+import android.view.MenuItem
+import androidx.lifecycle.Observer
+import com.alibaba.fastjson2.JSONObject
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.databinding.ActivityPagerBinding
+import com.sysu.edu.model.JwxtModel
+import com.sysu.edu.view.Pager2Adapter
+import com.sysu.edu.view.StaggeredFragment
 
-import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.tabs.TabLayoutMediator;
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityPagerBinding;
-import com.sysu.edu.model.JwxtModel;
-import com.sysu.edu.view.Pager2Adapter;
-import com.sysu.edu.view.StaggeredFragment;
-
-import java.util.ArrayList;
-import java.util.Objects;
-
-public class MajorInfoActivity extends BaseActivity {
-    JwxtModel model;
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        model.dispose();
-    }
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityPagerBinding binding = ActivityPagerBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        model = new JwxtModel(this);
-        ArrayList<String> categories = new ArrayList<>();
-        binding.toolbar.setTitle(R.string.major_info);
-        binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
-        Pager2Adapter pager2Adapter = new Pager2Adapter(this);
-        binding.pager.setAdapter(pager2Adapter);
-        binding.toolbar.getMenu().add(R.string.export).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setIcon(R.drawable.export).setOnMenuItemClickListener(_ -> {
-            int currentItem = binding.pager.getCurrentItem();
-            ((StaggeredFragment) pager2Adapter.get(currentItem)).export(binding.toolbar, Objects.requireNonNull(Objects.requireNonNull(binding.tabs.getTabAt(currentItem)).getText()).toString());
-            return true;
-        });
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(categories.get(position))).attach();
-        model.getMessage().observe(this, message -> {
-            JSONObject response = message.second;
-            if (response != null && response.getInteger("code").equals(200)) {
-                if (response.get("data") != null) {
-                    if (message.first == 0) {
-                        categories.clear();
-                        response.getJSONArray("data").forEach(a -> {
-                            categories.add(((JSONObject) a).getString("dataName"));
-                            Bundle args = new Bundle();
-                            args.putString("code", ((JSONObject) a).getString("dataNumber"));
-                            pager2Adapter.add(MajorInfoFragment.newInstance(args));
-                        });
-                    }
-                }
-            }
-        });
-        getCategory();
-    }
-    
-    void getCategory() {
-        model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=135", 0);
-    }
+class MajorInfoActivity : BaseActivity() {
+	lateinit var model: JwxtModel
+	override fun onDestroy() {
+		super.onDestroy()
+		model.dispose()
+	}
+	
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		model = JwxtModel(this)
+		val pager2Adapter = Pager2Adapter(this)
+		val categories = mutableListOf<String?>()
+		val binding = ActivityPagerBinding.inflate(layoutInflater).apply {
+			toolbar.setTitle(R.string.major_info)
+			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+			pager.adapter = pager2Adapter
+			toolbar.menu.add(R.string.export)
+				.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+				.setIcon(R.drawable.export)
+				.setOnMenuItemClickListener {
+					val currentItem = pager.currentItem
+					(pager2Adapter.get(currentItem) as StaggeredFragment).export(toolbar, tabLayout.getTabAt(currentItem)?.text.toString())
+					true
+				}
+			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab!!.text = categories[position] }.attach()
+		}
+		setContentView(binding.getRoot())
+		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			if (response.getInteger("code") == 200 && response.get("data") != null) if (message.first == 0) {
+				categories.clear()
+				response.getJSONArray("data").forEach { a: Any? ->
+					categories.add((a as JSONObject).getString("dataName"))
+					pager2Adapter.add(MajorInfoFragment.newInstance(Bundle().apply {
+						putString("code", a.getString("dataNumber"))
+					}))
+				}
+			}
+		})
+		category
+	}
+	
+	val category: Unit
+		get() {
+			model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=135", 0)
+		}
 }

@@ -27,7 +27,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.CalendarManager;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentPayNeedBinding;
 import com.sysu.edu.databinding.FragmentPayRecordBinding;
@@ -55,14 +55,14 @@ public class PayFragment extends StaggeredFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
-        Params params = new Params(this);
+        Config config = new Config(this);
         calendarManager = new CalendarManager();
-        params.setCallback(this::getPage);
+        config.setCallback(this::getPage);
         switch (position) {
             case 0:
                 FragmentPayNeedBinding b0 = FragmentPayNeedBinding.inflate(inflater);
                 b0.getRoot().addView(view);
-                b0.pay.setOnClickListener(params.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
+                b0.pay.setOnClickListener(config.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"));
                 binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -131,7 +131,7 @@ public class PayFragment extends StaggeredFragment {
                 binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                        fragmentPayRecordBinding.row.setElevation(recyclerView.canScrollVertically(-1) ? params.dpToPx(2) : 0);
+                        fragmentPayRecordBinding.row.setElevation(recyclerView.canScrollVertically(-1) ? config.dpToPx(2) : 0);
                     }
                 });
                 break;
@@ -139,7 +139,7 @@ public class PayFragment extends StaggeredFragment {
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == -1) params.toast(getString(R.string.no_net_connected));
+                if (msg.what == -1) config.toast(getString(R.string.no_net_connected));
                 else {
                     JSONObject response = JSONObject.parseObject((String) msg.obj);
                     if (response != null && response.getInteger("code").equals(200)) {
@@ -165,15 +165,15 @@ public class PayFragment extends StaggeredFragment {
                             }
                         }
                     } else if (response != null && response.getInteger("code").equals(4002)) {
-                        params.toast(response.getString("message"));
+                        config.toast(response.getString("message"));
                     } else {
-                        params.toast(R.string.login_warning);
-                        params.gotoLogin(TargetUrl.PAY);
+                        config.toast(R.string.login_warning);
+                        config.gotoLogin(TargetUrl.PAY);
                     }
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         http.setReferrer("https://pay.sysu.edu.cn/");
         http.setAuthorizationJar(new AuthorizationJar(requireContext()));
         http.setTokenRequired(true);

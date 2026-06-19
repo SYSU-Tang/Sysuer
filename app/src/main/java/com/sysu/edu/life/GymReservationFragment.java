@@ -28,7 +28,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.CommonUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentGymOrderBinding;
 import com.sysu.edu.todo.TitleAdapter;
@@ -62,12 +62,12 @@ public class GymReservationFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(GymReservationViewModel.class);
         concatAdapter = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
         binding.recyclerView.setAdapter(concatAdapter);
-        Params params = new Params(this);
-        params.setCallback(this::reset);
+        Config config = new Config(this);
+        config.setCallback(this::reset);
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                if (msg.what == -1) params.toast(R.string.no_net_connected);
+                if (msg.what == -1) config.toast(R.string.no_net_connected);
                 else {
                     String response = (String) msg.obj;
                     if (msg.getData().getBoolean("isJSON")) {
@@ -106,9 +106,9 @@ public class GymReservationFragment extends Fragment {
                         }
                     } else {
                         if (!viewModel.authorizationManager.isAuthorized(response)) {
-                            params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                            config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                         } else if (Pattern.compile("人机识别检测").matcher(response).find())
-                            params.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
+                            config.gotoLogin(viewModel.authorizationManager.isAccessible() ? TargetUrl.GYM : TargetUrl.GYM_WEBVPN);
                         else if (!viewModel.authorizationManager.isAccessible(response)) {
                             regetReservation();
                         }
@@ -117,7 +117,7 @@ public class GymReservationFragment extends Fragment {
             }
         };
         http = new HttpManager(handler);
-        http.setParams(params);
+        http.setParams(config);
         http.setHeader(Map.of("Accept", "application/json, text/plain, */*"));
         http.setUA(viewModel.ua);
         http.setAuthorizationRequired(true);

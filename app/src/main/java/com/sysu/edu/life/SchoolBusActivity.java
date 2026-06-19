@@ -89,12 +89,12 @@ public class SchoolBusActivity extends BaseActivity {
         binding.toolbar.getMenu().add(R.string.export).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setIcon(R.drawable.export).setOnMenuItemClickListener(_ -> {
             if (pager2Adapter.getItemCount() > 0) {
                 int currentItem = binding.pager.getCurrentItem();
-                ((StaggeredFragment) pager2Adapter.get(currentItem)).export(binding.toolbar, Objects.requireNonNull(Objects.requireNonNull(binding.tabs.getTabAt(currentItem)).getText()).toString());
+                ((StaggeredFragment) pager2Adapter.get(currentItem)).export(binding.toolbar, Objects.requireNonNull(Objects.requireNonNull(binding.tabLayout.getTabAt(currentItem)).getText()).toString());
             }
             return true;
         });
         binding.appBarLayout.addView(header.getRoot());
-        new TabLayoutMediator(binding.tabs, binding.pager, (tab, position) -> tab.setText(routes.get(position))).attach();
+        new TabLayoutMediator(binding.tabLayout, binding.pager, (tab, position) -> tab.setText(routes.get(position))).attach();
         model.getMessage().observe(this, message -> {
             JSONObject response = message.second;
             if (response.getJSONObject("meta").getInteger("statusCode").equals(200)) {

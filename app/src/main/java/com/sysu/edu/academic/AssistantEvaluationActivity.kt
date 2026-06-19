@@ -1,27 +1,24 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.databinding.ActivityAssistantEvaluationResultBinding
 
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityAssistantEvaluationResultBinding;
-
-public class AssistantEvaluationActivity extends BaseActivity {
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityAssistantEvaluationResultBinding binding = ActivityAssistantEvaluationResultBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        NavHostFragment fragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
-        if (fragment != null)
-            NavigationUI.setupWithNavController(binding.toolbar, fragment.getNavController(), new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
-                supportFinishAfterTransition();
-                return false;
-            }).build());
-    }
+class AssistantEvaluationActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityAssistantEvaluationResultBinding.inflate(layoutInflater)
+		setContentView(binding.root)
+		val fragment = supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment?
+		if (fragment != null) setupWithNavController(binding.toolbar, fragment.navController, AppBarConfiguration.Builder()
+			.setFallbackOnNavigateUpListener {
+				supportFinishAfterTransition()
+				false
+			}
+			.build())
+	}
 }

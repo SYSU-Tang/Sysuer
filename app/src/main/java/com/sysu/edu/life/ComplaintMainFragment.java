@@ -27,7 +27,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.sysu.edu.R;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.FragmentComplaintMainBinding;
 import com.sysu.edu.databinding.ItemTodoBinding;
 import com.sysu.edu.view.RecyclerAdapter;
@@ -59,17 +59,17 @@ public class ComplaintMainFragment extends Fragment {
         });
         binding.uploadAttachment.setOnClickListener(_ -> pickAttachment(fileLauncher));
         loadCaptcha(binding.captchaImage);
-        Params params = new Params(this);
+        Config config = new Config(this);
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 switch (msg.what) {
-                    case -1 -> params.toast(R.string.no_net_connected);
+                    case -1 -> config.toast(R.string.no_net_connected);
                     case 0, 1 -> System.out.println(msg.obj);
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         return binding.getRoot();
     }
     

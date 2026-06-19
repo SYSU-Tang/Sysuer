@@ -25,7 +25,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.R;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.FragmentCourseSelectionSelectedBinding;
 import com.sysu.edu.databinding.ItemCourseSelectionBinding;
 import com.sysu.edu.model.JwxtModel;
@@ -48,7 +48,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
     int total = -1;
     String category;
     StaggeredGridLayoutManager layoutManager;
-    Params params;
+    Config config;
     JwxtModel model;
     
     @Override
@@ -61,9 +61,9 @@ public class CourseSelectionSelectedFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         FragmentCourseSelectionSelectedBinding binding = FragmentCourseSelectionSelectedBinding.inflate(inflater, container, false);
-        params = new Params(this);
+        config = new Config(this);
         model = new JwxtModel(requireContext());
-        layoutManager = new StaggeredGridLayoutManager(params.getColumn(), StaggeredGridLayoutManager.VERTICAL);
+        layoutManager = new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL);
         binding.list.getRoot().setLayoutManager(layoutManager);
         binding.list.getRoot().setAdapter(adapter = new CourseSelectedAdapter());
         binding.list.getRoot().addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -71,11 +71,11 @@ public class CourseSelectionSelectedFragment extends Fragment {
             public void onScrolled(@NonNull RecyclerView v, int dx, int dy) {
                 if (!v.canScrollVertically(1) && total > (page - 1) * 10 && dy > 0)
                     getSelectedCourses();
-                binding.head.setElevation(v.canScrollVertically(-1) ? params.dpToPx(2) : 0);
+                binding.head.setElevation(v.canScrollVertically(-1) ? config.dpToPx(2) : 0);
             }
         });
         
-        binding.list.getRoot().addItemDecoration(new CourseSelectionMainFragment.SpacesItemDecoration(params.dpToPx(8)));
+        binding.list.getRoot().addItemDecoration(new CourseSelectionMainFragment.SpacesItemDecoration(config.dpToPx(8)));
         binding.filter.setOnCheckedStateChangeListener((_, checkedId) -> {
             success = checkedId.contains(R.id.success) ? 1 : 0;
             failure = checkedId.contains(R.id.failure) ? 1 : 0;
@@ -120,7 +120,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
                     }
                     case 1 -> {
                         if (response.containsKey("data") && response.getString("data") != null)
-                            params.toast(response.getString("data"));
+                            config.toast(response.getString("data"));
                         regetSelectedCourses();
                     }
                 }
@@ -169,7 +169,7 @@ public class CourseSelectionSelectedFragment extends Fragment {
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        layoutManager.setSpanCount(params.getColumn());
+        layoutManager.setSpanCount(config.getColumn());
     }
     
     static class CourseSelectedAdapter extends RecyclerAdapter<JSONObject> {

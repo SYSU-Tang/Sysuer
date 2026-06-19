@@ -1,173 +1,167 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import static com.sysu.edu.api.CommonUtil.trim;
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.CompoundButton
+import android.widget.NumberPicker
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigator
+import com.alibaba.fastjson2.JSONObject
+import com.google.android.material.chip.Chip
+import com.sysu.edu.BaseFragment
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.databinding.FragmentTrainingScheduleBinding
+import com.sysu.edu.databinding.ItemFilterChipBinding
+import com.sysu.edu.model.JwxtModel
 
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.FragmentNavigator;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.chip.Chip;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.FragmentTrainingScheduleBinding;
-import com.sysu.edu.databinding.ItemFilterChipBinding;
-import com.sysu.edu.model.JwxtModel;
-
-import java.util.ArrayList;
-import java.util.Map;
-
-public class TrainingProgramFragment extends Fragment {
-    
-    final MutableLiveData<String> unit = new MutableLiveData<>();
-    final MutableLiveData<String> profession = new MutableLiveData<>();
-    final MutableLiveData<String> type = new MutableLiveData<>();
-    final MutableLiveData<String> grade = new MutableLiveData<>();
-    FragmentTrainingScheduleBinding binding;
-    JwxtModel model;
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        model.dispose();
-    }
-    
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (binding == null) {
-            model = new JwxtModel(requireContext());
-            binding = FragmentTrainingScheduleBinding.inflate(inflater);
-            binding.unit.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-                
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    getColleges(s.toString());
-                    model.nextAll();
-                }
-                
-                @Override
-                public void afterTextChanged(Editable s) {
-                
-                }
-            });
-            binding.profession.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-                
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    getProfessions(s.toString());
-                    model.nextAll();
-                }
-                
-                @Override
-                public void afterTextChanged(Editable s) {
-                
-                }
-            });
-            binding.query.setOnClickListener(v -> {
-                Bundle arg = new Bundle();
-                arg.putString("unit", trim(unit.getValue()));
-                arg.putString("profession", trim(profession.getValue()));
-                arg.putString("grade", trim(grade.getValue()));
-                arg.putString("type", trim(type.getValue()));
-                Navigation.findNavController(binding.getRoot()).navigate(R.id.confirmationAction,
-                        arg, null, new FragmentNavigator.Extras(Map.of(v, "result")));
-            });
-            model.getMessage().observe(requireActivity(), message -> {
-                JSONObject data = message.second;
-                if (data.getInteger("code") == 200) {
-                    int what = message.first;
-                    switch (what) {
-                        case 1 -> {
-                            ArrayList<String> list = new ArrayList<>();
-                            ArrayList<String> unitIDs = new ArrayList<>();
-                            data.getJSONArray("data").forEach(e -> {
-                                unitIDs.add(((JSONObject) e).getString("departmentNumber"));
-                                list.add(((JSONObject) e).getString("departmentName"));
-                            });
-                            binding.unit.setSimpleItems(list.toArray(new String[]{}));
-                            if (binding.unit.hasFocus()) binding.unit.showDropDown();
-                            binding.unit.setOnItemClickListener((_, _, position, _) -> unit.setValue(unitIDs.get(position)));
-                        } // 处理学院
-                        case 2 -> {
-                            ArrayList<String> list = new ArrayList<>();
-                            ArrayList<String> professionIDs = new ArrayList<>();
-                            data.getJSONArray("data").forEach(e -> {
-                                professionIDs.add(((JSONObject) e).getString("dataNumber"));
-                                list.add(((JSONObject) e).getString("dataName"));
-                            });
-                            binding.grade.setMinValue(1);
-                            binding.grade.setMaxValue(list.size());
-                            binding.grade.setDisplayedValues(list.toArray(new String[0]));
-                            binding.grade.setOnValueChangedListener((_, _, fromUser) -> grade.setValue(professionIDs.get(fromUser - 1)));
-                            binding.grade.setValue(list.size());
-                            grade.postValue(professionIDs.get(list.size() - 1));
-                        } // 处理年级
-                        case 3 -> {
-                            data.getJSONArray("data").forEach(e -> {
-                                Chip chip = ItemFilterChipBinding.inflate(inflater, binding.types, false).getRoot();
-                                chip.setOnCheckedChangeListener((_, isChecked) -> {
-                                    if (isChecked)
-                                        type.setValue(((JSONObject) e).getString("dataNumber"));
-                                });
-                                chip.setText(((JSONObject) e).getString("dataName"));
-                                binding.types.addView(chip);
-                            });
-                            ((Chip) binding.types.getChildAt(0)).setChecked(true);
-                        } // 处理类型
-                        case 4 -> {
-                            ArrayList<String> list = new ArrayList<>();
-                            ArrayList<String> professionIDs = new ArrayList<>();
-                            data.getJSONArray("data").forEach(e -> {
-                                professionIDs.add(((JSONObject) e).getString("code"));
-                                list.add(((JSONObject) e).getString("name"));
-                            });
-                            binding.profession.setSimpleItems(list.toArray(new String[]{}));
-                            if (binding.profession.hasFocus()) binding.profession.showDropDown();
-                            binding.profession.setOnItemClickListener((_, _, position, _) ->
-                                    profession.setValue(professionIDs.get(position)));
-                            // 处理专业
-                        }
-                    }
-                    model.nextAll();
-                }
-            });
-            getColleges("");
-            getGrades();
-            getTypes();
-            getProfessions("");
-            model.next();
-        }
-        return binding.getRoot();
-    }
-    
-    void getProfessions(String keyword) {
-        model.add("jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode=" + keyword, 4);
-    }
-    
-    void getTypes() {
-        model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 3);
-    }
-    
-    void getColleges(String keyword) {
-        model.add("jwxt/base-info/department/recruitUnitPull", "{\"departmentName\":\"" + keyword + "\",\"subordinateDepartmentNumber\":null,\"id\":null}", 1);
-    }
-    
-    void getGrades() {
-        model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=127", 2);
-    }
-    
+class TrainingProgramFragment : BaseFragment() {
+	lateinit var binding: FragmentTrainingScheduleBinding
+	lateinit var model: JwxtModel
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+	
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): View {
+		super.onCreateView(inflater, container, savedInstanceState)
+		model = JwxtModel(requireContext())
+		val department: MutableLiveData<String?> = MutableLiveData<String?>()
+		val profession: MutableLiveData<String?> = MutableLiveData<String?>()
+		val type: MutableLiveData<String?> = MutableLiveData<String?>()
+		val grade: MutableLiveData<String?> = MutableLiveData<String?>()
+		binding = FragmentTrainingScheduleBinding.inflate(inflater).apply {
+			unit.addTextChangedListener(object : TextWatcher {
+				override fun beforeTextChanged(s: CharSequence?,
+				                               start: Int,
+				                               count: Int,
+				                               after: Int) {
+				}
+				
+				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+					getColleges("$s")
+					model.nextAll()
+				}
+				
+				override fun afterTextChanged(s: Editable?) {
+				}
+			})
+			this.profession.addTextChangedListener(object : TextWatcher {
+				override fun beforeTextChanged(s: CharSequence?,
+				                               start: Int,
+				                               count: Int,
+				                               after: Int) {
+				}
+				
+				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+					getProfessions("$s")
+					model.nextAll()
+				}
+				
+				override fun afterTextChanged(s: Editable?) {
+				}
+			})
+			query.setOnClickListener {
+				val arg = Bundle().apply {
+					putSerializable("unit", department.value)
+					putSerializable("profession", profession.value)
+					putSerializable("grade", grade.value)
+					putSerializable("type", type.value)
+				}
+				findNavController(binding.root).navigate(R.id.confirmationAction, arg, null, FragmentNavigator.Extras.Builder()
+					.addSharedElement(binding.root, "result")
+					.build())
+			}
+		}
+		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val data = message.second
+			if (data.getInteger("code") == 200) {
+				when (message.first) {
+					1 -> {
+						val list = ArrayList<String?>()
+						val unitIDs = ArrayList<String?>()
+						data.getJSONArray("data").forEach { e: Any? ->
+							unitIDs.add((e as JSONObject).getString("departmentNumber"))
+							list.add(e.getString("departmentName"))
+						}
+						binding.unit.setSimpleItems(list.toArray<String?>(arrayOf<String?>()))
+						if (binding.unit.hasFocus()) binding.unit.showDropDown()
+						binding.unit.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long -> department.value = unitIDs[position] }
+					}
+					2 -> {
+						val list = mutableListOf<String?>()
+						val professionIDs = mutableListOf<String?>()
+						data.getJSONArray("data").forEach { e: Any? ->
+							professionIDs.add((e as JSONObject).getString("dataNumber"))
+							list.add(e.getString("dataName"))
+						}
+						binding.grade.apply {
+							minValue = 1
+							maxValue = list.size
+							displayedValues = list.toTypedArray<String?>()
+							setOnValueChangedListener { _: NumberPicker?, _: Int, fromUser: Int -> grade.value = professionIDs[fromUser - 1] }
+							value = list.size
+						}
+						grade.value = professionIDs.last()
+					}
+					3 -> {
+						data.getJSONArray("data").forEach { e: Any? ->
+							binding.types.addView(ItemFilterChipBinding.inflate(inflater, binding.types, false).root.apply {
+								setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+									if (isChecked) type.value = (e as JSONObject).getString("dataNumber")
+								}
+								text = (e as JSONObject).getString("dataName")
+							})
+						}
+						(binding.types.getChildAt(0) as Chip).isChecked = true
+					}
+					4 -> {
+						val list = mutableListOf<String?>()
+						val professionIDs = mutableListOf<String?>()
+						data.getJSONArray("data").forEach { e: Any? ->
+							professionIDs.add((e as JSONObject).getString("code"))
+							list.add(e.getString("name"))
+						}
+						binding.profession.setSimpleItems(list.toTypedArray<String?>())
+						if (binding.profession.hasFocus()) binding.profession.showDropDown()
+						binding.profession.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long -> profession.value = professionIDs[position] } // 处理专业
+					}
+				}
+				model.nextAll()
+			}
+		})
+		getColleges("")
+		grades
+		types
+		getProfessions("")
+		model.next()
+		return binding.root
+	}
+	
+	fun getProfessions(keyword: String?) {
+		model.add("jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode=$keyword", 4)
+	}
+	
+	val types: Unit
+		get() {
+			model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 3)
+		}
+	
+	fun getColleges(keyword: String?) {
+		model.add("jwxt/base-info/department/recruitUnitPull", "{\"departmentName\":\"$keyword\",\"subordinateDepartmentNumber\":null,\"id\":null}", 1)
+	}
+	
+	val grades: Unit
+		get() {
+			model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=127", 2)
+		}
 }

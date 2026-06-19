@@ -56,7 +56,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.sysu.edu.BaseActivity;
 import com.sysu.edu.R;
 import com.sysu.edu.api.DownloadManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.ActivityBrowserBinding;
 import com.sysu.edu.databinding.DialogJsBinding;
 import com.sysu.edu.databinding.ItemPreferenceBinding;
@@ -66,7 +66,6 @@ import com.sysu.edu.view.GridDialog;
 import com.sysu.edu.view.RecyclerAdapter;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -92,7 +91,7 @@ public class BrowserActivity extends BaseActivity {
     MaterialButton refreshButton;
     BrowserHelper db;
     JavaScript js;
-    Params params;
+    Config config;
     
     @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     @Override
@@ -103,7 +102,7 @@ public class BrowserActivity extends BaseActivity {
         db = new BrowserHelper(this);
         cookie = CookieManager.getInstance();
         binding.toolbar.setNavigationOnClickListener(_ -> finishAfterTransition());
-        params = new Params(this);
+        config = new Config(this);
         BrowserPreference preference = new BrowserPreference(this);
         String url = getIntent().getDataString() != null ? getIntent().getDataString() : "https://www.sysu.edu.cn/";
         js = new JavaScript();
@@ -142,7 +141,7 @@ public class BrowserActivity extends BaseActivity {
             @Override
             public void onPageFinished(WebView view, String link) {
                 if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page").matcher(link).find())
-                    disposable.add(params.getContextUtil().getAccountManager().getActiveAccountAsync("sysu.edu.cn").subscribe(account ->
+                    disposable.add(config.getContextUtil().getAccountManager().getActiveAccountAsync("sysu.edu.cn").subscribe(account ->
                     {
                         if (!isEmpty(account.first) && !isEmpty(account.second))
                             web.evaluateJavascript(String.format("""
@@ -235,8 +234,8 @@ public class BrowserActivity extends BaseActivity {
         downloadDialog.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         downloadDialog.getMenu(0).setMaxLines(Integer.MAX_VALUE);
         downloadDialog.getMenu(0).setOnLongClickListener(_ -> {
-            params.copy("link", downloadDialog.getMenu(0).getText().toString());
-            params.toast(R.string.copy_successfully);
+            config.copy("link", downloadDialog.getMenu(0).getText().toString());
+            config.toast(R.string.copy_successfully);
             return true;
         });
         downloadDialog.setNegativeButton(R.string.cancel, (_, _) -> {
@@ -522,7 +521,7 @@ public class BrowserActivity extends BaseActivity {
         var websiteDialog = new GridDialog(this);
         websiteDialog.loadMenu(List.of(R.string.copy, R.string.share, R.string.open_in_browser, R.string.cookie, R.string.webpage_source),
                 List.of(R.drawable.copy, R.drawable.share, R.drawable.export, R.drawable.cookie, R.drawable.version),
-                List.of(_ -> params.copy("url:", web.getUrl()),
+                List.of(_ -> config.copy("url:", web.getUrl()),
                         _ -> startActivity(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, trim(web.getUrl()))),
                         _ -> startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse(trim(web.getUrl())))),
                         _ -> {
@@ -530,7 +529,7 @@ public class BrowserActivity extends BaseActivity {
                             cookieDialog.setValue(cookie.getCookie(targetUrl));
                             cookieDialog.getDialog().setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.save), (_, _) -> cookie.setCookie(targetUrl, cookieDialog.getText()));
                             cookieDialog.getDialog().setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear), (_, _) -> web.evaluateJavascript(BrowserCookieManager.clearAllCookies, null));
-                            cookieDialog.getDialog().setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.copy), (_, _) -> params.copy("Cookie:", cookieDialog.getText()));
+                            cookieDialog.getDialog().setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.copy), (_, _) -> config.copy("Cookie:", cookieDialog.getText()));
                             cookieDialog.show();
                         },
                         _ -> web.loadUrl("view-source:" + web.getUrl())), Integer.class);
@@ -656,7 +655,7 @@ public class BrowserActivity extends BaseActivity {
             return true;
         });
         popup.getMenu().add(R.string.copy).setOnMenuItemClickListener(_ -> {
-            params.copy("link", url);
+            config.copy("link", url);
             return true;
         });
         popup.getMenu().add(R.string.share).setOnMenuItemClickListener(_ -> {
@@ -693,7 +692,7 @@ public class BrowserActivity extends BaseActivity {
             return true;
         });
         popup.getMenu().add(R.string.copy).setOnMenuItemClickListener(_ -> {
-            params.copy("image", imageUrl);
+            config.copy("image", imageUrl);
             return true;
         });
         popup.getMenu().add(R.string.share).setOnMenuItemClickListener(_ -> {

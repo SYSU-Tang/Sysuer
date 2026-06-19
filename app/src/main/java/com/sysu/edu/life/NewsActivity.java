@@ -27,7 +27,7 @@ import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.AuthorizationManager;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Params;
+import com.sysu.edu.api.Config;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.browser.BrowserActivity;
 import com.sysu.edu.databinding.ActivityNewsBinding;
@@ -67,8 +67,8 @@ public class NewsActivity extends BaseActivity {
             
             }
         });
-        Params params = new Params(this);
-        params.setCallback(this::getSuggestions);
+        Config config = new Config(this);
+        config.setCallback(this::getSuggestions);
         binding.sugs.setAdapter(suggestionAdapter);
         binding.sugs.setLayoutManager(new GridLayoutManager(this, 1));
         http = new HttpManager(new Handler(getMainLooper()) {
@@ -78,18 +78,18 @@ public class NewsActivity extends BaseActivity {
                 boolean isJSON = rdata.getBoolean("isJSON");
                 String json = rdata.getString("data");
                 if (json == null) {
-                    params.toast(R.string.no_net_connected);
+                    config.toast(R.string.no_net_connected);
                     return;
                 }
                 System.out.println(json);
                 if (!isJSON) {
                     if (!authorizationManager.isAuthorized(json)) {
-                        params.toast(R.string.login_warning);
-                        params.gotoLogin(authorizationManager.isAccessible() ? TargetUrl.NEWS : TargetUrl.NEWS_WEBVPN);
+                        config.toast(R.string.login_warning);
+                        config.gotoLogin(authorizationManager.isAccessible() ? TargetUrl.NEWS : TargetUrl.NEWS_WEBVPN);
                         return;
                     }
                     if (!authorizationManager.isAccessible(json)) {
-                        params.toast(R.string.educational_wifi_warning);
+                        config.toast(R.string.educational_wifi_warning);
                         getSuggestions();
                         return;
                     }
@@ -102,16 +102,16 @@ public class NewsActivity extends BaseActivity {
                         suggestionAdapter.clear();
                         data.getJSONObject("data").getJSONArray("suggests").forEach(e -> suggestionAdapter.add((String) e));
                     } else if (Objects.equals(code, 496)) {
-                        params.toast(data.getString("message"));
-                        params.gotoLogin(authorizationManager.isAccessible() ? TargetUrl.NEWS : TargetUrl.NEWS_WEBVPN);
+                        config.toast(data.getString("message"));
+                        config.gotoLogin(authorizationManager.isAccessible() ? TargetUrl.NEWS : TargetUrl.NEWS_WEBVPN);
                     }
                     //suggestion
                 } else {
-                    params.toast(data.getString("code") + "\n" + data.getString("message"));
+                    config.toast(data.getString("code") + "\n" + data.getString("message"));
                 }
             }
         });
-        http.setParams(params);
+        http.setParams(config);
         http.setAuthorizationRequired(true);
         http.setAuthorizationJar(new AuthorizationJar(this));
         edit = binding.searchView.getEditText();

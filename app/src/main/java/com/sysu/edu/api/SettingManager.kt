@@ -11,8 +11,7 @@ class SettingManager(val context: Context) {
 	val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 	
 	init {
-		if (defaultFontSize == 0.0f)
-			defaultFontSize = context.resources.configuration.fontScale
+		if (defaultFontSize == 0.0f) defaultFontSize = context.resources.configuration.fontScale
 	}
 	
 	fun getLanguageCode(): String {
@@ -38,6 +37,7 @@ class SettingManager(val context: Context) {
 	fun setTheme() {
 		AppCompatDelegate.setDefaultNightMode((intArrayOf(AppCompatDelegate.MODE_NIGHT_NO, AppCompatDelegate.MODE_NIGHT_YES, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))[getTheme()])
 	}
+	
 	/*
 	* 获取主题
 	* 0: 浅色主题
@@ -54,9 +54,10 @@ class SettingManager(val context: Context) {
 		context.resources.configuration.fontScale = fontSize
 		return context.createConfigurationContext(context.resources.configuration)
 	}
+	
 	var fontSize: Float = defaultFontSize
 		get() {
-			return preferences.getString("fontSize", "0")?.takeIf{ "0" != it }
+			return preferences.getString("fontSize", "0")?.takeIf { "0" != it }
 				?.let { floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)[it.toInt() - 1] }
 				?: defaultFontSize
 		}
@@ -64,8 +65,6 @@ class SettingManager(val context: Context) {
 			field = value
 			preferences.edit { putString("fontSize", "$value") }
 		}
-	
-	
 	var developerMode: Boolean = false
 		get() {
 			return preferences.getBoolean("developer_mode", false)
@@ -74,7 +73,6 @@ class SettingManager(val context: Context) {
 			field = value
 			preferences.edit { putBoolean("developer_mode", value) }
 		}
-	
 	var betaCheck: Boolean = false
 		get() {
 			return preferences.getBoolean("beta_check", false)
@@ -82,5 +80,13 @@ class SettingManager(val context: Context) {
 		set(value) {
 			field = value
 			preferences.edit { putBoolean("beta_check", value) }
+		}
+	var qrCode: String = ""
+		get() {
+			return preferences.getString("qrcode", "") ?: ""
+		}
+		set(value) {
+			field = value
+			preferences.edit { putString("qrcode", value) }
 		}
 }
