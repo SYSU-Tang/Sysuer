@@ -33,11 +33,13 @@ class CourseSelectionContainerFragment : Fragment() {
 	}
 	
 	override fun onResume() {
-		setupWithNavController(requireActivity().findViewById(R.id.toolbar), nav!!, AppBarConfiguration.Builder()
-			.setFallbackOnNavigateUpListener {
-				requireActivity().supportFinishAfterTransition()
-				false
-			}.build())
+		nav?.let {
+			setupWithNavController(requireActivity().findViewById(R.id.toolbar), it, AppBarConfiguration.Builder()
+				.setFallbackOnNavigateUpListener {
+					requireActivity().supportFinishAfterTransition()
+					false
+				}.build())
+		}
 		super.onResume()
 	}
 	

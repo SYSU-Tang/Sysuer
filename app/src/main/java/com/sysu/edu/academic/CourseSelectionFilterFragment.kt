@@ -1,172 +1,154 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import static android.text.TextUtils.isEmpty;
-import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
+import android.graphics.Color
+import android.os.Bundle
+import android.text.Editable
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.EditText
+import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.Navigation.findNavController
+import com.alibaba.fastjson2.JSONObject
+import com.google.android.material.R
+import com.google.android.material.transition.MaterialContainerTransform
+import com.sysu.edu.BaseFragment
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.CommonUtil.toStringOrDefault
+import com.sysu.edu.databinding.FragmentCourseFilterBinding
+import com.sysu.edu.model.JwxtModel
 
-import android.graphics.Color;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.textfield.MaterialAutoCompleteTextView;
-import com.google.android.material.transition.MaterialContainerTransform;
-import com.sysu.edu.api.Config;
-import com.sysu.edu.databinding.FragmentCourseFilterBinding;
-import com.sysu.edu.model.JwxtModel;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.stream.IntStream;
-
-
-public class CourseSelectionFilterFragment extends Fragment {
-    
-    HashMap<String, String> filterValue = new HashMap<>();
-    HashMap<String, String> filterName = new HashMap<>();
-    CourseSelectionViewModel vm;
-    FragmentCourseFilterBinding binding;
-    NavController navController;
-    JwxtModel model;
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        model.dispose();
-    }
-    
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        if (binding == null) {
-            model = new JwxtModel(requireContext());
-            vm = new ViewModelProvider(requireActivity()).get(CourseSelectionViewModel.class);
-            filterValue = vm.getFilterValue();
-            filterName = vm.getFilterName();
-            binding = FragmentCourseFilterBinding.inflate(inflater, container, false);
-            binding.container.setColumnCount(new Config(this).getColumn());
-            model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = message.second;
-                int what = message.first;
-                if (response.getInteger("code").equals(200)) {
-                    JSONArray data = response.getJSONArray("data");
-                    if (data != null) {
-                        ArrayList<String> items = new ArrayList<>();
-                        ArrayList<String> itemCodes = new ArrayList<>();
-                        items.add("");
-                        itemCodes.add("");
-                        data.forEach(a -> {
-                            items.add(((JSONObject) a).getString(new String[]{"campusName", "dataName", "minorName", "dataName", "dataName"}[what]));
-                            itemCodes.add(((JSONObject) a).getString(new String[]{"id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber"}[what]));
-                        });
-                        MaterialAutoCompleteTextView textView = new MaterialAutoCompleteTextView[]{binding.campus, binding.days, binding.sections, binding.languages, binding.special}[what];
-                        textView.setSimpleItems(items.toArray(new String[]{}));
-                        textView.setOnItemClickListener((_, _, i, _) -> {
-                            filterValue.put(new String[]{"campus", "day", "section", "language", "special"}[what], itemCodes.get(i));
-                            filterName.put(new String[]{"campus", "day", "section", "language", "special"}[what], items.get(i));
-                        });
-                    }
-                }
-                model.nextAll();
-            });
-            IntStream.range(0, 5).forEach(this::getData);
-            load();
-            model.next();
-        }
-        requireActivity().getOnBackPressedDispatcher().addCallback(
-                getViewLifecycleOwner(),
-                new OnBackPressedCallback(true) {
-                    @Override
-                    public void handleOnBackPressed() {
-                        submit();
-                    }
-                }
-        );
-        return binding.getRoot();
-    }
-    
-    void reset() {
-        filterValue.clear();
-        filterName.clear();
-        vm.setFilterName(filterName);
-        vm.setFilterValue(filterValue);
-        load();
-    }
-    
-    void load() {
-        filterName = vm.getFilterName();
-        filterValue = vm.getFilterValue();
-        binding.campus.setText(filterName.getOrDefault("campus", ""), false);
-        binding.course.setText(filterName.getOrDefault("course", ""));
-        binding.days.setText(filterName.get("day"), false);
-        binding.sections.setText(filterName.get("section"), false);
-        binding.languages.setText(filterName.get("language"), false);
-        binding.special.setText(filterName.getOrDefault("special", ""), false);
-        binding.school.setText(filterName.get("school"));
-        binding.teacher.setText(filterName.get("teacher"));
-    }
-    
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        view.setTransitionName("miniapp");
-        navController = Navigation.findNavController(view);
-        binding.reset.setOnClickListener(_ -> reset());
-        binding.submit.setOnClickListener(_ -> submit());
-        MaterialContainerTransform transition = new MaterialContainerTransform();
-        transition.setScrimColor(Color.TRANSPARENT);
-        transition.setAllContainerColors(requireContext().getColor(com.google.android.material.R.color.design_default_color_surface));
-        setSharedElementEnterTransition(transition);
-        setSharedElementReturnTransition(transition);
-    }
-    
-    
-    void submit() {
-        vm.setReturnData(parseFilter(getMap()));
-        vm.setFilterName(filterName);
-        vm.setFilterValue(filterValue);
-        navController.navigateUp();
-    }
-    
-    void getData(int i) {
-        model.add(new String[]{"jwxt/base-info/campus/findCampusNamesBox",
-                "jwxt/base-info/codedata/findcodedataNames?datableNumber=233",
-                "jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1",
-                "jwxt/base-info/codedata/findcodedataNames?datableNumber=204",
-                "jwxt/base-info/codedata/findcodedataNames?datableNumber=387"}[i], i);
-    }
-    
-    HashMap<String, String> getMap() {
-        filterValue.put("course", getEditText(binding.course));
-        filterValue.put("teacher", getEditText(binding.teacher));
-        filterValue.put("school", getEditText(binding.school));
-        filterName.put("course", getEditText(binding.course));
-        filterName.put("teacher", getEditText(binding.teacher));
-        filterName.put("school", getEditText(binding.school));
-        return filterValue;
-    }
-    
-    String getEditText(EditText editText) {
-        return toStringOrDefault(editText.getText());
-    }
-    
-    String parseFilter(HashMap<String, String> filter) {
-        StringBuilder str = new StringBuilder();
-        String[] keys = new String[]{"course", "campus", "day", "section", "school", "teacher", "language", "special"};
-        String[] key = new String[]{"courseName", "studyCampusId", "week", "classTimes", "courseUnitNum", "teachingTeacherNum", "teachingLanguageCode", "specialClassCode"};
-        for (int i = 0; i < keys.length; i++) {
-            String v = filter.getOrDefault(keys[i], "");
-            if (!isEmpty(v)) str.append(String.format(",\"%s\":\"%s\"", key[i], v));
-        }
-        return str.toString();
-    }
+class CourseSelectionFilterFragment : BaseFragment() {
+	var filterValue: MutableMap<String?, String?> = mutableMapOf()
+	var filterName: MutableMap<String?, String?> = mutableMapOf()
+	lateinit var vm: CourseSelectionViewModel
+	lateinit var binding: FragmentCourseFilterBinding
+	var navController: NavController? = null
+	lateinit var model: JwxtModel
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+	
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): View {
+		super.onCreateView(inflater, container, savedInstanceState)
+		model = JwxtModel(requireContext())
+		vm = ViewModelProvider(requireActivity())[CourseSelectionViewModel::class.java]
+		vm.getFilterValue()?.also { filterValue = it }
+		vm.getFilterName()?.also { filterName = it }
+		binding = FragmentCourseFilterBinding.inflate(inflater, container, false)
+		binding.container.setColumnCount(config.column)
+		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			val what: Int = message.first
+			if (response.getInteger("code") == 200) {
+				val data = response.getJSONArray("data")
+				if (data != null) {
+					val items = mutableListOf<String?>()
+					val itemCodes = mutableListOf<String?>()
+					items.add("")
+					itemCodes.add("")
+					data.forEach { a: Any? ->
+						items.add((a as JSONObject).getString(arrayOf("campusName", "dataName", "minorName", "dataName", "dataName")[what]))
+						itemCodes.add(a.getString(arrayOf("id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber")[what]))
+					}
+					val textView = arrayOf(binding.campus, binding.days, binding.sections, binding.languages, binding.special)[what]
+					textView.setSimpleItems(items.toTypedArray())
+					textView.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
+						filterValue[arrayOf("campus", "day", "section", "language", "special")[what]] = itemCodes[i]
+						filterName[arrayOf("campus", "day", "section", "language", "special")[what]] = items[i]
+					}
+				}
+			}
+			model.nextAll()
+		})
+		(0..<5).forEach { getData(it) }
+		load()
+		model.next()
+		requireActivity().onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), object :
+			OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() {
+				submit()
+			}
+		})
+		return binding.getRoot()
+	}
+	
+	fun reset() {
+		filterValue.clear()
+		filterName.clear()
+		vm.setFilterName(filterName)
+		vm.setFilterValue(filterValue)
+		load()
+	}
+	
+	fun load() {
+		vm.getFilterName()?.also { filterName = it }
+		vm.getFilterValue()?.also { filterValue = it }
+		binding.campus.setText(filterName.getOrDefault("campus", ""), false)
+		binding.course.setText(filterName.getOrDefault("course", ""))
+		binding.days.setText(filterName["day"], false)
+		binding.sections.setText(filterName["section"], false)
+		binding.languages.setText(filterName["language"], false)
+		binding.special.setText(filterName.getOrDefault("special", ""), false)
+		binding.school.setText(filterName["school"])
+		binding.teacher.setText(filterName["teacher"])
+	}
+	
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+		view.transitionName = "miniapp"
+		navController = findNavController(view)
+		binding.reset.setOnClickListener { reset() }
+		binding.submit.setOnClickListener { submit() }
+		val transition = MaterialContainerTransform()
+		transition.scrimColor = Color.TRANSPARENT
+		transition.setAllContainerColors(requireContext().getColor(R.color.design_default_color_surface))
+		sharedElementEnterTransition = transition
+		sharedElementReturnTransition = transition
+	}
+	
+	fun submit() {
+		vm.returnData = parseFilter(map)
+		vm.setFilterName(filterName)
+		vm.setFilterValue(filterValue)
+		navController!!.navigateUp()
+	}
+	
+	fun getData(i: Int) {
+		model.add(arrayOf("jwxt/base-info/campus/findCampusNamesBox", "jwxt/base-info/codedata/findcodedataNames?datableNumber=233", "jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1", "jwxt/base-info/codedata/findcodedataNames?datableNumber=204", "jwxt/base-info/codedata/findcodedataNames?datableNumber=387")[i], i)
+	}
+	
+	val map: MutableMap<String?, String?>
+		get() {
+			filterValue["course"] = getEditText(binding.course)
+			filterValue["teacher"] = getEditText(binding.teacher)
+			filterValue["school"] = getEditText(binding.school)
+			filterName["course"] = getEditText(binding.course)
+			filterName["teacher"] = getEditText(binding.teacher)
+			filterName["school"] = getEditText(binding.school)
+			return filterValue
+		}
+	
+	fun getEditText(editText: EditText): String {
+		return toStringOrDefault<Editable?>(editText.getText())
+	}
+	
+	fun parseFilter(filter: MutableMap<String?, String?>): String {
+		val json = JSONObject()
+		val keys: Array<String?> = arrayOf("course", "campus", "day", "section", "school", "teacher", "language", "special")
+		val name: Array<String?> = arrayOf("courseName", "studyCampusId", "week", "classTimes", "courseUnitNum", "teachingTeacherNum", "teachingLanguageCode", "specialClassCode")
+		keys.forEachIndexed { i, k ->
+			filter.getOrDefault(k, "")?.takeIf { it.isNotEmpty() }?.let {
+				json[name[i]] = it
+			}
+		}
+		return "$json"
+	}
 }

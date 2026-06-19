@@ -1,100 +1,95 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.CompoundButton
+import androidx.appcompat.widget.PopupMenu
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.navigation.Navigation.findNavController
+import com.alibaba.fastjson2.JSONObject
+import com.sysu.edu.BaseFragment
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.databinding.FragmentAssistantInfoFilterBinding
+import com.sysu.edu.databinding.ItemFilterChipBinding
+import com.sysu.edu.model.JwxtModel
+import java.util.function.Consumer
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.MutableLiveData;
-import androidx.navigation.Navigation;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.FragmentAssistantInfoFilterBinding;
-import com.sysu.edu.databinding.ItemFilterChipBinding;
-import com.sysu.edu.model.JwxtModel;
-
-public class AssistantInfoFilterFragment extends Fragment {
-    
-    final MutableLiveData<String> term = new MutableLiveData<>();
-    final MutableLiveData<String> campus = new MutableLiveData<>();
-    FragmentAssistantInfoFilterBinding binding;
-    JwxtModel model;
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        model.dispose();
-    }
-    
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        if (binding == null) {
-            binding = FragmentAssistantInfoFilterBinding.inflate(inflater, container, false);
-            PopupMenu pop = new PopupMenu(requireContext(), binding.term.getRoot());
-            model = new JwxtModel(requireContext());
-            binding.term.itemTitle.setText(R.string.term);
-            binding.term.itemIcon.setImageResource(R.drawable.calendar);
-            binding.term.getRoot().setOnClickListener(_ -> pop.show());
-            binding.filter.setOnClickListener(_ -> {
-                Bundle data = new Bundle();
-                data.putString("term", term.getValue());
-                data.putString("campus", campus.getValue());
-                data.putString("courseNumber", String.valueOf(binding.courseNumber.getText()));
-                data.putString("courseName", String.valueOf(binding.courseName.getText()));
-                data.putString("teacherName", String.valueOf(binding.teacher.getText()));
-                Navigation.findNavController(binding.getRoot()).navigate(R.id.filter_to_result, data);
-            });
-            term.observe(requireActivity(), acadYearSemester -> {
-                if (acadYearSemester != null) {
-                    binding.term.itemContent.setText(acadYearSemester);
-                }
-            });
-            model.getMessage().observe(requireActivity(), message -> {
-                JSONObject response = message.second;
-                if (response.getInteger("code") == 200) {
-                    switch (message.first) {
-                        case 0 -> {
-                            response.getJSONArray("data").forEach(t -> pop.getMenu().add(((JSONObject) t).getString("acadYearSemester")).setOnMenuItemClickListener(_ -> {
-                                term.setValue(((JSONObject) t).getString("acadYearSemester"));
-                                return false;
-                            }));
-                            getCampuses();
-                        }
-                        case 1 -> response.getJSONArray("data").forEach(c -> {
-                            ItemFilterChipBinding item = ItemFilterChipBinding.inflate(inflater, binding.campus, false);
-                            item.getRoot().setText(((JSONObject) c).getString("campusName"));
-                            item.getRoot().setOnCheckedChangeListener((_, isChecked) -> {
-                                if (isChecked) {
-                                    campus.setValue(((JSONObject) c).getString("id"));
-                                }
-                            });
-                            binding.campus.addView(item.getRoot());
-                        });
-                    }
-                    model.nextAll();
-                }
-            });
-            getTerms();
-            model.next();
-        }
-        return binding.getRoot();
-    }
-    
-    
-    void getTerms() {
-        model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0);
-    }
-    
-    
-    void getCampuses() {
-        model.add("jwxt/base-info/campus/findCampusNamesBox", 1);
-    }
+class AssistantInfoFilterFragment : BaseFragment() {
+	lateinit var model: JwxtModel
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+	
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): View {
+		super.onCreateView(inflater, container, savedInstanceState)
+		val term: MutableLiveData<String?> = MutableLiveData<String?>()
+		val campus: MutableLiveData<String?> = MutableLiveData<String?>()
+		val binding = FragmentAssistantInfoFilterBinding.inflate(inflater, container, false).apply {
+			this.term.itemTitle.setText(R.string.term)
+			this.term.itemIcon.setImageResource(R.drawable.calendar)
+			filter.setOnClickListener {
+				findNavController(getRoot()).navigate(R.id.filter_to_result, Bundle().apply {
+					putString("term", term.getValue())
+					putString("campus", campus.getValue())
+					putString("courseNumber", courseNumber.getText().toString())
+					putString("courseName", courseName.getText().toString())
+					putString("teacherName", teacher.getText().toString())
+				})
+			}
+		}
+		val pop = PopupMenu(requireContext(), binding.term.root)
+		binding.term.root.setOnClickListener { pop.show() }
+		model = JwxtModel(requireContext())
+		term.observe(requireActivity(), Observer { acadYearSemester: String? ->
+			acadYearSemester?.let {
+				binding.term.itemContent.text = it
+			}
+		})
+		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			if (response.getInteger("code") == 200) {
+				when (message.first) {
+					0 -> {
+						response.getJSONArray("data").forEach(Consumer { t: Any? ->
+							pop.menu.add((t as JSONObject).getString("acadYearSemester"))
+								.setOnMenuItemClickListener {
+									term.value = t.getString("acadYearSemester")
+									false
+								}
+						})
+						this.campuses
+					}
+					1 -> response.getJSONArray("data").forEach(Consumer { c: Any? ->
+						val item = ItemFilterChipBinding.inflate(inflater, binding.campus, false)
+						item.getRoot().text = (c as JSONObject).getString("campusName")
+						item.getRoot()
+							.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+								if (isChecked) campus.value = c.getString("id")
+							}
+						binding.campus.addView(item.getRoot())
+					})
+				}
+				model.nextAll()
+			}
+		})
+		terms
+		model.next()
+		return binding.getRoot()
+	}
+	
+	val terms: Unit
+		get() {
+			model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
+		}
+	val campuses: Unit
+		get() {
+			model.add("jwxt/base-info/campus/findCampusNamesBox", 1)
+		}
 }
