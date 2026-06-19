@@ -1,11 +1,9 @@
 plugins {
-	alias(libs.plugins.android.application)
-//    alias(libs.plugins.kotlin.android)
+	alias(libs.plugins.android.application) //    alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.google.gms.google.services)
-	alias(libs.plugins.google.firebase.crashlytics)
-//    id("com.google.devtools.ksp")
-//    id("kotlin-parcelize")
+	alias(libs.plugins.google.firebase.crashlytics) //    id("com.google.devtools.ksp")
+	//    id("kotlin-parcelize")
 }
 
 android {
@@ -15,8 +13,8 @@ android {
 	defaultConfig {
 		val generation = "1"
 		val major = "2"
-		val minor = "0"
-		val beta = false
+		val minor = "1"
+		val beta = true
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
@@ -33,10 +31,7 @@ android {
 		release {
 			isMinifyEnabled = true
 			isShrinkResources = true
-			proguardFiles(
-				getDefaultProguardFile("proguard-android-optimize.txt"),
-				"proguard-rules.pro"
-			)
+			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 		}
 	}
 	compileOptions {
@@ -53,32 +48,22 @@ android {
 	sourceSets {
 		getByName("main") {
 			java {
-				mutableSetOf(
-					"src\\main\\java"
-				)
+				mutableSetOf("src\\main\\java")
 			}
-			kotlin {
-				sourceSets {
-					dependencies {
-//            implementation("top.yukonga.miuix.kmp:miuix-ui:<version>")
-						// 可选：添加 miuix-preference 以获取 Preference 组件
-//            implementation("top.yukonga.miuix.kmp:miuix-preference:<version>")
-						// 可选：添加 miuix-icons 以获取更多图标
-//            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-						// 可选：添加 miuix-blur 以获取模糊效果
-						implementation(libs.miuix.blur)
-						// 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
-						implementation(libs.miuix.navigation3.ui)
-					}
-				}
-			}
+		}
+		dependencies {
+			implementation(libs.miuix.ui)
+			implementation(libs.miuix.preference)
+			implementation(libs.miuix.icons)
+			implementation(libs.miuix.blur)                                // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
+			implementation(libs.miuix.navigation3.ui)
+			implementation(libs.miuix.squircle)
 		}
 	}
 	buildToolsVersion = "37.0.0"
 	ndkVersion = "30.0.14904198 rc1"
 	compileSdkMinor = 0
 }
-
 dependencies {
 	implementation(libs.androidx.activity.ktx)
 	implementation(libs.androidx.datastore.preferences.rxjava3)
@@ -109,12 +94,10 @@ dependencies {
 	implementation(libs.material3)
 	implementation(libs.preference)
 	implementation(libs.work.runtime)
-	implementation(libs.material.preference)
-	{
+	implementation(libs.material.preference) {
 		exclude("dev.rikka.rikkax.appcompat", "appcompat")
 	}
-	implementation(libs.dev.material)
-	{
+	implementation(libs.dev.material) {
 		exclude("dev.rikka.rikkax.appcompat", "appcompat")
 	}
 	implementation(libs.firebase.crashlytics)
@@ -144,10 +127,9 @@ dependencies {
 	implementation(project(":CalendarView"))
 	implementation(libs.okhttp.java.net.cookiejar)
 	implementation(libs.miuix.blur.android)
-//    implementation(libs.rxjava)
-//    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
+	implementation(libs.jsoup) //    implementation(libs.rxjava)
+	//    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
 	/*configurations.all {
 		exclude("androidx.appcompat", "appcompat")
-	}*/
-	//api(libs.wechat.sdk.android)
+	}*/    //api(libs.wechat.sdk.android)
 }
