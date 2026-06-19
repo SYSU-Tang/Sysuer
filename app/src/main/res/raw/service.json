@@ -324,7 +324,7 @@
         "id": 705,
         "name": "校历",
         "activity": ".academic.CalendarActivity",
-        "url": "https://www.sysu.edu.cn/index/xl.htm",
+        "url": "https://jwb.sysu.edu.cn/school-calendar",
         "description": "校历查询系统，学期安排、节假日安排、重要日期提醒等"
       },
       {
@@ -574,12 +574,6 @@
         "name": "电通院自救指南",
         "url": "https://www.survive-sysu.online",
         "description": "中大EE/CS学生自救指南，包含校园生活、学业、工作等指南"
-      },
-      {
-        "id": 1103,
-        "name": "中大公共资料",
-        "url": "https://pan.baidu.com/share/init?surl=PvaMG7X4C8gi3NOrDZgmGQ?pwd=nu3m",
-        "description": "中大公共资料，包含转专业指南、自救指南、公共资源等"
       },
       {
         "id": 1104,

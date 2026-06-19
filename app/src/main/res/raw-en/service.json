@@ -326,7 +326,7 @@
         "id": 705,
         "name": "School Calendar",
         "activity": ".academic.CalendarActivity",
-        "url": "https://www.sysu.edu.cn/index/xl.htm",
+        "url": "https://jwb.sysu.edu.cn/school-calendar",
         "description": "School calendar inquiry system, providing semester arrangements, holiday arrangements, and important date reminders"
       },
       {
@@ -574,12 +574,6 @@
         "name": "EE Self-Recovery Guide",
         "url": "https://www.survive-sysu.online",
         "description": "Self-Recovery Guide for EE/CS Students at Sun Yat-sen University"
-      },
-      {
-        "id": 1103,
-        "name": "EE/CS Public Resources",
-        "url": "https://pan.baidu.com/share/init?surl=PvaMG7X4C8gi3NOrDZgmGQ?pwd=nu3m",
-        "description": "Public resources for EE/CS students, including transference guides, self-recovery guides, and common resources"
       },
       {
         "id": 1104,
