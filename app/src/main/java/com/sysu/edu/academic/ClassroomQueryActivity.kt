@@ -119,6 +119,7 @@ class ClassroomQueryActivity : BaseActivity() {
 		campus
 		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
+			println(response)
 			if (response.getInteger("code") == 200) {
 				if (message.first == 3) {
 					val data = response.getJSONObject("data")
@@ -191,7 +192,7 @@ class ClassroomQueryActivity : BaseActivity() {
 			if (teachingBuildIDs.isEmpty()) model.contextUtil.toast(R.string.select_teaching_building)
 			else model.addAndNext("jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom", "{\"pageNo\":${page++},\"pageSize\":20,\"param\":{\"dateStr\":\"$dateStr\",\"teachingBuildIDs\":${
 				JSONArray.toJSONString(teachingBuildIDs)
-			},\"startClassTimes\":$startClassTime,\"endClassTimes\":$endClassTime,\"classRoomTagList\":${JSONArray.toJSONString(classType)}}", 3)
+			},\"startClassTimes\":$startClassTime,\"endClassTimes\":$endClassTime,\"classRoomTagList\":${JSONArray.toJSONString(classType)}}}", 3)
 		}
 	
 	class RoomAdapter : RecyclerAdapter<JSONObject>() {
