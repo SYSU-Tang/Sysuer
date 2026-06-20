@@ -1,354 +1,324 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import static android.text.TextUtils.isEmpty;
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
+import com.google.android.material.slider.LabelFormatter
+import com.google.android.material.slider.Slider
+import com.google.android.material.snackbar.Snackbar
+import com.sysu.edu.BaseFragment
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.databinding.DialogEditTextBinding
+import com.sysu.edu.databinding.FragmentQuestionnaireBinding
+import com.sysu.edu.databinding.ItemOptionBinding
+import com.sysu.edu.model.PjxtModel
+import com.sysu.edu.todo.TitleAdapter
+import com.sysu.edu.view.RecyclerViewHolder
 
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ConcatAdapter;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.slider.LabelFormatter;
-import com.google.android.material.slider.Slider;
-import com.google.android.material.snackbar.Snackbar;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.DialogEditTextBinding;
-import com.sysu.edu.databinding.FragmentQuestionnaireBinding;
-import com.sysu.edu.databinding.ItemOptionBinding;
-import com.sysu.edu.model.PjxtModel;
-import com.sysu.edu.todo.TitleAdapter;
-import com.sysu.edu.view.RecyclerViewHolder;
-
-import java.util.ArrayList;
-import java.util.Objects;
-
-
-public class EvaluationQuestionnaireFragment extends Fragment {
-    
-    final JSONObject answers = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}");
-    PjxtModel model;
-    
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        FragmentQuestionnaireBinding binding = FragmentQuestionnaireBinding.inflate(inflater, container, false);
-        model = new PjxtModel(requireContext());
-        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
-        binding.recyclerView.setLayoutManager(layoutManager);
-        ConcatAdapter adp = new ConcatAdapter(new ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build());
-        binding.recyclerView.setAdapter(adp);
-        binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (layoutManager.findFirstVisibleItemPosition() <= 0)
-                    binding.title.setVisibility(View.GONE);
-                else {
-                    binding.title.setVisibility(View.VISIBLE);
-                    for (int pos = layoutManager.findFirstVisibleItemPosition() - 1; pos >= 0; pos--) {
-                        Pair<RecyclerView.Adapter<? extends RecyclerView.ViewHolder>, Integer> adapterPair = adp.getWrappedAdapterAndPosition(pos);
-                        if (adapterPair.first instanceof TitleAdapter wrappedAdapter && wrappedAdapter.getHeader() == 1) {
-                            String targetTitle = wrappedAdapter.getTitle();
-                            binding.title.setText(targetTitle);
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-        requireActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-        model.getMessage().observe(requireActivity(), message -> {
-            JSONObject data = message.second;
-            if (data.get("code").equals("200")) {
-                switch (message.first) {
-                    case 1 ->
-                            data.getJSONObject("result").getJSONArray("assessedObjList").forEach(l ->
-                                    ((JSONObject) l).getJSONArray("bpdxList").forEach(list ->
-                                    {
-                                        JSONObject list1 = (JSONObject) list;
-                                        JSONObject pjjglist = list1.clone();
-                                        pjjglist.remove("dtjgList");
-                                        pjjglist.put("pjxxlist", new JSONArray());
-                                        answers.getJSONArray("pjjglist").add(pjjglist);
-                                        String bprmc = list1.getString("bprmc");// 被评人名称
-                                        if (!isEmpty(bprmc))
-                                            adp.addAdapter(new TitleAdapter(bprmc, 1));
-                                        
-                                        list1.getJSONArray("dtjgList").forEach(e ->
-                                        {
-                                            JSONObject question = (JSONObject) e;
-                                            JSONObject pjxxlist =
-                                                    JSONObject.parse(String.format(
-                                                            "{\"sjly\": \"1\",\"stlx\": \"%s\",\"wjid\": \"%s\",\"wjssrwid\": \"%s\",\"wjstctid\": \"\",\"wjstid\": \"%s\",\"xxdalist\": []}",
-                                                            question.getString("tmlx", "1"),
-                                                            list1.getString("wjid"),
-                                                            list1.getString("wjssrwid"),
-                                                            question.getString("tmid")
-                                                    ));
-                                            JSONArray da = question.getJSONArray("tmxxda");
-                                            pjxxlist.put("xxdalist", da);
-                                            pjjglist.getJSONArray("pjxxlist").add(pjxxlist);
-                                            
-                                            adp.addAdapter(new TitleAdapter(question.getString("tgmc"))); // 题目标题
-                                            
-                                            switch (question.getString("tmlx")) {
-                                                case "1" -> {
-                                                    OptionAdapter optionAdapter = new OptionAdapter();
-                                                    question.getJSONArray("tmxxlist").forEach(o -> optionAdapter.add((JSONObject) o));
-                                                    optionAdapter.setAnswer(da);
-                                                    adp.addAdapter(optionAdapter);
-                                                }
-                                                case "6" ->
-                                                        question.getJSONArray("tmxxlist").forEach(
-                                                                o -> {
-                                                                    BlanketAdapter blanketAdapter = new BlanketAdapter();
-                                                                    JSONObject tmxxlist = (JSONObject) o;
-                                                                    pjxxlist.put("wjstctid", tmxxlist.getString("tmxxid"));
-                                                                    pjxxlist.put("wjstid", tmxxlist.getString("tmid"));
-                                                                    JSONArray xxda = tmxxlist.getJSONArray("xxda");
-                                                                    pjxxlist.put("xxdalist", xxda);
-                                                                    blanketAdapter.setAnswer(xxda);
-                                                                    adp.addAdapter(blanketAdapter);
-                                                                }
-                                                        );
-                                                case "5" -> {
-                                                    RankAdapter rankAdapter = new RankAdapter();
-                                                    rankAdapter.setAnswer(da);
-                                                    adp.addAdapter(rankAdapter);
-                                                }
-                                            }
-                                        });
-                                    }));
-                    case 2 -> model.getContextUtil().toast(R.string.save_successful);
-                    case 3 -> model.getContextUtil().toast(R.string.submit_successful);
-                }
-            }
-        });
-        getEvaluation(requireArguments().getString("rwid"),
-                requireArguments().getString("wjid"),
-                requireArguments().getString("sxz"),
-                requireArguments().getString("pjrdm"),
-                requireArguments().getString("bpdm"),
-                requireArguments().getString("kcdm"),
-                requireArguments().getString("rwh"),
-                Objects.equals(requireArguments().getString("lsjgzt"), "2") ? "1" : "",
-                requireArguments().getString("bpmc"));
-        binding.save.setOnClickListener(_ -> saveEvaluation());
-        binding.submit.setOnClickListener(_ -> Snackbar.make(binding.floatingToolbar, R.string.unchangeable_after_submission, Snackbar.LENGTH_LONG).setAction(R.string.confirm, _ -> submitEvaluation()).show());
-        binding.reset.setOnClickListener(_ -> Snackbar.make(binding.floatingToolbar, R.string.reset, Snackbar.LENGTH_SHORT).setAction(R.string.confirm, _ -> adp.getAdapters().forEach(adapter -> {
-            if (adapter instanceof OptionAdapter) ((OptionAdapter) adapter).clearAnswer();
-            else if (adapter instanceof RankAdapter) ((RankAdapter) adapter).clearAnswer();
-            else if (adapter instanceof BlanketAdapter)
-                ((BlanketAdapter) adapter).clearAnswer();
-        })).show());
-        binding.auto.setOnClickListener(_ -> adp.getAdapters().forEach(adapter -> {
-            if (adapter instanceof OptionAdapter) ((OptionAdapter) adapter).setLastOption();
-            else if (adapter instanceof RankAdapter) ((RankAdapter) adapter).setLastRank();
-        }));
-        return binding.getRoot();
-    }
-    
-    public void getEvaluation(String rwid, String wjid, String sxz, String pjrdm, String bpdm, String kcdm, String rwh, String pjzt, String bpmc) {
-        model.addAndNext(String.format("evaluationPattern/getQuestionnaireTopic?rwid=%s&wjid=%s&sxz=%s&pjrdm=%s&bpdm=%s&kcdm=%s&rwh=%s&pjzt=%s&bpmc=%s", rwid, wjid, sxz, pjrdm, bpdm, kcdm, rwh, pjzt, bpmc), 1);
-    }
-    
-    public void saveEvaluation() {
-        postEvaluation("2", 2);
-    }
-    
-    public void submitEvaluation() {
-        postEvaluation("1", 3);
-    }
-    
-    public void postEvaluation(String mode, int what) {
-        answers.put("pjzt", mode);
-        System.out.println(answers);
-        model.addAndNext("evaluationPattern/submitSaveEvaluation", answers.toString(), what);
-    }
+class EvaluationQuestionnaireFragment : BaseFragment() {
+	val answers: JSONObject = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}")
+	lateinit var model: PjxtModel
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): View {
+		super.onCreateView(inflater, container, savedInstanceState)
+		model = PjxtModel(requireContext())
+		val layoutManager = LinearLayoutManager(requireContext())
+		val adp = ConcatAdapter(ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build())
+		val binding = FragmentQuestionnaireBinding.inflate(inflater, container, false).apply {
+			recyclerView.layoutManager = layoutManager
+			recyclerView.adapter = adp
+			recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+				override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+					if (layoutManager.findFirstVisibleItemPosition() <= 0) title.visibility = View.GONE
+					else {
+						title.visibility = View.VISIBLE
+						for (pos in layoutManager.findFirstVisibleItemPosition() - 1 downTo 0) {
+							val adapterPair = adp.getWrappedAdapterAndPosition(pos)
+							if (adapterPair.first is TitleAdapter && (adapterPair.first as TitleAdapter).header == 1) {
+								val targetTitle: String? = (adapterPair.first as TitleAdapter).getTitle()
+								title.text = targetTitle
+								break
+							}
+						}
+					}
+				}
+			})
+		}
+		requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val data = message.second
+			if (data.get("code") == "200") {
+				when (message.first) {
+					1 -> data.getJSONObject("result")
+						.getJSONArray("assessedObjList")
+						.forEach { l: Any? ->
+							(l as JSONObject).getJSONArray("bpdxList").forEach { list: Any? ->
+								val pjjglist = (list as JSONObject).clone()
+								pjjglist.remove("dtjgList")
+								pjjglist["pjxxlist"] = JSONArray()
+								answers.getJSONArray("pjjglist").add(pjjglist)
+								val bprmc = list.getString("bprmc") // 被评人名称
+								if (!TextUtils.isEmpty(bprmc)) adp.addAdapter(TitleAdapter(bprmc, 1))
+								list.getJSONArray("dtjgList").forEach { question: Any? ->
+									val pjxxlist = JSONObject.parse("{\"sjly\": \"1\",\"stlx\": \"${(question as JSONObject).getString("tmlx", "1")}\",\"wjid\": \"${list.getString("wjid")}\",\"wjssrwid\": \"${list.getString("wjssrwid")}\",\"wjstctid\": \"\",\"wjstid\": \"${question.getString("tmid")}\",\"xxdalist\": []}")
+									val da = question.getJSONArray("tmxxda")
+									pjxxlist["xxdalist"] = da
+									pjjglist.getJSONArray("pjxxlist").add(pjxxlist)
+									adp.addAdapter(TitleAdapter(question.getString("tgmc"))) // 题目标题
+									when (question.getString("tmlx")) {
+										"1" -> {
+											val optionAdapter = OptionAdapter()
+											question.getJSONArray("tmxxlist")
+												.forEach { o: Any? -> o?.let { optionAdapter.add(it as JSONObject) } }
+											optionAdapter.answer = da
+											adp.addAdapter(optionAdapter)
+										}
+										"6" -> question.getJSONArray("tmxxlist")
+											.forEach { o: Any? ->
+												val blanketAdapter = BlanketAdapter()
+												val tmxxlist = o as JSONObject
+												pjxxlist["wjstctid"] = tmxxlist.getString("tmxxid")
+												pjxxlist["wjstid"] = tmxxlist.getString("tmid")
+												val xxda = tmxxlist.getJSONArray("xxda")
+												pjxxlist["xxdalist"] = xxda
+												blanketAdapter.answer = xxda
+												adp.addAdapter(blanketAdapter)
+											}
+										"5" -> {
+											val rankAdapter = RankAdapter()
+											rankAdapter.answer = da
+											adp.addAdapter(rankAdapter)
+										}
+									}
+								}
+							}
+						}
+					2 -> model.contextUtil.toast(R.string.save_successful)
+					3 -> model.contextUtil.toast(R.string.submit_successful)
+				}
+			}
+		})
+		getEvaluation(requireArguments().getString("rwid")!!, requireArguments().getString("wjid"), requireArguments().getString("sxz"), requireArguments().getString("pjrdm"), requireArguments().getString("bpdm"), requireArguments().getString("kcdm"), requireArguments().getString("rwh"), if (requireArguments().getString("lsjgzt") == "2") "1" else "", requireArguments().getString("bpmc"))
+		binding.save.setOnClickListener { saveEvaluation() }
+		binding.submit.setOnClickListener {
+			Snackbar.make(binding.floatingToolbar, R.string.unchangeable_after_submission, Snackbar.LENGTH_LONG)
+				.setAction(R.string.confirm) { submitEvaluation() }
+				.show()
+		}
+		binding.reset.setOnClickListener {
+			Snackbar.make(binding.floatingToolbar, R.string.reset, Snackbar.LENGTH_SHORT)
+				.setAction(R.string.confirm) {
+					adp.adapters.forEach { adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder?>? ->
+						when (adapter) {
+							is OptionAdapter -> adapter.clearAnswer()
+							is RankAdapter -> adapter.clearAnswer()
+							is BlanketAdapter -> adapter.clearAnswer()
+						}
+					}
+				}
+				.show()
+		}
+		binding.auto.setOnClickListener {
+			adp.adapters.forEach { adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder?>? ->
+				if (adapter is OptionAdapter) adapter.setLastOption()
+				else if (adapter is RankAdapter) adapter.setLastRank()
+			}
+		}
+		return binding.root
+	}
+	
+	fun getEvaluation(rwid: String,
+	                  wjid: String?,
+	                  sxz: String?,
+	                  pjrdm: String?,
+	                  bpdm: String?,
+	                  kcdm: String?,
+	                  rwh: String?,
+	                  pjzt: String?,
+	                  bpmc: String?) {
+		model.addAndNext("evaluationPattern/getQuestionnaireTopic?rwid=$rwid&wjid=$wjid&sxz=$sxz&pjrdm=$pjrdm&bpdm=$bpdm&kcdm=$kcdm&rwh=$rwh&pjzt=$pjzt&bpmc=$bpmc", 1)
+	}
+	
+	fun saveEvaluation() {
+		postEvaluation("2", 2)
+	}
+	
+	fun submitEvaluation() {
+		postEvaluation("1", 3)
+	}
+	
+	fun postEvaluation(mode: String?, what: Int) {
+		answers["pjzt"] = mode
+		model.addAndNext("evaluationPattern/submitSaveEvaluation", "$answers", what)
+	}
 }
 
-class OptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final ArrayList<JSONObject> data = new ArrayList<>();
-    int selected = -1;
-    String option;
-    JSONArray answer;
-    
-    public void setOption(int pos) {
-        if (selected != pos) {
-            int old = selected;
-            selected = pos;
-            notifyItemChanged(old);
-            notifyItemChanged(selected);
-            answer.set(0, data.get(pos).getString("tmxxid"));
-        } else clearAnswer();
-    }
-    
-    public void setLastOption() {
-        setOption(data.size() - 1);
-    }
-    
-    public void clearAnswer() {
-        answer.clear();
-        int old = selected;
-        selected = -1;
-        option = null;
-        notifyItemChanged(old);
-    }
-    
-    public void setAnswer(JSONArray answers) {
-        answer = answers;
-        option = answers.isEmpty() ? null : answers.getString(0);
-        notifyItemRangeChanged(0, getItemCount());
-    }
-    
-    public void add(JSONObject item) {
-        data.add(item);
-        notifyItemInserted(data.size() - 1);
-    }
-    
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerView.ViewHolder(ItemOptionBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false).getRoot()) {
-        };
-    }
-    
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        int pos = holder.getBindingAdapterPosition();
-        ItemOptionBinding binding = ItemOptionBinding.bind(holder.itemView);
-        binding.getRoot().setOnClickListener(_ -> setOption(pos));
-        JSONObject item = data.get(pos);
-        if (selected == -1 && Objects.equals(item.getString("tmxxid"), option))
-            selected = pos;
-        binding.option.setChecked(selected == pos);
-        binding.option.setText(item.getString("xxmc"));
-        binding.getRoot().updateAppearance(pos, getItemCount());
-    }
-    
-    @Override
-    public int getItemCount() {
-        return data.size();
-    }
+internal class OptionAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
+	val data = ArrayList<JSONObject>()
+	var selected: Int = -1
+	var option: String? = null
+	var answer: JSONArray? = null
+		set(answers) {
+			field = answers
+			option = answers?.let { if (it.isEmpty()) null else it.getString(0) }
+			notifyItemRangeChanged(0, itemCount)
+		}
+	
+	fun setOption(pos: Int) {
+		if (selected != pos) {
+			val old = selected
+			selected = pos
+			notifyItemChanged(old)
+			notifyItemChanged(selected)
+			answer!![0] = data[pos].getString("tmxxid")
+		} else clearAnswer()
+	}
+	
+	fun setLastOption() {
+		setOption(data.size - 1)
+	}
+	
+	fun clearAnswer() {
+		answer!!.clear()
+		val old = selected
+		selected = -1
+		option = null
+		notifyItemChanged(old)
+	}
+	
+	fun add(item: JSONObject) {
+		data.add(item)
+		notifyItemInserted(data.size - 1)
+	}
+	
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+		return object :
+			RecyclerView.ViewHolder(ItemOptionBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
+	}
+	
+	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+		val pos = holder.getBindingAdapterPosition()
+		val item = data[pos]
+		if (selected == -1 && item.getString("tmxxid") == option) selected = pos
+		ItemOptionBinding.bind(holder.itemView).apply {
+			root.setOnClickListener { setOption(pos) }
+			option.setChecked(selected == pos)
+			option.text = item.getString("xxmc")
+			root.updateAppearance(pos, itemCount)
+		}
+	}
+	
+	override fun getItemCount(): Int {
+		return data.size
+	}
 }
 
-class RankAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    
-    int rank;
-    JSONArray answer;
-    
-    public void setAnswer(JSONArray answers) {
-        answer = answers;
-        rank = answers.isEmpty() ? 100 : Integer.parseInt(answers.getString(0));
-        notifyItemChanged(0);
-    }
-    
-    public void setLastRank() {
-        rank = 100;
-        answer.set(0, String.valueOf(rank));
-        notifyItemChanged(0);
-    }
-    
-    public void clearAnswer() {
-        answer.clear();
-        rank = 100;
-        notifyItemChanged(0);
-    }
-    
-    @NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Slider p = new Slider(parent.getContext());
-        p.setValue(rank == 0 ? 100 : rank);
-        p.setStepSize(1);
-        p.setValueFrom(0);
-        p.setValueTo(100);
-        p.setLabelBehavior(LabelFormatter.LABEL_VISIBLE);
-        p.setThumbHeight(96);
-        p.addOnChangeListener((_, value, _) -> answer.set(0, String.valueOf((int) value)));
-        return new RecyclerView.ViewHolder(p) {
-        };
-    }
-    
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-    }
-    
-    @Override
-    public int getItemCount() {
-        return 1;
-    }
+internal class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
+	var rank: Int = 0
+	var answer: JSONArray? = null
+		set(answers) {
+			field = answers
+			answers?.let { rank = if (it.isEmpty()) 100 else it.getString(0).toInt() }
+			notifyItemChanged(0)
+		}
+	
+	fun setLastRank() {
+		rank = 100
+		answer!![0] = "$rank"
+		notifyItemChanged(0)
+	}
+	
+	fun clearAnswer() {
+		answer?.clear()
+		rank = 100
+		notifyItemChanged(0)
+	}
+	
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+		return object : RecyclerView.ViewHolder(Slider(parent.context).apply {
+			value = (if (rank == 0) 100 else rank).toFloat()
+			stepSize = 1f
+			valueFrom = 0f
+			valueTo = 100f
+			labelBehavior = LabelFormatter.LABEL_VISIBLE
+			thumbHeight = 96
+			addOnChangeListener { _: Slider?, value: Float, _: Boolean ->
+				answer!![0] = value.toInt().toString()
+			}
+		}) {}
+	}
+	
+	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+	}
+	
+	override fun getItemCount(): Int {
+		return 1
+	}
 }
 
-class BlanketAdapter extends RecyclerView.Adapter<RecyclerViewHolder<DialogEditTextBinding>> {
-    String content;
-    JSONArray answer;
-    
-    public void setAnswer(JSONArray answers) {
-        answer = answers;
-        content = answers.isEmpty() ? null : answers.getString(0);
-        notifyItemChanged(0);
-    }
-    
-    @NonNull
-    @Override
-    public RecyclerViewHolder<DialogEditTextBinding> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new RecyclerViewHolder<>(DialogEditTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false)) {
-        };
-    }
-    
-    
-    public void setText(String text) {
-        content = text;
-    }
-    
-    public void clearAnswer() {
-        answer.clear();
-        content = null;
-        notifyItemChanged(0);
-    }
-    
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerViewHolder<DialogEditTextBinding> holder, int position) {
-        DialogEditTextBinding binding = holder.binding;
-        binding.editLayout.setHint(R.string.please_enter_content);
-        if (!isEmpty(content)) {
-            answer.set(0, content);
-            binding.edit.setText(content);
-        }
-        binding.edit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-            
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isEmpty(s)) {
-                    if (!answer.isEmpty())
-                        answer.remove(0);
-                } else answer.set(0, s.toString());
-            }
-        });
-        binding.executePendingBindings();
-    }
-    
-    @Override
-    public int getItemCount() {
-        return 1;
-    }
+internal class BlanketAdapter : RecyclerView.Adapter<RecyclerViewHolder<DialogEditTextBinding>>() {
+	var content: String? = null
+	var answer: JSONArray? = null
+		set(answers) {
+			field = answers
+			content = answers?.let { if (it.isEmpty()) null else it.getString(0) }
+			notifyItemChanged(0)
+		}
+	
+	override fun onCreateViewHolder(parent: ViewGroup,
+	                                viewType: Int): RecyclerViewHolder<DialogEditTextBinding> {
+		return object :
+			RecyclerViewHolder<DialogEditTextBinding>(DialogEditTextBinding.inflate(LayoutInflater.from(parent.context), parent, false)) {}
+	}
+	
+	fun setText(text: String?) {
+		content = text
+	}
+	
+	fun clearAnswer() {
+		answer?.clear()
+		content = null
+		notifyItemChanged(0)
+	}
+	
+	override fun onBindViewHolder(holder: RecyclerViewHolder<DialogEditTextBinding>,
+	                              position: Int) {
+		val binding = holder.binding
+		binding.editLayout.setHint(R.string.please_enter_content)
+		if (!TextUtils.isEmpty(content)) {
+			answer!![0] = content
+			binding.edit.setText(content)
+		}
+		binding.edit.addTextChangedListener(object : TextWatcher {
+			override fun afterTextChanged(editable: Editable?) {
+			}
+			
+			override fun beforeTextChanged(charSequence: CharSequence?, i: Int, i1: Int, i2: Int) {
+			}
+			
+			override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+				if (TextUtils.isEmpty(s)) {
+					if (!answer!!.isEmpty()) answer!!.removeAt(0)
+				} else answer!![0] = "$s"
+			}
+		})
+		binding.executePendingBindings()
+	}
+	
+	override fun getItemCount(): Int {
+		return 1
+	}
 }

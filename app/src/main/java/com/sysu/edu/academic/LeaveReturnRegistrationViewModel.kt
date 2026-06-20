@@ -1,9 +1,8 @@
-package com.sysu.edu.academic;
+package com.sysu.edu.academic
 
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
-public class LeaveReturnRegistrationViewModel extends ViewModel {
-    
-    final MutableLiveData<String> year = new MutableLiveData<>();
+class LeaveReturnRegistrationViewModel : ViewModel() {
+	val year: MutableLiveData<String?> = MutableLiveData<String?>()
 }

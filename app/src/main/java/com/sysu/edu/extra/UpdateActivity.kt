@@ -78,10 +78,10 @@ class UpdateActivity : BaseActivity() {
 																					 val minorVersion = getIntValue("minorVersion", 0)
 																					 val majorVersion = getIntValue("majorVersion", 0)
 																					 val generationVersion = getIntValue("generationVersion", 0)
-																					 val isBeta = getBooleanValue("isBeta", true)
+																					 val isBeta = getBooleanValue("isBeta", false)
 																					 if (generationVersion > BuildConfig.VERSION_GENERATION || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion > BuildConfig.VERSION_MAJOR) || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion == BuildConfig.VERSION_MAJOR && minorVersion > BuildConfig.VERSION_MINOR) && isBeta) {
 																						 val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
-																						 binding.changelog.setMarkdown("# $versionName($responseVersion)\n${data.getString("betaDescription", "")}")
+																						 binding.changelog.setMarkdown("# $versionName($responseVersion)\n${data.getString("previewDescription", "")}")
 																						 binding.updateButton.setText(R.string.beta_version_detected)
 																					 } else {
 																						 binding.changelog.setMarkdown("# $responseVersionName($responseVersion)\n${data.getString("description", "")}")
@@ -109,7 +109,7 @@ class UpdateActivity : BaseActivity() {
 					val minorVersion = getIntValue("minorVersion", 0)
 					val majorVersion = getIntValue("majorVersion", 0)
 					val generationVersion = getIntValue("generationVersion", 0)
-					val isBeta = getBooleanValue("isBeta", true)
+					val isBeta = getBooleanValue("isBeta", false)
 					if (generationVersion > BuildConfig.VERSION_GENERATION || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion > BuildConfig.VERSION_MAJOR) || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion == BuildConfig.VERSION_MAJOR && minorVersion > BuildConfig.VERSION_MINOR) && isBeta) {
 						val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
 						path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}-$versionName}apk"
