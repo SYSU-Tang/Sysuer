@@ -76,7 +76,7 @@ class MainActivity : BaseActivity() {
 				}
 			}
 		}).apply {
-			setParams(config)
+			setParams(this@MainActivity.config)
 		}
 		val binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.getRoot())

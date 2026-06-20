@@ -22,7 +22,6 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 	var position: Int = 0
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		config.setCallback { result }
 		val adp = Pager2Adapter(this)
 		val page1 = StaggeredFragment()
 		val page2 = StaggeredFragment()
@@ -126,7 +125,7 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 				}
 			}
 		}).apply {
-			setParams(config)
+			setParams(this@PhysicalFitnessTestResultActivity.config)
 			setUA("Mozilla/5.0 (Linux; Android 15.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36")
 		}
 		result

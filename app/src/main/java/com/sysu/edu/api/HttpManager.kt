@@ -19,7 +19,6 @@ import java.io.IOException
  * @param handler 处理消息的 Handler 对象
  */
 class HttpManager(val handler: Handler) {
-	
 	/**
 	 * 获取 OkHttpClient 客户端
 	 * 
@@ -42,39 +41,36 @@ class HttpManager(val handler: Handler) {
 	@JvmField var isAuthorizationRequired: Boolean = false // 是否需要 Authorization 头字段
 	@JvmField var isTokenRequired: Boolean = false // 是否需要 token 头字段
 	@JvmField var header: MutableMap<String?, String?>? = null // 自定义请求头字段
-	@JvmField var authorizationJar: AuthorizationJar? = null // 自定义 Authorization 头字段
-	
-	
-//	init {
-//		setHandler(handler)
-//	}
-//	/**
-//	 * 获取处理消息的 Handler 对象
-//	 *
-//	 * @return 处理消息的 Handler 对象
-//	 */
-//	fun getHandler(): Handler {
-//		return handler!!
-//	}
-//	/**
-//	 * 设置处理消息的 Handler 对象
-//	 *
-//	 * @param handler 处理消息的 Handler 对象
-//	 */
-//	fun setHandler(handler: Handler) {
-//		this.handler = handler
-//	}
-	
+	@JvmField
+	var authorizationJar: AuthorizationJar? = null // 自定义 Authorization 头字段 //	init {
+	//		setHandler(handler)
+	//	}
+	//	/**
+	//	 * 获取处理消息的 Handler 对象
+	//	 *
+	//	 * @return 处理消息的 Handler 对象
+	//	 */
+	//	fun getHandler(): Handler {
+	//		return handler!!
+	//	}
+	//	/**
+	//	 * 设置处理消息的 Handler 对象
+	//	 *
+	//	 * @param handler 处理消息的 Handler 对象
+	//	 */
+	//	fun setHandler(handler: Handler) {
+	//		this.handler = handler
+	//	}
 	/**
 	 * 设置请求参数
 	 *
 	 * @param config 请求参数对象
 	 */
-	fun setParams(config: Config?) {
+	fun setParams(config: Config) {
 		this.config = config
-		cookieManager = config?.let { CookieManager(it.context) }
+		cookieManager = CookieManager(config.context)
 	}
-
+	
 	/**
 	 * 设置 Referer 头字段
 	 *
@@ -83,7 +79,7 @@ class HttpManager(val handler: Handler) {
 	fun setReferrer(referrer: String?) {
 		this.referrer = referrer
 	}
-
+	
 	/**
 	 * 设置 Cookie 头字段，优先级最高
 	 *
@@ -92,7 +88,7 @@ class HttpManager(val handler: Handler) {
 	fun setCookie(cookie: String?) {
 		this.cookie = cookie
 	}
-
+	
 	/**
 	 * 设置是否需要 Authorization 头字段
 	 *
@@ -101,7 +97,7 @@ class HttpManager(val handler: Handler) {
 	fun setAuthorizationRequired(isAuthorizationRequired: Boolean) {
 		this.isAuthorizationRequired = isAuthorizationRequired
 	}
-
+	
 	/**
 	 * 设置是否需要 token 头字段
 	 *
@@ -110,7 +106,7 @@ class HttpManager(val handler: Handler) {
 	fun setTokenRequired(isTokenRequired: Boolean) {
 		this.isTokenRequired = isTokenRequired
 	}
-
+	
 	/**
 	 * 设置 User-Agent 头字段
 	 *
@@ -119,7 +115,7 @@ class HttpManager(val handler: Handler) {
 	fun setUA(ua: String?) {
 		this.ua = ua
 	}
-
+	
 	/**
 	 * 设置请求目标 URL
 	 *
@@ -128,7 +124,7 @@ class HttpManager(val handler: Handler) {
 	fun setTarget(target: String?) {
 		this.target = target
 	}
-
+	
 	/**
 	 * 设置请求头字段
 	 *
@@ -137,7 +133,7 @@ class HttpManager(val handler: Handler) {
 	fun setHeader(header: MutableMap<String?, String?>?) {
 		this.header = header
 	}
-
+	
 	/**
 	 * 设置 AuthorizationJar 对象
 	 *
@@ -155,8 +151,8 @@ class HttpManager(val handler: Handler) {
 	 */
 	fun sendRequest(request: Request, what: Int) {
 		client.newCall(request).enqueue(object : Callback {
-			override fun onFailure(call: Call, e: IOException) {
-//                System.out.println(request.url());
+			override fun onFailure(call: Call,
+			                       e: IOException) { //                System.out.println(request.url());
 				sendFailure()
 			}
 			
@@ -199,7 +195,8 @@ class HttpManager(val handler: Handler) {
 		if (authorization != null) request.header("Authorization", authorization!!)
 		if (referrer != null) request.header("Referer", referrer!!)
 		if (ua != null) request.header("User-Agent", ua!!)
-		if (data != null) request.post(data.toRequestBody((type ?: "application/json").toMediaType()))
+		if (data != null) request.post(data.toRequestBody((type
+			?: "application/json").toMediaType()))
 		if (isTokenRequired && authorizationJar != null) request.header("token", authorizationJar!!.getToken(host))
 		header?.forEach { (name: String?, value: String?) -> request.header(name!!, value!!) }
 		return request

@@ -88,13 +88,12 @@ class HomeworkMainFragment : BaseFragment() {
 						}
 					}
 					if (error) config.contextUtil.login(TargetUrl.LMS) {
-						getLmsTask(authorizationJar.getToken("lms.sysu.edu.cn"))
+						getLmsTask(authorizationJar.getToken("lms.sysu.edu.cn")) //						http.postRequest("https://lms.sysu.edu.cn/lib/ajax/service.php?sesskey=${authorizationJar.getToken("lms.sysu.edu.cn")}&info=core_calendar_get_calendar_upcoming_view", "[{\"index\":0,\"methodname\":\"core_calendar_get_calendar_upcoming_view\",\"args\":{\"courseid\":\"1\",\"categoryid\":\"0\"}}]", 0)
 					}
 				}
 			}
-		}).apply {
-			setParams(config)
-		}
+		})
+		http.setParams(config)
 		getLmsTask(authorizationJar.getToken("lms.sysu.edu.cn"))
 		return binding.root
 	}
