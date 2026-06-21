@@ -1,27 +1,19 @@
-package com.sysu.edu.life;
+package com.sysu.edu.life
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.databinding.ActivityNetPayBinding
 
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.NavigationUI;
-
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityNetPayBinding;
-
-public class NetPayActivity extends BaseActivity {
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityNetPayBinding binding = ActivityNetPayBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.net_pay_fragment);
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(binding.bottomNav, navController);
-        }
-        binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
-    }
+class NetPayActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityNetPayBinding.inflate(layoutInflater)
+		setContentView(binding.root)
+		val navHostFragment = supportFragmentManager.findFragmentById(R.id.net_pay_fragment) as NavHostFragment
+		setupWithNavController(binding.bottomNav, navHostFragment.navController)
+		binding.toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+	}
 }

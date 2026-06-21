@@ -1,15 +1,9 @@
-package com.sysu.edu.view;
+package com.sysu.edu.view
 
-import androidx.annotation.NonNull;
-import androidx.databinding.ViewDataBinding;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.databinding.ViewDataBinding
+import androidx.recyclerview.widget.RecyclerView
 
-public class RecyclerViewHolder<T extends ViewDataBinding> extends RecyclerView.ViewHolder {
-    
-    public final T binding;
-    
-    public RecyclerViewHolder(@NonNull T binding) {
-        super(binding.getRoot());
-        this.binding = binding;
-    }
+open class RecyclerViewHolder<T : ViewDataBinding?>(binding: T) :
+	RecyclerView.ViewHolder(binding!!.root) {
+	val binding: T? = binding
 }

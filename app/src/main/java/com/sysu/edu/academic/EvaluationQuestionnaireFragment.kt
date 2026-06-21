@@ -45,12 +45,11 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 					if (layoutManager.findFirstVisibleItemPosition() <= 0) title.visibility = View.GONE
 					else {
 						title.visibility = View.VISIBLE
-						for (pos in layoutManager.findFirstVisibleItemPosition() - 1 downTo 0) {
-							val adapterPair = adp.getWrappedAdapterAndPosition(pos)
-							if (adapterPair.first is TitleAdapter && (adapterPair.first as TitleAdapter).header == 1) {
-								val targetTitle: String? = (adapterPair.first as TitleAdapter).title
-								title.text = targetTitle
-								break
+						(layoutManager.findFirstVisibleItemPosition() - 1..0).forEach { pos ->
+							val adapterPair = adp.getWrappedAdapterAndPosition(pos).first
+							if (adapterPair is TitleAdapter && adapterPair.header == 1) {
+								title.text = adapterPair.title
+								return@forEach
 							}
 						}
 					}
@@ -144,9 +143,10 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 	fun String.encodeNonAscii(): String {
 		val sb = StringBuilder()
 		forEach {
-			if ((it in 'A'..'Z') || (it in 'a'..'z') || (it in '0'..'9')) sb.append(it) else "$it".toByteArray(Charsets.UTF_8).forEach { byte ->
-				sb.append("%${byte.toUByte().toString(16).uppercase().padStart(2, '0')}")
-			}
+			if ((it in 'A'..'Z') || (it in 'a'..'z') || (it in '0'..'9')) sb.append(it) else "$it".toByteArray(Charsets.UTF_8)
+				.forEach { byte ->
+					sb.append("%${byte.toUByte().toString(16).uppercase().padStart(2, '0')}")
+				}
 		}
 		return "$sb"
 	}
@@ -307,29 +307,31 @@ internal class BlanketAdapter : RecyclerView.Adapter<RecyclerViewHolder<DialogEd
 	
 	override fun onBindViewHolder(holder: RecyclerViewHolder<DialogEditTextBinding>,
 	                              position: Int) {
-		val binding = holder.binding
-		binding.editLayout.setHint(R.string.please_enter_content)
-		if (!TextUtils.isEmpty(content)) {
-			answer!![0] = content
-			binding.edit.setText(content)
+		holder.binding?.apply {
+			editLayout.setHint(R.string.please_enter_content)
+			if (!content.isNullOrEmpty()) {
+				answer!![0] = content
+				edit.setText(content)
+			}
+			edit.addTextChangedListener(object : TextWatcher {
+				override fun afterTextChanged(editable: Editable?) {
+				}
+				
+				override fun beforeTextChanged(charSequence: CharSequence?,
+				                               i: Int,
+				                               i1: Int,
+				                               i2: Int) {
+				}
+				
+				override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+					if (TextUtils.isEmpty(s) && answer?.isEmpty() == false) {
+						answer?.removeAt(0)
+					} else answer!![0] = "$s"
+				}
+			})
+			executePendingBindings()
 		}
-		binding.edit.addTextChangedListener(object : TextWatcher {
-			override fun afterTextChanged(editable: Editable?) {
-			}
-			
-			override fun beforeTextChanged(charSequence: CharSequence?, i: Int, i1: Int, i2: Int) {
-			}
-			
-			override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-				if (TextUtils.isEmpty(s)) {
-					if (!answer!!.isEmpty()) answer!!.removeAt(0)
-				} else answer!![0] = "$s"
-			}
-		})
-		binding.executePendingBindings()
 	}
 	
-	override fun getItemCount(): Int {
-		return 1
-	}
+	override fun getItemCount(): Int = 1
 }
