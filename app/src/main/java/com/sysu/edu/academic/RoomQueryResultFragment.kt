@@ -9,7 +9,6 @@ import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
-import com.sysu.edu.api.CommonUtil.toStringOrDefault
 import com.sysu.edu.databinding.FragmentCourseQueryResultBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.StaggeredFragment
@@ -34,14 +33,14 @@ class RoomQueryResultFragment : StaggeredFragment() {
 			val response = message.second
 			if (response.getInteger("code") == 200) response.getJSONObject("data")
 				.getJSONArray("data")
-				.forEach { e: Any? ->
-					val item = e as JSONObject
-					val values: ArrayList<String?> = extractValue(item, arrayOf("yearTerm", "date", "week", "dayWeek", "date", "campus", "teachingBuild", "teachingBuildNum", "classroomNum", "floor", "classroomID", "seatCount"))
-					for (i in arrayOf("oneSection", "twoSection", "threeSection", "fourSection", "fiveSection", "sixSection", "sevenSection", "eightSection", "nineSection", "tenSection", "elevenSection", "twelveSection", "thirteenSection", "fourteenSection", "fifteenSection", "sixteenSection")) {
-						val section = item.getJSONObject(i)
-						values.add(toStringOrDefault<String?>(section.getString("occupyReason"), "") + "-" + toStringOrDefault<String?>(section.getString("occupyUseDepartment"), ""))
+				.forEach { item: Any? ->
+					val values: ArrayList<String?> = extractValue(item as JSONObject, arrayOf("yearTerm", "date", "week", "dayWeek", "campus", "teachingBuild", "teachingBuildNum", "classroomNum", "floor", "classroomID", "seatCount"))
+					arrayOf("oneSection", "twoSection", "threeSection", "fourSection", "fiveSection", "sixSection", "sevenSection", "eightSection", "nineSection", "tenSection", "elevenSection"/*, "twelveSection", "thirteenSection", "fourteenSection", "fifteenSection", "sixteenSection"*/).forEach { i ->
+						item.getJSONObject(i)?.let {
+							values.add(it.getString("occupyReason", "") + "-" + it.getString("occupyUseDepartment", ""))
+						}
 					}
-					add(item.getString("classroomNum"), listOf(getString(R.string.year_term), getString(R.string.date), getString(R.string.week_range), getString(R.string.week), getString(R.string.date), getString(R.string.campus), getString(R.string.office), getString(R.string.teaching_building_number), getString(R.string.classroom_number), getString(R.string.floor), getString(R.string.classroom_id), getString(R.string.seat_count), getString(R.string.first_section), getString(R.string.second_section), getString(R.string.third_section), getString(R.string.fourth_section), getString(R.string.fifth_section), getString(R.string.sixth_section), getString(R.string.seventh_section), getString(R.string.eighth_section), getString(R.string.ninth_section), getString(R.string.tenth_section), getString(R.string.eleventh_section), getString(R.string.twelfth_section), getString(R.string.thirteenth_section), getString(R.string.fourteenth_section), getString(R.string.fifteenth_section), getString(R.string.sixteenth_section)), values)
+					add("${item.getString("classroomNum")}/${item.getString("date")}", CommonUtil.getString(requireContext(), intArrayOf(R.string.year_term, R.string.date, R.string.week_range, R.string.week, R.string.campus, R.string.office, R.string.teaching_building_number, R.string.classroom_number, R.string.floor, R.string.classroom_id, R.string.seat_count, R.string.first_section, R.string.second_section, R.string.third_section, R.string.fourth_section, R.string.fifth_section, R.string.sixth_section, R.string.seventh_section, R.string.eighth_section, R.string.ninth_section, R.string.tenth_section, R.string.eleventh_section)/* getString(R.string.twelfth_section), getString(R.string.thirteenth_section), getString(R.string.fourteenth_section), getString(R.string.fifteenth_section), getString(R.string.sixteenth_section)*/), values)
 				}
 		})
 		rooms
