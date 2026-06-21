@@ -67,12 +67,12 @@ class MainActivity : BaseActivity() {
 				when (msg.what) {
 					-1 -> config.toast(R.string.no_net_connected)
 					0 -> config.contextUtil.disposable.add(Observable.just(msg.obj)
-						                                       .map { JSONObject.parseObject(it as String?) }
-						                                       .subscribeOn(Schedulers.io())
-						                                       .observeOn(AndroidSchedulers.mainThread())
-						                                       .subscribe({ response: JSONObject? ->
-							                                                  this@MainActivity.showUpdateDialog(response!!)
-						                                                  }, {}))
+															   .map { JSONObject.parseObject(it as String?) }
+															   .subscribeOn(Schedulers.io())
+															   .observeOn(AndroidSchedulers.mainThread())
+															   .subscribe({ response: JSONObject? ->
+																			  this@MainActivity.showUpdateDialog(response!!)
+																		  }, {}))
 				}
 			}
 		}).apply {
@@ -87,11 +87,11 @@ class MainActivity : BaseActivity() {
 		val graph = NavInflater(this, navController.navigatorProvider).inflate(R.navigation.main_nav)
 		PreferenceManager.getDefaultSharedPreferences(this).getString("home", "0")?.let {
 			graph.setStartDestination(when (it) {
-				                          "0" -> R.id.navigation_dashboard
-				                          "1" -> R.id.navigation_service
-				                          "2" -> R.id.navigation_account
-				                          else -> R.id.navigation_dashboard
-			                          })
+										  "0" -> R.id.navigation_dashboard
+										  "1" -> R.id.navigation_service
+										  "2" -> R.id.navigation_account
+										  else -> R.id.navigation_dashboard
+									  })
 		}
 		navController.graph = graph
 		setupWithNavController(binding.navView as NavigationBarView, navController)
@@ -101,18 +101,24 @@ class MainActivity : BaseActivity() {
 			isFirstLaunch = false
 		}
 		val agreementDialog = MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
-			.setMessage("").setPositiveButton(R.string.agree) { _: DialogInterface?, _: Int ->
+			.setMessage("")
+			.setPositiveButton(R.string.agree) { _: DialogInterface?, _: Int ->
 				spm.isAgree = true
 				spm.setIsAgreeLiveData(false)
-			}.setNegativeButton(R.string.disagree) { _: DialogInterface?, _: Int ->
+			}
+			.setNegativeButton(R.string.disagree) { _: DialogInterface?, _: Int ->
 				spm.isAgree = false
 				supportFinishAfterTransition()
-			}.setCancelable(false).create()
+			}
+			.setCancelable(false)
+			.create()
 		spm.isAgreeLiveData.observe(this, Observer { aBoolean: Boolean? ->
 			if (aBoolean == true) {
 				agreementDialog.show()
 				agreementDialog.findViewById<TextView>(android.R.id.message)?.let {
-					Markwon.builder(this).usePlugin(StrikethroughPlugin.create()).build()
+					Markwon.builder(this)
+						.usePlugin(StrikethroughPlugin.create())
+						.build()
 						.setMarkdown(it, "请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)")
 				}
 			} else {
@@ -127,9 +133,10 @@ class MainActivity : BaseActivity() {
 				}
 				ContextCompat.registerReceiver(this, receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED)
 				getInstance(this).enqueue(OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java)
-					                          .setInputData(Data.Builder()
-						                                        .putStringArray("components", arrayOf("TodayClassWidget", "RecentClassWidget", "NextClassWidget"))
-						                                        .build()).build())
+											  .setInputData(Data.Builder()
+																.putStringArray("components", arrayOf("TodayClassWidget", "RecentClassWidget", "NextClassWidget"))
+																.build())
+											  .build())
 				if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PackageManager.PERMISSION_GRANTED)
 			}
 		})
@@ -143,18 +150,23 @@ class MainActivity : BaseActivity() {
 				.setTitle(R.string.higher_version_detected)
 				.setPositiveButton(R.string.download_in_system) { _: DialogInterface?, _: Int ->
 					downloadId = (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(DownloadManager.Request(Uri.parse(releaseLink))
-						                                                                             .setDestinationUri(Uri.fromFile(File(path)))
-						                                                                             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
-				}.setNegativeButton(R.string.download_in_browser) { _: DialogInterface?, _: Int ->
+																									 .setDestinationUri(Uri.fromFile(File(path)))
+																									 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
+				}
+				.setNegativeButton(R.string.download_in_browser) { _: DialogInterface?, _: Int ->
 					startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(releaseLink)))
-				}.setCancelable(!response.getBoolean("enforce"))
+				}
+				.setCancelable(!response.getBoolean("enforce"))
 				.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
 					com.sysu.edu.api.DownloadManager.downloadFile(this, releaseLink, path)
-				}.create().apply {
+				}
+				.create()
+				.apply {
 					setCancelable(!response.getBoolean("enforce"))
 					show()
 					findViewById<TextView>(android.R.id.message)?.let {
-						Markwon.builder(this@MainActivity).build()
+						Markwon.builder(this@MainActivity)
+							.build()
 							.setMarkdown(it, response.getString("description"))
 					}
 				}
@@ -167,23 +179,27 @@ class MainActivity : BaseActivity() {
 				if (generationVersion > BuildConfig.VERSION_GENERATION || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion > BuildConfig.VERSION_MAJOR) || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion == BuildConfig.VERSION_MAJOR && minorVersion > BuildConfig.VERSION_MINOR) && isBeta) {
 					val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
 					path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}-$versionName}apk"
-					val previewLink = response.getString("previewLink", "https://github.com/SYSU-Tang/Sysuer/releases/$versionName/download/app-release.apk")
+					val previewLink = response.getString("previewLink", "https://github.com/SYSU-Tang/Sysuer/releases/download/$versionName/app-release.apk")
 					MaterialAlertDialogBuilder(this).setMessage("")
 						.setTitle(R.string.beta_version_detected)
 						.setPositiveButton(R.string.download_in_system) { _: DialogInterface?, _: Int ->
 							downloadId = getSystemService(DownloadManager::class.java).enqueue(DownloadManager.Request(Uri.parse(previewLink))
-								                                                                   .setDestinationUri(Uri.fromFile(File(path)))
-								                                                                   .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
+																								   .setDestinationUri(Uri.fromFile(File(path)))
+																								   .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
 						}
 						.setNegativeButton(R.string.download_in_browser) { _: DialogInterface?, _: Int ->
 							startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(previewLink)))
-						}.setCancelable(!response.getBoolean("enforce"))
+						}
+						.setCancelable(!response.getBoolean("enforce"))
 						.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
 							com.sysu.edu.api.DownloadManager.downloadFile(this, previewLink, path)
-						}.create().apply {
+						}
+						.create()
+						.apply {
 							show()
 							findViewById<TextView>(android.R.id.message)?.let {
-								Markwon.builder(this@MainActivity).build()
+								Markwon.builder(this@MainActivity)
+									.build()
 									.setMarkdown(it, response.getString("previewDescription", "暂无更新描述"))
 							}
 						}
@@ -192,7 +208,9 @@ class MainActivity : BaseActivity() {
 		}
 	}
 	
-	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+	override fun onRequestPermissionsResult(requestCode: Int,
+	                                        permissions: Array<String>,
+	                                        grantResults: IntArray) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 		if (requestCode == PackageManager.PERMISSION_GRANTED) {
 			if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) config.toast(R.string.permission_granted)
