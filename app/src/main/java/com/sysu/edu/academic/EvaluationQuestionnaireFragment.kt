@@ -48,7 +48,7 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 						for (pos in layoutManager.findFirstVisibleItemPosition() - 1 downTo 0) {
 							val adapterPair = adp.getWrappedAdapterAndPosition(pos)
 							if (adapterPair.first is TitleAdapter && (adapterPair.first as TitleAdapter).header == 1) {
-								val targetTitle: String? = (adapterPair.first as TitleAdapter).getTitle()
+								val targetTitle: String? = (adapterPair.first as TitleAdapter).title
 								title.text = targetTitle
 								break
 							}
@@ -60,6 +60,7 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val data = message.second
+			println(data)
 			if (data.get("code") == "200") {
 				when (message.first) {
 					1 -> data.getJSONObject("result")
@@ -140,6 +141,16 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		return binding.root
 	}
 	
+	fun String.encodeNonAscii(): String {
+		val sb = StringBuilder()
+		forEach {
+			if ((it in 'A'..'Z') || (it in 'a'..'z') || (it in '0'..'9')) sb.append(it) else "$it".toByteArray(Charsets.UTF_8).forEach { byte ->
+				sb.append("%${byte.toUByte().toString(16).uppercase().padStart(2, '0')}")
+			}
+		}
+		return "$sb"
+	}
+	
 	fun getEvaluation(rwid: String,
 	                  wjid: String?,
 	                  sxz: String?,
@@ -149,7 +160,7 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 	                  rwh: String?,
 	                  pjzt: String?,
 	                  bpmc: String?) {
-		model.addAndNext("evaluationPattern/getQuestionnaireTopic?rwid=$rwid&wjid=$wjid&sxz=$sxz&pjrdm=$pjrdm&bpdm=$bpdm&kcdm=$kcdm&rwh=$rwh&pjzt=$pjzt&bpmc=$bpmc", 1)
+		model.addAndNext("evaluationPattern/getQuestionnaireTopic?rwid=$rwid&wjid=$wjid&sxz=$sxz&pjrdm=$pjrdm&bpdm=$bpdm&kcdm=$kcdm&rwh=${rwh?.encodeNonAscii()}&pjzt=$pjzt&bpmc=$bpmc", 1)
 	}
 	
 	fun saveEvaluation() {
