@@ -113,7 +113,7 @@ class UpdateActivity : BaseActivity() {
 					if (generationVersion > BuildConfig.VERSION_GENERATION || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion > BuildConfig.VERSION_MAJOR) || (generationVersion == BuildConfig.VERSION_GENERATION && majorVersion == BuildConfig.VERSION_MAJOR && minorVersion > BuildConfig.VERSION_MINOR) && isBeta) {
 						val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
 						path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getString(R.string.app_name)}-$versionName}apk"
-						link = getString("previewLink", "https://github.com/SYSU-Tang/Sysuer/releases/$versionName/download/app-release.apk")
+						link = getString("previewLink", "https://github.com/SYSU-Tang/Sysuer/releases/download/$versionName/app-release.apk")
 					}
 				}
 			} ?: run {
