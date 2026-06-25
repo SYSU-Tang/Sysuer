@@ -1,107 +1,84 @@
-package com.sysu.edu.life;
+package com.sysu.edu.life
 
-import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.alibaba.fastjson2.JSONObject
+import com.google.android.material.textfield.TextInputLayout
+import com.sysu.edu.BaseFragment
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.CommonUtil.toStringOrDefault
+import com.sysu.edu.databinding.FragmentComplaintResponseBinding
+import com.sysu.edu.life.ComplaintSquareFragment.SquareAdapter
+import com.sysu.edu.model.XinfangModel
+import java.util.function.Consumer
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.sysu.edu.R;
-import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Config;
-import com.sysu.edu.databinding.FragmentComplaintResponseBinding;
-
-public class ComplaintResponseFragment extends Fragment {
-    
-    HttpManager http;
-    
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FragmentComplaintResponseBinding binding = FragmentComplaintResponseBinding.inflate(inflater, container, false);
-        ComplaintSquareFragment.SquareAdapter adapter = new ComplaintSquareFragment.SquareAdapter();
-        binding.recyclerView.setAdapter(adapter);
-        Config config = new Config(this);
-        binding.phone.setEndIconOnClickListener(_ -> {
-            String phone = null;
-            if (binding.phone.getEditText() != null)
-                phone = CommonUtil.toStringOrDefault(binding.phone.getEditText().getText());
-            if (ComplaintModel.isInvalidPhone(phone))
-                binding.phone.setError(getString(R.string.invalid_phone));
-            else
-                getResponse(phone);
-        });
-        if (binding.phone.getEditText() != null) {
-            binding.phone.getEditText().addTextChangedListener(new TextWatcher() {
-                @Override
-                public void afterTextChanged(Editable s) {
-                
-                }
-                
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                
-                }
-                
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if (ComplaintModel.isInvalidPhone(toStringOrDefault(s)))
-                        binding.phone.setError(getString(R.string.invalid_phone));
-                    else
-                        binding.phone.setError(null);
-                }
-            });
-        }
-        binding.recyclerView.setLayoutManager(new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL));
-        http = new HttpManager(new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                
-                if (msg.what == -1) {
-                    config.toast(R.string.no_net_connected);
-                } else if (msg.getData().getBoolean("isJSON")) {
-                    switch (msg.what) {
-                        case 0 -> {
-                            JSONObject response = JSONObject.parse(msg.obj.toString());
-                            String code;
-                            if (response.getBoolean("ok"))
-                                code = response.getString("data").substring(0, 4);
-                            else
-                                config.toast(response.getString("msg"));
-                        }
-                        case 1 -> {
-                            JSONObject response = JSONObject.parse(msg.obj.toString());
-                            if (response.getBoolean("ok"))
-                                response.getJSONArray("data").forEach(v -> adapter.add((JSONObject) v));
-                            else
-                                config.toast(response.getString("msg"));
-                        }
-                    }
-                } else {
-                    config.toast(R.string.educational_wifi_warning);
-                }
-            }
-        });
-        http.setParams(config);
-        return binding.getRoot();
-    }
-
-//    void getCode(String phone) {
-//        http.postRequest("https://xinfang.sysu.edu.cn/jsp_api/code_send", "{\"m\":\"" + phone + "\",\"t\":\"jsjb\"}", 0);
-//    }
-    
-    void getResponse(String phone) {
-        http.postRequest("https://xinfang.sysu.edu.cn/jsp_api/jsjb_list", "{\"mobile\":\"" + phone + "\"}", 1);
-    }
+class ComplaintResponseFragment : BaseFragment() {
+	lateinit var model: XinfangModel
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): View {
+		super.onCreateView(inflater, container, savedInstanceState)
+		model = XinfangModel(requireContext())
+		val binding = FragmentComplaintResponseBinding.inflate(inflater, container, false)
+		val adapter = SquareAdapter()
+		binding.recyclerView.adapter = adapter
+		binding.phone.setEndIconOnClickListener { getResponse(binding.phone) }
+		if (binding.phone.getEditText() != null) {
+			binding.phone.getEditText()!!.addTextChangedListener(object : TextWatcher {
+				override fun afterTextChanged(s: Editable?) {
+				}
+				
+				override fun beforeTextChanged(s: CharSequence?,
+				                               start: Int,
+				                               count: Int,
+				                               after: Int) {
+				}
+				
+				override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+					if (ComplaintModel.isInvalidPhone(toStringOrDefault<CharSequence?>(s))) binding.phone.error = getString(R.string.invalid_phone)
+					else binding.phone.error = null
+				}
+			})
+		}
+		binding.recyclerView.setLayoutManager(StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL))
+		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			when (message.first) {
+				0 -> {
+					if (response.getBoolean("ok")) response.getString("data")
+					else config.toast(response.getString("msg"))
+				}
+				1 -> {
+					if (response.getBoolean("ok")) response.getJSONArray("data")
+						.forEach(Consumer { v: Any? -> adapter.add(v as JSONObject?) })
+					else config.toast(response.getString("msg"))
+				}
+			}
+		})
+		return binding.getRoot()
+	}
+	
+	fun getResponse(textInputLayout: TextInputLayout) {
+		var phone: String? = null
+		if (textInputLayout.getEditText() != null) phone = textInputLayout.getEditText()!!
+			.getText()
+			.toString()
+		if (ComplaintModel.isInvalidPhone(phone)) textInputLayout.error = getString(R.string.invalid_phone)
+		else getResponse(phone)
+	}
+	
+	fun getCode(phone: String?) {
+		model.addAndNext("jsp_api/code_send", "{\"m\":\"$phone\",\"t\":\"jsjb\"}", 0)
+	}
+	
+	fun getResponse(phone: String?) {
+		model.addAndNext("jsp_api/jsjb_list", "{\"mobile\":\"$phone\"}", 1)
+	}
 }

@@ -1,64 +1,47 @@
-package com.sysu.edu.preference;
+package com.sysu.edu.preference
 
-import static android.text.TextUtils.isEmpty;
+import android.text.TextUtils
+import androidx.preference.PreferenceFragmentCompat
+import com.alibaba.fastjson2.JSONObject
+import rikka.material.preference.MaterialSwitchPreference
+import rikka.preference.SimpleMenuPreference
 
-import androidx.preference.PreferenceFragmentCompat;
-
-import com.alibaba.fastjson2.JSONObject;
-
-import rikka.material.preference.MaterialSwitchPreference;
-import rikka.preference.SimpleMenuPreference;
-
-public class PreferenceUtil {
-    
-    private final PreferenceFragmentCompat fragment;
-    private final JSONObject params;
-    
-    public PreferenceUtil(PreferenceFragmentCompat fragment) {
-        this.fragment = fragment;
-        params = new JSONObject();
-    }
-    
-    public void insertMenuValue(String preferenceKey, String paramsKey) {
-        SimpleMenuPreference preference = fragment.findPreference(preferenceKey);
-        if (preference != null && !isEmpty(preference.getValue()))
-            params.put(paramsKey, preference.getValue());
-    }
-    
-    public void insertEditValue(String preferenceKey, String paramsKey) {
-        EditPreference preference = fragment.findPreference(preferenceKey);
-        if (preference != null) params.put(paramsKey, preference.getValue());
-    }
-    
-    public void insertSliderValue(String preferenceKey, String paramsKey) {
-        SliderPreference preference = fragment.findPreference(preferenceKey);
-        if (preference != null && preference.getValue() != 0)
-            params.put(paramsKey, preference.getValue());
-    }
-    
-    public void insertFilterValue(String preferenceKey, String paramsKey) {
-        FilterPreference preference = fragment.findPreference(preferenceKey);
-        if (preference != null) params.put(paramsKey, preference.getValue());
-    }
-    
-    public <T> void insertSwitchValue(String preferenceKey, String paramsKey, T ifChecked, T ifNotChecked) {
-        MaterialSwitchPreference preference = fragment.findPreference(preferenceKey);
-        if (preference != null)
-            params.put(paramsKey, preference.isChecked() ? ifChecked : ifNotChecked);
-    }
-    
-    public void insertSwitchValue(String preferenceKey, String paramsKey) {
-        MaterialSwitchPreference preference = fragment.findPreference(preferenceKey);
-        if (preference != null)
-            params.put(paramsKey, preference.isChecked());
-    }
-    
-    
-    public void insert(String key, Object value) {
-        params.put(key, value);
-    }
-    
-    public JSONObject getParams() {
-        return params;
-    }
+class PreferenceUtil(private val fragment: PreferenceFragmentCompat) {
+	val params: JSONObject = JSONObject()
+	fun insertMenuValue(preferenceKey: String, paramsKey: String?) {
+		val preference = fragment.findPreference<SimpleMenuPreference?>(preferenceKey)
+		if (preference != null && !TextUtils.isEmpty(preference.value)) params[paramsKey] = preference.value
+	}
+	
+	fun insertEditValue(preferenceKey: String, paramsKey: String?) {
+		val preference = fragment.findPreference<EditPreference?>(preferenceKey)
+		if (preference != null) params[paramsKey] = preference.value
+	}
+	
+	fun insertSliderValue(preferenceKey: String, paramsKey: String?) {
+		val preference = fragment.findPreference<SliderPreference?>(preferenceKey)
+		if (preference != null && preference.value != 0) params[paramsKey] = preference.value
+	}
+	
+	fun insertFilterValue(preferenceKey: String, paramsKey: String?) {
+		val preference = fragment.findPreference<FilterPreference?>(preferenceKey)
+		if (preference != null) params[paramsKey] = preference.value
+	}
+	
+	fun <T> insertSwitchValue(preferenceKey: String,
+	                          paramsKey: String?,
+	                          ifChecked: T?,
+	                          ifNotChecked: T?) {
+		val preference = fragment.findPreference<MaterialSwitchPreference?>(preferenceKey)
+		if (preference != null) params[paramsKey] = if (preference.isChecked) ifChecked else ifNotChecked
+	}
+	
+	fun insertSwitchValue(preferenceKey: String, paramsKey: String?) {
+		val preference = fragment.findPreference<MaterialSwitchPreference?>(preferenceKey)
+		if (preference != null) params[paramsKey] = preference.isChecked
+	}
+	
+	fun insert(key: String?, value: Any?) {
+		params[key] = value
+	}
 }

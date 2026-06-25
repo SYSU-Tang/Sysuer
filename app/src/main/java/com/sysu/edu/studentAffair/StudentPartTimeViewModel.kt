@@ -1,23 +1,22 @@
-package com.sysu.edu.studentAffair;
+package com.sysu.edu.studentAffair
 
-import androidx.appcompat.widget.PopupMenu;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.appcompat.widget.PopupMenu
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.sysu.edu.view.EditTextDialog
 
-import com.sysu.edu.view.EditTextDialog;
-
-public class StudentPartTimeViewModel extends ViewModel {
-    public final MutableLiveData<String> year = new MutableLiveData<>("2026");
-    public final MutableLiveData<String> jobType = new MutableLiveData<>("");
-    public final MutableLiveData<String> campus = new MutableLiveData<>("");
-    public final MutableLiveData<String> yearName = new MutableLiveData<>("2026");
-    public final MutableLiveData<String> jobTypeName = new MutableLiveData<>("");
-    public final MutableLiveData<String> campusName = new MutableLiveData<>("");
-    public final MutableLiveData<String> jobName = new MutableLiveData<>("");
-    public final MutableLiveData<String> unitName = new MutableLiveData<>("");
-    public PopupMenu yearPop;
-    public PopupMenu campusPop;
-    public PopupMenu typePop;
-    public EditTextDialog jobNameDialog;
-    public EditTextDialog unitDialog;
+class StudentPartTimeViewModel : ViewModel() {
+	val year: MutableLiveData<String?> = MutableLiveData<String?>("2026")
+	val jobType: MutableLiveData<String?> = MutableLiveData<String?>("")
+	val campus: MutableLiveData<String?> = MutableLiveData<String?>("")
+	@JvmField val yearName: MutableLiveData<String?> = MutableLiveData<String?>("2026")
+	@JvmField val jobTypeName: MutableLiveData<String?> = MutableLiveData<String?>("")
+	@JvmField val campusName: MutableLiveData<String?> = MutableLiveData<String?>("")
+	@JvmField val jobName: MutableLiveData<String?> = MutableLiveData<String?>("")
+	@JvmField val unitName: MutableLiveData<String?> = MutableLiveData<String?>("")
+	@JvmField var yearPop: PopupMenu? = null
+	@JvmField var campusPop: PopupMenu? = null
+	@JvmField var typePop: PopupMenu? = null
+	@JvmField var jobNameDialog: EditTextDialog? = null
+	@JvmField var unitDialog: EditTextDialog? = null
 }
