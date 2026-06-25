@@ -1,42 +1,19 @@
-package com.sysu.edu.view;
+package com.sysu.edu.view
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
 
-import java.util.ArrayList;
-
-public class Pager2Adapter extends FragmentStateAdapter {
-    
-    final ArrayList<Fragment> fragments = new ArrayList<>();
-    
-    public Pager2Adapter(@NonNull FragmentActivity fragmentActivity) {
-        super(fragmentActivity);
-    }
-    
-    @NonNull
-    @Override
-    public Fragment createFragment(int position) {
-        return fragments.get(position);
-    }
-    
-    public Pager2Adapter add(@NonNull Fragment e) {
-        fragments.add(e);
-        notifyItemInserted(getItemCount() - 1);
-        return this;
-    }
-    
-    public Fragment get(int position) {
-        return fragments.get(position);
-    }
-    
-    @Override
-    public int getItemCount() {
-        return fragments.size();
-    }
-    
-    public boolean isEmpty() {
-        return fragments.isEmpty();
-    }
+class Pager2Adapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
+	val fragments: MutableList<Fragment> = mutableListOf()
+	override fun createFragment(position: Int): Fragment = fragments[position]
+	fun add(e: Fragment): Pager2Adapter {
+		fragments.add(e)
+		notifyItemInserted(itemCount - 1)
+		return this
+	}
+	fun get(position: Int): Fragment = fragments[position]
+	override fun getItemCount(): Int = fragments.size
+	val isEmpty: Boolean
+		get() = fragments.isEmpty()
 }

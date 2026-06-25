@@ -1,30 +1,24 @@
-package com.sysu.edu.life;
+package com.sysu.edu.life
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.databinding.ActivityGymPreservationBinding
 
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityGymPreservationBinding;
-
-import java.util.Objects;
-
-public class GymReservationActivity extends BaseActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityGymPreservationBinding binding = ActivityGymPreservationBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        NavHostFragment fragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
-        NavController navController = Objects.requireNonNull(fragment).getNavController();
-        NavigationUI.setupWithNavController(binding.toolbar, navController, new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
-            supportFinishAfterTransition();
-            return false;
-        }).build());
-        NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-    }
+class GymReservationActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityGymPreservationBinding.inflate(layoutInflater)
+		setContentView(binding.root)
+		val fragment = supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment
+		setupWithNavController(binding.toolbar, fragment.navController, AppBarConfiguration.Builder()
+			.setFallbackOnNavigateUpListener {
+				supportFinishAfterTransition()
+				false
+			}.build())
+		setupWithNavController(binding.bottomNavigation, fragment.navController)
+	}
 }

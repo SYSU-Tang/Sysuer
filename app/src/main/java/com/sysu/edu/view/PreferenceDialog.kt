@@ -1,61 +1,57 @@
-package com.sysu.edu.view;
+package com.sysu.edu.view
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.sysu.edu.databinding.DialogKeyValueBinding
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.sysu.edu.databinding.DialogKeyValueBinding;
-
-public class PreferenceDialog {
-    private final BottomSheetDialog dialog;
-    private final DialogKeyValueBinding binding;
-    private PreferenceAdapter adapter;
-    
-    public PreferenceDialog(Context context) {
-        dialog = new BottomSheetDialog(context);
-        binding = DialogKeyValueBinding.inflate(LayoutInflater.from(context));
-        dialog.setContentView(binding.getRoot());
-        init(context);
-    }
-    
-    private void init(Context context) {
-        binding.recyclerView.getRoot().setLayoutManager(new LinearLayoutManager(context));
-        adapter = new PreferenceAdapter();
-        binding.recyclerView.getRoot().setAdapter(adapter);
-    }
-    
-    public void show() {
-        dialog.show();
-    }
-    
-    public void dismiss() {
-        dialog.dismiss();
-    }
-    
-    public PreferenceAdapter getAdapter() {
-        return adapter;
-    }
-    
-    public void setPositiveButton(String text, View.OnClickListener onClick) {
-        binding.positive.setVisibility(View.VISIBLE);
-        binding.positive.setText(text);
-        binding.positive.setOnClickListener(onClick);
-    }
-    
-    public void setNegativeButton(String text, View.OnClickListener onClick) {
-        binding.negative.setVisibility(View.VISIBLE);
-        binding.negative.setText(text);
-        binding.negative.setOnClickListener(onClick);
-    }
-    
-    public void add(String title, String content, Integer icon) {
-        adapter.add(title, content, icon);
-    }
-    
-    public void clear() {
-        adapter.clear();
-    }
+class PreferenceDialog(context: Context) {
+	private val dialog: BottomSheetDialog = BottomSheetDialog(context)
+	private val binding: DialogKeyValueBinding = DialogKeyValueBinding.inflate(LayoutInflater.from(context))
+	private lateinit var adapter: PreferenceAdapter
+	
+	init {
+		dialog.setContentView(binding.root)
+		init(context)
+	}
+	
+	private fun init(context: Context?) {
+		binding.recyclerView.root.layoutManager=LinearLayoutManager(context)
+		adapter = PreferenceAdapter()
+		binding.recyclerView.root.adapter = adapter
+	}
+	
+	fun show() {
+		dialog.show()
+	}
+	
+	fun dismiss() {
+		dialog.dismiss()
+	}
+	
+	fun getAdapter(): PreferenceAdapter {
+		return adapter
+	}
+	
+	fun setPositiveButton(text: String?, onClick: View.OnClickListener?) {
+		binding.positive.visibility = View.VISIBLE
+		binding.positive.text = text
+		binding.positive.setOnClickListener(onClick)
+	}
+	
+	fun setNegativeButton(text: String?, onClick: View.OnClickListener?) {
+		binding.negative.visibility = View.VISIBLE
+		binding.negative.text = text
+		binding.negative.setOnClickListener(onClick)
+	}
+	
+	fun add(title: String?, content: String?, icon: Int?) {
+		adapter.add(title, content, icon)
+	}
+	
+	fun clear() {
+		adapter.clear()
+	}
 }
