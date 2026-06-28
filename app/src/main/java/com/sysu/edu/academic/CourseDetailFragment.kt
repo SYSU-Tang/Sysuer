@@ -49,7 +49,7 @@ class CourseDetailFragment : BaseFragment() {
 								binding.detail.addView(ItemActionChipBinding.inflate(getLayoutInflater())
 														   .getRoot()
 														   .apply {
-															   this.text = "${this.resources.getStringArray(R.array.course_outline)[i]}：$content"
+															   this.text = "${resources.getStringArray(R.array.course_outline)[i]}：$content"
 															   setOnLongClickListener {
 																   config.copy("courseId", content)
 																   config.toast(R.string.copy_successfully)
@@ -67,10 +67,5 @@ class CourseDetailFragment : BaseFragment() {
 			})
 		}
 		super.setArguments(args)
-	}
-	
-	override fun onDestroy() {
-		super.onDestroy()
-		config.contextUtil.disposable.dispose()
 	}
 }

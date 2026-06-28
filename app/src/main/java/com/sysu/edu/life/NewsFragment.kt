@@ -80,7 +80,7 @@ class NewsFragment(val position: Int) : BaseFragment() {
 											it.isNotEmpty() && !it.getJSONObject(0)
 												.isNullOrEmpty() && !it.getJSONObject(0)
 												.getString("outLink")
-												.also { link ->
+												?.also { link ->
 													image = link
 												}
 												.isNullOrEmpty()

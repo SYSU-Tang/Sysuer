@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -22,7 +21,6 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import androidx.core.widget.NestedScrollView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -31,6 +29,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
@@ -43,6 +42,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
+import com.sysu.edu.BaseFragment
 import com.sysu.edu.ClassNotificationWorker
 import com.sysu.edu.MainActivity
 import com.sysu.edu.R
@@ -52,7 +52,6 @@ import com.sysu.edu.academic.CourseScheduleActivity
 import com.sysu.edu.academic.ExamActivity
 import com.sysu.edu.api.CalendarManager
 import com.sysu.edu.api.CommonUtil
-import com.sysu.edu.api.Config
 import com.sysu.edu.api.PreferenceViewModel
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.databinding.DialogServiceActionBinding
@@ -63,6 +62,7 @@ import com.sysu.edu.databinding.ItemHomeCourseBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.todo.TodoActivity
 import com.sysu.edu.todo.TodoManager
+import com.sysu.edu.view.AdapterListener
 import com.sysu.edu.view.RecyclerAdapter
 import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
@@ -85,16 +85,15 @@ import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
 import java.util.stream.IntStream
 
-class DashboardFragment : Fragment() {
+class DashboardFragment : BaseFragment() {
 	val todayCourse: MutableList<JSONObject> = mutableListOf()
 	val tomorrowCourse: MutableList<JSONObject> = mutableListOf()
-	val thisWeekExams: LinkedList<JSONObject?> = LinkedList<JSONObject?>()
-	val nextWeekExams: LinkedList<JSONObject?> = LinkedList<JSONObject?>()
+	val week18Exams: LinkedList<JSONObject?> = LinkedList<JSONObject?>()
+	val week19Exams: LinkedList<JSONObject?> = LinkedList<JSONObject?>()
 	val todoDate: MutableLiveData<String?> = MutableLiveData("")
-	lateinit var config: Config
 	lateinit var model: JwxtModel
 	var db: HomeCollectionHelper? = null
-	var binding: FragmentDashboardBinding? = null
+	lateinit var binding: FragmentDashboardBinding
 	var isRefreshRequired: Boolean = true
 	var viewModel: HomeViewModel? = null
 	var orderDialog: BottomSheetDialog? = null
@@ -104,11 +103,32 @@ class DashboardFragment : Fragment() {
 	var actionBinding: DialogServiceActionBinding? = null
 	private var todoManager: TodoManager? = null
 	var termString: String? = null
-	var week: Int? = null
-	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): NestedScrollView {
+	var week: String? = null
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): NestedScrollView {
 		if (isRefreshRequired) {
+			super.onCreateView(inflater, container, savedInstanceState)
 			val date = LocalDate.now()
 				.format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
+			var examSubject = ""
+			val examAdapter = ExamAdapter().apply {
+				setParams(config)
+				setListener(object : AdapterListener {
+					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+					                    holder: RecyclerView.ViewHolder?,
+					                    position: Int) {
+						holder?.itemView?.setOnClickListener {
+							examSubject = get(position).getString("examSubjectName")
+							getSelectedCourses(examSubject)
+						}
+					}
+					
+					override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+					                      binding: ViewBinding?) {
+					}
+				})
+			}
 			model = JwxtModel(requireContext()).apply {
 				message.observe(requireActivity()) { message: CommonUtil.Tuple2<Int, JSONObject> ->
 					message.second.run {
@@ -130,9 +150,9 @@ class DashboardFragment : Fragment() {
 										if (isToday) (if (status == "before") beforeArray else afterArray).add(item)
 										(if (isToday) todayCourse else tomorrowCourse).add(item)
 									}
-									binding!!.progress.setMax(todayCourse.size)
-									binding!!.progress.progress = beforeArray.size
-									binding!!.courseList.scrollToPosition(beforeArray.size)
+									binding.progress.setMax(todayCourse.size)
+									binding.progress.progress = beforeArray.size
+									binding.courseList.scrollToPosition(beforeArray.size)
 									Markwon.builder(requireContext())
 										.usePlugin(object : AbstractMarkwonPlugin() {
 											override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
@@ -145,16 +165,19 @@ class DashboardFragment : Fragment() {
 											override fun configureVisitor(builder1: MarkwonVisitor.Builder) {
 												super.configureVisitor(builder1)
 												builder1.blockHandler(object : BlockHandler {
-													override fun blockStart(visitor: MarkwonVisitor, node: Node) {
+													override fun blockStart(visitor: MarkwonVisitor,
+													                        node: Node) {
 													}
 													
-													override fun blockEnd(visitor: MarkwonVisitor, node: Node) {
+													override fun blockEnd(visitor: MarkwonVisitor,
+													                      node: Node) {
 														if (visitor.hasNext(node)) visitor.ensureNewLine()
 													}
 												})
 											}
-										}).build()
-										.setMarkdown(binding!!.nextClass, if (afterArray.isEmpty()) "### ${
+										})
+										.build()
+										.setMarkdown(binding.nextClass, if (afterArray.isEmpty()) "### ${
 											getString(R.string.noClass)
 										}\n\n${
 											getString(R.string.next_class)
@@ -168,60 +191,67 @@ class DashboardFragment : Fragment() {
 											getString(R.string.time)
 										}：**${
 											if (tomorrowCourse.isEmpty()) getString(R.string.none) else tomorrowCourse[0].getString("time")
-										}**" else "### ${
-											todayCourse[beforeArray.size].getString("courseName")
+										}**"
+										else "### ${
+											if (todayCourse.isEmpty()) getString(R.string.none) else todayCourse[beforeArray.size].getString("courseName")
 										}\n\n${
 											getString(R.string.location)
 										}：**${
-											todayCourse[beforeArray.size].getString("teachingPlace")
+											if (todayCourse.isEmpty()) getString(R.string.none) else todayCourse[beforeArray.size].getString("teachingPlace")
 										}**\n\n${
 											getString(R.string.time)
 										}：**${
-											todayCourse[beforeArray.size].getString("time")
+											if (todayCourse.isEmpty()) getString(R.string.none) else todayCourse[beforeArray.size].getString("time")
 										}**\n\n${
 											getString(R.string.date)
 										}：**${
-											todayCourse[beforeArray.size].getString("teachingDate")
+											if (todayCourse.isEmpty()) getString(R.string.none) else todayCourse[beforeArray.size].getString("teachingDate")
 										}**")
-									binding!!.toggle.clearChecked()
-									binding!!.toggle.check(R.id.today)
-									val array = (if (afterArray.isEmpty()) tomorrowCourse[0] else todayCourse[beforeArray.size])
-									val delta = LocalDateTime.parse("${
-										array.getString("teachingDate")
-									} ${array.getString("startTime")}", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-										.atZone(ZoneId.systemDefault()).toInstant()
-										.toEpochMilli() - System.currentTimeMillis()
-									if (delta > 0) getInstance(requireContext().applicationContext).enqueueUniqueWork("next_class_notification_update", ExistingWorkPolicy.KEEP, OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java)
-										.setInputData(Data.Builder()
-											              .putString("courseName", array.getString("courseName"))
-											              .putString("teachingPlace", array.getString("teachingPlace"))
-											              .putString("time", array.getString("time"))
-											              .build())
-										.setInitialDelay(if (delta < 1000 * 60 * 15) 0 else delta - 1000 * 60 * 15, TimeUnit.MILLISECONDS)
-										.build())
+									binding.toggle.clearChecked()
+									binding.toggle.check(R.id.today)
+									(if (afterArray.isEmpty()) if (tomorrowCourse.isEmpty()) null else tomorrowCourse[0] else todayCourse[beforeArray.size])?.run {
+										val delta = LocalDateTime.parse("${
+											getString("teachingDate")
+										} ${getString("startTime")}", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+											.atZone(ZoneId.systemDefault())
+											.toInstant()
+											.toEpochMilli() - System.currentTimeMillis()
+										if (delta > 0) getInstance(requireContext().applicationContext).enqueueUniqueWork("next_class_notification_update", ExistingWorkPolicy.KEEP, OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java)
+											.setInputData(Data.Builder()
+															  .putString("courseName", getString("courseName"))
+															  .putString("teachingPlace", getString("teachingPlace"))
+															  .putString("time", getString("time"))
+															  .build())
+											.setInitialDelay(if (delta < 1000 * 60 * 15) 0 else delta - 1000 * 60 * 15, TimeUnit.MILLISECONDS)
+											.build())
+									}
 								}
 								2 -> {
 									val dataArray = getJSONArray("data")
-									dataArray.indices.forEach { i ->
-										val exams = listOf(thisWeekExams, nextWeekExams)[i]
+									dataArray.forEachIndexed { i, v ->
+										val exams = if (i == 0) week18Exams else week19Exams
 										val sortedTimetable = TreeMap<Int?, JSONArray?>()
-										dataArray.getJSONObject(i).getJSONObject("timetable")
+										(v as JSONObject).getJSONObject("timetable")
 											.forEach { (s1: String?, t: Any?) ->
 												if (t != null) sortedTimetable[s1!!.toInt()] = t as JSONArray
 											}
 										sortedTimetable.forEach { (key: Int?, value: JSONArray?) ->
 											value?.forEach { c: Any? ->
-												(if (key == sortedTimetable.firstKey()) exams::addFirst else exams::addLast)(c as JSONObject?)
+												(c as JSONObject)["status"] = getDatePosition(c.getString("examDate"))
+												(if (key == sortedTimetable.firstKey()) exams::addFirst else exams::addLast)(c)
 											}
 										}
 									}
-									binding!!.toggle2.clearChecked()
-									binding!!.toggle2.check(R.id.week_18)
+									binding.toggle2.clearChecked()
+									binding.toggle2.check(if ("19" == week) R.id.week_19 else R.id.week_18)
+									val weekExams = if ("19" == week) week19Exams else week18Exams
+									val index = weekExams.indexOfFirst { (it as JSONObject).getString("status") == "in" }
+									binding.examList.scrollToPosition(if (index < 0 || index >= weekExams.size) 0 else index)
 								}
 								3 -> {
 									getJSONObject("data").getString("acadYearSemester").let {
 										termString = it
-										binding!!.dateView.text = getString(R.string.dashboard_time, it, date, resources.getStringArray(R.array.weeks)[LocalDate.now()
+										binding.dateView.text = getString(R.string.dashboard_time, it, date, resources.getStringArray(R.array.weeks)[LocalDate.now()
 											.getDayOfWeek().value - 1])
 										getTodayCourses(it)
 										getFinalExam(it)
@@ -229,16 +259,29 @@ class DashboardFragment : Fragment() {
 									}
 									isRefreshRequired = false
 								}
-								4 -> getJSONArray("data").getJSONObject(0).getString("weekTimes")
+								4 -> getJSONArray("data").getJSONObject(0)
+									.getString("weekTimes")
 									.let {
-										binding!!.dateView.text = getString(R.string.dashboard_week, it, binding!!.dateView.getText())
-										binding!!.toggle2.check(if ("19" == it) R.id.week_19 else R.id.week_18)
+										binding.dateView.text = getString(R.string.dashboard_week, it, binding.dateView.getText())
+										week = it
+										binding.toggle2.check(if ("19" == it) R.id.week_19 else R.id.week_18)
 									}
 								5 -> getJSONArray("data").first {
 									(it as JSONObject).getString("examWeekName") == "18-19周期末考"
 								}?.let {
 									termString?.let { it1 -> getExams(it1, (it as JSONObject).getString("examWeekId")) }
 								}
+								6 -> getJSONObject("data").getJSONArray("rows")
+									.takeIf { it.isNotEmpty() }
+									?.first {
+										(it as JSONObject).getString("courseName") == examSubject
+									}
+									?.also {
+										startActivity(Intent(requireContext(), CourseDetailActivity::class.java).putExtra("id", (it as JSONObject).getString("teachingClassId"))
+														  .putExtra("code", it.getString("courseNum"))
+														  .putExtra("class", it.getString("teachingClassNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), binding.examList, "miniapp")
+														  .toBundle())
+									}
 							}
 						}
 					}
@@ -248,19 +291,18 @@ class DashboardFragment : Fragment() {
 			viewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java].apply {
 				updateDashboardShortcut.observe(requireActivity()) { _: Boolean? -> this@DashboardFragment.shortcutCollection }
 			}
-			config = Config(this)
 			val courseAdapter = CourseAdapter().apply {
 				setParams(config)
 				setClick { jsonObject: JSONObject?, view: View? ->
 					startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code", jsonObject!!.getString("courseNum"))
-						              .putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view
+									  .putExtra("class", jsonObject.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view
 						?: requireView(), "miniapp").toBundle())
 				}
 			}
 			val todoAdapter = ConcatAdapter()
 			todoManager = TodoManager(requireActivity(), todoAdapter)
 			binding = FragmentDashboardBinding.inflate(inflater, container, false).apply {
-				scan.setOnClickListener { _: View? ->
+				scan.setOnClickListener {
 					Intent().setComponent(ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI"))
 						.putExtra("LauncherUI.From.Scaner.Shortcut", true)
 						.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -268,9 +310,11 @@ class DashboardFragment : Fragment() {
 						.takeIf { it.resolveActivity(requireContext().packageManager) != null }
 						?.let { startActivity(it) }
 				}
-				qrcode.setOnClickListener { _: View? ->
+				qrcode.setOnClickListener {
 					PreferenceManager.getDefaultSharedPreferences(requireContext())
-						.getString("qrcode", "")?.takeIf { it.isNotEmpty() }?.run {
+						.getString("qrcode", "")
+						?.takeIf { it.isNotEmpty() }
+						?.run {
 							Intent(Intent.ACTION_VIEW, toUri()).takeIf { i ->
 								i.resolveActivity(requireContext().packageManager) != null
 							}?.let { startActivity(it) }
@@ -289,7 +333,6 @@ class DashboardFragment : Fragment() {
 				nextClassCard.setOnClickListener(gotoActivity(CourseScheduleActivity::class.java))
 				timeCard.setOnClickListener(gotoActivity(AgendaActivity::class.java))
 				courseList.adapter = courseAdapter
-				val examAdapter = ExamAdapter().apply { setParams(config) }
 				examList.adapter = examAdapter
 				toggle.addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean ->
 					if (R.id.today == checkedId) {
@@ -299,7 +342,7 @@ class DashboardFragment : Fragment() {
 				}
 				toggle2.addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean ->
 					if (R.id.week_18 == checkedId) {
-						examAdapter.set(ArrayList(if (isChecked) thisWeekExams else nextWeekExams))
+						examAdapter.set(if (isChecked) week18Exams else week19Exams)
 						noExam.visibility = if (examAdapter.itemCount == 0) View.VISIBLE else View.GONE
 					}
 				}
@@ -307,15 +350,14 @@ class DashboardFragment : Fragment() {
 					.getDayOfWeek().value - 1])
 				todoList.layoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
 				todoList.adapter = todoAdapter
-				add.setOnClickListener { _: View? -> todoManager!!.showTodoAddDialog() }
+				add.setOnClickListener { todoManager!!.showTodoAddDialog() }
 				todoView.setOnClickListener(gotoActivity(TodoActivity::class.java))
 				val pop = PopupMenu(requireActivity(), todoDateButton, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
 				pop.menu.apply {
-					add(0, Menu.NONE, 0, R.string.all).setChecked(true)
-						.setOnMenuItemClickListener { _: MenuItem? ->
-							todoDate.value = ""
-							false
-						}
+					add(0, Menu.NONE, 0, R.string.all).setChecked(true).setOnMenuItemClickListener {
+						todoDate.value = ""
+						false
+					}
 					add(0, Menu.NONE, 0, R.string.today).setOnMenuItemClickListener { _: MenuItem? ->
 						todoDate.value = calendar.toDateStringPLus(0)
 						false
@@ -338,12 +380,12 @@ class DashboardFragment : Fragment() {
 					}
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) setGroupDividerEnabled(true)
 				}
-				todoDateButton.setOnClickListener { _: View? -> pop.show() }
+				todoDateButton.setOnClickListener { pop.show() }
 				toggle3.addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, checkedId: Int, _: Boolean ->
 					if (checkedId == R.id.filter_todo) refresh()
 				}
 			}
-			binding!!.toggle3.check(R.id.filter_todo)
+			binding.toggle3.check(R.id.filter_todo)
 			todoDate.observe(viewLifecycleOwner) { refresh() }
 			todoManager?.setOnRefreshListener { refresh() }
 			initOrder(inflater)
@@ -351,11 +393,12 @@ class DashboardFragment : Fragment() {
 			shortcutCollection
 			ViewModelProvider(requireActivity())[PreferenceViewModel::class.java].apply {
 				isAgreeLiveData.observe(viewLifecycleOwner) {
+					println(it)
 					if (!it) term
 				}
 			}
 		}
-		return binding!!.getRoot()
+		return binding.getRoot()
 	}
 	
 	override fun onDestroyView() {
@@ -371,11 +414,11 @@ class DashboardFragment : Fragment() {
 	}
 	
 	fun refresh() {
-		binding?.todoDateButton?.text = todoDate.value?.takeIf { it.isNotEmpty() }?.let {
-			todoManager!!.refresh("due_date = ? AND status = ?", arrayOf(it, if (binding!!.filterTodo.isChecked) "0" else "1"))
+		binding.todoDateButton.text = todoDate.value?.takeIf { it.isNotEmpty() }?.let {
+			todoManager!!.refresh("due_date = ? AND status = ?", arrayOf(it, if (binding.filterTodo.isChecked) "0" else "1"))
 			it
 		} ?: run {
-			todoManager!!.refresh("status = ?", arrayOf(if (binding!!.filterTodo.isChecked) "0" else "1"))
+			todoManager!!.refresh("status = ?", arrayOf(if (binding.filterTodo.isChecked) "0" else "1"))
 			getString(R.string.all)
 		}
 	}
@@ -401,17 +444,27 @@ class DashboardFragment : Fragment() {
 		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5)
 	}
 	
+	fun getSelectedCourses(courseName: String?) {
+		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", 1, courseName), 6)
+	}
+	
 	fun getTimePosition(from: String?, to: String?): String {
 		val now = LocalDateTime.now()
 		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 		return if (now.isBefore(LocalDateTime.parse(from, formatter))) "after" else if (now.isAfter(LocalDateTime.parse(to, formatter))) "before" else "in"
 	}
 	
+	fun getDatePosition(date: String): String {
+		val now = LocalDate.now()
+		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+		return if (now.isBefore(LocalDate.parse(date, formatter))) "after" else if (now.isAfter(LocalDate.parse(date, formatter))) "before" else "in"
+	}
+	
 	val shortcutCollection: Unit
 		get() {
-			binding!!.shortcutGroup.childCount.takeIf { it > 4 }?.let {
+			binding.shortcutGroup.childCount.takeIf { it > 4 }?.let {
 				(0 until it - 4).forEach { _ ->
-					binding!!.shortcutGroup.removeViewAt(3)
+					binding.shortcutGroup.removeViewAt(3)
 				}
 			}
 			db!!.writableDatabase.query("dashboard_shortcut_collection", null, null, null, null, null, "position")
@@ -423,16 +476,19 @@ class DashboardFragment : Fragment() {
 							val shortcut = JSON.parseObject(cursor.getString(cursor.getColumnIndexOrThrow("shortcutJson")))
 							val button = MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle)
 							button.text = shortcut.getString("name")
-							binding!!.shortcutGroup.addView(button)
+							binding.shortcutGroup.addView(button)
 							val url = shortcut.getString("url")
 							val activity = shortcut.getString("activity")
 							if (viewModel!!.actionMap.containsKey(id)) button.setOnClickListener(viewModel!!.actionMap[id])
-							button.setOnClickListener(if (viewModel!!.actionMap.containsKey(id)) viewModel!!.actionMap[id] else if (TextUtils.isEmpty(activity)) if (TextUtils.isEmpty(url)) View.OnClickListener { _: View? ->
+							button.setOnClickListener(if (viewModel!!.actionMap.containsKey(id)) viewModel!!.actionMap[id]
+													  else if (TextUtils.isEmpty(activity)) if (TextUtils.isEmpty(url)) View.OnClickListener {
 								model.contextUtil.toast(R.string.undeveloped)
-							} else View.OnClickListener { v: View? ->
+							}
+							else View.OnClickListener { v: View? ->
 								startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(url)), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp")
 									.toBundle())
-							} else View.OnClickListener { v: View? ->
+							}
+							else View.OnClickListener { v: View? ->
 								Intent(requireContext(), Class.forName(requireContext().packageName + activity)).takeIf {
 									it.resolveActivity(requireContext().packageManager) != null
 								}.let {
@@ -442,7 +498,7 @@ class DashboardFragment : Fragment() {
 									} ?: model.contextUtil.toast(R.string.activity_not_found)
 								}
 							})
-							button.setOnLongClickListener { _: View? -> showActionDialog(shortcut) }
+							button.setOnLongClickListener { showActionDialog(shortcut) }
 							collectionAdapter!!.add(shortcut)
 						} while (cursor.moveToNext())
 					}
@@ -456,18 +512,21 @@ class DashboardFragment : Fragment() {
 		orderBinding.recyclerView.setLayoutManager(LinearLayoutManager(context))
 		collectionAdapter = ServiceFragment.CollectionAdapter()
 		orderBinding.recyclerView.setAdapter(collectionAdapter)
-		orderBinding.confirm.setOnClickListener { _: View? ->
+		orderBinding.confirm.setOnClickListener {
 			updateShortcut()
 			this.shortcutCollection
 			orderDialog!!.dismiss()
 		}
 		orderDialog!!.setContentView(orderBinding.getRoot())
 		ItemTouchHelper(object : ItemTouchHelper.Callback() {
-			override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+			override fun getMovementFlags(recyclerView: RecyclerView,
+			                              viewHolder: RecyclerView.ViewHolder): Int {
 				return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
 			}
 			
-			override fun onMove(recyclerView: RecyclerView, source: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+			override fun onMove(recyclerView: RecyclerView,
+			                    source: RecyclerView.ViewHolder,
+			                    target: RecyclerView.ViewHolder): Boolean {
 				collectionAdapter!!.swap(source.getBindingAdapterPosition(), target.getBindingAdapterPosition())
 				return true
 			}
@@ -487,7 +546,7 @@ class DashboardFragment : Fragment() {
 	fun initAction(inflater: LayoutInflater) {
 		actionDialog = BottomSheetDialog(requireContext())
 		actionBinding = DialogServiceActionBinding.inflate(inflater)
-		actionBinding!!.order.setOnClickListener { _: View? -> orderDialog!!.show() }
+		actionBinding!!.order.setOnClickListener { orderDialog!!.show() }
 		actionDialog!!.setContentView(actionBinding!!.getRoot())
 	}
 	
@@ -498,7 +557,7 @@ class DashboardFragment : Fragment() {
 		with(actionBinding!!) {
 			collect.setText(if (true == isServiceCollected.getValue()) R.string.cancel_collect else R.string.collect)
 			addToDashboard.setText(if (true == isShortcutCollected.getValue()) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
-			addToLauncher.setOnClickListener { _: View? ->
+			addToLauncher.setOnClickListener {
 				if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
 					var intent = Intent(requireContext(), MainActivity::class.java)
 					if (item.containsKey("activity")) {
@@ -506,22 +565,27 @@ class DashboardFragment : Fragment() {
 							intent = Intent(context, Class.forName(context?.packageName + item.getString("activity")))
 						} catch (_: ClassNotFoundException) {
 						}
-					} else if (item.containsKey("url")) intent = Intent(requireContext(), BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url"))
-						                                                                                                           .toUri())
+					}
+					else if (item.containsKey("url")) intent = Intent(requireContext(), BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url"))
+																																 .toUri())
 					val pinShortcutInfo = ShortcutInfoCompat.Builder(requireContext(), "$itemId")
-						.setShortLabel(item.getString("name")).setLongLabel(item.getString("name"))
+						.setShortLabel(item.getString("name"))
+						.setLongLabel(item.getString("name"))
 						.setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
-						.setIntent(intent.setAction(Intent.ACTION_VIEW)).build()
+						.setIntent(intent.setAction(Intent.ACTION_VIEW))
+						.build()
 					ShortcutManagerCompat.requestPinShortcut(requireContext(), pinShortcutInfo, PendingIntent.getBroadcast(requireContext(), 0, ShortcutManagerCompat.createShortcutResultIntent(requireContext(), pinShortcutInfo),  /* flags */
 					                                                                                                       PendingIntent.FLAG_IMMUTABLE).intentSender)
-				} else model.contextUtil.toast(R.string.fail_to_add_shortcut)
+				}
+				else model.contextUtil.toast(R.string.fail_to_add_shortcut)
 			}
-			collect.setOnClickListener { _: View? ->
+			collect.setOnClickListener {
 				val isServiceCollect = true == isServiceCollected.getValue()
 				if (isServiceCollect) {
 					db!!.deleteService(itemId)
 					model.contextUtil.toast(R.string.cancel_collect_success)
-				} else {
+				}
+				else {
 					db!!.addService(itemId, item.toJSONString(), collectionAdapter!!.itemCount)
 					model.contextUtil.toast(R.string.collect_success)
 				}
@@ -529,12 +593,13 @@ class DashboardFragment : Fragment() {
 				collect.setText(if (isServiceCollect) R.string.collect else R.string.cancel_collect)
 				isServiceCollected.value = !isServiceCollect
 			}
-			addToDashboard.setOnClickListener { _: View? ->
+			addToDashboard.setOnClickListener {
 				val isShortcutCollect = true == isShortcutCollected.getValue()
 				if (isShortcutCollect) {
 					db!!.deleteDashboardShortcut(itemId)
 					model.contextUtil.toast(R.string.cancel_add_shortcut_success)
-				} else {
+				}
+				else {
 					db!!.addDashboardShortcut(itemId, item.toJSONString(), collectionAdapter!!.itemCount)
 					model.contextUtil.toast(R.string.add_shortcut_success)
 				}
@@ -542,7 +607,7 @@ class DashboardFragment : Fragment() {
 				addToDashboard.setText(if (isShortcutCollect) R.string.add_to_dashboard else R.string.cancel_add_shortcut)
 				isShortcutCollected.value = !isShortcutCollect
 			}
-			feedback.setOnClickListener { _: View? ->
+			feedback.setOnClickListener {
 				startActivity(Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${
 					item.getString("name")
 				}&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -561,7 +626,7 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 		return object :
 			RecyclerView.ViewHolder(ItemHomeCourseBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-				                        .getRoot()) {}
+										.getRoot()) {}
 	}
 	
 	fun setClick(onClick: BiConsumer<JSONObject?, View?>) {
@@ -574,20 +639,15 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 		holder.itemView.setOnClickListener { v: View? -> onClick!!.accept(item, v) }
 		mapOf<TextView, String>(binding.courseTitle to "courseName", binding.location to "teachingPlace", binding.time to "time", binding.teacher to "teacherName", binding.course to "course").forEach { (v: TextView, s: String) ->
 			v.text = item.getString(s)
-			v.setOnLongClickListener { _: View? ->
+			v.setOnLongClickListener {
 				config.copy(s, item.getString(s))
 				config.toast(R.string.copy_successfully)
 				true
 			}
 		}
-		val colorSurfaceDim = TypedValue()
-		val colorSurface = TypedValue()
-		val theme = holder.itemView.context.theme
-		theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceDim, colorSurfaceDim, true)
-		theme.resolveAttribute(com.google.android.material.R.attr.colorSurface, colorSurface, true)
 		val isBefore = item.getString("status") == "before"
+		holder.itemView.background.setTint(if (item.getString("status") == "in") config.contextUtil.getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim) else if (isBefore) 0x0 else config.contextUtil.getColorFromAttr(com.google.android.material.R.attr.colorSurface))
 		binding.courseTitle.setTextAppearance(if (isBefore) com.google.android.material.R.style.TextAppearance_Material3_TitleMedium else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized)
-		holder.itemView.background.setTint(if (item.getString("status") == "in") colorSurfaceDim.data else if (isBefore) 0x0 else colorSurface.data)
 		binding.item.setAlpha(if (isBefore) 0.64f else 1.0f)
 		super.onBindViewHolder(holder, position)
 	}
@@ -597,17 +657,17 @@ internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 		return object :
 			RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-				                        .getRoot()) {}
+										.getRoot()) {}
 	}
 	
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 		val binding = ItemExamBinding.bind(holder.itemView)
 		val context = holder.itemView.context
-		holder.itemView.setOnClickListener { _: View? -> }
+		holder.itemView.isClickable = true
 		val examData = get(position)
 		val startClassTimes = examData.getIntValue("startClassTimes")
 		val endClassTimes = examData.getIntValue("endClassTimes")
-		val text = arrayOf<String?>(examData.getString("examSubjectName"), examData.getString("classroomNumber"), examData.getString("examDate"), "${examData.getString("duration")}${
+		val text = arrayOf(examData.getString("examSubjectName"), examData.getString("classroomNumber"), "${examData.getString("examDate")} ${context.resources.getStringArray(R.array.weeks)[examData.getInteger("week") - 1]}", "${examData.getString("duration")}${
 			context.getString(R.string.minute)
 		}", examData.getString("durationTime"), String.format(context.getString(R.string.section_range), startClassTimes, endClassTimes), "${context.getString(R.string.exam_mode)}：${
 			examData.getString("examMode")
@@ -617,11 +677,15 @@ internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
 		val materialTextButtons = arrayOf<TextView>(binding.examName, binding.examLocation, binding.examDate, binding.examDuration, binding.examTime, binding.examClassTime, binding.examMode, binding.examStage)
 		(0..7).forEach { i ->
 			materialTextButtons[i].text = text[i]
-			materialTextButtons[i].setOnClickListener { _: View? ->
+			materialTextButtons[i].setOnClickListener {
 				config.copy("exam", text[i])
 				config.toast(R.string.copy_successfully)
 			}
 		}
+		val isBefore = examData.getString("status") == "before"
+		binding.root.background.setTint(if (examData.getString("status") == "in") config.contextUtil.getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim) else if (isBefore) 0x0 else config.contextUtil.getColorFromAttr(com.google.android.material.R.attr.colorSurface))
+		binding.examName.setTextAppearance(if (isBefore) com.google.android.material.R.style.TextAppearance_Material3_TitleMedium else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized)
+		binding.root.alpha = if (isBefore) 0.64f else 1.0f
 		super.onBindViewHolder(holder, position)
 	}
 }

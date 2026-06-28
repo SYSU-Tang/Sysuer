@@ -1,19 +1,17 @@
-package com.sysu.edu.todo;
+package com.sysu.edu.todo
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.databinding.ActivityTodoBinding
 
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.databinding.ActivityTodoBinding;
-
-public class TodoActivity extends BaseActivity {
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityTodoBinding binding = ActivityTodoBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        binding.toolbar.setNavigationOnClickListener(_ -> supportFinishAfterTransition());
-        TodoManager todoManager = ((TodoFragment) binding.fragment.getFragment()).getTodoManager();
-        binding.add.setOnClickListener(_ -> todoManager.showTodoAddDialog());
-    }
+class TodoActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityTodoBinding.inflate(layoutInflater).apply {
+			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
+			add.setOnClickListener { (fragment.getFragment<Fragment?>() as TodoFragment).todoManager.showTodoAddDialog() }
+		}
+		setContentView(binding.root)
+	}
 }

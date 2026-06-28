@@ -27,10 +27,14 @@ class GymModel(context: Context) : BaseModel(context) {
 		authorizationJar = AuthorizationJar(context)
 		header = mutableMapOf("Accept" to "application/json, text/plain, */*")
 	}
+	
 	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,
 	                            response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
 		val content = response.body.string()
 		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
+		println(content)
+		println(response.code)
+		println(request.first.url)
 		when (response.code) {
 			200 -> response.header("Content-Type")
 				?.takeIf { it.contains("application/json") }
@@ -48,5 +52,14 @@ class GymModel(context: Context) : BaseModel(context) {
 			401 -> login(request)
 		}
 		return result
+	}
+	
+	override fun updateRequest(request: Request): Request {
+		return request.newBuilder()
+			.url(request.url.newBuilder().host(authorizationManager.host).build())
+			.header("Cookie", cookieManager?.toSimpleString(authorizationManager.host) ?: "")
+			.header("Authorization", http.authorizationJar?.getAuthorization(authorizationManager.host)
+				?: "")
+			.build()
 	}
 }

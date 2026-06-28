@@ -18,6 +18,6 @@ open class BaseFragment : Fragment() {
 	
 	override fun onDestroy() {
 		super.onDestroy()
-		config.contextUtil.disposable.dispose()
+		if (::config.isInitialized) config.contextUtil.disposable.dispose()
 	}
 }

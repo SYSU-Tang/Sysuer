@@ -1,87 +1,46 @@
-package com.sysu.edu.todo;
+package com.sysu.edu.todo
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.content.ContentValues
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+import androidx.core.database.sqlite.transaction
+import com.sysu.edu.R
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-import androidx.annotation.NonNull;
-
-import com.sysu.edu.R;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-public class TodoHelper extends SQLiteOpenHelper {
-    
-    private static ContentValues value = new ContentValues();
-    private final Context context;
-    
-    public TodoHelper(Context context, int version) {
-        super(context, "todo.db", null, version);
-        this.context = context;
-    }
-    
-    @NonNull
-    private static ContentValues setContentValues(TodoInfo todoInfo) {
-        value.clear();
-        value.put("title", todoInfo.getTitle().getValue());
-        value.put("description", todoInfo.getDescription().getValue());
-        value.put("due_date", todoInfo.getDueDate().getValue());
-        value.put("status", todoInfo.getStatus().getValue());
-        value.put("priority", todoInfo.getPriority().getValue() == null ? 0 : todoInfo.getPriority().getValue());
-        value.put("todo_type", todoInfo.getType().getValue());
-        value.put("subtask", todoInfo.getSubtask().getValue());
-        value.put("attachment", todoInfo.getAttachment().getValue());
-        value.put("subject", todoInfo.getSubject().getValue());
-        value.put("location", todoInfo.getLocation().getValue());
-        value.put("color", todoInfo.getColor().getValue());
-        value.put("label", todoInfo.getTag().getValue());
-        value.put("due_time", todoInfo.getDueTime().getValue());
-        value.put("remind_time", todoInfo.getRemindTime().getValue());
-        value.put("done_datetime", todoInfo.getDoneDate().getValue());
-        value.put("update_datetime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        value.put("ddl", todoInfo.getDdlDate().getValue());
-        
-        return value;
-    }
-    
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        //db = context.openOrCreateDatabase("todo.db", Context.MODE_PRIVATE, null);
-        //db.execSQL("Drop table if exists types");
-        db.execSQL("CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, due_date DATETIME,due_time DATETIME, done_datetime DATETIME, create_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, update_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, status INTEGER DEFAULT 0, priority INTEGER DEFAULT 0, todo_type TEXT,subtask TEXT,attachment TEXT,subject TEXT, location TEXT,color TEXT,label TEXT,ddl DATETIME,remind_time TEXT);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);");
-        addType(db);
-    }
-    
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        if (i <= 6) addType(db);
-    }
-    
-    public void addType(SQLiteDatabase db) {
-        db.beginTransaction();
-        ContentValues value = new ContentValues();
-        for (String type : context.getResources().getStringArray(R.array.todo_base_type)) {
-            value.put("name", type);
-            try {
-                db.insertWithOnConflict("types", null, value, SQLiteDatabase.CONFLICT_ABORT);
-            } catch (Exception _) {
-            }
-            value.clear();
-        }
-        db.setTransactionSuccessful();
-        db.endTransaction();
-    }
-    
-    public void addType() {
-        addType(getWritableDatabase());
-    }
-    /*public void add() {
+class TodoHelper(private val context: Context, version: Int) :
+	SQLiteOpenHelper(context, "todo.db", null, version) {
+	override fun onCreate(db: SQLiteDatabase) {
+		//db = context.openOrCreateDatabase("todo.db", Context.MODE_PRIVATE, null);
+		//db.execSQL("Drop table if exists types");
+		db.execSQL("CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, due_date DATETIME,due_time DATETIME, done_datetime DATETIME, create_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, update_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, status INTEGER DEFAULT 0, priority INTEGER DEFAULT 0, todo_type TEXT,subtask TEXT,attachment TEXT,subject TEXT, location TEXT,color TEXT,label TEXT,ddl DATETIME,remind_time TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
+		addType(db)
+	}
+	
+	override fun onUpgrade(db: SQLiteDatabase, i: Int, i1: Int) {
+		if (i <= 6) addType(db)
+	}
+	
+	@JvmOverloads fun addType(db: SQLiteDatabase = writableDatabase) {
+		db.transaction {
+			val value = ContentValues()
+			context.resources.getStringArray(R.array.todo_base_type).forEach {
+				value.put("name", it)
+				try {
+					insertWithOnConflict("types", null, value, SQLiteDatabase.CONFLICT_ABORT)
+				} catch (`_`: Exception) {
+				}
+				value.clear()
+			}
+		}
+	}
+	
+	/*public void add() {
         ContentValues value = new ContentValues();
         value.put("title", "标题");
         value.put("description", "描述");
@@ -97,25 +56,54 @@ public class TodoHelper extends SQLiteOpenHelper {
         value.put("label", "#标签");
         db.insert("todos", null, value);
     }*/
-    
-    public void deleteTodo(String id) {
-        getWritableDatabase().delete("todos", "id  = ?", new String[]{id});
-        close();
-    }
-    
-    public void deleteTodo(TodoInfo todoInfo) {
-        deleteTodo(String.valueOf(todoInfo.getId().getValue()));
-    }
-    
-    public void addTodo(TodoInfo todoInfo) {
-        value = setContentValues(todoInfo);
-        getWritableDatabase().insert("todos", null, value);
-        close();
-    }
-    
-    public void updateTodo(TodoInfo todoInfo) {
-        value = setContentValues(todoInfo);
-        getWritableDatabase().update("todos", value, "id = ?", new String[]{String.valueOf(todoInfo.getId().getValue())});
-        close();
-    }
+	fun deleteTodo(id: String?) {
+		writableDatabase.delete("todos", "id  = ?", arrayOf(id))
+		close()
+	}
+	
+	fun deleteTodo(todoInfo: TodoInfo) {
+		deleteTodo(todoInfo.getId().value.toString())
+	}
+	
+	fun addTodo(todoInfo: TodoInfo) {
+		value = setContentValues(todoInfo)
+		writableDatabase.insert("todos", null, value)
+		close()
+	}
+	
+	fun updateTodo(todoInfo: TodoInfo) {
+		value = setContentValues(todoInfo)
+		writableDatabase.update("todos", value, "id = ?", arrayOf(todoInfo.getId().value.toString()))
+		close()
+	}
+	
+	companion object {
+		private var value = ContentValues()
+		private fun setContentValues(todoInfo: TodoInfo): ContentValues {
+			value.apply {
+				clear()
+				put("title", todoInfo.getTitle().value)
+				put("description", todoInfo.getDescription().value)
+				put("due_date", todoInfo.getDueDate().value)
+				put("status", todoInfo.getStatus().value)
+				put("priority", todoInfo.getPriority().value ?: 0)
+				put("todo_type", todoInfo.getType().value)
+				put("subtask", todoInfo.getSubtask().value)
+				put("attachment", todoInfo.getAttachment().value)
+				put("subject", todoInfo.getSubject().value)
+				put("location", todoInfo.getLocation().value)
+				put("color", todoInfo.getColor().value)
+				put("label", todoInfo.getTag().value)
+				put("due_time", todoInfo.getDueTime().value)
+				put("remind_time", todoInfo.getRemindTime().value)
+				put("done_datetime", todoInfo.getDoneDate().value)
+				put("update_datetime", LocalDateTime.now()
+					.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+				put("ddl", todoInfo.getDdlDate().value)
+			}
+			
+			
+			return value
+		}
+	}
 }

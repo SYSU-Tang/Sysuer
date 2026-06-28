@@ -2,13 +2,26 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
         android:enabled="true"
-        android:icon="@drawable/calendar"
+        android:icon="@drawable/course_table_circle"
         android:shortcutId="course_schedule"
         android:shortcutLongLabel="@string/course_schedule"
         android:shortcutShortLabel="@string/course_schedule">
         <intent
             android:action="android.intent.action.VIEW"
             android:targetClass="com.sysu.edu.academic.CourseScheduleActivity"
+            android:targetPackage="com.sysu.edu" />
+        <categories android:name="android.shortcut.conversation" />
+        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/setting_circle"
+        android:shortcutId="setting"
+        android:shortcutLongLabel="@string/setting"
+        android:shortcutShortLabel="@string/setting">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.sysu.edu.extra.SettingActivity"
             android:targetPackage="com.sysu.edu" />
         <categories android:name="android.shortcut.conversation" />
         <capability-binding android:key="actions.intent.CREATE_MESSAGE" />

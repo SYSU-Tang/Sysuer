@@ -16,19 +16,17 @@ import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.haibin.calendarview.Calendar;
+import com.sysu.edu.BaseFragment;
 import com.sysu.edu.R;
 import com.sysu.edu.api.AuthorizationJar;
 import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.ContextUtil;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Config;
 import com.sysu.edu.api.RequestQueue;
 import com.sysu.edu.api.TargetUrl;
 import com.sysu.edu.databinding.FragmentWaterFeeBinding;
@@ -45,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class EnergyWaterFeeFragment extends Fragment {
+public class EnergyWaterFeeFragment extends BaseFragment {
     
     final RequestQueue requestQueue = new RequestQueue();
     final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
@@ -57,8 +55,7 @@ public class EnergyWaterFeeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Config config = new Config(this);
-        ContextUtil contextUtil = new ContextUtil(requireContext());
+        super.onCreateView(inflater, container, savedInstanceState);
         adapter = new ConcatAdapter();
         FragmentWaterFeeBinding binding = FragmentWaterFeeBinding.inflate(inflater, container, false);
         binding.list.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -74,7 +71,6 @@ public class EnergyWaterFeeFragment extends Fragment {
                     config.toast(R.string.no_net_connected);
                 else if (msg.getData().getBoolean("isJSON")) {
                     JSONObject response = JSONObject.parse((String) msg.obj);
-                    System.out.println(response);
                     if (response.getInteger("code") == 200) {
                         switch (msg.what) {
                             case 0 -> name = response.getJSONObject("data").getString("username");
@@ -157,7 +153,7 @@ public class EnergyWaterFeeFragment extends Fragment {
                     } else if (response.getInteger("code") == 201)
                         config.toast(toStringOrDefault(response.getString("msg")));
                     else
-                        contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
+                        config.getContextUtil().login(TargetUrl.ZHNY, requestQueue::retry);
                 }
                 super.handleMessage(msg);
             }

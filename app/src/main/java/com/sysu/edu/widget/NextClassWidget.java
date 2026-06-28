@@ -70,7 +70,6 @@ public class NextClassWidget extends AppWidgetProvider {
         if (response.get("code").equals(200)) {
             switch (what) {
                 case 2 -> {
-                    
                     final ArrayList<JSONObject> todayCourse = new ArrayList<>();
                     final ArrayList<JSONObject> tomorrowCourse = new ArrayList<>();
                     ArrayList<JSONObject> beforeArray = new ArrayList<>();

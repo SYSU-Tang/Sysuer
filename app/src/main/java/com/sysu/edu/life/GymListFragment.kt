@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.viewbinding.ViewBinding
 import com.alibaba.fastjson2.JSONObject
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -17,11 +18,11 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
-import com.sysu.edu.api.AuthorizationJar
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.databinding.ItemFieldBinding
 import com.sysu.edu.databinding.RecyclerViewScrollBinding
 import com.sysu.edu.model.GymModel
+import com.sysu.edu.view.AdapterListener
 import com.sysu.edu.view.RecyclerAdapter
 
 class GymListFragment : BaseFragment() {
@@ -32,10 +33,8 @@ class GymListFragment : BaseFragment() {
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
-		binding = RecyclerViewScrollBinding.inflate(inflater, container, false)
 		model = GymModel(requireContext())
 		layoutManager = StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL)
-		binding.root.layoutManager = layoutManager
 		viewModel = ViewModelProvider(requireActivity())[GymReservationViewModel::class.java]
 		val fieldAdapter = FieldAdapter().apply {
 			action = { id: String? ->
@@ -45,8 +44,35 @@ class GymListFragment : BaseFragment() {
 				})
 			}
 			setParams(config)
+			setListener(object : AdapterListener {
+				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+				                    holder: RecyclerView.ViewHolder?,
+				                    position: Int) {
+					holder?.let { ItemFieldBinding.bind(it.itemView) }.apply {
+						get(position)?.getString("ImageUrl")?.takeIf { it.isNotEmpty() }?.let {
+							Glide.with(requireContext())
+								.load(GlideUrl(it, LazyHeaders.Builder()
+									.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+									.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+									.addHeader("Cookie", model.cookie)
+									.addHeader("Authorization", model.authorization)
+									.build()))
+								.skipMemoryCache(true)
+								.diskCacheStrategy(DiskCacheStrategy.NONE)
+								.into(this?.image!!)
+						}
+					}
+				}
+				
+				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+				                      binding: ViewBinding?) {
+				}
+			})
 		}
-		binding.root.adapter = fieldAdapter
+		binding = RecyclerViewScrollBinding.inflate(inflater, container, false).apply {
+			root.layoutManager = layoutManager
+			root.adapter = fieldAdapter
+		}
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			message.second.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
 				when (message.first) {
@@ -89,22 +115,12 @@ class GymListFragment : BaseFragment() {
 		}
 		
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-			val binding = ItemFieldBinding.bind(holder.itemView)
 			val item = get(position)
-			binding.title.text = item.getString("Name")
-			binding.root.setOnClickListener { action?.invoke(item.getString("Identity")) }
-			val imageUrl = item.getString("ImageUrl")
-			val authorizationJar = AuthorizationJar(holder.itemView.context)
-			if (!imageUrl.isNullOrEmpty()) Glide.with(holder.itemView.context)
-				.load(GlideUrl(imageUrl, LazyHeaders.Builder()
-					.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
-					.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-					.addHeader("Cookie", authorizationJar.getCookie(imageUrl))
-					.addHeader("Authorization", authorizationJar.getAuthorization(CommonUtil.getHost(imageUrl)))
-					.build()))
-				.skipMemoryCache(true)
-				.diskCacheStrategy(DiskCacheStrategy.NONE)
-				.into(binding.image)
+			ItemFieldBinding.bind(holder.itemView).apply {
+				title.text = item.getString("Name")
+				root.setOnClickListener { action?.invoke(item.getString("Identity")) }
+			}
+			
 			super.onBindViewHolder(holder, position)
 		}
 	}

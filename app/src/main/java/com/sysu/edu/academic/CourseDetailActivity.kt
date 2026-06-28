@@ -36,6 +36,9 @@ class CourseDetailActivity : BaseActivity() {
 		code = intent.getStringExtra("code")
 		id = intent.getStringExtra("id")
 		classNum = intent.getStringExtra("class") // code: EIT228, id: null, classNum: 202511441
+		println(code)
+		println(id)
+		println(classNum)
 		detail
 		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second

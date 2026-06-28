@@ -80,7 +80,7 @@ class CourseSelectedActivity : BaseActivity() {
 	}
 	
 	fun getSelectedCourses(courseName: String?) {
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", ++page, courseName), 1)
+		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format("{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", ++page, courseName), 1)
 	}
 	
 	class CourseSelectedAdapter : RecyclerAdapter<JSONObject?>() {

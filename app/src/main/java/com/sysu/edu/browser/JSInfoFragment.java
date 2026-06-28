@@ -53,7 +53,7 @@ public class JSInfoFragment extends PreferenceFragmentCompat {
         preferenceUtil.insert("matches", JSONArray.from(((EditPreference) Objects.requireNonNull(findPreference("matches"))).getValue().split(",")).toString());
         preferenceUtil.insertMenuValue("run", "run");
         preferenceUtil.insertSwitchValue("state", "state", 0, 1);
-        return preferenceUtil.params;
+        return preferenceUtil.getParams();
     }
     
     public void setData(JSONObject info) {

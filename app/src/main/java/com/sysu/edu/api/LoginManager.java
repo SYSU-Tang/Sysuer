@@ -210,7 +210,9 @@ public class LoginManager {
                         case TargetUrl.GYM_WEBVPN -> {
                             getGymToken(targetBaseUrl);
                             cookieJar.copy(targetBaseUrl, "https://gym.webvpn.sysu.edu.cn");
-                            setAuthorization(host, getGymAuthorization(targetBaseUrl));
+                            String gymAuthorization = getGymAuthorization(targetBaseUrl);
+                            System.out.println(gymAuthorization);
+                            setAuthorization(host, gymAuthorization);
                         }
                         case TargetUrl.XGXT_WEBVPN -> {
                             request(service, true);

@@ -40,15 +40,8 @@ abstract class BaseModel(context: Context) {
 	}
 	
 	fun add(path: String?, data: String? = null, type: String? = null, what: Int) {
-		queue.add(
-			CommonUtil.Tuple2(
-				http.generateRequest(
-					"https://${authorizationManager.host}/$path",
-					data,
-					type
-				).build(), what
-			)
-		)
+		queue.add(CommonUtil.Tuple2(http.generateRequest("https://${authorizationManager.host}/$path", data, type)
+										.build(), what))
 	}
 	
 	fun next() {
@@ -80,7 +73,7 @@ abstract class BaseModel(context: Context) {
 		val empty = afterLoginRequest.isEmpty()
 		afterLoginRequest.add(request)
 		if (empty) contextUtil.login(authorizationManager.targetUrl) {
-			afterLoginRequest.forEach { request: CommonUtil.Tuple2<Request, Int>? -> this.retry(request!!) }
+			afterLoginRequest.forEach { request: CommonUtil.Tuple2<Request, Int>? -> retry(request!!) }
 		}
 	}
 	
@@ -90,8 +83,7 @@ abstract class BaseModel(context: Context) {
 				handleFailure(request, e)
 			}
 			
-			@Throws(IOException::class)
-			override fun onResponse(call: Call, response: Response) {
+			@Throws(IOException::class) override fun onResponse(call: Call, response: Response) {
 				handleResponse(request, response)
 			}
 		})
@@ -113,18 +105,16 @@ abstract class BaseModel(context: Context) {
 	
 	fun execute(request: Request, code: Int): CommonUtil.Tuple2<Int, JSONObject>? {
 		try {
-			return handleResponse(CommonUtil.Tuple2(request, code),
-			                      http.client.newCall(request).execute())
+			return handleResponse(CommonUtil.Tuple2(request, code), http.client.newCall(request)
+				.execute())
 		} catch (e: IOException) {
 			handleFailure(CommonUtil.Tuple2(request, code), e)
 			return null
 		}
 	}
 	
-	protected open fun handleResponse(
-		request: CommonUtil.Tuple2<Request, Int>,
-		response: Response
-	): CommonUtil.Tuple2<Int, JSONObject>? {
+	protected open fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,
+	                                  response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
 		val content = response.body.string()
 		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
 		response.header("Content-Type")?.takeIf { it.contains("application/json") }?.let {
@@ -160,15 +150,23 @@ abstract class BaseModel(context: Context) {
 	val cookieManager: CookieManager?
 		get() = http.cookieManager
 	
-	fun updateRequest(request: Request): Request {
+	open fun updateRequest(request: Request): Request {
 		return request.newBuilder()
-			.url(request.url.newBuilder().host(authorizationManager.host).build()).header(
-				"Cookie",
-				cookieManager?.toSimpleString(authorizationManager.host) ?: ""
-			).build()
+			.url(request.url.newBuilder().host(host).build())
+			.header("Cookie", cookie)
+			.build()
 	}
 	
 	fun dispose() {
 		contextUtil.dispose()
 	}
+	
+	val cookie: String
+		get() = cookieManager?.toSimpleString(host) ?: ""
+	val authorization: String
+		get() = http.authorizationJar?.getAuthorization(host) ?: ""
+	val token: String
+		get() = http.authorizationJar?.getToken(host) ?: ""
 }
+
+

@@ -69,7 +69,8 @@ class HttpManager(val handler: Handler) {
 	fun setParams(config: Config) {
 		this.config = config
 		cookieManager = CookieManager(config.context)
-	}
+		authorizationJar = AuthorizationJar(config.context)
+		}
 	
 	/**
 	 * 设置 Referer 头字段
