@@ -12,9 +12,9 @@ android {
 	
 	defaultConfig {
 		val generation = "1"
-		val major = "2"
-		val minor = "2"
-		val beta = true
+		val major = "3"
+		val minor = "0"
+		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
@@ -127,7 +127,8 @@ dependencies {
 	implementation(project(":CalendarView"))
 	implementation(libs.okhttp.java.net.cookiejar)
 	implementation(libs.miuix.blur.android)
-	implementation(libs.jsoup) //    implementation(libs.rxjava)
+	implementation(libs.jsoup)
+    implementation(libs.rxjava)
 	//    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
 	/*configurations.all {
 		exclude("androidx.appcompat", "appcompat")

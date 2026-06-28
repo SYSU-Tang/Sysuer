@@ -28,7 +28,7 @@ activityCompose = "1.13.0"
 composeBom = "2026.06.00"
 preference = "1.2.1"
 recyclerview = "1.4.0"
-#rxjava = "4.0.0-alpha-13"
+rxjava = "4.0.0-alpha-13"
 workRuntime = "2.11.2"
 materialPreference = "2.0.0"
 materialVersion = "2.7.2"
@@ -104,7 +104,7 @@ activity-compose = { group = "androidx.activity", name = "activity-compose", ver
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 provider = { module = "dev.rikka.shizuku:provider", version.ref = "api" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
-#rxjava = { module = "io.reactivex.rxjava4:rxjava", version.ref = "rxjava" }
+rxjava = { module = "io.reactivex.rxjava4:rxjava", version.ref = "rxjava" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
