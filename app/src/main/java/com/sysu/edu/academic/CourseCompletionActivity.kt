@@ -66,8 +66,8 @@ class CourseCompletionActivity : BaseActivity() {
 								}
 						}
 						
-						override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
-						                      binding: ViewBinding) {
+						override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+						                      binding: ViewBinding?) {
 							(binding as ItemCardBinding).getRoot()
 								.addView(LinearProgressIndicator(this@CourseCompletionActivity).apply {
 									id = R.id.progress

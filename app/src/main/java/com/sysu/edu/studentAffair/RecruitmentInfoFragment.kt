@@ -11,6 +11,7 @@ import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.model.XgxtModel
+import com.sysu.edu.view.EditTextDialog
 import com.sysu.edu.view.StaggeredFragment
 
 class RecruitmentInfoFragment : StaggeredFragment() {
@@ -29,14 +30,19 @@ class RecruitmentInfoFragment : StaggeredFragment() {
 		val view = super.onCreateView(inflater, container, savedInstanceState)
 		model = XgxtModel(requireContext())
 		viewModel = ViewModelProvider(requireActivity())[StudentPartTimeViewModel::class.java]
-		viewModel.jobNameDialog?.setValueChangeListener { v: String? ->
-			viewModel.jobName.value = v
-			regetRecruitment()
-		}
-		viewModel.unitDialog?.setValueChangeListener { v: String? ->
-			viewModel.unitName.value = v
-			regetRecruitment()
-		}
+		viewModel.jobNameDialog?.setValueChangeListener(object :
+															EditTextDialog.ValueChangeListener {
+			override fun onValueChange(value: String?) {
+				viewModel.jobName.value = value
+				regetRecruitment()
+			}
+		})
+		viewModel.unitDialog?.setValueChangeListener(object : EditTextDialog.ValueChangeListener {
+			override fun onValueChange(value: String?) {
+				viewModel.unitName.value = value
+				regetRecruitment()
+			}
+		})
 		setScrollBottom {
 			if ((page - 1) * 10 < total) recruitment
 		}
@@ -96,13 +102,13 @@ class RecruitmentInfoFragment : StaggeredFragment() {
 	
 	val recruitment: Unit
 		get() {
-			var url = "qgzx/api/sm-qgzx/gwsq?pageSize=10&pageNum=${page++}" //			val query = mutableMapOf<String, String>()
+			val url = StringBuilder("qgzx/api/sm-qgzx/gwsq?pageSize=10&pageNum=${page++}")
 			mapOf(viewModel.year to "qgzxnd", viewModel.jobType to "gwlxids", viewModel.campus to "xqids", viewModel.jobName to "qgzxgwmc", viewModel.unitName to "sgdwmc").forEach { (k, v) ->
 				k.value?.takeUnless { it.isEmpty() }?.let {
-					url += "&$v=$it"
+					url.append("&$v=$it")
 				}
 			}
-			model.addAndNext(url, 0)
+			model.addAndNext("$url", 0)
 		}
 	val year: Unit
 		get() {

@@ -42,7 +42,7 @@ class NewsActivity : BaseActivity() {
 		val adapter = Pager2Adapter(this)
 		val suggestionAdapter = SuggestionAdapter().apply {
 			setListener(object : AdapterListener {
-				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
 					holder.itemView.setOnClickListener { v: View? ->
@@ -51,7 +51,7 @@ class NewsActivity : BaseActivity() {
 					}
 				}
 				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                      binding: ViewBinding?) {
 				}
 			})

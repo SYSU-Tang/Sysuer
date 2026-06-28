@@ -158,7 +158,7 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 				}
 			})
 			setListener(object : AdapterListener {
-				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
 					staggeredAdapter.getTwoColumnsAdapter(position)
@@ -234,15 +234,15 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 								}
 							}
 							
-							override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+							override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 							                      binding: ViewBinding?) {
 							}
 						})
 					holder.itemView.findViewById<View>(R.id.button).visibility = if (position == 0) View.GONE else View.VISIBLE
 				}
 				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
-				                      binding: ViewBinding) {
+				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+				                      binding: ViewBinding?) {
 					(binding as ItemCardBinding).root.addView(MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle).apply {
 						id = R.id.button
 						layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)

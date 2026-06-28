@@ -50,7 +50,7 @@ class AcademyNotification : BaseActivity() {
 						}
 					}
 					
-					override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+					override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 					                      binding: ViewBinding?) {
 					}
 				})

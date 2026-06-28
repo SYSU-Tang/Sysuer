@@ -44,7 +44,7 @@ class LeaveReturnListFragment : StaggeredFragment() {
 						.toList(), extractValue(e, arrayOf("blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt")))
 				})
 				setListener(object : AdapterListener {
-					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 					                    holder: RecyclerView.ViewHolder,
 					                    position: Int) {
 						val item = response.getJSONArray("data").getJSONObject(position)
@@ -63,8 +63,8 @@ class LeaveReturnListFragment : StaggeredFragment() {
 						}
 					}
 					
-					override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
-					                      binding: ViewBinding) {
+					override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+					                      binding: ViewBinding?) {
 						(binding as ItemCardBinding).root.addView(MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle).apply {
 							setId(R.id.button)
 							setLayoutParams(LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)

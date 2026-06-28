@@ -40,7 +40,7 @@ class EvaluationCategoryFragment : BaseFragment() {
 		val values: Array<String> = arrayOf("%s", "起始时间：%s", "结束时间：%s", "总评数：%s", "已评数：%s")
 		val arguments: Array<String> = arrayOf("rwid", "firstwjid", "pjrdm")
 		categoryAdapter.setListener(object : AdapterListener {
-			override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+			override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 			                    holder: RecyclerView.ViewHolder,
 			                    position: Int) {
 				val bind = ItemEvaluationBinding.bind(holder.itemView)
@@ -63,7 +63,7 @@ class EvaluationCategoryFragment : BaseFragment() {
 				bind.startTime.text = "$stringBuilder".trim { it <= ' ' }
 			}
 			
-			override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+			override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 			                      binding: ViewBinding?) {
 			}
 		})

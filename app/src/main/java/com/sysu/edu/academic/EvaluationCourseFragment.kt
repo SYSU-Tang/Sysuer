@@ -46,7 +46,7 @@ class EvaluationCourseFragment : BaseFragment() {
 		val arguments: Array<String> = arrayOf("rwid", "wjid", "sxz", "pjrdm", "bpdm", "kcdm", "rwh", "lsjgzt", "bpmc")
 		val adp = CourseEvaluationAdapter().apply {
 			setListener(object : AdapterListener {
-				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
 					val bind = ItemEvaluationBinding.bind(holder.itemView)
@@ -71,7 +71,7 @@ class EvaluationCourseFragment : BaseFragment() {
 					bind.startTime.text = "$stringBuilder".trim { it <= ' ' }
 				}
 				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                      binding: ViewBinding?) {
 				}
 			})

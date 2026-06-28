@@ -120,14 +120,14 @@ class NetOrderFragment : StaggeredFragment() {
 												if (actionMatcher.find()) {
 													staggeredAdapter.setListener(object :
 																					 AdapterListener {
-														override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
-														                    holder: RecyclerView.ViewHolder?,
+														override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+														                    holder: RecyclerView.ViewHolder,
 														                    position: Int) {
 														}
 														
-														override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
-														                      b: ViewBinding) {
-															val line = ItemButtonGroupBinding.inflate(inflater, (b as ItemCardBinding).root, false).root
+														override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+														                      binding: ViewBinding?) {
+															val line = ItemButtonGroupBinding.inflate(inflater, (binding as ItemCardBinding).root, false).root
 															val leftDay = actionMatcher.group(2)
 															orderDetail[9] = leftDay
 															val serviceId = actionMatcher.group(1)
@@ -147,7 +147,7 @@ class NetOrderFragment : StaggeredFragment() {
 																dialogNetBinding.service.value.text = orderDetail[1]
 																dialogNetBinding.submit.setOnClickListener { order(time!!, fee, serviceId) }
 															}
-															b.root.addView(line)
+															binding.root.addView(line)
 														}
 													})
 												}
@@ -163,14 +163,14 @@ class NetOrderFragment : StaggeredFragment() {
 												val serviceId = action.group(1)
 												staggeredAdapter.setListener(object :
 																				 AdapterListener {
-													override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
-													                    holder: RecyclerView.ViewHolder?,
+													override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+													                    holder: RecyclerView.ViewHolder,
 													                    position: Int) {
 													}
 													
-													override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
-													                      b: ViewBinding) {
-														val line = ItemButtonGroupBinding.inflate(inflater, (b as ItemCardBinding).root, false).root
+													override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+													                      binding: ViewBinding?) {
+														val line = ItemButtonGroupBinding.inflate(inflater, (binding as ItemCardBinding).root, false).root
 														getMaterialButton(inflater, line, getString(R.string.pay)) {
 															payDialog.show()
 															oldDate = LocalDate.parse(orderDetail[8], formatter)
@@ -178,7 +178,7 @@ class NetOrderFragment : StaggeredFragment() {
 															dialogNetBinding.service.value.text = orderDetail[1]
 															dialogNetBinding.submit.setOnClickListener { order(time!!, fee, serviceId) }
 														}
-														b.root.addView(line)
+														binding.root.addView(line)
 													}
 												})
 											}

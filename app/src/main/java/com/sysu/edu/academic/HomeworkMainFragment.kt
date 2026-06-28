@@ -62,7 +62,7 @@ class HomeworkMainFragment : BaseFragment() {
 									adapter.addAdapter(HomeworkAdapter().apply {
 										add(eventItem)
 										setListener(object : AdapterListener {
-											override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+											override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 											                    holder: RecyclerView.ViewHolder,
 											                    position: Int) {
 												ItemHomeworkBinding.bind(holder.itemView).apply {
@@ -79,7 +79,7 @@ class HomeworkMainFragment : BaseFragment() {
 												}
 											}
 											
-											override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?,
+											override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 											                      binding: ViewBinding?) {
 											}
 										})

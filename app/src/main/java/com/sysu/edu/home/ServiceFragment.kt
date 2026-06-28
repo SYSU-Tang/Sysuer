@@ -324,7 +324,7 @@ class ServiceFragment : Fragment() {
 			sugList.setLayoutManager(LinearLayoutManager(requireContext()))
 			val adapter = CollectionAdapter()
 			adapter.setListener(object : AdapterListener {
-				override fun onBind(adp: RecyclerView.Adapter<RecyclerView.ViewHolder?>?, holder: RecyclerView.ViewHolder, position: Int) {
+				override fun onBind(adp: RecyclerView.Adapter<RecyclerView.ViewHolder?>, holder: RecyclerView.ViewHolder, position: Int) {
 					val item = adapter.get(position)
 					holder.itemView.setOnClickListener(viewModel!!.actionMap[item.getInteger("id")]
 														   ?: View.OnClickListener { v: View? ->
@@ -335,7 +335,7 @@ class ServiceFragment : Fragment() {
 														   })
 				}
 				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>?, binding: ViewBinding?) {
+				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>, binding: ViewBinding?) {
 				}
 			})
 			sugList.setAdapter(adapter)
