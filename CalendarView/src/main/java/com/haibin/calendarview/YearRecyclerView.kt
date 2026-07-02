@@ -13,124 +13,110 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.haibin.calendarview;
+package com.haibin.calendarview
 
-import android.content.Context;
-import android.util.AttributeSet;
-
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import android.content.Context
+import android.util.AttributeSet
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import java.util.Calendar
 
 /**
  * 年份布局选择View
  */
-public final class YearRecyclerView extends RecyclerView {
-    private final YearViewAdapter mAdapter;
-    private CalendarViewDelegate mDelegate;
-    private OnMonthSelectedListener mListener;
-
-    public YearRecyclerView(Context context) {
-        this(context, null);
-    }
-
-    public YearRecyclerView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        mAdapter = new YearViewAdapter(context);
-        setLayoutManager(new GridLayoutManager(context, 3));
-        setAdapter(mAdapter);
-        mAdapter.setOnItemClickListener((position, _) -> {
-            if (mListener != null && mDelegate != null) {
-                Month month = mAdapter.getItem(position);
-                if (month == null) {
-                    return;
-                }
-                if (!CalendarUtil.isMonthInRange(month.getYear(), month.getMonth(),
-                        mDelegate.getMinYear(), mDelegate.getMinYearMonth(),
-                        mDelegate.getMaxYear(), mDelegate.getMaxYearMonth())) {
-                    return;
-                }
-                mListener.onMonthSelected(month.getYear(), month.getMonth());
-                if (mDelegate.mYearViewChangeListener != null) {
-                    mDelegate.mYearViewChangeListener.onYearViewChange(true);
-                }
-            }
-        });
-    }
-
-    /**
-     * 设置
-     *
-     * @param delegate delegate
-     */
-    void setup(CalendarViewDelegate delegate) {
-        mDelegate = delegate;
-        mAdapter.setup(delegate);
-    }
-
-    /**
-     * 初始化年视图
-     *
-     * @param year year
-     */
-    void init(int year) {
-        java.util.Calendar date = java.util.Calendar.getInstance();
-        for (int i = 1; i <= 12; i++) {
-            date.set(year, i - 1, 1);
-            int mDaysCount = CalendarUtil.getMonthDaysCount(year, i);
-            Month month = new Month();
-            month.setDiff(CalendarUtil.getMonthViewStartDiff(year, i, mDelegate.getWeekStart()));
-            month.setCount(mDaysCount);
-            month.setMonth(i);
-            month.setYear(year);
-            mAdapter.addItem(month);
-        }
-    }
-
-    /**
-     * 更新周起始
-     */
-    void updateWeekStart() {
-        for (Month month : mAdapter.getItems()) {
-            month.setDiff(CalendarUtil.getMonthViewStartDiff(month.getYear(), month.getMonth(), mDelegate.getWeekStart()));
-        }
-    }
-
-    /**
-     * 更新字体颜色大小
-     */
-    void updateStyle(){
-        for (int i = 0; i < getChildCount(); i++) {
-            YearView view = (YearView) getChildAt(i);
-            view.updateStyle();
-            view.invalidate();
-        }
-    }
-
-    /**
-     * 月份选择事件
-     *
-     * @param listener listener
-     */
-    void setOnMonthSelectedListener(OnMonthSelectedListener listener) {
-        mListener = listener;
-    }
-
-
-    void notifyAdapterDataSetChanged(){
-        if (getAdapter() != null)
-            getAdapter().notifyDataSetChanged();
-    }
-
-    @Override
-    protected void onMeasure(int widthSpec, int heightSpec) {
-        super.onMeasure(widthSpec, heightSpec);
-        int height = MeasureSpec.getSize(heightSpec);
-        int width = MeasureSpec.getSize(widthSpec);
-        mAdapter.setYearViewSize(width / 3, height / 4);
-    }
-
-    interface OnMonthSelectedListener {
-        void onMonthSelected(int year, int month);
-    }
+class YearRecyclerView(context: Context, attrs: AttributeSet? = null) :
+	RecyclerView(context, attrs) {
+	private val mAdapter: YearViewAdapter = YearViewAdapter(context).apply {
+		setOnItemClickListener(object : BaseRecyclerAdapter.OnItemClickListener {
+			override fun onItemClick(position: Int, itemId: Long) {
+				getItem(position)?.run {
+					if (CalendarUtil.isMonthInRange(year, month, mDelegate!!.minYear, mDelegate!!.minYearMonth, mDelegate!!.maxYear, mDelegate!!.maxYearMonth)) {
+						mListener?.onMonthSelected(year, month)
+						mDelegate!!.mYearViewChangeListener?.onYearViewChange(true)
+					}
+				}
+			}
+		})
+	}
+	private var mDelegate: CalendarViewDelegate? = null
+	private var mListener: OnMonthSelectedListener? = null
+	
+	init {
+		setLayoutManager(GridLayoutManager(context, 3))
+		setAdapter(mAdapter)
+	}
+	
+	/**
+	 * 设置
+	 * 
+	 * @param delegate delegate
+	 */
+	fun setup(delegate: CalendarViewDelegate) {
+		mDelegate = delegate
+		mAdapter.setup(delegate)
+	}
+	
+	/**
+	 * 初始化年视图
+	 * 
+	 * @param year year
+	 */
+	fun init(year: Int) {
+		val date = Calendar.getInstance()
+		(1..12).forEach { i ->
+			date.set(year, i - 1, 1)
+			mAdapter.addItem(Month().apply {
+				diff = CalendarUtil.getMonthViewStartDiff(year, i, mDelegate!!.weekStart)
+				count = CalendarUtil.getMonthDaysCount(year, i)
+				this.month = i
+				this.year = year
+			})
+		}
+	}
+	
+	/**
+	 * 更新周起始
+	 */
+	fun updateWeekStart() {
+		mAdapter.items.forEach { month ->
+			month?.let {
+				it.diff = CalendarUtil.getMonthViewStartDiff(it.year, it.month, mDelegate?.weekStart
+					?: 0)
+			}
+		}
+	}
+	
+	/**
+	 * 更新字体颜色大小
+	 */
+	fun updateStyle() {
+		(0..<childCount).forEach {
+			(getChildAt(it) as YearView).apply {
+				updateStyle()
+				invalidate()
+			}
+		}
+	}
+	
+	/**
+	 * 月份选择事件
+	 * 
+	 * @param listener listener
+	 */
+	fun setOnMonthSelectedListener(listener: OnMonthSelectedListener?) {
+		mListener = listener
+	}
+	
+	fun notifyAdapterDataSetChanged() {
+		adapter?.notifyDataSetChanged()
+	}
+	
+	override fun onMeasure(widthSpec: Int, heightSpec: Int) {
+		super.onMeasure(widthSpec, heightSpec)
+		mAdapter.setYearViewSize(MeasureSpec.getSize(widthSpec) / 3, MeasureSpec.getSize(heightSpec) / 4)
+	}
+	
+	interface OnMonthSelectedListener {
+		fun onMonthSelected(year: Int, month: Int)
+	}
 }

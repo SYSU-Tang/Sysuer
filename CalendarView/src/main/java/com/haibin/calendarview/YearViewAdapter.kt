@@ -13,68 +13,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.haibin.calendarview;
+package com.haibin.calendarview
 
-import android.content.Context;
-import android.text.TextUtils;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.Context
+import android.text.TextUtils
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import java.lang.reflect.Constructor
 
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.lang.reflect.Constructor;
-
-final class YearViewAdapter extends BaseRecyclerAdapter<Month> {
-    private CalendarViewDelegate mDelegate;
-    private int mItemWidth, mItemHeight;
-
-    YearViewAdapter(Context context) {
-        super(context);
-    }
-
-    void setup(CalendarViewDelegate delegate) {
-        mDelegate = delegate;
-    }
-
-
-    void setYearViewSize(int width, int height) {
-        mItemWidth = width;
-        mItemHeight = height;
-    }
-
-    @Override
-    RecyclerView.ViewHolder onCreateDefaultViewHolder(ViewGroup parent, int type) {
-        YearView yearView;
-        if (TextUtils.isEmpty(mDelegate.getYearViewClassPath())) {
-            yearView = new DefaultYearView(mContext);
-        } else {
-            try {
-                Constructor<?> constructor = mDelegate.getYearViewClass().getConstructor(Context.class);
-                yearView = (YearView) constructor.newInstance(mContext);
-            } catch (Exception _) {
-                yearView = new DefaultYearView(mContext);
-            }
-        }
-        RecyclerView.LayoutParams params = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
-                RecyclerView.LayoutParams.MATCH_PARENT);
-        yearView.setLayoutParams(params);
-        return new YearViewHolder(yearView, mDelegate);
-    }
-
-    @Override
-    void onBindViewHolder(RecyclerView.ViewHolder holder, Month item, int position) {
-        YearViewHolder h = (YearViewHolder) holder;
-        YearView view = h.mYearView;
-        view.init(item.getYear(), item.getMonth());
-        view.measureSize(mItemWidth, mItemHeight);
-    }
-
-    private static class YearViewHolder extends RecyclerView.ViewHolder {
-        final YearView mYearView;
-        YearViewHolder(View itemView, CalendarViewDelegate delegate) {
-            super(itemView);
-            mYearView = (YearView) itemView;
-            mYearView.setup(delegate);
-        }
-    }
+internal class YearViewAdapter(context: Context) : BaseRecyclerAdapter<Month?>(context) {
+	private var mDelegate: CalendarViewDelegate? = null
+	private var mItemWidth = 0
+	private var mItemHeight = 0
+	fun setup(delegate: CalendarViewDelegate) {
+		mDelegate = delegate
+	}
+	
+	fun setYearViewSize(width: Int, height: Int) {
+		mItemWidth = width
+		mItemHeight = height
+	}
+	
+	override fun onCreateDefaultViewHolder(parent: ViewGroup?, type: Int): RecyclerView.ViewHolder {
+		var yearView: YearView?
+		if (TextUtils.isEmpty(mDelegate!!.yearViewClassPath)) yearView = DefaultYearView(mContext)
+		else try {
+			val constructor: Constructor<*> = mDelegate!!.yearViewClass
+				.getConstructor(Context::class.java)
+			yearView = constructor.newInstance(mContext) as YearView
+		} catch (_: Exception) {
+			yearView = DefaultYearView(mContext)
+		}
+		yearView.setLayoutParams(RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT))
+		return YearViewHolder(yearView, mDelegate)
+	}
+	
+	override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, item: Month?, position: Int) {
+		val view = (holder as YearViewHolder).mYearView
+		view.init(item?.year ?: 0, item?.month ?: 0)
+		view.measureSize(mItemWidth, mItemHeight)
+	}
+	
+	private class YearViewHolder(itemView: View, delegate: CalendarViewDelegate?) :
+		RecyclerView.ViewHolder(itemView) {
+		val mYearView: YearView = itemView as YearView
+		
+		init {
+			mYearView.setup(delegate)
+		}
+	}
 }

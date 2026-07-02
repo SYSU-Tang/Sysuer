@@ -13,80 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.haibin.calendarview;
+package com.haibin.calendarview
 
-import android.content.Context;
-import android.graphics.Canvas;
+import android.content.Context
+import android.graphics.Canvas
 
 /**
  * 默认年视图
  */
-
-public class DefaultYearView extends YearView {
-
-    private final int mTextPadding;
-
-    public DefaultYearView(Context context) {
-        super(context);
-        mTextPadding = CalendarUtil.dipToPx(context, 3);
-    }
-
-    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
-    @Override
-    protected void onDrawMonth(Canvas canvas, int year, int month, int x, int y, int width, int height) {
-
-        String text = getContext()
-                .getResources()
-                .getStringArray(R.array.month_string_array)[month - 1];
-
-        canvas.drawText(text,
-                x + mItemWidth / 2 - mTextPadding,
-                y + mMonthTextBaseLine,
-                mMonthTextPaint);
-    }
-
-    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
-    @Override
-    protected void onDrawWeek(Canvas canvas, int week, int x, int y, int width, int height) {
-        String text = getContext().getResources().getStringArray(R.array.year_view_week_string_array)[week];
-        canvas.drawText(text,
-                x + width / 2,
-                y + mWeekTextBaseLine,
-                mWeekTextPaint);
-    }
-
-
-    @Override
-    protected boolean onDrawSelected(Canvas canvas, Calendar calendar, int x, int y, boolean hasScheme) {
-        return false;
-    }
-
-    @Override
-    protected void onDrawScheme(Canvas canvas, Calendar calendar, int x, int y) {
-
-    }
-
-    @Override
-    protected void onDrawText(Canvas canvas, Calendar calendar, int x, int y, boolean hasScheme, boolean isSelected) {
-        float baselineY = mTextBaseLine + y;
-        int cx = x + mItemWidth / 2;
-
-        if (isSelected) {
-            canvas.drawText(String.valueOf(calendar.getDay()),
-                    cx,
-                    baselineY,
-                    hasScheme ? mSchemeTextPaint : mSelectTextPaint);
-        } else if (hasScheme) {
-            canvas.drawText(String.valueOf(calendar.getDay()),
-                    cx,
-                    baselineY,
-                    calendar.isCurrentDay() ? mCurDayTextPaint :
-                            calendar.isCurrentMonth() ? mSchemeTextPaint : mOtherMonthTextPaint);
-
-        } else {
-            canvas.drawText(String.valueOf(calendar.getDay()), cx, baselineY,
-                    calendar.isCurrentDay() ? mCurDayTextPaint :
-                            calendar.isCurrentMonth() ? mCurMonthTextPaint : mOtherMonthTextPaint);
-        }
-    }
+class DefaultYearView(context: Context) : YearView(context) {
+	private val mTextPadding: Int = CalendarUtil.dipToPx(context, 3f)
+	override fun onDrawMonth(canvas: Canvas,
+	                         year: Int,
+	                         month: Int,
+	                         x: Int,
+	                         y: Int,
+	                         width: Int,
+	                         height: Int) {
+		canvas.drawText(this.context.resources.getStringArray(R.array.month_string_array)[month - 1], (x + mItemWidth / 2 - mTextPadding).toFloat(), y + mMonthTextBaseLine, mMonthTextPaint)
+	}
+	
+	override fun onDrawWeek(canvas: Canvas, week: Int, x: Int, y: Int, width: Int, height: Int) {
+		canvas.drawText(this.context.resources.getStringArray(R.array.year_view_week_string_array)[week], x + width.toFloat() / 2, y + mWeekTextBaseLine, mWeekTextPaint)
+	}
+	
+	override fun onDrawSelected(canvas: Canvas?,
+	                            calendar: Calendar?,
+	                            x: Int,
+	                            y: Int,
+	                            hasScheme: Boolean): Boolean = false
+	
+	override fun onDrawScheme(canvas: Canvas?, calendar: Calendar?, x: Int, y: Int) {}
+	override fun onDrawText(canvas: Canvas,
+	                        calendar: Calendar,
+	                        x: Int,
+	                        y: Int,
+	                        hasScheme: Boolean,
+	                        isSelected: Boolean) {
+		val baselineY = mTextBaseLine + y
+		val cx = (x + mItemWidth / 2).toFloat()
+		when {
+			isSelected -> canvas.drawText("${calendar.day}", cx, baselineY, if (hasScheme) mSchemeTextPaint else mSelectTextPaint)
+			hasScheme -> canvas.drawText("${calendar.day}", cx, baselineY, if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth) mSchemeTextPaint else mOtherMonthTextPaint)
+			else -> canvas.drawText("${calendar.day}", cx, baselineY, if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth) mCurMonthTextPaint else mOtherMonthTextPaint)
+		}
+	}
 }

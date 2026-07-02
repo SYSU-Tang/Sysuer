@@ -93,6 +93,8 @@ class CustomMonthView(context: Context) : MonthView(context) {
 		mSolarTermTextPaint.textSize = mCurMonthLunarTextPaint.textSize
 		mRadius = min(mItemWidth, mItemHeight) / 11 * 5
 	}
+	override fun onDestroy() {
+	}
 	
 	override fun onDrawSelected(canvas: Canvas,
 	                            calendar: Calendar?,

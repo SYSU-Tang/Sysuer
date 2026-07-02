@@ -13,46 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.haibin.calendarview;
+package com.haibin.calendarview
 
-import java.io.Serializable;
+import java.io.Serializable
 
-@SuppressWarnings("unused")
-final class Month implements Serializable {
-    private int diff;//日期偏移
-    private int count;
-    private int month;
-    private int year;
-
-    int getDiff() {
-        return diff;
-    }
-
-    void setDiff(int diff) {
-        this.diff = diff;
-    }
-
-    int getCount() {
-        return count;
-    }
-
-    void setCount(int count) {
-        this.count = count;
-    }
-
-    int getMonth() {
-        return month;
-    }
-
-    void setMonth(int month) {
-        this.month = month;
-    }
-
-    int getYear() {
-        return year;
-    }
-
-    void setYear(int year) {
-        this.year = year;
-    }
+internal class Month : Serializable {
+	var diff: Int = 0 //日期偏移
+	var count: Int = 0
+	var month: Int = 0
+	var year: Int = 0
 }

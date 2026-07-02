@@ -49,7 +49,7 @@ class GridDialog(private val activity: FragmentActivity) {
 		referenceIds.clear()
 		menuTitle.forEachIndexed { i, v ->
 			val menu = ItemButtonGridBinding.inflate(activity.layoutInflater, menuBinding.grid, false).root
-			if (type == Int::class.java) menu.setText((v as Int?)!!)
+			if (type == Integer::class.java) menu.setText((v as Int?)!!)
 			else menu.text = v as String?
 			if (menuIcon.size > i && menuIcon[i] != 0) menu.setIconResource(menuIcon[i]!!)
 			val id = View.generateViewId()

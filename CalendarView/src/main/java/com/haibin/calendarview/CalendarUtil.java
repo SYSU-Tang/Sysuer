@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * 一些日期辅助计算工具
  */
-@SuppressWarnings("all")
+
 public final class CalendarUtil {
 
     private static final long ONE_DAY = 1000 * 3600 * 24;
@@ -745,7 +745,7 @@ public final class CalendarUtil {
             int monthDays = getMonthDaysCount(calendar.getYear(), calendar.getMonth());
             Calendar indexCalendar = delegate.mIndexCalendar;
             calendar.setDay(indexCalendar == null || indexCalendar.getDay() == 0 ? 1 :
-                    monthDays < indexCalendar.getDay() ? monthDays : indexCalendar.getDay());
+                    Math.min(monthDays, indexCalendar.getDay()));
         } else {
             calendar.setDay(1);
         }
@@ -809,7 +809,6 @@ public final class CalendarUtil {
      * @return px
      */
     static int dipToPx(Context context, float dpValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
+        return (int) (dpValue * context.getResources().getDisplayMetrics().density + 0.5f);
     }
 }

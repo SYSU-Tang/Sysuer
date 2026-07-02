@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.CalendarView
 import com.haibin.calendarview.CalendarView.OnCalendarSelectListener
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
@@ -22,8 +23,7 @@ class TodoFragment : BaseFragment() {
 	val todoInfo: TodoInfo = TodoInfo().apply {
 		setStatus(null)
 	}
-	lateinit var binding: FragmentTodoBinding
-	@JvmField var date: String? = getDate()
+	lateinit var calendarView: CalendarView
 	var due: Boolean = true
 	var ddl: Boolean = false
 	var todo: Boolean = true
@@ -37,28 +37,29 @@ class TodoFragment : BaseFragment() {
 											  .setIsolateViewTypes(true)
 											  .build())
 		val toolbar = requireActivity().findViewById<Toolbar>(R.id.toolbar)
-		binding = FragmentTodoBinding.inflate(inflater, container, false).apply {
+		val binding = FragmentTodoBinding.inflate(inflater, container, false).apply {
 			recyclerView.adapter = concatAdapter
 			recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false) //		val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+			calendarView.setOnMonthChangeListener { year: Int, month: Int -> toolbar.setSubtitle("${year}年${month}月") }
+			calendarView.setSelectSingleMode()
+			toolbar.setSubtitle("${calendarView.curYear}年${calendarView.curMonth}月")
 			calendarView.setOnCalendarSelectListener(object : OnCalendarSelectListener {
 				override fun onCalendarOutOfRange(calendar: Calendar?) {
 				}
 				
 				override fun onCalendarSelect(calendar: Calendar, isClick: Boolean) {
-					date = calendarManager.toDateString(calendar.getTimeInMillis())
+					println(calendar)
 					todoManager.performRefresh()
 				}
 			})
-			calendarView.setOnMonthChangeListener { year: Int, month: Int -> toolbar.setSubtitle("${year}年${month}月") }
-			calendarView.setSelectSingleMode()
-			toolbar.setSubtitle("${calendarView.curYear}年${calendarView.curMonth}月")
+		}.also {
+			calendarView = it.calendarView
 		}
-		todoManager = TodoManager(requireActivity(), concatAdapter).apply {
-			setOnRefreshListener { refresh() }
-		}
+		todoManager = TodoManager(requireActivity(), concatAdapter)
+		todoManager.setOnRefreshListener { refresh() }
 		requireActivity().findViewById<FloatingActionButton>(R.id.add).setOnClickListener {
 			todoManager.showTodoAddDialog()
-			todoManager.getTodoInfo().setDueDate(getDate())
+			todoManager.getTodoInfo().setDueDate(date)
 		}
 		(requireActivity().findViewById<View?>(R.id.todo_date) as MaterialButtonToggleGroup).addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean ->
 			if (checkedId == R.id.due_todo) due = isChecked
@@ -74,20 +75,19 @@ class TodoFragment : BaseFragment() {
 				refresh()
 			}
 		}
-		
 		refresh()
 		return binding.root
 	}
 	
-	private fun getDate(): String? {
-		return calendarManager.toDateString(binding.calendarView.selectedCalendar.getTimeInMillis())
-	}
+	val date: String?
+		get() {
+			return calendarManager.toDateString(calendarView.selectedCalendar.getTimeInMillis())
+		}
 	
 	fun refresh() {
 		val a = mutableListOf<String?>()
 		val b = mutableListOf<String?>()
-		val map = mutableMapOf<String, MutableLiveData<*>>()		//        map.put("due_date", todoInfo.getDueDate());
-		//        map.put("ddl", todoInfo.getDdlDate());
+		val map = mutableMapOf<String, MutableLiveData<*>>()        //        map.put("due_date", todoInfo.getDueDate());		//        map.put("ddl", todoInfo.getDdlDate());
 		map["status"] = todoInfo.getStatus()
 		map["title"] = todoInfo.getTitle()
 		map["description"] = todoInfo.getDescription()

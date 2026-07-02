@@ -91,14 +91,14 @@ class FeeWeekView(context: Context) : WeekView(context) {
 	}
 	
 	override fun onDrawSelected(canvas: Canvas,
-	                            calendar: Calendar?,
+	                            calendar: Calendar,
 	                            x: Int,
 	                            hasScheme: Boolean): Boolean {
 		canvas.drawCircle((x + mItemWidth / 2).toFloat(), (mItemHeight / 2).toFloat(), mRadius.toFloat(), mSelectedPaint)
 		return true
 	}
 	
-	override fun onDrawScheme(canvas: Canvas?, calendar: Calendar?, x: Int) {
+	override fun onDrawScheme(canvas: Canvas, calendar: Calendar, x: Int) {
 		mPointPaint.setColor(if (isSelected(calendar)) Color.WHITE else Color.GRAY)    //        canvas.drawCircle(x + (float) mItemWidth / 2, mItemHeight - 3 * mPadding, mPointRadius, mPointPaint);
 	}
 	

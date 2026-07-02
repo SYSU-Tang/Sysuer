@@ -118,7 +118,7 @@ class DashboardFragment : BaseFragment() {
 					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 					                    holder: RecyclerView.ViewHolder,
 					                    position: Int) {
-						holder?.itemView?.setOnClickListener {
+						holder.itemView.setOnClickListener {
 							examSubject = get(position).getString("examSubjectName")
 							getSelectedCourses(examSubject)
 						}
@@ -135,8 +135,8 @@ class DashboardFragment : BaseFragment() {
 						if (getInteger("code") == 200) {
 							when (message.first) {
 								1 -> {
-									val beforeArray = ArrayList<JSONObject?>()
-									val afterArray = ArrayList<JSONObject?>()
+									val beforeArray = mutableListOf<JSONObject?>()
+									val afterArray = mutableListOf<JSONObject?>()
 									getJSONArray("data").forEach { item: Any? ->
 										val status = getTimePosition("${(item as JSONObject).getString("teachingDate")} ${item.getString("startTime")}", "${item.getString("teachingDate")} ${item.getString("endTime")}")
 										item["status"] = status
