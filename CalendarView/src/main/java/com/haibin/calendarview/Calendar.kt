@@ -111,7 +111,7 @@ class Calendar : Serializable, Comparable<com.haibin.calendarview.Calendar?> {
 	/**
 	 * 获取完整的农历日期
 	 */
-	@JvmField var lunarCalendar: Calendar? = null
+	@JvmField var lunarCalendar: com.haibin.calendarview.Calendar? = null
 	fun addScheme(scheme: Scheme?) {
 		if (schemes == null) schemes = mutableListOf()
 		schemes!!.add(scheme)

@@ -105,12 +105,12 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 		}
 		campusPreference.setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
 			getTeachingBuilding(newValue as String?)
-			getClassRoom(newValue, buildingPreference.value, classroomPreference.getValueLiveData()
+			getClassRoom(newValue, buildingPreference.value, classroomPreference.valueLiveData
 				.getValue())
 			true
 		}
 		buildingPreference.setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
-			getClassRoom(campusPreference.value, newValue as String?, classroomPreference.getValueLiveData()
+			getClassRoom(campusPreference.value, newValue as String?, classroomPreference.valueLiveData
 				.getValue())
 			true
 		}
@@ -119,7 +119,7 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 		datePicker.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { _: Pair<Long?, Long?>? ->
 			datePreference?.setSummary(datePicker.headerText)
 		})
-		classroomPreference.getValueLiveData()
+		classroomPreference.valueLiveData
 			.observe(requireActivity(), Observer { value: String? -> getClassRoom(campusPreference.value, buildingPreference.value, value) })
 		datePreference?.setOnPreferenceClickListener { _: Preference? ->
 			datePicker.show(getChildFragmentManager(), "date_picker")

@@ -43,9 +43,9 @@ class CourseQueryFilterFragment : PreferenceFragmentCompat() {
 				}, NavOptions.Builder().build())
 			}
 		}
-		findPreference<FilterPreference>("department")?.getValueLiveData()
+		findPreference<FilterPreference>("department")?.valueLiveData
 			?.observe(requireActivity(), Observer { text: String? -> getTeachingBuilding(text) })
-		findPreference<FilterPreference>("classroom")?.getValueLiveData()
+		findPreference<FilterPreference>("classroom")?.valueLiveData
 			?.observe(requireActivity(), Observer { text: String? -> getClassroom(text ?: "") })
 		(0..<6).forEach { pos: Int -> this.getData(pos) }
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->

@@ -4,7 +4,6 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -50,7 +49,10 @@ class CourseSelectionMainFragment : BaseFragment() {
 	val filter: MutableLiveData<String?> = MutableLiveData<String?>()
 	val type: MutableLiveData<Int?> = MutableLiveData<Int?>(1)
 	val category: MutableLiveData<Int?> = MutableLiveData<Int?>(11)
-	val typeCate: MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?> = MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?>()
+	val typeCate: MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?> = MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?>().apply {
+		addSource<Int?>(type, Observer { typeCate.value = CommonUtil.Tuple2(toIntegerOrDefault(type.value, 1), it) })
+		addSource<Int?>(category, Observer { typeCate.value = CommonUtil.Tuple2(toIntegerOrDefault(category.value, 11), it) })
+		}
 	lateinit var binding: FragmentCourseSelectionBinding
 	var tmp: Int = 0
 	var page: Int = 1
@@ -69,10 +71,43 @@ class CourseSelectionMainFragment : BaseFragment() {
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
-		binding = FragmentCourseSelectionBinding.inflate(inflater, container, false)
 		model = JwxtModel(requireContext())
+		clear()
 		vm = ViewModelProvider(requireActivity())[CourseSelectionViewModel::class.java]
-		vm.filterValue.observe(requireActivity(), Observer { _: MutableMap<String?, String?>? ->
+		binding = FragmentCourseSelectionBinding.inflate(inflater, container, false).apply {
+			head.type.setOnCheckedStateChangeListener { chipGroup: ChipGroup?, _: MutableList<Int?>? ->
+				val cid = chipGroup!!.checkedChipId
+				if (cid == R.id.my_major) selectCategory()
+				else type.value = if (cid == R.id.college_public_selective) 4 else 2
+				if (cid != R.id.my_major && head.category.height != 0) tmp = head.category.height
+				val animator = ValueAnimator.ofInt(*if (chipGroup.checkedChipId == R.id.my_major) intArrayOf(0, tmp) else intArrayOf(if (head.category.height == 0) 0 else tmp, 0))
+				animator.addUpdateListener { valueAnimator: ValueAnimator? ->
+					head.category.layoutParams = (head.category.layoutParams as LinearLayout.LayoutParams).apply { height = valueAnimator!!.getAnimatedValue() as Int }
+				}
+				animator.start()
+			}
+			zoom.setOnClickListener {
+				head.root.visibility = if (head.root.isVisible) View.GONE else View.VISIBLE
+			}
+			head.category.setOnCheckedStateChangeListener { _: ChipGroup?, _: MutableList<Int?>? -> selectCategory() }
+			course.layoutManager = GridLayoutManager(requireContext(), config.column)
+			course.addItemDecoration(SpacesItemDecoration(config.dpToPx(8)))
+			course.adapter = CourseAdapter().apply {
+				selectAction = { position: Int? ->
+					if (get(position!!).getInteger("selectedStatus") == 3 || get(position).getInteger("selectedStatus") == 4) unselect(convert(position, "courseId"), convert(position, "teachingClassId"))
+					else select(convert(position, "teachingClassId"))
+				}
+				likeAction = { code: String? -> like(code!!) }
+			}.also { adp = it }
+			head.filter.setOnCheckedStateChangeListener { _: ChipGroup?, _: MutableList<Int?>? -> regetCourseList() }
+			course.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+				override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
+					if (!v.canScrollVertically(1) && total!! / 10 + 1 > page && dy > 0) courseList
+					head.root.elevation = (if (v.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
+				}
+			})
+		}
+		vm.filterValue.observe(requireActivity(), Observer {
 			filter.value = vm.returnData
 			binding.head.seniorFilter.removeAllViews()
 			vm.getFilterName()?.forEach { (_: String?, v: String?) ->
@@ -84,56 +119,18 @@ class CourseSelectionMainFragment : BaseFragment() {
 			}
 			regetCourseList()
 		})
-		binding.head.type.setOnCheckedStateChangeListener { chipGroup: ChipGroup?, _: MutableList<Int?>? ->
-			val cid = chipGroup!!.checkedChipId
-			if (cid == R.id.my_major) selectCategory()
-			else type.value = if (cid == R.id.college_public_selective) 4 else 2
-			if (cid != R.id.my_major && binding.head.category.height != 0) tmp = binding.head.category.height
-			val animator = ValueAnimator.ofInt(*if (chipGroup.checkedChipId == R.id.my_major) intArrayOf(0, tmp) else intArrayOf(if (binding.head.category.height == 0) 0 else tmp, 0))
-			animator.addUpdateListener { valueAnimator: ValueAnimator? ->
-				binding.head.category.layoutParams = (binding.head.category.layoutParams as LinearLayout.LayoutParams).apply { height = valueAnimator!!.getAnimatedValue() as Int }
-			}
-			animator.start()
-		}
-		binding.zoom.setOnClickListener { _: View? ->
-			binding.head.root.visibility = if (binding.head.root.isVisible) View.GONE else View.VISIBLE
-		}
-		typeCate.addSource<Int?>(type, Observer { s: Int? -> typeCate.value = CommonUtil.Tuple2(toIntegerOrDefault(type.getValue(), 1), s) })
-		typeCate.addSource<Int?>(category, Observer { s: Int? -> typeCate.value = CommonUtil.Tuple2(toIntegerOrDefault(category.getValue(), 11), s) })
-		typeCate.observe(requireActivity(), Observer { _: CommonUtil.Tuple2<Int?, Int?>? -> regetCourseList() })
-		binding.head.category.setOnCheckedStateChangeListener { _: ChipGroup?, _: MutableList<Int?>? -> selectCategory() }
-		binding.course.layoutManager = GridLayoutManager(requireContext(), config.column)
-		binding.course.addItemDecoration(SpacesItemDecoration(config.dpToPx(8)))
-		binding.course.adapter = CourseAdapter().also { adp = it }
-		binding.head.filter.setOnCheckedStateChangeListener { _: ChipGroup?, _: MutableList<Int?>? -> regetCourseList() }
-		adp!!.selectAction = { position: Int? ->
-			if (adp!!.get(position!!).getInteger("selectedStatus") == 3 || adp!!.get(position)
-					.getInteger("selectedStatus") == 4) unselect(adp!!.convert(position, "courseId"), adp!!.convert(position, "teachingClassId"))
-			else select(adp!!.convert(position, "teachingClassId"))
-		}
-		adp!!.likeAction =  { code: String? -> like(code!!) }
-		binding.course.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-			override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
-				if (!v.canScrollVertically(1) && total!! / 10 + 1 > page && dy > 0) courseList
-				binding.head.root.elevation = (if (v.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
-			}
-		})
+		typeCate.observe(requireActivity(), Observer { regetCourseList() })
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
-			val code = response.getInteger("code")
-			if (code == 200) {
+			if (response.getInteger("code") == 200) {
 				when (message.first) {
 					0 -> {
 						term = response.getJSONObject("data").getString("semesterYear")
-						this.courseList
+						courseList
 					}
-					1 -> {
-						val data = response.getJSONObject("data")
-						if (data != null) {
-							total = data.getInteger("total")
-							data.getJSONArray("rows")
-								.forEach { e: Any? -> adp!!.add(e as JSONObject?) }
-						}
+					1 -> response.getJSONObject("data")?.run {
+						total = getInteger("total")
+						getJSONArray("rows").forEach { e: Any? -> adp!!.add(e as JSONObject?) }
 					}
 					3 -> {
 						config.toast(response.getString("data"))
@@ -197,7 +194,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 	
 	val courseList: Unit
 		get() {
-			if (type.getValue() != null && category.getValue() != null && term != null) getCourseList(getType(), getCategory(), term, toStringOrDefault<String?>(filter.getValue()))
+			if (type.value != null && category.value != null && term != null) getCourseList(getType(), getCategory(), term, toStringOrDefault<String?>(filter.value))
 		}
 	
 	fun getCourseList(selectedType: Int, selectedCate: Int, term: String?, filterText: String) {
@@ -217,13 +214,10 @@ class CourseSelectionMainFragment : BaseFragment() {
 		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose", String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, getType(), getCategory()), 3)
 	}
 	
-	fun getType(): Int {
-		return typeCate.getValue()?.first ?: 1
-	}
+	fun getType(): Int= typeCate.value?.first ?: 1
 	
-	fun getCategory(): Int {
-		return typeCate.getValue()?.second ?: 11
-	}
+	
+	fun getCategory(): Int = typeCate.value?.second ?: 11
 	
 	fun unselect(classId: String, code: String?) {
 		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/back", String.format(Locale.getDefault(), "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}", classId, code, getType()), 3)
@@ -250,12 +244,12 @@ class CourseSelectionMainFragment : BaseFragment() {
 			val binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context), parent, false)
 			info.indices.forEach { _ ->
 				binding.courseInfo.addView(ItemActionChipBinding.inflate(LayoutInflater.from(context), binding.courseInfo, false).root.apply {
-					setOnLongClickListener { a: View? ->
-						(context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("", (a as Chip).getText()))
+					setOnLongClickListener {
+						(context.getSystemService(ClipboardManager::class.java)).setPrimaryClip(ClipData.newPlainText("", text))
 						false
 					}
-					setOnClickListener { a: View? ->
-						Snackbar.make(context, a!!, (a as Chip).getText(), Snackbar.LENGTH_LONG)
+					setOnClickListener {
+						Snackbar.make(context, this, text, Snackbar.LENGTH_LONG)
 							.show()
 					}
 				})
@@ -272,16 +266,16 @@ class CourseSelectionMainFragment : BaseFragment() {
 			item.fluentPut("statusName", context.getString(if (selectedStatus == 4) R.string.status_selected else if (selectedStatus == 3) R.string.filtering else if (selectedStatus == 1) R.string.retired else R.string.unselected))
 			binding.like.setSelected(item.containsKey("collectionStatus") && item.getInteger("collectionStatus") == 1)
 			binding.select.setSelected(item.containsKey("selectedStatus") && (selectedStatus == 3 || selectedStatus == 4))
-			binding.select.text = if (binding.select.isSelected) context.getString(R.string.drop_course) else context.getString(R.string.select_course)
-			binding.like.text = if (binding.like.isSelected) context.getString(R.string.unlike) else context.getString(R.string.like)
-			binding.select.setOnClickListener { _: View? ->
-				if (selectAction != null) selectAction!!.accept(position)
+			binding.select.text = context.getString(if (binding.select.isSelected) R.string.drop_course else R.string.select_course)
+			binding.like.text = context.getString(if (binding.like.isSelected) R.string.unlike else R.string.like)
+			binding.select.setOnClickListener {
+				selectAction?.accept(position)
 			}
 			binding.like.setOnClickListener { v: View? ->
 				Snackbar.make(v!!, context.getString(R.string.already) + (v as MaterialButton).getText(), Snackbar.LENGTH_LONG)
 					.show()
-				v.text = if (v.isSelected) context.getString(R.string.unlike) else context.getString(R.string.like)
-				if (likeAction != null) likeAction!!.accept(convert(position, "teachingClassId"))
+				v.text = context.getString(if (v.isSelected) R.string.unlike else R.string.like)
+				likeAction?.accept(convert(position, "teachingClassId"))
 				v.setSelected(!v.isSelected)
 			}
 			binding.open.setOnClickListener { v: View? ->
@@ -302,9 +296,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 			}
 		}
 		
-		fun convert(position: Int, key: String?): String {
-			return trim(get(position).getString(key)).replace("\n\n", "\n")
-		}
+		fun convert(position: Int, key: String?): String =trim(get(position).getString(key)).replace("\n\n", "\n")
 	}
 }
 

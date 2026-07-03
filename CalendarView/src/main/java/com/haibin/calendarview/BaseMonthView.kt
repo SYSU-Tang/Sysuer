@@ -58,23 +58,23 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 		mYear = year
 		mMonth = month
 		initCalendar()
-		mHeight = CalendarUtil.getMonthViewHeight(year, month, mItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+		mHeight = CalendarUtil.getMonthViewHeight(year, month, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
 	}
 	
 	/**
 	 * 初始化日历
 	 */
 	private fun initCalendar() {
-		mNextDiff = CalendarUtil.getMonthEndDiff(mYear, mMonth, mDelegate!!.weekStart)
-		val preDiff = CalendarUtil.getMonthViewStartDiff(mYear, mMonth, mDelegate!!.weekStart)
+		mNextDiff = CalendarUtil.getMonthEndDiff(mYear, mMonth, mDelegate.weekStart)
+		val preDiff = CalendarUtil.getMonthViewStartDiff(mYear, mMonth, mDelegate.weekStart)
 		val monthDayCount = CalendarUtil.getMonthDaysCount(mYear, mMonth)
-		mItems = CalendarUtil.initCalendarForMonthView(mYear, mMonth, mDelegate!!.currentDay, mDelegate!!.weekStart)
-		mCurrentItem = (if (mItems!!.contains(mDelegate!!.currentDay)) mItems!!.indexOf(mDelegate!!.currentDay)
-		else mItems!!.indexOf(mDelegate!!.mSelectedCalendar))
+		mItems = CalendarUtil.initCalendarForMonthView(mYear, mMonth, mDelegate.currentDay, mDelegate.weekStart)
+		mCurrentItem = (if (mItems!!.contains(mDelegate.currentDay)) mItems!!.indexOf(mDelegate.currentDay)
+		else mItems!!.indexOf(mDelegate.mSelectedCalendar))
 		
-		if (mCurrentItem > 0 && mDelegate!!.mCalendarInterceptListener != null && mDelegate!!.mCalendarInterceptListener.onCalendarIntercept(mDelegate!!.mSelectedCalendar)) mCurrentItem = -1
+		if (mCurrentItem > 0 && mDelegate.mCalendarInterceptListener != null && mDelegate.mCalendarInterceptListener.onCalendarIntercept(mDelegate.mSelectedCalendar)) mCurrentItem = -1
 		
-		mLineCount = (if (mDelegate!!.monthViewShowMode == CalendarViewDelegate.MODE_ALL_MONTH) 6
+		mLineCount = (if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ALL_MONTH) 6
 		else (preDiff + monthDayCount + mNextDiff) / 7)
 		addSchemesFromMap()
 		invalidate()
@@ -88,11 +88,11 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 		 */
 		get() {
 			if (mItemWidth != 0 && mItemHeight != 0) {
-				if (mX <= mDelegate!!.calendarPaddingLeft || mX >= width - mDelegate!!.calendarPaddingRight) {
+				if (mX <= mDelegate.calendarPaddingLeft || mX >= width - mDelegate.calendarPaddingRight) {
 					onClickCalendarPadding()
 					return null
 				}
-				val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate!!.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it >= 7 }
+				val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it >= 7 }
 					?: 6) // 选择项
 				return if (position >= 0 && position < mItems!!.size) mItems!![position]
 				else null
@@ -101,13 +101,13 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 		}
 	
 	private fun onClickCalendarPadding() {
-		if (mDelegate!!.mClickCalendarPaddingListener != null) {
+		if (mDelegate.mClickCalendarPaddingListener != null) {
 			var calendar: Calendar?
-			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate!!.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it >= 7 }
+			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it >= 7 }
 				?: 6) // 选择项
 			if (position >= 0 && position < mItems!!.size) {
 				calendar = mItems!![position]
-				mDelegate!!.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, true, calendar, getClickCalendarPaddingObject(mX, mY, calendar))
+				mDelegate.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, true, calendar, getClickCalendarPaddingObject(mX, mY, calendar))
 			}
 		}
 	}
@@ -137,8 +137,8 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 	 * 更新显示模式
 	 */
 	fun updateShowMode() {
-		mLineCount = CalendarUtil.getMonthViewLineCount(mYear, mMonth, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+		mLineCount = CalendarUtil.getMonthViewLineCount(mYear, mMonth, mDelegate.weekStart, mDelegate.monthViewShowMode)
+		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
 		invalidate()
 	}
 	
@@ -147,21 +147,21 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 	 */
 	fun updateWeekStart() {
 		initCalendar()
-		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
 	}
 	
 	override fun updateItemHeight() {
 		super.updateItemHeight()
-		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
 	}
 	
 	override fun updateCurrentDate() {
 		if (mItems != null) {
-			if (mItems!!.contains(mDelegate!!.currentDay)) {
+			if (mItems!!.contains(mDelegate.currentDay)) {
 				for (it in mItems) {    //添加操作
 					it.isCurrentDay = false
 				}
-				mItems!![mItems!!.indexOf(mDelegate!!.currentDay)].isCurrentDay = true
+				mItems!![mItems!!.indexOf(mDelegate.currentDay)].isCurrentDay = true
 			}
 			invalidate()
 		}

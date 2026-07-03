@@ -30,13 +30,13 @@ abstract class MultiWeekView(context: Context) : BaseWeekView(context) {
 	 * @param canvas canvas
 	 */
 	override fun onDraw(canvas: Canvas) {
-		if (mItems.isNotEmpty()) {
+		if (mItems!!.isNotEmpty()) {
 			mItemWidth = (width - mDelegate.calendarPaddingLeft - mDelegate.calendarPaddingRight) / 7
 			onPreviewHook()
 			
 			(0..6).forEach {
 				onLoopStart()
-				val calendar = mItems[it]
+				val calendar = mItems!![it]
 				val isSelected = isCalendarSelected(calendar)
 				val isPreSelected = isSelectPreCalendar(calendar, it)
 				val isNextSelected = isSelectNextCalendar(calendar, it)
@@ -63,7 +63,7 @@ abstract class MultiWeekView(context: Context) : BaseWeekView(context) {
 	
 	override fun onClick(v: View?) {
 		if (isClick) {
-			val calendar = getIndex() ?: return
+			val calendar = index ?: return
 			if (onCalendarIntercept(calendar)) {
 				mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
 				return
@@ -84,7 +84,7 @@ abstract class MultiWeekView(context: Context) : BaseWeekView(context) {
 				}
 				mDelegate.mSelectedCalendars[key] = calendar
 			}
-			mCurrentItem = mItems.indexOf(calendar)
+			mCurrentItem = mItems!!.indexOf(calendar)
 			mDelegate.mInnerListener?.onWeekDateSelected(calendar, true)
 			mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 			mDelegate.mCalendarMultiSelectListener?.onCalendarMultiSelect(calendar, mDelegate.mSelectedCalendars.size, mDelegate.maxMultiSelectSize)
@@ -108,7 +108,7 @@ abstract class MultiWeekView(context: Context) : BaseWeekView(context) {
 			mDelegate.updateCalendarScheme(preCalendar)
 		}
 		else {
-			preCalendar = mItems[calendarIndex - 1]
+			preCalendar = mItems!![calendarIndex - 1]
 		}
 		return isCalendarSelected(preCalendar)
 	}
@@ -122,12 +122,12 @@ abstract class MultiWeekView(context: Context) : BaseWeekView(context) {
 	 */
 	protected fun isSelectNextCalendar(calendar: Calendar, calendarIndex: Int): Boolean {
 		val nextCalendar: Calendar
-		if (calendarIndex == mItems.size - 1) {
+		if (calendarIndex == mItems!!.size - 1) {
 			nextCalendar = CalendarUtil.getNextCalendar(calendar)
 			mDelegate.updateCalendarScheme(nextCalendar)
 		}
 		else {
-			nextCalendar = mItems[calendarIndex + 1]
+			nextCalendar = mItems!![calendarIndex + 1]
 		}
 		return isCalendarSelected(nextCalendar)
 	}

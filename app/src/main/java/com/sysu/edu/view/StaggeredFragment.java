@@ -15,17 +15,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityOptionsCompat;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.sysu.edu.BaseFragment;
 import com.sysu.edu.R;
 import com.sysu.edu.academic.MarkdownViewActivity;
 import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.ItemCardBinding;
 import com.sysu.edu.databinding.ItemTwoColumnRowBinding;
 import com.sysu.edu.databinding.RecyclerViewBinding;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
-public class StaggeredFragment extends Fragment {
+public class StaggeredFragment extends BaseFragment {
     
     protected final StaggeredAdapter staggeredAdapter = new StaggeredAdapter();
     final MutableLiveData<Integer> orientation = new MutableLiveData<>(StaggeredGridLayoutManager.VERTICAL);
@@ -47,7 +46,6 @@ public class StaggeredFragment extends Fragment {
     final MutableLiveData<AdapterListener> staggeredListener = new MutableLiveData<>();
     public int position;
     protected RecyclerViewScrollBinding binding;
-    protected Config config;
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     
     public static StaggeredFragment newInstance(int position) {
@@ -58,7 +56,7 @@ public class StaggeredFragment extends Fragment {
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        config = new Config(this);
+        super.onCreateView(inflater,container,savedInstanceState);
         binding = RecyclerViewScrollBinding.inflate(inflater);
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(config.getColumn(), StaggeredGridLayoutManager.VERTICAL);
         binding.recyclerView.setLayoutManager(staggeredGridLayoutManager);

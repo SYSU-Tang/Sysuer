@@ -81,27 +81,27 @@ class TodoFragment : BaseFragment() {
 	
 	val date: String?
 		get() {
-			return calendarManager.toDateString(calendarView.selectedCalendar.getTimeInMillis())
+			return calendarManager.toDateString(calendarView.selectedCalendar.timeInMillis)
 		}
 	
 	fun refresh() {
 		val a = mutableListOf<String?>()
 		val b = mutableListOf<String?>()
 		val map = mutableMapOf<String, MutableLiveData<*>>()        //        map.put("due_date", todoInfo.getDueDate());		//        map.put("ddl", todoInfo.getDdlDate());
-		map["status"] = todoInfo.getStatus()
-		map["title"] = todoInfo.getTitle()
-		map["description"] = todoInfo.getDescription()
-		map["priority"] = todoInfo.getPriority()
-		map["todo_type"] = todoInfo.getType()
-		map["subtask"] = todoInfo.getSubtask()
-		map["attachment"] = todoInfo.getAttachment()
-		map["subject"] = todoInfo.getSubject()
-		map["location"] = todoInfo.getLocation()
-		map["color"] = todoInfo.getColor()
-		map["label"] = todoInfo.getTag()
-		map["due_time"] = todoInfo.getDueTime()
-		map["remind_time"] = todoInfo.getRemindTime()
-		map["done_datetime"] = todoInfo.getDoneDate()
+		map["status"] = todoInfo.status
+		map["title"] = todoInfo.title
+		map["description"] = todoInfo.description
+		map["priority"] = todoInfo.priority
+		map["todo_type"] = todoInfo.type
+		map["subtask"] = todoInfo.subtask
+		map["attachment"] = todoInfo.attachment
+		map["subject"] = todoInfo.subject
+		map["location"] = todoInfo.location
+		map["color"] = todoInfo.color
+		map["label"] = todoInfo.tag
+		map["due_time"] = todoInfo.dueTime
+		map["remind_time"] = todoInfo.remindTime
+		map["done_datetime"] = todoInfo.doneDate
 		map.forEach { (key: String, value: MutableLiveData<*>) ->
 			if (!isEmpty(value.value)) {
 				a.add("$key = ?")

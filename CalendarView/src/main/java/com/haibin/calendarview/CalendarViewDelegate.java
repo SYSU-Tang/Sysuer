@@ -996,7 +996,6 @@ public final class CalendarViewDelegate {
         return calendar;
     }
 
-    @SuppressWarnings("unused")
     Calendar getMaxRangeCalendar() {
         Calendar calendar = new Calendar();
         calendar.year = mMaxYear;
@@ -1022,11 +1021,11 @@ public final class CalendarViewDelegate {
                 }
                 a.scheme = TextUtils.isEmpty(d.scheme) ? getSchemeText() : d.scheme;
                 a.schemeColor = d.schemeColor;
-                a.setSchemes(d.schemes);
+                a.schemes=d.schemes;
             } else {
                 a.scheme = "";
                 a.schemeColor = 0;
-                a.setSchemes(null);
+                a.schemes=null;
             }
         }
     }

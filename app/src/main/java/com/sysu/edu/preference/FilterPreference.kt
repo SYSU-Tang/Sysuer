@@ -1,113 +1,86 @@
-package com.sysu.edu.preference;
+package com.sysu.edu.preference
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
-import android.util.AttributeSet;
-import android.widget.ArrayAdapter;
+import android.content.Context
+import android.text.Editable
+import android.text.InputType
+import android.text.TextWatcher
+import android.util.AttributeSet
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import androidx.core.content.withStyledAttributes
+import androidx.lifecycle.MutableLiveData
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceViewHolder
+import com.sysu.edu.R
+import com.sysu.edu.databinding.PreferenceFilterBinding
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.MutableLiveData;
-import androidx.preference.ListPreference;
-import androidx.preference.PreferenceViewHolder;
-
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.PreferenceFilterBinding;
-
-public class FilterPreference extends ListPreference {
-    
-    
-    final MutableLiveData<String> valueLiveData = new MutableLiveData<>();
-    boolean isFilter;
-    boolean canEdit;
-    TextWatcher textWatcher;
-    
-    public FilterPreference(@NonNull Context context) {
-        this(context, null);
-    }
-    
-    public FilterPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, R.attr.filterPreferenceStyle);
-    }
-    
-    public FilterPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-    
-    public FilterPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        setLayoutResource(R.layout.preference_filter);
-        try (TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.filterPreferenceStyle, defStyleAttr, defStyleRes)) {
-            valueLiveData.setValue(a.getString(R.styleable.filterPreferenceStyle_value));
-            isFilter = a.getBoolean(R.styleable.filterPreferenceStyle_isFilter, true);
-            canEdit = a.getBoolean(R.styleable.filterPreferenceStyle_canEdit, false);
-            a.recycle();
-        } catch (Exception e) {
-//            throw new RuntimeException(e);
-        }
-    }
-    
-    @Override
-    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-        super.onBindViewHolder(holder);
-        PreferenceFilterBinding binding = PreferenceFilterBinding.bind(holder.itemView);
-        binding.textInputLayout.setStartIconDrawable(getIcon());
-        binding.textInputLayout.setHint(getTitle());
-        binding.textField.setText(valueLiveData.getValue(), isFilter);
-        binding.textField.setInputType(canEdit ? InputType.TYPE_CLASS_TEXT : InputType.TYPE_NULL);
-        binding.textField.setSelection(binding.textField.getText().length());
-        if (getEntries() != null)
-            binding.textField.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, getEntries()));
-        binding.textField.setOnItemClickListener((_, _, position, _) -> {
-            setValueIndex(position);
-            valueLiveData.setValue(getEntries()[position].toString());
-        });
-        /*
-        if (binding.textField.isFocused())
-            binding.textField.showDropDown();*/
-        if (textWatcher == null) {
-            textWatcher = new TextWatcher() {
-                @Override
-                public void afterTextChanged(Editable s) {
-                }
-                
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-                
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if (!s.toString().equals(valueLiveData.getValue()))
-                        valueLiveData.setValue(s.toString());
-                }
-            };
-            binding.textField.addTextChangedListener(textWatcher);
-        }
-        binding.getRoot().setOnClickListener(_ -> binding.textField.showDropDown());
-        
-    }
-    
-    @Override
-    protected void onClick() {
-    
-    }
-    
-    public MutableLiveData<String> getValueLiveData() {
-        return valueLiveData;
-    }
-    
-    public void setIsFilter(boolean filter) {
-        isFilter = filter;
-        notifyChanged();
-    }
-    
-    @Override
-    public void setEntries(CharSequence[] entries) {
-        super.setEntries(entries);
-        notifyChanged();
-    }
+class FilterPreference(context: Context,
+                       attrs: AttributeSet? = null,
+                       defStyleAttr: Int = R.attr.filterPreferenceStyle,
+                       defStyleRes: Int = 0) :
+	ListPreference(context, attrs, defStyleAttr, defStyleRes) {
+	val valueLiveData: MutableLiveData<String?> = MutableLiveData<String?>()
+	var isFilter: Boolean = false
+	var canEdit: Boolean = false
+	var textWatcher: TextWatcher? = null
+	
+	init {
+		layoutResource = R.layout.preference_filter
+		try {
+			context.withStyledAttributes(attrs, R.styleable.filterPreferenceStyle, defStyleAttr, defStyleRes) {
+				valueLiveData.value = getString(R.styleable.filterPreferenceStyle_value)
+				isFilter = getBoolean(R.styleable.filterPreferenceStyle_isFilter, true)
+				canEdit = getBoolean(R.styleable.filterPreferenceStyle_canEdit, false)
+			}
+		} catch (_: Exception) { //            throw new RuntimeException(e);
+		}
+	}
+	
+	override fun onBindViewHolder(holder: PreferenceViewHolder) {
+		super.onBindViewHolder(holder)
+		PreferenceFilterBinding.bind(holder.itemView).apply {
+			textInputLayout.startIconDrawable = getIcon()
+			textInputLayout.hint = title
+			textField.setText(valueLiveData.getValue(), isFilter)
+			textField.setInputType(if (canEdit) InputType.TYPE_CLASS_TEXT else InputType.TYPE_NULL)
+			textField.setSelection(textField.getText().length)
+			if (entries != null) textField.setAdapter<ArrayAdapter<CharSequence?>?>(ArrayAdapter(context, android.R.layout.simple_list_item_1, entries))
+			textField.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
+				setValueIndex(position)
+				valueLiveData.value = "${entries[position]}"
+			}        /*
+        if (textField.isFocused())
+            textField.showDropDown();*/
+			
+			textField.addTextChangedListener(textWatcher ?: object : TextWatcher {
+				override fun afterTextChanged(s: Editable?) {
+				}
+				
+				override fun beforeTextChanged(s: CharSequence?,
+				                               start: Int,
+				                               count: Int,
+				                               after: Int) {
+				}
+				
+				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+					if ("$s" != valueLiveData.getValue()) valueLiveData.value = "$s"
+				}
+			})
+			root.setOnClickListener { textField.showDropDown() }
+		}
+	}
+	
+	override fun onClick() {
+	}
+	
+	fun setIsFilter(filter: Boolean) {
+		isFilter = filter
+		notifyChanged()
+	}
+	
+	override fun setEntries(entries: Array<CharSequence?>?) {
+		super.setEntries(entries)
+		notifyChanged()
+	}
 }

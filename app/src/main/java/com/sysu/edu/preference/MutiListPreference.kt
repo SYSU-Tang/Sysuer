@@ -1,50 +1,30 @@
-package com.sysu.edu.preference;
+package com.sysu.edu.preference
 
-import android.content.Context;
-import android.util.AttributeSet;
+import android.content.Context
+import android.content.DialogInterface
+import android.util.AttributeSet
+import androidx.preference.MultiSelectListPreference
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.sysu.edu.R
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.preference.MultiSelectListPreference;
-
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.sysu.edu.R;
-
-public class MutiListPreference extends MultiSelectListPreference {
-    public MutiListPreference(@NonNull Context context) {
-        this(context, null);
-    }
-    
-    public MutiListPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, R.attr.dialogPreferenceStyle);
-    }
-    
-    public MutiListPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-    
-    public MutiListPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-    
-    @Override
-    protected void onClick() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(getContext());
-        if (getTitle() != null) dialogBuilder.setTitle(getTitle());
-        if (getPositiveButtonText() != null)
-            dialogBuilder.setPositiveButton(getPositiveButtonText(), (_, _) -> {
-                persistStringSet(getValues());
-                notifyChanged();
-            });
-        if (getNegativeButtonText() != null)
-            dialogBuilder.setNegativeButton(getNegativeButtonText(), (dialog, _) -> dialog.dismiss());
-        if (getEntries() != null)
-            dialogBuilder.setMultiChoiceItems(getEntries(), getSelectedItems(), (_, which, isChecked) -> {
-                getValues().remove(getEntryValues()[which].toString());
-                if (isChecked) getValues().add(getEntryValues()[which].toString());
-                persistStringSet(getValues());
-            });
-        dialogBuilder.show();
-    }
-    
+class MutiListPreference @JvmOverloads constructor(context: Context,
+                                                   attrs: AttributeSet? = null,
+                                                   defStyleAttr: Int = R.attr.dialogPreferenceStyle,
+                                                   defStyleRes: Int = 0) :
+	MultiSelectListPreference(context, attrs, defStyleAttr, defStyleRes) {
+	override fun onClick() {
+		val dialogBuilder = MaterialAlertDialogBuilder(context)
+		if (title != null) dialogBuilder.setTitle(title)
+		if (positiveButtonText != null) dialogBuilder.setPositiveButton(positiveButtonText) { _: DialogInterface?, _: Int ->
+			persistStringSet(values)
+			notifyChanged()
+		}
+		if (negativeButtonText != null) dialogBuilder.setNegativeButton(negativeButtonText) { dialog: DialogInterface?, _: Int -> dialog!!.dismiss() }
+		if (entries != null) dialogBuilder.setMultiChoiceItems(entries, getSelectedItems()) { _: DialogInterface?, which: Int, isChecked: Boolean ->
+			values.remove("${entryValues[which]}")
+			if (isChecked) values.add("${entryValues[which]}")
+			persistStringSet(values)
+		}
+		dialogBuilder.show()
+	}
 }

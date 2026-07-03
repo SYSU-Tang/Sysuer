@@ -15,28 +15,18 @@
  */
 package com.haibin.calendarview;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 农历计算相关
- */
-@SuppressWarnings("all")
+
 public final class LunarCalendar {
 
-    /**
-     * 特殊节日、母亲节和父亲节,感恩节等
-     */
-    @SuppressLint("UseSparseArrays")
+
     private static final Map<Integer, String[]> SPECIAL_FESTIVAL = new HashMap<>();
-    /**
-     * 保存每年24节气
-     */
-    @SuppressLint("UseSparseArrays")
+
     private static final Map<Integer, String[]> SOLAR_TERMS = new HashMap<>();
     /**
      * 用来表示1900年到2099年间农历年份的相关信息，共24位bit的16进制表示，其中：

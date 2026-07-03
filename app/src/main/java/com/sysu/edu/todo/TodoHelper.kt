@@ -62,7 +62,7 @@ class TodoHelper(private val context: Context, version: Int) :
 	}
 	
 	fun deleteTodo(todoInfo: TodoInfo) {
-		deleteTodo(todoInfo.getId().value.toString())
+		deleteTodo(todoInfo.id.value.toString())
 	}
 	
 	fun addTodo(todoInfo: TodoInfo) {
@@ -73,7 +73,7 @@ class TodoHelper(private val context: Context, version: Int) :
 	
 	fun updateTodo(todoInfo: TodoInfo) {
 		value = setContentValues(todoInfo)
-		writableDatabase.update("todos", value, "id = ?", arrayOf(todoInfo.getId().value.toString()))
+		writableDatabase.update("todos", value, "id = ?", arrayOf(todoInfo.id.value.toString()))
 		close()
 	}
 	
@@ -82,24 +82,24 @@ class TodoHelper(private val context: Context, version: Int) :
 		private fun setContentValues(todoInfo: TodoInfo): ContentValues {
 			value.apply {
 				clear()
-				put("title", todoInfo.getTitle().value)
-				put("description", todoInfo.getDescription().value)
-				put("due_date", todoInfo.getDueDate().value)
-				put("status", todoInfo.getStatus().value)
-				put("priority", todoInfo.getPriority().value ?: 0)
-				put("todo_type", todoInfo.getType().value)
-				put("subtask", todoInfo.getSubtask().value)
-				put("attachment", todoInfo.getAttachment().value)
-				put("subject", todoInfo.getSubject().value)
-				put("location", todoInfo.getLocation().value)
-				put("color", todoInfo.getColor().value)
-				put("label", todoInfo.getTag().value)
-				put("due_time", todoInfo.getDueTime().value)
-				put("remind_time", todoInfo.getRemindTime().value)
-				put("done_datetime", todoInfo.getDoneDate().value)
+				put("title", todoInfo.title.value)
+				put("description", todoInfo.description.value)
+				put("due_date", todoInfo.dueDate.value)
+				put("status", todoInfo.status.value)
+				put("priority", todoInfo.priority.value ?: 0)
+				put("todo_type", todoInfo.type.value)
+				put("subtask", todoInfo.subtask.value)
+				put("attachment", todoInfo.attachment.value)
+				put("subject", todoInfo.subject.value)
+				put("location", todoInfo.location.value)
+				put("color", todoInfo.color.value)
+				put("label", todoInfo.tag.value)
+				put("due_time", todoInfo.dueTime.value)
+				put("remind_time", todoInfo.remindTime.value)
+				put("done_datetime", todoInfo.doneDate.value)
 				put("update_datetime", LocalDateTime.now()
 					.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-				put("ddl", todoInfo.getDdlDate().value)
+				put("ddl", todoInfo.ddlDate.value)
 			}
 			
 			

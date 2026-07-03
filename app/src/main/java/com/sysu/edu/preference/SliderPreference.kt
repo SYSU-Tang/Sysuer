@@ -1,62 +1,41 @@
-package com.sysu.edu.preference;
+package com.sysu.edu.preference
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.View;
+import android.content.Context
+import android.util.AttributeSet
+import android.view.View
+import androidx.preference.PreferenceViewHolder
+import androidx.preference.SeekBarPreference
+import com.google.android.material.slider.Slider
+import com.sysu.edu.R
+import com.sysu.edu.databinding.PreferenceSliderBinding
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.preference.PreferenceViewHolder;
-import androidx.preference.SeekBarPreference;
-
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.PreferenceSliderBinding;
-
-public class SliderPreference extends SeekBarPreference {
-    public SliderPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        setLayoutResource(R.layout.preference_slider);
-    }
-    
-    public SliderPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-    
-    public SliderPreference(@NonNull Context context) {
-        this(context, null);
-    }
-    
-    public SliderPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, R.attr.sliderPreferenceStyle);
-    }
-    
-    @Override
-    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
-        PreferenceSliderBinding binding = PreferenceSliderBinding.bind(holder.itemView);
-        binding.seekbar.setEnabled(isEnabled());
-        binding.title.setEnabled(isEnabled());
-        binding.seekbarValue.setEnabled(isEnabled());
-        binding.getRoot().setEnabled(isEnabled());
-        binding.seekbar.setStepSize(getSeekBarIncrement());
-        binding.seekbar.setValueTo(getMax());
-        binding.seekbar.setValueFrom(getMin());
-        binding.title.setText(getTitle());
-        binding.icon.setImageDrawable(getIcon());
-        binding.seekbarValue.setVisibility(getShowSeekBarValue() ? View.VISIBLE : View.GONE);
-        binding.seekbarValue.setText(String.valueOf(getValue()));
-        binding.seekbar.setValue(getValue());
-        binding.seekbar.addOnChangeListener((slider, v, b) -> setValue((int) v));
-        binding.getRoot().setOnClickListener(v -> onClick());
-    }
-    
-    @Override
-    protected void onClick() {
-        super.onClick();
-    }
-    
-    @Override
-    public int getValue() {
-        return super.getValue() == 0 ? getMin() : super.getValue();
-    }
-    
+class SliderPreference(context: Context,
+                       attrs: AttributeSet? = null,
+                       defStyleAttr: Int = R.attr.sliderPreferenceStyle,
+                       defStyleRes: Int = 0) :
+	SeekBarPreference(context, attrs, defStyleAttr, defStyleRes) {
+	init {
+		layoutResource = R.layout.preference_slider
+	}
+	
+	override fun onBindViewHolder(holder: PreferenceViewHolder) {
+		PreferenceSliderBinding.bind(holder.itemView).apply {
+			seekbar.isEnabled = isEnabled
+			title.setEnabled(isEnabled)
+			seekbarValue.setEnabled(isEnabled)
+			root.setEnabled(isEnabled)
+			seekbar.stepSize = seekBarIncrement.toFloat()
+			seekbar.valueTo = max.toFloat()
+			seekbar.valueFrom = min.toFloat()
+			title.text = this@SliderPreference.title
+			icon.setImageDrawable(getIcon())
+			seekbarValue.visibility = if (showSeekBarValue) View.VISIBLE else View.GONE
+			seekbarValue.text = "$value"
+			seekbar.value = value.toFloat()
+			seekbar.addOnChangeListener { _: Slider?, v: Float, _: Boolean -> value = v.toInt() }
+			root.setOnClickListener { onClick() }
+		}
+	}
+	
+	override fun getValue(): Int = if (super.getValue() == 0) min else super.getValue()
 }

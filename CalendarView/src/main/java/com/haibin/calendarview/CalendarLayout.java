@@ -41,7 +41,7 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * 日历布局
  */
-@SuppressWarnings("unused")
+
 public class CalendarLayout extends LinearLayout {
 
     private static final int ACTIVE_POINTER = 1;

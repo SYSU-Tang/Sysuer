@@ -311,11 +311,11 @@ public abstract class YearView extends View {
                 }
                 a.scheme = TextUtils.isEmpty(d.scheme) ? mDelegate.getSchemeText() : d.scheme;
                 a.schemeColor = d.schemeColor;
-                a.setSchemes(d.schemes);
+                a.schemes=d.schemes;
             } else {
                 a.scheme = "";
                 a.schemeColor = 0;
-                a.setSchemes(null);
+                a.schemes=null;
             }
         }
     }

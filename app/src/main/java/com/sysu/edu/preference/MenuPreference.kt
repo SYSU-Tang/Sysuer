@@ -1,39 +1,28 @@
-package com.sysu.edu.preference;
+package com.sysu.edu.preference
 
-import android.content.Context;
-import android.util.AttributeSet;
+import android.content.Context
+import android.util.AttributeSet
+import rikka.preference.SimpleMenuPreference
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import rikka.preference.SimpleMenuPreference;
-
-public class MenuPreference extends SimpleMenuPreference {
-    public MenuPreference(@NonNull Context context) {
-        super(context);
-    }
-    
-    public MenuPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
-    
-    public MenuPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-    
-    public MenuPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-    
-    @Override
-    protected void onSetInitialValue(@Nullable Object defaultValue) {
-        super.onSetInitialValue(defaultValue);
-        setSummary(getEntries()[Integer.parseInt(getValue())]);
-    }
-    
-    @Override
-    protected boolean persistString(String value) {
-        setSummary(getEntries()[Integer.parseInt(value)]);
-        return super.persistString(value);
-    }
+class MenuPreference : SimpleMenuPreference {
+	constructor(context: Context) : super(context)
+	constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+	constructor(context: Context,
+	            attrs: AttributeSet?,
+	            defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+	
+	constructor(context: Context,
+	            attrs: AttributeSet?,
+	            defStyleAttr: Int,
+	            defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
+	
+	override fun onSetInitialValue(defaultValue: Any?) {
+		super.onSetInitialValue(defaultValue)
+		setSummary(entries[value.toInt()])
+	}
+	
+	override fun persistString(value: String): Boolean {
+		setSummary(entries[value.toInt()])
+		return super.persistString(value)
+	}
 }

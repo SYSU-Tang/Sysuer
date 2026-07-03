@@ -54,7 +54,7 @@ class DefaultMonthView(context: Context) : MonthView(context) {
 	 * @return true 则绘制onDrawScheme，因为这里背景色不是是互斥的
 	 */
 	override fun onDrawSelected(canvas: Canvas,
-	                            calendar: Calendar?,
+	                            calendar: Calendar,
 	                            x: Int,
 	                            y: Int,
 	                            hasScheme: Boolean): Boolean {

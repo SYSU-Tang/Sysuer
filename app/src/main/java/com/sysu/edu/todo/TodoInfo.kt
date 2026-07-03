@@ -1,256 +1,166 @@
-package com.sysu.edu.todo;
+package com.sysu.edu.todo
 
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.MutableLiveData
 
-public class TodoInfo {
-    public final static Integer ADD = 0;
-    public final static Integer VIEW = 1;
-    public final static Integer TODO = 0;
-    public final static Integer DONE = 1;
-    public final static Integer DELETE = 2;
-    final MutableLiveData<String> title;
-    final MutableLiveData<String> description;
-    final MutableLiveData<String> dueDate;
-    final MutableLiveData<String> ddlDate;
-    final MutableLiveData<String> dueTime;
-    final MutableLiveData<String> remindTime;
-    final MutableLiveData<String> type;
-    final MutableLiveData<String> location;
-    final MutableLiveData<String> subject;
-    final MutableLiveData<Integer> priority;
-    final MutableLiveData<String> subtask;
-    final MutableLiveData<String> attachment;
-    final MutableLiveData<String> doneDate;
-    final MutableLiveData<Integer> status;
-    final MutableLiveData<String> color;
-    final MutableLiveData<String> tag;
-    final MutableLiveData<Integer> id;
-    int function = ADD;
-    
-    public TodoInfo() {
-        title = new MutableLiveData<>();
-        description = new MutableLiveData<>();
-        dueDate = new MutableLiveData<>();
-        ddlDate = new MutableLiveData<>();
-        dueTime = new MutableLiveData<>();
-        priority = new MutableLiveData<>();
-        remindTime = new MutableLiveData<>();
-        type = new MutableLiveData<>();
-        location = new MutableLiveData<>();
-        subject = new MutableLiveData<>();
-        subtask = new MutableLiveData<>();
-        attachment = new MutableLiveData<>();
-        doneDate = new MutableLiveData<>();
-        status = new MutableLiveData<>(0);
-        color = new MutableLiveData<>();
-        tag = new MutableLiveData<>();
-        id = new MutableLiveData<>(0);
-        reset();
-    }
-    
-    public int getFunction() {
-        return function;
-    }
-    
-    public void setFunction(int function) {
-        this.function = function;
-    }
-    
-    public MutableLiveData<String> getDdlDate() {
-        return ddlDate;
-    }
-    
-    public void setDdlDate(String ddlDate) {
-        this.ddlDate.setValue(ddlDate);
-    }
-    
-    public MutableLiveData<String> getDueTime() {
-        return dueTime;
-    }
-    
-    public void setDueTime(String dueTime) {
-        this.dueTime.setValue(dueTime);
-    }
-    
-    public MutableLiveData<String> getRemindTime() {
-        return remindTime;
-    }
-    
-    public void setRemindTime(String remindTime) {
-        this.remindTime.setValue(remindTime);
-    }
-    
-    public MutableLiveData<String> getType() {
-        return type;
-    }
-    
-    public void setType(String type) {
-        this.type.setValue(type);
-    }
-    
-    public MutableLiveData<String> getLocation() {
-        return location;
-    }
-    
-    public void setLocation(String location) {
-        this.location.setValue(location);
-    }
-    
-    public MutableLiveData<String> getTitle() {
-        return title;
-    }
-    
-    public void setTitle(String title) {
-        this.title.setValue(title);
-    }
-    
-    public MutableLiveData<String> getDescription() {
-        return description;
-    }
-    
-    public void setDescription(String description) {
-        this.description.setValue(description);
-    }
-    
-    public MutableLiveData<String> getDueDate() {
-        return dueDate;
-    }
-    
-    public void setDueDate(String dueDate) {
-        this.dueDate.setValue(dueDate);
-    }
-    
-    /**
-     * 获取优先级
-     * 0: 无优先级
-     * 1: 不重要且不紧急
-     * 2: 不重要且紧急
-     * 3: 重要且不紧急
-     * 4: 重要且紧急
-     *
-     * @return 优先级
-     *
-     */
-    public MutableLiveData<Integer> getPriority() {
-        return priority;
-    }
-    
-    /**
-     * 设置优先级
-     * 0: 无优先级
-     * 1: 不重要且不紧急
-     * 2: 不重要且紧急
-     * 3: 重要且不紧急
-     * 4: 重要且紧急
-     *
-     * @param priority 优先级
-     */
-    public void setPriority(Integer priority) {
-        this.priority.setValue(priority);
-    }
-    
-    public MutableLiveData<String> getSubject() {
-        return subject;
-    }
-    
-    public void setSubject(String subject) {
-        this.subject.setValue(subject);
-    }
-    
-    public MutableLiveData<String> getSubtask() {
-        return subtask;
-    }
-    
-    public void setSubtask(String subtask) {
-        this.subtask.setValue(subtask);
-    }
-    
-    public MutableLiveData<String> getAttachment() {
-        return attachment;
-    }
-    
-    public void setAttachment(String attachment) {
-        this.attachment.setValue(attachment);
-    }
-    
-    public MutableLiveData<Integer> getStatus() {
-        return status;
-    }
-    
-    public void setStatus(Integer status) {
-        this.status.setValue(status);
-    }
-    
-    public MutableLiveData<String> getColor() {
-        return color;
-    }
-    
-    public void setColor(String color) {
-        this.color.setValue(color);
-    }
-    
-    public MutableLiveData<String> getTag() {
-        return tag;
-    }
-    
-    public void setTag(String tag) {
-        this.tag.setValue(tag);
-    }
-    
-    public MutableLiveData<String> getDoneDate() {
-        return doneDate;
-    }
-    
-    public void setDoneDate(String doneDate) {
-        this.doneDate.setValue(doneDate);
-    }
-    
-    public MutableLiveData<Integer> getId() {
-        return id;
-    }
-    
-    public void setId(Integer id) {
-        this.id.setValue(id);
-    }
-    
-    public void reset() {
-        setTitle("");
-        setDescription("");
-        setDueDate("");
-        setDdlDate("");
-        setDueTime("");
-        setPriority(null);
-        setRemindTime("");
-        setType("");
-        setLocation("");
-        setSubject("");
-        setSubtask("");
-        setAttachment("");
-        setDoneDate("");
-        setStatus(0);
-        setColor("");
-        setTag("");
-        function = ADD;
-    }
-    
-    public void copyFrom(TodoInfo todoInfo) {
-        title.setValue(todoInfo.getTitle().getValue());
-        description.setValue(todoInfo.getDescription().getValue());
-        dueDate.setValue(todoInfo.getDueDate().getValue());
-        ddlDate.setValue(todoInfo.getDdlDate().getValue());
-        dueTime.setValue(todoInfo.getDueTime().getValue());
-        priority.setValue(todoInfo.getPriority().getValue());
-        remindTime.setValue(todoInfo.getRemindTime().getValue());
-        type.setValue(todoInfo.getType().getValue());
-        location.setValue(todoInfo.getLocation().getValue());
-        subject.setValue(todoInfo.getSubject().getValue());
-        subtask.setValue(todoInfo.getSubtask().getValue());
-        attachment.setValue(todoInfo.getAttachment().getValue());
-        doneDate.setValue(todoInfo.getDoneDate().getValue());
-        status.setValue(todoInfo.getStatus().getValue());
-        color.setValue(todoInfo.getColor().getValue());
-        tag.setValue(todoInfo.getTag().getValue());
-        id.setValue(todoInfo.getId().getValue());
-        function = todoInfo.getFunction();
-    }
+class TodoInfo {
+	@JvmField val title: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val description: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val dueDate: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val ddlDate: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val dueTime: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val remindTime: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val type: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val location: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val subject: MutableLiveData<String?> = MutableLiveData<String?>()
+	
+	/**
+	 * 获取优先级
+	 * 0: 无优先级
+	 * 1: 不重要且不紧急
+	 * 2: 不重要且紧急
+	 * 3: 重要且不紧急
+	 * 4: 重要且紧急
+	 * 
+	 * @return 优先级
+	 */
+	@JvmField val priority: MutableLiveData<Int?> = MutableLiveData<Int?>()
+	val subtask: MutableLiveData<String?> = MutableLiveData<String?>()
+	val attachment: MutableLiveData<String?> = MutableLiveData<String?>()
+	val doneDate: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val status: MutableLiveData<Int?> = MutableLiveData<Int?>(0)
+	val color: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val tag: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val id: MutableLiveData<Int?> = MutableLiveData<Int?>(0)
+	@JvmField var function: Int = ADD
+	
+	init {
+		reset()
+	}
+	
+	fun setDdlDate(ddlDate: String?) {
+		this.ddlDate.value = ddlDate
+	}
+	
+	fun setDueTime(dueTime: String?) {
+		this.dueTime.value = dueTime
+	}
+	
+	fun setRemindTime(remindTime: String?) {
+		this.remindTime.value = remindTime
+	}
+	
+	fun setType(type: String?) {
+		this.type.value = type
+	}
+	
+	fun setLocation(location: String?) {
+		this.location.value = location
+	}
+	
+	fun setTitle(title: String?) {
+		this.title.value = title
+	}
+	
+	fun setDescription(description: String?) {
+		this.description.value = description
+	}
+	
+	fun setDueDate(dueDate: String?) {
+		this.dueDate.value = dueDate
+	}
+	
+	/**
+	 * 设置优先级
+	 * 0: 无优先级
+	 * 1: 不重要且不紧急
+	 * 2: 不重要且紧急
+	 * 3: 重要且不紧急
+	 * 4: 重要且紧急
+	 * 
+	 * @param priority 优先级
+	 */
+	fun setPriority(priority: Int?) {
+		this.priority.value = priority
+	}
+	
+	fun setSubject(subject: String?) {
+		this.subject.value = subject
+	}
+	
+	fun setSubtask(subtask: String?) {
+		this.subtask.value = subtask
+	}
+	
+	fun setAttachment(attachment: String?) {
+		this.attachment.value = attachment
+	}
+	
+	fun setStatus(status: Int?) {
+		this.status.value = status
+	}
+	
+	fun setColor(color: String?) {
+		this.color.value = color
+	}
+	
+	fun setTag(tag: String?) {
+		this.tag.value = tag
+	}
+	
+	fun setDoneDate(doneDate: String?) {
+		this.doneDate.value = doneDate
+	}
+	
+	fun setId(id: Int?) {
+		this.id.value = id
+	}
+	
+	fun reset() {
+		setTitle("")
+		setDescription("")
+		setDueDate("")
+		setDdlDate("")
+		setDueTime("")
+		setPriority(null)
+		setRemindTime("")
+		setType("")
+		setLocation("")
+		setSubject("")
+		setSubtask("")
+		setAttachment("")
+		setDoneDate("")
+		setStatus(0)
+		setColor("")
+		setTag("")
+		function = ADD
+	}
+	
+	fun copyFrom(todoInfo: TodoInfo) {
+		title.value = todoInfo.title.value
+		description.value = todoInfo.description.value
+		dueDate.value = todoInfo.dueDate.value
+		ddlDate.value = todoInfo.ddlDate.value
+		dueTime.value = todoInfo.dueTime.value
+		priority.value = todoInfo.priority.value
+		remindTime.value = todoInfo.remindTime.value
+		type.value = todoInfo.type.value
+		location.value = todoInfo.location.value
+		subject.value = todoInfo.subject.value
+		subtask.value = todoInfo.subtask.value
+		attachment.value = todoInfo.attachment.value
+		doneDate.value = todoInfo.doneDate.value
+		status.value = todoInfo.status.value
+		color.value = todoInfo.color.value
+		tag.value = todoInfo.tag.value
+		id.value = todoInfo.id.value
+		function = todoInfo.function
+	}
+	
+	companion object {
+		const val ADD: Int = 0
+		const val VIEW: Int = 1
+		const val TODO: Int = 0
+		const val DONE: Int = 1
+		const val DELETE: Int = 2
+	}
 }

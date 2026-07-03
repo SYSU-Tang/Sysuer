@@ -23,20 +23,20 @@ import android.view.View
  * 范围选择周视图
  * Created by huanghaibin on 2018/9/11.
  */
-abstract class RangeWeekView(context: Context?) : BaseWeekView(context) {
+abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 	/**
 	 * 绘制日历文本
 	 * 
 	 * @param canvas canvas
 	 */
 	override fun onDraw(canvas: Canvas) {
-		if (mItems.isNotEmpty()) {
+		if (mItems!!.isNotEmpty()) {
 			mItemWidth = (width - mDelegate.calendarPaddingLeft - mDelegate.calendarPaddingRight) / 7
 			onPreviewHook()
 			(0..6).forEach {
 				val x = it * mItemWidth + mDelegate.calendarPaddingLeft
 				onLoopStart()
-				val calendar = mItems[it]
+				val calendar = mItems!![it]
 				val isSelected = isCalendarSelected(calendar)
 				val isPreSelected = isSelectPreCalendar(calendar, it)
 				val isNextSelected = isSelectNextCalendar(calendar, it)
@@ -73,7 +73,7 @@ abstract class RangeWeekView(context: Context?) : BaseWeekView(context) {
 	
 	override fun onClick(v: View?) {
 		if (isClick) {
-			val calendar = getIndex() ?: return
+			val calendar = index ?: return
 			if (onCalendarIntercept(calendar)) {
 				mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
 				return
@@ -117,7 +117,7 @@ abstract class RangeWeekView(context: Context?) : BaseWeekView(context) {
 					}
 				}
 			}
-			mCurrentItem = mItems.indexOf(calendar)
+			mCurrentItem = mItems!!.indexOf(calendar)
 			mDelegate.mInnerListener?.onWeekDateSelected(calendar, true)
 			mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 			mDelegate.mCalendarRangeSelectListener?.onCalendarRangeSelect(calendar, mDelegate.mSelectedEndRangeCalendar != null)
@@ -142,7 +142,7 @@ abstract class RangeWeekView(context: Context?) : BaseWeekView(context) {
 			preCalendar = CalendarUtil.getPreCalendar(calendar)
 			mDelegate.updateCalendarScheme(preCalendar)
 		}
-		else preCalendar = mItems[calendarIndex - 1]
+		else preCalendar = mItems!![calendarIndex - 1]
 		return mDelegate.mSelectedStartRangeCalendar != null && isCalendarSelected(preCalendar)
 	}
 	
@@ -155,11 +155,11 @@ abstract class RangeWeekView(context: Context?) : BaseWeekView(context) {
 	 */
 	protected fun isSelectNextCalendar(calendar: Calendar, calendarIndex: Int): Boolean {
 		val nextCalendar: Calendar
-		if (calendarIndex == mItems.size - 1) {
+		if (calendarIndex == mItems!!.size - 1) {
 			nextCalendar = CalendarUtil.getNextCalendar(calendar)
 			mDelegate.updateCalendarScheme(nextCalendar)
 		}
-		else nextCalendar = mItems[calendarIndex + 1]
+		else nextCalendar = mItems!![calendarIndex + 1]
 		return mDelegate.mSelectedStartRangeCalendar != null && isCalendarSelected(nextCalendar)
 	}
 	

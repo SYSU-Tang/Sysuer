@@ -45,7 +45,7 @@ class AssistantEvaluationQueryFragment : PreferenceFragmentCompat() {
 				}
 			}
 			val unit = findPreference<FilterPreference>("unit")
-			unit?.getValueLiveData()
+			unit?.valueLiveData
 				?.observe(requireActivity(), Observer { params: String? -> this.getUnit(params) })
 			model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 				val response = message.second

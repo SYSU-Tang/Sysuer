@@ -77,13 +77,13 @@ public class TodoManager {
                 .setPositiveButton(R.string.confirm, (_, _) -> {
                     todoInfo.setTitle(toStringOrDefault(dialogTodoBinding.title.getText()));
                     todoInfo.setDescription(toStringOrDefault(dialogTodoBinding.description.getText()));
-                    if (todoInfo.getFunction() == TodoInfo.ADD) todoDB.addTodo(todoInfo);
-                    else if (todoInfo.getFunction() == TodoInfo.VIEW) todoDB.updateTodo(todoInfo);
+                    if (todoInfo.function == TodoInfo.ADD) todoDB.addTodo(todoInfo);
+                    else if (todoInfo.function == TodoInfo.VIEW) todoDB.updateTodo(todoInfo);
                     performRefresh();
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .setNeutralButton(R.string.delete, (_, _) -> {
-                    if (todoInfo.getFunction() == TodoInfo.VIEW) {
+                    if (todoInfo.function == TodoInfo.VIEW) {
                         todoDB.deleteTodo(todoInfo);
                         performRefresh();
                     }
@@ -170,7 +170,7 @@ public class TodoManager {
                         return true;
                     });
                     none.setOnMenuItemClickListener(_ -> {
-                        todoInfo.getDueDate().setValue(null);
+                        todoInfo.dueDate.setValue(null);
                         return true;
                     });
                     break;
@@ -187,9 +187,9 @@ public class TodoManager {
                         ddlPicker.show(activity.getSupportFragmentManager(), "ddl_picker");
                         return true;
                     });
-                    ddlPicker.addOnPositiveButtonClickListener(selection -> todoInfo.getDdlDate().setValue(dateString.format(selection)));
+                    ddlPicker.addOnPositiveButtonClickListener(selection -> todoInfo.ddlDate.setValue(dateString.format(selection)));
                     none.setOnMenuItemClickListener(_ -> {
-                        todoInfo.getDdlDate().setValue(null);
+                        todoInfo.ddlDate.setValue(null);
                         return true;
                     });
                     break;
@@ -295,7 +295,7 @@ public class TodoManager {
                     todoDetail.setSubtask(cursor.getString(cursor.getColumnIndexOrThrow("subtask")));
                     todoDetail.setAttachment(cursor.getString(cursor.getColumnIndexOrThrow("attachment")));
                     todoDetail.setDoneDate(cursor.getString(cursor.getColumnIndexOrThrow("done_datetime")));
-                    todoDetail.setFunction(TodoInfo.VIEW);
+                    todoDetail.function = TodoInfo.VIEW;
 //                    if (!titleAdapter.getTitle().equals(dueDate)) {
 //                        titleAdapter = new TitleAdapter();
 //                        titleAdapter.setTitle(dueDate);
@@ -316,7 +316,7 @@ public class TodoManager {
                         public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
                             ItemTodoBinding binding = ItemTodoBinding.bind(holder.itemView);
                             binding.delete.setOnClickListener(_ -> {
-                                todoDB.getWritableDatabase().delete("todos", "id=?", new String[]{String.valueOf(todoDetail.getId().getValue())});
+                                todoDB.getWritableDatabase().delete("todos", "id=?", new String[]{String.valueOf(todoDetail.id.getValue())});
                                 performRefresh();
                             });
                             binding.getRoot().setOnClickListener(_ -> {
@@ -325,7 +325,7 @@ public class TodoManager {
                             });
                             binding.copy.setOnClickListener(_ -> {
                                 initDialog(((TodoAdapter) adapter).get(position));
-                                todoInfo.setFunction(TodoInfo.ADD);
+                                todoInfo.function = TodoInfo.ADD;
                                 showDialog();
                             });
                         }
@@ -389,14 +389,14 @@ public class TodoManager {
     public void initDialog() {
         if (todoInfo == null) todoInfo = new TodoInfo();
         
-        todoInfo.getTitle().observe(activity, dialogTodoBinding.title::setText);
-        todoInfo.getDescription().observe(activity, dialogTodoBinding.description::setText);
-        todoInfo.getPriority().observe(activity, integer -> {
+        todoInfo.title.observe(activity, dialogTodoBinding.title::setText);
+        todoInfo.description.observe(activity, dialogTodoBinding.description::setText);
+        todoInfo.priority.observe(activity, integer -> {
             int priority = integer != null && integer != -1 ? integer : 0;
             dialogTodoBinding.prioritySlider.setValue(priority);
             dialogTodoBinding.priorityValue.setText(activity.getResources().getStringArray(R.array.priority)[priority]);
         });
-        todoInfo.getType().observe(activity, s -> {
+        todoInfo.type.observe(activity, s -> {
             if (!isEmpty(s)) {
                 if (!types.contains(s)) {
                     createFilterChip(s, dialogTodoBinding.todoType, 0);
@@ -407,7 +407,7 @@ public class TodoManager {
                 dialogTodoBinding.todoType.clearCheck();
             }
         });
-        todoInfo.getSubject().observe(activity, s -> {
+        todoInfo.subject.observe(activity, s -> {
             if (!isEmpty(s)) {
                 if (!subjects.contains(s)) {
                     createFilterChip(s, dialogTodoBinding.subject, 1);
@@ -418,7 +418,7 @@ public class TodoManager {
                 dialogTodoBinding.subject.clearCheck();
             }
         });
-        todoInfo.getTag().observe(activity, s -> {
+        todoInfo.tag.observe(activity, s -> {
             if (!isEmpty(s)) {
                 if (!tags.contains(s)) {
                     createFilterChip(s, dialogTodoBinding.tag, 2);
@@ -438,11 +438,11 @@ public class TodoManager {
 //                selectChipIfPresent(dialogTodoBinding.tag, tags, s);
 //            }
 //        } );
-        todoInfo.getStatus().observe(activity, integer -> dialogTodoBinding.check.setChecked(integer != null && Objects.equals(integer, TodoInfo.DONE)));
-        todoInfo.getDueDate().observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(0)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
-        todoInfo.getDueTime().observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(1)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
-        todoInfo.getRemindTime().observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(2)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
-        todoInfo.getDdlDate().observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(3)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
+        todoInfo.status.observe(activity, integer -> dialogTodoBinding.check.setChecked(integer != null && Objects.equals(integer, TodoInfo.DONE)));
+        todoInfo.dueDate.observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(0)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
+        todoInfo.dueTime.observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(1)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
+        todoInfo.remindTime.observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(2)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
+        todoInfo.ddlDate.observe(activity, i -> ItemPreferenceBinding.bind(dialogTodoBinding.times.getChildAt(3)).itemContent.setText(!isEmpty(i) ? i : activity.getString(R.string.none)));
     }
     
     public void showDialog() {
@@ -451,7 +451,7 @@ public class TodoManager {
     
     public void showTodoAddDialog() {
         todoInfo.reset();
-        todoInfo.setFunction(TodoInfo.ADD);
+        todoInfo.function = TodoInfo.ADD;
         showDialog();
     }
     

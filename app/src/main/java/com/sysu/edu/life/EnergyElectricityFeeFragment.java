@@ -50,7 +50,7 @@ public class EnergyElectricityFeeFragment extends Fragment {
     final MutableLiveData<String> roomCode = new MutableLiveData<>();
     HttpManager http;
     String name = "";
-    ConcatAdapter adapter = new ConcatAdapter();
+    final ConcatAdapter adapter = new ConcatAdapter();
     
     @Nullable
     @Override

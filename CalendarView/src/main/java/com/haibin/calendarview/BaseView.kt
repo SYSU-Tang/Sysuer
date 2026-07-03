@@ -175,7 +175,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 */
 	@JvmField protected var mX: Float = 0f
 	@JvmField protected var mY: Float = 0f
-	@JvmField var mDelegate: CalendarViewDelegate? = null
+	lateinit var mDelegate: CalendarViewDelegate
 	
 	/**
 	 * 日历布局，需要在日历下方放自己的布局
@@ -208,45 +208,45 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 * @param delegate delegate
 	 */
 	fun setup(delegate: CalendarViewDelegate?) {
-		mDelegate = delegate
-		mWeekStartWidth = mDelegate!!.weekStart
+		if (delegate != null) {
+			mDelegate = delegate
+		}
+		mWeekStartWidth = mDelegate.weekStart
 		updateStyle()
 		updateItemHeight()
 		initPaint()
 	}
 	
 	fun updateStyle() {
-		if (mDelegate != null) {
-			mCurDayTextPaint.setColor(mDelegate!!.curDayTextColor)
-			mCurDayLunarTextPaint.setColor(mDelegate!!.curDayLunarTextColor)
-			mCurMonthTextPaint.setColor(mDelegate!!.currentMonthTextColor)
-			mOtherMonthTextPaint.setColor(mDelegate!!.otherMonthTextColor)
-			mCurMonthLunarTextPaint.setColor(mDelegate!!.currentMonthLunarTextColor)
-			mSelectedLunarTextPaint.setColor(mDelegate!!.selectedLunarTextColor)
-			mSelectTextPaint.setColor(mDelegate!!.selectedTextColor)
-			mOtherMonthLunarTextPaint.setColor(mDelegate!!.otherMonthLunarTextColor)
-			mSchemeLunarTextPaint.setColor(mDelegate!!.schemeLunarTextColor)
-			mSchemePaint.setColor(mDelegate!!.schemeThemeColor)
-			mSchemeTextPaint.setColor(mDelegate!!.schemeTextColor)
-			mCurMonthTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
-			mOtherMonthTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
-			mCurDayTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
-			mSchemeTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
-			mSelectTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
-			
-			mCurMonthLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
-			mSelectedLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
-			mCurDayLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
-			mOtherMonthLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
-			mSchemeLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
-			
-			mSelectedPaint.style = Paint.Style.FILL
-			mSelectedPaint.setColor(mDelegate!!.selectedThemeColor)
-		}
+		mCurDayTextPaint.setColor(mDelegate.curDayTextColor)
+		mCurDayLunarTextPaint.setColor(mDelegate.curDayLunarTextColor)
+		mCurMonthTextPaint.setColor(mDelegate.currentMonthTextColor)
+		mOtherMonthTextPaint.setColor(mDelegate.otherMonthTextColor)
+		mCurMonthLunarTextPaint.setColor(mDelegate.currentMonthLunarTextColor)
+		mSelectedLunarTextPaint.setColor(mDelegate.selectedLunarTextColor)
+		mSelectTextPaint.setColor(mDelegate.selectedTextColor)
+		mOtherMonthLunarTextPaint.setColor(mDelegate.otherMonthLunarTextColor)
+		mSchemeLunarTextPaint.setColor(mDelegate.schemeLunarTextColor)
+		mSchemePaint.setColor(mDelegate.schemeThemeColor)
+		mSchemeTextPaint.setColor(mDelegate.schemeTextColor)
+		mCurMonthTextPaint.textSize = mDelegate.dayTextSize.toFloat()
+		mOtherMonthTextPaint.textSize = mDelegate.dayTextSize.toFloat()
+		mCurDayTextPaint.textSize = mDelegate.dayTextSize.toFloat()
+		mSchemeTextPaint.textSize = mDelegate.dayTextSize.toFloat()
+		mSelectTextPaint.textSize = mDelegate.dayTextSize.toFloat()
+		
+		mCurMonthLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
+		mSelectedLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
+		mCurDayLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
+		mOtherMonthLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
+		mSchemeLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
+		
+		mSelectedPaint.style = Paint.Style.FILL
+		mSelectedPaint.setColor(mDelegate.selectedThemeColor)
 	}
 	
 	open fun updateItemHeight() {
-		mItemHeight = mDelegate!!.calendarItemHeight
+		mItemHeight = mDelegate.calendarItemHeight
 		val metrics = mCurMonthTextPaint.getFontMetrics()
 		mTextBaseLine = mItemHeight / 2 - metrics.descent + (metrics.bottom - metrics.top) / 2
 	}
@@ -266,11 +266,11 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 * 添加事件标记，来自Map
 	 */
 	fun addSchemesFromMap() {
-		if (mDelegate!!.mSchemeDatesMap != null && !mDelegate!!.mSchemeDatesMap.isEmpty()) {
+		if (mDelegate.mSchemeDatesMap != null && !mDelegate.mSchemeDatesMap.isEmpty()) {
 			mItems!!.forEach {
-				if (mDelegate!!.mSchemeDatesMap.containsKey("$it")) {
-					val d = mDelegate!!.mSchemeDatesMap["$it"] ?: return@forEach
-					it.scheme = if (TextUtils.isEmpty(d.scheme)) mDelegate!!.schemeText else d.scheme
+				if (mDelegate.mSchemeDatesMap.containsKey("$it")) {
+					val d = mDelegate.mSchemeDatesMap["$it"] ?: return@forEach
+					it.scheme = if (TextUtils.isEmpty(d.scheme)) mDelegate.schemeText else d.scheme
 					it.schemeColor = d.schemeColor
 					it.schemes = d.schemes
 				}
@@ -329,7 +329,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 * 更新事件
 	 */
 	fun update() {
-		if (mDelegate!!.mSchemeDatesMap == null || mDelegate!!.mSchemeDatesMap.isEmpty()) { //清空操作
+		if (mDelegate.mSchemeDatesMap == null || mDelegate.mSchemeDatesMap.isEmpty()) { //清空操作
 			removeSchemes()
 			invalidate()
 			return
@@ -345,7 +345,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 * @return 是否拦截日期
 	 */
 	protected fun onCalendarIntercept(calendar: Calendar?): Boolean =
-		mDelegate!!.mCalendarInterceptListener != null && mDelegate!!.mCalendarInterceptListener.onCalendarIntercept(calendar)
+		mDelegate.mCalendarInterceptListener != null && mDelegate.mCalendarInterceptListener.onCalendarIntercept(calendar)
 	
 	/**
 	 * 是否在日期范围内
@@ -353,8 +353,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 * @param calendar calendar
 	 * @return 是否在日期范围内
 	 */
-	protected fun isInRange(calendar: Calendar?): Boolean =
-		mDelegate != null && CalendarUtil.isCalendarInRange(calendar, mDelegate)
+	protected fun isInRange(calendar: Calendar?): Boolean = CalendarUtil.isCalendarInRange(calendar, mDelegate)
 	
 	/**
 	 * 跟新当前日期
@@ -366,11 +365,11 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 */
 	abstract fun onDestroy()
 	protected val weekStartWith: Int
-		get() = if (mDelegate != null) mDelegate!!.weekStart else CalendarViewDelegate.WEEK_START_WITH_SUN
+		get() = mDelegate.weekStart
 	protected val calendarPaddingLeft: Int
-		get() = if (mDelegate != null) mDelegate!!.calendarPaddingLeft else 0
+		get() = mDelegate.calendarPaddingLeft
 	protected val calendarPaddingRight: Int
-		get() = if (mDelegate != null) mDelegate!!.calendarPaddingRight else 0
+		get() = mDelegate.calendarPaddingRight
 	
 	/**
 	 * 初始化画笔相关

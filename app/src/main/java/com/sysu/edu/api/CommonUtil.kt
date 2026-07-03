@@ -105,7 +105,9 @@ object CommonUtil {
 	 * @param valueKey 要提取的值键名
 	 * @return 包含提取值的 Tuple2 对象，其中第一个元素为名称数组，第二个元素为值数组
 	 */
-	@JvmStatic fun extractValue(array: JSONArray, nameKey: String?, valueKey: String?): Tuple2<ArrayList<String?>?, ArrayList<String?>?> {
+	@JvmStatic fun extractValue(array: JSONArray,
+	                            nameKey: String?,
+	                            valueKey: String?): Tuple2<ArrayList<String?>?, ArrayList<String?>?> {
 		val names = ArrayList<String?>()
 		val values = ArrayList<String?>()
 		array.forEach { i: Any? ->
@@ -184,31 +186,35 @@ object CommonUtil {
 	 * @param <T1> 第二个值的类型
 	 */
 	data class Tuple2<T, T1>(@JvmField var first: T, @JvmField var second: T1) {
+		fun set(f: T, s: T1) {
+			first = f
+			second = s
+		}
+		
 		//		fun setFirst(first: T?) {
-//			this.first = first
-//		}
-//
-//		fun setSecond(second: T1?) {
-//			this.second = second
-//		}
-//
+		//			this.first = first
+		//		}
+		//
+		//		fun setSecond(second: T1?) {
+		//			this.second = second
+		//		}
+		//
 		fun getFirst(): T? {
 			return first
 		}
 		
 		fun getSecond(): T1? {
 			return second
-		}
-//		override fun toString(): String {
-//			return "($first, $second)"
-//		}
-//
-//		override fun equals(other: Any?): Boolean {
-//			return other is Tuple2<*, *> && first == other.first && second == other.second
-//		}
-//
-//		override fun hashCode(): Int {
-//			return Objects.hash(first, second)
-//		}
+		} //		override fun toString(): String {
+		//			return "($first, $second)"
+		//		}
+		//
+		//		override fun equals(other: Any?): Boolean {
+		//			return other is Tuple2<*, *> && first == other.first && second == other.second
+		//		}
+		//
+		//		override fun hashCode(): Int {
+		//			return Objects.hash(first, second)
+		//		}
 	}
 }

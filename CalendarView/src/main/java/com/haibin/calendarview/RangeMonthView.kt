@@ -32,9 +32,9 @@ abstract class RangeMonthView(context: Context?) : BaseMonthView(context) {
 			var d = 0
 			(0..<mLineCount).forEach { i ->
 				(0..6).forEach { j ->
-					val calendar = mItems[d]
+					val calendar = mItems!![d]
 					if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ONLY_CURRENT_MONTH) {
-						if (d > mItems.size - mNextDiff) return
+						if (d > mItems!!.size - mNextDiff) return
 						if (!calendar.isCurrentMonth) {
 							++d
 							return@forEach
@@ -128,7 +128,7 @@ abstract class RangeMonthView(context: Context?) : BaseMonthView(context) {
 						else mDelegate.mSelectedEndRangeCalendar = calendar
 					}
 					
-					mCurrentItem = mItems.indexOf(calendar)
+					mCurrentItem = mItems!!.indexOf(calendar)
 					
 					if (!calendar.isCurrentMonth && mMonthViewPager != null) {
 						val cur = mMonthViewPager!!.currentItem
@@ -140,8 +140,8 @@ abstract class RangeMonthView(context: Context?) : BaseMonthView(context) {
 					
 					
 					if (mParentLayout != null) {
-						if (calendar.isCurrentMonth) mParentLayout.updateSelectPosition(mItems.indexOf(calendar))
-						else mParentLayout.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
+						if (calendar.isCurrentMonth) mParentLayout!!.updateSelectPosition(mItems!!.indexOf(calendar))
+						else mParentLayout!!.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 					}
 					mDelegate.mCalendarRangeSelectListener?.onCalendarRangeSelect(calendar, mDelegate.mSelectedEndRangeCalendar != null)
 					return
@@ -166,7 +166,7 @@ abstract class RangeMonthView(context: Context?) : BaseMonthView(context) {
 			preCalendar = CalendarUtil.getPreCalendar(calendar)
 			mDelegate.updateCalendarScheme(preCalendar)
 		}
-		else preCalendar = mItems[calendarIndex - 1]
+		else preCalendar = mItems!![calendarIndex - 1]
 		
 		return mDelegate.mSelectedStartRangeCalendar != null && isCalendarSelected(preCalendar)
 	}
@@ -180,11 +180,11 @@ abstract class RangeMonthView(context: Context?) : BaseMonthView(context) {
 	 */
 	protected fun isSelectNextCalendar(calendar: Calendar, calendarIndex: Int): Boolean {
 		val nextCalendar: Calendar
-		if (calendarIndex == mItems.size - 1) {
+		if (calendarIndex == mItems!!.size - 1) {
 			nextCalendar = CalendarUtil.getNextCalendar(calendar)
 			mDelegate.updateCalendarScheme(nextCalendar)
 		}
-		else nextCalendar = mItems[calendarIndex + 1]
+		else nextCalendar = mItems!![calendarIndex + 1]
 		
 		return mDelegate.mSelectedStartRangeCalendar != null && isCalendarSelected(nextCalendar)
 	}

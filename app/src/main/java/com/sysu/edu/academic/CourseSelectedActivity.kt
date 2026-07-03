@@ -24,7 +24,6 @@ import com.sysu.edu.databinding.ActivityCourseSelectedBinding
 import com.sysu.edu.databinding.ItemCourseSelectedBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.RecyclerAdapter
-import java.util.Locale
 import java.util.regex.Pattern
 
 class CourseSelectedActivity : BaseActivity() {

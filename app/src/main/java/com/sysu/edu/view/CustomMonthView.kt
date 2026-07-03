@@ -97,7 +97,7 @@ class CustomMonthView(context: Context) : MonthView(context) {
 	}
 	
 	override fun onDrawSelected(canvas: Canvas,
-	                            calendar: Calendar?,
+	                            calendar: Calendar,
 	                            x: Int,
 	                            y: Int,
 	                            hasScheme: Boolean): Boolean {
@@ -105,7 +105,7 @@ class CustomMonthView(context: Context) : MonthView(context) {
 		return true
 	}
 	
-	override fun onDrawScheme(canvas: Canvas, calendar: Calendar?, x: Int, y: Int) {
+	override fun onDrawScheme(canvas: Canvas, calendar: Calendar, x: Int, y: Int) {
 		mPointPaint.setColor(if (isSelected(calendar)) Color.WHITE else Color.GRAY)
 		canvas.drawCircle(x + mItemWidth.toFloat() / 2, (y + mItemHeight - 3 * mPadding).toFloat(), mPointRadius, mPointPaint)
 	}

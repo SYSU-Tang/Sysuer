@@ -1,29 +1,20 @@
-package com.sysu.edu.widget;
+package com.sysu.edu.widget
 
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 
-import androidx.annotation.NonNull;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
-
-import java.util.List;
-
-public class DailyWidgetWorker extends Worker {
-    
-    public DailyWidgetWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
-    }
-    
-    @NonNull
-    @Override
-    public Result doWork() {
-        List.of(TomorrowClassWidget.class).forEach(c -> getApplicationContext().startService(new Intent(getApplicationContext(), c)
-                .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, AppWidgetManager.getInstance(getApplicationContext())
-                        .getAppWidgetIds(new ComponentName(getApplicationContext(), c)))));
-        return Result.success();
-    }
+class DailyWidgetWorker(context: Context, workerParams: WorkerParameters) :
+	Worker(context, workerParams) {
+	override fun doWork(): Result {
+		listOf(TomorrowClassWidget::class.java).forEach { c ->
+			applicationContext.startService(Intent(applicationContext, c).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+												.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, AppWidgetManager.getInstance(applicationContext)
+													.getAppWidgetIds(ComponentName(applicationContext, c))))
+		}
+		return Result.success()
+	}
 }

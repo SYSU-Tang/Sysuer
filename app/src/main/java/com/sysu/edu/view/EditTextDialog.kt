@@ -1,7 +1,6 @@
 package com.sysu.edu.view
 
 import com.sysu.edu.api.CommonUtil.toStringOrDefault
-import com.sysu.edu.view.EditTextDialog.ValueChangeListener
 import android.view.LayoutInflater
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.content.DialogInterface
