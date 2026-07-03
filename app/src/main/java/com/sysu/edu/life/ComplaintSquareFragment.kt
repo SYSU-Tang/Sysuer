@@ -32,10 +32,11 @@ class ComplaintSquareFragment : BaseFragment() {
 			root.adapter = adapter
 			root.layoutManager = layoutManager
 		}
+		model = XinfangModel(requireContext())
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
 			if (message.first == 0) if (response.getBoolean("ok")) response.getJSONArray("data")
-				.forEach { v: Any? -> adapter.add(v as JSONObject?) }
+				.forEach { adapter.add(it as JSONObject?) }
 			else config.toast(response.getString("msg"))
 		})
 		square

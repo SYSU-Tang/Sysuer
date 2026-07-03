@@ -16,6 +16,9 @@ class RangeSliderPreference(context: Context,
                             defStyleAttr: Int = R.attr.rangeSliderPreferenceStyle,
                             defStyleRes: Int = 0) :
 	SeekBarPreference(context, attrs, defStyleAttr, defStyleRes) {
+	
+	constructor(context: Context, attrs: AttributeSet? = null) : this(context, attrs, R.attr.rangeSliderPreferenceStyle, 0)
+	
 	private lateinit var mValue: FloatArray
 	
 	init {

@@ -89,4 +89,5 @@ class SettingManager(val context: Context) {
 			field = value
 			preferences.edit { putString("qrcode", value) }
 		}
+	
 }

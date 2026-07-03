@@ -6,14 +6,19 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.SharedPreferences
+import android.graphics.Point
+import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
 import android.util.Pair
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
@@ -25,8 +30,7 @@ import io.reactivex.rxjava3.functions.Consumer
 import kotlin.math.roundToInt
 
 class ContextUtil(val context: Context) {
-	private val sharedPreferences: SharedPreferences =
-		context.getSharedPreferences("privacy", Context.MODE_PRIVATE)
+	private val sharedPreferences: SharedPreferences = context.getSharedPreferences("privacy", Context.MODE_PRIVATE)
 	private val loginManager: LoginManager = LoginManager(context)
 	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
 	private val handler = Handler(Looper.getMainLooper())
@@ -35,7 +39,8 @@ class ContextUtil(val context: Context) {
 	private var dialog: AlertDialog? = null
 	
 	init {
-		if (!TextUtils.isEmpty(this.userName) && !TextUtils.isEmpty(this.password)) disposable.add(accountManager.setAccountAsync(TargetHost.SYSU, this.userName, this.password, true).subscribe { sharedPreferences.edit { remove("username").remove("password") } })
+		if (!TextUtils.isEmpty(userName) && !TextUtils.isEmpty(password)) disposable.add(accountManager.setAccountAsync(TargetHost.SYSU, userName, password, true)
+																							 .subscribe { sharedPreferences.edit { remove("username").remove("password") } })
 	}
 	
 	fun getColorFromAttr(attr: Int): Int {
@@ -50,9 +55,7 @@ class ContextUtil(val context: Context) {
 	 * @param dps dp 值
 	 * @return 对应的 px 值
 	 */
-	fun dpToPx(dps: Int): Int {
-		return (context.resources.displayMetrics.density * dps).roundToInt()
-	}
+	fun dpToPx(dps: Int): Int=(context.resources.displayMetrics.density * dps).roundToInt()
 	
 	val userName: String
 		/**
@@ -68,20 +71,6 @@ class ContextUtil(val context: Context) {
 		 * @return 密码
 		 */
 		get() = sharedPreferences.getString("password", "")!!
-	var isDeveloper: Boolean
-		/**
-		 * 获取是否为开发者
-		 * 
-		 * @return 是否为开发者
-		 */
-		get() = sharedPreferences.getBoolean("developer_mode", false)
-		/**
-		 * 设置是否为开发者
-		 * 
-		 */
-		set(developer) {
-			sharedPreferences.edit { putBoolean("developer_mode", developer) }
-		}
 	
 	/**
 	 * 复制文本到剪贴板
@@ -90,8 +79,8 @@ class ContextUtil(val context: Context) {
 	 * @param text 要复制的文本
 	 */
 	fun copy(tag: String?, text: String?) {
-		val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-		clip.setPrimaryClip(ClipData.newPlainText(tag, text))
+		context.getSystemService(ClipboardManager::class.java)
+			.setPrimaryClip(ClipData.newPlainText(tag, text))
 	}
 	
 	/**
@@ -119,21 +108,23 @@ class ContextUtil(val context: Context) {
 	 * @param afterLogin 登录成功后的回调 Runnable 对象
 	 */
 	fun loginForUrl(service: String?, host: String, afterLogin: Runnable?) {
-		disposable.add(accountManager.getActiveAccountAsync(host).subscribe { activeAccount: Pair<String?, String?> ->
-			if (!TextUtils.isEmpty(activeAccount.first) && !TextUtils.isEmpty(activeAccount.second) && !TextUtils.isEmpty(service)) {
-				loginManager.setOnLoginListener(object : LoginListener {
-					override fun onSuccess() {
-						afterLogin?.run()
-					}
-					
-					override fun onError(code: String?, message: String?) {
-						if ("SSO10002" == code || "30506" == code) changeAccount(service, host, afterLogin)
-						else handler.post { toast(CommonUtil.toStringOrDefault<String?>(message)) }
-					}
-				})
-				loginManager.login(activeAccount.first, activeAccount.second, service)
-			} else changeAccount(service, host, afterLogin)
-		})
+		disposable.add(accountManager.getActiveAccountAsync(host)
+						   .subscribe { activeAccount: Pair<String?, String?> ->
+							   if (!TextUtils.isEmpty(activeAccount.first) && !TextUtils.isEmpty(activeAccount.second) && !TextUtils.isEmpty(service)) {
+								   loginManager.setOnLoginListener(object : LoginListener {
+									   override fun onSuccess() {
+										   afterLogin?.run()
+									   }
+									   
+									   override fun onError(code: String?, message: String?) {
+										   if ("SSO10002" == code || "30506" == code) changeAccount(service, host, afterLogin)
+										   else handler.post { toast(CommonUtil.toStringOrDefault<String?>(message)) }
+									   }
+								   })
+								   loginManager.login(activeAccount.first, activeAccount.second, service)
+							   }
+							   else changeAccount(service, host, afterLogin)
+						   })
 	}
 	
 	fun login(url: String?, afterLogin: Runnable?) {
@@ -146,8 +137,7 @@ class ContextUtil(val context: Context) {
 				binding = DialogAccountBinding.inflate(LayoutInflater.from(context))
 				binding!!.password.editLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
 			}
-			if (dialog == null) dialog = MaterialAlertDialogBuilder(context)
-				.setView(binding!!.root)
+			if (dialog == null) dialog = MaterialAlertDialogBuilder(context).setView(binding!!.root)
 				.setTitle(R.string.privacy)
 				.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
 					val username = binding!!.username.edit.getText()
@@ -158,19 +148,44 @@ class ContextUtil(val context: Context) {
 				}
 				.setNegativeButton(android.R.string.cancel, null)
 				.create()
-			disposable.add(accountManager.getActiveAccountAsync(host).subscribe(Consumer { account: Pair<String?, String?>? ->
-				context.runOnUiThread {
-					if (!TextUtils.isEmpty(account!!.first) && !TextUtils.isEmpty(account.second)) {
-						binding!!.password.edit.setText(account.second)
-						binding!!.username.edit.setText(account.first)
-					}
-					dialog!!.show()
-				}
-			}))
+			disposable.add(accountManager.getActiveAccountAsync(host)
+							   .subscribe(Consumer { account: Pair<String?, String?>? ->
+								   context.runOnUiThread {
+									   if (!TextUtils.isEmpty(account!!.first) && !TextUtils.isEmpty(account.second)) {
+										   binding!!.password.edit.setText(account.second)
+										   binding!!.username.edit.setText(account.first)
+									   }
+									   dialog!!.show()
+								   }
+							   }))
 		}
 	}
 	
 	fun dispose() {
 		disposable.dispose()
 	}
+	
+	val width: Int?
+		/**
+		 * 获取屏幕宽度
+		 *
+		 * @return 屏幕宽度（px）
+		 */
+		get() {
+			return if (SDK_INT >= Build.VERSION_CODES.R) ContextCompat.getSystemService(context, WindowManager::class.java)?.currentWindowMetrics?.bounds?.width()
+			else run {
+				val realSize = Point()
+				context.getSystemService(WindowManager::class.java)?.defaultDisplay?.getRealSize(realSize)
+				realSize.x
+			}
+		}
+	val column: Int
+		/**
+		 * 获取列数，根据屏幕宽度动态调整，手机屏幕为一列，以此类推
+		 *
+		 * @return 列数（1、2 或 3）
+		 */
+		get() = width?.let {
+			if (it < dpToPx(540)) 1 else if (it < dpToPx(900)) 2 else 3
+		} ?: 1
 }

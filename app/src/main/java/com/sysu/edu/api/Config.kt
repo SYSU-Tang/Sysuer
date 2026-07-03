@@ -2,10 +2,7 @@ package com.sysu.edu.api
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Point
 import android.net.Uri
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.R
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -34,7 +31,7 @@ class Config {
 	 */
 	constructor(fragment: Fragment) {
 		this.fragment = fragment
-		this.activity = fragment.requireActivity()
+		activity = fragment.requireActivity()
 		contextUtil = ContextUtil(fragment.requireContext())
 	}
 	
@@ -53,48 +50,23 @@ class Config {
 	 * @param dps dp 值
 	 * @return 对应的 px 值
 	 */
-	fun dpToPx(dps: Int): Int {
-		return contextUtil.dpToPx(dps)
-	}
-	
+	fun dpToPx(dps: Int): Int = contextUtil.dpToPx(dps)
 	val width: Int?
 		/**
 		 * 获取屏幕宽度
 		 * 
 		 * @return 屏幕宽度（px）
 		 */
-		get() {
-			return if (SDK_INT >= R)
-				activity?.windowManager?.currentWindowMetrics?.bounds?.width()
-			else run {
-				val realSize = Point()
-				activity?.windowManager?.defaultDisplay?.getRealSize(realSize)
-				realSize.x
-			}
-		}
+		get() = contextUtil.width
 	val column: Int
 		/**
 		 * 获取列数，根据屏幕宽度动态调整，手机屏幕为一列，以此类推
 		 * 
 		 * @return 列数（1、2 或 3）
 		 */
-		get() =
-			this.width?.let {
-				if (it < dpToPx(540)) 1 else if (it < dpToPx(900)) 2 else 3
-			} ?: 1
+		get() = contextUtil.column
 	val context: Context
-		get() = this.contextUtil.context
-	
-	var isDeveloper: Boolean
-		/**
-		 * 获取是否为开发者
-		 * 
-		 * @return 是否为开发者
-		 */
-		get() = contextUtil.isDeveloper
-		set(isDeveloper) {
-			contextUtil.isDeveloper = isDeveloper
-		}
+		get() = contextUtil.context
 	
 	/**
 	 * 打开浏览器
@@ -102,9 +74,8 @@ class Config {
 	 * @param url 要打开的 URL
 	 * @return 点击事件监听器
 	 */
-	fun browse(url: String?): View.OnClickListener {
-		return View.OnClickListener { v: View? -> v!!.context.startActivity(Intent(activity, BrowserActivity::class.java).setData(Uri.parse(url))) }
-	}
+	fun browse(url: String?): View.OnClickListener =
+		View.OnClickListener { context.startActivity(Intent(context, BrowserActivity::class.java).setData(Uri.parse(url))) }
 	
 	/**
 	 * 复制文本到剪贴板

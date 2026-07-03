@@ -3,6 +3,7 @@ package com.sysu.edu.api
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import okhttp3.Cache
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -11,6 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.io.File
 import java.io.IOException
 
 /**
@@ -19,13 +21,6 @@ import java.io.IOException
  * @param handler 处理消息的 Handler 对象
  */
 class HttpManager(val handler: Handler) {
-	/**
-	 * 获取 OkHttpClient 客户端
-	 * 
-	 * @return OkHttpClient 客户端
-	 */
-	val client: OkHttpClient = OkHttpClient.Builder().build() // 全局 OkHttpClient 实例
-	
 	/**
 	 * 获取 CookieManager 管理器
 	 * 
@@ -41,26 +36,15 @@ class HttpManager(val handler: Handler) {
 	@JvmField var isAuthorizationRequired: Boolean = false // 是否需要 Authorization 头字段
 	@JvmField var isTokenRequired: Boolean = false // 是否需要 token 头字段
 	@JvmField var header: MutableMap<String?, String?>? = null // 自定义请求头字段
-	@JvmField
-	var authorizationJar: AuthorizationJar? = null // 自定义 Authorization 头字段 //	init {
-	//		setHandler(handler)
-	//	}
-	//	/**
-	//	 * 获取处理消息的 Handler 对象
-	//	 *
-	//	 * @return 处理消息的 Handler 对象
-	//	 */
-	//	fun getHandler(): Handler {
-	//		return handler!!
-	//	}
-	//	/**
-	//	 * 设置处理消息的 Handler 对象
-	//	 *
-	//	 * @param handler 处理消息的 Handler 对象
-	//	 */
-	//	fun setHandler(handler: Handler) {
-	//		this.handler = handler
-	//	}
+	@JvmField var authorizationJar: AuthorizationJar? = null // 自定义 Authorization 头字段 //	init {
+	
+	/**
+	 * 获取 OkHttpClient 客户端
+	 *
+	 * @return OkHttpClient 客户端
+	 */
+	var client: OkHttpClient = OkHttpClient.Builder().build() // 全局 OkHttpClient 实例
+	
 	/**
 	 * 设置请求参数
 	 *
@@ -70,7 +54,12 @@ class HttpManager(val handler: Handler) {
 		this.config = config
 		cookieManager = CookieManager(config.context)
 		authorizationJar = AuthorizationJar(config.context)
-		}
+		setCache(config.context.cacheDir)
+	}
+	
+	fun setCache(dir: File) {
+		client = client.newBuilder().cache(Cache(dir, 1024 * 1024 * 10)).build()
+	}
 	
 	/**
 	 * 设置 Referer 头字段

@@ -7,11 +7,14 @@ import androidx.preference.MultiSelectListPreference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sysu.edu.R
 
-class MutiListPreference @JvmOverloads constructor(context: Context,
-                                                   attrs: AttributeSet? = null,
-                                                   defStyleAttr: Int = R.attr.dialogPreferenceStyle,
-                                                   defStyleRes: Int = 0) :
+class MutiListPreference(context: Context,
+                         attrs: AttributeSet? = null,
+                         defStyleAttr: Int = R.attr.dialogPreferenceStyle,
+                         defStyleRes: Int = 0) :
 	MultiSelectListPreference(context, attrs, defStyleAttr, defStyleRes) {
+	constructor(context: Context,
+	            attrs: AttributeSet?) : this(context, attrs, R.attr.dialogPreferenceStyle, 0)
+	
 	override fun onClick() {
 		val dialogBuilder = MaterialAlertDialogBuilder(context)
 		if (title != null) dialogBuilder.setTitle(title)

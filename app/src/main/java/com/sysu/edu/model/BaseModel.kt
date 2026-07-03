@@ -23,6 +23,7 @@ abstract class BaseModel(context: Context) {
 	abstract val authorizationManager: AuthorizationManager //= AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn")
 	open val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
 		cookieManager = CookieManager(context)
+		setCache(context.cacheDir)
 	}
 	private val queue = ArrayDeque<CommonUtil.Tuple2<Request, Int>>()
 	val message: MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>> = MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>>()

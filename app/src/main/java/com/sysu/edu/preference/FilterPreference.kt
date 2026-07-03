@@ -18,8 +18,10 @@ import com.sysu.edu.databinding.PreferenceFilterBinding
 class FilterPreference(context: Context,
                        attrs: AttributeSet? = null,
                        defStyleAttr: Int = R.attr.filterPreferenceStyle,
-                       defStyleRes: Int = 0) :
-	ListPreference(context, attrs, defStyleAttr, defStyleRes) {
+                       defStyleRes: Int = 0) : ListPreference(context, attrs, defStyleAttr, defStyleRes) {
+	
+	constructor(context: Context, attrs: AttributeSet? = null) : this(context, attrs, R.attr.filterPreferenceStyle, 0)
+	
 	val valueLiveData: MutableLiveData<String?> = MutableLiveData<String?>()
 	var isFilter: Boolean = false
 	var canEdit: Boolean = false

@@ -143,7 +143,7 @@ public class ComplaintMainFragment extends Fragment {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             JSONObject item = get(position);
             ItemTodoBinding binding = ItemTodoBinding.bind(holder.itemView);
-            binding.title.setText(toStringOrDefault(item.getString("title")));
+            binding.title.setText(item.getString("title",""));
             super.onBindViewHolder(holder, position);
         }
     }

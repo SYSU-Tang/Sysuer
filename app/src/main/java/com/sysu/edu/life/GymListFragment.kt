@@ -59,7 +59,7 @@ class GymListFragment : BaseFragment() {
 									.build()))
 								.skipMemoryCache(true)
 								.diskCacheStrategy(DiskCacheStrategy.NONE)
-								.into(this.image!!)
+								.into(this.image)
 						}
 					}
 				}
