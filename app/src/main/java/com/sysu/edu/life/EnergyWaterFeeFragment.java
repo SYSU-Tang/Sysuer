@@ -90,10 +90,10 @@ public class EnergyWaterFeeFragment extends BaseFragment {
                                     Object totalWaterUsage = item.get("totalWaterUsage");
                                     String content = totalWaterUsage == null ? getString(R.string.no_data_available) : totalWaterUsage.toString();
                                     Calendar calendar = new Calendar();
-                                    calendar.setScheme(content);
-                                    calendar.setYear(binding.calendarView.getSelectedCalendar().getYear());
-                                    calendar.setMonth(binding.calendarView.getSelectedCalendar().getMonth());
-                                    calendar.setDay(Integer.parseInt(item.getString("timeLabel")));
+                                    calendar.scheme = content;
+                                    calendar.year = binding.calendarView.getSelectedCalendar().year;
+                                    calendar.month = binding.calendarView.getSelectedCalendar().month;
+                                    calendar.day = Integer.parseInt(item.getString("timeLabel"));
                                     binding.calendarView.addSchemeDate(calendar);
                                 });
                                 adapter.addAdapter(preferenceAdapter);
@@ -166,7 +166,7 @@ public class EnergyWaterFeeFragment extends BaseFragment {
         requestQueue.add(() -> getRoom(name));
         roomCode.observe(getViewLifecycleOwner(), v -> {
             if (v != null) {
-                requestQueue.add(() -> getWaterConsumption(v, LocalDate.of(binding.calendarView.getSelectedCalendar().getYear(), binding.calendarView.getSelectedCalendar().getMonth(), 1).format(formatter)));
+                requestQueue.add(() -> getWaterConsumption(v, LocalDate.of(binding.calendarView.getSelectedCalendar().year, binding.calendarView.getSelectedCalendar().month, 1).format(formatter)));
                 requestQueue.addAndNext(() -> getWaterBill(v));
             }
         });

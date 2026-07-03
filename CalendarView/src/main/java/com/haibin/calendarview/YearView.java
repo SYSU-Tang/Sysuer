@@ -269,7 +269,6 @@ public abstract class YearView extends View {
      * @param width  width
      * @param height height
      */
-    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     final void measureSize(int width, int height) {
 
         Rect rect = new Rect();
@@ -284,14 +283,14 @@ public abstract class YearView extends View {
         mItemHeight = (h - getMonthViewTop()) / 6;
 
         Paint.FontMetrics metrics = mCurMonthTextPaint.getFontMetrics();
-        mTextBaseLine = mItemHeight / 2 - metrics.descent + (metrics.bottom - metrics.top) / 2;
+        mTextBaseLine = (float) mItemHeight / 2 - metrics.descent + (metrics.bottom - metrics.top) / 2;
 
         Paint.FontMetrics monthMetrics = mMonthTextPaint.getFontMetrics();
-        mMonthTextBaseLine = mDelegate.getYearViewMonthHeight() / 2 - monthMetrics.descent +
+        mMonthTextBaseLine = (float) mDelegate.getYearViewMonthHeight() / 2 - monthMetrics.descent +
                 (monthMetrics.bottom - monthMetrics.top) / 2;
 
         Paint.FontMetrics weekMetrics = mWeekTextPaint.getFontMetrics();
-        mWeekTextBaseLine = mDelegate.getYearViewWeekHeight() / 2 - weekMetrics.descent +
+        mWeekTextBaseLine = (float) mDelegate.getYearViewWeekHeight() / 2 - weekMetrics.descent +
                 (weekMetrics.bottom - weekMetrics.top) / 2;
 
         invalidate();
@@ -310,12 +309,12 @@ public abstract class YearView extends View {
                 if(d == null){
                     continue;
                 }
-                a.setScheme(TextUtils.isEmpty(d.getScheme()) ? mDelegate.getSchemeText() : d.getScheme());
-                a.setSchemeColor(d.getSchemeColor());
-                a.setSchemes(d.getSchemes());
+                a.scheme = TextUtils.isEmpty(d.scheme) ? mDelegate.getSchemeText() : d.scheme;
+                a.schemeColor = d.schemeColor;
+                a.setSchemes(d.schemes);
             } else {
-                a.setScheme("");
-                a.setSchemeColor(0);
+                a.scheme = "";
+                a.schemeColor = 0;
                 a.setSchemes(null);
             }
         }
@@ -402,7 +401,7 @@ public abstract class YearView extends View {
                 if (d > mItems.size() - mNextDiff) {
                     return;
                 }
-                if (!calendar.isCurrentMonth()) {
+                if (!calendar.isCurrentMonth) {
                     ++d;
                     continue;
                 }
@@ -437,7 +436,7 @@ public abstract class YearView extends View {
             }
             if (isDrawSelected || !isSelected) {
                 //将画笔设置为标记颜色
-                mSchemePaint.setColor(calendar.getSchemeColor() != 0 ? calendar.getSchemeColor() : mDelegate.getSchemeThemeColor());
+                mSchemePaint.setColor(calendar.schemeColor != 0 ? calendar.schemeColor : mDelegate.getSchemeThemeColor());
                 onDrawScheme(canvas, calendar, x, y);
             }
         } else {

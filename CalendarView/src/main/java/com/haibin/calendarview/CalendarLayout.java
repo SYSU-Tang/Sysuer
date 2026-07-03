@@ -176,7 +176,7 @@ public class CalendarLayout extends LinearLayout {
      */
     private void initCalendarPosition(Calendar cur) {
         int diff = CalendarUtil.getMonthViewStartDiff(cur, mDelegate.getWeekStart());
-        int size = diff + cur.getDay() - 1;
+        int size = diff + cur.day - 1;
         updateSelectPosition(size);
     }
 
@@ -208,8 +208,8 @@ public class CalendarLayout extends LinearLayout {
         if (mDelegate.getMonthViewShowMode() == CalendarViewDelegate.MODE_ALL_MONTH) {
             mContentViewTranslateY = 5 * mItemHeight;
         } else {
-            mContentViewTranslateY = CalendarUtil.getMonthViewHeight(calendar.getYear(),
-                    calendar.getMonth(), mItemHeight, mDelegate.getWeekStart())
+            mContentViewTranslateY = CalendarUtil.getMonthViewHeight(calendar.year,
+                    calendar.month, mItemHeight, mDelegate.getWeekStart())
                     - mItemHeight;
         }
         //已经显示周视图，则需要动态平移contentView的高度
@@ -232,7 +232,7 @@ public class CalendarLayout extends LinearLayout {
         if (mDelegate.getMonthViewShowMode() == CalendarViewDelegate.MODE_ALL_MONTH) {
             mContentViewTranslateY = 5 * mItemHeight;
         } else {
-            mContentViewTranslateY = CalendarUtil.getMonthViewHeight(calendar.getYear(), calendar.getMonth(),
+            mContentViewTranslateY = CalendarUtil.getMonthViewHeight(calendar.year, calendar.month,
                     mItemHeight, mDelegate.getWeekStart()) - mItemHeight;
         }
         translationViewPager();
@@ -511,8 +511,8 @@ public class CalendarLayout extends LinearLayout {
             return;
         }
 
-        int year = mDelegate.mIndexCalendar.getYear();
-        int month = mDelegate.mIndexCalendar.getMonth();
+        int year = mDelegate.mIndexCalendar.year;
+        int month = mDelegate.mIndexCalendar.month;
         int weekBarHeight = CalendarUtil.dipToPx(getContext(), 1)
                 + mDelegate.getWeekBarHeight();
 

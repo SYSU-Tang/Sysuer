@@ -477,10 +477,10 @@ public final class CalendarViewDelegate {
     private void init() {
         mCurrentDate = new Calendar();
         Date d = new Date();
-        mCurrentDate.setYear(CalendarUtil.getDate("yyyy", d));
-        mCurrentDate.setMonth(CalendarUtil.getDate("MM", d));
-        mCurrentDate.setDay(CalendarUtil.getDate("dd", d));
-        mCurrentDate.setCurrentDay(true);
+        mCurrentDate.year = CalendarUtil.getDate("yyyy", d);
+        mCurrentDate.month = CalendarUtil.getDate("MM", d);
+        mCurrentDate.day = CalendarUtil.getDate("dd", d);
+        mCurrentDate.isCurrentDay = true;
         LunarCalendar.setupLunarCalendar(mCurrentDate);
         setRange(mMinYear, mMinYearMonth, mMaxYear, mMaxYearMonth);
 
@@ -514,14 +514,14 @@ public final class CalendarViewDelegate {
         mMinYearMonth = minYearMonth;
         mMaxYear = maxYear;
         mMaxYearMonth = maxYearMonth;
-        if (mMaxYear < mCurrentDate.getYear()) {
-            mMaxYear = mCurrentDate.getYear();
+        if (mMaxYear < mCurrentDate.year) {
+            mMaxYear = mCurrentDate.year;
         }
         if (mMaxYearDay == -1) {
             mMaxYearDay = CalendarUtil.getMonthDaysCount(mMaxYear, mMaxYearMonth);
         }
-        int y = mCurrentDate.getYear() - mMinYear;
-        mCurrentMonthViewItem = 12 * y + mCurrentDate.getMonth() - mMinYearMonth;
+        int y = mCurrentDate.year - mMinYear;
+        mCurrentMonthViewItem = 12 * y + mCurrentDate.month - mMinYearMonth;
     }
 
     void setRange(int minYear, int minYearMonth, int minYearDay,
@@ -534,8 +534,8 @@ public final class CalendarViewDelegate {
         mMaxYearDay = maxYearDay;
         if (mMaxYearDay == -1)
             mMaxYearDay = CalendarUtil.getMonthDaysCount(mMaxYear, mMaxYearMonth);
-        int y = mCurrentDate.getYear() - mMinYear;
-        mCurrentMonthViewItem = 12 * y + mCurrentDate.getMonth() - mMinYearMonth;
+        int y = mCurrentDate.year - mMinYear;
+        mCurrentMonthViewItem = 12 * y + mCurrentDate.month - mMinYearMonth;
     }
 
     String getSchemeText() {
@@ -892,9 +892,9 @@ public final class CalendarViewDelegate {
 
     void updateCurrentDay() {
         Date d = new Date();
-        mCurrentDate.setYear(CalendarUtil.getDate("yyyy", d));
-        mCurrentDate.setMonth(CalendarUtil.getDate("MM", d));
-        mCurrentDate.setDay(CalendarUtil.getDate("dd", d));
+        mCurrentDate.year = CalendarUtil.getDate("yyyy", d);
+        mCurrentDate.month = CalendarUtil.getDate("MM", d);
+        mCurrentDate.day = CalendarUtil.getDate("dd", d);
         LunarCalendar.setupLunarCalendar(mCurrentDate);
     }
 
@@ -977,21 +977,21 @@ public final class CalendarViewDelegate {
 
     Calendar createCurrentDate() {
         Calendar calendar = new Calendar();
-        calendar.setYear(mCurrentDate.getYear());
-        calendar.setWeek(mCurrentDate.getWeek());
-        calendar.setMonth(mCurrentDate.getMonth());
-        calendar.setDay(mCurrentDate.getDay());
-        calendar.setCurrentDay(true);
+        calendar.year = mCurrentDate.year;
+        calendar.week = mCurrentDate.week;
+        calendar.month = mCurrentDate.month;
+        calendar.day = mCurrentDate.day;
+        calendar.isCurrentDay = true;
         LunarCalendar.setupLunarCalendar(calendar);
         return calendar;
     }
 
     Calendar getMinRangeCalendar() {
         Calendar calendar = new Calendar();
-        calendar.setYear(mMinYear);
-        calendar.setMonth(mMinYearMonth);
-        calendar.setDay(mMinYearDay);
-        calendar.setCurrentDay(calendar.equals(mCurrentDate));
+        calendar.year = mMinYear;
+        calendar.month = mMinYearMonth;
+        calendar.day = mMinYearDay;
+        calendar.isCurrentDay = calendar.equals(mCurrentDate);
         LunarCalendar.setupLunarCalendar(calendar);
         return calendar;
     }
@@ -999,10 +999,10 @@ public final class CalendarViewDelegate {
     @SuppressWarnings("unused")
     Calendar getMaxRangeCalendar() {
         Calendar calendar = new Calendar();
-        calendar.setYear(mMaxYear);
-        calendar.setMonth(mMaxYearMonth);
-        calendar.setDay(mMaxYearDay);
-        calendar.setCurrentDay(calendar.equals(mCurrentDate));
+        calendar.year = mMaxYear;
+        calendar.month = mMaxYearMonth;
+        calendar.day = mMaxYearDay;
+        calendar.isCurrentDay = calendar.equals(mCurrentDate);
         LunarCalendar.setupLunarCalendar(calendar);
         return calendar;
     }
@@ -1020,12 +1020,12 @@ public final class CalendarViewDelegate {
                 if (d == null) {
                     continue;
                 }
-                a.setScheme(TextUtils.isEmpty(d.getScheme()) ? getSchemeText() : d.getScheme());
-                a.setSchemeColor(d.getSchemeColor());
-                a.setSchemes(d.getSchemes());
+                a.scheme = TextUtils.isEmpty(d.scheme) ? getSchemeText() : d.scheme;
+                a.schemeColor = d.schemeColor;
+                a.setSchemes(d.schemes);
             } else {
-                a.setScheme("");
-                a.setSchemeColor(0);
+                a.scheme = "";
+                a.schemeColor = 0;
                 a.setSchemes(null);
             }
         }
@@ -1078,23 +1078,23 @@ public final class CalendarViewDelegate {
         final long ONE_DAY = 1000 * 3600 * 24;
         java.util.Calendar date = java.util.Calendar.getInstance();
 
-        date.set(mSelectedStartRangeCalendar.getYear(),
-                mSelectedStartRangeCalendar.getMonth() - 1,
-                mSelectedStartRangeCalendar.getDay());//
+        date.set(mSelectedStartRangeCalendar.year,
+                mSelectedStartRangeCalendar.month - 1,
+                mSelectedStartRangeCalendar.day);//
 
         long startTimeMills = date.getTimeInMillis();//获得起始时间戳
 
 
-        date.set(mSelectedEndRangeCalendar.getYear(),
-                mSelectedEndRangeCalendar.getMonth() - 1,
-                mSelectedEndRangeCalendar.getDay());//
+        date.set(mSelectedEndRangeCalendar.year,
+                mSelectedEndRangeCalendar.month - 1,
+                mSelectedEndRangeCalendar.day);//
         long endTimeMills = date.getTimeInMillis();
         for (long start = startTimeMills; start <= endTimeMills; start += ONE_DAY) {
             date.setTimeInMillis(start);
             Calendar calendar = new Calendar();
-            calendar.setYear(date.get(java.util.Calendar.YEAR));
-            calendar.setMonth(date.get(java.util.Calendar.MONTH) + 1);
-            calendar.setDay(date.get(java.util.Calendar.DAY_OF_MONTH));
+            calendar.year = date.get(java.util.Calendar.YEAR);
+            calendar.month = date.get(java.util.Calendar.MONTH) + 1;
+            calendar.day = date.get(java.util.Calendar.DAY_OF_MONTH);
             LunarCalendar.setupLunarCalendar(calendar);
             updateCalendarScheme(calendar);
             if (mCalendarInterceptListener != null &&

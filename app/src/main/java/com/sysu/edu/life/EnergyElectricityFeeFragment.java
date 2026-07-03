@@ -89,10 +89,10 @@ public class EnergyElectricityFeeFragment extends Fragment {
                                         String content = useElectric == null ? "暂无数据" : useElectric.toString();
                                         Calendar calendar = new Calendar();
                                         LocalDate date = LocalDate.parse(item.getString("date"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                                        calendar.setScheme(content);
-                                        calendar.setYear(date.getYear());
-                                        calendar.setMonth(date.getMonthValue());
-                                        calendar.setDay(date.getDayOfMonth());
+                                        calendar.scheme = content;
+                                        calendar.year = date.getYear();
+                                        calendar.month = date.getMonthValue();
+                                        calendar.day = date.getDayOfMonth();
                                         binding.calendarView.addSchemeDate(calendar);
                                     });
                             case 3 -> {
@@ -160,7 +160,7 @@ public class EnergyElectricityFeeFragment extends Fragment {
         requestQueue.add(() -> getRoom(name));
         roomCode.observe(getViewLifecycleOwner(), v -> {
             if (v != null) {
-                LocalDate date = LocalDate.of(binding.calendarView.getSelectedCalendar().getYear(), binding.calendarView.getSelectedCalendar().getMonth(), 1);
+                LocalDate date = LocalDate.of(binding.calendarView.getSelectedCalendar().year, binding.calendarView.getSelectedCalendar().month, 1);
                 requestQueue.add(() -> getElectricityConsumption(v, date.with(TemporalAdjusters.firstDayOfMonth()).format(formatter), date.with(TemporalAdjusters.lastDayOfMonth()).format(formatter)));
                 requestQueue.addAndNext(() -> getElectricityBill(v));
             }

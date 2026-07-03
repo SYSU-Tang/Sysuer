@@ -23,7 +23,7 @@ import android.view.View
  * 多选周视图
  * Created by huanghaibin on 2018/9/11.
  */
-abstract class MultiWeekView(context: Context?) : BaseWeekView(context) {
+abstract class MultiWeekView(context: Context) : BaseWeekView(context) {
 	/**
 	 * 绘制日历文本
 	 * 
@@ -35,7 +35,7 @@ abstract class MultiWeekView(context: Context?) : BaseWeekView(context) {
 			onPreviewHook()
 			
 			(0..6).forEach {
-				onLoopStart(it * mItemWidth + mDelegate.calendarPaddingLeft)
+				onLoopStart()
 				val calendar = mItems[it]
 				val isSelected = isCalendarSelected(calendar)
 				val isPreSelected = isSelectPreCalendar(calendar, it)
@@ -58,7 +58,8 @@ abstract class MultiWeekView(context: Context?) : BaseWeekView(context) {
 	 * @param calendar calendar
 	 * @return 日历是否被选中
 	 */
-	protected fun isCalendarSelected(calendar: Calendar): Boolean =!onCalendarIntercept(calendar) && mDelegate.mSelectedCalendars.containsKey("$calendar")
+	protected fun isCalendarSelected(calendar: Calendar): Boolean =
+		!onCalendarIntercept(calendar) && mDelegate.mSelectedCalendars.containsKey("$calendar")
 	
 	override fun onClick(v: View?) {
 		if (isClick) {
@@ -68,9 +69,7 @@ abstract class MultiWeekView(context: Context?) : BaseWeekView(context) {
 				return
 			}
 			if (!isInRange(calendar)) {
-				if (mDelegate.mCalendarMultiSelectListener != null) {
-					mDelegate.mCalendarMultiSelectListener.onCalendarMultiSelectOutOfRange(calendar)
-				}
+				mDelegate.mCalendarMultiSelectListener?.onCalendarMultiSelectOutOfRange(calendar)
 				return
 			}
 			val key = "$calendar"
@@ -93,7 +92,7 @@ abstract class MultiWeekView(context: Context?) : BaseWeekView(context) {
 		}
 	}
 	
-	override fun onLongClick(v: View?): Boolean =false
+	override fun onLongClick(v: View?): Boolean = false
 	
 	/**
 	 * 上一个日期是否选中

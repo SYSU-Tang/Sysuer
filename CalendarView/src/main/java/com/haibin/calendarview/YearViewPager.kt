@@ -22,6 +22,8 @@ import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.haibin.calendarview.YearRecyclerView.OnMonthSelectedListener
@@ -30,8 +32,7 @@ import com.haibin.calendarview.YearRecyclerView.OnMonthSelectedListener
  * 年份+月份选择布局
  * ViewPager + RecyclerView
  */
-class YearViewPager(context: Context, attrs: AttributeSet? = null) :
-	ViewPager(context, attrs) {
+class YearViewPager(context: Context, attrs: AttributeSet? = null) : ViewPager(context, attrs) {
 	private var mYearCount = 0
 	private var isUpdateYearView = false
 	var mDelegate: CalendarViewDelegate? = null
@@ -162,7 +163,7 @@ class YearViewPager(context: Context, attrs: AttributeSet? = null) :
 		 */
 		private fun getHeight(context: Context, view: View): Int {
 			val dm = DisplayMetrics()
-			context.display.getRealMetrics(dm)
+			ContextCompat.getSystemService(context, WindowManager::class.java)?.defaultDisplay?.getMetrics(dm)
 			val h = dm.heightPixels
 			val location = IntArray(2)
 			view.getLocationInWindow(location)

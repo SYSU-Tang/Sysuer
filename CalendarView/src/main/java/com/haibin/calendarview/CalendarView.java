@@ -152,8 +152,8 @@ public class CalendarView extends FrameLayout {
             @Override
             public void onMonthDateSelected(Calendar calendar, boolean isClick) {
 
-                if (calendar.getYear() == mDelegate.getCurrentDay().getYear() &&
-                        calendar.getMonth() == mDelegate.getCurrentDay().getMonth()
+                if (calendar.year == mDelegate.getCurrentDay().year &&
+                        calendar.month == mDelegate.getCurrentDay().month
                         && mMonthPager.getCurrentItem() != mDelegate.mCurrentMonthViewItem) {
                     return;
                 }
@@ -181,8 +181,8 @@ public class CalendarView extends FrameLayout {
                         || mDelegate.mIndexCalendar.equals(mDelegate.mSelectedCalendar)) {
                     mDelegate.mSelectedCalendar = calendar;
                 }
-                int y = calendar.getYear() - mDelegate.getMinYear();
-                int position = 12 * y + mDelegate.mIndexCalendar.getMonth() - mDelegate.getMinYearMonth();
+                int y = calendar.year - mDelegate.getMinYear();
+                int position = 12 * y + mDelegate.mIndexCalendar.month - mDelegate.getMinYearMonth();
                 mWeekPager.updateSingleSelect();
                 mMonthPager.setCurrentItem(position, false);
                 mMonthPager.updateSelected();
@@ -258,7 +258,7 @@ public class CalendarView extends FrameLayout {
      * @return 返回今天
      */
     public int getCurDay() {
-        return mDelegate.getCurrentDay().getDay();
+        return mDelegate.getCurrentDay().day;
     }
 
     /**
@@ -267,7 +267,7 @@ public class CalendarView extends FrameLayout {
      * @return 返回本月
      */
     public int getCurMonth() {
-        return mDelegate.getCurrentDay().getMonth();
+        return mDelegate.getCurrentDay().month;
     }
 
     /**
@@ -276,7 +276,7 @@ public class CalendarView extends FrameLayout {
      * @return 返回本年
      */
     public int getCurYear() {
-        return mDelegate.getCurrentDay().getYear();
+        return mDelegate.getCurrentDay().year;
     }
 
 
@@ -357,8 +357,8 @@ public class CalendarView extends FrameLayout {
         if (mYearViewPager.getVisibility() == GONE) {
             return;
         }
-        int position = 12 * (mDelegate.mSelectedCalendar.getYear() - mDelegate.getMinYear()) +
-                mDelegate.mSelectedCalendar.getMonth() - mDelegate.getMinYearMonth();
+        int position = 12 * (mDelegate.mSelectedCalendar.year - mDelegate.getMinYear()) +
+                mDelegate.mSelectedCalendar.month - mDelegate.getMinYearMonth();
         closeSelectLayout(position);
         mDelegate.isShowYearSelectedLayout = false;
     }
@@ -450,7 +450,7 @@ public class CalendarView extends FrameLayout {
         } else {
             mWeekPager.scrollToCurrent(smoothScroll);
         }
-        mYearViewPager.scrollToYear(mDelegate.getCurrentDay().getYear(), smoothScroll);
+        mYearViewPager.scrollToYear(mDelegate.getCurrentDay().year, smoothScroll);
     }
 
 
@@ -506,9 +506,9 @@ public class CalendarView extends FrameLayout {
         if (!mDelegate.mSelectedCalendar.isAvailable()) {
             return;
         }
-        scrollToCalendar(mDelegate.mSelectedCalendar.getYear(),
-                mDelegate.mSelectedCalendar.getMonth(),
-                mDelegate.mSelectedCalendar.getDay(),
+        scrollToCalendar(mDelegate.mSelectedCalendar.year,
+                mDelegate.mSelectedCalendar.month,
+                mDelegate.mSelectedCalendar.day,
                 false,
                 true);
     }
@@ -548,9 +548,9 @@ public class CalendarView extends FrameLayout {
     public void scrollToCalendar(int year, int month, int day, boolean smoothScroll, boolean invokeListener) {
 
         Calendar calendar = new Calendar();
-        calendar.setYear(year);
-        calendar.setMonth(month);
-        calendar.setDay(day);
+        calendar.year = year;
+        calendar.month = month;
+        calendar.day = day;
         if (!calendar.isAvailable()) {
             return;
         }
@@ -921,9 +921,9 @@ public class CalendarView extends FrameLayout {
             return;
         }
         Calendar startCalendar = new Calendar();
-        startCalendar.setYear(startYear);
-        startCalendar.setMonth(startMonth);
-        startCalendar.setDay(startDay);
+        startCalendar.year = startYear;
+        startCalendar.month = startMonth;
+        startCalendar.day = startDay;
         setSelectStartCalendar(startCalendar);
     }
 
@@ -948,7 +948,7 @@ public class CalendarView extends FrameLayout {
         }
         mDelegate.mSelectedEndRangeCalendar = null;
         mDelegate.mSelectedStartRangeCalendar = startCalendar;
-        scrollToCalendar(startCalendar.getYear(), startCalendar.getMonth(), startCalendar.getDay());
+        scrollToCalendar(startCalendar.year, startCalendar.month, startCalendar.day);
     }
 
     public final void setSelectEndCalendar(int endYear, int endMonth, int endDay) {
@@ -959,9 +959,9 @@ public class CalendarView extends FrameLayout {
             return;
         }
         Calendar endCalendar = new Calendar();
-        endCalendar.setYear(endYear);
-        endCalendar.setMonth(endMonth);
-        endCalendar.setDay(endDay);
+        endCalendar.year = endYear;
+        endCalendar.month = endMonth;
+        endCalendar.day = endDay;
         setSelectEndCalendar(endCalendar);
     }
 
@@ -991,14 +991,14 @@ public class CalendarView extends FrameLayout {
             return;
         }
         Calendar startCalendar = new Calendar();
-        startCalendar.setYear(startYear);
-        startCalendar.setMonth(startMonth);
-        startCalendar.setDay(startDay);
+        startCalendar.year = startYear;
+        startCalendar.month = startMonth;
+        startCalendar.day = startDay;
 
         Calendar endCalendar = new Calendar();
-        endCalendar.setYear(endYear);
-        endCalendar.setMonth(endMonth);
-        endCalendar.setDay(endDay);
+        endCalendar.year = endYear;
+        endCalendar.month = endMonth;
+        endCalendar.day = endDay;
         setSelectCalendarRange(startCalendar, endCalendar);
     }
 
@@ -1055,7 +1055,7 @@ public class CalendarView extends FrameLayout {
             if (mDelegate.mCalendarRangeSelectListener != null) {
                 mDelegate.mCalendarRangeSelectListener.onCalendarRangeSelect(startCalendar, false);
             }
-            scrollToCalendar(startCalendar.getYear(), startCalendar.getMonth(), startCalendar.getDay());
+            scrollToCalendar(startCalendar.year, startCalendar.month, startCalendar.day);
             return;
         }
 
@@ -1065,7 +1065,7 @@ public class CalendarView extends FrameLayout {
             mDelegate.mCalendarRangeSelectListener.onCalendarRangeSelect(startCalendar, false);
             mDelegate.mCalendarRangeSelectListener.onCalendarRangeSelect(endCalendar, true);
         }
-        scrollToCalendar(startCalendar.getYear(), startCalendar.getMonth(), startCalendar.getDay());
+        scrollToCalendar(startCalendar.year, startCalendar.month, startCalendar.day);
     }
 
     /**
@@ -1184,9 +1184,9 @@ public class CalendarView extends FrameLayout {
             mDelegate.mCalendarSelectListener.onCalendarSelect(mDelegate.mSelectedCalendar, false);
         }
         if (mDelegate.mIndexCalendar != null) {
-            scrollToCalendar(mDelegate.mIndexCalendar.getYear(),
-                    mDelegate.mIndexCalendar.getMonth(),
-                    mDelegate.mIndexCalendar.getDay());
+            scrollToCalendar(mDelegate.mIndexCalendar.year,
+                    mDelegate.mIndexCalendar.month,
+                    mDelegate.mIndexCalendar.day);
         }
         update();
         super.onRestoreInstanceState(superData);

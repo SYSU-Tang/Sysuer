@@ -130,14 +130,14 @@ class GymDetailFragment : BaseFragment() {
 				}
 				1 -> {
 					fee.clear()
-					val feeTemplates = response.getJSONArray("data")
-					if (feeTemplates != null) feeTemplates.forEach(Consumer { e: Any? -> fee[(e as JSONObject).getString("UserRole")] = e })
-					this.me
+					response.getJSONArray("data")?.run {
+						forEach { fee[(it as JSONObject).getString("UserRole")] = it }
+					}
+					me
 				}
 				2 -> {
 					response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
-						val me = it.getJSONObject(0)
-						userId = me.getString("UserId")
+						userId = it.getJSONObject(0).getString("UserId")
 					}
 					getType(id)
 				}
@@ -147,9 +147,10 @@ class GymDetailFragment : BaseFragment() {
 					}
 				}
 				4 -> {
-					val result = response.getJSONObject("data")
-					if (result.getInteger("Code") == 200) config.toast(R.string.reserve_success)
-					else config.toast(result.getString("Result")) // 订单编号
+					with(response.getJSONObject("data")) {
+						if (getInteger("Code") == 200) config.toast(R.string.reserve_success)
+						else config.toast(getString("Result")) // 订单编号
+					}
 				}
 			}
 		})
@@ -218,7 +219,7 @@ class GymDetailFragment : BaseFragment() {
 	
 	/**
 	 * 生成 UUID
-	 * 
+	 *
 	 * @return 生成的 UUID
 	 */
 	fun generateUUID(): String {
@@ -227,7 +228,7 @@ class GymDetailFragment : BaseFragment() {
 	
 	/**
 	 * 生成 Token
-	 * 
+	 *
 	 * @param hash 哈希值
 	 * @return 生成的 Token
 	 */
@@ -238,7 +239,7 @@ class GymDetailFragment : BaseFragment() {
 	
 	/**
 	 * 计算 MD5 哈希值
-	 * 
+	 *
 	 * @param input 输入字符串
 	 * @return 计算得到的 MD5 哈希值（十六进制小写字符串）
 	 */
@@ -323,19 +324,12 @@ class GymDetailFragment : BaseFragment() {
 				.format(DateTimeFormatter.ofPattern(pattern))
 		}
 		
-		fun getDate(distanceDay: Int): String? {
-			return getDate(distanceDay, "M月dd日")
-		}
-		
-		fun getFormattedDate(distanceDay: Int): String? {
-			return getDate(distanceDay, "M-dd")
-		}
-		
-		fun getWeek(context: Context, distanceDay: Int): String? {
-			return context.resources.getStringArray(R.array.weeks)[LocalDate.now()
+		fun getDate(distanceDay: Int): String? = getDate(distanceDay, "M月dd日")
+		fun getFormattedDate(distanceDay: Int): String? = getDate(distanceDay, "M-dd")
+		fun getWeek(context: Context, distanceDay: Int): String? =
+			context.resources.getStringArray(R.array.weeks)[LocalDate.now()
 				.plusDays(distanceDay.toLong())
 				.getDayOfWeek().value - 1]
-		}
 	}
 	
 	class FieldAdapter : RecyclerAdapter<JSONObject>() {

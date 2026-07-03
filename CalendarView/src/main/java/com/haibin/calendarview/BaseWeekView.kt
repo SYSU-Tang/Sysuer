@@ -13,281 +13,191 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.haibin.calendarview;
+package com.haibin.calendarview
 
-import android.content.Context;
+import android.content.Context
 
 /**
  * 最基础周视图，因为日历UI采用热插拔实现，所以这里必须继承实现，达到UI一致即可
  * 可通过此扩展各种视图如：WeekView、RangeWeekView
  */
-
-public abstract class BaseWeekView extends BaseView {
-
-    public BaseWeekView(Context context) {
-        super(context);
-    }
-
-    /**
-     * 初始化周视图控件
-     *
-     * @param calendar calendar
-     */
-    final void setup(Calendar calendar) {
-        mItems = CalendarUtil.initCalendarForWeekView(calendar, mDelegate, mDelegate.getWeekStart());
-        addSchemesFromMap();
-        invalidate();
-    }
-
-
-    /**
-     * 记录已经选择的日期
-     *
-     * @param calendar calendar
-     */
-    final void setSelectedCalendar(Calendar calendar) {
-        if (mDelegate.getSelectMode() == CalendarViewDelegate.SELECT_MODE_SINGLE &&
-                !calendar.equals(mDelegate.mSelectedCalendar)) {
-            return;
-        }
-        mCurrentItem = mItems.indexOf(calendar);
-    }
-
-
-    /**
-     * 周视图切换点击默认位置
-     *
-     * @param calendar calendar
-     * @param isNotice isNotice
-     */
-    final void performClickCalendar(Calendar calendar, boolean isNotice) {
-
-        if (mParentLayout == null ||
-                mDelegate.mInnerListener == null ||
-                mItems == null || mItems.isEmpty()) {
-            return;
-        }
-
-        int week = CalendarUtil.getWeekViewIndexFromCalendar(calendar, mDelegate.getWeekStart());
-        if (mItems.contains(mDelegate.getCurrentDay())) {
-            week = CalendarUtil.getWeekViewIndexFromCalendar(mDelegate.getCurrentDay(), mDelegate.getWeekStart());
-        }
-
-        int curIndex = week;
-
-        Calendar currentCalendar = mItems.get(week);
-        if (mDelegate.getSelectMode() != CalendarViewDelegate.SELECT_MODE_DEFAULT) {
-            if (mItems.contains(mDelegate.mSelectedCalendar)) {
-                currentCalendar = mDelegate.mSelectedCalendar;
-            } else {
-                mCurrentItem = -1;
-            }
-        }
-
-        if (!isInRange(currentCalendar)) {
-            curIndex = getEdgeIndex(isMinRangeEdge(currentCalendar));
-            currentCalendar = mItems.get(curIndex);
-        }
-
-
-        currentCalendar.setCurrentDay(currentCalendar.equals(mDelegate.getCurrentDay()));
-        mDelegate.mInnerListener.onWeekDateSelected(currentCalendar, false);
-        int i = CalendarUtil.getWeekFromDayInMonth(currentCalendar, mDelegate.getWeekStart());
-        mParentLayout.updateSelectWeek(i);
-
-
-        if (mDelegate.mCalendarSelectListener != null
-                && isNotice
-                && mDelegate.getSelectMode() == CalendarViewDelegate.SELECT_MODE_DEFAULT) {
-            mDelegate.mCalendarSelectListener.onCalendarSelect(currentCalendar, false);
-        }
-
-        mParentLayout.updateContentViewTranslateY();
-        if (mDelegate.getSelectMode() == CalendarViewDelegate.SELECT_MODE_DEFAULT) {
-            mCurrentItem = curIndex;
-        }
-
-        if (!mDelegate.isShowYearSelectedLayout &&
-                mDelegate.mIndexCalendar != null &&
-                calendar.getYear() != mDelegate.mIndexCalendar.getYear() &&
-                mDelegate.mYearChangeListener != null) {
-            mDelegate.mYearChangeListener.onYearChange(mDelegate.mIndexCalendar.getYear());
-        }
-
-        mDelegate.mIndexCalendar = currentCalendar;
-        invalidate();
-    }
-
-    /**
-     * 是否是最小访问边界了
-     *
-     * @param calendar calendar
-     * @return 是否是最小访问边界了
-     */
-    final boolean isMinRangeEdge(Calendar calendar) {
-        java.util.Calendar c = java.util.Calendar.getInstance();
-        c.set(mDelegate.getMinYear(), mDelegate.getMinYearMonth() - 1, mDelegate.getMinYearDay());
-        long minTime = c.getTimeInMillis();
-        c.set(calendar.getYear(), calendar.getMonth() - 1, calendar.getDay());
-        long curTime = c.getTimeInMillis();
-        return curTime < minTime;
-    }
-
-    /**
-     * 获得边界范围内下标
-     *
-     * @param isMinEdge isMinEdge
-     * @return 获得边界范围内下标
-     */
-    final int getEdgeIndex(boolean isMinEdge) {
-        for (int i = 0; i < mItems.size(); i++) {
-            Calendar item = mItems.get(i);
-            boolean isInRange = isInRange(item);
-            if (isMinEdge && isInRange) {
-                return i;
-            } else if (!isMinEdge && !isInRange) {
-                return i - 1;
-            }
-        }
-        return isMinEdge ? 6 : 0;
-    }
-
-
-    /**
-     * 获取点击的日历
-     *
-     * @return 获取点击的日历
-     */
-    protected Calendar getIndex() {
-        if (mX <= mDelegate.getCalendarPaddingLeft() || mX >= getWidth() - mDelegate.getCalendarPaddingRight()) {
-            onClickCalendarPadding();
-            return null;
-        }
-
-        int indexX = (int) (mX - mDelegate.getCalendarPaddingLeft()) / mItemWidth;
-        if (indexX >= 7) {
-            indexX = 6;
-        }
-        int indexY = (int) mY / mItemHeight;
-        int position = indexY * 7 + indexX;// 选择项
-        if (position >= 0 && position < mItems.size())
-            return mItems.get(position);
-        return null;
-    }
-
-
-    private void onClickCalendarPadding() {
-        if (mDelegate.mClickCalendarPaddingListener == null) {
-            return;
-        }
-        Calendar calendar = null;
-        int indexX = (int) (mX - mDelegate.getCalendarPaddingLeft()) / mItemWidth;
-        if (indexX >= 7) {
-            indexX = 6;
-        }
-        int indexY = (int) mY / mItemHeight;
-        int position = indexY * 7 + indexX;// 选择项
-        if (position >= 0 && position < mItems.size()) {
-            calendar = mItems.get(position);
-        }
-        if (calendar == null) {
-            return;
-        }
-        mDelegate.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, false, calendar,
-                getClickCalendarPaddingObject(mX, mY, calendar));
-    }
-
-    /**
-     * /**
-     * 获取点击事件处的对象
-     *
-     * @param x                x
-     * @param y                y
-     * @param adjacentCalendar adjacent calendar
-     * @return obj can as null
-     */
-    @SuppressWarnings("unused")
-    protected Object getClickCalendarPaddingObject(float x, float y, Calendar adjacentCalendar) {
-        return null;
-    }
-
-
-    /**
-     * 更新显示模式
-     */
-    final void updateShowMode() {
-        invalidate();
-    }
-
-    /**
-     * 更新周起始
-     */
-    final void updateWeekStart() {
-
-        int position = (int) getTag();
-        Calendar calendar = CalendarUtil.getFirstCalendarStartWithMinCalendar(mDelegate.getMinYear(),
-                mDelegate.getMinYearMonth(),
-                mDelegate.getMinYearDay(),
-                position + 1,
-                mDelegate.getWeekStart());
-        setSelectedCalendar(mDelegate.mSelectedCalendar);
-        setup(calendar);
-    }
-
-    /**
-     * 更新当选模式
-     */
-    final void updateSingleSelect() {
-        if (!mItems.contains(mDelegate.mSelectedCalendar)) {
-            mCurrentItem = -1;
-            invalidate();
-        }
-    }
-
-    @Override
-    void updateCurrentDate() {
-        if (mItems == null)
-            return;
-        if (mItems.contains(mDelegate.getCurrentDay())) {
-            for (Calendar a : mItems) {//添加操作
-                a.setCurrentDay(false);
-            }
-            int index = mItems.indexOf(mDelegate.getCurrentDay());
-            mItems.get(index).setCurrentDay(true);
-        }
-        invalidate();
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(mItemHeight, MeasureSpec.EXACTLY);
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    /**
-     * 开始绘制前的钩子，这里做一些初始化的操作，每次绘制只调用一次，性能高效
-     * 没有需要可忽略不实现
-     * 例如：
-     * 1、需要绘制圆形标记事件背景，可以在这里计算半径
-     * 2、绘制矩形选中效果，也可以在这里计算矩形宽和高
-     */
-    protected void onPreviewHook() {
-        super.onPreviewHook();
-    }
-
-
-    /**
-     * 循环绘制开始的回调，不需要可忽略
-     * 绘制每个日历项的循环，用来计算baseLine、圆心坐标等都可以在这里实现
-     *
-     * @param x 日历Card x起点坐标
-     */
-    @SuppressWarnings("unused")
-    protected void onLoopStart(int x) {
-    }
-
-    @Override
-    protected void onDestroy() {
-
-    }
+abstract class BaseWeekView(context: Context) : BaseView(context) {
+	/**
+	 * 初始化周视图控件
+	 * 
+	 * @param calendar calendar
+	 */
+	fun setup(calendar: Calendar) {
+		mItems = CalendarUtil.initCalendarForWeekView(calendar, mDelegate, mDelegate!!.weekStart)
+		addSchemesFromMap()
+		invalidate()
+	}
+	
+	/**
+	 * 记录已经选择的日期
+	 * 
+	 * @param calendar calendar
+	 */
+	fun setSelectedCalendar(calendar: Calendar) {
+		if (mDelegate!!.selectMode != CalendarViewDelegate.SELECT_MODE_SINGLE || calendar == mDelegate!!.mSelectedCalendar) mCurrentItem = mItems!!.indexOf(calendar)
+	}
+	
+	/**
+	 * 周视图切换点击默认位置
+	 * 
+	 * @param calendar calendar
+	 * @param isNotice isNotice
+	 */
+	fun performClickCalendar(calendar: Calendar, isNotice: Boolean) {
+		if (mParentLayout != null && mDelegate!!.mInnerListener != null && mItems != null && !mItems!!.isEmpty()) {
+			val week = if (mItems!!.contains(mDelegate!!.currentDay)) CalendarUtil.getWeekViewIndexFromCalendar(mDelegate!!.currentDay, mDelegate!!.weekStart) else CalendarUtil.getWeekViewIndexFromCalendar(calendar, mDelegate!!.weekStart)
+			var curIndex = week
+			var currentCalendar = mItems!![week]
+			if (mDelegate!!.selectMode != CalendarViewDelegate.SELECT_MODE_DEFAULT) {
+				if (mItems!!.contains(mDelegate!!.mSelectedCalendar)) currentCalendar = mDelegate!!.mSelectedCalendar
+				else mCurrentItem = -1
+			}
+			
+			if (!isInRange(currentCalendar)) {
+				curIndex = getEdgeIndex(isMinRangeEdge(currentCalendar))
+				currentCalendar = mItems!![curIndex]
+			}
+			
+			currentCalendar.isCurrentDay = currentCalendar == mDelegate!!.currentDay
+			mDelegate!!.mInnerListener.onWeekDateSelected(currentCalendar, false)
+			mParentLayout!!.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(currentCalendar, mDelegate!!.weekStart))
+			
+			if (mDelegate!!.mCalendarSelectListener != null && isNotice && mDelegate!!.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) mDelegate!!.mCalendarSelectListener.onCalendarSelect(currentCalendar, false)
+			
+			mParentLayout!!.updateContentViewTranslateY()
+			if (mDelegate!!.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) mCurrentItem = curIndex
+			
+			if (!mDelegate!!.isShowYearSelectedLayout && mDelegate!!.mIndexCalendar != null && calendar.year != mDelegate!!.mIndexCalendar.year && mDelegate!!.mYearChangeListener != null) mDelegate!!.mYearChangeListener.onYearChange(mDelegate!!.mIndexCalendar.year)
+			
+			mDelegate!!.mIndexCalendar = currentCalendar
+			invalidate()
+		}
+	}
+	
+	/**
+	 * 是否是最小访问边界了
+	 * 
+	 * @param calendar calendar
+	 * @return 是否是最小访问边界了
+	 */
+	fun isMinRangeEdge(calendar: Calendar): Boolean = with(java.util.Calendar.getInstance()) {
+		set(mDelegate!!.minYear, mDelegate!!.minYearMonth - 1, mDelegate!!.minYearDay)
+		val minTime = getTimeInMillis()
+		set(calendar.year, calendar.month - 1, calendar.day)
+		val curTime = getTimeInMillis()
+		curTime < minTime
+	}
+	
+	/**
+	 * 获得边界范围内下标
+	 * 
+	 * @param isMinEdge isMinEdge
+	 * @return 获得边界范围内下标
+	 */
+	fun getEdgeIndex(isMinEdge: Boolean): Int {
+		mItems?.forEachIndexed { i, v ->
+			val isInRange = isInRange(v)
+			when {
+				isMinEdge && isInRange -> return i
+				!isMinEdge && !isInRange -> return i - 1
+			}
+		}
+		return if (isMinEdge) 6 else 0
+	}
+	
+	protected val index: Calendar?
+		/**
+		 * 获取点击的日历
+		 * 
+		 * @return 获取点击的日历
+		 */
+		get() {
+			if (mX <= mDelegate!!.calendarPaddingLeft || mX >= width - mDelegate!!.calendarPaddingRight) {
+				onClickCalendarPadding()
+				return null
+			}
+			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate!!.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
+				?: 6) // 选择项
+			return if (position >= 0 && position < mItems!!.size) mItems!![position]
+			else null
+		}
+	
+	private fun onClickCalendarPadding() {
+		if (mDelegate!!.mClickCalendarPaddingListener != null) {
+			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate!!.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
+				?: 6) // 选择项
+			if (position >= 0 && position < mItems!!.size) {
+				val calendar = mItems!![position]
+				mDelegate!!.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, false, calendar, getClickCalendarPaddingObject(mX, mY, calendar))
+			}
+		}
+	}
+	
+	/**
+	 * / **
+	 * 获取点击事件处的对象
+	 * 
+	 * @param x                x
+	 * @param y                y
+	 * @param adjacentCalendar adjacent calendar
+	 * @return obj can as null
+	 */
+	protected fun getClickCalendarPaddingObject(x: Float,
+	                                            y: Float,
+	                                            adjacentCalendar: Calendar?): Any? {
+		return null
+	}
+	
+	/**
+	 * 更新显示模式
+	 */
+	fun updateShowMode() {
+		invalidate()
+	}
+	
+	/**
+	 * 更新周起始
+	 */
+	fun updateWeekStart() {
+		val calendar = CalendarUtil.getFirstCalendarStartWithMinCalendar(mDelegate!!.minYear, mDelegate!!.minYearMonth, mDelegate!!.minYearDay, tag as Int + 1, mDelegate!!.weekStart)
+		setSelectedCalendar(mDelegate!!.mSelectedCalendar)
+		setup(calendar)
+	}
+	
+	/**
+	 * 更新当选模式
+	 */
+	fun updateSingleSelect() {
+		if (!mItems!!.contains(mDelegate!!.mSelectedCalendar)) {
+			mCurrentItem = -1
+			invalidate()
+		}
+	}
+	
+	override fun updateCurrentDate() {
+		if (mItems == null) return
+		if (mDelegate != null && mItems!!.contains(mDelegate!!.currentDay)) {
+			for (a in mItems) { //添加操作
+				a.isCurrentDay = false
+			}
+			val index = mItems!!.indexOf(mDelegate!!.currentDay)
+			mItems!![index].isCurrentDay = true
+		}
+		invalidate()
+	}
+	
+	override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+		super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(mItemHeight, MeasureSpec.EXACTLY))
+	}
+	
+	protected fun onLoopStart() {
+	}
+	
+	override fun onDestroy() {
+	}
 }

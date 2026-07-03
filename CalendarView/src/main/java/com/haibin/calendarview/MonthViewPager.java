@@ -63,8 +63,8 @@ public final class MonthViewPager extends ViewPager {
     void setup(CalendarViewDelegate delegate) {
         mDelegate = delegate;
 
-        updateMonthViewHeight(mDelegate.getCurrentDay().getYear(),
-                mDelegate.getCurrentDay().getMonth());
+        updateMonthViewHeight(mDelegate.getCurrentDay().year,
+                mDelegate.getCurrentDay().month);
 
         ViewGroup.LayoutParams params = getLayoutParams();
         params.height = mCurrentViewHeight;
@@ -109,26 +109,26 @@ public final class MonthViewPager extends ViewPager {
                 if (getVisibility() == VISIBLE) {
                     if (!mDelegate.isShowYearSelectedLayout &&
                             mDelegate.mIndexCalendar != null &&
-                            calendar.getYear() != mDelegate.mIndexCalendar.getYear() &&
+                            calendar.year != mDelegate.mIndexCalendar.year &&
                             mDelegate.mYearChangeListener != null) {
-                        mDelegate.mYearChangeListener.onYearChange(calendar.getYear());
+                        mDelegate.mYearChangeListener.onYearChange(calendar.year);
                     }
                     mDelegate.mIndexCalendar = calendar;
                 }
                 //月份改变事件
                 if (mDelegate.mMonthChangeListener != null) {
-                    mDelegate.mMonthChangeListener.onMonthChange(calendar.getYear(), calendar.getMonth());
+                    mDelegate.mMonthChangeListener.onMonthChange(calendar.year, calendar.month);
                 }
 
                 //周视图显示的时候就需要动态改变月视图高度
                 if (mWeekPager.getVisibility() == VISIBLE) {
-                    updateMonthViewHeight(calendar.getYear(), calendar.getMonth());
+                    updateMonthViewHeight(calendar.year, calendar.month);
                     return;
                 }
 
 
                 if (mDelegate.getSelectMode() == CalendarViewDelegate.SELECT_MODE_DEFAULT) {
-                    if (!calendar.isCurrentMonth()) {
+                    if (!calendar.isCurrentMonth) {
                         mDelegate.mSelectedCalendar = calendar;
                     } else {
                         mDelegate.mSelectedCalendar = CalendarUtil.getRangeEdgeCalendar(calendar, mDelegate);
@@ -165,7 +165,7 @@ public final class MonthViewPager extends ViewPager {
                     view.invalidate();
                 }
                 mWeekPager.updateSelected(mDelegate.mIndexCalendar, false);
-                updateMonthViewHeight(calendar.getYear(), calendar.getMonth());
+                updateMonthViewHeight(calendar.year, calendar.month);
                 isUsingScrollToCalendar = false;
             }
 
@@ -257,8 +257,8 @@ public final class MonthViewPager extends ViewPager {
         }
         isUsingScrollToCalendar = false;
         Calendar calendar = mDelegate.mSelectedCalendar;
-        int y = calendar.getYear() - mDelegate.getMinYear();
-        int position = 12 * y + calendar.getMonth() - mDelegate.getMinYearMonth();
+        int y = calendar.year - mDelegate.getMinYear();
+        int position = 12 * y + calendar.month - mDelegate.getMinYearMonth();
         setCurrentItem(position, false);
         BaseMonthView view = findViewWithTag(position);
         if (view != null) {
@@ -295,16 +295,16 @@ public final class MonthViewPager extends ViewPager {
     void scrollToCalendar(int year, int month, int day, boolean smoothScroll, boolean invokeListener) {
         isUsingScrollToCalendar = true;
         Calendar calendar = new Calendar();
-        calendar.setYear(year);
-        calendar.setMonth(month);
-        calendar.setDay(day);
-        calendar.setCurrentDay(calendar.equals(mDelegate.getCurrentDay()));
+        calendar.year = year;
+        calendar.month = month;
+        calendar.day = day;
+        calendar.isCurrentDay = calendar.equals(mDelegate.getCurrentDay());
         LunarCalendar.setupLunarCalendar(calendar);
         mDelegate.mIndexCalendar = calendar;
         mDelegate.mSelectedCalendar = calendar;
         mDelegate.updateSelectCalendarScheme();
-        int y = calendar.getYear() - mDelegate.getMinYear();
-        int position = 12 * y + calendar.getMonth() - mDelegate.getMinYearMonth();
+        int y = calendar.year - mDelegate.getMinYear();
+        int position = 12 * y + calendar.month - mDelegate.getMinYearMonth();
         int curItem = getCurrentItem();
         if (curItem == position) {
             isUsingScrollToCalendar = false;
@@ -339,8 +339,8 @@ public final class MonthViewPager extends ViewPager {
      */
     void scrollToCurrent(boolean smoothScroll) {
         isUsingScrollToCalendar = true;
-        int position = 12 * (mDelegate.getCurrentDay().getYear() - mDelegate.getMinYear()) +
-                mDelegate.getCurrentDay().getMonth() - mDelegate.getMinYearMonth();
+        int position = 12 * (mDelegate.getCurrentDay().year - mDelegate.getMinYear()) +
+                mDelegate.getCurrentDay().month - mDelegate.getMinYearMonth();
         int curItem = getCurrentItem();
         if (curItem == position) {
             isUsingScrollToCalendar = false;
@@ -448,7 +448,7 @@ public final class MonthViewPager extends ViewPager {
             mNextViewHeight = mCurrentViewHeight;
             mPreViewHeight = mCurrentViewHeight;
         } else {
-            updateMonthViewHeight(mDelegate.mSelectedCalendar.getYear(), mDelegate.mSelectedCalendar.getMonth());
+            updateMonthViewHeight(mDelegate.mSelectedCalendar.year, mDelegate.mSelectedCalendar.month);
         }
         ViewGroup.LayoutParams params = getLayoutParams();
         params.height = mCurrentViewHeight;
@@ -468,7 +468,7 @@ public final class MonthViewPager extends ViewPager {
             view.requestLayout();
         }
 
-        updateMonthViewHeight(mDelegate.mSelectedCalendar.getYear(), mDelegate.mSelectedCalendar.getMonth());
+        updateMonthViewHeight(mDelegate.mSelectedCalendar.year, mDelegate.mSelectedCalendar.month);
         ViewGroup.LayoutParams params = getLayoutParams();
         params.height = mCurrentViewHeight;
         setLayoutParams(params);
@@ -489,8 +489,8 @@ public final class MonthViewPager extends ViewPager {
             view.requestLayout();
         }
 
-        int year = mDelegate.mIndexCalendar.getYear();
-        int month = mDelegate.mIndexCalendar.getMonth();
+        int year = mDelegate.mIndexCalendar.year;
+        int month = mDelegate.mIndexCalendar.month;
         mCurrentViewHeight = CalendarUtil.getMonthViewHeight(year, month,
                 mDelegate.getCalendarItemHeight(), mDelegate.getWeekStart(),
                 mDelegate.getMonthViewShowMode());

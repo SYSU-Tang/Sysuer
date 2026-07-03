@@ -179,10 +179,10 @@ public final class WeekViewPager extends ViewPager {
     void scrollToCalendar(int year, int month, int day, boolean smoothScroll, boolean invokeListener) {
         isUsingScrollToCalendar = true;
         Calendar calendar = new Calendar();
-        calendar.setYear(year);
-        calendar.setMonth(month);
-        calendar.setDay(day);
-        calendar.setCurrentDay(calendar.equals(mDelegate.getCurrentDay()));
+        calendar.year = year;
+        calendar.month = month;
+        calendar.day = day;
+        calendar.isCurrentDay = calendar.equals(mDelegate.getCurrentDay());
         LunarCalendar.setupLunarCalendar(calendar);
         mDelegate.mIndexCalendar = calendar;
         mDelegate.mSelectedCalendar = calendar;

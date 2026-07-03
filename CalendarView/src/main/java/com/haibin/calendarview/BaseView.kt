@@ -13,409 +13,375 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.haibin.calendarview;
+package com.haibin.calendarview
 
-
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
-
-import androidx.annotation.Nullable;
-
-import java.util.List;
+import android.content.Context
+import android.graphics.Color
+import android.graphics.Paint
+import android.text.TextUtils
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.OnLongClickListener
+import kotlin.math.abs
 
 /**
  * 基本的日历View，派生出MonthView 和 WeekView
  * Created by huanghaibin on 2018/1/23.
  */
-
-public abstract class BaseView extends View implements View.OnClickListener, View.OnLongClickListener {
-
-    /**
-     * 字体大小
-     */
-    static final int TEXT_SIZE = 14;
-    /**
-     * 当前月份日期的笔
-     */
-    protected final Paint mCurMonthTextPaint = new Paint();
-
-    /**
-     * 其它月份日期颜色
-     */
-    protected final Paint mOtherMonthTextPaint = new Paint();
-
-    /**
-     * 当前月份农历文本颜色
-     */
-    protected final Paint mCurMonthLunarTextPaint = new Paint();
-
-    /**
-     * 当前月份农历文本颜色
-     */
-    protected final Paint mSelectedLunarTextPaint = new Paint();
-
-    /**
-     * 其它月份农历文本颜色
-     */
-    protected final Paint mOtherMonthLunarTextPaint = new Paint();
-
-    /**
-     * 其它月份农历文本颜色
-     */
-    protected final Paint mSchemeLunarTextPaint = new Paint();
-
-    /**
-     * 标记的日期背景颜色画笔
-     */
-    protected final Paint mSchemePaint = new Paint();
-
-    /**
-     * 被选择的日期背景色
-     */
-    protected final Paint mSelectedPaint = new Paint();
-
-    /**
-     * 标记的文本画笔
-     */
-    protected final Paint mSchemeTextPaint = new Paint();
-
-    /**
-     * 选中的文本画笔
-     */
-    protected final Paint mSelectTextPaint = new Paint();
-
-    /**
-     * 当前日期文本颜色画笔
-     */
-    protected final Paint mCurDayTextPaint = new Paint();
-
-    /**
-     * 当前日期文本颜色画笔
-     */
-    protected final Paint mCurDayLunarTextPaint = new Paint();
-    /**
-     * 日历项
-     */
-    protected List<Calendar> mItems;
-    /**
-     * 每一项的高度
-     */
-    protected int mItemHeight;
-    /**
-     * 每一项的宽度
-     */
-    protected int mItemWidth;
-    /**
-     * Text的基线
-     */
-    protected float mTextBaseLine;
-    /**
-     * 点击的x、y坐标
-     */
-    protected float mX, mY;
-    CalendarViewDelegate mDelegate;
-    /**
-     * 日历布局，需要在日历下方放自己的布局
-     */
-    CalendarLayout mParentLayout;
-    /**
-     * 是否点击
-     */
-    boolean isClick = true;
-    /**
-     * 当前点击项
-     */
-    int mCurrentItem = -1;
-
-    /**
-     * 周起始
-     */
-    int mWeekStartWidth;
-
-    public BaseView(Context context) {
-        this(context, null);
-    }
-
-    public BaseView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        initPaint(context);
-    }
-
-    /**
-     * 初始化配置
-     *
-     * @param context context
-     */
-    private void initPaint(Context context) {
-        mCurMonthTextPaint.setAntiAlias(true);
-        mCurMonthTextPaint.setTextAlign(Paint.Align.CENTER);
-        mCurMonthTextPaint.setColor(0xFF111111);
-        mCurMonthTextPaint.setFakeBoldText(true);
-        mCurMonthTextPaint.setTextSize(CalendarUtil.dipToPx(context, TEXT_SIZE));
-
-        mOtherMonthTextPaint.setAntiAlias(true);
-        mOtherMonthTextPaint.setTextAlign(Paint.Align.CENTER);
-        mOtherMonthTextPaint.setColor(0xFFe1e1e1);
-        mOtherMonthTextPaint.setFakeBoldText(true);
-        mOtherMonthTextPaint.setTextSize(CalendarUtil.dipToPx(context, TEXT_SIZE));
-
-        mCurMonthLunarTextPaint.setAntiAlias(true);
-        mCurMonthLunarTextPaint.setTextAlign(Paint.Align.CENTER);
-
-        mSelectedLunarTextPaint.setAntiAlias(true);
-        mSelectedLunarTextPaint.setTextAlign(Paint.Align.CENTER);
-
-        mOtherMonthLunarTextPaint.setAntiAlias(true);
-        mOtherMonthLunarTextPaint.setTextAlign(Paint.Align.CENTER);
-
-
-        mSchemeLunarTextPaint.setAntiAlias(true);
-        mSchemeLunarTextPaint.setTextAlign(Paint.Align.CENTER);
-
-        mSchemeTextPaint.setAntiAlias(true);
-        mSchemeTextPaint.setStyle(Paint.Style.FILL);
-        mSchemeTextPaint.setTextAlign(Paint.Align.CENTER);
-        mSchemeTextPaint.setColor(0xffed5353);
-        mSchemeTextPaint.setFakeBoldText(true);
-        mSchemeTextPaint.setTextSize(CalendarUtil.dipToPx(context, TEXT_SIZE));
-
-        mSelectTextPaint.setAntiAlias(true);
-        mSelectTextPaint.setStyle(Paint.Style.FILL);
-        mSelectTextPaint.setTextAlign(Paint.Align.CENTER);
-        mSelectTextPaint.setColor(0xffed5353);
-        mSelectTextPaint.setFakeBoldText(true);
-        mSelectTextPaint.setTextSize(CalendarUtil.dipToPx(context, TEXT_SIZE));
-
-        mSchemePaint.setAntiAlias(true);
-        mSchemePaint.setStyle(Paint.Style.FILL);
-        mSchemePaint.setStrokeWidth(2);
-        mSchemePaint.setColor(0xffefefef);
-
-        mCurDayTextPaint.setAntiAlias(true);
-        mCurDayTextPaint.setTextAlign(Paint.Align.CENTER);
-        mCurDayTextPaint.setColor(Color.RED);
-        mCurDayTextPaint.setFakeBoldText(true);
-        mCurDayTextPaint.setTextSize(CalendarUtil.dipToPx(context, TEXT_SIZE));
-
-        mCurDayLunarTextPaint.setAntiAlias(true);
-        mCurDayLunarTextPaint.setTextAlign(Paint.Align.CENTER);
-        mCurDayLunarTextPaint.setColor(Color.RED);
-        mCurDayLunarTextPaint.setFakeBoldText(true);
-        mCurDayLunarTextPaint.setTextSize(CalendarUtil.dipToPx(context, TEXT_SIZE));
-
-        mSelectedPaint.setAntiAlias(true);
-        mSelectedPaint.setStyle(Paint.Style.FILL);
-        mSelectedPaint.setStrokeWidth(2);
-
-        setOnClickListener(this);
-        setOnLongClickListener(this);
-    }
-
-    /**
-     * 初始化所有UI配置
-     *
-     * @param delegate delegate
-     */
-    final void setup(CalendarViewDelegate delegate) {
-        mDelegate = delegate;
-        mWeekStartWidth = mDelegate.getWeekStart();
-        updateStyle();
-        updateItemHeight();
-
-        initPaint();
-    }
-
-
-    final void updateStyle() {
-        if (mDelegate == null) {
-            return;
-        }
-        mCurDayTextPaint.setColor(mDelegate.getCurDayTextColor());
-        mCurDayLunarTextPaint.setColor(mDelegate.getCurDayLunarTextColor());
-        mCurMonthTextPaint.setColor(mDelegate.getCurrentMonthTextColor());
-        mOtherMonthTextPaint.setColor(mDelegate.getOtherMonthTextColor());
-        mCurMonthLunarTextPaint.setColor(mDelegate.getCurrentMonthLunarTextColor());
-        mSelectedLunarTextPaint.setColor(mDelegate.getSelectedLunarTextColor());
-        mSelectTextPaint.setColor(mDelegate.getSelectedTextColor());
-        mOtherMonthLunarTextPaint.setColor(mDelegate.getOtherMonthLunarTextColor());
-        mSchemeLunarTextPaint.setColor(mDelegate.getSchemeLunarTextColor());
-        mSchemePaint.setColor(mDelegate.getSchemeThemeColor());
-        mSchemeTextPaint.setColor(mDelegate.getSchemeTextColor());
-        mCurMonthTextPaint.setTextSize(mDelegate.getDayTextSize());
-        mOtherMonthTextPaint.setTextSize(mDelegate.getDayTextSize());
-        mCurDayTextPaint.setTextSize(mDelegate.getDayTextSize());
-        mSchemeTextPaint.setTextSize(mDelegate.getDayTextSize());
-        mSelectTextPaint.setTextSize(mDelegate.getDayTextSize());
-
-        mCurMonthLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        mSelectedLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        mCurDayLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        mOtherMonthLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-        mSchemeLunarTextPaint.setTextSize(mDelegate.getLunarTextSize());
-
-        mSelectedPaint.setStyle(Paint.Style.FILL);
-        mSelectedPaint.setColor(mDelegate.getSelectedThemeColor());
-    }
-
-    @SuppressWarnings("IntegerDivisionInFloatingPointContext")
-    void updateItemHeight() {
-        mItemHeight = mDelegate.getCalendarItemHeight();
-        Paint.FontMetrics metrics = mCurMonthTextPaint.getFontMetrics();
-        mTextBaseLine = mItemHeight / 2 - metrics.descent + (metrics.bottom - metrics.top) / 2;
-    }
-
-
-    /**
-     * 移除事件
-     */
-    final void removeSchemes() {
-        for (Calendar a : mItems) {
-            a.setScheme("");
-            a.setSchemeColor(0);
-            a.setSchemes(null);
-        }
-    }
-
-    /**
-     * 添加事件标记，来自Map
-     */
-    final void addSchemesFromMap() {
-        if (mDelegate.mSchemeDatesMap == null || mDelegate.mSchemeDatesMap.isEmpty()) {
-            return;
-        }
-        for (Calendar a : mItems) {
-            if (mDelegate.mSchemeDatesMap.containsKey(a.toString())) {
-                Calendar d = mDelegate.mSchemeDatesMap.get(a.toString());
-                if (d == null) {
-                    continue;
-                }
-                a.setScheme(TextUtils.isEmpty(d.getScheme()) ? mDelegate.getSchemeText() : d.getScheme());
-                a.setSchemeColor(d.getSchemeColor());
-                a.setSchemes(d.getSchemes());
-            } else {
-                a.setScheme("");
-                a.setSchemeColor(0);
-                a.setSchemes(null);
-            }
-        }
-    }
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getPointerCount() > 1)
-            return false;
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mX = event.getX();
-                mY = event.getY();
-                isClick = true;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float mDY;
-                if (isClick) {
-                    mDY = event.getY() - mY;
-                    isClick = Math.abs(mDY) <= 50;
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                mX = event.getX();
-                mY = event.getY();
-                break;
-        }
-        return super.onTouchEvent(event);
-    }
-
-
-    /**
-     * 开始绘制前的钩子，这里做一些初始化的操作，每次绘制只调用一次，性能高效
-     * 没有需要可忽略不实现
-     * 例如：
-     * 1、需要绘制圆形标记事件背景，可以在这里计算半径
-     * 2、绘制矩形选中效果，也可以在这里计算矩形宽和高
-     */
-    protected void onPreviewHook() {
-    }
-
-    /**
-     * 是否是选中的
-     *
-     * @param calendar calendar
-     * @return true or false
-     */
-    protected boolean isSelected(Calendar calendar) {
-        return mItems != null && mItems.indexOf(calendar) == mCurrentItem;
-    }
-
-    /**
-     * 更新事件
-     */
-    final void update() {
-        if (mDelegate.mSchemeDatesMap == null || mDelegate.mSchemeDatesMap.isEmpty()) {//清空操作
-            removeSchemes();
-            invalidate();
-            return;
-        }
-        addSchemesFromMap();
-        invalidate();
-    }
-
-
-    /**
-     * 是否拦截日期，此设置续设置mCalendarInterceptListener
-     *
-     * @param calendar calendar
-     * @return 是否拦截日期
-     */
-    protected final boolean onCalendarIntercept(Calendar calendar) {
-        return mDelegate.mCalendarInterceptListener != null &&
-                mDelegate.mCalendarInterceptListener.onCalendarIntercept(calendar);
-    }
-
-    /**
-     * 是否在日期范围内
-     *
-     * @param calendar calendar
-     * @return 是否在日期范围内
-     */
-    protected final boolean isInRange(Calendar calendar) {
-        return mDelegate != null && CalendarUtil.isCalendarInRange(calendar, mDelegate);
-    }
-
-    /**
-     * 跟新当前日期
-     */
-    abstract void updateCurrentDate();
-
-    /**
-     * 销毁
-     */
-    protected abstract void onDestroy();
-
-    protected int getWeekStartWith() {
-        return mDelegate != null ? mDelegate.getWeekStart() : CalendarViewDelegate.WEEK_START_WITH_SUN;
-    }
-
-
-    protected int getCalendarPaddingLeft() {
-        return mDelegate != null ? mDelegate.getCalendarPaddingLeft() : 0;
-    }
-
-
-    protected int getCalendarPaddingRight() {
-        return mDelegate != null ? mDelegate.getCalendarPaddingRight() : 0;
-    }
-
-
-    /**
-     * 初始化画笔相关
-     */
-    protected void initPaint() {
-
-    }
+abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
+	View(context, attrs), View.OnClickListener, OnLongClickListener {
+	/**
+	 * 当前月份日期的笔
+	 */
+	protected val mCurMonthTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+		setColor(-0xeeeeef)
+		isFakeBoldText = true
+		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
+	}
+	
+	/**
+	 * 其它月份日期颜色
+	 */
+	protected val mOtherMonthTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+		setColor(-0x1e1e1f)
+		isFakeBoldText = true
+		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
+	}
+	
+	/**
+	 * 当前月份农历文本颜色
+	 */
+	protected val mCurMonthLunarTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+	}
+	
+	/**
+	 * 当前月份农历文本颜色
+	 */
+	protected val mSelectedLunarTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+	}
+	
+	/**
+	 * 其它月份农历文本颜色
+	 */
+	protected val mOtherMonthLunarTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+	}
+	
+	/**
+	 * 其它月份农历文本颜色
+	 */
+	protected val mSchemeLunarTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+	}
+	
+	/**
+	 * 标记的日期背景颜色画笔
+	 */
+	@JvmField protected val mSchemePaint: Paint = Paint().apply {
+		isAntiAlias = true
+		style = Paint.Style.FILL
+		strokeWidth = 2f
+		setColor(-0x101011)
+	}
+	
+	/**
+	 * 被选择的日期背景色
+	 */
+	protected val mSelectedPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		style = Paint.Style.FILL
+		strokeWidth = 2f
+	}
+	
+	/**
+	 * 标记的文本画笔
+	 */
+	protected val mSchemeTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		style = Paint.Style.FILL
+		textAlign = Paint.Align.CENTER
+		setColor(-0x12acad)
+		isFakeBoldText = true
+		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
+	}
+	
+	/**
+	 * 选中的文本画笔
+	 */
+	protected val mSelectTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		style = Paint.Style.FILL
+		textAlign = Paint.Align.CENTER
+		setColor(-0x12acad)
+		isFakeBoldText = true
+		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
+	}
+	
+	/**
+	 * 当前日期文本颜色画笔
+	 */
+	protected val mCurDayTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+		setColor(Color.RED)
+		isFakeBoldText = true
+		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
+	}
+	
+	/**
+	 * 当前日期文本颜色画笔
+	 */
+	protected val mCurDayLunarTextPaint: Paint = Paint().apply {
+		isAntiAlias = true
+		textAlign = Paint.Align.CENTER
+		setColor(Color.RED)
+		isFakeBoldText = true
+		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
+	}
+	
+	/**
+	 * 日历项
+	 */
+	@JvmField var mItems: MutableList<Calendar>? = null
+	
+	/**
+	 * 每一项的高度
+	 */
+	@JvmField protected var mItemHeight: Int = 0
+	
+	/**
+	 * 每一项的宽度
+	 */
+	@JvmField protected var mItemWidth: Int = 0
+	
+	/**
+	 * Text的基线
+	 */
+	protected var mTextBaseLine: Float = 0f
+	
+	/**
+	 * 点击的x、y坐标
+	 */
+	@JvmField protected var mX: Float = 0f
+	@JvmField protected var mY: Float = 0f
+	@JvmField var mDelegate: CalendarViewDelegate? = null
+	
+	/**
+	 * 日历布局，需要在日历下方放自己的布局
+	 */
+	@JvmField var mParentLayout: CalendarLayout? = null
+	
+	/**
+	 * 是否点击
+	 */
+	@JvmField var isClick: Boolean = true
+	
+	/**
+	 * 当前点击项
+	 */
+	@JvmField var mCurrentItem: Int = -1
+	
+	/**
+	 * 周起始
+	 */
+	var mWeekStartWidth: Int = 0
+	
+	init {
+		setOnClickListener(this)
+		setOnLongClickListener(this)
+	}
+	
+	/**
+	 * 初始化所有UI配置
+	 * 
+	 * @param delegate delegate
+	 */
+	fun setup(delegate: CalendarViewDelegate?) {
+		mDelegate = delegate
+		mWeekStartWidth = mDelegate!!.weekStart
+		updateStyle()
+		updateItemHeight()
+		initPaint()
+	}
+	
+	fun updateStyle() {
+		if (mDelegate != null) {
+			mCurDayTextPaint.setColor(mDelegate!!.curDayTextColor)
+			mCurDayLunarTextPaint.setColor(mDelegate!!.curDayLunarTextColor)
+			mCurMonthTextPaint.setColor(mDelegate!!.currentMonthTextColor)
+			mOtherMonthTextPaint.setColor(mDelegate!!.otherMonthTextColor)
+			mCurMonthLunarTextPaint.setColor(mDelegate!!.currentMonthLunarTextColor)
+			mSelectedLunarTextPaint.setColor(mDelegate!!.selectedLunarTextColor)
+			mSelectTextPaint.setColor(mDelegate!!.selectedTextColor)
+			mOtherMonthLunarTextPaint.setColor(mDelegate!!.otherMonthLunarTextColor)
+			mSchemeLunarTextPaint.setColor(mDelegate!!.schemeLunarTextColor)
+			mSchemePaint.setColor(mDelegate!!.schemeThemeColor)
+			mSchemeTextPaint.setColor(mDelegate!!.schemeTextColor)
+			mCurMonthTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
+			mOtherMonthTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
+			mCurDayTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
+			mSchemeTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
+			mSelectTextPaint.textSize = mDelegate!!.dayTextSize.toFloat()
+			
+			mCurMonthLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
+			mSelectedLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
+			mCurDayLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
+			mOtherMonthLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
+			mSchemeLunarTextPaint.textSize = mDelegate!!.lunarTextSize.toFloat()
+			
+			mSelectedPaint.style = Paint.Style.FILL
+			mSelectedPaint.setColor(mDelegate!!.selectedThemeColor)
+		}
+	}
+	
+	open fun updateItemHeight() {
+		mItemHeight = mDelegate!!.calendarItemHeight
+		val metrics = mCurMonthTextPaint.getFontMetrics()
+		mTextBaseLine = mItemHeight / 2 - metrics.descent + (metrics.bottom - metrics.top) / 2
+	}
+	
+	/**
+	 * 移除事件
+	 */
+	fun removeSchemes() {
+		mItems!!.forEach {
+			it.scheme = ""
+			it.schemeColor = 0
+			it.schemes = null
+		}
+	}
+	
+	/**
+	 * 添加事件标记，来自Map
+	 */
+	fun addSchemesFromMap() {
+		if (mDelegate!!.mSchemeDatesMap != null && !mDelegate!!.mSchemeDatesMap.isEmpty()) {
+			mItems!!.forEach {
+				if (mDelegate!!.mSchemeDatesMap.containsKey("$it")) {
+					val d = mDelegate!!.mSchemeDatesMap["$it"] ?: return@forEach
+					it.scheme = if (TextUtils.isEmpty(d.scheme)) mDelegate!!.schemeText else d.scheme
+					it.schemeColor = d.schemeColor
+					it.schemes = d.schemes
+				}
+				else {
+					it.scheme = ""
+					it.schemeColor = 0
+					it.schemes = null
+				}
+			}
+		}
+	}
+	
+	override fun onTouchEvent(event: MotionEvent): Boolean {
+		if (event.pointerCount > 1) return false
+		when (event.action) {
+			MotionEvent.ACTION_DOWN -> {
+				mX = event.x
+				mY = event.y
+				isClick = true
+			}
+			MotionEvent.ACTION_MOVE -> {
+				val mDY: Float
+				if (isClick) {
+					mDY = event.y - mY
+					isClick = abs(mDY) <= 50
+				}
+			}
+			MotionEvent.ACTION_UP -> {
+				mX = event.x
+				mY = event.y
+			}
+		}
+		return super.onTouchEvent(event)
+	}
+	
+	/**
+	 * 开始绘制前的钩子，这里做一些初始化的操作，每次绘制只调用一次，性能高效
+	 * 没有需要可忽略不实现
+	 * 例如：
+	 * 1、需要绘制圆形标记事件背景，可以在这里计算半径
+	 * 2、绘制矩形选中效果，也可以在这里计算矩形宽和高
+	 */
+	protected open fun onPreviewHook() {
+	}
+	
+	/**
+	 * 是否是选中的
+	 *
+	 * @param calendar calendar
+	 * @return true or false
+	 */
+	protected fun isSelected(calendar: Calendar?): Boolean =
+		mItems != null && mItems!!.indexOf(calendar!!) == mCurrentItem
+	
+	/**
+	 * 更新事件
+	 */
+	fun update() {
+		if (mDelegate!!.mSchemeDatesMap == null || mDelegate!!.mSchemeDatesMap.isEmpty()) { //清空操作
+			removeSchemes()
+			invalidate()
+			return
+		}
+		addSchemesFromMap()
+		invalidate()
+	}
+	
+	/**
+	 * 是否拦截日期，此设置续设置mCalendarInterceptListener
+	 *
+	 * @param calendar calendar
+	 * @return 是否拦截日期
+	 */
+	protected fun onCalendarIntercept(calendar: Calendar?): Boolean =
+		mDelegate!!.mCalendarInterceptListener != null && mDelegate!!.mCalendarInterceptListener.onCalendarIntercept(calendar)
+	
+	/**
+	 * 是否在日期范围内
+	 *
+	 * @param calendar calendar
+	 * @return 是否在日期范围内
+	 */
+	protected fun isInRange(calendar: Calendar?): Boolean =
+		mDelegate != null && CalendarUtil.isCalendarInRange(calendar, mDelegate)
+	
+	/**
+	 * 跟新当前日期
+	 */
+	abstract fun updateCurrentDate()
+	
+	/**
+	 * 销毁
+	 */
+	abstract fun onDestroy()
+	protected val weekStartWith: Int
+		get() = if (mDelegate != null) mDelegate!!.weekStart else CalendarViewDelegate.WEEK_START_WITH_SUN
+	protected val calendarPaddingLeft: Int
+		get() = if (mDelegate != null) mDelegate!!.calendarPaddingLeft else 0
+	protected val calendarPaddingRight: Int
+		get() = if (mDelegate != null) mDelegate!!.calendarPaddingRight else 0
+	
+	/**
+	 * 初始化画笔相关
+	 */
+	protected fun initPaint() {
+	}
+	
+	companion object {
+		/**
+		 * 字体大小
+		 */
+		const val TEXT_SIZE: Int = 14
+	}
 }
