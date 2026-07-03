@@ -1,63 +1,55 @@
-package com.sysu.edu.browser;
+package com.sysu.edu.browser
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
+import java.util.regex.Pattern
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Pattern;
-
-public class JavaScript {
-    private JSONArray jsList = new JSONArray();
-    
-    public JavaScript(String jsList) {
-        this.jsList = JSONArray.parse(jsList);
-    }
-    
-    public JavaScript() {
-    }
-    
-    public void add(String title, String description, String[] matches, String script) {
-        jsList.add(JSONObject.parse(String.format("{\"title\": \"%s\",\"description\": \"%s\",\"matches\": %s,\"script\": \"%s\"}", title, description, Arrays.toString(matches), script)));
-    }
-    
-    public void add(JSONObject item) {
-        jsList.add(item);
-    }
-    
-    public ArrayList<JSONObject> searchJS(String key) {
-        ArrayList<JSONObject> list = new ArrayList<>();
-        jsList.forEach(a -> {
-            JSONObject item = (JSONObject) a;
-            if (item.containsKey("state") && item.getInteger("state") == 1) {
-                for (Object e : item.getJSONArray("matches")) {
-                    if (Pattern.compile((String) e).matcher(key).find()) {
-                        list.add(item);
-                        break;
-                    }
-                }
-            }
-        });
-        return list;
-    }
-    
-    public ArrayList<JSONObject> searchJS(String key, boolean isActive) {
-        ArrayList<JSONObject> list = new ArrayList<>();
-        jsList.forEach(a -> {
-            JSONObject item = (JSONObject) a;
-            if (item.containsKey("state") && item.getInteger("state") == 1 && isActive && item.containsKey("run") && item.getInteger("run") == 1) {
-                for (Object e : item.getJSONArray("matches")) {
-                    if (Pattern.compile((String) e).matcher(key).find()) {
-                        list.add(item);
-                        break;
-                    }
-                }
-            }
-        });
-        return list;
-    }
-    
-    public void clear() {
-        jsList.clear();
-    }
+class JavaScript {
+	private var jsList = JSONArray()
+	
+	constructor()
+	
+	fun add(title: String, description: String?, matches: Array<String?>?, script: String?) {
+		jsList.add(JSONObject.parse("{\"title\": \"$title\",\"description\": \"$description\",\"matches\": ${matches.contentToString()},\"script\": \"$script\"}"))
+	}
+	
+	fun add(item: JSONObject?) {
+		jsList.add(item)
+	}
+	
+	fun searchJS(key: String): MutableList<JSONObject?> {
+		val list = mutableListOf<JSONObject?>()
+		jsList.forEach { a: Any? ->
+			val item = a as JSONObject
+			if (item.containsKey("state") && item.getInteger("state") == 1) {
+				for (e in item.getJSONArray("matches")) {
+					if (Pattern.compile(e as String).matcher(key).find()) {
+						list.add(item)
+						break
+					}
+				}
+			}
+		}
+		return list
+	}
+	
+	fun searchJS(key: String, isActive: Boolean): ArrayList<JSONObject?> {
+		val list = ArrayList<JSONObject?>()
+		jsList.forEach { a: Any? ->
+			val item = a as JSONObject
+			if (item.containsKey("state") && item.getInteger("state") == 1 && isActive && item.containsKey("run") && item.getInteger("run") == 1) {
+				for (e in item.getJSONArray("matches")) {
+					if (Pattern.compile(e as String).matcher(key).find()) {
+						list.add(item)
+						break
+					}
+				}
+			}
+		}
+		return list
+	}
+	
+	fun clear() {
+		jsList.clear()
+	}
 }

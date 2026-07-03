@@ -245,7 +245,8 @@ class DashboardFragment : BaseFragment() {
 									binding.toggle2.clearChecked()
 									binding.toggle2.check(if ("19" == week) R.id.week_19 else R.id.week_18)
 									val weekExams = if ("19" == week) week19Exams else week18Exams
-									val index = weekExams.indexOfFirst { (it as JSONObject).getString("status") == "in" }
+									var index = weekExams.indexOfFirst { (it as JSONObject).getString("status") == "in" }
+									index = if (index < 0) weekExams.indexOfFirst { (it as JSONObject).getString("status") == "after" } else index
 									binding.examList.scrollToPosition(if (index < 0 || index >= weekExams.size) 0 else index)
 								}
 								3 -> {

@@ -38,5 +38,5 @@ class ButtonAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
 }
 
 interface OnBindListener {
-	fun onBind(button: Button?, position: Int)
+	fun onBind(button: Button, position: Int)
 }

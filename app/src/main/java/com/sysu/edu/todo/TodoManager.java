@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.NumberPicker;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.FragmentActivity;
@@ -313,7 +314,7 @@ public class TodoManager {
                     todoAdapter.add(todoDetail);
                     todoAdapter.setListener(new AdapterListener() {
                         @Override
-                        public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
+                        public void onBind(@NonNull RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, @NonNull RecyclerView.ViewHolder holder, int position) {
                             ItemTodoBinding binding = ItemTodoBinding.bind(holder.itemView);
                             binding.delete.setOnClickListener(_ -> {
                                 todoDB.getWritableDatabase().delete("todos", "id=?", new String[]{String.valueOf(todoDetail.id.getValue())});
@@ -331,7 +332,7 @@ public class TodoManager {
                         }
                         
                         @Override
-                        public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
+                        public void onCreate(@NonNull RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
                         
                         }
                     });

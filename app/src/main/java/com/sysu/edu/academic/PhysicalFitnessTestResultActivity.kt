@@ -69,7 +69,7 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 										.setListener(object : AdapterListener {
 											override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 											                    holder: RecyclerView.ViewHolder,
-											                    p: Int) {
+											                    position: Int) {
 												holder.itemView.setOnClickListener {
 													if (adapter.itemCount == 1 && what != 2) {
 														if (what == 0) getDetail(urls[position])

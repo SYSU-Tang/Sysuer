@@ -10,7 +10,6 @@ import java.util.Set;
 
 public class PreferenceViewModel extends ViewModel {
     
-    
     private final static String Theme = "theme";
     private final static String Home = "home";
     private final static String Language = "language";

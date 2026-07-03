@@ -165,10 +165,10 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 						.setListener(object : AdapterListener {
 							override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 							                    holder: RecyclerView.ViewHolder,
-							                    pos: Int) {
+							                    position: Int) {
 								holder.itemView.setOnClickListener {
 									if (position == 1) {
-										if (pos == 0) {
+										if (position == 0) {
 											val menu = PopupMenu(requireContext(), holder.itemView)
 											mutableListOf<String?>("离校", "留校").forEach { i: String? ->
 												menu.menu.add(i)
@@ -182,13 +182,13 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 											menu.show()
 										}
 										if (adapter.itemCount == 6) {
-											when (pos) {
+											when (position) {
 												3, 4 -> {
 													val menu = PopupMenu(requireContext(), holder.itemView)
-													(if (pos == 4) transportation else destination)!!.forEach { e: Any? ->
+													(if (position == 4) transportation else destination)!!.forEach { e: Any? ->
 														menu.menu.add((e as JSONObject).getString("label"))
 															.setOnMenuItemClickListener {
-																leave[pos] = e.getString("label")
+																leave[position] = e.getString("label")
 																(adapter as TwoColumnsAdapter).setValue(leave)
 																true
 															}
@@ -197,32 +197,32 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 												}
 												2, 1 -> {
 													val calendar = MaterialDatePicker.Builder.datePicker()
-														.setSelection(if (pos == 2) if (returnDate.getValue() != null) returnDate.getValue() else MaterialDatePicker.todayInUtcMilliseconds() else if (leaveDate.getValue() != null) leaveDate.getValue() else MaterialDatePicker.todayInUtcMilliseconds())
+														.setSelection(if (position == 2) if (returnDate.getValue() != null) returnDate.getValue() else MaterialDatePicker.todayInUtcMilliseconds() else if (leaveDate.getValue() != null) leaveDate.getValue() else MaterialDatePicker.todayInUtcMilliseconds())
 														.build()
 													calendar.show(getParentFragmentManager(), "calendar")
 													calendar.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { aLong: Long? ->
-														leave[pos] = calendar.headerText
+														leave[position] = calendar.headerText
 														(adapter as TwoColumnsAdapter).setValue(leave)
-														(if (pos == 2) returnDate else leaveDate).value = aLong
+														(if (position == 2) returnDate else leaveDate).value = aLong
 													})
 												}
 												5 -> {
 													regionDialog.show()
 													dialogRegionBinding.confirm.setOnClickListener {
-														leave[pos] = countryAdapter.result + " " + provinceAdapter.result + " " + cityAdapter.result
+														leave[position] = countryAdapter.result + " " + provinceAdapter.result + " " + cityAdapter.result
 														(adapter as TwoColumnsAdapter).setValue(leave)
 														regionDialog.dismiss()
 													}
 												}
 											}
 										} else if (adapter.itemCount == 2) {
-											if (pos == 1) {
+											if (position == 1) {
 												val menu = PopupMenu(requireContext(), holder.itemView)
 												resources.getStringArray(R.array.registration_info_keys)
 													.forEach { i: String? ->
 														menu.menu.add(i)
 															.setOnMenuItemClickListener {
-																stay[pos] = i
+																stay[position] = i
 																(adapter as TwoColumnsAdapter).setValue(stay)
 																true
 															}

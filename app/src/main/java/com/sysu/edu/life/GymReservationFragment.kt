@@ -88,8 +88,8 @@ class GymReservationFragment : BaseFragment() {
 					val buttonAdapter = ButtonAdapter().apply {
 						add(getString(R.string.cancel_reservation))
 						setListener(object : OnBindListener {
-							override fun onBind(button: Button?, position: Int) {
-								button?.setOnClickListener { deleteReservation(item.getString("Identity")) }
+							override fun onBind(button: Button, position: Int) {
+								button.setOnClickListener { deleteReservation(item.getString("Identity")) }
 								regetReservation()
 							}
 						})

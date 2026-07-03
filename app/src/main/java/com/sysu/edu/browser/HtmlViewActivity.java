@@ -48,15 +48,6 @@ public class HtmlViewActivity extends BaseActivity {
         cookie.setAcceptCookie(true);
         cookie.setAcceptThirdPartyCookies(web, true);
         cookie.acceptThirdPartyCookies(web);
-
-//        @NonNull Observable<String> d = Observable.fromCallable(() -> {
-//            // 解码 Base64
-//            File file = new File(getCacheDir(), String.valueOf(System.currentTimeMillis()));
-//            try (FileOutputStream fos = new FileOutputStream(file)) {
-//                fos.write("".getBytes());
-//            }
-//            return file.getAbsolutePath();
-//        }).subscribeOn(Schedulers.io());
         RxDataStore<Preferences> dataStore = new RxPreferenceDataStoreBuilder(
                 getApplicationContext(),
                 "html_view"

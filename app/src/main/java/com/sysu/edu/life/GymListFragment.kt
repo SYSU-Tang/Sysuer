@@ -48,7 +48,7 @@ class GymListFragment : BaseFragment() {
 				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
-					holder?.let { ItemFieldBinding.bind(it.itemView) }.apply {
+					holder.let { ItemFieldBinding.bind(it.itemView) }.apply {
 						get(position)?.getString("ImageUrl")?.takeIf { it.isNotEmpty() }?.let {
 							Glide.with(requireContext())
 								.load(GlideUrl(it, LazyHeaders.Builder()
@@ -59,7 +59,7 @@ class GymListFragment : BaseFragment() {
 									.build()))
 								.skipMemoryCache(true)
 								.diskCacheStrategy(DiskCacheStrategy.NONE)
-								.into(this?.image!!)
+								.into(this.image!!)
 						}
 					}
 				}
