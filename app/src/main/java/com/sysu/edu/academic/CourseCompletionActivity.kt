@@ -58,7 +58,7 @@ class CourseCompletionActivity : BaseActivity() {
 						override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 						                    holder: RecyclerView.ViewHolder,
 						                    position: Int) {
-							val item = (adapter as StaggeredAdapter).getValues(position)
+							val item = (adapter as StaggeredAdapter).values[position]!!
 							holder.itemView.findViewById<LinearProgressIndicator>(R.id.progress)
 								.apply {
 									max = item[3]!!.toFloat().toInt()

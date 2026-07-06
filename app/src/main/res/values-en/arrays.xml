@@ -142,4 +142,11 @@
         <item>Important but Not Urgent</item>
         <item>Important and Urgent</item>
     </string-array>
+    <string-array name="payment_key">
+        <item>Pending Payment</item>
+        <item>Selected Payment</item>
+        <item>Payment Status</item>
+        <item>Payment Record</item>
+        <item>Refund Record</item>
+    </string-array>
 </resources>

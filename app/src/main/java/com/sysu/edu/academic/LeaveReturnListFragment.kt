@@ -40,8 +40,7 @@ class LeaveReturnListFragment : StaggeredFragment() {
 			if (response.getInteger("code") == 200) {
 				clear()
 				response.getJSONArray("data").forEach(Consumer { e: Any? ->
-					add((e as JSONObject).getString("gzmc"), if (e.getInteger("gzztm") == 1) R.drawable.uncheck else R.drawable.check, resources.getStringArray(R.array.registration_keys)
-						.toList(), extractValue(e, arrayOf("blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt")))
+					add((e as JSONObject).getString("gzmc"), if (e.getInteger("gzztm") == 1) R.drawable.uncheck else R.drawable.check, resources.getStringArray(R.array.registration_keys).toMutableList(), extractValue(e, arrayOf("blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt")))
 				})
 				setListener(object : AdapterListener {
 					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,

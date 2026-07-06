@@ -68,7 +68,7 @@ class SchoolBusActivity : BaseActivity() {
 			val key = if (b == true) "workDay" else "holiday"
 			data?.run {
 				if (getJSONArray(key).isEmpty()) IntStream.range(0, pager2Adapter.itemCount)
-					.forEach { j: Int -> (pager2Adapter.get(j) as StaggeredFragment).clear() }
+					.forEach { j -> (pager2Adapter.get(j) as StaggeredFragment).clear() }
 				else {
 					var i = 0
 					getJSONArray(key).forEach { item: Any? ->
@@ -77,15 +77,16 @@ class SchoolBusActivity : BaseActivity() {
 						if (pager2Adapter.itemCount > i) {
 							fragment = pager2Adapter.get(i) as StaggeredFragment
 							fragment.clear()
-						} else {
+						}
+						else {
 							routes.add(item.getString("drivingDirectionName"))
 							fragment = StaggeredFragment()
 							pager2Adapter.add(fragment)
 						}
 						i++
-						fragment.add(getString(R.string.route_detail), R.drawable.bus, listOf(getString(R.string.route), getString(R.string.start), getString(R.string.end)), extractValue(item, arrayOf("drivingDirectionName", "startStation", "endStation")))
+						fragment.add(getString(R.string.route_detail), R.drawable.bus, CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.route,R.string.start,R.string.end)), extractValue(item, arrayOf("drivingDirectionName", "startStation", "endStation")))
 						item.getJSONArray("schoolBusShuttleMomentList").forEach {
-							fragment.add((it as JSONObject).getString("time"), R.drawable.bus, listOf(getString(R.string.passenger), getString(R.string.vehicles), getString(R.string.time), getString(R.string.route)), extractValue(it, arrayOf("passenger", "vehiclesType", "time", "drivingRoute")))
+							fragment.add((it as JSONObject).getString("time"), R.drawable.bus, CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.passenger,R.string.vehicles,R.string.time,R.string.route)), extractValue(it, arrayOf("passenger", "vehiclesType", "time", "drivingRoute")))
 						}
 					}
 					header.option.setSimpleItems(routes.toTypedArray<String?>())

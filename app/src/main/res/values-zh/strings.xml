@@ -667,6 +667,6 @@
     <string name="beta_version_detected">发现预览版</string>
     <string name="version_info">%1$s(%2$d)</string>
     <string name="select_teaching_building">请先选择教学楼</string>
-    <string name="course_outline_content">教学内容：%1$s 育人元素：%2$s 重点、难点：%3$s</string>
+    <string name="course_outline_content">教学内容：%1$s\n育人元素：%2$s\n重点、难点：%3$s</string>
     <string name="copy_link">复制链接</string>
 </resources>

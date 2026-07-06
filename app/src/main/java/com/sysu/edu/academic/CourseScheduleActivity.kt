@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class CourseScheduleActivity : BaseActivity() {
+	private var targetSubject: String? = null
 	val weeks: MutableList<Int?> = mutableListOf()
 	val realTime: CommonUtil.Tuple2<String?, Int?> = CommonUtil.Tuple2(null, null)
 	var currentTerm: String = ""
@@ -124,12 +125,7 @@ class CourseScheduleActivity : BaseActivity() {
 			binding.week.addView(itemBinding.root)
 		} // 初始化周历
 		val detailDialog = BottomSheetDialog(this)
-		detailBinding = ItemDetailBinding.inflate(layoutInflater).apply {
-			open.setOnClickListener {
-				startActivity(Intent(this@CourseScheduleActivity, CourseDetailActivity::class.java).putExtra("id", id.getValue()), ActivityOptionsCompat.makeSceneTransitionAnimation(this@CourseScheduleActivity, open, "miniapp")
-					.toBundle())
-			}
-		} // 初始化打开链接
+		detailBinding = ItemDetailBinding.inflate(layoutInflater)
 		detailDialog.setContentView(detailBinding.root)
 		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
@@ -214,12 +210,29 @@ class CourseScheduleActivity : BaseActivity() {
 						getTable(currentTerm, currentWeek)
 						realTime.second = currentWeekIndex
 					}
+					6 -> response.getJSONObject("data")
+						.getJSONArray("rows")
+						.takeIf { it.isNotEmpty() }
+						?.first {
+							(it as JSONObject).getString("courseName") == targetSubject
+						}
+						?.also {
+							startActivity(Intent(this, CourseDetailActivity::class.java).putExtra("id", (it as JSONObject).getString("teachingClassId"))
+											  .putExtra("code", it.getString("courseNum"))
+											  .putExtra("class", it.getString("teachingClassNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(this, binding.toolbar, "miniapp")
+											  .toBundle())
+						}
 				}
 				model.nextAll()
 			}
 		})
 		term
 		model.next()
+	}
+	
+	fun getSelectedCourses(courseName: String?) {
+		targetSubject = courseName
+		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", 1, courseName), 6)
 	}
 	
 	fun getAvailableWeeks(academicYear: String?) {
@@ -261,6 +274,9 @@ class CourseScheduleActivity : BaseActivity() {
 		detailBinding.teacher.text = teacher
 		detailBinding.classTime.text = classTime
 		detailBinding.assistant.text = assistant
+		detailBinding.open.setOnClickListener {
+			getSelectedCourses(course)
+		}
 	}
 	
 	fun changeWeek(newWeek: Int) {
@@ -271,7 +287,8 @@ class CourseScheduleActivity : BaseActivity() {
 			getTable(currentTerm, currentWeek)
 			getRange(currentTerm, currentWeek)
 			model.nextAll()
-		} else if (newWeek == weeks.size) model.contextUtil.toast(R.string.last_week_warning)
+		}
+		else if (newWeek == weeks.size) model.contextUtil.toast(R.string.last_week_warning)
 	}
 	
 	fun getTable(academicYear: String, week: Int) {

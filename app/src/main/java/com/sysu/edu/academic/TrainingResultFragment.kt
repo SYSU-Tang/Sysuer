@@ -33,7 +33,7 @@ class TrainingResultFragment : Fragment() {
 		staggeredFragment.setScrollBottom {
 			if (total > page * 10) selectedCourses
 		}
-		binding.export.setOnClickListener { v: View? -> staggeredFragment.export(v, getString(R.string.result)) }
+		binding.export.setOnClickListener { staggeredFragment.export(binding.export, getString(R.string.result)) }
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
 			if (response.getIntValue("code") == 200) {

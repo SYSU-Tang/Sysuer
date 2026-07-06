@@ -50,18 +50,18 @@ class RegistrationActivity : BaseActivity() {
 			val response = msg.second
 			if (response.getInteger("code") == 200 && response.get("data") != null) {
 				when (msg.first) {
-					0 -> (adp.get(0) as StaggeredFragment).add("学生报到信息", R.drawable.calendar, mutableListOf<String?>("学号", "注册学年学期", "报到状态", "注册状态", "缴费状态"), extractValue(response.getJSONObject("data"), arrayOf("stuNum", "academicYearTerm", "checkInStatusName", "registerStatusName", "payedStatusName")))
+					0 -> (adp.get(0) as StaggeredFragment).add("学生报到信息", R.drawable.calendar, mutableListOf("学号", "注册学年学期", "报到状态", "注册状态", "缴费状态"), extractValue(response.getJSONObject("data"), arrayOf("stuNum", "academicYearTerm", "checkInStatusName", "registerStatusName", "payedStatusName")))
 					1 -> response.getJSONArray("data").forEach { v: Any? ->
 						(adp.get(1) as StaggeredFragment).apply {
 							setHideNull(true)
-							add((v as JSONObject).getString("acadYear"), R.drawable.money, listOf<String?>("年份", "类别", "项目名称", "金额（元）", "区间", "时间"), extractValue(v, arrayOf("acadYear", "typeName", "feeTypeName", "payedItemAmount", "feeTimeSection", "editeTime")))
+							add((v as JSONObject).getString("acadYear"), R.drawable.money, mutableListOf("年份", "类别", "项目名称", "金额（元）", "区间", "时间"), extractValue(v, arrayOf("acadYear", "typeName", "feeTypeName", "payedItemAmount", "feeTimeSection", "editeTime")))
 						}
 					}
 					2 -> {
 						val data = response.getJSONObject("data")
 						val total = data.getInteger("total")
 						data.getJSONArray("rows").forEach { a: Any? ->
-							(adp.get(2) as StaggeredFragment).add((a as JSONObject).getString("academicYearTerm"), R.drawable.calendar, listOf<String?>("学年学期", "校区", "学院", "年级专业", "缴费状态", "报到状态", "注册状态", "报到日期", "注册日期"), extractValue(a, arrayOf("academicYearTerm", "campusName", "collegeName", "gradeMajorName", "payedStatusName", "checkInStatusName", "registerStatusName", "checkInDate", "registerDate")))
+							(adp.get(2) as StaggeredFragment).add((a as JSONObject).getString("academicYearTerm"), R.drawable.calendar, mutableListOf("学年学期", "校区", "学院", "年级专业", "缴费状态", "报到状态", "注册状态", "报到日期", "注册日期"), extractValue(a, arrayOf("academicYearTerm", "campusName", "collegeName", "gradeMajorName", "payedStatusName", "checkInStatusName", "registerStatusName", "checkInDate", "registerDate")))
 						}
 						if (total / 10 > page - 1) list
 					}

@@ -78,7 +78,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.LinkedList
 import java.util.Locale
 import java.util.TreeMap
 import java.util.concurrent.TimeUnit
@@ -88,8 +87,8 @@ import java.util.stream.IntStream
 class DashboardFragment : BaseFragment() {
 	val todayCourse: MutableList<JSONObject> = mutableListOf()
 	val tomorrowCourse: MutableList<JSONObject> = mutableListOf()
-	val week18Exams: LinkedList<JSONObject?> = LinkedList<JSONObject?>()
-	val week19Exams: LinkedList<JSONObject?> = LinkedList<JSONObject?>()
+	val week18Exams: LinkedHashSet<JSONObject?> = linkedSetOf()
+	val week19Exams: LinkedHashSet<JSONObject?> = linkedSetOf()
 	val todoDate: MutableLiveData<String?> = MutableLiveData("")
 	lateinit var model: JwxtModel
 	var db: HomeCollectionHelper? = null
@@ -131,6 +130,7 @@ class DashboardFragment : BaseFragment() {
 			}
 			model = JwxtModel(requireContext()).apply {
 				message.observe(requireActivity()) { message: CommonUtil.Tuple2<Int, JSONObject> ->
+					println("${message.first} ${message.second}")
 					message.second.run {
 						if (getInteger("code") == 200) {
 							when (message.first) {
@@ -227,8 +227,7 @@ class DashboardFragment : BaseFragment() {
 									}
 								}
 								2 -> {
-									val dataArray = getJSONArray("data")
-									dataArray.forEachIndexed { i, v ->
+									getJSONArray("data").forEachIndexed { i, v ->
 										val exams = if (i == 0) week18Exams else week19Exams
 										val sortedTimetable = TreeMap<Int?, JSONArray?>()
 										(v as JSONObject).getJSONObject("timetable")
@@ -242,35 +241,37 @@ class DashboardFragment : BaseFragment() {
 											}
 										}
 									}
-									binding.toggle2.clearChecked()
-									binding.toggle2.check(if ("19" == week) R.id.week_19 else R.id.week_18)
 									val weekExams = if ("19" == week) week19Exams else week18Exams
 									var index = weekExams.indexOfFirst { (it as JSONObject).getString("status") == "in" }
 									index = if (index < 0) weekExams.indexOfFirst { (it as JSONObject).getString("status") == "after" } else index
 									binding.examList.scrollToPosition(if (index < 0 || index >= weekExams.size) 0 else index)
+									binding.toggle2.check(if ("19" == week) R.id.week_19 else R.id.week_18)
+									binding.noExam.visibility = if (weekExams.isEmpty()) View.VISIBLE else View.GONE
+									examAdapter.set(weekExams.toMutableList())
+									isRefreshRequired = false
 								}
 								3 -> {
 									getJSONObject("data").getString("acadYearSemester").let {
 										termString = it
 										binding.dateView.text = getString(R.string.dashboard_time, it, date, resources.getStringArray(R.array.weeks)[LocalDate.now()
 											.getDayOfWeek().value - 1])
-										getTodayCourses(it)
-										getFinalExam(it)
 										getWeek(it)
+										getTodayCourses(it)
 									}
-									isRefreshRequired = false
 								}
-								4 -> getJSONArray("data").getJSONObject(0)
-									.getString("weekTimes")
-									.let {
-										binding.dateView.text = getString(R.string.dashboard_week, it, binding.dateView.getText())
-										week = it
-										binding.toggle2.check(if ("19" == it) R.id.week_19 else R.id.week_18)
-									}
+								4 -> {
+									getJSONArray("data").getJSONObject(0)
+										.getString("weekTimes")
+										.let {
+											binding.dateView.text = getString(R.string.dashboard_week, it, binding.dateView.getText())
+											week = it
+											termString?.let { it1 -> getFinalExam(it1) }
+										}
+								}
 								5 -> getJSONArray("data").first {
 									(it as JSONObject).getString("examWeekName") == "18-19周期末考"
 								}?.let {
-									termString?.let { it1 -> getExams(it1, (it as JSONObject).getString("examWeekId")) }
+									termString?.let { term -> getExams(term, (it as JSONObject).getString("examWeekId")) }
 								}
 								6 -> getJSONObject("data").getJSONArray("rows")
 									.takeIf { it.isNotEmpty() }
@@ -343,7 +344,7 @@ class DashboardFragment : BaseFragment() {
 				}
 				toggle2.addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean ->
 					if (R.id.week_18 == checkedId) {
-						examAdapter.set(if (isChecked) week18Exams else week19Exams)
+						examAdapter.set((if (isChecked) week18Exams else week19Exams).toMutableList())
 						noExam.visibility = if (examAdapter.itemCount == 0) View.VISIBLE else View.GONE
 					}
 				}
@@ -394,12 +395,11 @@ class DashboardFragment : BaseFragment() {
 			shortcutCollection
 			ViewModelProvider(requireActivity())[PreferenceViewModel::class.java].apply {
 				isAgreeLiveData.observe(viewLifecycleOwner) {
-					println(it)
 					if (!it) term
 				}
 			}
 		}
-		return binding.getRoot()
+		return binding.root
 	}
 	
 	override fun onDestroyView() {
@@ -518,7 +518,7 @@ class DashboardFragment : BaseFragment() {
 			this.shortcutCollection
 			orderDialog!!.dismiss()
 		}
-		orderDialog!!.setContentView(orderBinding.getRoot())
+		orderDialog!!.setContentView(orderBinding.root)
 		ItemTouchHelper(object : ItemTouchHelper.Callback() {
 			override fun getMovementFlags(recyclerView: RecyclerView,
 			                              viewHolder: RecyclerView.ViewHolder): Int {
@@ -538,9 +538,9 @@ class DashboardFragment : BaseFragment() {
 	}
 	
 	fun updateShortcut() {
-		IntStream.range(0, collectionAdapter!!.itemCount).forEach { i: Int ->
-			collectionAdapter!!.get(i)
-			db!!.updateDashboardShortcutPosition(collectionAdapter!!.get(i).getInteger("id"), i)
+		IntStream.range(0, collectionAdapter!!.itemCount).forEach {
+			collectionAdapter!!.get(it)
+			db!!.updateDashboardShortcutPosition(collectionAdapter!!.get(it).getInteger("id"), it)
 		}
 	}
 	
@@ -548,7 +548,7 @@ class DashboardFragment : BaseFragment() {
 		actionDialog = BottomSheetDialog(requireContext())
 		actionBinding = DialogServiceActionBinding.inflate(inflater)
 		actionBinding!!.order.setOnClickListener { orderDialog!!.show() }
-		actionDialog!!.setContentView(actionBinding!!.getRoot())
+		actionDialog!!.setContentView(actionBinding!!.root)
 	}
 	
 	fun showActionDialog(item: JSONObject): Boolean {
@@ -626,8 +626,7 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 	var onClick: BiConsumer<JSONObject?, View?>? = null
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 		return object :
-			RecyclerView.ViewHolder(ItemHomeCourseBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-										.getRoot()) {}
+			RecyclerView.ViewHolder(ItemHomeCourseBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
 	}
 	
 	fun setClick(onClick: BiConsumer<JSONObject?, View?>) {
@@ -657,8 +656,7 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 		return object :
-			RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-										.getRoot()) {}
+			RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
 	}
 	
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

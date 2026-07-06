@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.view.size
 import androidx.recyclerview.widget.RecyclerView
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.chip.ChipGroup
@@ -29,11 +30,8 @@ import com.sysu.edu.databinding.FragmentPaySituationBinding
 import com.sysu.edu.databinding.ItemFilterChipBinding
 import com.sysu.edu.view.StaggeredFragment
 import java.time.LocalDate
-import androidx.core.view.size
 
 class PayFragment : StaggeredFragment() {
-	
-	var order: Int = 0
 	lateinit var http: HttpManager
 	val calendarManager: CalendarManager = CalendarManager()
 	override fun onCreateView(inflater: LayoutInflater,
@@ -41,13 +39,14 @@ class PayFragment : StaggeredFragment() {
 	                          savedInstanceState: Bundle?): View? {
 		var view = super.onCreateView(inflater, container, savedInstanceState)
 		config.setCallback { page }
+		var order = 0
 		when (position) {
 			0 -> {
 				val b0 = FragmentPayNeedBinding.inflate(inflater).apply {
 					root.addView(view)
 					pay.setOnClickListener(config.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"))
 				}
-				binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 						b0.chips.elevation = (if (recyclerView.canScrollVertically(-1)) 6 else 0).toFloat()
 						super.onScrolled(recyclerView, dx, dy)
@@ -65,17 +64,18 @@ class PayFragment : StaggeredFragment() {
 					yearCodes.add(year)
 					i++
 				}
-				val fragmentPaySituationBinding = FragmentPaySituationBinding.inflate(inflater).apply {
-					root.addView(view)
-					spinner.setText(calendarManager.year.toString())
-					spinner.setSimpleItems(years.toTypedArray())
-					spinner.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-						clear()
-						getFeeList("${yearCodes[i]}")
+				val fragmentPaySituationBinding = FragmentPaySituationBinding.inflate(inflater)
+					.apply {
+						root.addView(view)
+						spinner.setText(calendarManager.year.toString())
+						spinner.setSimpleItems(years.toTypedArray())
+						spinner.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
+							clear()
+							getFeeList("${yearCodes[i]}")
+						}
+						view = root
 					}
-					view = root
-				}
-				binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 						fragmentPaySituationBinding.p.elevation = (if (recyclerView.canScrollVertically(-1)) 6 else 0).toFloat()
 						super.onScrolled(recyclerView, dx, dy)
@@ -87,8 +87,8 @@ class PayFragment : StaggeredFragment() {
 				dm.fromDate = calendarManager.firstOfMonth
 				dm.toDate = calendarManager.endOfMonth
 				val fragmentPayRecordBinding = FragmentPayRecordBinding.inflate(inflater)
-				fragmentPayRecordBinding.root.addView(view)
 				view = fragmentPayRecordBinding.root
+				fragmentPayRecordBinding.root.addView(view)
 				fragmentPayRecordBinding.from.text = dm.fromDateString
 				fragmentPayRecordBinding.from.setOnClickListener {
 					val fromDatePicker = MaterialDatePicker.Builder.datePicker()
@@ -121,7 +121,7 @@ class PayFragment : StaggeredFragment() {
 					})
 					toDatePicker.show(requireActivity().supportFragmentManager, null)
 				}
-				binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 						fragmentPayRecordBinding.row.elevation = (if (recyclerView.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
 					}
@@ -138,26 +138,22 @@ class PayFragment : StaggeredFragment() {
 							clear()
 							val data = response.getJSONArray("data")
 							when (msg.what) {
-								0, 1 -> data.forEach { a: Any? ->
-									add((a as JSONObject).getString("itemName"), mutableListOf<String?>("学号", "交费区间", "当前应交", "本次交费"), extractValue(a, arrayOf("personCode", "intervalName", "nowMoney", "needMoney")))
+								0, 1 -> data.forEach {
+									add((it as JSONObject).getString("itemName"), mutableListOf("学号", "交费区间", "当前应交", "本次交费"), extractValue(it, arrayOf("personCode", "intervalName", "nowMoney", "needMoney")))
 								}
 								2 -> data.forEach { a: Any? ->
-									add((a as JSONObject).getString("itemName"), mutableListOf<String?>("学号", "收费项目", "交费区间", "应交", "缓交", "实交"), extractValue(a, arrayOf("personCode", "itemName", "intervalName", "needPay", "laterPay", "realPay")))
+									add((a as JSONObject).getString("itemName"), mutableListOf("学号", "收费项目", "交费区间", "应交", "缓交", "实交"), extractValue(a, arrayOf("personCode", "itemName", "intervalName", "needPay", "laterPay", "realPay")))
 								}
 								3 -> data.forEach { a: Any? ->
-									add((++order).toString(), mutableListOf<String?>("订单编号", "金额", "支付方式", "支付时间", "支付编号"), extractValue(a as JSONObject, arrayOf("orderNo", "money", "payTypeName", "payTime", "outPayNo")))
+									add("${++order}", mutableListOf("订单编号", "金额", "支付方式", "支付时间", "支付编号"), extractValue(a as JSONObject, arrayOf("orderNo", "money", "payTypeName", "payTime", "outPayNo")))
 								}
 								4 -> data.forEach { a: Any? ->
-									add((++order).toString(), mutableListOf<String?>("收费项目", "收费区间", "退费金额", "退费日期", "退费状态"), extractValue(a as JSONObject, arrayOf("itemName", "intervalName", "refundMoney", "refundDate", "refundStateStr")))
+									add("${++order}", mutableListOf("收费项目", "收费区间", "退费金额", "退费日期", "退费状态"), extractValue(a as JSONObject, arrayOf("itemName", "intervalName", "refundMoney", "refundDate", "refundStateStr")))
 								}
 							}
 						}
-					} else if (response != null && response.getInteger("code") == 4002) {
-						config.toast(response.getString("message"))
-					} else {
-						config.toast(R.string.login_warning)
-						config.gotoLogin(TargetUrl.PAY)
 					}
+					else if (response != null && response.getInteger("code") == 4002) config.toast(response.getString("message")) else config.gotoLogin(TargetUrl.PAY)
 				}
 			}
 		}).apply {
@@ -172,8 +168,8 @@ class PayFragment : StaggeredFragment() {
 	
 	override fun add(title: String?,
 	                 icon: Int?,
-	                 keys: MutableList<String?>?,
-	                 values: MutableList<String?>?) {
+	                 keys: MutableList<String?>,
+	                 values: MutableList<String?>) {
 		super.add(title, icon, keys, values)
 		if (position == 0) {
 			val chips = requireView().findViewById<ChipGroup>(R.id.chips)

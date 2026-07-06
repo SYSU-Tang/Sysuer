@@ -12,11 +12,12 @@ class PayActivity : BaseActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val adp = Pager2Adapter(this)
+		val tabs = resources.getStringArray(R.array.payment_key)
 		(0..<5).forEach { adp.add(PayFragment.newInstance(it)) }
 		ActivityPagerBinding.inflate(layoutInflater).apply {
 			toolbar.setTitle(R.string.pay)
 			pager.adapter = adp
-			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.text = arrayOf("待交费用", "选交费用", "交费情况", "付款记录", "退费记录")[position] }.attach()
+			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.text = tabs[position] }.attach()
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 		}.also{
 			setContentView(it.root)

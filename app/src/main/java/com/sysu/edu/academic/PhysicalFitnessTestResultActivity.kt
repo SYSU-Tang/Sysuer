@@ -54,7 +54,7 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 							while (matcher.find()) {
 								val matcher1 = Pattern.compile("<div class=\"weui-cell__bd\".*?<p.*?>(.+?)</p>.*?<div class=\"weui-cell__ft.*?\">.+?<span.+?>(.+?)(&nbsp;)?</span>", Pattern.DOTALL)
 									.matcher(matcher.group())
-								if (matcher1.find()) page.add(matcher1.group(1), R.drawable.calendar, listOf(arrayOf("总成绩", "总积分", "是否达标")[msg.what]), listOf(matcher1.group(2)
+								if (matcher1.find()) page.add(matcher1.group(1), R.drawable.calendar, mutableListOf(arrayOf("总成绩", "总积分", "是否达标")[msg.what]), mutableListOf(matcher1.group(2)
 																																											?.trim { it <= ' ' }))
 								val matcher2 = Pattern.compile("<a class=\"weui-cell weui-cell_access\" href=\"(.+?)\">", Pattern.DOTALL)
 									.matcher(matcher.group())
@@ -64,9 +64,9 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 								override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 								                    holder: RecyclerView.ViewHolder,
 								                    position: Int) {
-									page.getStaggeredAdapter()
+									page.staggeredAdapter
 										.getTwoColumnsAdapter(position)
-										.setListener(object : AdapterListener {
+										?.setListener(object : AdapterListener {
 											override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 											                    holder: RecyclerView.ViewHolder,
 											                    position: Int) {
@@ -95,7 +95,7 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 						3 -> {
 							val matcher = Pattern.compile("<a class=\"weui-cell\">.*?<div class=\"weui-cell__bd\">(.+?)</div>.*?<div class=\"weui-cell__ft\">(.+?)</div>.*?</a>", Pattern.DOTALL)
 								.matcher(msg.obj as String)
-							while (matcher.find()) page1.getStaggeredAdapter()
+							while (matcher.find()) page1.staggeredAdapter
 								.addRow(position, matcher.group(1)
 									?.replace("</span>", "~")
 									?.replace("<.+?>".toRegex(), "")
@@ -114,10 +114,10 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 									.matcher(matcher.group())
 								val creditMatcher = Pattern.compile("class=\"ticeImg\">(.+?)<", Pattern.DOTALL)
 									.matcher(matcher.group())
-								if (creditMatcher.find()) page2.getStaggeredAdapter()
+								if (creditMatcher.find()) page2.staggeredAdapter
 									.addRow(position, "积分", creditMatcher.group(1)
 										?.trim { it <= ' ' })
-								while (matcher1.find()) page2.getStaggeredAdapter()
+								while (matcher1.find()) page2.staggeredAdapter
 									.addRow(position, matcher1.group(1), matcher1.group(2))
 							}
 						}

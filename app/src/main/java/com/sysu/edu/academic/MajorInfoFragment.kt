@@ -29,7 +29,7 @@ class MajorInfoFragment : StaggeredFragment() {
 		val view = super.onCreateView(inflater, container, savedInstanceState)
 		code = requireArguments().getString("code")
 		model = JwxtModel(requireContext())
-		binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+		binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 			override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
 				if (!v.canScrollVertically(1) && total > page * 10) list
 			}

@@ -151,7 +151,8 @@ class GradeActivity : BaseActivity() {
 						if (!type.isEmpty()) {
 							binding.type.text = type.getJSONObject(0).getString("dataName")
 							trainType.value = type.getJSONObject(0).getString("dataNumber")
-						} else model.contextUtil.toast(R.string.no_train_type) // 初始化学年选项
+						}
+						else model.contextUtil.toast(R.string.no_train_type) // 初始化学年选项
 						years.clear()
 						val selectYearPull = pull.getJSONArray("selectYearPull")
 						if (selectYearPull != null && !selectYearPull.isEmpty()) selectYearPull.forEach(Consumer { a: Any? ->
@@ -191,9 +192,9 @@ class GradeActivity : BaseActivity() {
 						}
 						val total = pull.getString("stuTotal")
 						header.clear()
-						header.add(getString(R.string.total_year), listOf<String?>(getString(R.string.total_rank), getString(R.string.total_credit), getString(R.string.total_point)), listOf<String?>("$totalRank/$total", totalCredit, totalPoint))
-						header.add(terms[if (term.getValue() == null) 1 else term.getValue()!! - 1], listOf<String?>(getString(R.string.current_rank), getString(R.string.current_point)), listOf<String?>("$rank/$total", point))
-						header.add(getString(R.string.credit), listOf<String?>(getString(R.string.term_credit), getString(R.string.public_compulsory_credit), getString(R.string.public_select_credit), getString(R.string.major_compulsory_credit), getString(R.string.major_select_credit), getString(R.string.honor_credit)), extractValue(pull.getJSONObject("stuCredit"), arrayOf("allGetCredit", "publicGetCredit", "publicSelectGetCredit", "majorGetCredit", "majorSelectGetCredit", "honorCourseGetCredit")))
+						header.add(getString(R.string.total_year), CommonUtil.getString(this, intArrayOf(R.string.total_rank, R.string.total_credit, R.string.total_point)), mutableListOf("$totalRank/$total", totalCredit, totalPoint))
+						header.add(terms[if (term.getValue() == null) 1 else term.getValue()!! - 1], CommonUtil.getString(this, intArrayOf(R.string.current_rank,R.string.current_point)), mutableListOf("$rank/$total", point))
+						header.add(getString(R.string.credit), CommonUtil.getString(this, intArrayOf(R.string.term_credit,R.string.public_compulsory_credit,R.string.public_select_credit,R.string.major_compulsory_credit,R.string.major_select_credit,R.string.honor_credit)), extractValue(pull.getJSONObject("stuCredit"), arrayOf("allGetCredit", "publicGetCredit", "publicSelectGetCredit", "majorGetCredit", "majorSelectGetCredit", "honorCourseGetCredit")))
 					}
 					5 -> {
 						if (response.containsKey("data") && response.getJSONObject("data")

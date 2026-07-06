@@ -60,8 +60,8 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 			model = XgxtModel(requireContext())
 			val leave: MutableList<String?> = mutableListOf()
 			val stay: MutableList<String?> = mutableListOf()
-			val leaveKeys: MutableList<String> = mutableListOf("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地")
-			val stayKeys: MutableList<String> = mutableListOf("假期去向", "留校原因")
+			val leaveKeys: MutableList<String?> = mutableListOf("假期去向", "预计离校时间", "预计返校时间", "去向类型", "交通工具", "外出地")
+			val stayKeys: MutableList<String?> = mutableListOf("假期去向", "留校原因")
 			val regionDialog = BottomSheetDialog(requireContext())
 			val dialogRegionBinding = DialogRegionBinding.inflate(inflater, container, false)
 			regionDialog.setContentView(dialogRegionBinding.root)
@@ -87,7 +87,7 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 						0 -> {
 							clear()
 							val data = response.getJSONObject("data")
-							add("基本信息", mutableListOf<String?>("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段"), extractValue(data, arrayOf("xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj")))
+							add("基本信息", mutableListOf("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段"), extractValue(data, arrayOf("xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj")))
 							isStay = data.getString("sflx")
 							if (data.containsKey("yjlxsj") && !data.getString("yjlxsj", "")
 									.isEmpty()) leaveDate.value = LocalDate.parse(data.getString("yjlxsj"))
@@ -162,12 +162,12 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
 					staggeredAdapter.getTwoColumnsAdapter(position)
-						.setListener(object : AdapterListener {
+						?.setListener(object : AdapterListener {
 							override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 							                    holder: RecyclerView.ViewHolder,
 							                    position: Int) {
 								holder.itemView.setOnClickListener {
-									if (position == 1) {
+									if (this@LeaveReturnRegistrationFragment.position == 1) {
 										if (position == 0) {
 											val menu = PopupMenu(requireContext(), holder.itemView)
 											mutableListOf<String?>("离校", "留校").forEach { i: String? ->

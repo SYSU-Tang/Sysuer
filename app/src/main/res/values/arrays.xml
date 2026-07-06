@@ -264,4 +264,11 @@
         <item>重要但不紧急</item>
         <item>重要且紧急</item>
     </string-array>
+    <string-array name="payment_key">
+        <item>待交费用</item>
+        <item>选交费用</item>
+        <item>交费情况</item>
+        <item>付款记录</item>
+        <item>退费记录</item>
+    </string-array>
 </resources>

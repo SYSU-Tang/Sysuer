@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_column="2"
-    android:orientation="vertical"
     android:background="?selectableItemBackground"
+    android:orientation="vertical"
     android:paddingHorizontal="@dimen/horizontal_padding">
 
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
@@ -122,6 +122,7 @@
         android:layout_row="6"
         android:layout_column="2"
         android:layout_gravity="end"
-        android:text="@string/open"
-        android:visibility="gone" />
+        android:layout_marginTop="@dimen/vertical_margin"
+        android:layout_marginBottom="@dimen/vertical_margin"
+        android:text="@string/open" />
 </GridLayout>

@@ -82,8 +82,8 @@ object CommonUtil {
 	 * @param resource 资源 ID 数组
 	 * @return 包含对应字符串的数组
 	 */
-	@JvmStatic fun getString(context: Context, resource: IntArray): List<String?> {
-		return resource.map { resId: Int -> context.getString(resId) }.toList()
+	@JvmStatic fun getString(context: Context, resource: IntArray): MutableList<String?> {
+		return resource.map { resId: Int -> context.getString(resId) }.toMutableList()
 	}
 	
 	/**
@@ -93,8 +93,8 @@ object CommonUtil {
 	 * @param resource 资源 ID 列表
 	 * @return 包含对应字符串的数组
 	 */
-	@JvmStatic fun getString(context: Context, resource: MutableList<Int>): List<String?> {
-		return resource.map { resId: Int -> context.getString(resId) }.toList()
+	@JvmStatic fun getString(context: Context, resource: MutableList<Int>): MutableList<String?> {
+		return resource.map { resId: Int -> context.getString(resId) }.toMutableList()
 	}
 	
 	/**
