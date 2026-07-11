@@ -218,10 +218,10 @@ public final class SolarTermUtil {
     /**
      * 24节气
      */
-    private static String[] SOLAR_TERMS = null;
-    private static double EnnT = 0; // 调用Enn前先设置EnnT时间变量
+    private static String[] SOLAR_TERMS;
+    private static double EnnT; // 调用Enn前先设置EnnT时间变量
     // ==================月位置计算===================
-    private static double MnnT = 0; // 调用Mnn前先设置MnnT时间变量
+    private static double MnnT; // 调用Mnn前先设置MnnT时间变量
 
     static void init(Context context) {
         SOLAR_TERMS = context.getResources().getStringArray(R.array.solar_term);

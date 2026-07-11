@@ -46,7 +46,7 @@ public final class WeekViewPager extends ViewPager {
     /**
      * 是否使用滚动到某一天
      */
-    private boolean isUsingScrollToCalendar = false;
+    private boolean isUsingScrollToCalendar;
 
     public WeekViewPager(Context context) {
         this(context, null);

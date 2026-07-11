@@ -64,23 +64,23 @@ public final class LunarCalendar {
     /**
      * 农历月份第一天转写
      */
-    private static String[] MONTH_STR = null;
+    private static String[] MONTH_STR;
     /**
      * 传统农历节日
      */
-    private static String[] TRADITION_FESTIVAL_STR = null;
+    private static String[] TRADITION_FESTIVAL_STR;
     /**
      * 农历大写
      */
-    private static String[] DAY_STR = null;
+    private static String[] DAY_STR;
     /**
      * 特殊节日的数组
      */
-    private static String[] SPECIAL_FESTIVAL_STR = null;
+    private static String[] SPECIAL_FESTIVAL_STR;
     /**
      * 公历节日
      */
-    private static String[] SOLAR_CALENDAR = null;
+    private static String[] SOLAR_CALENDAR;
 
     static void init(Context context) {
         if (MONTH_STR != null) {

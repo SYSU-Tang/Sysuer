@@ -127,11 +127,11 @@ public class CalendarLayout extends LinearLayout {
     private boolean isWeekView;
     private int mCalendarShowMode;
     private int mContentViewTranslateY; //ContentView  可滑动的最大距离距离 , 固定
-    private int mViewPagerTranslateY = 0;// ViewPager可以平移的距离，不代表mMonthView的平移距离
+    private int mViewPagerTranslateY;// ViewPager可以平移的距离，不代表mMonthView的平移距离
     private float downY;
     private float mLastY;
     private float mLastX;
-    private boolean isAnimating = false;
+    private boolean isAnimating;
     private int mItemHeight;
 
     private CalendarViewDelegate mDelegate;

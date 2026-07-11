@@ -45,7 +45,7 @@ public final class MonthViewPager extends ViewPager {
     /**
      * 是否使用滚动到某一天
      */
-    private boolean isUsingScrollToCalendar = false;
+    private boolean isUsingScrollToCalendar;
 
     public MonthViewPager(Context context) {
         this(context, null);
