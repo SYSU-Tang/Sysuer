@@ -41,7 +41,7 @@ class TrainingResultFragment : Fragment() {
 					val data = response.getJSONObject("data")
 					total = data.getInteger("total")
 					data.getJSONArray("rows").forEach { o: Any? ->
-						staggeredFragment.add((o as JSONObject).getString("name"), R.drawable.book, mutableListOf<String?>("专业", "年级", "学院", "培养类别", "修业年限", "学科门类", "学位", "专业代码", "专业ID"), extractValue(o, arrayOf("professionName", "grade", "manageUnitName", "trainTypeName", "educationalSystem", "disciplineCateName", "degreeGrantName", "professionCode", "professionId")))
+						staggeredFragment.add((o as JSONObject).getString("name"), R.drawable.book, mutableListOf("专业", "年级", "学院", "培养类别", "修业年限", "学科门类", "学位", "专业代码", "专业ID"), extractValue(o, arrayOf("professionName", "grade", "manageUnitName", "trainTypeName", "educationalSystem", "disciplineCateName", "degreeGrantName", "professionCode", "professionId")))
 					}
 				}
 			}

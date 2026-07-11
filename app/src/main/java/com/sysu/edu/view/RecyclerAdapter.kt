@@ -10,15 +10,6 @@ abstract class RecyclerAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder
 	var listener: AdapterListener? = null
 	protected var config: Config? = null
 	override fun getItemCount(): Int = data.size
-	
-	/*@NonNull
-   @Override
-   public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-	   ViewBinding binding = ViewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-	   if (listener != null) listener.onCreate(this, binding);
-	   return new RecyclerView.ViewHolder(binding.getRoot()) {
-	   };
-   }*/
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 		listener?.onBind(this, holder, position)
 	}
@@ -44,9 +35,9 @@ abstract class RecyclerAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder
 	
 	fun get(position: Int): T = if (position in 0..<itemCount) data[position] else null!!
 	fun set(d: MutableList<out T>) {
-		clear()
+		data.clear()
 		data.addAll(d)
-		notifyItemRangeChanged(0, itemCount)
+		notifyItemRangeInserted(0, itemCount)
 	}
 	
 	fun swap(position1: Int, position2: Int) {

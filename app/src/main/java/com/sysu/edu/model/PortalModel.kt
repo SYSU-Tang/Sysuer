@@ -24,7 +24,7 @@ class PortalModel(context: Context) : BaseModel(context) {
 					?.takeIf { it.contains("application/json") }
 					?.let {
 						val contentJSON = JSONObject.parse(content)
-						result = CommonUtil.Tuple2<Int, JSONObject>(request.second, contentJSON)
+						result = CommonUtil.Tuple2(request.second, contentJSON)
 						val meta = contentJSON.getJSONObject("meta")
 						if (!meta.getBoolean("success")) {
 							if (meta.getInteger("statusCode") == 302) login(request)
@@ -43,10 +43,10 @@ class PortalModel(context: Context) : BaseModel(context) {
 									)
 								}
 							message.postValue(
-								CommonUtil.Tuple2<Int, JSONObject>(
+								CommonUtil.Tuple2(
 									request.second,
 									contentJSON
-								)
+								                 )
 							)
 							afterLoginRequest.remove(request)
 						}

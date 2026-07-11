@@ -661,7 +661,7 @@
     <string name="dashboard_week">Week%1$s\n%2$s</string>
     <string name="dashboard_day">%1$s/%2$s</string>
     <string name="guide">Guide</string>
-    <string name="querying">Querying...</string>
+    <string name="querying">Querying…</string>
     <string name="please_select_exam_week">Please Select the Exam Week</string>
     <string name="unchangeable_after_submission">Cannot be changed after submission.</string>
     <string name="developer_mode">Developer Mode</string>

@@ -658,7 +658,7 @@ class TodoManager(private val activity: FragmentActivity,
 			
 			remindDateTime = remindDateTime.minusMinutes(remindMinutes.toLong())
 			if (remindDateTime.isBefore(LocalDateTime.now())) return
-			val alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+			val alarmManager = activity.getSystemService(AlarmManager::class.java)
 			val intent = Intent(activity, TodoReminderReceiver::class.java).apply {
 				putExtra("todo_id", todoInfo.id)
 				putExtra("notification_id", notificationId)

@@ -21,7 +21,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavInflater
 import androidx.navigation.fragment.NavHostFragment
@@ -95,33 +94,10 @@ class MainActivity : BaseActivity() {
 		}
 		navController.graph = graph
 		setupWithNavController(binding.navView as NavigationBarView, navController)
-		val spm = ViewModelProvider(this)[PreferenceViewModel::class.java].apply {
-			setPM(PreferenceManager.getDefaultSharedPreferences(this@MainActivity))
-			initLiveData()
-			isFirstLaunch = false
-		}
-		val agreementDialog = MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
-			.setMessage("")
-			.setPositiveButton(R.string.agree) { _: DialogInterface?, _: Int ->
-				spm.isAgree = true
-				spm.setIsAgreeLiveData(false)
-			}
-			.setNegativeButton(R.string.disagree) { _: DialogInterface?, _: Int ->
-				spm.isAgree = false
-				supportFinishAfterTransition()
-			}
-			.setCancelable(false)
-			.create()
-		spm.isAgreeLiveData.observe(this, Observer { aBoolean: Boolean? ->
-			if (aBoolean == true) {
-				agreementDialog.show()
-				agreementDialog.findViewById<TextView>(android.R.id.message)?.let {
-					Markwon.builder(this)
-						.usePlugin(StrikethroughPlugin.create())
-						.build()
-						.setMarkdown(it, "请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)")
-				}
-			} else {
+		val spm = ViewModelProvider(this)[PreferenceViewModel::class.java]
+		spm.isFirstLaunch = false
+		spm.isAgreeLiveData.observe(this) { aBoolean ->
+			if (aBoolean) {
 				if (spm.update) checkUpdate()
 				listOf(NextClassWidget::class.java,  /*TodayClassWidget.class, */
 				       TomorrowClassWidget::class.java, RecentClassWidget::class.java).forEach {
@@ -139,7 +115,28 @@ class MainActivity : BaseActivity() {
 											  .build())
 				if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PackageManager.PERMISSION_GRANTED)
 			}
-		})
+			else {
+				val agreementDialog = MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
+					.setMessage("")
+					.setPositiveButton(R.string.agree) { _: DialogInterface?, _: Int ->
+						spm.isAgree = true
+						spm.setIsAgreeLiveData(true)
+					}
+					.setNegativeButton(R.string.disagree) { _: DialogInterface?, _: Int ->
+						spm.isAgree = false
+						supportFinishAfterTransition()
+					}
+					.setCancelable(false)
+					.create()
+				agreementDialog.show()
+				agreementDialog.findViewById<TextView>(android.R.id.message)?.let {
+					Markwon.builder(this)
+						.usePlugin(StrikethroughPlugin.create())
+						.build()
+						.setMarkdown(it, "请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)")
+				}
+			}
+		}
 	}
 	
 	fun showUpdateDialog(response: JSONObject) {
@@ -170,7 +167,8 @@ class MainActivity : BaseActivity() {
 							.setMarkdown(it, response.getString("description"))
 					}
 				}
-		} else if (settingManager.developerMode && settingManager.betaCheck) {
+		}
+		else if (settingManager.developerMode && settingManager.betaCheck) {
 			if (response.containsKey("minorVersion") && response.containsKey("majorVersion") && response.containsKey("generationVersion")) {
 				val minorVersion = response.getInteger("minorVersion")
 				val majorVersion = response.getInteger("majorVersion")

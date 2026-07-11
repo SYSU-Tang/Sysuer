@@ -70,7 +70,7 @@ class ExamActivity : BaseActivity() {
 						(detail as JSONArray).forEach { o: Any? ->
 							for (i in arrayOf("examSubjectName", "classroomNumber", "durationTime", "examDate", "acadYear")) values.add((o as JSONObject).getString(i))
 						}
-						(binding.examFragment.getFragment<Fragment?>() as StaggeredFragment).add(values[0], mutableListOf<String?>("科目", "考场", "时长", "日期", "学年"), values)
+						(binding.examFragment.getFragment<Fragment?>() as StaggeredFragment).add(values[0], mutableListOf("科目", "考场", "时长", "日期", "学年"), values)
 					}
 				}
 			}

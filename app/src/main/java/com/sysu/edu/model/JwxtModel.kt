@@ -35,7 +35,7 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 				if (code != 200) http.handler.post {
 					contextUtil.toast(CommonUtil.toStringOrDefault(contentJSON.getString("message")))
 				}
-				result = CommonUtil.Tuple2<Int, JSONObject>(request.second, contentJSON)
+				result = CommonUtil.Tuple2(request.second, contentJSON)
 				message.postValue(result)
 				afterLoginRequest.remove(request)
 			}

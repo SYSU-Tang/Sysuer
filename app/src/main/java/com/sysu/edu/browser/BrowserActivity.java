@@ -316,7 +316,7 @@ public class BrowserActivity extends BaseActivity {
         
         jsAdapter.setListener(new AdapterListener() {
             @Override
-            public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
+            public void onBind(@NonNull RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, @NonNull RecyclerView.ViewHolder holder, int position) {
                 JSONObject item = jsAdapter.get(position);
                 holder.itemView.setOnClickListener(_ -> web.evaluateJavascript(item.getString("script"), null));
                 holder.itemView.setOnLongClickListener(v -> {
@@ -356,7 +356,7 @@ public class BrowserActivity extends BaseActivity {
             }
             
             @Override
-            public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
+            public void onCreate(@NonNull RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
             }
         });
         

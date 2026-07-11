@@ -16,7 +16,6 @@ import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.databinding.DialogGymReservationBinding
 import com.sysu.edu.databinding.FragmentGymDetailBinding
 import com.sysu.edu.databinding.ItemDateBinding
@@ -44,12 +43,14 @@ class GymDetailFragment : BaseFragment() {
 	var dateAdapter: DateAdapter? = null
 	var userId: String? = null
 	var type: String? = null
-	lateinit var model: GymModel
+	val model: GymModel by lazy {
+		GymModel(requireContext())
+	}
+	
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
-		model = GymModel(requireContext())
 		viewModel = ViewModelProvider(requireActivity())[GymReservationViewModel::class.java]
 		id = requireArguments().getString("id")
 		val gridLayoutManager = GridLayoutManager(requireContext(), 4, GridLayoutManager.HORIZONTAL, false)
@@ -84,12 +85,12 @@ class GymDetailFragment : BaseFragment() {
 		val dialog = BottomSheetDialog(requireContext())
 		dialog.setContentView(dialogBinding.root)
 		if (viewModel!!.position.value == null) viewModel!!.position.postValue(0)
-		viewModel!!.position.observe(getViewLifecycleOwner(), Observer { p: Int? ->
+		viewModel!!.position.observe(viewLifecycleOwner) { p: Int? ->
 			if (p != null) info
-		})
-		model.message.observe(getViewLifecycleOwner(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			when (message.first) {
+		}
+		model.message.observe(viewLifecycleOwner) { (code, response) ->
+			println(response)
+			when (code) {
 				0 -> {
 					reset(fieldAdapter)
 					hash = md5("$response")
@@ -117,7 +118,7 @@ class GymDetailFragment : BaseFragment() {
 														 .fluentPut("Timeslots", JSONArray.of(data)))
 													 .fluentPut("Type", 1)
 													 .fluentPut("Venue", fieldName)
-													 .fluentPut("Duration", String.format(Locale.getDefault(), "%s~%s", data.getString("Start"), data.getString("End"))))
+													 .fluentPut("Duration", "${data.getString("Start")}~${data.getString("End")}"))
 								data.getInteger("AvailableCapacity")?.let {
 									availableCapacity += it
 								}
@@ -153,8 +154,8 @@ class GymDetailFragment : BaseFragment() {
 					}
 				}
 			}
-		})
-		viewModel!!.selected.observe(getViewLifecycleOwner(), Observer { selected: MutableSet<Int>? ->
+		}
+		viewModel!!.selected.observe(viewLifecycleOwner, Observer { selected: MutableSet<Int>? ->
 			fieldAdapter.selected = selected
 			val studentFee = fee["学生"]
 			if (studentFee != null) {
@@ -354,17 +355,18 @@ class GymDetailFragment : BaseFragment() {
 			s?.forEach { notifyItemChanged(it) }
 		}
 		
-		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, pos: Int) {
-			val position = holder.getBindingAdapterPosition()
-			val item = get(position)
+		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+			val pos = holder.getBindingAdapterPosition()
+			val item = get(pos)
 			ItemFieldDetailBinding.bind(holder.itemView).apply {
+				val context = root.context
 				fieldDetail.alpha = 1.0f
 				root.setOnClickListener {
 					if (item.getInteger("Type") == 1 && item.getInteger("AvailableCapacity") > 0) {
-						if (selected!!.contains(position)) selected!!.remove(position)
-						else selected!!.add(position)
-						action!!(position)
-						notifyItemChanged(position)
+						if (selected!!.contains(pos)) selected!!.remove(pos)
+						else selected!!.add(pos)
+						action!!(pos)
+						notifyItemChanged(pos)
 					}
 				}
 				when (item.getInteger("Type")) {
@@ -372,13 +374,13 @@ class GymDetailFragment : BaseFragment() {
 					2 -> fieldDetail.text = item.getString("Name", "")
 					1 -> {
 						if (item.getInteger("AvailableCapacity") > 0) {
-							fieldDetail.setText(R.string.reservable)
+							fieldDetail.text = "${context.getString(R.string.reservable)}/${item.getString("AvailableCapacity", "")}"
 						}
 						else {
 							fieldDetail.setText(R.string.reserved)
 							fieldDetail.setAlpha(0.5f)
 						}
-						root.isChecked = selected!!.contains(position)
+						root.isChecked = selected!!.contains(pos)
 					}
 					else -> fieldDetail.text = ""
 				}

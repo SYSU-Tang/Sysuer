@@ -3,6 +3,7 @@ package com.sysu.edu.home
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
@@ -111,7 +112,7 @@ class DashboardFragment : BaseFragment() {
 			}
 		}).build()
 	}
-	
+	val spm: PreferenceViewModel by lazy { ViewModelProvider(this)[PreferenceViewModel::class.java] }
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): NestedScrollView {
@@ -160,6 +161,7 @@ class DashboardFragment : BaseFragment() {
 			courseList.adapter = courseAdapter
 			examList.addItemDecoration(DividerItemDecoration(requireContext(), 0))
 			examList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+			examList.itemAnimator = null
 			examList.adapter = examAdapter
 			toggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
 				if (checkedId == R.id.today) {
@@ -169,8 +171,11 @@ class DashboardFragment : BaseFragment() {
 			}
 			toggle2.addOnButtonCheckedListener { _, checkedId, isChecked ->
 				if (checkedId == R.id.week_18) {
-					examAdapter.set((if (isChecked) week18Exams else week19Exams).toMutableList())
-					noExam.visibility = if (examAdapter.itemCount == 0) View.VISIBLE else View.GONE
+					val newData = if (isChecked) week18Exams else week19Exams
+					examList.post {
+						examAdapter.set(newData.toMutableList())
+						noExam.visibility = if (examAdapter.itemCount == 0) View.VISIBLE else View.GONE
+					}
 				}
 			}
 			toggle3.addOnButtonCheckedListener { _, checkedId, _ -> if (checkedId == R.id.filter_todo) refresh() }
@@ -219,8 +224,13 @@ class DashboardFragment : BaseFragment() {
 		}
 		todoDate.observe(viewLifecycleOwner) { refresh() }
 		todoManager?.setOnRefreshListener { refresh() }
-		ViewModelProvider(requireActivity())[PreferenceViewModel::class.java].isAgreeLiveData.observe(viewLifecycleOwner) {
-			if (!it) term
+		spm.isAgreeLiveData.observe(viewLifecycleOwner) {
+			if (it) term
+		}
+		val selectedSet = spm.dashboard?.mapNotNull { it?.toIntOrNull() }?.toSet().orEmpty()
+		(0..5).toSet().minus(selectedSet).forEach {
+			listOf(binding.shortcutGroup, binding.scheduleGroup, binding.timeCard, binding.courseGroup, binding.examGroup, binding.todoGroup)[it].visibility = View.GONE
+			
 		}
 	}
 	
@@ -300,7 +310,11 @@ class DashboardFragment : BaseFragment() {
 		binding.examList.scrollToPosition(if (index < 0 || index >= weekExams.size) 0 else index)
 		binding.toggle2.check(if ("19" == week) R.id.week_19 else R.id.week_18)
 		binding.noExam.visibility = if (weekExams.isEmpty()) View.VISIBLE else View.GONE
-		(binding.examList.adapter as? ExamAdapter)?.set(weekExams.toMutableList())
+		(binding.examList.adapter as? ExamAdapter)?.let { adapter ->
+			binding.examList.post {
+				adapter.set(weekExams.toMutableList())
+			}
+		}
 		isRefreshRequired = false
 	}
 	
@@ -420,7 +434,7 @@ class DashboardFragment : BaseFragment() {
 		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5)
 	
 	fun getSelectedCourses(courseName: String?): Unit =
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", 1, courseName), 6)
+		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", 6)
 	
 	fun getTimePosition(from: String?, to: String?): String {
 		val now = LocalDateTime.now()
@@ -629,10 +643,10 @@ internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
 		val isBefore = status == "before"
 		val tint = when (status) {
 			"in" -> config?.contextUtil?.getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim)
-			"before" -> 0
+			"before" -> Color.TRANSPARENT
 			else -> config?.contextUtil?.getColorFromAttr(com.google.android.material.R.attr.colorSurface)
-		} ?: 0
-		binding.root.background.setTint(tint)
+		} ?: Color.TRANSPARENT
+		binding.root.setCardBackgroundColor(tint)
 		binding.examName.setTextAppearance(if (isBefore) com.google.android.material.R.style.TextAppearance_Material3_TitleMedium else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized)
 		binding.root.alpha = if (isBefore) 0.64f else 1.0f
 		super.onBindViewHolder(holder, position)

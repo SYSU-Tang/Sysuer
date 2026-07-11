@@ -13,7 +13,7 @@ class MutiListPreference(context: Context,
                          defStyleRes: Int = 0) :
 	MultiSelectListPreference(context, attrs, defStyleAttr, defStyleRes) {
 	constructor(context: Context,
-	            attrs: AttributeSet?) : this(context, attrs, R.attr.dialogPreferenceStyle, 0)
+	            attrs: AttributeSet?) : this(context, attrs, R.attr.dialogPreferenceStyle)
 	
 	override fun onClick() {
 		val dialogBuilder = MaterialAlertDialogBuilder(context)

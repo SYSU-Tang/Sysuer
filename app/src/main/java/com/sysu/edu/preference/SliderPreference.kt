@@ -15,7 +15,7 @@ class SliderPreference(context: Context,
                        defStyleRes: Int = 0) :
 	SeekBarPreference(context, attrs, defStyleAttr, defStyleRes) {
 	
-	constructor(context: Context, attrs: AttributeSet? = null) : this(context, attrs, R.attr.sliderPreferenceStyle, 0)
+	constructor(context: Context, attrs: AttributeSet? = null) : this(context, attrs, R.attr.sliderPreferenceStyle)
 	init {
 		layoutResource = R.layout.preference_slider
 	}

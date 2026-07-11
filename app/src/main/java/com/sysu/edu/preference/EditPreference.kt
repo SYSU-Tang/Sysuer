@@ -14,7 +14,7 @@ class EditPreference(context: Context,
                      attrs: AttributeSet? = null,
                      defStyleAttr: Int = android.R.attr.editTextPreferenceStyle,
                      defStyleRes: Int = 0) : Preference(context, attrs, defStyleAttr, defStyleRes) {
-	constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0, 0)
+	constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 	
 	private var mValue: String? = null
 	

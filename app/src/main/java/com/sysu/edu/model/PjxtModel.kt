@@ -39,13 +39,13 @@ class PjxtModel(context: Context) : BaseModel(context) {
 					?.let {
 						val data =
 							JSONObject.parse(content)
-						result = CommonUtil.Tuple2<Int, JSONObject>(request.second, data)
+						result = CommonUtil.Tuple2(request.second, data)
 						data?.takeIf { it.containsKey("code") && it.getString("code") != "200" }?.let {
 							http.handler.post {
 								contextUtil.toast(CommonUtil.toStringOrDefault(data.getString("msg")))
 							}
 						}
-						message.postValue(CommonUtil.Tuple2<Int, JSONObject>(request.second, data))
+						message.postValue(CommonUtil.Tuple2(request.second, data))
 						afterLoginRequest.remove(request)
 					} ?: run {
 					if (!authorizationManager.isAuthorized(content)) login(request)

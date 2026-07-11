@@ -20,7 +20,7 @@ class FilterPreference(context: Context,
                        defStyleAttr: Int = R.attr.filterPreferenceStyle,
                        defStyleRes: Int = 0) : ListPreference(context, attrs, defStyleAttr, defStyleRes) {
 	
-	constructor(context: Context, attrs: AttributeSet? = null) : this(context, attrs, R.attr.filterPreferenceStyle, 0)
+	constructor(context: Context, attrs: AttributeSet? = null) : this(context, attrs, R.attr.filterPreferenceStyle)
 	
 	val valueLiveData: MutableLiveData<String?> = MutableLiveData<String?>()
 	var isFilter: Boolean = false

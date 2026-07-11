@@ -14,7 +14,6 @@ import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.trim
-import com.sysu.edu.api.Config
 import com.sysu.edu.databinding.ItemEvaluationBinding
 import com.sysu.edu.databinding.RecyclerViewScrollBinding
 import com.sysu.edu.model.PjxtModel

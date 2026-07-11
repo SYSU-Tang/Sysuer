@@ -44,7 +44,7 @@ public class JSListFragment extends Fragment {
         toolbar.getMenu().setGroupVisible(R.id.editor_group, false);
         jsAdapter.setListener(new AdapterListener() {
             @Override
-            public void onBind(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, RecyclerView.ViewHolder holder, int position) {
+            public void onBind(@NonNull RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, @NonNull RecyclerView.ViewHolder holder, int position) {
                 holder.itemView.setOnClickListener(v -> {
                     v.setTransitionName("script");
                     Bundle bundle = new Bundle();
@@ -81,7 +81,7 @@ public class JSListFragment extends Fragment {
             }
             
             @Override
-            public void onCreate(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
+            public void onCreate(@NonNull RecyclerView.Adapter<RecyclerView.ViewHolder> adapter, ViewBinding binding) {
             
             }
         });

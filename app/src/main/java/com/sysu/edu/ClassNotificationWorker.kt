@@ -1,20 +1,14 @@
-package com.sysu.edu;
+package com.sysu.edu
 
-import android.content.Context;
+import android.content.Context
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import com.sysu.edu.ClassIsland.sendCourseNotification
 
-import androidx.annotation.NonNull;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
-
-public class ClassNotificationWorker extends Worker {
-    public ClassNotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
-    }
-    
-    @NonNull
-    @Override
-    public Result doWork() {
-        ClassIsland.sendCourseNotification(getApplicationContext(), getInputData().getString("courseName"), getInputData().getString("time"), getInputData().getString("teachingPlace"));
-        return Result.success();
-    }
+class ClassNotificationWorker(context: Context, workerParams: WorkerParameters) :
+	Worker(context, workerParams) {
+	override fun doWork(): Result {
+		sendCourseNotification(applicationContext, inputData.getString("courseName"), inputData.getString("time"), inputData.getString("teachingPlace"))
+		return Result.success()
+	}
 }

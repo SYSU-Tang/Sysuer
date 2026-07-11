@@ -32,7 +32,7 @@ class CourseCompletionFragment : StaggeredFragment() {
 					val values: ArrayList<String?> = extractValue(a as JSONObject, arrayOf("acadYearSemester", "courseNumber", "courseName", "courseCategoryName", "credit",  /**/"acadYearSemester", "achievementCourseNumber", "achievementCourseName", "achievementCourseCategoryName", "achievementCredit", "ispassed", "achievementPoint"))
 					if (values[0] != null) values[0] = values[0]!!.replace(",", "|")
 					if (values[5] != null) values[5] = values[5]!!.replace(",", "|")
-					add(a.getString("courseName"), mutableListOf<String?>("学年学期", "课程号", "课程名称", "课程类别", "学分", "成绩获取学年学期", "课程号", "课程名称", "课程类别", "学分", "是否及格", "成绩"), values)
+					add(a.getString("courseName"), mutableListOf("学年学期", "课程号", "课程名称", "课程类别", "学分", "成绩获取学年学期", "课程号", "课程名称", "课程类别", "学分", "是否及格", "成绩"), values)
 				}
 			}
 		})

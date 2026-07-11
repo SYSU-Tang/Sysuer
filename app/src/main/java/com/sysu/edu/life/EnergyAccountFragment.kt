@@ -1,182 +1,144 @@
-package com.sysu.edu.life;
+package com.sysu.edu.life
 
-import static android.text.TextUtils.isEmpty;
-import static com.sysu.edu.api.CommonUtil.extractValue;
-import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import androidx.collection.ArraySet
+import androidx.collection.arraySetOf
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.alibaba.fastjson2.JSONObject
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.sysu.edu.BaseFragment
+import com.sysu.edu.R
+import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.CommonUtil.extractValue
+import com.sysu.edu.databinding.DialogRechargeBinding
+import com.sysu.edu.databinding.FragmentEnergyOrderBinding
+import com.sysu.edu.model.ZhnyModel
+import com.sysu.edu.todo.TitleAdapter
+import com.sysu.edu.view.ButtonAdapter
+import com.sysu.edu.view.PreferenceAdapter
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Response
+import java.io.IOException
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.text.Editable;
-import android.util.ArraySet;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ConcatAdapter;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.sysu.edu.R;
-import com.sysu.edu.api.AuthorizationJar;
-import com.sysu.edu.api.CommonUtil;
-import com.sysu.edu.api.ContextUtil;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Config;
-import com.sysu.edu.api.RequestQueue;
-import com.sysu.edu.api.TargetUrl;
-import com.sysu.edu.databinding.DialogRechargeBinding;
-import com.sysu.edu.databinding.FragmentEnergyOrderBinding;
-import com.sysu.edu.todo.TitleAdapter;
-import com.sysu.edu.view.ButtonAdapter;
-import com.sysu.edu.view.PreferenceAdapter;
-
-import java.io.IOException;
-import java.util.List;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
-
-public class EnergyAccountFragment extends Fragment {
-    
-    final RequestQueue requestQueue = new RequestQueue();
-    final ArraySet<CommonUtil.Tuple2<String, String>> rooms = new ArraySet<>();
-    HttpManager http;
-    String roomCode;
-    String username;
-    FragmentEnergyOrderBinding binding;
-    
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        if (binding == null) {
-            Config config = new Config(this);
-            ConcatAdapter adapter = new ConcatAdapter();
-            ContextUtil contextUtil = new ContextUtil(requireContext());
-            BottomSheetDialog rechargeDialog = new BottomSheetDialog(requireContext());
-            DialogRechargeBinding rechargeBinding = DialogRechargeBinding.inflate(inflater);
-            rechargeDialog.setContentView(rechargeBinding.getRoot());
-            rechargeBinding.submit.setOnClickListener(_ -> {
-                Editable money = rechargeBinding.rmb.getText();
-                int rmb;
-                if (!isEmpty(money) && (rmb = (int) (Float.parseFloat(money.toString()) * 100)) > 0) {
-                    recharge(rmb, roomCode, toStringOrDefault(rechargeBinding.remark.getText()));
-                }
-            });
-            http = new HttpManager(new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(@NonNull Message msg) {
-                    if (msg.what == -1) config.toast(R.string.no_net_connected);
-                    else if (msg.what == 4) {
-                        config.copy("recharge", (String) msg.obj);
-                        Intent intent = Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, (String) msg.obj).putExtra(Intent.EXTRA_SUBJECT, getString(R.string.recharge)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), getString(R.string.share));
-                        if (intent.resolveActivity(requireContext().getPackageManager()) != null)
-                            startActivity(intent);
-                    } else if (msg.getData().getBoolean("isJSON")) {
-                        JSONObject response = JSONObject.parse((String) msg.obj);
-                        if (response.getInteger("code") == 200) {
-                            switch (msg.what) {
-                                case 0 -> {
-                                    JSONObject userInfo = response.getJSONObject("data");
-                                    adapter.addAdapter(new TitleAdapter(getString(R.string.account)));
-                                    PreferenceAdapter preferenceAdapter = new PreferenceAdapter();
-                                    preferenceAdapter.set(List.of(R.string.name, R.string.student_id),
-                                            extractValue(userInfo, new String[]{"name", "username"}), List.of(R.drawable.account, R.drawable.id), requireContext());
-                                    adapter.addAdapter(preferenceAdapter);
-                                    username = userInfo.getString("username");
-                                }
-                                case 1 -> response.getJSONArray("data").forEach(e -> {
-                                    JSONObject roomInfo = (JSONObject) e;
-                                    adapter.addAdapter(new TitleAdapter(getString(R.string.dorm)));
-                                    PreferenceAdapter preferenceAdapter = new PreferenceAdapter();
-                                    preferenceAdapter.set(List.of(R.string.location, R.string.room_name),
-                                            extractValue(roomInfo, new String[]{"areaInfo", "roomName"}), List.of(R.drawable.location, R.drawable.home), requireContext());
-                                    adapter.addAdapter(preferenceAdapter);
-                                    rooms.add(new CommonUtil.Tuple2<>(roomInfo.getString("roomName"), roomInfo.getString("roomCode")));
-                                });
-                                case 2 -> {
-                                    adapter.addAdapter(new TitleAdapter(getString(R.string.balance)));
-                                    PreferenceAdapter preferenceAdapter = new PreferenceAdapter();
-                                    preferenceAdapter.add(getString(R.string.balance), response.getJSONObject("data").getString("balance"), R.drawable.money);
-                                    adapter.addAdapter(preferenceAdapter);
-                                    ButtonAdapter buttonAdapter = new ButtonAdapter();
-                                    buttonAdapter.add(getString(R.string.pay));
-                                    buttonAdapter.setListener((button, _) -> button.setOnClickListener(_ -> rechargeDialog.show()));
-                                    adapter.addAdapter(buttonAdapter);
-                                }
-                                case 3 -> /*https://fee.sysu.edu.cn/gateway/cashier/app/order?orderno=1487527133151629312&scene=wx&showwxpaytitle=1&response_type=code&scope=snsapi_base&state=1&connect_redirect=1#wechat_redirect*/
-                                        gotoWechat(response.getJSONObject("data").getJSONObject("data"));
-                            }
-                            requestQueue.next();
-                        } else contextUtil.login(TargetUrl.ZHNY, requestQueue::retry);
-                    }
-                    super.handleMessage(msg);
-                }
-            });
-            http.setAuthorizationRequired(true);
-            http.setParams(config);
-            http.setAuthorizationJar(new AuthorizationJar(requireContext()));
-            binding = FragmentEnergyOrderBinding.inflate(inflater, container, false);
-            binding.recyclerViewScroll.getRoot().setLayoutManager(new LinearLayoutManager(requireContext()));
-            binding.recyclerViewScroll.getRoot().setAdapter(adapter);
-            requestQueue.add(this::getUserInfo);
-            requestQueue.add(() -> getRoom(username));
-            requestQueue.add(() -> {
-                if (!rooms.isEmpty()) {
-                    roomCode = rooms.valueAt(0).getSecond();
-                    getBalance(roomCode);
-                }
-            });
-            requestQueue.next();
-        }
-        return binding.getRoot();
-    }
-    
-    void getUserInfo() {
-        http.getRequest("https://zhny.sysu.edu.cn/kbp/auth/userInfo", 0);
-    }
-    
-    void getRoom(String username) {
-        http.postRequest("https://zhny.sysu.edu.cn/kbp/admin/sys/personRoom/list", "{\"username\":\"" + username + "\"}", 1);
-    }
-    
-    void getBalance(String room) {
-        http.getRequest("https://zhny.sysu.edu.cn/kbp/pay/roomBalance?roomCode=" + room, 2);
-    }
-    
-    void recharge(int amount, String room, String remark) {
-        http.postRequest("https://zhny.sysu.edu.cn/kbp/pay/recharge/zdPay", String.format("{\"payAmount\":%s,\"body\":\"房间钱包充值\",\"rechargeChannel\":6,\"accountType\":7,\"rechargeType\":7,\"params\":{\"roomCode\":\"%s\"},\"remark\":\"%s\"}", amount, room, remark), 3);
-    }
-    
-    void gotoWechat(JSONObject data) {
-//        data.put("scene", "web");
-        StringBuilder info = new StringBuilder();
-        data.forEach((key, value) -> info.append(key).append("=").append(value).append("&"));
-        new OkHttpClient.Builder().followRedirects(false).build().newCall(http.generateRequest("https://fee.sysu.edu.cn/gateway/unifiedorder/pagepay", info.toString(), "application/x-www-form-urlencoded").build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                http.sendFailure();
-            }
-            
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) {
-                response.header("Location");
-                if (!isEmpty(response.header("Location"))) {
-                    Message message = new Message();
-                    message.what = 4;
-                    message.obj = response.header("Location");
-                    http.getHandler().sendMessage(message);
-                }
-            }
-        });
-    }
+class EnergyAccountFragment : BaseFragment() {
+	val model: ZhnyModel by lazy { ZhnyModel(requireContext()) }
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: ViewGroup?,
+	                          savedInstanceState: Bundle?): View {
+		super.onCreateView(inflater, container, savedInstanceState)
+		val rooms: ArraySet<CommonUtil.Tuple2<String?, String?>?> = arraySetOf()
+		var roomCode: String? = null
+		val adapter = ConcatAdapter()
+		val rechargeDialog = BottomSheetDialog(requireContext())
+		val rechargeBinding = DialogRechargeBinding.inflate(inflater)
+		rechargeDialog.setContentView(rechargeBinding.root)
+		rechargeBinding.submit.setOnClickListener {
+			"${rechargeBinding.rmb.text}".toFloat().times(100).toInt().takeIf { it > 0 }?.let {
+				recharge(it, roomCode, rechargeBinding.remark.text.toString())
+			}
+		}
+		model.message.observe(getViewLifecycleOwner()) { (code, response) ->
+			if (response.getInteger("code") == 200) {
+				when (code) {
+					0 -> {
+						val userInfo = response.getJSONObject("data")
+						adapter.addAdapter(TitleAdapter(getString(R.string.account)))
+						val preferenceAdapter = PreferenceAdapter()
+						preferenceAdapter.set(mutableListOf(R.string.name, R.string.student_id), extractValue(userInfo, arrayOf("name", "username")), mutableListOf(R.drawable.account, R.drawable.id), requireContext())
+						adapter.addAdapter(preferenceAdapter)
+						getRoom(userInfo.getString("username"))
+					}
+					1 -> {
+						response.getJSONArray("data").forEach { e: Any? ->
+							val roomInfo = e as JSONObject
+							adapter.addAdapter(TitleAdapter(getString(R.string.dorm)))
+							val preferenceAdapter = PreferenceAdapter()
+							preferenceAdapter.set(mutableListOf(R.string.location, R.string.room_name), extractValue(roomInfo, arrayOf("areaInfo", "roomName")), mutableListOf(R.drawable.location, R.drawable.home), requireContext())
+							adapter.addAdapter(preferenceAdapter)
+							rooms.add(CommonUtil.Tuple2(roomInfo.getString("roomName"), roomInfo.getString("roomCode")))
+						}
+						if (!rooms.isEmpty()) {
+							roomCode = rooms.valueAt(0)!!.getSecond()
+							getBalance(roomCode)
+						}
+					}
+					2 -> {
+						adapter.addAdapter(TitleAdapter(getString(R.string.balance)))
+						val preferenceAdapter = PreferenceAdapter()
+						preferenceAdapter.add(getString(R.string.balance), response.getJSONObject("data")
+							.getString("balance"), R.drawable.money)
+						adapter.addAdapter(preferenceAdapter)
+						val buttonAdapter = ButtonAdapter()
+						buttonAdapter.add(getString(R.string.pay))
+						buttonAdapter.setListener { button: Button?, _: Int -> button!!.setOnClickListener { rechargeDialog.show() } }
+						adapter.addAdapter(buttonAdapter)
+					}
+					3 ->  /*https://fee.sysu.edu.cn/gateway/cashier/app/order?orderno=1487527133151629312&scene=wx&showwxpaytitle=1&response_type=code&scope=snsapi_base&state=1&connect_redirect=1#wechat_redirect*/
+						gotoWechat(response.getJSONObject("data").getJSONObject("data"))
+				}
+			}
+		}
+		val binding = FragmentEnergyOrderBinding.inflate(inflater, container, false).apply {
+			recyclerViewScroll.root.layoutManager = LinearLayoutManager(requireContext())
+			recyclerViewScroll.root.adapter = adapter
+		}
+		userInfo
+		return binding.root
+	}
+	
+	val userInfo: Unit
+		get() {
+			model.addAndNext("hkbp/auth/userInfo", 0)
+		}
+	
+	fun getRoom(username: String?) {
+		model.addAndNext("hkbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 1)
+	}
+	
+	fun getBalance(room: String?) {
+		model.addAndNext("hkbp/pay/roomBalance?roomCode=$room", 2)
+	}
+	
+	fun recharge(amount: Int, room: String?, remark: String?) {
+		model.addAndNext("hkbp/pay/recharge/zdPay", "{\"payAmount\":$amount,\"body\":\"房间钱包充值\",\"rechargeChannel\":6,\"accountType\":7,\"rechargeType\":7,\"params\":{\"roomCode\":\"$room\"},\"remark\":\"$remark\"}", 3)
+	}
+	
+	fun gotoWechat(data: JSONObject) {
+		val info = StringBuilder()
+		data.forEach { (key: String?, value: Any?) ->
+			info.append("&").append(key).append("=").append(value)
+		}
+		info.substring(0)
+		OkHttpClient.Builder()
+			.followRedirects(false)
+			.build()
+			.newCall(model.http.generateRequest("https://fee.sysu.edu.cn/gateway/unifiedorder/pagepay", "$info", "application/x-www-form-urlencoded")
+						 .build())
+			.enqueue(object : Callback {
+				override fun onFailure(call: Call, e: IOException) {
+				}
+				
+				override fun onResponse(call: Call, response: Response) {
+					val location = response.header("Location")
+					if (!location.isNullOrEmpty()) {
+						model.http.handler.post {
+							config.copy("recharge", location)
+							val intent = Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
+																  .putExtra(Intent.EXTRA_TEXT, location)
+																  .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.recharge))
+																  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), getString(R.string.share))
+							if (intent.resolveActivity(requireContext().packageManager) != null) startActivity(intent)
+						}
+					}
+				}
+			})
+	}
 }

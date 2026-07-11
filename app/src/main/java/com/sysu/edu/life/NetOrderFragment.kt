@@ -184,7 +184,7 @@ class NetOrderFragment : StaggeredFragment() {
 											}
 										}
 									}
-									add(orderDetail[if (msg.what == 0) 4 else 0], if (msg.what == 0) mutableListOf<String?>("订单号", "所有者", "金额", "支付方式", "订单时间", "订单状态", "服务", "代支付者") else keys, orderDetail)
+									add(orderDetail[if (msg.what == 0) 4 else 0], if (msg.what == 0) mutableListOf("订单号", "所有者", "金额", "支付方式", "订单时间", "订单状态", "服务", "代支付者") else keys, orderDetail)
 								}
 							}
 						}

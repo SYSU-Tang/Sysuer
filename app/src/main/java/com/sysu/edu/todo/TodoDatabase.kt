@@ -157,7 +157,7 @@ abstract class TodoDatabase : RoomDatabase() {
 					try {
 						database.todoDao()
 							.insertTypes(context.resources.getStringArray(R.array.todo_base_type)
-											 .map<String, TypeEntity> { TypeEntity(name = it, color = null) })
+											 .map<String, TypeEntity> { TypeEntity(name = it) })
 					} catch (_: Exception) {
 					}
 				}

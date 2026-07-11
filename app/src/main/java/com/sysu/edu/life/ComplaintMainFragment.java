@@ -1,7 +1,5 @@
 package com.sysu.edu.life;
 
-import static com.sysu.edu.api.CommonUtil.toStringOrDefault;
-
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -18,16 +16,15 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.sysu.edu.BaseFragment;
 import com.sysu.edu.R;
 import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.api.Config;
 import com.sysu.edu.databinding.FragmentComplaintMainBinding;
 import com.sysu.edu.databinding.ItemTodoBinding;
 import com.sysu.edu.view.RecyclerAdapter;
@@ -41,12 +38,13 @@ import okhttp3.RequestBody;
 import okio.BufferedSink;
 import okio.Okio;
 
-public class ComplaintMainFragment extends Fragment {
+public class ComplaintMainFragment extends BaseFragment {
     
     HttpManager http;
     
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         FragmentComplaintMainBinding binding = FragmentComplaintMainBinding.inflate(inflater, container, false);
         binding.captchaImage.setOnClickListener(_ -> loadCaptcha(binding.captchaImage));
         ActivityResultLauncher<Intent> fileLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (result) -> {
@@ -59,7 +57,6 @@ public class ComplaintMainFragment extends Fragment {
         });
         binding.uploadAttachment.setOnClickListener(_ -> pickAttachment(fileLauncher));
         loadCaptcha(binding.captchaImage);
-        Config config = new Config(this);
         http = new HttpManager(new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -143,7 +140,7 @@ public class ComplaintMainFragment extends Fragment {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             JSONObject item = get(position);
             ItemTodoBinding binding = ItemTodoBinding.bind(holder.itemView);
-            binding.title.setText(item.getString("title",""));
+            binding.title.setText(item.getString("title", ""));
             super.onBindViewHolder(holder, position);
         }
     }

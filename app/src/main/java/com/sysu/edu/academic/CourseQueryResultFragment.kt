@@ -42,7 +42,7 @@ class CourseQueryResultFragment : StaggeredFragment() {
 					val values: ArrayList<String?> = extractValue(e as JSONObject, arrayOf("yearTerm", "courseName", "courseNum", "openingUnitName", "courseCategoryName", "score", "teachingName", "limitNumber", "selectedNumber", "examMode", "teachingTimePlaceStr", "openingSchoolName", "readObj", "classNumber"))
 					if (values[10] != null) values[10] = values[10]!!.replace(",", "\n")
 						.replace("/", " | ")
-					add(e.getString("courseName"), mutableListOf<String?>("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values)
+					add(e.getString("courseName"), mutableListOf("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values)
 				}
 			}
 		})

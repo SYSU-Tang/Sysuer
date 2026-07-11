@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ConcatAdapter
@@ -26,7 +25,6 @@ import com.sysu.edu.databinding.FragmentGymOrderBinding
 import com.sysu.edu.model.GymModel
 import com.sysu.edu.todo.TitleAdapter
 import com.sysu.edu.view.ButtonAdapter
-import com.sysu.edu.view.OnBindListener
 import com.sysu.edu.view.PreferenceAdapter
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -87,12 +85,10 @@ class GymReservationFragment : BaseFragment() {
 					}
 					val buttonAdapter = ButtonAdapter().apply {
 						add(getString(R.string.cancel_reservation))
-						setListener(object : OnBindListener {
-							override fun onBind(button: Button, position: Int) {
-								button.setOnClickListener { deleteReservation(item.getString("Identity")) }
-								regetReservation()
-							}
-						})
+						setListener { button, position ->
+							button.setOnClickListener { deleteReservation(item.getString("Identity")) }
+							regetReservation()
+						}
 					}
 					concatAdapter!!.addAdapter(titleAdapter)
 					concatAdapter!!.addAdapter(preferenceAdapter)

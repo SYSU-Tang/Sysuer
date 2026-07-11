@@ -77,7 +77,7 @@ class CourseCompletionActivity : BaseActivity() {
 								})
 						}
 					})
-					creditFragment.add((a as JSONObject).getString("courseCategoryName"), mutableListOf<String?>("课程类别", "培养方案学分要求", "免修课程学分", "实际毕业学分要求", "实得"), extractValue(a, arrayOf("courseCategoryName", "trainingCredit", "exemptCredit", "actualCredit", "earnedCredit")))
+					creditFragment.add((a as JSONObject).getString("courseCategoryName"), mutableListOf("课程类别", "培养方案学分要求", "免修课程学分", "实际毕业学分要求", "实得"), extractValue(a, arrayOf("courseCategoryName", "trainingCredit", "exemptCredit", "actualCredit", "earnedCredit")))
 				}
 			}
 		})

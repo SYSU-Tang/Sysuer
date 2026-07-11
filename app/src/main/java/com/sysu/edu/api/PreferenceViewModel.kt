@@ -1,105 +1,65 @@
-package com.sysu.edu.api;
+package com.sysu.edu.api
 
-import android.content.SharedPreferences;
+import android.app.Application
+import android.content.SharedPreferences
+import androidx.core.content.edit
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.preference.PreferenceManager
 
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
-import java.util.HashSet;
-import java.util.Set;
-
-public class PreferenceViewModel extends ViewModel {
-    
-    private final static String Theme = "theme";
-    private final static String Home = "home";
-    private final static String Language = "language";
-    private final static String Qrcode = "qrcode";
-    private final static String Update = "update";
-    private final static String IsFirstLaunch = "launch";
-    private final static String IsAgree = "agree";
-    private final MutableLiveData<Boolean> isAgreeLiveData = new MutableLiveData<>();
-    private final MutableLiveData<Set<String>> dashboardLiveData = new MutableLiveData<>();
-    
-    SharedPreferences pm;
-    
-    public void setPM(SharedPreferences oldPM) {
-        pm = oldPM;
-    }
-    
-    public String getString(String key, String defValue) {
-        return pm.getString(key, defValue);
-    }
-    
-    public boolean getBoolean(String key, boolean defValue) {
-        return pm.getBoolean(key, defValue);
-    }
-    
-    public SharedPreferences getPm() {
-        return pm;
-    }
-    
-    public String getTheme() {
-        return getString(Theme, "2");
-    }
-    
-    private Set<String> getSet(String key) {
-        return pm.getStringSet(key, new HashSet<>());
-    }
-    
-    public Set<String> getDashboard() {
-        return getSet("dashboard");
-    }
-    
-    public MutableLiveData<Set<String>> getDashboardLiveData() {
-        return dashboardLiveData;
-    }
-    
-    public void setDashboardLiveData(Set<String> dashboard) {
-        dashboardLiveData.setValue(dashboard);
-    }
-    
-    public String getHome() {
-        return getString(Home, "2");
-    }
-    
-    public String getLanguage() {
-        return getString(Language, "2");
-    }
-    
-    public String getQrcode() {
-        return getString(Qrcode, "");
-    }
-    
-    public boolean getIsAgree() {
-        return !getBoolean(IsAgree, false);
-    }
-    
-    public void setIsAgree(boolean isAgree) {
-        pm.edit().putBoolean(IsAgree, isAgree).apply();
-    }
-    
-    public boolean getIsFirstLaunch() {
-        return getBoolean(IsFirstLaunch, false);
-    }
-    
-    public void setIsFirstLaunch(boolean isFirstLaunch) {
-        pm.edit().putBoolean(IsFirstLaunch, isFirstLaunch).apply();
-    }
-    
-    public boolean getUpdate() {
-        return getBoolean(Update, true);
-    }
-    
-    public MutableLiveData<Boolean> getIsAgreeLiveData() {
-        return isAgreeLiveData;
-    }
-    
-    public void setIsAgreeLiveData(boolean isAgree) {
-        isAgreeLiveData.setValue(isAgree);
-    }
-    
-    public void initLiveData() {
-        isAgreeLiveData.setValue(getIsAgree());
-        dashboardLiveData.setValue(getDashboard());
-    }
+class PreferenceViewModel(application: Application) : AndroidViewModel(application) {
+	val isAgreeLiveData: MutableLiveData<Boolean> = MutableLiveData()
+	val dashboardLiveData: MutableLiveData<MutableSet<String?>?> = MutableLiveData<MutableSet<String?>?>()
+	val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
+	fun getString(key: String?, defValue: String?): String? =
+		sharedPreferences.getString(key, defValue)
+	
+	fun getBoolean(key: String?, defValue: Boolean): Boolean =
+		sharedPreferences.getBoolean(key, defValue)
+	
+	val theme: String?
+		get() = getString(THEME, "2")
+	
+	init {
+		isAgreeLiveData.value = isAgree
+		dashboardLiveData.value = dashboard
+	}
+	
+	private fun getSet(key: String?, defValue: Set<String?>?): MutableSet<String?>? =
+		sharedPreferences.getStringSet(key, defValue)
+	
+	val dashboard: MutableSet<String?>?
+		get() = getSet("dashboard", (0..5).map { "$it" }.toSet())
+	val home: String?
+		get() = getString(HOME, "2")
+	val language: String?
+		get() = getString(LANGUAGE, "2")
+	val qrcode: String?
+		get() = getString(QRCODE, "")
+	var isAgree: Boolean
+		get() = getBoolean(IS_AGREE, false)
+		set(isAgree) {
+			sharedPreferences.edit { putBoolean(IS_AGREE, isAgree) }
+		}
+	var isFirstLaunch: Boolean
+		get() = getBoolean(IS_FIRST_LAUNCH, false)
+		set(isFirstLaunch) {
+			sharedPreferences.edit { putBoolean(IS_FIRST_LAUNCH, isFirstLaunch) }
+		}
+	val update: Boolean
+		get() = getBoolean(UPDATE, true)
+	
+	fun setIsAgreeLiveData(isAgree: Boolean) {
+		isAgreeLiveData.value = isAgree
+	}
+	
+	companion object {
+		private const val THEME = "theme"
+		private const val HOME = "home"
+		private const val LANGUAGE = "language"
+		private const val QRCODE = "qrcode"
+		private const val UPDATE = "update"
+		private const val IS_FIRST_LAUNCH = "launch"
+		private const val IS_AGREE = "agree"
+	}
 }

@@ -334,10 +334,7 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity-alias>
-
-        <receiver android:name=".AlarmReceiver" />
         <receiver android:name=".todo.TodoReminderReceiver" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.sysu.edu.fileProvider"

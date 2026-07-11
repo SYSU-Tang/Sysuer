@@ -17,7 +17,6 @@ import com.sysu.edu.api.CommonUtil.toStringOrDefault
 import com.sysu.edu.databinding.FragmentComplaintResponseBinding
 import com.sysu.edu.life.ComplaintSquareFragment.SquareAdapter
 import com.sysu.edu.model.XinfangModel
-import java.util.function.Consumer
 
 class ComplaintResponseFragment : BaseFragment() {
 	lateinit var model: XinfangModel

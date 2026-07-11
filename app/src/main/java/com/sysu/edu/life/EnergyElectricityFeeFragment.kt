@@ -88,7 +88,7 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 						.getJSONArray("useEleByDayList")
 						.forEach { item: Any? ->
 							val useElectric = (item as JSONObject).get("useElectric")
-							val content = useElectric?.toString() ?: "暂无数据"
+							val content = useElectric?.toString() ?: getString(R.string.no_data_available)
 							val date = LocalDate.parse(item.getString("date"), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 							val calendar = Calendar().apply {
 								scheme = content
@@ -145,7 +145,7 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 			}
 			else config.toast(response.getString("msg"))
 		}
-		roomCode.observe(getViewLifecycleOwner()) { v: String? ->
+		roomCode.observe(viewLifecycleOwner) { v: String? ->
 			v?.takeUnless { it.isEmpty() }?.let {
 				val date = LocalDate.of(binding.calendarView.selectedCalendar.year, binding.calendarView.selectedCalendar.month, 1)
 				getElectricityConsumption(it, date.with(TemporalAdjusters.firstDayOfMonth())

@@ -113,7 +113,7 @@ class GradeForLevelActivity : BaseActivity() {
 					3 -> {
 						if (total == -1) total = response.getJSONObject("data").getInteger("total")
 						response.getJSONObject("data").getJSONArray("rows").forEach { item: Any? ->
-							fragment.add((item as JSONObject).getString("courseName"), mutableListOf<String?>("绩点", "教学班编号", "课程类别", "课程ID", "课程名称", "课程编号", "学分", "考试性质", "等级", "年级", "开设单位", "学期", "总学时", "培养类别", "总成绩"), extractValue(item, arrayOf("achievementPoint", "classesNum", "courseCategoryName", "courseId", "courseName", "courseNum", "credit", "examNatureName", "finalAchievementStr", "grade", "openClassUnitName", "schoolSemester", "sumHours", "trainingCategoryName", "totalAchievement")))
+							fragment.add((item as JSONObject).getString("courseName"), mutableListOf("绩点", "教学班编号", "课程类别", "课程ID", "课程名称", "课程编号", "学分", "考试性质", "等级", "年级", "开设单位", "学期", "总学时", "培养类别", "总成绩"), extractValue(item, arrayOf("achievementPoint", "classesNum", "courseCategoryName", "courseId", "courseName", "courseNum", "credit", "examNatureName", "finalAchievementStr", "grade", "openClassUnitName", "schoolSemester", "sumHours", "trainingCategoryName", "totalAchievement")))
 						}
 					}
 					0, 1, 2 -> {
