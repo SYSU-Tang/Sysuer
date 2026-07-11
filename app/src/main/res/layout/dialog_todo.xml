@@ -96,8 +96,7 @@
             app:chipSpacingVertical="-4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/subject"
-            app:singleSelection="true">
+            app:layout_constraintTop_toBottomOf="@id/subject">
 
             <com.google.android.material.chip.Chip
                 android:layout_width="wrap_content"
@@ -130,7 +129,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.listitem.ListItemLayout
-            android:id="@+id/priority_container"
+            android:id="@+id/subtask_header"
             style="@style/Widget.Material3.ListItemLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -144,6 +143,60 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/subtask_icon"
+                        style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/add" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/subtask_key"
+                        style="@style/Widget.Material3.TextView.ListItem.LabelText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/subtask"
+                        app:layout_constraintStart_toEndOf="@id/subtask_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.listitem.ListItemCardView>
+        </com.google.android.material.listitem.ListItemLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/subtask"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subtask_header" />
+
+        <com.google.android.material.listitem.ListItemLayout
+            android:id="@+id/priority_container"
+            style="@style/Widget.Material3.ListItemLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subtask">
+
+            <com.google.android.material.listitem.ListItemCardView
+                style="@style/Widget.Material3.ListItemCardView.Segmented"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -199,13 +252,85 @@
             </com.google.android.material.listitem.ListItemCardView>
         </com.google.android.material.listitem.ListItemLayout>
 
+        <com.google.android.material.listitem.ListItemLayout
+            android:id="@+id/color_container"
+            style="@style/Widget.Material3.ListItemLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/priority_container">
+
+            <com.google.android.material.listitem.ListItemCardView
+                style="@style/Widget.Material3.ListItemCardView.Segmented"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/color_icon"
+                        style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/color" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/color_key"
+                        style="@style/Widget.Material3.TextView.ListItem.LabelText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/color"
+                        app:layout_constraintStart_toEndOf="@id/color_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <HorizontalScrollView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/color_key"
+                        app:layout_constraintTop_toBottomOf="@id/color_key">
+
+                        <LinearLayout
+                            android:id="@+id/color_list"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.listitem.ListItemCardView>
+        </com.google.android.material.listitem.ListItemLayout>
+
         <LinearLayout
             android:id="@+id/times"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/priority_container" />
+            app:layout_constraintTop_toBottomOf="@id/color_container" />
+
+        <LinearLayout
+            android:id="@+id/deadline_times"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/times" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -28,7 +28,6 @@ import com.sysu.edu.databinding.FragmentCourseSelectionSelectedBinding
 import com.sysu.edu.databinding.ItemCourseSelectionBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.RecyclerAdapter
-import java.util.function.Consumer
 
 class CourseSelectionSelectedFragment : BaseFragment() {
 	var adapter: CourseSelectedAdapter? = null
@@ -100,7 +99,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 						total = response.getJSONObject("data").getInteger("total")
 						response.getJSONObject("data")
 							.getJSONArray("rows")
-							.forEach(Consumer { o: Any? -> adapter!!.add(o as JSONObject?) })
+							.forEach { o: Any? -> adapter!!.add(o as JSONObject) }
 					}
 					1 -> {
 						if (response.containsKey("data") && response.getString("data") != null) config.toast(response.getString("data"))

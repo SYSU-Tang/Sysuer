@@ -45,7 +45,7 @@ class EvaluationCourseFragment : BaseFragment() {
 		val values: Array<String> = arrayOf("%s", "教师：%s", "课程类型：%s", "开课院系：%s", "教学班号：%s", "课程代码：%s", "学期：%s", "评价状态：%s")
 		val arguments: Array<String> = arrayOf("rwid", "wjid", "sxz", "pjrdm", "bpdm", "kcdm", "rwh", "lsjgzt", "bpmc")
 		val adp = CourseEvaluationAdapter().apply {
-			setListener(object : AdapterListener {
+			listener = object : AdapterListener {
 				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
@@ -74,14 +74,14 @@ class EvaluationCourseFragment : BaseFragment() {
 				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                      binding: ViewBinding?) {
 				}
-			})
+			}
 		}
 		binding.root.adapter = adp
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
 			if (response.get("code") == "200") if (message.first == 1) {
 				val result = response.getJSONObject("result")
-				result.getJSONArray("list").forEach { e: Any? -> adp.add(e as JSONObject?) }
+				result.getJSONArray("list").forEach { e: Any? -> adp.add(e as JSONObject) }
 				if (result.getInteger("total") / 20.0 > page) getEvaluation(type, rwid, pjrdm!!)
 			}
 		})

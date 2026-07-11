@@ -31,11 +31,11 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 	 */
 	override fun onDraw(canvas: Canvas) {
 		if (mItems!!.isNotEmpty()) {
-			mItemWidth = (width - mDelegate!!.calendarPaddingLeft - mDelegate!!.calendarPaddingRight) / 7
+			mItemWidth = (width - mDelegate.calendarPaddingLeft - mDelegate.calendarPaddingRight) / 7
 			onPreviewHook()
 			
 			(mItems as Iterable<Any?>).forEachIndexed { i, calendar ->
-				val x = i * mItemWidth + mDelegate!!.calendarPaddingLeft
+				val x = i * mItemWidth + mDelegate.calendarPaddingLeft
 				onLoopStart()
 				val isSelected = i == mCurrentItem
 				val hasScheme = (calendar as Calendar).hasScheme()
@@ -43,7 +43,7 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 					val isDrawSelected = //是否继续绘制选中的onDrawScheme
 						if (isSelected) onDrawSelected(canvas, calendar, x, true) else false
 					if (isDrawSelected || !isSelected) { //将画笔设置为标记颜色
-						mSchemePaint.setColor(if (calendar.schemeColor != 0) calendar.schemeColor else mDelegate!!.schemeThemeColor)
+						mSchemePaint.setColor(if (calendar.schemeColor != 0) calendar.schemeColor else mDelegate.schemeThemeColor)
 						onDrawScheme(canvas, calendar, x)
 					}
 				}
@@ -57,50 +57,50 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 		if (isClick) {
 			val calendar = index ?: return
 			if (onCalendarIntercept(calendar)) {
-				mDelegate!!.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
+				mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
 				return
 			}
 			if (!isInRange(calendar)) {
-				mDelegate!!.mCalendarSelectListener?.onCalendarOutOfRange(calendar)
+				mDelegate.mCalendarSelectListener?.onCalendarOutOfRange(calendar)
 				return
 			}
 			mCurrentItem = mItems!!.indexOf(calendar)
-			mDelegate!!.mInnerListener?.onWeekDateSelected(calendar, true)
-			mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate!!.weekStart))
+			mDelegate.mInnerListener?.onWeekDateSelected(calendar, true)
+			mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 			
 			
-			mDelegate!!.mCalendarSelectListener?.onCalendarSelect(calendar, true)
+			mDelegate.mCalendarSelectListener?.onCalendarSelect(calendar, true)
 			
 			invalidate()
 		}
 	}
 	
 	override fun onLongClick(v: View?): Boolean {
-		if (mDelegate!!.mCalendarLongClickListener == null) return false
+		if (mDelegate.mCalendarLongClickListener == null) return false
 		if (!isClick) {
 			return false
 		}
 		val calendar = index ?: return false
 		if (onCalendarIntercept(calendar)) {
-			mDelegate!!.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
+			mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
 			return true
 		}
 		if (!isInRange(calendar)) {
-			mDelegate!!.mCalendarLongClickListener?.onCalendarLongClickOutOfRange(calendar)
+			mDelegate.mCalendarLongClickListener?.onCalendarLongClickOutOfRange(calendar)
 			return true
 		}
 		
-		if (mDelegate!!.isPreventLongPressedSelected) { //如果启用拦截长按事件不选择日期
-			mDelegate!!.mCalendarLongClickListener?.onCalendarLongClick(calendar)
+		if (mDelegate.isPreventLongPressedSelected) { //如果启用拦截长按事件不选择日期
+			mDelegate.mCalendarLongClickListener?.onCalendarLongClick(calendar)
 			return true
 		}
 		
 		mCurrentItem = mItems!!.indexOf(calendar)
-		mDelegate!!.mIndexCalendar = mDelegate!!.mSelectedCalendar
-		mDelegate!!.mInnerListener?.onWeekDateSelected(calendar, true)
-		mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate!!.weekStart))
-		mDelegate!!.mCalendarSelectListener?.onCalendarSelect(calendar, true)
-		mDelegate!!.mCalendarLongClickListener?.onCalendarLongClick(calendar)
+		mDelegate.mIndexCalendar = mDelegate.mSelectedCalendar
+		mDelegate.mInnerListener?.onWeekDateSelected(calendar, true)
+		mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
+		mDelegate.mCalendarSelectListener?.onCalendarSelect(calendar, true)
+		mDelegate.mCalendarLongClickListener?.onCalendarLongClick(calendar)
 		
 		invalidate()
 		return true

@@ -125,7 +125,7 @@ class ClassroomQueryActivity : BaseActivity() {
 					val data = response.getJSONObject("data")
 					total = data.getInteger("total")
 					data.getJSONArray("rows")
-						.forEach { a: Any? -> roomAdapter.add(a as JSONObject?) }
+						.forEach { a: Any? -> roomAdapter.add(a as JSONObject) }
 					BottomSheetBehavior.from<LinearLayout?>(binding.resultSheet)
 						.setState(BottomSheetBehavior.STATE_EXPANDED)
 					roomAdapter.setHost(model.host)

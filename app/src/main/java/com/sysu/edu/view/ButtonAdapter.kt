@@ -37,6 +37,6 @@ class ButtonAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
 	override fun getItemCount(): Int = 1
 }
 
-interface OnBindListener {
+fun interface OnBindListener {
 	fun onBind(button: Button, position: Int)
 }

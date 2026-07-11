@@ -13,7 +13,6 @@ import androidx.viewbinding.ViewBinding
 import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.trim
 import com.sysu.edu.api.Config
 import com.sysu.edu.databinding.ItemEvaluationBinding
@@ -29,50 +28,48 @@ class EvaluationCategoryFragment : BaseFragment() {
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
-		config = Config(this)
 		model = PjxtModel(requireContext())
 		staggeredGridLayoutManager = StaggeredGridLayoutManager(config.column, 1)
 		val binding = RecyclerViewScrollBinding.inflate(inflater, container, false).apply {
-			root.layoutManager=staggeredGridLayoutManager
+			root.layoutManager = staggeredGridLayoutManager
 		}
 		val categoryAdapter = CategoryAdapter()
 		val keys: Array<String> = arrayOf("rwmc", "rwkssj", "rwjssj", "pjsl", "ypsl")
 		val values: Array<String> = arrayOf("%s", "起始时间：%s", "结束时间：%s", "总评数：%s", "已评数：%s")
 		val arguments: Array<String> = arrayOf("rwid", "firstwjid", "pjrdm")
-		categoryAdapter.setListener(object : AdapterListener {
+		categoryAdapter.listener = object : AdapterListener {
 			override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 			                    holder: RecyclerView.ViewHolder,
 			                    position: Int) {
-				val bind = ItemEvaluationBinding.bind(holder.itemView)
+				val binding = ItemEvaluationBinding.bind(holder.itemView)
 				val args = Bundle()
 				val item = categoryAdapter.get(position)
 				for (param in arguments) args.putString(param, item.getString(param))
-				val listener = View.OnClickListener {  findNavController(binding.root).navigate(R.id.from_category_to_course, args) }
-				bind.open.setOnClickListener(listener)
+				val listener = View.OnClickListener { findNavController(binding.root).navigate(R.id.from_category_to_course, args) }
+				binding.open.setOnClickListener(listener)
 				holder.itemView.setOnClickListener(listener)
-				bind.title.setCompoundDrawablesWithIntrinsicBounds(if (item.getString("pjsl")
-						.toInt() <= item.getString("ypsl")
-						.toInt()) R.drawable.submit else R.drawable.window, 0, 0, 0)
-				bind.title.setCompoundDrawablePadding(36)
-				bind.title.text = String.format(values[0], trim(item.getString(keys[0])))
+				binding.title.setCompoundDrawablesWithIntrinsicBounds(if (item.getString("pjsl")
+						.toInt() <= item.getString("ypsl").toInt()) R.drawable.submit
+				                                                   else R.drawable.window, 0, 0, 0)
+				binding.title.setCompoundDrawablePadding(36)
+				binding.title.text = String.format(values[0], trim(item.getString(keys[0])))
 				val stringBuilder = StringBuilder()
 				keys.forEachIndexed { index, string ->
 					stringBuilder.append(String.format(values[index], trim(item.getString(string))))
 						.append("\n")
 				}
-				bind.startTime.text = "$stringBuilder".trim { it <= ' ' }
+				binding.startTime.text = "$stringBuilder".trim { it <= ' ' }
 			}
 			
 			override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 			                      binding: ViewBinding?) {
 			}
-		})
-		binding.root.setAdapter(categoryAdapter)
-		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val data = message.second
-			if (data.get("code") == "200") if (message.first == 1) data.getJSONObject("result")
+		}
+		binding.root.adapter = categoryAdapter
+		model.message.observe(requireActivity(), Observer { (code, data) ->
+			if (data.get("code") == "200") if (code == 1) data.getJSONObject("result")
 				.getJSONArray("list")
-				.forEach { e: Any? -> categoryAdapter.add(e as JSONObject?) }
+				.forEach { categoryAdapter.add(it as JSONObject) }
 		})
 		evaluation
 		return binding.root
@@ -91,8 +88,7 @@ class EvaluationCategoryFragment : BaseFragment() {
 	class CategoryAdapter : RecyclerAdapter<JSONObject>() {
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 			return object :
-				RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-											.root) {}
+				RecyclerView.ViewHolder(ItemEvaluationBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
 		}
 	}
 }

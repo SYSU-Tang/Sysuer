@@ -11,7 +11,8 @@
     <uses-permission android:name="android.permission.BIND_SHORTCUT" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" /> <!-- <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <queries>
         <package android:name="com.tencent.wework" />
 
@@ -335,6 +336,7 @@
         </activity-alias>
 
         <receiver android:name=".AlarmReceiver" />
+        <receiver android:name=".todo.TodoReminderReceiver" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

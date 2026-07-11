@@ -35,7 +35,7 @@ class SchoolWorkWarning : BaseActivity() {
 			setScrollBottom {
 				if (total > page * 10) warning
 			}
-			setViewTableMenu(binding.toolbar)
+			addExportMenu(binding.toolbar)
 		}
 		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second

@@ -126,7 +126,7 @@ open class StaggeredFragment : BaseFragment() {
 		return "$markdown"
 	}
 	
-	fun setViewTableMenu(toolbar: MaterialToolbar) {
+	fun addExportMenu(toolbar: MaterialToolbar) {
 		toolbar.menu.add(R.string.export).setIcon(R.drawable.export).setOnMenuItemClickListener {
 			export(toolbar, toolbar.title.toString())
 			false
@@ -139,25 +139,25 @@ open class StaggeredFragment : BaseFragment() {
 						  .toBundle())
 	}
 	
-	class TwoColumnsAdapter(@JvmField var key: MutableList<String?>,
-	                        @JvmField var value: MutableList<String?>,
+	class TwoColumnsAdapter(@JvmField var keys: MutableList<String?>,
+	                        @JvmField var values: MutableList<String?>,
 	                        val hideNull: Boolean) :
 		RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
 		var rowListener: AdapterListener? = null
 		val map: LinkedHashMap<String, String?> = linkedMapOf()
 		fun setValue(value: MutableList<String?>) {
-			this.value = value
+			values = value
 			notifyItemRangeChanged(0, itemCount)
 		}
 		
 		fun setKey(key: MutableList<String?>) {
-			this.key = key
+			keys = key
 			notifyItemRangeChanged(0, itemCount)
 		}
 		
 		fun setKeyAndValue(key: MutableList<String?>, value: MutableList<String?>) {
-			this.key = key
-			this.value = value
+			keys = key
+			values = value
 			notifyItemRangeChanged(0, itemCount)
 		}
 		
@@ -167,8 +167,8 @@ open class StaggeredFragment : BaseFragment() {
 		
 		fun add(row: Int = itemCount - 1, key: String?, value: String?) {
 			if (row in 1..<itemCount) {
-				this.key.add(key)
-				this.value.add(value)
+				keys.add(key)
+				values.add(value)
 				notifyItemInserted(row)
 			}
 		}
@@ -181,12 +181,12 @@ open class StaggeredFragment : BaseFragment() {
 		
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 			val binding = ItemTwoColumnRowBinding.bind(holder.itemView)
-			binding.key.text = key[position]
-			position.takeIf { it < value.size }?.let { value[it] }?.let {
+			binding.key.text = keys[position]
+			position.takeIf { it < values.size }?.let { values[it] }?.let {
 				binding.value.text = it
 				holder.itemView.setOnClickListener { _ ->
 					val clip = binding.root.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-					clip.setPrimaryClip(ClipData.newPlainText(key[position], it))
+					clip.setPrimaryClip(ClipData.newPlainText(keys[position], it))
 				}
 			} ?: run {
 				if (hideNull) {
@@ -201,7 +201,7 @@ open class StaggeredFragment : BaseFragment() {
 			rowListener = listener
 		}
 		
-		override fun getItemCount(): Int = min(key.size, value.size)
+		override fun getItemCount(): Int = min(keys.size, values.size)
 	}
 	
 	class StaggeredAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
@@ -252,7 +252,7 @@ open class StaggeredFragment : BaseFragment() {
 		}
 		
 		fun addRow(pos: Int = itemCount - 1, key: String?, value: String?) {
-			if (pos < itemCount) {
+			if (pos in 0..<itemCount) {
 				keys[pos]?.add(key)
 				values[pos]?.add(value)
 				notifyItemChanged(pos)
@@ -262,12 +262,11 @@ open class StaggeredFragment : BaseFragment() {
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 			val item = ItemCardBinding.bind(holder.itemView)
 			val context = holder.itemView.context
-			if (icons[position] != null) {
+			icons[position]?.let {
 				item.title.setCompoundDrawablePadding(24)
-				val icon = AppCompatResources.getDrawable(context, icons[position]!!)
-				if (icon != null) {
-					icon.setBounds(0, 0, 72, 72)
-					item.title.setCompoundDrawables(icon, null, null, null)
+				AppCompatResources.getDrawable(context, it)?.apply {
+					setBounds(0, 0, 72, 72)
+					item.title.setCompoundDrawables(this, null, null, null)
 				}
 			} // 设置图标
 			item.title.text = titles[position] // 设置标题
@@ -277,9 +276,7 @@ open class StaggeredFragment : BaseFragment() {
 				twoColumnsAdapter = TwoColumnsAdapter(keys[position]!!, values[position]!!, hideNull)
 				recyclerView.setAdapter(twoColumnsAdapter)
 			}
-			else {
-				twoColumnsAdapter.setKeyAndValue(keys[position]!!, values[position]!!)
-			}
+			else twoColumnsAdapter.setKeyAndValue(keys[position]!!, values[position]!!)
 			if (twoColumnsAdapters.size <= position || twoColumnsAdapters[position] == null) twoColumnsAdapters.add(position, twoColumnsAdapter)
 			
 			adapterListener?.onBind(this, holder, position)

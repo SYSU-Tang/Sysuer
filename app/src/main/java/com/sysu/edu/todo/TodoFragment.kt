@@ -18,6 +18,7 @@ import com.sysu.edu.R
 import com.sysu.edu.api.CalendarManager
 import com.sysu.edu.api.CommonUtil.isEmpty
 import com.sysu.edu.databinding.FragmentTodoBinding
+import kotlin.collections.toTypedArray
 
 class TodoFragment : BaseFragment() {
 	val todoInfo: TodoInfo = TodoInfo().apply {
@@ -59,7 +60,7 @@ class TodoFragment : BaseFragment() {
 		todoManager.setOnRefreshListener { refresh() }
 		requireActivity().findViewById<FloatingActionButton>(R.id.add).setOnClickListener {
 			todoManager.showTodoAddDialog()
-			todoManager.getTodoInfo().setDueDate(date)
+			todoManager.todoInfo.dueDate = date
 		}
 		(requireActivity().findViewById<View?>(R.id.todo_date) as MaterialButtonToggleGroup).addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean ->
 			if (checkedId == R.id.due_todo) due = isChecked
@@ -79,14 +80,12 @@ class TodoFragment : BaseFragment() {
 		return binding.root
 	}
 	
-	val date: String?
-		get() {
-			return calendarManager.toDateString(calendarView.selectedCalendar.timeInMillis)
-		}
+	val date: String
+		get() = calendarManager.toDateString(calendarView.selectedCalendar.timeInMillis) ?:""
 	
 	fun refresh() {
-		val a = mutableListOf<String?>()
-		val b = mutableListOf<String?>()
+		val a = mutableListOf<String>()
+		val b = mutableListOf<String>()
 		val map = mutableMapOf<String, MutableLiveData<*>>()        //        map.put("due_date", todoInfo.getDueDate());		//        map.put("ddl", todoInfo.getDdlDate());
 		map["status"] = todoInfo.status
 		map["title"] = todoInfo.title
@@ -134,6 +133,6 @@ class TodoFragment : BaseFragment() {
 			a.add("status = ?")
 			b.add("1")
 		}
-		todoManager.refresh(a.joinToString(" AND "), b.toTypedArray<String?>())
+		todoManager.refresh(a.joinToString(" AND "),b.toTypedArray())
 	}
 }

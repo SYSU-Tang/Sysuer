@@ -16,7 +16,7 @@ material = "1.14.0"
 constraintlayout = "2.2.1"
 lifecycleLivedataKtx = "2.11.0"
 lifecycleViewmodelKtx = "2.11.0"
-miuixNavigation3Ui = "0.9.2"
+miuixNavigation3Ui = "0.9.3"
 navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
 legacySupportV4 = "1.0.0"
@@ -28,7 +28,8 @@ activityCompose = "1.13.0"
 composeBom = "2026.06.01"
 preference = "1.2.1"
 recyclerview = "1.4.0"
-rxjava = "4.0.0-alpha-15"
+room3Compiler = "3.0.0"
+rxjava = "4.0.0-alpha-17"
 workRuntime = "2.11.2"
 materialPreference = "2.0.0"
 materialVersion = "2.7.2"
@@ -55,11 +56,14 @@ multiplatformMarkdownRendererM3 = "0.43.0"
 material3 = "1.5.0-alpha23"
 runtimeLivedata = "1.12.0-beta02"
 jsoup = "1.22.2"
+room3Runtime = "3.0.0"
+roomCommonJvm = "2.8.4"
 #enroVersion = "2.9.0-kmp03"
 #enroAndroid = "2.9.0-kmp03"
 #enro = "2.9.0-kmp03"
 
 [libraries]
+androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3Compiler" }
 api = { module = "dev.rikka.shizuku:api", version.ref = "api" }
 #casclient-android = { module = "org.jasig.cas.client.android:casclient-android", version.ref = "casclientAndroid" }
 #dev-appcompat = { module = "dev.rikka.rikkax.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -141,12 +145,12 @@ multiplatform-markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplat
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+androidx-room3-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room3Runtime" }
+androidx-room-common-jvm = {group = "androidx.room",name = "room-common-jvm",version.ref = "roomCommonJvm" }
 #enro-android = { group = "dev.enro", name = "enro-android", version.ref = "enroAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-#kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
-

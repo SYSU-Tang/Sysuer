@@ -12,13 +12,10 @@ import java.time.format.DateTimeFormatter
 class TodoHelper(private val context: Context, version: Int) :
 	SQLiteOpenHelper(context, "todo.db", null, version) {
 	override fun onCreate(db: SQLiteDatabase) {
-		//db = context.openOrCreateDatabase("todo.db", Context.MODE_PRIVATE, null);
-		//db.execSQL("Drop table if exists types");
-		db.execSQL("CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, description TEXT, due_date DATETIME,due_time DATETIME, done_datetime DATETIME, create_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, update_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, status INTEGER DEFAULT 0, priority INTEGER DEFAULT 0, todo_type TEXT,subtask TEXT,attachment TEXT,subject TEXT, location TEXT,color TEXT,label TEXT,ddl DATETIME,remind_time TEXT);")
-		db.execSQL("CREATE TABLE IF NOT EXISTS types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
-		db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
-		db.execSQL("CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
-		db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, color TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title TEXT, description TEXT, due_date TEXT, due_time TEXT, done_datetime TEXT, create_datetime TEXT DEFAULT CURRENT_TIMESTAMP, update_datetime TEXT DEFAULT CURRENT_TIMESTAMP, status INTEGER NOT NULL DEFAULT 0, priority INTEGER NOT NULL DEFAULT 0, todo_type TEXT, subtask TEXT NOT NULL, attachment TEXT NOT NULL, tag TEXT NOT NULL, subject TEXT, location TEXT, color TEXT, label TEXT, ddl TEXT, remind_time TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS types (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT, color TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS subjects (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT, color TEXT);")
+		db.execSQL("CREATE TABLE IF NOT EXISTS tags (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT, color TEXT);")
 		addType(db)
 	}
 	
@@ -40,22 +37,6 @@ class TodoHelper(private val context: Context, version: Int) :
 		}
 	}
 	
-	/*public void add() {
-        ContentValues value = new ContentValues();
-        value.put("title", "标题");
-        value.put("description", "描述");
-        value.put("due_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
-        value.put("status", 1);
-        value.put("priority", 0);
-        value.put("todo_type", 1);
-        value.put("subtask", "['子任务1','子任务2']");
-        value.put("attachment", "0");
-        value.put("subject", "大学英语");
-        value.put("location", "教学楼A座");
-        value.put("color", "red");
-        value.put("label", "#标签");
-        db.insert("todos", null, value);
-    }*/
 	fun deleteTodo(id: String?) {
 		writableDatabase.delete("todos", "id  = ?", arrayOf(id))
 		close()
@@ -101,7 +82,6 @@ class TodoHelper(private val context: Context, version: Int) :
 					.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 				put("ddl", todoInfo.ddlDate.value)
 			}
-			
 			
 			return value
 		}

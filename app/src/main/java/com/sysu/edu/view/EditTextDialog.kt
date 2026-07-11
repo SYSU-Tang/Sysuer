@@ -1,66 +1,58 @@
 package com.sysu.edu.view
 
-import com.sysu.edu.api.CommonUtil.toStringOrDefault
-import android.view.LayoutInflater
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.content.DialogInterface
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
+import com.sysu.edu.api.CommonUtil.toStringOrDefault
+import com.sysu.edu.databinding.DialogEditTextBinding
 
 class EditTextDialog(context: android.content.Context) {
-	private val dialog: androidx.appcompat.app.AlertDialog
-	private val binding: com.sysu.edu.databinding.DialogEditTextBinding
-	var mValue: String? = ""
+	private val dialog: AlertDialog
+	private val binding: DialogEditTextBinding = DialogEditTextBinding.inflate(LayoutInflater.from(context))
+	var mValue: String? = null
 	var listener: ValueChangeListener? = null
 	
 	init {
-		binding = com.sysu.edu.databinding.DialogEditTextBinding.inflate(LayoutInflater.from(context))
-		dialog = MaterialAlertDialogBuilder(context).setView(binding.getRoot())
-			.setPositiveButton(android.R.string.ok, DialogInterface.OnClickListener { _: DialogInterface?, _: kotlin.Int -> setValue(toStringOrDefault<Editable?>(binding.edit.getText())) })
+		dialog = MaterialAlertDialogBuilder(context).setView(binding.root)
+			.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int -> value = toStringOrDefault<Editable?>(binding.edit.getText()) }
 			.setNegativeButton(android.R.string.cancel, null)
 			.create()
 		getEditText().addTextChangedListener(object : TextWatcher {
 			override fun afterTextChanged(s: Editable?) {
 			}
 			
-			override fun beforeTextChanged(s: kotlin.CharSequence?,
-			                               start: kotlin.Int,
-			                               count: kotlin.Int,
-			                               after: kotlin.Int) {
+			override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 			}
 			
-			override fun onTextChanged(s: kotlin.CharSequence,
-			                           start: kotlin.Int,
-			                           before: kotlin.Int,
-			                           count: kotlin.Int) {
-				setValue(s.toString())
+			override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+				value = "$s"
 			}
 		})
 	}
 	
-	fun getValue(): String? {
-		return mValue
-	}
-	
-	fun setValue(value: String?) {
-		if (mValue != value) {
-			mValue = value
-			if (getText() != value) getEditText().setText(value ?: "")
-			listener?.onValueChange(value)
+	var value: String?
+		get() = mValue
+		set(value) {
+			if (mValue != value) {
+				mValue = value
+				if (getText() != value) getEditText().setText(value ?: "")
+				listener?.onValueChange(value)
+			}
 		}
-	}
 	
 	fun show() {
 		dialog.show()
 		val params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT)
 		params.setMargins(72, 32, 72, 0)
-		binding.getRoot().setLayoutParams(params)
+		binding.root.setLayoutParams(params)
 	}
 	
-	fun setTitle(title: kotlin.Int) {
+	fun setTitle(title: Int) {
 		dialog.setTitle(title)
 	}
 	
@@ -68,36 +60,17 @@ class EditTextDialog(context: android.content.Context) {
 		dialog.setTitle(title)
 	}
 	
-	fun setHint(hint: kotlin.Int) {
+	fun setHint(hint: Int) {
 		binding.editLayout.setHint(hint)
-	}
-	
-	fun setHint(hint: String?) {
-		binding.editLayout.setHint(hint)
-		getEditText().setContentDescription(hint)
 	}
 	
 	fun setValueChangeListener(listener: ValueChangeListener?) {
 		this.listener = listener
 	}
 	
-	fun getText(): String {
-		return getEditText().text.toString()
-	}
-	
-	fun getDialog(): androidx.appcompat.app.AlertDialog {
-		return dialog
-	}
-	
-	fun getEditText(): TextInputEditText {
-		return binding.edit
-	}
-	
-	fun setPasswordMode() {
-		binding.edit.setInputType(android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)
-		binding.editLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE)
-	}
-	
+	fun getText(): String = getEditText().text.toString()
+	fun getDialog(): AlertDialog = dialog
+	fun getEditText(): TextInputEditText = binding.edit
 	interface ValueChangeListener {
 		fun onValueChange(value: String?)
 	}

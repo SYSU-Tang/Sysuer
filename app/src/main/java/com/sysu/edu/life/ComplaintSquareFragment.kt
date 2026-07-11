@@ -36,7 +36,7 @@ class ComplaintSquareFragment : BaseFragment() {
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
 			if (message.first == 0) if (response.getBoolean("ok")) response.getJSONArray("data")
-				.forEach { adapter.add(it as JSONObject?) }
+				.forEach { adapter.add(it as JSONObject) }
 			else config.toast(response.getString("msg"))
 		})
 		square

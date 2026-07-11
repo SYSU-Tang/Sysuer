@@ -262,6 +262,7 @@
             android:id="@+id/toggle3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:checkedButton="@id/filter_todo"
             app:overflowMode="menu"
             app:selectionRequired="true"
             app:singleSelection="true">

@@ -24,7 +24,7 @@ class CETActivity : BaseActivity() {
 		val binding = ActivityListBinding.inflate(layoutInflater).apply {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			fragment = list.getFragment()
-			fragment.setViewTableMenu(toolbar)
+			fragment.addExportMenu(toolbar)
 		}
 		setContentView(binding.getRoot())
 		model = JwxtModel(this)

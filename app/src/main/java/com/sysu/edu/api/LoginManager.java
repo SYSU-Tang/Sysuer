@@ -34,7 +34,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Cookie;
-import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -144,7 +143,7 @@ public class LoginManager {
             return null;
         }
     }
-    
+
 //    /**
 //     * 登录，使用 AuthorizationJar 中的用户名和密码登录
 //     *
@@ -390,9 +389,8 @@ public class LoginManager {
         void onError(String code, String message);
     }
     
-    static class CookieStore implements CookieJar {
+    static class CookieStore extends AndroidCookieJar {
         private final HashMap<String, List<Cookie>> _cookieStore = new HashMap<>();
-
 //        public CookieStore() {
 //        }
 
@@ -405,7 +403,7 @@ public class LoginManager {
 //        }
         
         @Override
-        public void saveFromResponse(HttpUrl url, @NonNull List<Cookie> cookies) {
+        public void saveFromResponse(@NonNull HttpUrl url, @NonNull List<Cookie> cookies) {
             String host = url.host();
             List<Cookie> currentCookies = _cookieStore.get(host);
             List<Cookie> responseCookies = new ArrayList<>(cookies);
@@ -415,11 +413,13 @@ public class LoginManager {
                 currentCookies.stream().filter(currentCookie -> !responseCookies.contains(currentCookie) && (!currentCookie.value().isEmpty()) && (!keys.contains(currentCookie.name()))).forEach(responseCookies::add);
             _cookieStore.put(host, responseCookies);
             cookieManager.set(host, responseCookies.stream().map(Cookie::toString).collect(Collectors.toCollection(HashSet::new)));
+            super.saveFromResponse(url, cookies);
         }
         
         @NonNull
         @Override
-        public List<Cookie> loadForRequest(HttpUrl url) {
+        public List<Cookie> loadForRequest(@NonNull HttpUrl url) {
+            super.loadForRequest(url);
             List<Cookie> cookies = _cookieStore.get(url.host());
             List<Cookie> loginCookies = new ArrayList<>();
             if (cookies != null && !cookies.isEmpty())
@@ -529,36 +529,5 @@ public class LoginManager {
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(keyBytes, "AES"), new IvParameterSpec(ivBytes));
             return Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8)));
         }
-
-//        /**
-//         * AES-CBC 解密，输入 Base64 密文，返回明文字符串
-//         *
-//         * @param ciphertextB64 Base64 编码的密文
-//         * @param key           密钥字符串（UTF-8 编码后长度必须为 16、24 或 32 字节）
-//         * @param iv            初始向量字符串（UTF-8 编码后长度必须为 16 字节）
-//         * @return 明文字符串
-//         * @throws Exception 加解密异常
-//         */
-//        public static String decryptByCBC(String ciphertextB64, String key, String iv) throws Exception {
-//            byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
-//            byte[] ivBytes = iv.getBytes(StandardCharsets.UTF_8);
-//
-//            if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
-//                throw new IllegalArgumentException("密钥长度必须为 16、24 或 32 字节");
-//            }
-//            if (ivBytes.length != 16) {
-//                throw new IllegalArgumentException("IV 长度必须为 16 字节");
-//            }
-//
-//            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
-//            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-//            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-//            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
-//
-//            byte[] ciphertext = Base64.getDecoder().decode(ciphertextB64);
-//            byte[] plaintext = cipher.doFinal(ciphertext);
-//            return new String(plaintext, StandardCharsets.UTF_8);
-//        }
-    
     }
 }

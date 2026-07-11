@@ -2,10 +2,13 @@ plugins {
 	alias(libs.plugins.android.application) //    alias(libs.plugins.kotlin.android)
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.google.gms.google.services)
-	alias(libs.plugins.google.firebase.crashlytics) //    id("com.google.devtools.ksp")
-	//    id("kotlin-parcelize")
+	alias(libs.plugins.google.firebase.crashlytics)
+	id("com.google.devtools.ksp")
+	id("androidx.room3")    //    id("kotlin-parcelize")
 }
-
+room3 {
+	schemaDirectory("$projectDir/schemas")
+}
 android {
 	namespace = "com.sysu.edu"
 	compileSdk = 37
@@ -55,7 +58,7 @@ android {
 			implementation(libs.miuix.ui)
 			implementation(libs.miuix.preference)
 			implementation(libs.miuix.icons)
-			implementation(libs.miuix.blur)                                // 可选：添加 miuix-navigation3-ui 以获取 Navigation3 支持
+			implementation(libs.miuix.blur)
 			implementation(libs.miuix.navigation3.ui)
 			implementation(libs.miuix.squircle)
 		}
@@ -68,6 +71,8 @@ dependencies {
 	implementation(libs.androidx.activity.ktx)
 	implementation(libs.androidx.datastore.preferences.rxjava3)
 	implementation(libs.androidx.material3)
+// implementation(libs.androidx.room.common.jvm)
+	implementation(libs.androidx.room3.runtime)
 	implementation(libs.androidx.runtime.livedata)
 	implementation(libs.glide)
 	implementation(libs.multiplatform.markdown.renderer.android)
@@ -128,8 +133,8 @@ dependencies {
 	implementation(libs.okhttp.java.net.cookiejar)
 	implementation(libs.miuix.blur.android)
 	implementation(libs.jsoup)
-    implementation(libs.rxjava)
-	//    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
+	implementation(libs.rxjava)
+	ksp(libs.androidx.room3.compiler)    //    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
 	/*configurations.all {
 		exclude("androidx.appcompat", "appcompat")
 	}*/    //api(libs.wechat.sdk.android)

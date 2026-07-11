@@ -57,7 +57,7 @@ class ComplaintResponseFragment : BaseFragment() {
 				}
 				1 -> {
 					if (response.getBoolean("ok")) response.getJSONArray("data")
-						.forEach(Consumer { v: Any? -> adapter.add(v as JSONObject?) })
+						.forEach { adapter.add(it as JSONObject) }
 					else config.toast(response.getString("msg"))
 				}
 			}

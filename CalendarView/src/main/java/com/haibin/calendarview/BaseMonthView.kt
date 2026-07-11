@@ -74,8 +74,8 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 		
 		if (mCurrentItem > 0 && mDelegate.mCalendarInterceptListener != null && mDelegate.mCalendarInterceptListener.onCalendarIntercept(mDelegate.mSelectedCalendar)) mCurrentItem = -1
 		
-		mLineCount = (if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ALL_MONTH) 6
-		else (preDiff + monthDayCount + mNextDiff) / 7)
+		mLineCount = if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ALL_MONTH) 6
+		else (preDiff + monthDayCount + mNextDiff) / 7
 		addSchemesFromMap()
 		invalidate()
 	}
@@ -87,28 +87,22 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 		 * @return return
 		 */
 		get() {
-			if (mItemWidth != 0 && mItemHeight != 0) {
+			return if (mItemWidth != 0 && mItemHeight != 0) {
 				if (mX <= mDelegate.calendarPaddingLeft || mX >= width - mDelegate.calendarPaddingRight) {
 					onClickCalendarPadding()
-					return null
+					null
 				}
-				val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it >= 7 }
-					?: 6) // 选择项
-				return if (position >= 0 && position < mItems!!.size) mItems!![position]
-				else null
+				else mItems?.getOrNull(mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf{ it < 7 }
+					?: 6))
 			}
-			return null
+			else null
 		}
 	
 	private fun onClickCalendarPadding() {
 		if (mDelegate.mClickCalendarPaddingListener != null) {
-			var calendar: Calendar?
-			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it >= 7 }
+			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf{ it < 7 }
 				?: 6) // 选择项
-			if (position >= 0 && position < mItems!!.size) {
-				calendar = mItems!![position]
-				mDelegate.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, true, calendar, getClickCalendarPaddingObject(mX, mY, calendar))
-			}
+			if (position in mItems!!.indices) mDelegate.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, true, mItems!![position], getClickCalendarPaddingObject(mX, mY, mItems!![position]))
 		}
 	}
 	

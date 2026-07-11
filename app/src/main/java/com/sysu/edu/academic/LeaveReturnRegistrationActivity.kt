@@ -45,7 +45,7 @@ class LeaveReturnRegistrationActivity : BaseActivity() {
 				}
 			}
 		})
-		this.years
+		years
 	}
 	
 	val years: Unit

@@ -65,7 +65,7 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
 
 class ServiceFragment : BaseFragment() {
-	val list: MutableList<JSONObject?> = mutableListOf()
+	val list: MutableList<JSONObject> = mutableListOf()
 	private val disposables = CompositeDisposable()
 	lateinit var binding: FragmentServiceBinding
 	var actionDialog: BottomSheetDialog? = null
@@ -79,19 +79,19 @@ class ServiceFragment : BaseFragment() {
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
-			binding = FragmentServiceBinding.inflate(inflater)
-			requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-			viewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
-			initAction(inflater)
-			initOrder(inflater)
-			initSearch()
-			val reader = JSONReader.of(resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
-			db = HomeCollectionHelper(requireContext())
-			addCollection(inflater)
-			reader.readJSONArray().forEach {
-				binding.serviceContainer.addView(initBoxWithHashMap(inflater, (it as JSONObject).getString("name"), it.getJSONArray("items")).root)
-			}
-			reader.close()
+		binding = FragmentServiceBinding.inflate(inflater)
+		requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+		viewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
+		initAction(inflater)
+		initOrder(inflater)
+		initSearch()
+		val reader = JSONReader.of(resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
+		db = HomeCollectionHelper(requireContext())
+		addCollection(inflater)
+		reader.readJSONArray().forEach {
+			binding.serviceContainer.addView(initBoxWithHashMap(inflater, (it as JSONObject).getString("name"), it.getJSONArray("items")).root)
+		}
+		reader.close()
 		return binding.root
 	}
 	
@@ -310,7 +310,8 @@ class ServiceFragment : BaseFragment() {
 				v!!.setPadding(left, 0, right, bottom)
 				WindowInsetsCompat.CONSUMED
 			}
-			searchBar.getViewTreeObserver().addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+			searchBar.getViewTreeObserver()
+				.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
 					override fun onGlobalLayout() {
 						searchBar.getViewTreeObserver().removeOnGlobalLayoutListener(this)
 						val layoutParams = searchBar.layoutParams as MarginLayoutParams
@@ -319,7 +320,7 @@ class ServiceFragment : BaseFragment() {
 				})
 			sugList.setLayoutManager(LinearLayoutManager(requireContext()))
 			val serviceFragmentCollectionAdapter = CollectionAdapter()
-			serviceFragmentCollectionAdapter.setListener(object : AdapterListener {
+			serviceFragmentCollectionAdapter.listener = object : AdapterListener {
 				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
@@ -329,14 +330,15 @@ class ServiceFragment : BaseFragment() {
 															   getItemIntent(item, null)?.let {
 																   startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp")
 																	   .toBundle())
-															   } ?: config.toast(R.string.activity_not_found)
+															   }
+								                                   ?: config.toast(R.string.activity_not_found)
 														   })
 				}
 				
 				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                      binding: ViewBinding?) {
 				}
-			})
+			}
 			sugList.setAdapter(serviceFragmentCollectionAdapter)
 			val objectPublishSubject = PublishSubject.create<String>()
 			disposables.add(objectPublishSubject.debounce(300, TimeUnit.MILLISECONDS)
@@ -346,18 +348,22 @@ class ServiceFragment : BaseFragment() {
 									if (query.trim { it <= ' ' }.isEmpty()) return@map list
 									val q = query.trim { it <= ' ' }
 									list.filter { item ->
-										item?.getString("name")?.contains(q) == true || item?.getString("description")
+										item.getString("name")
+											?.contains(q) == true || item.getString("description")
 											?.contains(q) == true
 									}.sortedWith { a: JSONObject?, b: JSONObject? ->
 										val aNameMatch = a!!.getString("name").contains(q)
 										val bNameMatch = b!!.getString("name").contains(q)
 										if (aNameMatch && !bNameMatch) -1 else if (!aNameMatch && bNameMatch) 1 else 0
-									}
+									}.toMutableList()
 								}
 								.observeOn(AndroidSchedulers.mainThread())
-								.subscribe { d: List<JSONObject?> -> serviceFragmentCollectionAdapter.set(d) })
+								.subscribe { d: MutableList<JSONObject> -> serviceFragmentCollectionAdapter.set(d) })
 			searchView.editText.addTextChangedListener(object : TextWatcher {
-				override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+				override fun beforeTextChanged(s: CharSequence?,
+				                               start: Int,
+				                               count: Int,
+				                               after: Int) {
 				}
 				
 				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {

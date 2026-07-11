@@ -1,148 +1,122 @@
-package com.sysu.edu.view;
+package com.sysu.edu.view
 
-import androidx.annotation.NonNull;
-import androidx.databinding.ViewDataBinding;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.databinding.ViewDataBinding
+import androidx.recyclerview.widget.RecyclerView
+import com.sysu.edu.api.Config
+import java.util.Collections
 
-import com.sysu.edu.api.Config;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public abstract class RecyclerAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    
-    protected final ArrayList<T> data = new ArrayList<>();
-    
-    protected AdapterListener listener;
-    protected Config config;
-    
-    @Override
-    public int getItemCount() {
-        return data.size();
-    }
-
-    /*@NonNull
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ViewBinding binding = ViewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-        if (listener != null) listener.onCreate(this, binding);
-        return new RecyclerView.ViewHolder(binding.getRoot()) {
-        };
-    }*/
-    
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (listener != null) listener.onBind(this, holder, position);
-    }
-    
-    public void add(T item) {
-        data.add(item);
-        notifyItemInserted(getItemCount() - 1);
-    }
-    
-    public void remove(int position) {
-        data.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, position - 1);
-        notifyItemRangeChanged(position, getItemCount() - position);
-    }
-    
-    public void clear() {
-        int temp = getItemCount();
-        data.clear();
-        notifyItemRangeRemoved(0, temp);
-    }
-    
-    public T get(int position) {
-        return (position < 0 || position >= getItemCount()) ? null : data.get(position);
-    }
-    
-    public void setListener(AdapterListener listener) {
-        this.listener = listener;
-    }
-    
-    public void set(List<? extends T> d) {
-        clear();
-        data.addAll(d);
-        notifyItemRangeInserted(0, getItemCount());
-    }
-    
-    public void swap(int position1, int position2) {
-        Collections.swap(data, position1, position2);
-        notifyItemMoved(position1, position2);
-    }
-    
-    public void setParams(Config config) {
-        this.config = config;
-    }
-    
+abstract class RecyclerAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
+	val data: ArrayList<T> = ArrayList()
+	var listener: AdapterListener? = null
+	protected var config: Config? = null
+	override fun getItemCount(): Int = data.size
+	
+	/*@NonNull
+   @Override
+   public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+	   ViewBinding binding = ViewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+	   if (listener != null) listener.onCreate(this, binding);
+	   return new RecyclerView.ViewHolder(binding.getRoot()) {
+	   };
+   }*/
+	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+		listener?.onBind(this, holder, position)
+	}
+	
+	fun add(item: T) {
+		data.add(item)
+		notifyItemInserted(itemCount - 1)
+		notifyItemChanged(itemCount - 2)
+	}
+	
+	fun remove(position: Int) {
+		data.removeAt(position)
+		notifyItemRemoved(position)
+		notifyItemRangeChanged(position, position - 1)
+		notifyItemRangeChanged(position, itemCount - position)
+	}
+	
+	fun clear() {
+		val temp = itemCount
+		data.clear()
+		notifyItemRangeRemoved(0, temp)
+	}
+	
+	fun get(position: Int): T = if (position in 0..<itemCount) data[position] else null!!
+	fun set(d: MutableList<out T>) {
+		clear()
+		data.addAll(d)
+		notifyItemRangeChanged(0, itemCount)
+	}
+	
+	fun swap(position1: Int, position2: Int) {
+		Collections.swap(data, position1, position2)
+		notifyItemMoved(position1, position2)
+	}
+	
+	fun setParams(config: Config?) {
+		this.config = config
+	}
+	
+	fun forEach(action: (T) -> Unit) {
+		data.forEach(action)
+	}
 }
 
-abstract class Recycler2Adapter<T, V extends ViewDataBinding> extends RecyclerView.Adapter<RecyclerViewHolder<V>> {
-    
-    protected final ArrayList<T> data = new ArrayList<>();
-    
-    protected Adapter2Listener<V> listener;
-    protected Config config;
-    
-    @Override
-    public int getItemCount() {
-        return data.size();
-    }
-
-//    @NonNull
-//    @Override
-//    public RecyclerViewHolder<V> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        V binding = V.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-//        if (listener != null) listener.onCreate(this, binding);
-//        return new RecyclerViewHolder<>(binding);
-//    }
-    
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerViewHolder<V> holder, int position) {
-        if (listener != null) listener.onBind(this, holder, position);
-    }
-    
-    public void add(T item) {
-        data.add(item);
-        notifyItemInserted(getItemCount() - 1);
-    }
-    
-    public void remove(int position) {
-        data.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, position - 1);
-        notifyItemRangeChanged(position, getItemCount() - position);
-    }
-    
-    public void clear() {
-        int temp = getItemCount();
-        data.clear();
-        notifyItemRangeRemoved(0, temp);
-    }
-    
-    public T get(int position) {
-        return (position < 0 || position >= getItemCount()) ? null : data.get(position);
-    }
-    
-    public void setListener(Adapter2Listener<V> listener) {
-        this.listener = listener;
-    }
-    
-    public void set(List<? extends T> d) {
-        clear();
-        data.addAll(d);
-        notifyItemRangeInserted(0, getItemCount());
-    }
-    
-    public void swap(int position1, int position2) {
-        Collections.swap(data, position1, position2);
-        notifyItemMoved(position1, position2);
-    }
-    
-    public void setParams(Config config) {
-        this.config = config;
-    }
-    
+internal abstract class Recycler2Adapter<T, V : ViewDataBinding?> :
+	RecyclerView.Adapter<RecyclerViewHolder<V?>?>() {
+	protected val data = ArrayList<T?>()
+	protected var listener: Adapter2Listener<V?>? = null
+	protected var config: Config? = null
+	override fun getItemCount(): Int {
+		return data.size
+	}
+	
+	//    @NonNull
+	//    @Override
+	//    public RecyclerViewHolder<V> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+	//        V binding = V.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+	//        if (listener != null) listener.onCreate(this, binding);
+	//        return new RecyclerViewHolder<>(binding);
+	//    }
+	override fun onBindViewHolder(holder: RecyclerViewHolder<V?>, position: Int) {
+		if (listener != null) listener!!.onBind(this, holder, position)
+	}
+	
+	fun add(item: T?) {
+		data.add(item)
+		notifyItemInserted(itemCount - 1)
+	}
+	
+	fun remove(position: Int) {
+		data.removeAt(position)
+		notifyItemRemoved(position)
+		notifyItemRangeChanged(position, position - 1)
+		notifyItemRangeChanged(position, itemCount - position)
+	}
+	
+	fun clear() {
+		val temp = itemCount
+		data.clear()
+		notifyItemRangeRemoved(0, temp)
+	}
+	
+	fun get(position: Int): T? {
+		return if (position in 0..<itemCount) data[position] else null
+	}
+	
+	fun set(d: MutableList<out T?>) {
+		clear()
+		data.addAll(d)
+		notifyItemRangeInserted(0, itemCount)
+	}
+	
+	fun swap(position1: Int, position2: Int) {
+		Collections.swap(data, position1, position2)
+		notifyItemMoved(position1, position2)
+	}
+	
+	fun setParams(config: Config?) {
+		this.config = config
+	}
 }

@@ -671,4 +671,6 @@
     <string name="select_teaching_building">Please choose a teaching building firstly!</string>
     <string name="course_outline_content">Teaching content: %1$s\nEducational elements: %2$s\nKey points and difficulties: %3$s</string>
     <string name="copy_link">Copy the link</string>
+    <string name="color">Color</string>
+    <string name="subtask">Subtask</string>
 </resources>

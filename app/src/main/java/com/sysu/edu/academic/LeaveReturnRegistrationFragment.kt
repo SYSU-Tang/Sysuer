@@ -167,7 +167,7 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 							                    holder: RecyclerView.ViewHolder,
 							                    position: Int) {
 								holder.itemView.setOnClickListener {
-									if (this@LeaveReturnRegistrationFragment.position == 1) {
+//									if (this@LeaveReturnRegistrationFragment.position == 1) {
 										if (position == 0) {
 											val menu = PopupMenu(requireContext(), holder.itemView)
 											mutableListOf<String?>("离校", "留校").forEach { i: String? ->
@@ -231,7 +231,7 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 											}
 										}
 									}
-								}
+//								}
 							}
 							
 							override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
@@ -315,14 +315,14 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 				RecyclerView.ViewHolder(ItemTitleBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
 		}
 		
-		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, pos: Int) {
-			val position = holder.getBindingAdapterPosition()
+		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+			val pos = holder.getBindingAdapterPosition()
 			ItemTitleBinding.bind(holder.itemView).apply {
-				title.text = get(position)
-				root.setBackgroundResource(if (position == selection) R.drawable.bg_selected else R.drawable.box_background)
+				title.text = get(pos)
+				root.setBackgroundResource(if (pos == selection) R.drawable.bg_selected else R.drawable.box_background)
 				root.setOnClickListener {
-					action?.invoke(position)
-					selection = position
+					action?.invoke(pos)
+					selection = pos
 					notifyItemRangeChanged(0, itemCount)
 				}
 			}

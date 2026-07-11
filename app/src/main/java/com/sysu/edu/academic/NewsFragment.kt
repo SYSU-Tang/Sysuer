@@ -35,7 +35,7 @@ class NewsFragment : Fragment() {
 	}
 	
 	fun setListener(listener: AdapterListener?) {
-		newsAdapter.setListener(listener)
+		newsAdapter.listener = listener
 	}
 	
 	override fun onConfigurationChanged(newConfig: Configuration) {

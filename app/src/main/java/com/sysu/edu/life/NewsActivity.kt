@@ -41,7 +41,7 @@ class NewsActivity : BaseActivity() {
 		super.onCreate(savedInstanceState)
 		val adapter = Pager2Adapter(this)
 		val suggestionAdapter = SuggestionAdapter().apply {
-			setListener(object : AdapterListener {
+			listener=object : AdapterListener {
 				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
@@ -54,7 +54,7 @@ class NewsActivity : BaseActivity() {
 				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                      binding: ViewBinding?) {
 				}
-			})
+			}
 		}
 		(0..<4).forEach { adapter.add(NewsFragment(it)) }
 		val binding = ActivityNewsBinding.inflate(layoutInflater).apply {

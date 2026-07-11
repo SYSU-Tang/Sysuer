@@ -61,7 +61,7 @@ class HomeworkMainFragment : BaseFragment() {
 									adapter.addAdapter(TitleAdapter(eventItem.getString("popupname")))
 									adapter.addAdapter(HomeworkAdapter().apply {
 										add(eventItem)
-										setListener(object : AdapterListener {
+										listener = object : AdapterListener {
 											override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 											                    holder: RecyclerView.ViewHolder,
 											                    position: Int) {
@@ -82,7 +82,7 @@ class HomeworkMainFragment : BaseFragment() {
 											override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 											                      binding: ViewBinding?) {
 											}
-										})
+										}
 									})
 								}
 						}

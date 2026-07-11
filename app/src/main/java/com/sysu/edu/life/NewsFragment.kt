@@ -157,7 +157,7 @@ class NewsFragment(val position: Int) : BaseFragment() {
 					.addHeader("Authorization", toStringOrDefault(authorizationJar.getAuthorization(getHost(img))))
 					.build()))
 				.timeout(15000)
-				.override(config.dpToPx(120), config.dpToPx(120))
+				.override(config?.dpToPx(120)?:360, config?.dpToPx(120)?:360)
 				.optionalFitCenter()
 				.transform(RoundedCorners(16))
 				.into(binding.image)

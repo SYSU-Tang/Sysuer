@@ -669,4 +669,6 @@
     <string name="select_teaching_building">请先选择教学楼！</string>
     <string name="course_outline_content">教学内容：%1$s\n育人元素：%2$s\n重点、难点：%3$s</string>
     <string name="copy_link">复制链接</string>
+    <string name="color">颜色</string>
+    <string name="subtask">子任务</string>
 </resources>

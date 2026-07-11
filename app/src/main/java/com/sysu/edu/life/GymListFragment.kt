@@ -44,7 +44,7 @@ class GymListFragment : BaseFragment() {
 				})
 			}
 			setParams(config)
-			setListener(object : AdapterListener {
+			listener = object : AdapterListener {
 				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
@@ -67,7 +67,7 @@ class GymListFragment : BaseFragment() {
 				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                      binding: ViewBinding?) {
 				}
-			})
+			}
 		}
 		binding = RecyclerViewScrollBinding.inflate(inflater, container, false).apply {
 			root.layoutManager = layoutManager

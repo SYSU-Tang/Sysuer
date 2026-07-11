@@ -130,7 +130,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 					}
 					1 -> response.getJSONObject("data")?.run {
 						total = getInteger("total")
-						getJSONArray("rows").forEach { e: Any? -> adp!!.add(e as JSONObject?) }
+						getJSONArray("rows").forEach { e: Any? -> adp!!.add(e as JSONObject) }
 					}
 					3 -> {
 						config.toast(response.getString("data"))
