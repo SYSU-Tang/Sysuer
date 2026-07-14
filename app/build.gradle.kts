@@ -48,21 +48,6 @@ android {
 		aidl = true
 		buildConfig = true
 	}
-	sourceSets {
-		getByName("main") {
-			java {
-				mutableSetOf("src\\main\\java")
-			}
-		}
-		dependencies {
-			implementation(libs.miuix.ui)
-			implementation(libs.miuix.preference)
-			implementation(libs.miuix.icons)
-			implementation(libs.miuix.blur)
-			implementation(libs.miuix.navigation3.ui)
-			implementation(libs.miuix.squircle)
-		}
-	}
 	buildToolsVersion = "37.0.0"
 	ndkVersion = "30.0.14904198 rc1"
 	compileSdkMinor = 0
@@ -71,7 +56,7 @@ dependencies {
 	implementation(libs.androidx.activity.ktx)
 	implementation(libs.androidx.datastore.preferences.rxjava3)
 	implementation(libs.androidx.material3)
-// implementation(libs.androidx.room.common.jvm)
+	implementation(libs.androidx.preference.ktx) // implementation(libs.androidx.room.common.jvm)
 	implementation(libs.androidx.room3.runtime)
 	implementation(libs.androidx.runtime.livedata)
 	implementation(libs.glide)
@@ -132,6 +117,12 @@ dependencies {
 	implementation(project(":CalendarView"))
 	implementation(libs.okhttp.java.net.cookiejar)
 	implementation(libs.miuix.blur.android)
+	implementation(libs.miuix.ui)
+	implementation(libs.miuix.preference)
+	implementation(libs.miuix.icons)
+	implementation(libs.miuix.blur)
+	implementation(libs.miuix.navigation3.ui)
+	implementation(libs.miuix.squircle)
 	implementation(libs.jsoup)
 	implementation(libs.rxjava)
 	ksp(libs.androidx.room3.compiler)    //    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")

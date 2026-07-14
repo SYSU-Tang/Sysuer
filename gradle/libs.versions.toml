@@ -58,6 +58,7 @@ runtimeLivedata = "1.12.0-beta02"
 jsoup = "1.22.2"
 room3Runtime = "3.0.0"
 roomCommonJvm = "2.8.4"
+preferenceKtx = "1.2.1"
 #enroVersion = "2.9.0-kmp03"
 #enroAndroid = "2.9.0-kmp03"
 #enro = "2.9.0-kmp03"
@@ -146,6 +147,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 androidx-room3-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room3Runtime" }
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
 #androidx-room-common-jvm = {group = "androidx.room",name = "room-common-jvm",version.ref = "roomCommonJvm" }
 #enro-android = { group = "dev.enro", name = "enro-android", version.ref = "enroAndroid" }
 
