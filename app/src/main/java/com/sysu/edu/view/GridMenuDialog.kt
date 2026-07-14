@@ -13,15 +13,15 @@ import com.sysu.edu.databinding.DialogGridBinding
 import com.sysu.edu.databinding.ItemButtonGridBinding
 import java.util.function.Consumer
 
-class GridDialog(private val activity: FragmentActivity) {
-	val referenceIds: MutableList<Int?> = mutableListOf()
+class GridMenuDialog(private val activity: FragmentActivity) {
+	val referenceIds: MutableList<Int> = mutableListOf()
 	private val menuBinding: DialogGridBinding = DialogGridBinding.inflate(activity.layoutInflater)
 	val dialog: BottomSheetDialog = BottomSheetDialog(activity)
 	private var selected = -1
 	private var selectable = false
 	private var multipleSelectable = false
-	private var iconGravity = 0
-	private var gravity = 0
+	private var iconGravity = -1
+	private var gravity = -1
 	
 	init {
 		dialog.setContentView(menuBinding.root)
@@ -34,47 +34,53 @@ class GridDialog(private val activity: FragmentActivity) {
 	
 	fun setIconGravity(gravity: Int) {
 		iconGravity = gravity
-		referenceIds.forEach { id: Int? -> (menuBinding.grid.findViewById<View?>(id!!) as MaterialButton).iconGravity = gravity }
+		referenceIds.forEach { id -> (menuBinding.grid.findViewById<View?>(id) as MaterialButton).iconGravity = gravity }
 	}
 	
 	fun setGravity(gravity: Int) {
 		this.gravity = gravity
-		referenceIds.forEach { id: Int? -> (menuBinding.grid.findViewById<View?>(id!!) as MaterialButton).setGravity(gravity) }
+		referenceIds.forEach { id -> (menuBinding.grid.findViewById<View?>(id) as MaterialButton).gravity = gravity }
 	}
 	
-	fun <T> loadMenu(menuTitle: MutableList<T?>,
-	                 menuIcon: MutableList<Int?>,
-	                 menuAction: MutableList<out Consumer<MaterialButton?>?>,
-	                 type: Class<T?>?) {
+	fun <T> set(menuTitle: MutableList<T>,
+	            menuIcon: MutableList<Int?>,
+	            menuAction: MutableList<out onGridMenuClickListener?>) {
 		referenceIds.clear()
 		menuTitle.forEachIndexed { i, v ->
-			val menu = ItemButtonGridBinding.inflate(activity.layoutInflater, menuBinding.grid, false).root
-			if (type == Integer::class.java) menu.setText((v as Int?)!!)
-			else menu.text = v as String?
-			if (menuIcon.size > i && menuIcon[i] != 0) menu.setIconResource(menuIcon[i]!!)
-			val id = View.generateViewId()
-			referenceIds.add(id)
-			menu.setId(id)
-			menu.addOnCheckedChangeListener { _: MaterialButton?, isChecked: Boolean -> menu.strokeWidth = if (isChecked && (selectable || multipleSelectable)) 3 else 0 }
-			menu.setOnClickListener {
-				if (menuAction.size > i && menuAction[i] != null) menuAction[i]!!.accept(menu)
-				if (multipleSelectable) toggleMenu(i)
-				else if (selectable) selectMenu(i)
-			}
-			if (iconGravity != 0) menu.iconGravity = iconGravity
-			if (gravity != 0) menu.setGravity(gravity)
-			menuBinding.grid.addView(menu)
+			add<T>(v, menuIcon[i], menuAction.getOrNull(i))
 		}
+	}
+	
+	fun <T> add(title: T?, menuIcon: Int?, menuAction: onGridMenuClickListener?) {
+		val menu = ItemButtonGridBinding.inflate(activity.layoutInflater, menuBinding.grid, false).root
+		if (title is Int) menu.setText(title)
+		else if (title is String) menu.text = title
+		if (menuIcon != null) menu.setIconResource(menuIcon)
+		val id = View.generateViewId()
+		val position = referenceIds.size
+		referenceIds.add(id)
+		menu.id = id
+		menu.addOnCheckedChangeListener { _: MaterialButton?, isChecked: Boolean -> menu.strokeWidth = if (isChecked && (selectable || multipleSelectable)) 3 else 0 }
+		menu.setOnClickListener {
+			menuAction?.onClick(menu)
+			if (multipleSelectable) menu.isChecked = !menu.isChecked
+			else if (selectable) selectMenu(position)
+		}
+		if (iconGravity != -1) menu.iconGravity = iconGravity
+		if (gravity != -1) menu.gravity = gravity
+		menuBinding.grid.addView(menu)
+	}
+	
+	fun add(menu: GridMenuItem) {
+		add(menu.title, menu.icon, menu.action)
 	}
 	
 	fun show() {
 		dialog.show()
-		dialog.behavior.setState(BottomSheetBehavior.STATE_EXPANDED)
+		dialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 	}
 	
-	fun getMenu(position: Int): MaterialButton? {
-		return if (position >= referenceIds.size || position < 0) null else menuBinding.grid.findViewById(referenceIds[position]!!)
-	}
+	fun getMenu(position: Int): MaterialButton? = if (position in referenceIds.indices) menuBinding.grid.findViewById(referenceIds[position]) else null
 	
 	fun setSelectable(selectable: Boolean) {
 		this.selectable = selectable
@@ -85,17 +91,13 @@ class GridDialog(private val activity: FragmentActivity) {
 	}
 	
 	fun selectMenu(position: Int) {
-		val menu = getMenu(position)
-		if (menu != null && position != selected) {
-			menu.isChecked = true
+		if (position != selected) {
+			getMenu(position)?.run{
+				isChecked = true
+			}
 			if (selected >= 0) getMenu(selected)?.isChecked = false
 			selected = position
 		}
-	}
-	
-	fun toggleMenu(position: Int) {
-		val menu = getMenu(position)
-		if (menu != null) menu.isChecked = !menu.isChecked
 	}
 	
 	fun toggleMenu(position: Int, toggle: Boolean) {
@@ -106,9 +108,6 @@ class GridDialog(private val activity: FragmentActivity) {
 		getMenu(position)?.performClick()
 	}
 	
-	/*public void multipleSelectMenu(int[] positions) {
-        IntStream.of(positions).forEach(this::selectMenu);
-    }*/
 	fun setTogglable(positions: IntArray, togglable: Boolean) {
 		positions.forEach { setTogglable(it, togglable) }
 	}
@@ -161,5 +160,27 @@ class GridDialog(private val activity: FragmentActivity) {
 	
 	fun dismiss() {
 		dialog.dismiss()
+	}
+	
+	class GridMenuItem {
+		var title: CharSequence? = null
+		var icon: Int? = null
+		var action: onGridMenuClickListener? = null
+		
+		companion object {
+			fun of(title: CharSequence?,
+			       icon: Int?,
+			       action: onGridMenuClickListener?): GridMenuItem {
+				val item = GridMenuItem()
+				item.title = title
+				item.icon = icon
+				item.action = action
+				return item
+			}
+		}
+	}
+	
+	fun interface onGridMenuClickListener {
+		fun onClick(menu: MaterialButton?)
 	}
 }
