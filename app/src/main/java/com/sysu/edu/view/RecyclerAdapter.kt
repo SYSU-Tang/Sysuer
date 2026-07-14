@@ -35,7 +35,7 @@ abstract class RecyclerAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder
 	
 	fun get(position: Int): T = if (position in 0..<itemCount) data[position] else null!!
 	fun set(d: MutableList<out T>) {
-		data.clear()
+		clear()
 		data.addAll(d)
 		notifyItemRangeInserted(0, itemCount)
 	}

@@ -148,7 +148,8 @@ class GymDetailFragment : BaseFragment() {
 					}
 				}
 				4 -> {
-					with(response.getJSONObject("data")) {
+					println(response)
+					response.getJSONObject("data").run {
 						if (getInteger("Code") == 200) config.toast(R.string.reserve_success)
 						else config.toast(getString("Result")) // 订单编号
 					}
@@ -275,7 +276,8 @@ class GymDetailFragment : BaseFragment() {
 			.withZoneSameInstant(ZoneOffset.UTC)
 			.toString()
 		val payload = JSONObject.of("Identity", uuid, "BookingId", genToken(uuid, hash), "VenueTypeId", type, "VenueBookings", items, "Participants", JSONArray.of(), "Status", "Accepted", "Description", venueName, "CreatedAt", time, "UpdatedAt", time, "ActionedBy", userId,  /*NetID*/
-		                            "IsCash", false, "Charge", creditFee) //        System.out.println(payload);
+		                            "IsCash", false, "Charge", creditFee)
+		println(payload)
 		reserve(payload.toJSONString())
 	}
 	
