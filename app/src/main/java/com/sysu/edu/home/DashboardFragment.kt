@@ -112,7 +112,7 @@ class DashboardFragment : BaseFragment() {
 			}
 		}).build()
 	}
-	val spm: PreferenceViewModel by lazy { ViewModelProvider(this)[PreferenceViewModel::class.java] }
+	val spm: PreferenceViewModel by lazy { ViewModelProvider(requireActivity())[PreferenceViewModel::class.java] }
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): NestedScrollView {
@@ -160,8 +160,7 @@ class DashboardFragment : BaseFragment() {
 			courseList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 			courseList.adapter = courseAdapter
 			examList.addItemDecoration(DividerItemDecoration(requireContext(), 0))
-			examList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-			examList.itemAnimator = null
+			examList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false) //			examList.itemAnimator = null
 			examList.adapter = examAdapter
 			toggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
 				if (checkedId == R.id.today) {
@@ -230,7 +229,6 @@ class DashboardFragment : BaseFragment() {
 		val selectedSet = spm.dashboard?.mapNotNull { it?.toIntOrNull() }?.toSet().orEmpty()
 		(0..5).toSet().minus(selectedSet).forEach {
 			listOf(binding.shortcutGroup, binding.scheduleGroup, binding.timeCard, binding.courseGroup, binding.examGroup, binding.todoGroup)[it].visibility = View.GONE
-			
 		}
 	}
 	
@@ -648,7 +646,7 @@ internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
 		} ?: Color.TRANSPARENT
 		binding.root.setCardBackgroundColor(tint)
 		binding.examName.setTextAppearance(if (isBefore) com.google.android.material.R.style.TextAppearance_Material3_TitleMedium else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized)
-		binding.root.alpha = if (isBefore) 0.64f else 1.0f
+		binding.item.alpha = if (isBefore) 0.64f else 1.0f
 		super.onBindViewHolder(holder, position)
 	}
 }
