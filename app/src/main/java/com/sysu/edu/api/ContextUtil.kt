@@ -111,20 +111,24 @@ class ContextUtil(val context: Context) {
 		disposable.add(accountManager.getActiveAccountAsync(host)
 						   .subscribe { activeAccount: Pair<String?, String?> ->
 							   if (!TextUtils.isEmpty(activeAccount.first) && !TextUtils.isEmpty(activeAccount.second) && !TextUtils.isEmpty(service)) {
-								   loginManager.setOnLoginListener(object : LoginListener {
-									   override fun onSuccess() {
-										   afterLogin?.run()
-									   }
-									   
-									   override fun onError(code: String?, message: String?) {
-										   if ("SSO10002" == code || "30506" == code) changeAccount(service, host, afterLogin)
-										   else handler.post { toast(CommonUtil.toStringOrDefault<String?>(message)) }
-									   }
-								   })
-								   loginManager.login(activeAccount.first, activeAccount.second, service)
+								   performLogin(service, host, activeAccount, afterLogin)
 							   }
 							   else changeAccount(service, host, afterLogin)
 						   })
+	}
+	
+	private fun performLogin(service: String?, host: String, account: Pair<String?, String?>, afterLogin: Runnable?) {
+		loginManager.setOnLoginListener(object : LoginListener {
+			override fun onSuccess() {
+				afterLogin?.run()
+			}
+			
+			override fun onError(code: String?, message: String?) {
+				if ("SSO10002" == code || "30506" == code) changeAccount(service, host, afterLogin)
+				else handler.post { toast(CommonUtil.toStringOrDefault<String?>(message)) }
+			}
+		})
+		loginManager.login(account.first, account.second, service)
 	}
 	
 	fun login(url: String?, afterLogin: Runnable?) {
@@ -140,11 +144,11 @@ class ContextUtil(val context: Context) {
 			if (dialog == null) dialog = MaterialAlertDialogBuilder(context).setView(binding!!.root)
 				.setTitle(R.string.privacy)
 				.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
-					val username = binding!!.username.edit.getText()
-					val password = binding!!.password.edit.getText()
+					val username = binding!!.username.edit.getText().toString()
+					val password = binding!!.password.edit.getText().toString()
 					if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) toast(R.string.username_password_warning)
-					else disposable.add(accountManager.setAccountAsync(host, "$username", "$password", true)
-											.subscribe { loginForUrl(url, host, afterLogin) })
+					else disposable.add(accountManager.setAccountAsync(host, username, password, true)
+											.subscribe { performLogin(url, host, Pair(username, password), afterLogin) })
 				}
 				.setNegativeButton(android.R.string.cancel, null)
 				.create()

@@ -70,43 +70,41 @@ class AccountManager private constructor(context: Context) {
 	}
 	
 	fun setAccountAsync(domain: String, username: String, password: String, active: Boolean): Completable {
-		return Completable.fromAction {
-			dataStore.updateDataAsync { prefs: Preferences? ->
-				Single.just(prefs!!.toMutablePreferences()
-								.also { it[stringPreferencesKey("$domain:$username")] = Base64.encodeToString(aead.encrypt(password.toByteArray(), null), Base64.DEFAULT) }
-								.also {
-									if (active || !it.contains(stringPreferencesKey("active:$domain")))
-										it[stringPreferencesKey("active:$domain")] = username
-								})
-			}
-		}.subscribeOn(Schedulers.io())
+		return dataStore.updateDataAsync { prefs: Preferences? ->
+			Single.just(prefs!!.toMutablePreferences()
+							.also {
+								it[stringPreferencesKey("$domain:$username")] = Base64.encodeToString(aead.encrypt(password.toByteArray(), null), Base64.DEFAULT)
+							}
+							.also {
+								if (active || !it.contains(stringPreferencesKey("active:$domain")))
+									it[stringPreferencesKey("active:$domain")] = username
+							})
+		}.ignoreElement()
+			.subscribeOn(Schedulers.io())
 	}
 	
 	fun setActiveAccountAsync(domain: String?, username: String?): Completable {
-		return Completable.fromAction {
-			dataStore.updateDataAsync { prefs: Preferences? ->
-				Single.just(prefs!!.toMutablePreferences()
-								.also { it[stringPreferencesKey("active:$domain")] = username as String })
-			}
-		}.subscribeOn(Schedulers.io())
+		return dataStore.updateDataAsync { prefs: Preferences? ->
+			Single.just(prefs!!.toMutablePreferences()
+							.also { it[stringPreferencesKey("active:$domain")] = username as String })
+		}.ignoreElement()
+			.subscribeOn(Schedulers.io())
 	}
 	
 	fun removeAccountAsync(domain: String, username: String): Completable {
-		return Completable.fromAction {
-			dataStore.updateDataAsync { prefs: Preferences? ->
-				Single.just(prefs!!.toMutablePreferences()
-								.also { it.remove(stringPreferencesKey("$domain:$username")) })
-			}
-		}.subscribeOn(Schedulers.io())
+		return dataStore.updateDataAsync { prefs: Preferences? ->
+			Single.just(prefs!!.toMutablePreferences()
+							.also { it.remove(stringPreferencesKey("$domain:$username")) })
+		}.ignoreElement()
+			.subscribeOn(Schedulers.io())
 	}
 	
 	fun removeActiveAccountAsync(domain: String): Completable {
-		return Completable.fromAction {
-			dataStore.updateDataAsync { prefs: Preferences? ->
-				Single.just(prefs!!.toMutablePreferences()
-								.also { it.remove(stringPreferencesKey("active:$domain")) })
-			}
-		}.subscribeOn(Schedulers.io())
+		return dataStore.updateDataAsync { prefs: Preferences? ->
+			Single.just(prefs!!.toMutablePreferences()
+							.also { it.remove(stringPreferencesKey("active:$domain")) })
+		}.ignoreElement()
+			.subscribeOn(Schedulers.io())
 	}
 	
 	companion object {

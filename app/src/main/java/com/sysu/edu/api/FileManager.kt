@@ -12,7 +12,7 @@ object FileManager {
 			val input = InputStreamReader(context.assets.open(file))
 			val buffer = BufferedReader(input)
 			var line: String?
-			while ((buffer.readLine().also { line = it }) != null) jsJSON.append(line)
+			while ((buffer.readLine().also { line = it }) != null) jsJSON.append(line).append("\n")
 			input.close()
 			buffer.close()
 		} catch (_: IOException) {
