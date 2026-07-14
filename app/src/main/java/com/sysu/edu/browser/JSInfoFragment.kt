@@ -1,115 +1,242 @@
-package com.sysu.edu.browser;
+package com.sysu.edu.browser
 
-import static com.sysu.edu.api.CommonUtil.isEmpty;
-import static com.sysu.edu.api.CommonUtil.trim;
+import android.app.Dialog
+import android.os.Bundle
+import android.view.View
+import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.Navigation.findNavController
+import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.children
+import com.alibaba.fastjson2.JSONArray
+import com.sysu.edu.R
+import com.sysu.edu.browser.data.BrowserRepository
+import com.sysu.edu.browser.data.JavaScriptEntity
+import com.sysu.edu.browser.data.JsModel
+import com.sysu.edu.browser.data.JsModelFactory
+import com.sysu.edu.preference.EditPreference
+import com.sysu.edu.view.EditTextDialog
+import rikka.material.preference.MaterialSwitchPreference
+import rikka.preference.SimpleMenuPreference
 
-import android.content.ContentValues;
-import android.os.Bundle;
-import android.view.View;
-
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.sysu.edu.R;
-import com.sysu.edu.preference.EditPreference;
-import com.sysu.edu.preference.PreferenceUtil;
-
-import java.util.Objects;
-
-import rikka.material.preference.MaterialSwitchPreference;
-import rikka.preference.SimpleMenuPreference;
-
-public class JSInfoFragment extends PreferenceFragmentCompat {
-    
-    
-    BrowserHelper db;
-    
-    @Override
-    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
-        setPreferencesFromResource(R.xml.js_info, rootKey);
-    }
-    
-    void save(ContentValues value, String id) {
-        value.clear();
-        getData().forEach((k, v) -> {
-            if (!isEmpty(v))
-                value.put(k, v.toString());
-        });
-        db.getWritableDatabase().update("js", value, "id = ?", new String[]{id});
-    }
-    
-    public JSONObject getData() {
-        PreferenceUtil preferenceUtil = new PreferenceUtil(this);
-        preferenceUtil.insertEditValue("title", "title");
-        preferenceUtil.insertEditValue("description", "description");
-        preferenceUtil.insertEditValue("author", "author");
-        preferenceUtil.insert("matches", JSONArray.from(((EditPreference) Objects.requireNonNull(findPreference("matches"))).getValue().split(",")).toString());
-        preferenceUtil.insertMenuValue("run", "run");
-        preferenceUtil.insertSwitchValue("state", "state", 0, 1);
-        return preferenceUtil.getParams();
-    }
-    
-    public void setData(JSONObject info) {
-        ((EditPreference) Objects.requireNonNull(findPreference("title"))).setValue(info.getString("title"));
-        ((EditPreference) Objects.requireNonNull(findPreference("description"))).setValue(info.getString("description"));
-        ((EditPreference) Objects.requireNonNull(findPreference("author"))).setValue(info.getString("author"));
-        ((EditPreference) Objects.requireNonNull(findPreference("matches"))).setValue(String.join(",", JSONArray.parseArray(trim(info.getString("matches"))).toList(String.class)));
-        ((MaterialSwitchPreference) Objects.requireNonNull(findPreference("state"))).setChecked(info.getInteger("state") == 0);
-        ((SimpleMenuPreference) Objects.requireNonNull(findPreference("run"))).setValue(info.getString("run"));
-    }
-    
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        db = new BrowserHelper(requireContext());
-        NavController navController = Navigation.findNavController(view);
-        var data = JSONObject.parseObject(requireArguments().getString("item"));
-        var value = new ContentValues();
-        if (data != null) setData(data);
-        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (data != null) save(value, data.getString("id"));
-                navController.navigateUp();
-            }
-        });
-        ((Preference) Objects.requireNonNull(findPreference("edit"))).setOnPreferenceClickListener(_ -> {
-            if (data != null) {
-                Bundle bundle = new Bundle();
-                bundle.putString("item", data.toString());
-                navController.navigate(R.id.info_to_editor, bundle);
-            }
-            return false;
-        });
-        ((Preference) Objects.requireNonNull(findPreference("save"))).setOnPreferenceClickListener(_ -> {
-            if (data != null) save(value, data.getString("id"));
-            return false;
-        });
-        ((Preference) Objects.requireNonNull(findPreference("delete"))).setOnPreferenceClickListener(_ -> {
-            if (data != null) {
-                db.getWritableDatabase().delete("js", "id = ?", new String[]{data.getString("id")});
-                navController.navigateUp();
-            }
-            return false;
-        });
-        /*
-        if (data != null) {
-            Preference state = Objects.requireNonNull(findPreference("state"));
-            state.setTitle(data.getInteger("state") == 1 ? getString(R.string.enable) : getString(R.string.disable));
-            state.setOnPreferenceClickListener(_ -> {
-                int i = 1 - data.getInteger("state");
-                data.put("state", i);
-                state.setTitle(i == 1 ? getString(R.string.enable) : getString(R.string.disable));
-                save(value, data.getString("id"));
-                return false;
-            });
-        }*/
-        super.onViewCreated(view, savedInstanceState);
-    }
+class JSInfoFragment : PreferenceFragmentCompat() {
+	var data: JavaScriptEntity? = null
+	val model: JsModel by lazy {
+		ViewModelProvider(this, JsModelFactory(BrowserRepository(requireContext(), lifecycleScope)))[JsModel::class.java]
+	}
+	val dialog: EditTextDialog by lazy { EditTextDialog(requireContext()) }
+	override fun onCreatePreferences(savedInstanceState: Bundle?, p1: String?) {
+		setPreferencesFromResource(R.xml.js_info, p1)
+	}
+	
+	fun save(onResult: () -> Unit = {}) {
+		val entity = data ?: run {
+			init()
+			return
+		}
+		with(entity) {
+			title = findPreference<EditPreference>("title")?.value
+			description = findPreference<EditPreference>("description")?.value
+			author = findPreference<EditPreference>("author")?.value
+			val excludeLink = JSONArray()
+			val matchLink = JSONArray()
+			findPreference<PreferenceCategory>("exclude")?.children?.forEach {
+				if (it is EditPreference) it.value?.takeIf { it1 -> it1.isNotEmpty() }
+					?.let { pattern ->
+						excludeLink.add(pattern)
+					}
+			}
+			excludes = excludeLink
+			findPreference<PreferenceCategory>("match")?.children?.forEach {
+				if (it is EditPreference) it.value?.takeIf { it1 -> it1.isNotEmpty() }
+					?.let { pattern ->
+						matchLink.add(pattern)
+					}
+			}
+			matches = matchLink
+			state = if (findPreference<MaterialSwitchPreference>("state")?.isChecked == true) 1 else 0
+			runAt = findPreference<SimpleMenuPreference>("run")?.value
+		}
+		model.updateJs(entity, onResult)
+	}
+	
+	private fun init() {
+		model.getJs(requireArguments().getLong("id")) {
+			if (it != null) {
+				data = it
+				load()
+			}
+		}
+	}
+	
+	override fun onResume() {
+		super.onResume()
+		init()
+	}
+	
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+		val navController = findNavController(view)
+		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object :
+			OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() {
+				save {
+					navController.navigateUp()
+				}
+			}
+		})
+		findPreference<Preference?>("edit")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+			data?.let { entity ->
+				save {
+					navController.navigate(R.id.info_to_editor, Bundle().apply {
+						putLong("id", entity.id)
+					})
+				}
+			}
+			false
+		}
+		findPreference<Preference?>("save")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+			save()
+			false
+		}
+		findPreference<Preference?>("delete")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+			data?.let { entity ->
+				model.deleteJs(entity) {
+					navController.navigateUp()
+				}
+			}
+			false
+		}
+		val dialog = EditTextDialog(requireContext()).apply {
+			setTitle(R.string.add)
+		}
+		findPreference<Preference?>("match_add")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+			dialog.setTitle(R.string.matches)
+			dialog.value = ""
+			dialog.getDialog().setButton(Dialog.BUTTON_POSITIVE, getString(R.string.add)) { _, _ ->
+				dialog.getText().takeIf { it.isNotEmpty() }?.let {
+					addMatch(it)
+					save()
+				}
+			}
+			dialog.show()
+			false
+		}
+		findPreference<Preference?>("exclude_add")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+			dialog.setTitle(R.string.exclude)
+			dialog.value = ""
+			dialog.getDialog().setButton(Dialog.BUTTON_POSITIVE, getString(R.string.add)) { _, _ ->
+				dialog.getText().takeIf { it.isNotEmpty() }?.let {
+					addExclude(it)
+					save()
+				}
+			}
+			dialog.show()
+			false
+		}
+		preferenceScreen.children.forEach {
+			it.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
+				save()
+				true
+			}
+		}
+	}
+	
+	private fun load() {
+		val entity = data ?: return
+		view?.post {
+			if (!isAdded) return@post
+			with(entity) {
+				findPreference<EditPreference>("title")?.value = title
+				findPreference<EditPreference>("description")?.value = description
+				findPreference<EditPreference>("author")?.value = author
+				removeAll("match")
+				matches.forEach { match ->
+					if (match is String) addMatch(match)
+				}
+				removeAll("exclude")
+				excludes.forEach { exclude ->
+					if (exclude is String) addExclude(exclude)
+				}
+				
+				findPreference<MaterialSwitchPreference>("state")?.isChecked = (state == 1)
+				findPreference<SimpleMenuPreference>("run")?.value = runAt ?: "document-idle"
+				findPreference<EditPreference>("version")?.value = version
+				findPreference<EditPreference>("namespace")?.value = namespace
+				findPreference<EditPreference>("link")?.value = downloadURL
+				findPreference<EditPreference>("update")?.value = updateURL
+				findPreference<EditPreference>("homepage")?.value = homepage //				findPreference<EditPreference>("icon")?.value = icon
+				findPreference<EditPreference>("support")?.value = supportURL
+			}
+		}
+	}
+	
+	private fun addExclude(exclude: String) {
+		if (exclude.isNotEmpty()) {
+			val preference = findPreference<PreferenceCategory>("exclude")
+			val editPreference = EditPreference(requireContext()).apply {
+				this@apply.value = exclude
+				this@apply.title = getString(R.string.exclude)
+				onPreferenceClickListener = {
+					dialog.setTitle(R.string.matches)
+					dialog.value = value
+					dialog.getDialog()
+						.setButton(Dialog.BUTTON_POSITIVE, getString(R.string.confirm)) { _, _ ->
+							dialog.getText().takeIf { it.isNotEmpty() && it != value }?.let {
+								value = it
+							}
+						}
+					dialog.getDialog()
+						.setButton(Dialog.BUTTON_NEUTRAL, getString(R.string.delete)) { _, _ ->
+							dialog.getText().takeIf { it.isNotEmpty() }?.let {
+								preference?.removePreference(this)
+								save()
+							}
+						}
+					dialog.show()
+					true
+				}
+			}
+			preference?.addPreference(editPreference)
+		}
+	}
+	
+	private fun addMatch(match: String) {
+		if (match.isNotEmpty()) {
+			val preference = findPreference<PreferenceCategory>("match")
+			val editPreference = EditPreference(requireContext()).apply {
+				this@apply.value = match
+				this@apply.title = getString(R.string.matches)
+				onPreferenceClickListener = {
+					dialog.setTitle(R.string.matches)
+					dialog.value = value
+					dialog.getDialog()
+						.setButton(Dialog.BUTTON_POSITIVE, getString(R.string.confirm)) { _, _ ->
+							dialog.getText().takeIf { it.isNotEmpty() && it != value }?.let {
+								value = it
+							}
+						}
+					dialog.getDialog()
+						.setButton(Dialog.BUTTON_NEUTRAL, getString(R.string.delete)) { _, _ ->
+							preference?.removePreference(this)
+							save()
+						}
+					dialog.show()
+					true
+				}
+			}
+			preference?.addPreference(editPreference)
+		}
+	}
+	
+	private fun removeAll(key: String) {
+		val preference = findPreference<PreferenceCategory>(key)
+		val count = preference?.preferenceCount?.takeIf { it > 1 } ?: return
+		((count - 1)..1).forEach {
+			preference.removePreference(preference.getPreference(it))
+		}
+	}
 }

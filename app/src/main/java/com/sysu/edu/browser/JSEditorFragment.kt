@@ -6,20 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.transition.MaterialContainerTransform
-import com.sysu.edu.R
 import com.sysu.edu.databinding.FragmentJsEditorBinding
 
 class JSEditorFragment : Fragment() {
-	var db: BrowserHelper? = null
+//	var db: BrowserHelper? = null
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		val binding = FragmentJsEditorBinding.inflate(inflater, container, false)
-		db = BrowserHelper(requireContext())
-		val fragment = getChildFragmentManager().findFragmentById(R.id.js_info) as JSInfoFragment?
-		val data = JSONObject.parseObject(requireArguments().getString("item")) //        FileProviderRegistry.getInstance().addFileProvider(new AssetsFileResolver(requireContext().getAssets()));
+//		db = BrowserHelper(requireContext())
+//		val fragment = getChildFragmentManager().findFragmentById(R.id.js_info) as JSInfoFragment?
+//		val data = JSONObject.parseObject(requireArguments().getString("item")) //        FileProviderRegistry.getInstance().addFileProvider(new AssetsFileResolver(requireContext().getAssets()));
 		//        GrammarRegistry.getInstance().loadGrammars("textmate/languages.json");
 		//        binding.editor.setEditorLanguage(TextMateLanguage.create("source.js", true));
 		//        var themeRegistry = ThemeRegistry.getInstance();
@@ -51,10 +49,10 @@ class JSEditorFragment : Fragment() {
 		//            else if (item.getItemId() == R.id.undo) binding.editor.undo();
 		//            return false;
 		//        });
-		if (data != null) {
-			binding.editor.setText(data.getString("script"))
-			fragment?.setData(data)
-		}
+//		if (data != null) {
+//			binding.editor.setText(data.getString("script"))
+//			fragment?.setData(data)
+//		}
 		
 		return binding.root
 	}

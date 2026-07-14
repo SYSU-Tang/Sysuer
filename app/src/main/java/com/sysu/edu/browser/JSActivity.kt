@@ -1,28 +1,30 @@
-package com.sysu.edu.browser;
+package com.sysu.edu.browser
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.sysu.edu.BaseActivity
+import com.sysu.edu.R
+import com.sysu.edu.databinding.ActivityJsActivityBinding
 
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.sysu.edu.BaseActivity;
-import com.sysu.edu.R;
-import com.sysu.edu.databinding.ActivityJsActivityBinding;
-
-public class JSActivity extends BaseActivity {
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ActivityJsActivityBinding binding = ActivityJsActivityBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        NavHostFragment fragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
-        if (fragment != null)
-            NavigationUI.setupWithNavController(binding.toolbar, fragment.getNavController(), new AppBarConfiguration.Builder().setFallbackOnNavigateUpListener(() -> {
-                supportFinishAfterTransition();
-                return false;
-            }).build());
-        getMenuInflater().inflate(R.menu.editor, binding.toolbar.getMenu());
-    }
+class JSActivity : BaseActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		val binding = ActivityJsActivityBinding.inflate(layoutInflater)
+		setContentView(binding.root)
+		val fragment = supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment
+		setupWithNavController(binding.toolbar, fragment.navController, AppBarConfiguration.Builder()
+			.setFallbackOnNavigateUpListener {
+				supportFinishAfterTransition()
+				false
+			}
+			.build())
+		menuInflater.inflate(R.menu.editor, binding.toolbar.menu)
+		intent.getLongExtra("id", -1L).takeIf { it > 0 }?.let{
+			fragment.navController.navigate(R.id.list_to_info, Bundle().apply {
+				putLong("id", it)
+			})
+		}
+	}
 }
