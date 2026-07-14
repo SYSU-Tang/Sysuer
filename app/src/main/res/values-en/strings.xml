@@ -673,4 +673,14 @@
     <string name="copy_link">Copy the link</string>
     <string name="color">Color</string>
     <string name="subtask">Subtask</string>
+
+    <string name="exclude">Exclude</string>
+    <string name="action">Action</string>
+    <string name="info">Information</string>
+    <string name="script_link">Script Link</string>
+    <string name="update_link">Update Link</string>
+    <string name="homepage">Homepage</string>
+    <string name="namespace">Namespace</string>
+    <string name="support_link">Support Link</string>
+    <string name="new_script">New Script</string>
 </resources>

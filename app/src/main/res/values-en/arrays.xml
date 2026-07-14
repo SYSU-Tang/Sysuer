@@ -115,8 +115,10 @@
         <item>Intended Cross-Campus Synchronous Course</item>
     </string-array>
     <string-array name="run">
-        <item>Manual Run</item>
-        <item>Automatic Run</item>
+        <item>document-start</item>
+        <item>document-end</item>
+        <item>document-idle</item>
+        <item>manual</item>
     </string-array>
     <string-array name="weeks_simple">
         <item>Mon</item>

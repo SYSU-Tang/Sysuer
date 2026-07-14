@@ -13,49 +13,104 @@
         app:persistent="false"
         app:title="@string/description" />
 
-    <com.sysu.edu.preference.EditPreference
-        app:icon="@drawable/account"
-        app:key="author"
-        app:persistent="false"
-        app:title="@string/author" />
-
-    <com.sysu.edu.preference.EditPreference
-        app:icon="@drawable/text"
-        app:key="matches"
-        app:persistent="false"
-        app:title="@string/matches" />
-
     <rikka.preference.SimpleMenuPreference
         app:entries="@array/run"
-        app:entryValues="@array/values_2"
+        app:entryValues="@array/run_at"
         app:icon="@drawable/time"
         app:key="run"
         app:persistent="false"
         app:title="@string/run"
         app:useSimpleSummaryProvider="true" />
-
-    <rikka.material.preference.MaterialSwitchPreference
-        app:icon="@drawable/warning"
-        app:key="state"
-        app:persistent="false"
-        app:title="@string/disable" />
-
-    <Preference
+    <PreferenceCategory
         app:allowDividerAbove="true"
-        app:icon="@drawable/edit"
-        app:key="edit"
         app:persistent="false"
-        app:title="@string/edit" />
+        app:title="@string/action">
 
-    <Preference
-        app:icon="@drawable/save"
-        app:key="save"
-        app:persistent="false"
-        app:title="@string/save" />
+        <rikka.material.preference.MaterialSwitchPreference
+            app:icon="@drawable/warning"
+            app:key="state"
+            app:persistent="false"
+            app:summaryOff="@string/disable"
+            app:summaryOn="@string/enable"
+            app:title="@string/status" />
 
-    <Preference
-        app:icon="@drawable/delete"
-        app:key="delete"
+        <Preference
+            app:icon="@drawable/edit"
+            app:key="edit"
+            app:persistent="false"
+            app:title="@string/edit" />
+
+        <Preference
+            app:icon="@drawable/save"
+            app:key="save"
+            app:persistent="false"
+            app:title="@string/save" />
+
+        <Preference
+            app:icon="@drawable/delete"
+            app:key="delete"
+            app:persistent="false"
+            app:title="@string/delete" />
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        app:allowDividerAbove="true"
+        app:key="match"
         app:persistent="false"
-        app:title="@string/delete" />
+        app:title="@string/matches">
+        <Preference
+            app:icon="@drawable/add"
+            app:key="match_add"
+            app:persistent="false"
+            app:title="@string/add" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:allowDividerAbove="true"
+        app:key="exclude"
+        app:persistent="false"
+        app:title="@string/exclude">
+        <Preference
+            app:icon="@drawable/add"
+            app:key="exclude_add"
+            app:persistent="false"
+            app:title="@string/add" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:allowDividerAbove="true"
+        app:persistent="false"
+        app:title="@string/info">
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/account"
+            app:key="author"
+            app:persistent="false"
+            app:title="@string/author" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/version"
+            app:key="version"
+            app:persistent="false"
+            app:title="@string/version" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/link"
+            app:key="link"
+            app:persistent="false"
+            app:title="@string/script_link" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/link"
+            app:key="update"
+            app:persistent="false"
+            app:title="@string/update_link" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/home"
+            app:key="homepage"
+            app:persistent="false"
+            app:title="@string/homepage" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/money"
+            app:key="support"
+            app:persistent="false"
+            app:title="@string/support_link" />
+
+    </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

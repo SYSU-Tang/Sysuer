@@ -671,4 +671,13 @@
     <string name="copy_link">复制链接</string>
     <string name="color">颜色</string>
     <string name="subtask">子任务</string>
+    <string name="exclude">排除</string>
+    <string name="action">操作</string>
+    <string name="info">信息</string>
+    <string name="script_link">脚本链接</string>
+    <string name="update_link">更新链接</string>
+    <string name="homepage">主页</string>
+    <string name="namespace">命名空间</string>
+    <string name="support_link">支持</string>
+    <string name="new_script">新脚本</string>
 </resources>

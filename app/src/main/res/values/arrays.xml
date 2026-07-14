@@ -13,6 +13,12 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="values_4">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
     <string-array name="language">
         <item>中文</item>
         <item>English</item>
@@ -237,8 +243,10 @@
         <item>是否有意向开设跨校园同步课程</item>
     </string-array>
     <string-array name="run">
+        <item>开始加载时</item>
+        <item>结束加载时</item>
+        <item>空载时</item>
         <item>手动运行</item>
-        <item>自动运行</item>
     </string-array>
     <string-array name="weeks_simple">
         <item>一</item>
@@ -270,5 +278,11 @@
         <item>交费情况</item>
         <item>付款记录</item>
         <item>退费记录</item>
+    </string-array>
+    <string-array name="run_at">
+        <item>document-start</item>
+        <item>document-end</item>
+        <item>document-idle</item>
+        <item>manual</item>
     </string-array>
 </resources>
