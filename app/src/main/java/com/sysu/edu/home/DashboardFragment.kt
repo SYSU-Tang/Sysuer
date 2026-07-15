@@ -503,8 +503,8 @@ class DashboardFragment : BaseFragment() {
 		orderDialog = BottomSheetDialog(requireContext())
 		val orderBinding = DialogServiceOrderBinding.inflate(inflater).apply {
 			recyclerView.layoutManager = LinearLayoutManager(requireContext())
-			collectionAdapter = ServiceFragment.CollectionAdapter()
-				.also { recyclerView.adapter = it }
+			recyclerView.adapter = ServiceFragment.CollectionAdapter()
+				.also { collectionAdapter = it }
 			confirm.setOnClickListener { updateShortcut(); shortcutCollection; orderDialog?.dismiss() }
 		}
 		orderDialog?.setContentView(orderBinding.root)

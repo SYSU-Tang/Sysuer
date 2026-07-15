@@ -164,4 +164,12 @@
         android:layout_height="wrap_content"
         app:chipSpacingHorizontal="0dp"
         app:chipSpacingVertical="-8dp" />
+
+    <com.google.android.material.button.MaterialButton
+        style="@style/Widget.Material3Expressive.Button.TonalButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/rank"
+        android:id="@+id/pe_sort"
+        android:visibility="gone" />
 </LinearLayout>

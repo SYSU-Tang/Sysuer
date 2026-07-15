@@ -17,7 +17,7 @@ abstract class RecyclerAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder
 	fun add(item: T) {
 		data.add(item)
 		notifyItemInserted(itemCount - 1)
-		notifyItemChanged(itemCount - 2)
+		if (itemCount > 1) notifyItemChanged(itemCount - 2)
 	}
 	
 	fun remove(position: Int) {
@@ -43,6 +43,8 @@ abstract class RecyclerAdapter<T> : RecyclerView.Adapter<RecyclerView.ViewHolder
 	fun swap(position1: Int, position2: Int) {
 		Collections.swap(data, position1, position2)
 		notifyItemMoved(position1, position2)
+		notifyItemChanged(position1)
+		notifyItemChanged(position2)
 	}
 	
 	fun setParams(config: Config?) {
@@ -82,8 +84,8 @@ internal abstract class Recycler2Adapter<T, V : ViewDataBinding?> :
 	fun remove(position: Int) {
 		data.removeAt(position)
 		notifyItemRemoved(position)
-		notifyItemRangeChanged(position, position - 1)
-		notifyItemRangeChanged(position, itemCount - position)
+		if (position > 1) notifyItemRangeChanged(position, position - 1)
+		if (position < itemCount) notifyItemRangeChanged(position, itemCount - position)
 	}
 	
 	fun clear() {

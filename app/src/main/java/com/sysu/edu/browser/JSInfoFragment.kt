@@ -63,8 +63,9 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 		model.updateJs(entity, onResult)
 	}
 	
+	val jsId: Long by lazy { requireArguments().getLong("id") }
 	private fun init() {
-		model.getJs(requireArguments().getLong("id")) {
+		model.getJs(jsId) {
 			if (it != null) {
 				data = it
 				load()

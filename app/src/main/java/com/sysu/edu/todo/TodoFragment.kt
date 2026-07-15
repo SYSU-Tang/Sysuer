@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -18,11 +17,10 @@ import com.sysu.edu.R
 import com.sysu.edu.api.CalendarManager
 import com.sysu.edu.api.CommonUtil.isEmpty
 import com.sysu.edu.databinding.FragmentTodoBinding
-import kotlin.collections.toTypedArray
 
 class TodoFragment : BaseFragment() {
-	val todoInfo: TodoInfo = TodoInfo().apply {
-		setStatus(null)
+	val todoInfo: TodoEntity = TodoEntity().apply {
+		status = TodoInfo.TODO
 	}
 	lateinit var calendarView: CalendarView
 	var due: Boolean = true
@@ -49,7 +47,6 @@ class TodoFragment : BaseFragment() {
 				}
 				
 				override fun onCalendarSelect(calendar: Calendar, isClick: Boolean) {
-					println(calendar)
 					todoManager.performRefresh()
 				}
 			})
@@ -81,17 +78,17 @@ class TodoFragment : BaseFragment() {
 	}
 	
 	val date: String
-		get() = calendarManager.toDateString(calendarView.selectedCalendar.timeInMillis) ?:""
+		get() = calendarManager.toDateString(calendarView.selectedCalendar.timeInMillis) ?: ""
 	
 	fun refresh() {
 		val a = mutableListOf<String>()
 		val b = mutableListOf<String>()
-		val map = mutableMapOf<String, MutableLiveData<*>>()        //        map.put("due_date", todoInfo.getDueDate());		//        map.put("ddl", todoInfo.getDdlDate());
+		val map = mutableMapOf<String, Any?>()
 		map["status"] = todoInfo.status
 		map["title"] = todoInfo.title
 		map["description"] = todoInfo.description
 		map["priority"] = todoInfo.priority
-		map["todo_type"] = todoInfo.type
+		map["todo_type"] = todoInfo.todoType
 		map["subtask"] = todoInfo.subtask
 		map["attachment"] = todoInfo.attachment
 		map["subject"] = todoInfo.subject
@@ -100,11 +97,11 @@ class TodoFragment : BaseFragment() {
 		map["label"] = todoInfo.tag
 		map["due_time"] = todoInfo.dueTime
 		map["remind_time"] = todoInfo.remindTime
-		map["done_datetime"] = todoInfo.doneDate
-		map.forEach { (key: String, value: MutableLiveData<*>) ->
-			if (!isEmpty(value.value)) {
+		map["done_datetime"] = todoInfo.doneDateTime
+		map.forEach { (key: String, value: Any?) ->
+			if (!isEmpty(value)) {
 				a.add("$key = ?")
-				b.add(value.value.toString())
+				b.add("$value")
 			}
 		}
 		if (due && ddl) {
@@ -133,6 +130,6 @@ class TodoFragment : BaseFragment() {
 			a.add("status = ?")
 			b.add("1")
 		}
-		todoManager.refresh(a.joinToString(" AND "),b.toTypedArray())
+		todoManager.refresh(a.joinToString(" AND "), b.toTypedArray())
 	}
 }

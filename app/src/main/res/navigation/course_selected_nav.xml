@@ -7,6 +7,25 @@
     <fragment
         android:id="@+id/course_selection_selected_fragment"
         android:name="com.sysu.edu.academic.CourseSelectionSelectedFragment"
-        android:label="@string/course_selected" />
+        android:label="@string/course_selected">
+        <action
+            android:id="@+id/selection_to_filter"
+            app:destination="@id/filter_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/filter_fragment"
+        android:name="com.sysu.edu.academic.CourseSelectionFilterFragment"
+        android:label="@string/filter">
+        <argument
+            android:name="course_selection_value_filter"
+            android:defaultValue="@null"
+            app:argType="com.sysu.edu.academic.CourseFilterValueData"
+            app:nullable="true" />
+        <argument
+            android:name="course_selection_name_filter"
+            android:defaultValue="@null"
+            app:argType="com.sysu.edu.academic.CourseFilterNameData"
+            app:nullable="true" />
+    </fragment>
 
 </navigation>

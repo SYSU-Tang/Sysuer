@@ -8,11 +8,22 @@
         android:name="com.sysu.edu.academic.CourseSelectionMainFragment"
         android:label="@string/course_selection">
         <action
-            android:id="@+id/selection_to_filter1"
-            app:destination="@id/filter1_fragment" />
+            android:id="@+id/selection_to_filter"
+            app:destination="@id/filter_fragment" />
     </fragment>
     <fragment
-        android:id="@+id/filter1_fragment"
+        android:id="@+id/filter_fragment"
         android:name="com.sysu.edu.academic.CourseSelectionFilterFragment"
-        android:label="@string/filter" />
+        android:label="@string/filter">
+        <argument
+            android:name="course_selection_value_filter"
+            android:defaultValue="@null"
+            app:argType="com.sysu.edu.academic.CourseFilterValueData"
+            app:nullable="true" />
+        <argument
+            android:name="course_selection_name_filter"
+            android:defaultValue="@null"
+            app:argType="com.sysu.edu.academic.CourseFilterNameData"
+            app:nullable="true" />
+    </fragment>
 </navigation>

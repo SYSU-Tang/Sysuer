@@ -45,6 +45,9 @@ abstract class BaseModel(context: Context) {
 										.build(), what))
 	}
 	
+	fun run() {
+	}
+	
 	fun next() {
 		val request: CommonUtil.Tuple2<Request, Int>? = nextRequest
 		request?.let { request(it) }
@@ -73,9 +76,13 @@ abstract class BaseModel(context: Context) {
 	fun login(request: CommonUtil.Tuple2<Request, Int>?) {
 		val empty = afterLoginRequest.isEmpty()
 		afterLoginRequest.add(request)
-		if (empty) contextUtil.login(authorizationManager.targetUrl) {
+		if (empty) login {
 			afterLoginRequest.forEach { request: CommonUtil.Tuple2<Request, Int>? -> retry(request!!) }
 		}
+	}
+	
+	fun login(afterLogin: () -> Unit) {
+		contextUtil.login(authorizationManager.targetUrl, afterLogin)
 	}
 	
 	fun request(request: CommonUtil.Tuple2<Request, Int>) {
@@ -112,6 +119,10 @@ abstract class BaseModel(context: Context) {
 			handleFailure(CommonUtil.Tuple2(request, code), e)
 			return null
 		}
+	}
+	
+	fun run(path: String, data: String? = null, type: String? = null, callback: Callback) {
+		http.client.newCall(http.generateRequest("https://${authorizationManager.host}/$path", data, type).build()).enqueue(callback)
 	}
 	
 	protected open fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,
