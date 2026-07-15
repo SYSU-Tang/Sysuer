@@ -9,9 +9,7 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavOptions
+import androidx.navigation.NavDirections
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.recyclerview.widget.RecyclerView
@@ -20,8 +18,8 @@ import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.databinding.FragmentCourseSelectionPreviewBinding
+import com.sysu.edu.databinding.ItemActionChipBinding
 import com.sysu.edu.databinding.ItemEvaluationBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.RecyclerAdapter
@@ -33,13 +31,14 @@ import io.noties.markwon.ext.tables.TablePlugin
 import org.commonmark.node.Node
 
 class CourseSelectionPreviewFragment : BaseFragment() {
-	val type: MutableLiveData<Int?> = MutableLiveData<Int?>()
-	lateinit var vm: CourseSelectionViewModel
+	val type: MutableLiveData<Int?> = MutableLiveData<Int?>(1)
 	lateinit var binding: FragmentCourseSelectionPreviewBinding
 	var page: Int = 1
 	var total: Int = -1
-	var previewAdapter: CourseSelectionPreviewAdapter? = null
+	val previewAdapter: CourseSelectionPreviewAdapter = CourseSelectionPreviewAdapter()
 	lateinit var model: JwxtModel
+	var filterName: CourseFilterNameData = CourseFilterNameData()
+	var filterValue: CourseFilterValueData = CourseFilterValueData()
 	override fun onDestroyView() {
 		super.onDestroyView()
 		model.dispose()
@@ -50,53 +49,76 @@ class CourseSelectionPreviewFragment : BaseFragment() {
 	                          savedInstanceState: Bundle?): ConstraintLayout {
 		super.onCreateView(inflater, container, savedInstanceState)
 		model = JwxtModel(requireContext())
-		previewAdapter = CourseSelectionPreviewAdapter()
-		vm = ViewModelProvider(requireActivity())[CourseSelectionViewModel::class.java]
 		binding = FragmentCourseSelectionPreviewBinding.inflate(inflater, container, false).apply {
 			list.recyclerView.layoutManager = StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL)
 			list.recyclerView.adapter = previewAdapter
 			list.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 				override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-					if (!recyclerView.canScrollVertically(1) && dy > 0 && total / 10.0 > page - 1) list
+					if (!recyclerView.canScrollVertically(1) && dy > 0 && total > (page - 1) * 10) list
 				}
 			})
 			type.addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, _: Int, _: Boolean -> this@CourseSelectionPreviewFragment.type.value = if (major.isChecked) 1 else if (collegePublicSelective.isChecked) 4 else 2 }
 			addFilter.setOnClickListener {
-				findNavController(root).navigate(R.id.preview_to_filter2, null, NavOptions.Builder()
-					.setEnterAnim(android.R.animator.fade_in)
-					.setExitAnim(android.R.animator.fade_out)
-					.setLaunchSingleTop(true)
-					.build(), FragmentNavigator.Extras.Builder()
-													 .addSharedElement(addFilter, "miniapp")
-													 .build())
+				val action: NavDirections = CourseSelectionPreviewFragmentDirections.previewToFilter()
+					.apply {
+						setCourseSelectionNameFilter(filterName)
+						setCourseSelectionValueFilter(filterValue)
+					}
+				findNavController(root).navigate(action.actionId, action.arguments, null, FragmentNavigator.Extras.Builder()
+					.addSharedElement(addFilter, "miniapp")
+					.build())
 			}
 		}
-		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
+		model.message.observe(requireActivity()) { (code, response) ->
 			if (response.getInteger("code") == 200) {
-				if (message.first == 0) {
+				if (code == 0) {
 					val data = response.getJSONObject("data")
 					total = data.getInteger("total")
 					data.getJSONArray("rows")
-						.forEach { e: Any? -> previewAdapter!!.add(e as JSONObject?) }
+						.forEach { e: Any? -> previewAdapter.add(e as JSONObject?) }
 				}
 			}
-		})
-		type.observe(getViewLifecycleOwner(), Observer { regetList() })
-		vm.filterValue.observe(requireActivity(), Observer { regetList() })
+		}
+		type.observe(viewLifecycleOwner) { regetList() }
 		return binding.root
+	}
+	
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+		val navController = findNavController(view)
+		navController.currentBackStackEntry?.savedStateHandle?.getLiveData<CourseFilterNameData>("filter_name")
+			?.observe(viewLifecycleOwner) { result ->
+				binding.seniorFilter.removeAllViews()
+				listOf(result.courseName, result.studyCampusId, result.week, result.classTimes, result.courseUnitNum, result.teachingTeacherNum, result.teachingLanguageCode, result.specialClassCode).forEach { v ->
+					if (!v.isNullOrEmpty()) {
+						val item = ItemActionChipBinding.inflate(layoutInflater, binding.seniorFilter, false)
+						item.root.text = v
+						binding.seniorFilter.addView(item.root)
+					}
+				}
+				filterName = result
+				navController.currentBackStackEntry?.savedStateHandle?.remove<CourseFilterNameData>("filter_name")
+			}
+		navController.currentBackStackEntry?.savedStateHandle?.getLiveData<CourseFilterValueData>("filter_value")
+			?.observe(viewLifecycleOwner) { result ->
+				filterValue = result
+				navController.currentBackStackEntry?.savedStateHandle?.remove<CourseFilterValueData>("filter_value")
+			}
 	}
 	
 	private fun regetList() {
 		page = 1
 		total = -1
-		previewAdapter?.clear()
+		previewAdapter.clear()
 		list
 	}
 	
 	val list: Unit
 		get() {
-			model.addAndNext("jwxt/choose-course-front-server/schoolCourse/pageList", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":false,\"param\":{\"hiddenSelectedStatus\":\"0\",\"type\":\"${type.value ?: 1}\"${vm.returnData}}}", 0)
+			val data = JSONObject.of("pageNo", page++, "pageSize", 10, "param", JSONObject.of("hiddenSelectedStatus", "0", "type", type.value
+				?: 1))
+			data.getJSONObject("param").putAll(JSONObject.from(filterValue))
+			model.addAndNext("jwxt/choose-course-front-server/schoolCourse/pageList", "$data", 0)
 		}
 	
 	class CourseSelectionPreviewAdapter : RecyclerAdapter<JSONObject?>() {
@@ -109,17 +131,21 @@ class CourseSelectionPreviewFragment : BaseFragment() {
 		
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 			val binding = ItemEvaluationBinding.bind(holder.itemView)
-			binding.title.text = data[position]!!.getString("courseName")
-			val md = StringBuilder("|老师|时间|地点|\n|:-----:|:----:|:----:|\n|" + data[position]!!.getString("teachingTimePlace")
+			val item = get(position)
+			val context = binding.root.context
+			binding.title.text = item!!.getString("courseName")
+			val md = StringBuilder("|老师|时间|地点|\n|:-----:|:----:|:----:|\n|" + item.getString("teachingTimePlace")
 				.replace(";", " | ")
 				.replace(",", " |\n| ") + "|\n")
-			for (i in key.indices) md.append("\n${name[i]}：**${
-				if (data[position]!!.getString(key[i]) == null) "无" else data[position]!!.getString(key[i])
-			}**\n")
+			key.forEachIndexed { i, v ->
+				md.append("\n${name[i]}：**${
+					item.getString(v) ?: context.getString(R.string.none)
+				}**\n")
+			}
 			val action = View.OnClickListener { view: View? ->
-				view!!.context.startActivity(Intent(view.context, CourseDetailActivity::class.java).putExtra("id", data[position]!!.getString("teachingClassId"))
-												 .putExtra("code", data[position]!!.getString("courseNum"))
-												 .putExtra("class", data[position]!!.getString("teachingClassNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((binding.root.context as Activity?)!!, binding.title, "miniapp")
+				view!!.context.startActivity(Intent(view.context, CourseDetailActivity::class.java).putExtra("id", item.getString("teachingClassId"))
+												 .putExtra("code", item.getString("courseNum"))
+												 .putExtra("class", item.getString("teachingClassNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((binding.root.context as Activity?)!!, binding.title, "miniapp")
 												 .toBundle())
 			}
 			binding.root.setOnClickListener(action)
