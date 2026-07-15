@@ -1,10 +1,12 @@
 plugins {
-	alias(libs.plugins.android.application) //    alias(libs.plugins.kotlin.android)
+	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.google.gms.google.services)
 	alias(libs.plugins.google.firebase.crashlytics)
 	id("com.google.devtools.ksp")
-	id("androidx.room3")    //    id("kotlin-parcelize")
+	id("kotlin-parcelize")
+	id("androidx.navigation.safeargs")
+	id("androidx.room3")
 }
 room3 {
 	schemaDirectory("$projectDir/schemas")
@@ -15,16 +17,16 @@ android {
 	
 	defaultConfig {
 		val generation = "1"
-		val major = "3"
-		val minor = "2"
-		val beta = true
+		val major = "4"
+		val minor = "0"
+		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
 		applicationId = "com.sysu.edu"
 		minSdk = 26
 		targetSdk = 37
-		versionCode = 1938
+		versionCode = 1939
 		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled = true
@@ -75,7 +77,6 @@ dependencies {
 	implementation(libs.annotation)
 	implementation(libs.lifecycle.runtime.ktx)
 	implementation(libs.activity.compose)
-	implementation(platform(libs.compose.bom))
 	implementation(libs.rxandroid)
 	implementation(libs.tink.android)
 	implementation(libs.ui)
@@ -125,7 +126,7 @@ dependencies {
 	implementation(libs.miuix.squircle)
 	implementation(libs.jsoup)
 	implementation(libs.rxjava)
-	ksp(libs.androidx.room3.compiler)    //    implementation("androidx.datastore:datastore-preferences-rxjava3:1.2.1")
+	ksp(libs.androidx.room3.compiler)
 	/*configurations.all {
 		exclude("androidx.appcompat", "appcompat")
 	}*/    //api(libs.wechat.sdk.android)
