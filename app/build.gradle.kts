@@ -58,7 +58,7 @@ dependencies {
 	implementation(libs.androidx.activity.ktx)
 	implementation(libs.androidx.datastore.preferences.rxjava3)
 	implementation(libs.androidx.material3)
-	implementation(libs.androidx.preference.ktx) // implementation(libs.androidx.room.common.jvm)
+	implementation(libs.androidx.preference.ktx)
 	implementation(libs.androidx.room3.runtime)
 	implementation(libs.androidx.runtime.livedata)
 	implementation(libs.glide)
