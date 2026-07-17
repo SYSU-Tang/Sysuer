@@ -1,147 +1,185 @@
-package com.sysu.edu.life;
+package com.sysu.edu.life
 
-import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.app.Activity
+import android.content.ContentResolver
+import android.content.Intent
+import android.provider.OpenableColumns
+import android.view.LayoutInflater
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.android.material.imageview.ShapeableImageView
+import com.sysu.edu.R
+import com.sysu.edu.databinding.FragmentComplaintMainBinding
+import com.sysu.edu.databinding.ItemFileBinding
+import com.sysu.edu.model.XinfangModel
+import com.sysu.edu.view.AdapterListener
+import com.sysu.edu.view.RecyclerAdapter
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okio.source
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.material.imageview.ShapeableImageView;
-import com.sysu.edu.BaseFragment;
-import com.sysu.edu.R;
-import com.sysu.edu.api.HttpManager;
-import com.sysu.edu.databinding.FragmentComplaintMainBinding;
-import com.sysu.edu.databinding.ItemTodoBinding;
-import com.sysu.edu.view.RecyclerAdapter;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okio.BufferedSink;
-import okio.Okio;
-
-public class ComplaintMainFragment extends BaseFragment {
-    
-    HttpManager http;
-    
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        FragmentComplaintMainBinding binding = FragmentComplaintMainBinding.inflate(inflater, container, false);
-        binding.captchaImage.setOnClickListener(_ -> loadCaptcha(binding.captchaImage));
-        ActivityResultLauncher<Intent> fileLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (result) -> {
-            if (result.getResultCode() == Activity.RESULT_OK) {
-                Uri uri = null;
-                if (result.getData() != null) uri = result.getData().getData();
-                if (uri != null)
-                    uploadAttachment(uri);
-            }
-        });
-        binding.uploadAttachment.setOnClickListener(_ -> pickAttachment(fileLauncher));
-        loadCaptcha(binding.captchaImage);
-        http = new HttpManager(new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                switch (msg.what) {
-                    case -1 -> config.toast(R.string.no_net_connected);
-                    case 0, 1 -> System.out.println(msg.obj);
-                }
-            }
-        });
-        http.setParams(config);
-        return binding.getRoot();
-    }
-    
-    /*
+class ComplaintMainFragment : com.sysu.edu.BaseFragment() {
+	val model: XinfangModel by lazy {
+		XinfangModel(requireContext())
+	}
+	
+	override fun onCreateView(inflater: LayoutInflater,
+	                          container: android.view.ViewGroup?,
+	                          savedInstanceState: android.os.Bundle?): android.view.View {
+		super.onCreateView(inflater, container, savedInstanceState)
+		val fileAdapter = FileAdapter().apply {
+			listener = object : AdapterListener {
+				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+				                    holder: RecyclerView.ViewHolder,
+				                    position: Int) {
+					ItemFileBinding.bind(holder.itemView).apply {
+						root.setOnClickListener(config.browse("https://${model.host}${
+							get(position).getString("path").toUri()
+						}"))
+						delete.setOnClickListener { remove(position) }
+					}
+				}
+				
+				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+				                      binding: ViewBinding?) {
+				}
+			}
+		}
+		val fileLauncher = registerForActivityResult<Intent?, ActivityResult?>(
+			ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+			if (result?.resultCode == Activity.RESULT_OK) {
+				result.data?.data?.let {
+					uploadAttachment(it)
+				}
+			}
+		}
+		val cm = ComplaintModel(model)
+		val binding = FragmentComplaintMainBinding.inflate(inflater, container, false).apply {
+			captchaImage.setOnClickListener { loadCaptcha(captchaImage) }
+			attachments.layoutManager = LinearLayoutManager(requireContext())
+			attachments.adapter = fileAdapter
+			uploadAttachment.setOnClickListener { pickAttachment(fileLauncher) }
+			submit.setOnClickListener {
+				cm.submitForm(mutableMapOf("visitorName" to visitorName.editText?.text.toString(),
+				                           "phone" to phone.editText?.text.toString(),
+				                           "mobileCheckCode" to mobileCheckCode.editText?.text.toString(),
+				                           "name" to name.editText?.text.toString(),
+				                           "company" to company.editText?.text.toString(),
+				                           "description" to description.editText?.text.toString(),
+				                           "checkCode" to checkCode.editText?.text.toString()),
+				              attachments = JSONArray(fileAdapter.data))
+			}
+		}
+		loadCaptcha(binding.captchaImage)
+		model.message.observe(viewLifecycleOwner) { (code, response) ->
+			when (code) {
+				0 -> {
+					if (response.getBoolean("ok")) {
+						response.getJSONArray("data").forEach { fileAdapter.add(it as JSONObject) }
+					}
+				}
+				2 -> {
+					if (response.getBoolean("ok")) model.contextUtil.toast(
+						R.string.submit_successful)
+					else model.contextUtil.toast(
+						response.getString("msg") ?: getString(R.string.submit_fail))
+				}            /*{"msg":"File upload processed successfully","data":[{"ext":"txt","path":"\/uploadfile\/api\/7cbc45dc8c6d42318e23ba4e6a466a39.txt","ownerName":"file","size":0,"mime":"text\/plain","name":"hook.txt"}],"ok":true,"params":{},"timestamp":"Thu Jul 16 21:43:17 CST 2026"}*/
+			}
+		}
+		
+		return binding.root
+	}
+	
+	/*
      * 上传附件
      * */
-    void pickAttachment(ActivityResultLauncher<? super Intent> fileLauncher) {
-        fileLauncher.launch(new Intent(Intent.ACTION_GET_CONTENT)
-                .addCategory(Intent.CATEGORY_OPENABLE)
-                .setType("*/*"));
-    }
-    
-    void uploadAttachment(Uri uri) {
-        ContentResolver resolver = requireContext().getContentResolver();
-        String type = resolver.getType(uri);
-        try {
-            InputStream inputStream = resolver.openInputStream(uri);
-            RequestBody requestBody = new RequestBody() {
-                @Override
-                public void writeTo(@NonNull BufferedSink bufferedSink) throws IOException {
-                    if (inputStream != null) bufferedSink.writeAll(Okio.source(inputStream));
-                }
-                
-                @Nullable
-                @Override
-                public MediaType contentType() {
-                    return type != null ? MediaType.parse(type) : null;
-                }
-            };
-            if (inputStream != null) inputStream.close();
-            http.sendRequest(http.generateRequest("https://xinfang.sysu.edu.cn/jsp_api/upload", null, null).post(new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("file", uri.getLastPathSegment(), requestBody).build()).build(), 1);
-            
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-//        if (cursor == null) {
-//            if (uri.getPath() != null)
-//                file = new File(uri.getPath());
-//        } else {
-//            cursor.moveToFirst();
-//            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-//            if (nameIndex != -1) {
-//                String name = cursor.getString(nameIndex);
-//            }
-//            System.out.println(cursor.getString(0));
-//            file = new File(cursor.getString(0));
-//            cursor.close();
-//        }
-//        if (file != null) {
-//            System.out.println(file);
-//        }
-//        if (file != null && type != null)
-    }
-    
-    
-    void loadCaptcha(ShapeableImageView imageView) {
-        Glide.with(requireContext()).load(Uri.parse("https://xinfang.sysu.edu.cn/servlet/checkcode")).diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).override(300, 120).into(imageView);
-    }
-    
-    static class FileAdapter extends RecyclerAdapter<JSONObject> {
-        
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RecyclerView.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_todo, parent, false)) {
-            };
-        }
-        
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            JSONObject item = get(position);
-            ItemTodoBinding binding = ItemTodoBinding.bind(holder.itemView);
-            binding.title.setText(item.getString("title", ""));
-            super.onBindViewHolder(holder, position);
-        }
-    }
+	fun pickAttachment(fileLauncher: ActivityResultLauncher<in Intent?>) {
+		fileLauncher.launch(
+			Intent(Intent.ACTION_GET_CONTENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"))
+	}
+	
+	fun uploadAttachment(uri: android.net.Uri) {
+		val resolver: ContentResolver = requireContext().contentResolver
+		val type: String? = resolver.getType(uri)
+		var resolvedFileName: String? = null
+		var resolvedFileSize: Long = -1
+		try {
+			resolver.query(uri, null, null, null, null).use { cursor ->
+				if (cursor != null && cursor.moveToFirst()) {
+					val nameIndex: Int = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+					if (nameIndex != -1) {
+						resolvedFileName = cursor.getString(nameIndex)
+					}
+					val sizeIndex: Int = cursor.getColumnIndex(OpenableColumns.SIZE)
+					if (sizeIndex != -1) {
+						resolvedFileSize = cursor.getLong(sizeIndex)
+					}
+				}
+			}
+		} catch (e: java.lang.Exception) {
+			System.err.println("Failed to resolve file info: " + e.message)
+		}
+		val finalFileName = resolvedFileName ?: uri.lastPathSegment
+		val finalFileSize = resolvedFileSize
+		val requestBody: RequestBody = object : RequestBody() {
+			override fun contentType(): okhttp3.MediaType? {
+				return type?.toMediaTypeOrNull() ?: "application/octet-stream".toMediaTypeOrNull()
+			}
+			
+			override fun contentLength(): Long = finalFileSize
+			@Throws(java.io.IOException::class) override fun writeTo(sink: okio.BufferedSink) {
+				resolver.openInputStream(uri).use { inputStream ->
+					inputStream?.source().use { source ->
+						source?.let { sink.writeAll(it) }
+					}
+				}
+			}
+		}
+		model.request(model.http.generateRequest("https://${model.host}/jsp_api/upload", null, null)
+						  .post(MultipartBody.Builder()
+									.setType(MultipartBody.FORM)
+									.addFormDataPart("file", finalFileName, requestBody)
+									.build())
+						  .build(), 0)
+	}
+	
+	fun loadCaptcha(imageView: ShapeableImageView) {
+		Glide.with(requireContext())
+			.load("https://${model.host}/servlet/checkcode".toUri())
+			.diskCacheStrategy(DiskCacheStrategy.NONE)
+			.skipMemoryCache(true)
+			.override(300, 120)
+			.into(imageView)
+	}
+	
+	internal class FileAdapter : RecyclerAdapter<JSONObject>() {
+		override fun onCreateViewHolder(parent: android.view.ViewGroup,
+		                                viewType: Int): RecyclerView.ViewHolder {
+			return object : RecyclerView.ViewHolder(
+				LayoutInflater.from(parent.context).inflate(R.layout.item_file, parent, false)) {}
+		}
+		
+		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+			val item = get(position)
+			val binding = ItemFileBinding.bind(holder.itemView)
+			val context = holder.itemView.context
+			binding.title.text = item.getString("name", "")
+			binding.type.text = item.getString("ext",
+			                                   "")            //binding.description.text = item.getString("path", "")
+			binding.detailContent.text = "${context.getString(R.string.size)}：${
+				item.getString("size", "")
+			}|${context.getString(R.string.type)}：${item.getString("mime", "")}"
+			super.onBindViewHolder(holder, position)
+		}
+	}
 }

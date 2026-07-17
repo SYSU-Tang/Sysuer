@@ -16,6 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
+            android:id="@+id/visitor_name"
             android:hint="@string/name"
             app:helperText="@string/name_helper_text"
             app:startIconDrawable="@drawable/account">
@@ -33,6 +34,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:hint="@string/phone"
+            android:id="@+id/phone"
             app:startIconDrawable="@drawable/phone">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -55,6 +57,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/mobile_check_code"
                 android:hint="@string/message_code"
                 app:endIconMode="clear_text"
                 app:startIconDrawable="@drawable/message">
@@ -78,6 +81,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/company"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
@@ -93,6 +97,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/name"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
@@ -111,6 +116,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:id="@+id/description"
             android:hint="@string/content"
             app:helperText="@string/content_helper_text">
 
@@ -129,7 +135,7 @@
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/captcha"
+                android:id="@+id/check_code"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -205,11 +211,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/reset"
                 android:text="@string/reset" />
 
             <com.google.android.material.button.MaterialButton
                 style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="0dp"
+                android:id="@+id/submit"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/horizontal_margin"
                 android:layout_weight="1"

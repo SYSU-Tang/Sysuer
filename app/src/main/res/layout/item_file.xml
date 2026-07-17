@@ -4,9 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?android:selectableItemBackground"
-    android:minHeight="?android:listPreferredItemHeight"
-    android:paddingHorizontal="@dimen/horizontal_padding"
-    android:paddingVertical="@dimen/vertical_padding">
+    android:minHeight="?android:listPreferredItemHeight">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/check"
@@ -15,6 +13,7 @@
         android:src="@drawable/text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/type"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Barrier
@@ -22,13 +21,13 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="type,detail"/>
+        app:constraint_referenced_ids="type,detail" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/type"
-        android:layout_height="0dp"
         android:layout_width="wrap_content"
-        android:layout_marginStart="4dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/round_rect"
         android:paddingHorizontal="4dp"
@@ -51,7 +50,7 @@
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         app:layout_constraintBottom_toTopOf="@id/detail"
         app:layout_constraintLeft_toRightOf="@id/type"
-        app:layout_constraintRight_toLeftOf="@id/menu"
+        app:layout_constraintRight_toLeftOf="@id/delete"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.helper.widget.Flow
@@ -76,30 +75,13 @@
         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
         app:drawableStartCompat="@drawable/round_rect" />
 
-
-    <com.google.android.material.button.MaterialButtonGroup
-        android:id="@+id/menu"
-        style="@style/Widget.Material3.MaterialButtonGroup.Connected"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/delete"
+        style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:icon="@drawable/delete"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/title"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:overflowMode="menu">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/view"
-            style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/view" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/delete"
-            style="@style/Widget.Material3Expressive.Button.IconButton.Tonal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/delete" />
-    </com.google.android.material.button.MaterialButtonGroup>
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

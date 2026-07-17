@@ -25,6 +25,7 @@ class XinfangModel(context: Context) : BaseModel(context) {
 	                            response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
 		val content = response.body.string()
 		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
+		println(content)
 		when (response.code) {
 			200 -> response.header("Content-Type")
 				?.takeIf { it.contains("application/json") }
