@@ -10,9 +10,6 @@ buildscript {
 
 plugins {
     alias(libs.plugins.android.application) apply false
-//    alias(libs.plugins.kotlin.android) apply false
-//    id("org.jetbrains.kotlin.plugin.parcelize") version "2.3.20" apply false
-//    id("com.google.devtools.ksp") version "2.3.6" apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.google.gms.google.services) apply false
     alias(libs.plugins.google.firebase.crashlytics) apply false

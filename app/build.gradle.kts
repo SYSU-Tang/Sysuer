@@ -65,6 +65,7 @@ dependencies {
 	implementation(libs.multiplatform.markdown.renderer.android)
 	implementation(libs.multiplatform.markdown.renderer.m3)
 	implementation(libs.okhttp)
+	implementation(libs.okio)
 	implementation(libs.fastjson2)
 	implementation(libs.appcompat)
 	implementation(libs.constraintlayout)
