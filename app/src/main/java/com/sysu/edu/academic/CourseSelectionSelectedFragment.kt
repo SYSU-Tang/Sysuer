@@ -131,7 +131,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 		page = 1
 		total = -1
 		adapter!!.clear()
-		this.selectedCourses
+		selectedCourses
 	}
 	
 	fun setPNP(type: String?, id: String) {

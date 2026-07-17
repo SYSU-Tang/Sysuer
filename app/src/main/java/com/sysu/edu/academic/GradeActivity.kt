@@ -99,34 +99,36 @@ class GradeActivity : BaseActivity() {
 		}
 		
 		val gradeManager = GradeManager()
-		adp.action = { position: Int? ->
+		adp.action = { position: Int ->
 			if (gradeManager.isFetching) model.contextUtil.toast(R.string.grade_fetching)
 			else {
-				val level = adp.getLevel(position!!)
+				val level = adp.get(position).getString("scoFinalScore")
 				if (!TextUtils.isEmpty(level)) {
 					val minGrade = gradeMap.getOrDefault(level[0], 0)
 						.minus((if (level.length == 2) 0 else 6))
-					gradeManager.getGrade(adp.getClassNumber(position), position, minGrade)
+					gradeManager.getGrade(adp.get(position)
+											  .getString("scoCourseNumber"), position, minGrade)
 				}
 			}
 		}
 		val header = binding.header.getFragment<StaggeredFragment>()
 		header.setNested(false)
 		trainType.observe(this, Observer { score })
-		year.observe(this, Observer { s: String? ->
-			if (year.value != null && term.value != null) {
+		year.observe(this) { s: String? ->
+			if (s != binding.year.text) {
 				binding.year.text = s
 				score
 			}
-		})
-		term.observe(this) { s: Int ->
-			binding.term.text = terms[s]
-			score
 		}
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
+		term.observe(this) { s: Int ->
+			if (terms[s] != binding.term.text) {
+				binding.term.text = terms[s]
+				score
+			}
+		}
+		model.message.observe(this) { (code, response) ->
 			if (response.getInteger("code") == 200) {
-				when (message.first) {
+				when (code) {
 					1 -> {
 						adp.clear()
 						response.getJSONArray("data").forEach { adp.add(it as JSONObject) }
@@ -150,26 +152,26 @@ class GradeActivity : BaseActivity() {
 						else model.contextUtil.toast(R.string.no_train_type) // 初始化学年选项
 						years.clear()
 						val selectYearPull = pull.getJSONArray("selectYearPull")
-						if (selectYearPull != null && !selectYearPull.isEmpty()) selectYearPull.forEach(Consumer { a: Any? ->
+						if (selectYearPull != null && !selectYearPull.isEmpty()) selectYearPull.forEach { a: Any? ->
 							years.add((a as JSONObject).getString("dataName"))
 							yearPop.menu.add(a.getString("dataName")).setOnMenuItemClickListener {
 								year.postValue(a.getString("dataName"))
 								binding.year.text = a.getString("dataNumber")
 								false
 							}
-						}) //获取这个学期的信息
-						this.now
+						} //获取这个学期的信息
+						now
 					}
 					3 -> { // 初始化学期选项
 						val pull = response.getJSONObject("data")
 						if (!years.contains(pull.getString("acadYear"))) yearPop.menu.add(pull.getString("acadYear"))
 							.setOnMenuItemClickListener {
-								term.postValue(pull.getInteger("acadSemester"))
-								year.postValue(pull.getString("acadYear"))
+								term.value = pull.getInteger("acadSemester")
+								year.value = pull.getString("acadYear")
 								false
 							}
-						term.postValue(pull.getInteger("acadSemester"))
-						year.postValue(pull.getString("acadYear"))
+						term.value = pull.getInteger("acadSemester")
+						year.value = pull.getString("acadYear")
 					}
 					4 -> {
 						val pull = response.getJSONObject("data")
@@ -199,7 +201,7 @@ class GradeActivity : BaseActivity() {
 					}
 				}
 			}
-		})
+		}
 		pull
 	}
 	
@@ -213,9 +215,11 @@ class GradeActivity : BaseActivity() {
 			model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 3)
 		}
 	val score: Unit
-		get() {            //if (year.value != null && term.value != null && trainType.value != null) {
-			getScore(year.value, term.value, trainType.value)
-			getTotalScore(year.value, term.value, trainType.value)            //}
+		get() {
+			if (year.value != null && term.value != null && trainType.value != null) {
+				getScore(year.value, term.value, trainType.value)
+				getTotalScore(year.value, term.value, trainType.value)
+			}
 		}
 	
 	fun getScore(year: String?, term: Int?, type: String?) {
@@ -232,7 +236,7 @@ class GradeActivity : BaseActivity() {
 		}
 	
 	internal class ScoreAdapter : RecyclerAdapter<JSONObject>() {
-		var action: Consumer<in Int?>? = null
+		var action: Consumer<in Int>? = null
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 			return object :
 				RecyclerView.ViewHolder(ItemScoreBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
@@ -241,14 +245,6 @@ class GradeActivity : BaseActivity() {
 		fun setGrade(position: Int, grade: String?) {
 			get(position)["originalScore"] = grade
 			notifyItemChanged(position)
-		}
-		
-		fun getLevel(position: Int): String {
-			return get(position).getString("scoFinalScore")
-		}
-		
-		fun getClassNumber(position: Int): String {
-			return get(position).getString("scoCourseNumber")
 		}
 		
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

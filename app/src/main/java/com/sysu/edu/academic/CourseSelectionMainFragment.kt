@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -107,12 +108,15 @@ class CourseSelectionMainFragment : BaseFragment() {
 		}
 		peDialog.setContentView(pe.root)
 		binding = FragmentCourseSelectionBinding.inflate(inflater, container, false).apply {
-			head.type.setOnCheckedStateChangeListener { chipGroup: ChipGroup?, _: MutableList<Int?>? ->
-				val cid = chipGroup!!.checkedChipId
+			head.type.setOnCheckedStateChangeListener { _: ChipGroup?, _: MutableList<Int?>? ->
+				val cid = head.type.checkedChipId
 				if (cid == R.id.my_major) selectCategory()
-				else type.value = if (cid == R.id.college_public_selective) 4 else 2
+				else {
+					type.value = if (cid == R.id.college_public_selective) 4 else 2
+					head.peSort.isVisible = false
+				}
 				if (cid != R.id.my_major && head.category.height != 0) tmp = head.category.height
-				val animator = ValueAnimator.ofInt(*if (chipGroup.checkedChipId == R.id.my_major) intArrayOf(0, tmp) else intArrayOf(if (head.category.height == 0) 0 else tmp, 0))
+				val animator = ValueAnimator.ofInt(*if (cid == R.id.my_major) intArrayOf(0, tmp) else intArrayOf(if (head.category.height == 0) 0 else tmp, 0))
 				animator.addUpdateListener { valueAnimator: ValueAnimator? ->
 					head.category.layoutParams = (head.category.layoutParams as LinearLayout.LayoutParams).apply { height = valueAnimator!!.getAnimatedValue() as Int }
 				}
@@ -375,7 +379,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 			val courseInfoLabels = context.resources.getStringArray(R.array.course_info_labels)
 			val seatInfoLabels = context.resources.getStringArray(R.array.seat_info_labels)
 			info.forEachIndexed { i, s ->
-				(binding.courseInfo.getChildAt(i) as Chip).text = "${courseInfoLabels[i]}：${convert(position, s)}"
+				(binding.courseInfo[i] as Chip).text = "${courseInfoLabels[i]}：${convert(position, s)}"
 			}
 			arrayOf("baseReceiveNum", "filterSelectedNum", "courseSelectedNum").forEachIndexed { i, s ->
 				val button = arrayOf(binding.left, binding.filtering, binding.selected)[i]

@@ -34,10 +34,7 @@ class PreferenceAdapter : RecyclerAdapter<JSONObject>() {
 	        icons: MutableList<Int?>) {
 		clear()
 		titles.indices.forEach { add(titles[it], contents[it], icons[it]) }
-	} //	fun setHideNull(hideNull: Boolean) {
-	
-	//		this.hideNull = hideNull
-	//	}
+	}
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 		val pos = holder.getBindingAdapterPosition()
 		val item = get(position)
