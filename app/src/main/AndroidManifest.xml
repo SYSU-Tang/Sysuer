@@ -13,9 +13,9 @@
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <queries>
         <package android:name="com.tencent.wework" />
-
         <intent>
             <action android:name="android.intent.action.MAIN" />
         </intent>
@@ -23,16 +23,19 @@
     <queries>
         <package android:name="com.tencent.mm" />
     </queries>
+    <queries>
+        <package android:name="com.comingx.zanao" />
+    </queries>
 
     <application
         android:name=".Application"
         android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/icon_round"
         android:supportsRtl="true"
-        android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.SYSUER.DayNight"
         android:usesCleartextTraffic="true"
         tools:ignore="UnusedAttribute">
@@ -334,7 +337,9 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity-alias>
+
         <receiver android:name=".todo.TodoReminderReceiver" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.sysu.edu.fileProvider"

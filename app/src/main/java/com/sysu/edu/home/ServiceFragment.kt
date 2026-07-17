@@ -89,7 +89,9 @@ class ServiceFragment : BaseFragment() {
 		db = HomeCollectionHelper(requireContext())
 		addCollection(inflater)
 		reader.readJSONArray().forEach {
-			binding.serviceContainer.addView(initBoxWithHashMap(inflater, (it as JSONObject).getString("name"), it.getJSONArray("items")).root)
+			binding.serviceContainer.addView(
+				initBoxWithHashMap(inflater, (it as JSONObject).getString("name"),
+				                   it.getJSONArray("items")).root)
 		}
 		reader.close()
 		return binding.root
@@ -124,7 +126,8 @@ class ServiceFragment : BaseFragment() {
 				override fun onMove(recyclerView: RecyclerView,
 				                    source: RecyclerView.ViewHolder,
 				                    target: RecyclerView.ViewHolder): Boolean {
-					collectionAdapter!!.swap(source.getBindingAdapterPosition(), target.getBindingAdapterPosition())
+					collectionAdapter!!.swap(source.getBindingAdapterPosition(),
+					                         target.getBindingAdapterPosition())
 					return true
 				}
 				
@@ -136,7 +139,8 @@ class ServiceFragment : BaseFragment() {
 	
 	fun addCollection(inflater: LayoutInflater) {
 		val collection = collection
-		collectionBinding = initBoxWithHashMap(inflater, getString(R.string.collect), collection).apply {
+		collectionBinding = initBoxWithHashMap(inflater, getString(R.string.collect),
+		                                       collection).apply {
 			serviceBoxTitle.setOnClickListener { orderDialog!!.show() }
 			binding.serviceContainer.addView(root, 0)
 			if (collection.isEmpty()) root.visibility = View.GONE
@@ -157,11 +161,12 @@ class ServiceFragment : BaseFragment() {
 	
 	private val collection: JSONArray
 		get() {
-			val cursor = db.writableDatabase.query("service_collection", null, null, null, null, null, "position ASC")
+			val cursor = db.writableDatabase.query("service_collection", null, null, null, null,
+			                                       null, "position ASC")
 			val collection = JSONArray()
 			collectionAdapter!!.clear()
-			while (cursor.moveToNext()) JSONObject.parse(cursor.getString(cursor.getColumnIndexOrThrow("serviceJson")))
-				.apply {
+			while (cursor.moveToNext()) JSONObject.parse(
+				cursor.getString(cursor.getColumnIndexOrThrow("serviceJson"))).apply {
 					collection.add(this)
 					collectionAdapter!!.add(this)
 				}
@@ -183,13 +188,14 @@ class ServiceFragment : BaseFragment() {
 			items.getJSONObject(index).let { item ->
 				list.add(item)
 				ItemActionChipBinding.inflate(inflater, binding.serviceBoxItems, false).root.apply {
-					setOnClickListener(viewModel!!.actionMap[item.getIntValue("id")]
-										   ?: View.OnClickListener {
-											   getItemIntent(item, null)?.let { it1 ->
-												   startActivity(it1, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), it, "miniapp")
-													   .toBundle())
-											   } ?: config.toast(R.string.activity_not_found)
-										   })
+					setOnClickListener(
+						viewModel!!.actionMap[item.getIntValue("id")] ?: View.OnClickListener {
+							getItemIntent(item, null)?.let { it1 ->
+								startActivity(it1,
+								              ActivityOptionsCompat.makeSceneTransitionAnimation(
+									              requireActivity(), it, "miniapp").toBundle())
+							} ?: config.toast(R.string.activity_not_found)
+						})
 					setOnLongClickListener { showActionDialog(item) }
 					text = item.getString("name")
 					binding.serviceBoxItems.addView(this)
@@ -203,8 +209,10 @@ class ServiceFragment : BaseFragment() {
 		val isServiceCollected = MutableLiveData(db.isServiceCollected(itemId))
 		val isShortcutCollected = MutableLiveData(db.isDashboardShortcutCollected(itemId))
 		actionBinding?.run {
-			collect.setText(if (true == isServiceCollected.value) R.string.cancel_collect else R.string.collect)
-			addToDashboard.setText(if (true == isShortcutCollected.value) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
+			collect.setText(
+				if (true == isServiceCollected.value) R.string.cancel_collect else R.string.collect)
+			addToDashboard.setText(
+				if (true == isShortcutCollected.value) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
 			addToLauncher.setOnClickListener {
 				if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
 					getItemIntent(item, Intent(requireContext(), MainActivity::class.java))?.let {
@@ -214,7 +222,14 @@ class ServiceFragment : BaseFragment() {
 							.setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
 							.setIntent(it.setAction(Intent.ACTION_VIEW))
 					}?.build()?.let {
-						ShortcutManagerCompat.requestPinShortcut(requireContext(), it, PendingIntent.getBroadcast(requireContext(),  /* request code */0, ShortcutManagerCompat.createShortcutResultIntent(requireContext(), it),  /* flags */PendingIntent.FLAG_IMMUTABLE).intentSender)
+						ShortcutManagerCompat.requestPinShortcut(requireContext(), it,
+						                                         PendingIntent.getBroadcast(
+							                                         requireContext(),  /* request code */
+							                                         0,
+							                                         ShortcutManagerCompat.createShortcutResultIntent(
+								                                         requireContext(),
+								                                         it),  /* flags */
+							                                         PendingIntent.FLAG_IMMUTABLE).intentSender)
 					}
 				}
 				else config.toast(R.string.fail_to_add_shortcut)
@@ -244,19 +259,27 @@ class ServiceFragment : BaseFragment() {
 					config.toast(R.string.add_shortcut_success)
 				}
 				viewModel!!.updateDashboardShortcut.value = true
-				addToDashboard.setText(if (isShortcutCollect) R.string.add_to_dashboard else R.string.cancel_add_shortcut)
+				addToDashboard.setText(
+					if (isShortcutCollect) R.string.add_to_dashboard else R.string.cancel_add_shortcut)
 				isShortcutCollected.value = !isShortcutCollect
 			}
 			feedback.setOnClickListener {
-				startActivity(Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${item.getString("name")}&labels=bug,crash-report".toUri())
-								  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+				startActivity(Intent(Intent.ACTION_VIEW).setData(
+					"https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${
+						item.getString("name")
+					}&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 			}
 			openAsUrl.setOnClickListener {
 				val url = item.getString("url")
-				if (!TextUtils.isEmpty(url)) startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(url)))
+				if (!TextUtils.isEmpty(url)) startActivity(
+					Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(url)))
 			}
 			guide.setOnClickListener {
-				if (item.containsKey("doc")) startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.getString("doc"))}").toUri()))
+				if (item.containsKey("doc")) startActivity(
+					Intent(requireContext(), BrowserActivity::class.java).setData(
+						("https://sysu-tang.github.io/sysuer-website${
+							CommonUtil.trim(item.getString("doc"))
+						}").toUri()))
 				else config.toast(R.string.undeveloped_warning)
 			}
 			val contextUtil = ContextUtil(requireContext())
@@ -264,11 +287,18 @@ class ServiceFragment : BaseFragment() {
 				.usePlugin(object : AbstractMarkwonPlugin() {
 					override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
 						super.configureSpansFactory(builder)
-						builder.appendFactory(Heading::class.java, SpanFactory { _: MarkwonConfiguration?, configuration: RenderProps? ->
-							if (CoreProps.HEADING_LEVEL.require(configuration!!) == 3) return@SpanFactory ForegroundColorSpan(contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary))
-							null
-						})
-						builder.appendFactory(Heading::class.java) { _: MarkwonConfiguration?, _: RenderProps? -> LastLineSpacingSpan(24) }
+						builder.appendFactory(Heading::class.java,
+						                      SpanFactory { _: MarkwonConfiguration?, configuration: RenderProps? ->
+												  if (CoreProps.HEADING_LEVEL.require(
+									                      configuration!!) == 3) return@SpanFactory ForegroundColorSpan(
+								                      contextUtil.getColorFromAttr(
+									                      androidx.appcompat.R.attr.colorPrimary))
+												  null
+											  })
+						builder.appendFactory(
+							Heading::class.java) { _: MarkwonConfiguration?, _: RenderProps? ->
+							LastLineSpacingSpan(24)
+						}
 					}
 					
 					override fun configureVisitor(builder: MarkwonVisitor.Builder) {
@@ -284,7 +314,9 @@ class ServiceFragment : BaseFragment() {
 					}
 				})
 				.build()
-				.setMarkdown(description, "### ${item.getString("name")}\n${item.getString("description")}\n\n`${CommonUtil.trim(item.getString("url"))}`")
+				.setMarkdown(description, "### ${item.getString("name")}\n${
+					item.getString("description")
+				}\n\n`${CommonUtil.trim(item.getString("url"))}`")
 		}
 		actionDialog!!.show()
 		return true
@@ -303,7 +335,8 @@ class ServiceFragment : BaseFragment() {
 	
 	fun initSearch() {
 		binding.run {
-			ViewCompat.setOnApplyWindowInsetsListener(searchView) { v: View?, insets: WindowInsetsCompat? ->
+			ViewCompat.setOnApplyWindowInsetsListener(
+				searchView) { v: View?, insets: WindowInsetsCompat? ->
 				val left = insets!!.getInsets(WindowInsetsCompat.Type.systemBars()).left
 				val right = insets.getInsets(WindowInsetsCompat.Type.systemBars()).right
 				val bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
@@ -315,7 +348,9 @@ class ServiceFragment : BaseFragment() {
 					override fun onGlobalLayout() {
 						searchBar.getViewTreeObserver().removeOnGlobalLayoutListener(this)
 						val layoutParams = searchBar.layoutParams as MarginLayoutParams
-						serviceContainer.setPadding(0, searchBar.height + layoutParams.topMargin + layoutParams.bottomMargin, 0, 0)
+						serviceContainer.setPadding(0,
+						                            searchBar.height + layoutParams.topMargin + layoutParams.bottomMargin,
+						                            0, 0)
 					}
 				})
 			sugList.setLayoutManager(LinearLayoutManager(requireContext()))
@@ -328,10 +363,13 @@ class ServiceFragment : BaseFragment() {
 					holder.itemView.setOnClickListener(viewModel!!.actionMap[item.getInteger("id")]
 														   ?: View.OnClickListener { v: View? ->
 															   getItemIntent(item, null)?.let {
-																   startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp")
-																	   .toBundle())
-															   }
-								                                   ?: config.toast(R.string.activity_not_found)
+																   startActivity(it,
+								                                                 ActivityOptionsCompat.makeSceneTransitionAnimation(
+									                                                 requireActivity(),
+									                                                 v!!, "miniapp")
+																					 .toBundle())
+															   } ?: config.toast(
+								                                   R.string.activity_not_found)
 														   })
 				}
 				
@@ -358,7 +396,9 @@ class ServiceFragment : BaseFragment() {
 									}.toMutableList()
 								}
 								.observeOn(AndroidSchedulers.mainThread())
-								.subscribe { d: MutableList<JSONObject> -> serviceFragmentCollectionAdapter.set(d) })
+								.subscribe { d: MutableList<JSONObject> ->
+					                serviceFragmentCollectionAdapter.set(d)
+				                })
 			searchView.editText.addTextChangedListener(object : TextWatcher {
 				override fun beforeTextChanged(s: CharSequence?,
 				                               start: Int,
@@ -378,16 +418,19 @@ class ServiceFragment : BaseFragment() {
 	}
 	
 	fun getItemIntent(item: JSONObject, intent: Intent?): Intent? =
-		if (item.containsKey("activity")) Intent(requireContext(), Class.forName(requireContext().packageName + item.getString("activity"))).takeIf { it.resolveActivity(requireContext().packageManager) != null }
-			?: intent
-		else if (item.containsKey("url")) Intent(requireContext(), BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url"))
-																											.toUri())
+		if (item.containsKey("activity")) Intent(requireContext(), Class.forName(
+			requireContext().packageName + item.getString("activity"))).takeIf {
+			it.resolveActivity(requireContext().packageManager) != null
+		} ?: intent
+		else if (item.containsKey("url")) Intent(requireContext(),
+		                                         BrowserActivity::class.java).setData(
+			CommonUtil.trim(item.getString("url")).toUri())
 		else intent
 	
 	class CollectionAdapter : RecyclerAdapter<JSONObject>() {
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object : RecyclerView.ViewHolder(LayoutInflater.from(parent.context)
-														.inflate(R.layout.item_sug, parent, false)) {}
+			return object : RecyclerView.ViewHolder(
+				LayoutInflater.from(parent.context).inflate(R.layout.item_sug, parent, false)) {}
 		}
 		
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
