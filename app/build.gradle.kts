@@ -18,8 +18,8 @@ android {
 	defaultConfig {
 		val generation = "1"
 		val major = "4"
-		val minor = "0"
-		val beta = false
+		val minor = "1"
+		val beta = true
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
@@ -36,7 +36,8 @@ android {
 		release {
 			isMinifyEnabled = true
 			isShrinkResources = true
-			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
+			              "proguard-rules.pro")
 		}
 	}
 	compileOptions {
@@ -62,6 +63,7 @@ dependencies {
 	implementation(libs.androidx.room3.runtime)
 	implementation(libs.androidx.runtime.livedata)
 	implementation(libs.glide)
+	implementation(libs.material.icons.extended)
 	implementation(libs.multiplatform.markdown.renderer.android)
 	implementation(libs.multiplatform.markdown.renderer.m3)
 	implementation(libs.okhttp)
@@ -78,6 +80,7 @@ dependencies {
 	implementation(libs.annotation)
 	implementation(libs.lifecycle.runtime.ktx)
 	implementation(libs.activity.compose)
+	implementation(libs.coil.compose)
 	implementation(libs.rxandroid)
 	implementation(libs.tink.android)
 	implementation(libs.ui)
@@ -103,6 +106,7 @@ dependencies {
 	implementation(libs.inline.parser)
 	implementation(libs.androidx.core.remoteviews)
 	implementation(libs.androidx.fragment)
+	implementation(libs.zxing.core)
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.ext.junit)
 	androidTestImplementation(libs.espresso.core)
@@ -127,8 +131,7 @@ dependencies {
 	implementation(libs.miuix.squircle)
 	implementation(libs.jsoup)
 	implementation(libs.rxjava)
-	ksp(libs.androidx.room3.compiler)
-	/*configurations.all {
+	ksp(libs.androidx.room3.compiler)	/*configurations.all {
 		exclude("androidx.appcompat", "appcompat")
 	}*/    //api(libs.wechat.sdk.android)
 }

@@ -7,6 +7,7 @@ editor = "0.24.6"
 fastjson2 = "2.0.61.android8"
 firebaseAnalytics = "23.2.0"
 glide = "5.0.9"
+coil = "2.7.0"
 googleServices = "4.5.0"
 html = "4.6.2"
 junit = "4.13.2"
@@ -54,12 +55,14 @@ tinkAndroid = "1.23.0"
 activityKtx = "1.13.0"
 multiplatformMarkdownRendererAndroid = "0.43.0"
 multiplatformMarkdownRendererM3 = "0.43.0"
-material3 = "1.5.0-alpha23"
+material3 = "1.5.0-alpha24"
 runtimeLivedata = "1.12.0-beta02"
 jsoup = "1.22.2"
 room3Runtime = "3.0.0"
 #roomCommonJvm = "2.8.4"
 preferenceKtx = "1.2.1"
+coreVersion = "3.5.3"
+materialIconsExtended = "1.7.8"
 #enroVersion = "2.9.0-kmp03"
 #enroAndroid = "2.9.0-kmp03"
 #enro = "2.9.0-kmp03"
@@ -107,6 +110,7 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleLivedataKtx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 provider = { module = "dev.rikka.shizuku:provider", version.ref = "api" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
@@ -147,10 +151,13 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 multiplatform-markdown-renderer-android = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-android", version.ref = "multiplatformMarkdownRendererAndroid" }
 multiplatform-markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "multiplatformMarkdownRendererM3" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 androidx-room3-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room3Runtime" }
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "coreVersion" }
+material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 #androidx-room-common-jvm = {group = "androidx.room",name = "room-common-jvm",version.ref = "roomCommonJvm" }
 #enro-android = { group = "dev.enro", name = "enro-android", version.ref = "enroAndroid" }
 
