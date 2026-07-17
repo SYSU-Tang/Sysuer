@@ -683,4 +683,6 @@
     <string name="namespace">Namespace</string>
     <string name="support_link">Support Link</string>
     <string name="new_script">New Script</string>
+    <string name="rank">Rank</string>
+    <string name="size">Size</string>
 </resources>

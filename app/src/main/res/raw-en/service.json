@@ -586,6 +586,12 @@
         "name": "A Campus Public Resources",
         "url": "https://pan.baidu.com/s/1RNVAELK9Bs-3IyyLEfkfyg?pwd=s7bp",
         "description": "Public resources for A campus students, including transference guides, self-recovery guides, and common resources"
+      },
+      {
+        "id": 1106,
+        "name": "SYSU Breakthrough Plan",
+        "url": "https://arxiv.jaison.ink/",
+        "description": "Sun Yat-sen University Breakthrough Plan, non-official learning materials and true exam source community"
       }
     ]
   }

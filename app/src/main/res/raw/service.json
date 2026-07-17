@@ -586,6 +586,12 @@
         "name": "A校园公共资料",
         "url": "https://pan.baidu.com/s/1RNVAELK9Bs-3IyyLEfkfyg?pwd=s7bp",
         "description": "中大A校园公共资料"
+      },
+      {
+        "id": 1106,
+        "name": "破壁计划",
+        "url": "https://arxiv.jaison.ink/",
+        "description": "中大破壁计划，非官方学习资料和真题开源社区"
       }
     ]
   }
