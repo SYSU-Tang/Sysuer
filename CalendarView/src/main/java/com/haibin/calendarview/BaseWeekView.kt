@@ -28,7 +28,7 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	 * @param calendar calendar
 	 */
 	fun setup(calendar: Calendar) {
-		mItems = CalendarUtil.initCalendarForWeekView(calendar, mDelegate, mDelegate!!.weekStart)
+		mItems = CalendarUtil.initCalendarForWeekView(calendar, mDelegate, mDelegate.weekStart)
 		addSchemesFromMap()
 		invalidate()
 	}
@@ -39,7 +39,7 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	 * @param calendar calendar
 	 */
 	fun setSelectedCalendar(calendar: Calendar) {
-		if (mDelegate!!.selectMode != CalendarViewDelegate.SELECT_MODE_SINGLE || calendar == mDelegate!!.mSelectedCalendar) mCurrentItem = mItems!!.indexOf(calendar)
+		if (mDelegate.selectMode != CalendarViewDelegate.SELECT_MODE_SINGLE || calendar == mDelegate.mSelectedCalendar) mCurrentItem = mItems!!.indexOf(calendar)
 	}
 	
 	/**
@@ -49,12 +49,12 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	 * @param isNotice isNotice
 	 */
 	fun performClickCalendar(calendar: Calendar, isNotice: Boolean) {
-		if (mParentLayout != null && mDelegate!!.mInnerListener != null && mItems != null && !mItems!!.isEmpty()) {
-			val week = if (mItems!!.contains(mDelegate!!.currentDay)) CalendarUtil.getWeekViewIndexFromCalendar(mDelegate!!.currentDay, mDelegate!!.weekStart) else CalendarUtil.getWeekViewIndexFromCalendar(calendar, mDelegate!!.weekStart)
+		if (mParentLayout != null && mDelegate.mInnerListener != null && mItems != null && !mItems!!.isEmpty()) {
+			val week = if (mItems!!.contains(mDelegate.currentDay)) CalendarUtil.getWeekViewIndexFromCalendar(mDelegate.currentDay, mDelegate.weekStart) else CalendarUtil.getWeekViewIndexFromCalendar(calendar, mDelegate.weekStart)
 			var curIndex = week
 			var currentCalendar = mItems!![week]
-			if (mDelegate!!.selectMode != CalendarViewDelegate.SELECT_MODE_DEFAULT) {
-				if (mItems!!.contains(mDelegate!!.mSelectedCalendar)) currentCalendar = mDelegate!!.mSelectedCalendar
+			if (mDelegate.selectMode != CalendarViewDelegate.SELECT_MODE_DEFAULT) {
+				if (mItems!!.contains(mDelegate.mSelectedCalendar)) currentCalendar = mDelegate.mSelectedCalendar
 				else mCurrentItem = -1
 			}
 			
@@ -63,18 +63,18 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 				currentCalendar = mItems!![curIndex]
 			}
 			
-			currentCalendar.isCurrentDay = currentCalendar == mDelegate!!.currentDay
-			mDelegate!!.mInnerListener.onWeekDateSelected(currentCalendar, false)
-			mParentLayout!!.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(currentCalendar, mDelegate!!.weekStart))
+			currentCalendar.isCurrentDay = currentCalendar == mDelegate.currentDay
+			mDelegate.mInnerListener.onWeekDateSelected(currentCalendar, false)
+			mParentLayout!!.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(currentCalendar, mDelegate.weekStart))
 			
-			if (mDelegate!!.mCalendarSelectListener != null && isNotice && mDelegate!!.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) mDelegate!!.mCalendarSelectListener.onCalendarSelect(currentCalendar, false)
+			if (mDelegate.mCalendarSelectListener != null && isNotice && mDelegate.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) mDelegate.mCalendarSelectListener.onCalendarSelect(currentCalendar, false)
 			
 			mParentLayout!!.updateContentViewTranslateY()
-			if (mDelegate!!.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) mCurrentItem = curIndex
+			if (mDelegate.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) mCurrentItem = curIndex
 			
-			if (!mDelegate!!.isShowYearSelectedLayout && mDelegate!!.mIndexCalendar != null && calendar.year != mDelegate!!.mIndexCalendar.year && mDelegate!!.mYearChangeListener != null) mDelegate!!.mYearChangeListener.onYearChange(mDelegate!!.mIndexCalendar.year)
+			if (!mDelegate.isShowYearSelectedLayout && mDelegate.mIndexCalendar != null && calendar.year != mDelegate.mIndexCalendar.year && mDelegate.mYearChangeListener != null) mDelegate.mYearChangeListener.onYearChange(mDelegate.mIndexCalendar.year)
 			
-			mDelegate!!.mIndexCalendar = currentCalendar
+			mDelegate.mIndexCalendar = currentCalendar
 			invalidate()
 		}
 	}
@@ -86,7 +86,7 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	 * @return 是否是最小访问边界了
 	 */
 	fun isMinRangeEdge(calendar: Calendar): Boolean = with(java.util.Calendar.getInstance()) {
-		set(mDelegate!!.minYear, mDelegate!!.minYearMonth - 1, mDelegate!!.minYearDay)
+		set(mDelegate.minYear, mDelegate.minYearMonth - 1, mDelegate.minYearDay)
 		val minTime = getTimeInMillis()
 		set(calendar.year, calendar.month - 1, calendar.day)
 		val curTime = getTimeInMillis()
@@ -117,23 +117,23 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 		 * @return 获取点击的日历
 		 */
 		get() {
-			if (mX <= mDelegate!!.calendarPaddingLeft || mX >= width - mDelegate!!.calendarPaddingRight) {
+			if (mX <= mDelegate.calendarPaddingLeft || mX >= width - mDelegate.calendarPaddingRight) {
 				onClickCalendarPadding()
 				return null
 			}
-			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate!!.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
+			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
 				?: 6) // 选择项
 			return if (position >= 0 && position < mItems!!.size) mItems!![position]
 			else null
 		}
 	
 	private fun onClickCalendarPadding() {
-		if (mDelegate!!.mClickCalendarPaddingListener != null) {
-			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate!!.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
+		if (mDelegate.mClickCalendarPaddingListener != null) {
+			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
 				?: 6) // 选择项
 			if (position >= 0 && position < mItems!!.size) {
 				val calendar = mItems!![position]
-				mDelegate!!.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, false, calendar, getClickCalendarPaddingObject(mX, mY, calendar))
+				mDelegate.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, false, calendar, getClickCalendarPaddingObject(mX, mY, calendar))
 			}
 		}
 	}
@@ -164,8 +164,8 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	 * 更新周起始
 	 */
 	fun updateWeekStart() {
-		val calendar = CalendarUtil.getFirstCalendarStartWithMinCalendar(mDelegate!!.minYear, mDelegate!!.minYearMonth, mDelegate!!.minYearDay, tag as Int + 1, mDelegate!!.weekStart)
-		setSelectedCalendar(mDelegate!!.mSelectedCalendar)
+		val calendar = CalendarUtil.getFirstCalendarStartWithMinCalendar(mDelegate.minYear, mDelegate.minYearMonth, mDelegate.minYearDay, tag as Int + 1, mDelegate.weekStart)
+		setSelectedCalendar(mDelegate.mSelectedCalendar)
 		setup(calendar)
 	}
 	
@@ -173,7 +173,7 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	 * 更新当选模式
 	 */
 	fun updateSingleSelect() {
-		if (!mItems!!.contains(mDelegate!!.mSelectedCalendar)) {
+		if (!mItems!!.contains(mDelegate.mSelectedCalendar)) {
 			mCurrentItem = -1
 			invalidate()
 		}
@@ -181,11 +181,11 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	
 	override fun updateCurrentDate() {
 		if (mItems == null) return
-		if (mDelegate != null && mItems!!.contains(mDelegate!!.currentDay)) {
+		if (mItems!!.contains(mDelegate.currentDay)) {
 			for (a in mItems) { //添加操作
 				a.isCurrentDay = false
 			}
-			val index = mItems!!.indexOf(mDelegate!!.currentDay)
+			val index = mItems!!.indexOf(mDelegate.currentDay)
 			mItems!![index].isCurrentDay = true
 		}
 		invalidate()

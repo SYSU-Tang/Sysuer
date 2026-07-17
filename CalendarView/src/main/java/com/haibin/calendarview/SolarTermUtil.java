@@ -25,8 +25,8 @@ import androidx.annotation.NonNull;
  */
 
 public final class SolarTermUtil {
-
-
+    
+    
     /**
      * 每弧度的角秒数
      */
@@ -153,8 +153,8 @@ public final class SolarTermUtil {
             0.00001628461, 1.17387749012, 5753.3848848968, 0.00001575568, 2.84685245825, 7860.4193924392, 0.00000924799, 5.45292234084, 11506.7697697936, 0.00000542444, 4.56409149777, 3930.2096962196};
     private static final double[] E31 = {0.00103018608, 1.10748969588, 6283.0758499914, 0.00001721238, 1.06442301418, 12566.1516999828, 0.00000702215, 3.14159265359, 0.0000000000};
     private static final double[] E32 = {0.00004359385, 5.78455133738, 6283.0758499914};
-
-
+    
+    
     //
     private static final double[] E33 = {0.00000144595, 4.27319435148, 6283.0758499914};
     //月球运动参数
@@ -222,11 +222,11 @@ public final class SolarTermUtil {
     private static double EnnT; // 调用Enn前先设置EnnT时间变量
     // ==================月位置计算===================
     private static double MnnT; // 调用Mnn前先设置MnnT时间变量
-
+    
     static void init(Context context) {
         SOLAR_TERMS = context.getResources().getStringArray(R.array.solar_term);
     }
-
+    
     /**
      * 向下取整
      *
@@ -237,10 +237,10 @@ public final class SolarTermUtil {
         v = Math.floor(v);
         if (v < 0)
             return v + 1;
-
+        
         return v;
     }
-
+    
     /**
      * 对超过0-2PI的角度转为0-2PI
      *
@@ -251,10 +251,10 @@ public final class SolarTermUtil {
         v = v % (2 * Math.PI);
         if (v < 0)
             return v + 2 * Math.PI;
-
+        
         return v;
     }
-
+    
     /**
      * 计算世界时与原子时之差,传入年
      *
@@ -266,13 +266,13 @@ public final class SolarTermUtil {
         for (i = 0; i < 100; i += 5)
             if (year < DTS[i + 5] || i == 95)
                 break;
-
+        
         double t1 = (year - DTS[i]) / (DTS[i + 5] - DTS[i]) * 10;
         double t2 = t1 * t1;
         double t3 = t2 * t1;
         return DTS[i + 1] + DTS[i + 2] * t1 + DTS[i + 3] * t2 + DTS[i + 4] * t3;
     }
-
+    
     /**
      * 传入儒略日(J2000起算),计算UTC与原子时的差(单位:日)
      *
@@ -282,7 +282,7 @@ public final class SolarTermUtil {
     private static double atomTimeDiff(double julian) {
         return worldTimeDiff(julian / 365.2425 + 2000) / 86400.0;
     }
-
+    
     /**
      * 公历转儒略日,UTC=1表示原日期是UTC
      *
@@ -293,46 +293,46 @@ public final class SolarTermUtil {
         double y = time.year; // 取出年月
         double m = time.month;
         double n = 0;
-
+        
         if (m <= 2) {
             m += 12;
             y--;
         }
-
+        
         if (time.year * 372 + time.month * 31 + time.day >= 588829) {
             // 判断是否为格里高利历日1582*372+10*31+15
             n = doubleFloor(y / 100);
             n = 2 - n + doubleFloor(n / 4);// 加百年闰
         }
-
+        
         n += doubleFloor(365.2500001 * (y + 4716)); // 加上年引起的偏移日数
         n += doubleFloor(30.6 * (m + 1)) + time.day; // 加上月引起的偏移日数及日偏移数
         n += ((time.second / 60 + time.minute) / 60 + time.hour) / 24 - 1524.5;
         if (UTC)
             return n + atomTimeDiff(n - J2000);
-
+        
         return n;
     }
-
+    
     /**
      * 儒略日数转公历,UTC=1表示目标公历是UTC
      *
      * @param jd  jd
      * @param UTC UTC
      */
-    @SuppressWarnings("all")
+    
     private static Time setFromJulian(double jd, boolean UTC) {
         Time time = new Time();
         if (UTC)
             jd -= atomTimeDiff(jd - J2000);
-
+        
         jd += 0.5;
-
+        
         // 取得日数的整数部份A及小数部分F
         double A = doubleFloor(jd);
         double F = jd - A;
         double D;
-
+        
         if (A > 2299161) {
             D = doubleFloor((A - 1867216.25) / 36524.25);
             A += 1 + D - doubleFloor(D / 4);
@@ -359,7 +359,7 @@ public final class SolarTermUtil {
         time.second = F;
         return time;
     }
-
+    
     /**
      * 补岁差
      *
@@ -375,7 +375,7 @@ public final class SolarTermUtil {
         }
         zb[0] = rad2mrad(zb[0] + (v + 2.9965 * t1) / SECOND_PER_RAD);
     }
-
+    
     /**
      * 恒星周年光行差计算(黄道坐标中)
      *
@@ -396,7 +396,7 @@ public final class SolarTermUtil {
         zb[1] -= GXC_K * Math.sin(zb[1]) * (Math.sin(dL) - e * Math.sin(dP));
         zb[0] = rad2mrad(zb[0]);
     }
-
+    
     /**
      * 计算黄经章动及交角章动
      *
@@ -419,7 +419,7 @@ public final class SolarTermUtil {
         d.Obl /= SECOND_PER_RAD * 10000; // 交角章动
         return d;
     }
-
+    
     /**
      * 计算E10,E11,E20等,即:某一组周期项或泊松项算出,计算前先设置EnnT时间
      *
@@ -432,7 +432,7 @@ public final class SolarTermUtil {
             v += F[i] * Math.cos(F[i + 1] + EnnT * F[i + 2]);
         return v;
     }
-
+    
     /**
      * 返回地球位置,日心Date黄道分点坐标
      *
@@ -451,7 +451,7 @@ public final class SolarTermUtil {
         llr[0] = rad2mrad(llr[0]);
         return llr;
     }
-
+    
     /**
      * 计算M10,M11,M20等,计算前先设置MnnT时间
      *
@@ -466,8 +466,8 @@ public final class SolarTermUtil {
                     * F[i + 4] + t4 * F[i + 5]);
         return v;
     }
-
-
+    
+    
     /**
      * 返回月球位置,返回地心Date黄道坐标
      *
@@ -487,8 +487,8 @@ public final class SolarTermUtil {
         precession(julian, llr); // 补岁差
         return llr;
     }
-
-
+    
+    
     /**
      * 地心坐标中的日月位置计算
      *
@@ -510,7 +510,7 @@ public final class SolarTermUtil {
         double[] moon = moonCoord(time); // 日月角差与章动无关
         return rad2mrad(angle - (moon[0] - sun[0]));
     }
-
+    
     /**
      * 已知位置反求时间,对于节气计算,应满足t在t1到t1+360天之间,对于Y年第n个节气(n=0是春分),t1可取值Y*365.2422+n*15.2,
      * 对于朔望计算,应满足t在t1到t1+25天之间,在此范围之外,求右边的根
@@ -551,15 +551,15 @@ public final class SolarTermUtil {
         }
         return t;
     }
-
-
+    
+    
     /**
      * 获得某一年24节气
      *
      * @param year 年
      * @return 24节气
      */
-
+    
     public static String[] getSolarTerms(int year) {
         String[] solarTerms = new String[24];
         String[] preOffset = getSolarTermsPreOffset(year - 1);
@@ -573,11 +573,11 @@ public final class SolarTermUtil {
             Time time = setFromJulian(q, true);
             solarTerms[i + 3] = time + SOLAR_TERMS[i];
         }
-
+        
         return solarTerms;
     }
-
-
+    
+    
     /**
      * 要获得2018年24节气需要传入2017年
      *
@@ -595,7 +595,7 @@ public final class SolarTermUtil {
         }
         return solarTerms;
     }
-
+    
     /**
      * 要获得2018年24节气需要传入2017年
      *
@@ -613,12 +613,12 @@ public final class SolarTermUtil {
         }
         return solarTerms;
     }
-
+    
     private static String doubleToString(double value) {
         int v = (int) value;
         return value < 10 ? "0" + v : String.valueOf(v);
     }
-
+    
     /**
      * 章动
      */
@@ -627,13 +627,13 @@ public final class SolarTermUtil {
          * 章动角
          */
         private double Lon;
-
+        
         /**
          * 交角
          */
         private double Obl;
     }
-
+    
     private static class Time {
         private double year;
         private double month;
@@ -641,11 +641,11 @@ public final class SolarTermUtil {
         private double hour;
         private double minute;
         private double second;
-
+        
         @NonNull
         @Override
         public String toString() {
-            return  doubleToString(year) + doubleToString(month) + doubleToString(day);
+            return doubleToString(year) + doubleToString(month) + doubleToString(day);
         }
     }
 }
