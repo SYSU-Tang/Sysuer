@@ -4,11 +4,13 @@ import static android.text.TextUtils.isEmpty;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sysu.edu.R;
+import com.sysu.edu.rainClass.QrCode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -169,6 +171,26 @@ public class LoginManager {
                 authorizationJar.setToken("www.ketangpai.com", result.getJSONObject("data").getString("token"));
             else onError(code, "登录失败：" + result.getString("msg"));
         }
+    }
+    
+    public void loginForYuketang(ImageView imageView) {
+        CompletableFuture.supplyAsync(() -> {
+            JSONObject response = new QrCode(imageView).run();
+            try {
+                response = JSONObject.parse(client.newCall(new Request.Builder()
+                        .post(RequestBody.create(JSONObject.of("Auth", response.getString("Auth"), "UserID", response.getLong("UserID")).toJSONString(), MediaType.parse("application/json")))
+                        .url("https://www.yuketang.cn/pc/web_login")
+                        .build()).execute().body().string());
+                if (response.containsKey("success") && response.getBoolean("success"))
+                    return true;
+            } catch (IOException e) {
+                Log.e("LoginManager", e.getMessage(), e);
+            }
+            return false;
+        }).thenAccept(b -> {
+            System.out.println("Login result: " + b);
+            if (b) onSuccess();
+        });
     }
     
     /**

@@ -16,6 +16,7 @@ import android.util.Pair
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.WindowManager
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -26,21 +27,28 @@ import com.sysu.edu.R
 import com.sysu.edu.api.LoginManager.LoginListener
 import com.sysu.edu.databinding.DialogAccountBinding
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.functions.Consumer
 import kotlin.math.roundToInt
 
 class ContextUtil(val context: Context) {
-	private val sharedPreferences: SharedPreferences = context.getSharedPreferences("privacy", Context.MODE_PRIVATE)
+	private val sharedPreferences: SharedPreferences = context.getSharedPreferences("privacy",
+	                                                                                Context.MODE_PRIVATE)
 	private val loginManager: LoginManager = LoginManager(context)
 	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
 	private val handler = Handler(Looper.getMainLooper())
 	val disposable: CompositeDisposable = CompositeDisposable()
-	private var binding: DialogAccountBinding? = null
+	private val binding: DialogAccountBinding by lazy {
+		DialogAccountBinding.inflate(LayoutInflater.from(context)).apply {
+			password.editLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+		}
+	}
 	private var dialog: AlertDialog? = null
 	
 	init {
-		if (!TextUtils.isEmpty(userName) && !TextUtils.isEmpty(password)) disposable.add(accountManager.setAccountAsync(TargetHost.SYSU, userName, password, true)
-																							 .subscribe { sharedPreferences.edit { remove("username").remove("password") } })
+		if (userName.isNotEmpty() && password.isNotEmpty()) disposable.add(accountManager.setAccountAsync(
+			TargetHost.SYSU,
+			userName,
+			password,
+			true).subscribe { sharedPreferences.edit { remove("username").remove("password") } })
 	}
 	
 	fun getColorFromAttr(attr: Int): Int {
@@ -55,22 +63,21 @@ class ContextUtil(val context: Context) {
 	 * @param dps dp 值
 	 * @return 对应的 px 值
 	 */
-	fun dpToPx(dps: Int): Int=(context.resources.displayMetrics.density * dps).roundToInt()
-	
+	fun dpToPx(dps: Int): Int = (context.resources.displayMetrics.density * dps).roundToInt()
 	val userName: String
 		/**
 		 * 获取用户名
 		 * 
 		 * @return 用户名
 		 */
-		get() = sharedPreferences.getString("username", "")!!
+		get() = sharedPreferences.getString("username", "") ?: ""
 	val password: String
 		/**
 		 * 获取密码
 		 * 
 		 * @return 密码
 		 */
-		get() = sharedPreferences.getString("password", "")!!
+		get() = sharedPreferences.getString("password", "") ?: ""
 	
 	/**
 	 * 复制文本到剪贴板
@@ -109,15 +116,35 @@ class ContextUtil(val context: Context) {
 	 */
 	fun loginForUrl(service: String?, host: String, afterLogin: Runnable?) {
 		disposable.add(accountManager.getActiveAccountAsync(host)
-						   .subscribe { activeAccount: Pair<String?, String?> ->
-							   if (!TextUtils.isEmpty(activeAccount.first) && !TextUtils.isEmpty(activeAccount.second) && !TextUtils.isEmpty(service)) {
-								   performLogin(service, host, activeAccount, afterLogin)
-							   }
-							   else changeAccount(service, host, afterLogin)
-						   })
+			               .subscribe { activeAccount: Pair<String?, String?> ->
+				               if (!activeAccount.first.isNullOrEmpty() && !activeAccount.second.isNullOrEmpty() && !service.isNullOrEmpty()) performLogin(
+					               service,
+					               host,
+					               activeAccount,
+					               afterLogin)
+				               else changeAccount(service, host, afterLogin)
+			               })
 	}
 	
-	private fun performLogin(service: String?, host: String, account: Pair<String?, String?>, afterLogin: Runnable?) {
+	fun loginByQrCode(host: String, imageView: ImageView, afterLogin: Runnable?) {
+		when (host) {
+			TargetHost.YU_KE_TANG -> loginManager.loginForYuketang(imageView)
+		}
+		loginManager.setOnLoginListener(object : LoginListener {
+			override fun onSuccess() {
+				afterLogin?.run()
+			}
+			
+			override fun onError(code: String?, message: String?) {
+				handler.post { toast(message ?: "") }
+			}
+		})
+	}
+	
+	private fun performLogin(service: String?,
+	                         host: String,
+	                         account: Pair<String?, String?>,
+	                         afterLogin: Runnable?) {
 		loginManager.setOnLoginListener(object : LoginListener {
 			override fun onSuccess() {
 				afterLogin?.run()
@@ -125,7 +152,7 @@ class ContextUtil(val context: Context) {
 			
 			override fun onError(code: String?, message: String?) {
 				if ("SSO10002" == code || "30506" == code) changeAccount(service, host, afterLogin)
-				else handler.post { toast(CommonUtil.toStringOrDefault<String?>(message)) }
+				else handler.post { toast(message ?: "") }
 			}
 		})
 		loginManager.login(account.first, account.second, service)
@@ -137,31 +164,31 @@ class ContextUtil(val context: Context) {
 	
 	fun changeAccount(url: String?, host: String, afterLogin: Runnable?) {
 		if (context is Activity && !context.isFinishing && !context.isDestroyed) {
-			if (binding == null) {
-				binding = DialogAccountBinding.inflate(LayoutInflater.from(context))
-				binding!!.password.editLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-			}
-			if (dialog == null) dialog = MaterialAlertDialogBuilder(context).setView(binding!!.root)
+			if (dialog == null) dialog = MaterialAlertDialogBuilder(context).setView(binding.root)
 				.setTitle(R.string.privacy)
 				.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
-					val username = binding!!.username.edit.getText().toString()
-					val password = binding!!.password.edit.getText().toString()
+					val username = binding.username.edit.getText().toString()
+					val password = binding.password.edit.getText().toString()
 					if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) toast(R.string.username_password_warning)
-					else disposable.add(accountManager.setAccountAsync(host, username, password, true)
-											.subscribe { performLogin(url, host, Pair(username, password), afterLogin) })
+					else disposable.add(accountManager.setAccountAsync(host,
+					                                                   username,
+					                                                   password,
+					                                                   true).subscribe {
+						performLogin(url, host, Pair(username, password), afterLogin)
+					})
 				}
-				.setNegativeButton(android.R.string.cancel, null)
+				.setNegativeButton(R.string.cancel, null)
 				.create()
 			disposable.add(accountManager.getActiveAccountAsync(host)
-							   .subscribe(Consumer { account: Pair<String?, String?>? ->
-								   context.runOnUiThread {
-									   if (!TextUtils.isEmpty(account!!.first) && !TextUtils.isEmpty(account.second)) {
-										   binding!!.password.edit.setText(account.second)
-										   binding!!.username.edit.setText(account.first)
-									   }
-									   dialog!!.show()
-								   }
-							   }))
+				               .subscribe { account: Pair<String?, String?>? ->
+					               context.runOnUiThread {
+						               if (!account?.first.isNullOrEmpty() && !account.second.isNullOrEmpty()) {
+							               binding.password.edit.setText(account.second)
+							               binding.username.edit.setText(account.first)
+						               }
+						               dialog!!.show()
+					               }
+				               })
 		}
 	}
 	
@@ -175,13 +202,13 @@ class ContextUtil(val context: Context) {
 		 *
 		 * @return 屏幕宽度（px）
 		 */
-		get() {
-			return if (SDK_INT >= Build.VERSION_CODES.R) ContextCompat.getSystemService(context, WindowManager::class.java)?.currentWindowMetrics?.bounds?.width()
-			else run {
-				val realSize = Point()
-				context.getSystemService(WindowManager::class.java)?.defaultDisplay?.getRealSize(realSize)
-				realSize.x
-			}
+		get() = if (SDK_INT >= Build.VERSION_CODES.R) ContextCompat.getSystemService(context,
+		                                                                             WindowManager::class.java)?.currentWindowMetrics?.bounds?.width()
+		else run {
+			val realSize = Point()
+			context.getSystemService(WindowManager::class.java)?.defaultDisplay?.getRealSize(
+				realSize)
+			realSize.x
 		}
 	val column: Int
 		/**

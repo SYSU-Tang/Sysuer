@@ -420,6 +420,7 @@
         "id": 802,
         "name": "雨课堂",
         "url": "https://www.yuketang.cn/web",
+        "activity": ".rainClass.RainClassMainActivity",
         "description": "雨课堂智慧教学工具，课堂互动、实时答题、学习数据分析等"
       },
       {

@@ -16,6 +16,7 @@
 
     <queries>
         <package android:name="com.tencent.wework" />
+
         <intent>
             <action android:name="android.intent.action.MAIN" />
         </intent>
@@ -413,6 +414,14 @@
             android:grantUriPermissions="false"
             android:initOrder="101" />
 
+        <activity
+            android:name=".academic.RainClassActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".rainClass.RainClassMainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

@@ -49,7 +49,7 @@ class GymListFragment : BaseFragment() {
 				                    holder: RecyclerView.ViewHolder,
 				                    position: Int) {
 					holder.let { ItemFieldBinding.bind(it.itemView) }.apply {
-						get(position)?.getString("ImageUrl")?.takeIf { it.isNotEmpty() }?.let {
+						get(position).getString("ImageUrl")?.takeIf { it.isNotEmpty() }?.let {
 							Glide.with(requireContext())
 								.load(GlideUrl(it, LazyHeaders.Builder()
 									.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
