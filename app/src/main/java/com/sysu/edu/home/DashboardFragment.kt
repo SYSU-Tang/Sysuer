@@ -98,7 +98,9 @@ class DashboardFragment : BaseFragment() {
 		Markwon.builder(requireContext()).usePlugin(object : AbstractMarkwonPlugin() {
 			override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
 				builder.appendFactory(Heading::class.java) { _, configuration ->
-					if (CoreProps.HEADING_LEVEL.require(configuration) == 3) ForegroundColorSpan(model.contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary)) else null
+					if (CoreProps.HEADING_LEVEL.require(configuration) == 3) ForegroundColorSpan(
+						model.contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary))
+					else null
 				}
 			}
 			
@@ -148,19 +150,30 @@ class DashboardFragment : BaseFragment() {
 		val courseAdapter = CourseAdapter().apply {
 			setParams(config)
 			setClick { json, view ->
-				startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code", json!!.getString("courseNum"))
-								  .putExtra("class", json.getString("classesNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view
-					?: requireView(), "miniapp").toBundle())
+				startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code",
+				                                                                         json!!.getString(
+					                                                                         "courseNum"))
+					              .putExtra("class", json.getString("classesNum")),
+				              ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),
+				                                                                 view
+					                                                                 ?: requireView(),
+				                                                                 "miniapp")
+					              .toBundle())
 			}
 		}
-		todoManager = TodoManager(requireActivity(), ConcatAdapter().also { binding.todoList.adapter = it })
+		todoManager = TodoManager(requireActivity(),
+		                          ConcatAdapter().also { binding.todoList.adapter = it })
 		with(binding) {
 			setupClickListeners()
 			courseList.addItemDecoration(DividerItemDecoration(requireContext(), 0))
-			courseList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+			courseList.layoutManager = LinearLayoutManager(requireContext(),
+			                                               LinearLayoutManager.HORIZONTAL,
+			                                               false)
 			courseList.adapter = courseAdapter
 			examList.addItemDecoration(DividerItemDecoration(requireContext(), 0))
-			examList.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false) //			examList.itemAnimator = null
+			examList.layoutManager = LinearLayoutManager(requireContext(),
+			                                             LinearLayoutManager.HORIZONTAL,
+			                                             false) //			examList.itemAnimator = null
 			examList.adapter = examAdapter
 			toggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
 				if (checkedId == R.id.today) {
@@ -178,8 +191,12 @@ class DashboardFragment : BaseFragment() {
 				}
 			}
 			toggle3.addOnButtonCheckedListener { _, checkedId, _ -> if (checkedId == R.id.filter_todo) refresh() }
-			dateView.text = getString(R.string.dashboard_day, date, resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1])
-			todoList.layoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
+			dateView.text = getString(R.string.dashboard_day,
+			                          date,
+			                          resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1])
+			todoList.layoutManager = LinearLayoutManager(requireActivity(),
+			                                             LinearLayoutManager.VERTICAL,
+			                                             false)
 			add.setOnClickListener { todoManager?.showTodoAddDialog() }
 			todoDateButton.setOnClickListener { showTodoPopup() }
 		}
@@ -228,7 +245,12 @@ class DashboardFragment : BaseFragment() {
 		}
 		val selectedSet = spm.dashboard?.mapNotNull { it?.toIntOrNull() }?.toSet().orEmpty()
 		(0..5).toSet().minus(selectedSet).forEach {
-			listOf(binding.shortcutGroup, binding.scheduleGroup, binding.timeCard, binding.courseGroup, binding.examGroup, binding.todoGroup)[it].visibility = View.GONE
+			listOf(binding.shortcutGroup,
+			       binding.scheduleGroup,
+			       binding.timeCard,
+			       binding.courseGroup,
+			       binding.examGroup,
+			       binding.todoGroup)[it].visibility = View.GONE
 		}
 	}
 	
@@ -237,7 +259,8 @@ class DashboardFragment : BaseFragment() {
 		todayCourse.clear()
 		tomorrowCourse.clear()
 		val (beforeArray, afterArray) = courseArray.map { it as JSONObject }.filter { item ->
-			val status = getTimePosition("${item.getString("teachingDate")} ${item.getString("startTime")}", "${item.getString("teachingDate")} ${item.getString("endTime")}")
+			val status = getTimePosition("${item.getString("teachingDate")} ${item.getString("startTime")}",
+			                             "${item.getString("teachingDate")} ${item.getString("endTime")}")
 			item["status"] = status
 			item["time"] = "${item.getString("startTime")}~${item.getString("endTime")}"
 			item["course"] = "第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
@@ -260,11 +283,19 @@ class DashboardFragment : BaseFragment() {
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
 		val markdown = if (isAfterEmpty) {
 			val next = tomorrowCourse.getOrNull(0)
-			"### ${getString(R.string.noClass)}\n\n${getString(R.string.next_class)}：**${next?.getString("courseName") ?: getString(R.string.none)}**\n\n${getString(R.string.location)}：**${next?.getString("teachingPlace") ?: getString(R.string.none)}**\n\n${getString(R.string.time)}：**${next?.getString("time") ?: getString(R.string.none)}**"
+			"### ${getString(R.string.noClass)}\n\n${getString(R.string.next_class)}：**${
+				next?.getString("courseName") ?: getString(R.string.none)
+			}**\n\n${getString(R.string.location)}：**${
+				next?.getString("teachingPlace") ?: getString(R.string.none)
+			}**\n\n${getString(R.string.time)}：**${next?.getString("time") ?: getString(R.string.none)}**"
 		}
 		else {
 			val current = todayCourse.getOrNull(beforeSize)
-			"### ${current?.getString("courseName") ?: getString(R.string.none)}\n\n${getString(R.string.location)}：**${current?.getString("teachingPlace") ?: getString(R.string.none)}**\n\n${getString(R.string.time)}：**${current?.getString("time") ?: getString(R.string.none)}**\n\n${getString(R.string.date)}：**${current?.getString("teachingDate") ?: getString(R.string.none)}**"
+			"### ${current?.getString("courseName") ?: getString(R.string.none)}\n\n${getString(R.string.location)}：**${
+				current?.getString("teachingPlace") ?: getString(R.string.none)
+			}**\n\n${getString(R.string.time)}：**${current?.getString("time") ?: getString(R.string.none)}**\n\n${
+				getString(R.string.date)
+			}：**${current?.getString("teachingDate") ?: getString(R.string.none)}**"
 		}
 		markwon.setMarkdown(binding.nextClass, markdown)
 	}
@@ -272,18 +303,23 @@ class DashboardFragment : BaseFragment() {
 	private fun scheduleNotification(beforeSize: Int, isAfterEmpty: Boolean) {
 		(if (isAfterEmpty) tomorrowCourse.getOrNull(0) else todayCourse.getOrNull(beforeSize))?.run {
 			val startTimeStr = "${getString("teachingDate")} ${getString("startTime")}"
-			val delta = LocalDateTime.parse(startTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+			val delta = LocalDateTime.parse(startTimeStr,
+			                                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
 				.atZone(ZoneId.systemDefault())
 				.toInstant()
 				.toEpochMilli() - System.currentTimeMillis()
 			if (delta > 0) {
 				val delay = if (delta < 15 * 60 * 1000) 0L else delta - 15 * 60 * 1000
 				val workRequest = OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java)
-					.setInputData(workDataOf("courseName" to getString("courseName"), "teachingPlace" to getString("teachingPlace"), "time" to getString("time")))
+					.setInputData(workDataOf("courseName" to getString("courseName"),
+					                         "teachingPlace" to getString("teachingPlace"),
+					                         "time" to getString("time")))
 					.setInitialDelay(delay, TimeUnit.MILLISECONDS)
 					.build()
 				WorkManager.getInstance(requireContext().applicationContext)
-					.enqueueUniqueWork("next_class_notification_update", ExistingWorkPolicy.KEEP, workRequest)
+					.enqueueUniqueWork("next_class_notification_update",
+					                   ExistingWorkPolicy.KEEP,
+					                   workRequest)
 			}
 		}
 	}
@@ -321,7 +357,10 @@ class DashboardFragment : BaseFragment() {
 			termString = it
 			val date = LocalDate.now()
 				.format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
-			binding.dateView.text = getString(R.string.dashboard_time, it, date, resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1])
+			binding.dateView.text = getString(R.string.dashboard_time,
+			                                  it,
+			                                  date,
+			                                  resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1])
 			getWeek(it)
 			getTodayCourses(it)
 		}
@@ -339,7 +378,10 @@ class DashboardFragment : BaseFragment() {
 		data.getJSONArray("data")
 			.firstOrNull { (it as JSONObject).getString("examWeekName") == "18-19周期末考" }
 			?.let {
-				termString?.let { term -> getExams(term, (it as JSONObject).getString("examWeekId")) }
+				termString?.let { term ->
+					getExams(term,
+					         (it as JSONObject).getString("examWeekId"))
+				}
 			}
 	}
 	
@@ -347,10 +389,14 @@ class DashboardFragment : BaseFragment() {
 		data.getJSONObject("data").getJSONArray("rows").takeIf { it.isNotEmpty() }?.firstOrNull {
 			(it as JSONObject).getString("courseName") == examSubject
 		}?.also {
-			startActivity(Intent(requireContext(), CourseDetailActivity::class.java).putExtra("id", (it as JSONObject).getString("teachingClassId"))
-							  .putExtra("code", it.getString("courseNum"))
-							  .putExtra("class", it.getString("teachingClassNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), binding.examList, "miniapp")
-							  .toBundle())
+			startActivity(Intent(requireContext(), CourseDetailActivity::class.java).putExtra("id",
+			                                                                                  (it as JSONObject).getString(
+				                                                                                  "teachingClassId"))
+				              .putExtra("code", it.getString("courseNum"))
+				              .putExtra("class", it.getString("teachingClassNum")),
+			              ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),
+			                                                                 binding.examList,
+			                                                                 "miniapp").toBundle())
 		}
 	}
 	
@@ -368,26 +414,45 @@ class DashboardFragment : BaseFragment() {
 			.getString("qrcode", "")
 			?.takeIf { it.isNotEmpty() }
 			?.run {
-				Intent(Intent.ACTION_VIEW, toUri()).takeIf { it.resolveActivity(requireContext().packageManager) != null }
+				Intent(Intent.ACTION_VIEW,
+				       toUri()).takeIf { it.resolveActivity(requireContext().packageManager) != null }
 					?.let { startActivity(it) }
 					?: model.contextUtil.toast(R.string.fix_sysu_code_warning)
 			} ?: model.contextUtil.toast(R.string.set_sysu_code_warning)
 	}
 	
 	private fun showTodoPopup() {
-		val pop = PopupMenu(requireActivity(), binding.todoDateButton, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
+		val pop = PopupMenu(requireActivity(),
+		                    binding.todoDateButton,
+		                    0,
+		                    0,
+		                    com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
 		val datePicker = MaterialDatePicker.Builder.datePicker()
 		pop.menu.apply {
 			add(0, Menu.NONE, 0, R.string.all).setChecked(true)
 				.setOnMenuItemClickListener { todoDate.value = ""; false }
-			add(0, Menu.NONE, 0, R.string.today).setOnMenuItemClickListener { todoDate.value = calendar.toDateStringPLus(0); false }
-			add(0, Menu.NONE, 0, R.string.tomorrow).setOnMenuItemClickListener { todoDate.value = calendar.toDateStringPLus(1); false }
+			add(0,
+			    Menu.NONE,
+			    0,
+			    R.string.today).setOnMenuItemClickListener {
+				todoDate.value = calendar.toDateStringPLus(0); false
+			}
+			add(0,
+			    Menu.NONE,
+			    0,
+			    R.string.tomorrow).setOnMenuItemClickListener {
+				todoDate.value = calendar.toDateStringPLus(1); false
+			}
 			add(1, Menu.NONE, 0, R.string.select).setOnMenuItemClickListener {
 				todoDate.value?.takeIf { it.isNotEmpty() }
 					?.let { datePicker.setSelection(calendar.toMillis(it) + 86400000) }
 				datePicker.build().apply {
 					show(this@DashboardFragment.childFragmentManager, "date_picker")
-					addOnPositiveButtonClickListener { l -> todoDate.value = l?.let { calendar.toDateString(it) } }
+					addOnPositiveButtonClickListener { l ->
+						todoDate.value = l?.let {
+							calendar.toDateString(it)
+						}
+					}
 				}
 				false
 			}
@@ -402,16 +467,20 @@ class DashboardFragment : BaseFragment() {
 	}
 	
 	private fun gotoActivity(cls: Class<*>?): View.OnClickListener = View.OnClickListener { v ->
-		startActivity(Intent(context, cls), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp")
-			.toBundle())
+		startActivity(Intent(context, cls),
+		              ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),
+		                                                                 v!!,
+		                                                                 "miniapp").toBundle())
 	}
 	
 	fun refresh() {
 		binding.todoDateButton.text = todoDate.value?.takeIf { it.isNotEmpty() }?.let {
-			todoManager?.refresh("due_date = ? AND status = ?", arrayOf(it, if (binding.filterTodo.isChecked) "0" else "1"))
+			todoManager?.refresh("due_date = ? AND status = ?",
+			                     arrayOf(it, if (binding.filterTodo.isChecked) "0" else "1"))
 			it
 		} ?: run {
-			todoManager?.refresh("status = ?", arrayOf(if (binding.filterTodo.isChecked) "0" else "1"))
+			todoManager?.refresh("status = ?",
+			                     arrayOf(if (binding.filterTodo.isChecked) "0" else "1"))
 			getString(R.string.all)
 		}
 	}
@@ -423,16 +492,22 @@ class DashboardFragment : BaseFragment() {
 		model.addAndNext("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 4)
 	
 	fun getTodayCourses(term: String?): Unit =
-		model.addAndNext("jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term", 1)
+		model.addAndNext("jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term",
+		                 1)
 	
 	fun getExams(term: String, weekId: String?): Unit =
-		model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck", "{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", 2)
+		model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck",
+		                 "{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}",
+		                 2)
 	
 	fun getFinalExam(term: String): Unit =
-		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5)
+		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term",
+		                 5)
 	
 	fun getSelectedCourses(courseName: String?): Unit =
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", 6)
+		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list",
+		                 "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
+		                 6)
 	
 	fun getTimePosition(from: String?, to: String?): String {
 		val now = LocalDateTime.now()
@@ -460,14 +535,22 @@ class DashboardFragment : BaseFragment() {
 		get() {
 			binding.shortcutGroup.childCount.takeIf { it > 4 }
 				?.let { repeat(it - 4) { binding.shortcutGroup.removeViewAt(3) } }
-			db?.writableDatabase?.query("dashboard_shortcut_collection", null, null, null, null, null, "position")
-				?.use { cursor ->
+			db?.writableDatabase?.query("dashboard_shortcut_collection",
+			                            null,
+			                            null,
+			                            null,
+			                            null,
+			                            null,
+			                            "position")?.use { cursor ->
 					if (cursor.moveToFirst()) {
 						collectionAdapter?.clear()
 						do {
 							val id = cursor.getInt(cursor.getColumnIndexOrThrow("shortcutId"))
-							val shortcut = JSON.parseObject(cursor.getString(cursor.getColumnIndexOrThrow("shortcutJson")))
-							val button = MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle).apply {
+							val shortcut = JSON.parseObject(cursor.getString(cursor.getColumnIndexOrThrow(
+								"shortcutJson")))
+							val button = MaterialButton(requireContext(),
+							                            null,
+							                            com.google.android.material.R.attr.materialButtonTonalStyle).apply {
 								text = shortcut.getString("name")
 								setOnClickListener { v ->
 									viewModel?.actionMap?.get(id)?.run {
@@ -477,15 +560,26 @@ class DashboardFragment : BaseFragment() {
 										val url = shortcut.getString("url")
 										when {
 											!activity.isNullOrEmpty() -> {
-												Intent(requireContext(), Class.forName(requireContext().packageName + activity)).takeIf { it.resolveActivity(requireContext().packageManager) != null }
-													?.let {
-														startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp")
-															.toBundle())
+												Intent(requireContext(),
+												       Class.forName(requireContext().packageName + activity)).takeIf {
+													it.resolveActivity(requireContext().packageManager) != null
+												}?.let {
+														startActivity(it,
+														              ActivityOptionsCompat.makeSceneTransitionAnimation(
+															              requireActivity(),
+															              v!!,
+															              "miniapp").toBundle())
 													}
 													?: model.contextUtil.toast(R.string.activity_not_found)
 											}
-											!url.isNullOrEmpty() -> startActivity(Intent(requireContext(), BrowserActivity::class.java).setData(url.toUri()), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), v!!, "miniapp")
-												.toBundle())
+											!url.isNullOrEmpty() -> startActivity(Intent(
+												requireContext(),
+												BrowserActivity::class.java).setData(url.toUri()),
+											                                      ActivityOptionsCompat.makeSceneTransitionAnimation(
+												                                      requireActivity(),
+												                                      v!!,
+												                                      "miniapp")
+												                                      .toBundle())
 											else -> model.contextUtil.toast(R.string.undeveloped)
 										}
 									}
@@ -508,8 +602,8 @@ class DashboardFragment : BaseFragment() {
 			confirm.setOnClickListener { updateShortcut(); shortcutCollection; orderDialog?.dismiss() }
 		}
 		orderDialog?.setContentView(orderBinding.root)
-		ItemTouchHelper(object :
-							ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+		ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+		                                                        0) {
 			override fun onMove(r: RecyclerView,
 			                    s: RecyclerView.ViewHolder,
 			                    t: RecyclerView.ViewHolder): Boolean {
@@ -546,13 +640,15 @@ class DashboardFragment : BaseFragment() {
 					val intent = when {
 						item.containsKey("activity") -> {
 							try {
-								Intent(requireContext(), Class.forName(requireContext().packageName + item.getString("activity")))
+								Intent(requireContext(),
+								       Class.forName(requireContext().packageName + item.getString("activity")))
 							} catch (_: Exception) {
 								Intent(requireContext(), MainActivity::class.java)
 							}
 						}
-						item.containsKey("url") -> Intent(requireContext(), BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url"))
-																													 .toUri())
+						item.containsKey("url") -> Intent(requireContext(),
+						                                  BrowserActivity::class.java).setData(
+							CommonUtil.trim(item.getString("url")).toUri())
 						else -> Intent(requireContext(), MainActivity::class.java)
 					}
 					val info = ShortcutInfoCompat.Builder(requireContext(), "$itemId")
@@ -561,7 +657,15 @@ class DashboardFragment : BaseFragment() {
 						.setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
 						.setIntent(intent.setAction(Intent.ACTION_VIEW))
 						.build()
-					ShortcutManagerCompat.requestPinShortcut(requireContext(), info, PendingIntent.getBroadcast(requireContext(), 0, ShortcutManagerCompat.createShortcutResultIntent(requireContext(), info), PendingIntent.FLAG_IMMUTABLE).intentSender)
+					ShortcutManagerCompat.requestPinShortcut(requireContext(),
+					                                         info,
+					                                         PendingIntent.getBroadcast(
+						                                         requireContext(),
+						                                         0,
+						                                         ShortcutManagerCompat.createShortcutResultIntent(
+							                                         requireContext(),
+							                                         info),
+						                                         PendingIntent.FLAG_IMMUTABLE).intentSender)
 				}
 				else model.contextUtil.toast(R.string.fail_to_add_shortcut)
 			}
@@ -577,15 +681,22 @@ class DashboardFragment : BaseFragment() {
 			addToDashboard.setOnClickListener {
 				val collected = isShortcutCollected.value == true
 				if (collected) db?.deleteDashboardShortcut(itemId)
-				else db?.addDashboardShortcut(itemId, item.toJSONString(), collectionAdapter?.itemCount
-					?: 0)
+				else db?.addDashboardShortcut(itemId,
+				                              item.toJSONString(),
+				                              collectionAdapter?.itemCount ?: 0)
 				model.contextUtil.toast(if (collected) R.string.cancel_add_shortcut_success else R.string.add_shortcut_success)
 				viewModel?.updateDashboardShortcut?.value = true
 				isShortcutCollected.value = !collected
 				addToDashboard.text = getString(if (isShortcutCollected.value == true) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
 			}
-			feedback.setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${item.getString("name")}&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-			markwon.setMarkdown(description, "### ${item.getString("name")}\n${item.getString("description")}")
+			feedback.setOnClickListener {
+				startActivity(Intent(Intent.ACTION_VIEW,
+				                     "https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${
+					                     item.getString("name")
+				                     }&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+			}
+			markwon.setMarkdown(description,
+			                    "### ${item.getString("name")}\n${item.getString("description")}")
 		}
 		actionDialog!!.show()
 		return true
@@ -594,8 +705,10 @@ class DashboardFragment : BaseFragment() {
 
 internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 	private var onClick: ((JSONObject?, View?) -> Unit)? = null
-	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = object :
-		RecyclerView.ViewHolder(ItemHomeCourseBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+		object : RecyclerView.ViewHolder(ItemHomeCourseBinding.inflate(LayoutInflater.from(parent.context),
+		                                                               parent,
+		                                                               false).root) {}
 	
 	fun setClick(onClick: (JSONObject?, View?) -> Unit) {
 		this.onClick = onClick
@@ -605,9 +718,16 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 		val binding = ItemHomeCourseBinding.bind(holder.itemView)
 		val item = get(position)
 		holder.itemView.setOnClickListener { v -> onClick?.invoke(item, v) }
-		mapOf(binding.courseTitle to "courseName", binding.location to "teachingPlace", binding.time to "time", binding.teacher to "teacherName", binding.course to "course").forEach { (v, s) ->
+		mapOf(binding.courseTitle to "courseName",
+		      binding.location to "teachingPlace",
+		      binding.time to "time",
+		      binding.teacher to "teacherName",
+		      binding.course to "course").forEach { (v, s) ->
 			v.text = item.getString(s)
-			v.setOnLongClickListener { config?.copy(s, item.getString(s)); config?.toast(R.string.copy_successfully); true }
+			v.setOnLongClickListener {
+				config?.copy(s,
+				             item.getString(s)); config?.toast(R.string.copy_successfully); true
+			}
 		}
 		val status = item.getString("status")
 		val isBefore = status == "before"
@@ -624,18 +744,41 @@ internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
 }
 
 internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
-	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = object :
-		RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+		object : RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(parent.context),
+		                                                         parent,
+		                                                         false).root) {}
 	
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 		val binding = ItemExamBinding.bind(holder.itemView)
 		val context = holder.itemView.context
 		val examData = get(position)
-		val text = arrayOf(examData.getString("examSubjectName"), examData.getString("classroomNumber"), "${examData.getString("examDate")} ${context.resources.getStringArray(R.array.weeks)[examData.getInteger("week") - 1]}", "${examData.getString("duration")}${context.getString(R.string.minute)}", examData.getString("durationTime"), String.format(context.getString(R.string.section_range), examData.getIntValue("startClassTimes"), examData.getIntValue("endClassTimes")), "${context.getString(R.string.exam_mode)}：${examData.getString("examMode")}", "${context.getString(R.string.exam_stage)}：${examData.getString("examStage")}")
-		val views = arrayOf<TextView>(binding.examName, binding.examLocation, binding.examDate, binding.examDuration, binding.examTime, binding.examClassTime, binding.examMode, binding.examStage)
+		val text = arrayOf(examData.getString("examSubjectName"),
+		                   examData.getString("classroomNumber"),
+		                   "${examData.getString("examDate")} ${
+			                   context.resources.getStringArray(R.array.weeks)[examData.getInteger("week") - 1]
+		                   }",
+		                   "${examData.getString("duration")}${context.getString(R.string.minute)}",
+		                   examData.getString("durationTime"),
+		                   String.format(context.getString(R.string.section_range),
+		                                 examData.getIntValue("startClassTimes"),
+		                                 examData.getIntValue("endClassTimes")),
+		                   "${context.getString(R.string.exam_mode)}：${examData.getString("examMode")}",
+		                   "${context.getString(R.string.exam_stage)}：${examData.getString("examStage")}")
+		val views = arrayOf<TextView>(binding.examName,
+		                              binding.examLocation,
+		                              binding.examDate,
+		                              binding.examDuration,
+		                              binding.examTime,
+		                              binding.examClassTime,
+		                              binding.examMode,
+		                              binding.examStage)
 		views.forEachIndexed { i, v ->
 			v.text = text[i]
-			v.setOnClickListener { config?.copy("exam", text[i]); config?.toast(R.string.copy_successfully) }
+			v.setOnClickListener {
+				config?.copy("exam",
+				             text[i]); config?.toast(R.string.copy_successfully)
+			}
 		}
 		val status = examData.getString("status")
 		val isBefore = status == "before"
