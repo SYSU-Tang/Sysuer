@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,7 +31,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
-import java.util.function.Consumer
 import java.util.regex.Pattern
 
 class GymDetailFragment : BaseFragment() {
@@ -53,7 +51,10 @@ class GymDetailFragment : BaseFragment() {
 		super.onCreateView(inflater, container, savedInstanceState)
 		viewModel = ViewModelProvider(requireActivity())[GymReservationViewModel::class.java]
 		id = requireArguments().getString("id")
-		val gridLayoutManager = GridLayoutManager(requireContext(), 4, GridLayoutManager.HORIZONTAL, false)
+		val gridLayoutManager = GridLayoutManager(requireContext(),
+		                                          4,
+		                                          GridLayoutManager.HORIZONTAL,
+		                                          false)
 		val fieldAdapter = FieldAdapter().apply {
 			action = {
 				viewModel!!.selected.value = selected
@@ -65,7 +66,9 @@ class GymDetailFragment : BaseFragment() {
 		}
 		val binding = FragmentGymDetailBinding.inflate(inflater, container, false).apply {
 			date.recyclerView.adapter = dateAdapter
-			date.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+			date.recyclerView.layoutManager = LinearLayoutManager(requireContext(),
+			                                                      LinearLayoutManager.HORIZONTAL,
+			                                                      false)
 			date.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 				override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 					super.onScrolled(recyclerView, dx, dy)
@@ -89,7 +92,6 @@ class GymDetailFragment : BaseFragment() {
 			if (p != null) info
 		}
 		model.message.observe(viewLifecycleOwner) { (code, response) ->
-			println(response)
 			when (code) {
 				0 -> {
 					reset(fieldAdapter)
@@ -97,12 +99,21 @@ class GymDetailFragment : BaseFragment() {
 					var availableCapacity = 0
 					var rows = -1
 					val name = MutableLiveData(false)
-					response.getJSONArray("data").forEach(Consumer { item: Any? ->
+					response.getJSONArray("data").forEach { item: Any? ->
 						val timeslots = (item as JSONObject).getJSONArray("Timeslots")
 						if (timeslots != null) {
 							if (rows == -1) {
-								fieldAdapter.add(JSONObject.of("Name", getString(R.string.time), "Type", 2))
-								timeslots.forEach { o: Any? -> fieldAdapter.add(JSONObject.of("Name", "${(o as JSONObject).getString("Start")}\n${o.getString("End")}", "Type", 2)) }
+								fieldAdapter.add(JSONObject.of("Name",
+								                               getString(R.string.time),
+								                               "Type",
+								                               2))
+								timeslots.forEach { o: Any? ->
+									fieldAdapter.add(JSONObject.of("Name", "${
+										(o as JSONObject).getString("Start")
+									}\n${
+										o.getString("End")
+									}", "Type", 2))
+								}
 								name.value = true
 								rows = timeslots.size + 1
 								gridLayoutManager.spanCount = rows
@@ -111,22 +122,37 @@ class GymDetailFragment : BaseFragment() {
 								.matcher(item.getString("VenueName"))
 								.replaceAll("") // 第一行
 							fieldAdapter.add(JSONObject().fluentPut("VenueName", fieldName)
-												 .fluentPut("Type", 0))
+								                 .fluentPut("Type", 0))
 							timeslots.forEach { data: Any? ->
-								fieldAdapter.add((data as JSONObject).clone()
-													 .fluentPut("VenueBooking", item.clone()
-														 .fluentPut("Timeslots", JSONArray.of(data)))
-													 .fluentPut("Type", 1)
-													 .fluentPut("Venue", fieldName)
-													 .fluentPut("Duration", "${data.getString("Start")}~${data.getString("End")}"))
+								val venueBooking = item.clone()
+								venueBooking.remove("Timeslots")
+								venueBooking["TimeSlots"] = JSONArray.of((data as JSONObject).clone()
+									                                         .fluentPut("Date", "${
+										                                         data.getString("Date")
+									                                         }T00:00:00.000Z")
+									                                         .apply {
+										                                         remove("AvailableCapacity")
+									                                         })
+								fieldAdapter.add(data.clone()
+									                 .fluentPut("VenueBooking", venueBooking)
+									                 .fluentPut("Type", 1)
+									                 .fluentPut("Venue", fieldName)
+									                 .fluentPut("Duration",
+									                            "${data.getString("Start")}~${
+										                            data.getString("End")
+									                            }"))
 								data.getInteger("AvailableCapacity")?.let {
 									availableCapacity += it
 								}
 							}
-							if (fieldAdapter.itemCount % rows != 0) (0..<(rows - fieldAdapter.itemCount % rows)).forEach { _ -> fieldAdapter.add(JSONObject.of("Type", 3)) }
+							if (fieldAdapter.itemCount % rows != 0) (0..<(rows - fieldAdapter.itemCount % rows)).forEach { _ ->
+								fieldAdapter.add(JSONObject.of("Type", 3))
+							}
 						}
-					})
-					if (viewModel!!.position.value != null) dateAdapter!!.setAvailableCapacity(viewModel!!.position.value!!, availableCapacity)
+					}
+					if (viewModel!!.position.value != null) dateAdapter!!.setAvailableCapacity(
+						viewModel!!.position.value!!,
+						availableCapacity)
 					getFee(id!!)
 				}
 				1 -> {
@@ -148,15 +174,15 @@ class GymDetailFragment : BaseFragment() {
 					}
 				}
 				4 -> {
-					println(response)
-					response.getJSONObject("data").run {
-						if (getInteger("Code") == 200) config.toast(R.string.reserve_success)
-						else config.toast(getString("Result")) // 订单编号
-					}
+					println("Reserve: $response")                    //response.getJSONObject("data").run {
+					if (response.getInteger("Code") == 200) config.toast(response.getString("data")
+						                                                     ?: getString(R.string.reserve_success))
+					else config.toast(response.getString("Result")) // 订单编号
+					//}
 				}
 			}
 		}
-		viewModel!!.selected.observe(viewLifecycleOwner, Observer { selected: MutableSet<Int>? ->
+		viewModel!!.selected.observe(viewLifecycleOwner) { selected: MutableSet<Int>? ->
 			fieldAdapter.selected = selected
 			val studentFee = fee["学生"]
 			if (studentFee != null) {
@@ -166,22 +192,26 @@ class GymDetailFragment : BaseFragment() {
 					else {
 						val info = StringBuilder()
 						val items = JSONArray()
-						fieldAdapter.selected?.forEach { e: Int? ->
-							info.append(fieldAdapter.get(e!!).getString("Venue"))
+						fieldAdapter.selected?.forEach { e: Int ->
+							info.append(fieldAdapter.get(e).getString("Venue"))
 								.append(" ")
 								.append(fieldAdapter.get(e).getString("Duration"))
 								.append("+")
 							items.add(fieldAdapter.get(e).getJSONObject("VenueBooking"))
 						}
-						val venueName = fieldAdapter.get(fieldAdapter.selected?.toList()?.get(0)!!)
+						val venueName = fieldAdapter.get(fieldAdapter.selected!!.toList()[0])
+							.getJSONObject("VenueBooking")
 							.getString("VenueName")
 						val creditFee = studentFee.getInteger("CreditFee") * fieldAdapter.selected?.size!!
 						binding.submit.setOnClickListener { reserve(items, venueName, creditFee) }
-						binding.info.text = String.format(Locale.getDefault(), "%s=%d元", info.deleteCharAt(info.length - 1), creditFee)
+						binding.info.text = String.format(Locale.getDefault(),
+						                                  "%s=%d元",
+						                                  info.deleteCharAt(info.length - 1),
+						                                  creditFee)
 					}
 				}
 			}
-		})
+		}
 		return binding.root
 	}
 	
@@ -194,7 +224,9 @@ class GymDetailFragment : BaseFragment() {
 	val info: Unit
 		get() {
 			viewModel!!.position.value?.let {
-				getInfo(id!!, dateAdapter!!.getFormattedDate(it), dateAdapter!!.getFormattedDate(it))
+				getInfo(id!!,
+				        dateAdapter!!.getFormattedDate(it),
+				        dateAdapter!!.getFormattedDate(it))
 			}
 		}
 	
@@ -224,9 +256,7 @@ class GymDetailFragment : BaseFragment() {
 	 *
 	 * @return 生成的 UUID
 	 */
-	fun generateUUID(): String {
-		return UUID.randomUUID().toString()
-	}
+	fun generateUUID(): String = UUID.randomUUID().toString()
 	
 	/**
 	 * 生成 Token
@@ -236,7 +266,7 @@ class GymDetailFragment : BaseFragment() {
 	 */
 	fun genToken(uuid: String?, hash: String?): String {
 		val timestamp = System.currentTimeMillis() / 1000L
-		return md5("SYSUBOOKING-$uuid$timestamp") + "." + timestamp + "." + hash
+		return md5("SYSU888BOOKING-$uuid$timestamp") + "." + timestamp + "." + hash
 	}
 	
 	/**
@@ -248,10 +278,10 @@ class GymDetailFragment : BaseFragment() {
 	fun md5(input: String): String {
 		try {
 			val hexString = StringBuilder()
-			(MessageDigest.getInstance("MD5")
-				.digest(input.toByteArray(StandardCharsets.UTF_8))).forEach {
-					hexString.append(Integer.toHexString(0xff and it.toInt())
-										 .takeUnless { it1 -> it1.length == 1 } ?: "0")
+			MessageDigest.getInstance("MD5")
+				.digest(input.toByteArray(StandardCharsets.UTF_8))
+				.forEach {
+					hexString.append(Integer.toHexString(0xff and it.toInt()).padStart(2, '0'))
 				}
 			return "$hexString"
 		} catch (e: NoSuchAlgorithmException) {
@@ -275,9 +305,31 @@ class GymDetailFragment : BaseFragment() {
 			.atZone(ZoneId.systemDefault())
 			.withZoneSameInstant(ZoneOffset.UTC)
 			.toString()
-		val payload = JSONObject.of("Identity", uuid, "BookingId", genToken(uuid, hash), "VenueTypeId", type, "VenueBookings", items, "Participants", JSONArray.of(), "Status", "Accepted", "Description", venueName, "CreatedAt", time, "UpdatedAt", time, "ActionedBy", userId,  /*NetID*/
-		                            "IsCash", false, "Charge", creditFee)
-		println(payload)
+		val payload = JSONObject.of("Identity",
+		                            uuid,
+		                            "BookingId",
+		                            genToken(uuid, hash),
+		                            "VenueTypeId",
+		                            type,
+		                            "VenueBookings",
+		                            items,
+		                            "Participants",
+		                            JSONArray.of(),
+		                            "Status",
+		                            "Accepted",
+		                            "Description",
+		                            venueName,
+		                            "CreatedAt",
+		                            time,
+		                            "UpdatedAt",
+		                            time,
+		                            "ActionedBy",
+		                            userId,  /*NetID*/
+		                            "IsCash",
+		                            false,
+		                            "Charge",
+		                            creditFee)
+		println("reserve: ${payload.toJSONString()}")
 		reserve(payload.toJSONString())
 	}
 	
@@ -287,8 +339,8 @@ class GymDetailFragment : BaseFragment() {
 		var page: Int = 7
 		var selected: Int = -1
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object :
-				RecyclerView.ViewHolder(ItemDateBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
+			return object : RecyclerView.ViewHolder(ItemDateBinding.inflate(LayoutInflater.from(
+				parent.context), parent, false).root) {}
 		}
 		
 		fun select(position: Int) {
@@ -347,8 +399,8 @@ class GymDetailFragment : BaseFragment() {
 			}
 		
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object :
-				RecyclerView.ViewHolder(ItemFieldDetailBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
+			return object : RecyclerView.ViewHolder(ItemFieldDetailBinding.inflate(LayoutInflater.from(
+				parent.context), parent, false).root) {}
 		}
 		
 		fun clearSelected() {
@@ -376,7 +428,9 @@ class GymDetailFragment : BaseFragment() {
 					2 -> fieldDetail.text = item.getString("Name", "")
 					1 -> {
 						if (item.getInteger("AvailableCapacity") > 0) {
-							fieldDetail.text = "${context.getString(R.string.reservable)}/${item.getString("AvailableCapacity", "")}"
+							fieldDetail.text = "${context.getString(R.string.reservable)}/${
+								item.getString("AvailableCapacity", "")
+							}"
 						}
 						else {
 							fieldDetail.setText(R.string.reserved)

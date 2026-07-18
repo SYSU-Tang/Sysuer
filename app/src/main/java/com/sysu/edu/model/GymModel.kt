@@ -17,7 +17,8 @@ import okhttp3.Response
 import java.util.regex.Pattern
 
 class GymModel(context: Context) : BaseModel(context) {
-	override val authorizationManager: AuthorizationManager = AuthorizationManager("gym.sysu.edu.cn", "gym-443.webvpn.sysu.edu.cn").also {
+	override val authorizationManager: AuthorizationManager = AuthorizationManager("gym.sysu.edu.cn",
+	                                                                               "gym-443.webvpn.sysu.edu.cn").also {
 		it.setTargetUrl(TargetUrl.GYM, TargetUrl.GYM_WEBVPN)
 	}
 	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
@@ -55,8 +56,8 @@ class GymModel(context: Context) : BaseModel(context) {
 		return request.newBuilder()
 			.url(request.url.newBuilder().host(authorizationManager.host).build())
 			.header("Cookie", cookieManager?.toSimpleString(authorizationManager.host) ?: "")
-			.header("Authorization", http.authorizationJar?.getAuthorization(authorizationManager.host)
-				?: "")
+			.header("Authorization",
+			        http.authorizationJar?.getAuthorization(authorizationManager.host) ?: "")
 			.build()
 	}
 }

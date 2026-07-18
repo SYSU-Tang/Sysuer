@@ -41,11 +41,9 @@ abstract class BaseModel(context: Context) {
 	}
 	
 	fun add(path: String?, data: String? = null, type: String? = null, what: Int) {
-		queue.add(CommonUtil.Tuple2(http.generateRequest("https://${authorizationManager.host}/$path", data, type)
-										.build(), what))
-	}
-	
-	fun run() {
+		queue.add(CommonUtil.Tuple2(http.generateRequest("https://${authorizationManager.host}/$path",
+		                                                 data,
+		                                                 type).build(), what))
 	}
 	
 	fun next() {
@@ -113,8 +111,8 @@ abstract class BaseModel(context: Context) {
 	
 	fun execute(request: Request, code: Int): CommonUtil.Tuple2<Int, JSONObject>? {
 		try {
-			return handleResponse(CommonUtil.Tuple2(request, code), http.client.newCall(request)
-				.execute())
+			return handleResponse(CommonUtil.Tuple2(request, code),
+			                      http.client.newCall(request).execute())
 		} catch (e: IOException) {
 			handleFailure(CommonUtil.Tuple2(request, code), e)
 			return null
@@ -122,7 +120,12 @@ abstract class BaseModel(context: Context) {
 	}
 	
 	fun run(path: String, data: String? = null, type: String? = null, callback: Callback) {
-		http.client.newCall(http.generateRequest("https://${authorizationManager.host}/$path", data, type).build()).enqueue(callback)
+		run(http.generateRequest("https://${authorizationManager.host}/$path", data, type).build(),
+		    callback)
+	}
+	
+	fun run(request: Request, callback: Callback) {
+		http.client.newCall(request).enqueue(callback)
 	}
 	
 	protected open fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,
