@@ -13,33 +13,36 @@ import com.sysu.edu.R
 import com.sysu.edu.databinding.FragmentContainerBinding
 
 class CourseSelectionContainerFragment : Fragment() {
-	var nav: NavController? = null
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		return FragmentContainerBinding.inflate(inflater, container, false).getRoot()
 	}
 	
+	private val navController: NavController by lazy {
+		(childFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController
+	}
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
-		(getChildFragmentManager().findFragmentById(R.id.nav_host_fragment) as NavHostFragment).navController.let {
-			it.setGraph(listOf(R.navigation.course_selection_nav, R.navigation.course_preview_nav, R.navigation.course_selected_nav)[requireArguments().getInt("position")])
-			setupWithNavController(requireActivity().findViewById(R.id.toolbar), it, AppBarConfiguration.Builder()
-				.setFallbackOnNavigateUpListener {
-					requireActivity().supportFinishAfterTransition()
-					true
-				}.build())
-		}
+		val position = requireArguments().getInt("position")
+		navController.setGraph(listOf(R.navigation.course_selection_nav,
+		                              R.navigation.course_preview_nav,
+		                              R.navigation.course_selected_nav)[position])
+		setupWithNavController(requireActivity().findViewById(R.id.toolbar),
+		                       navController,
+		                       AppBarConfiguration.Builder().setFallbackOnNavigateUpListener {
+			                       requireActivity().supportFinishAfterTransition()
+			                       true
+		                       }.build())
 	}
 	
 	override fun onResume() {
-		nav?.let {
-			setupWithNavController(requireActivity().findViewById(R.id.toolbar), it, AppBarConfiguration.Builder()
-				.setFallbackOnNavigateUpListener {
-					requireActivity().supportFinishAfterTransition()
-					false
-				}.build())
-		}
+		setupWithNavController(requireActivity().findViewById(R.id.toolbar),
+		                       navController,
+		                       AppBarConfiguration.Builder().setFallbackOnNavigateUpListener {
+			                       requireActivity().supportFinishAfterTransition()
+			                       false
+		                       }.build())
 		super.onResume()
 	}
 	
