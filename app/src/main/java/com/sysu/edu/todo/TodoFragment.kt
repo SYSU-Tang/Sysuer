@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.alibaba.fastjson2.JSONArray
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.haibin.calendarview.Calendar
@@ -33,12 +34,14 @@ class TodoFragment : BaseFragment() {
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		val concatAdapter = ConcatAdapter(ConcatAdapter.Config.Builder()
-											  .setIsolateViewTypes(true)
-											  .build())
+			                                  .setIsolateViewTypes(true)
+			                                  .build())
 		val toolbar = requireActivity().findViewById<Toolbar>(R.id.toolbar)
 		val binding = FragmentTodoBinding.inflate(inflater, container, false).apply {
 			recyclerView.adapter = concatAdapter
-			recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false) //		val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+			recyclerView.layoutManager = LinearLayoutManager(requireContext(),
+			                                                 LinearLayoutManager.VERTICAL,
+			                                                 false) //		val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 			calendarView.setOnMonthChangeListener { year: Int, month: Int -> toolbar.setSubtitle("${year}年${month}月") }
 			calendarView.setSelectSingleMode()
 			toolbar.setSubtitle("${calendarView.curYear}年${calendarView.curMonth}月")
@@ -83,11 +86,9 @@ class TodoFragment : BaseFragment() {
 	fun refresh() {
 		val a = mutableListOf<String>()
 		val b = mutableListOf<String>()
-		val map = mutableMapOf<String, Any?>()
-		map["status"] = todoInfo.status
+		val map = mutableMapOf<String, Any?>()        //map["status"] = todoInfo.status
 		map["title"] = todoInfo.title
-		map["description"] = todoInfo.description
-		map["priority"] = todoInfo.priority
+		map["description"] = todoInfo.description		//map["priority"] = todoInfo.priority
 		map["todo_type"] = todoInfo.todoType
 		map["subtask"] = todoInfo.subtask
 		map["attachment"] = todoInfo.attachment
@@ -99,7 +100,10 @@ class TodoFragment : BaseFragment() {
 		map["remind_time"] = todoInfo.remindTime
 		map["done_datetime"] = todoInfo.doneDateTime
 		map.forEach { (key: String, value: Any?) ->
-			if (!isEmpty(value)) {
+			if (value is JSONArray) {				//a.add("$key IN (?)")
+				//b.add(value.joinToString(","))
+			}
+			else if (!isEmpty(value)) {
 				a.add("$key = ?")
 				b.add("$value")
 			}
@@ -130,6 +134,8 @@ class TodoFragment : BaseFragment() {
 			a.add("status = ?")
 			b.add("1")
 		}
+		println(a.joinToString(" AND "))
+		println(b)
 		todoManager.refresh(a.joinToString(" AND "), b.toTypedArray())
 	}
 }
