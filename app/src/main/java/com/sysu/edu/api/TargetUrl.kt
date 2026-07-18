@@ -36,6 +36,7 @@ object TargetUrl {
 	const val XGXT_WEBVPN: String =
 		"https://xgxt-443.webvpn.sysu.edu.cn/?hash_route=%23%2F" // 学工系统 WebVPN URL
 	const val TICE: String = "https://tice.sysu.edu.cn/caslogin" // 体测 URL
+	const val TICE_WEBVPN: String = "https://tice-443.webvpn.sysu.edu.cn/caslogin" // 体测 WebVPN URL
 	const val PJXT: String = "https://pjxt.sysu.edu.cn/casLogin" // 评教系统 URL
 	const val ZHNY: String = "https://zhny.sysu.edu.cn/h5" // 综合能源系统 URL
 	const val PJXT_WEBVPN: String =

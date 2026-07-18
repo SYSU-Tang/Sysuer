@@ -161,12 +161,12 @@ open class StaggeredFragment : BaseFragment() {
 			notifyItemRangeChanged(0, itemCount)
 		}
 		
-		fun add(key: String?, value: String?) {
-			add(key, value)
-		}
+		//fun add(key: String?, value: String?) {
+		//	add(key, value)
+		//}
 		
 		fun add(row: Int = itemCount - 1, key: String?, value: String?) {
-			if (row in 1..<itemCount) {
+			if (row in 0..<itemCount) {
 				keys.add(key)
 				values.add(value)
 				notifyItemInserted(row)
