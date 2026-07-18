@@ -685,4 +685,7 @@
     <string name="new_script">New Script</string>
     <string name="rank">Rank</string>
     <string name="size">Size</string>
+    <string name="university">University</string>
+    <string name="email">Email</string>
+    <string name="account_info">Account Info</string>
 </resources>

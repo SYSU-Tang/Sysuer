@@ -682,4 +682,7 @@
     <string name="new_script">新脚本</string>
     <string name="rank">排序</string>
     <string name="size">大小</string>
+    <string name="university">大学</string>
+    <string name="email">邮箱</string>
+    <string name="account_info">账户信息</string>
 </resources>
