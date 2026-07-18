@@ -104,6 +104,9 @@ class BrowserActivity : BaseActivity() {
 		web = binding.web.apply {
 			gmBridge = com.sysu.edu.browser.data.GMBridge(this@BrowserActivity)
 			addJavascriptInterface(gmBridge!!, "AndroidGM")
+			isFocusable = true
+			isFocusableInTouchMode = true
+			requestFocus()
 			webViewClient = object : WebViewClient() {
 				override fun shouldOverrideUrlLoading(view: WebView,
 				                                      request: WebResourceRequest): Boolean {
@@ -310,7 +313,10 @@ class BrowserActivity : BaseActivity() {
 				}
 			}
 		})
-		web.setOnTouchListener { _: View?, event: MotionEvent? ->
+		web.setOnTouchListener { v: View?, event: MotionEvent? ->
+			if (event?.action == MotionEvent.ACTION_DOWN) {
+				v?.requestFocus()
+			}
 			gesture.onTouchEvent(event!!)
 			false
 		}/*

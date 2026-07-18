@@ -44,6 +44,9 @@ public class HtmlViewActivity extends BaseActivity {
         ActivityHtmlViewBinding binding = ActivityHtmlViewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         WebView web = binding.web;
+        web.setFocusable(true);
+        web.setFocusableInTouchMode(true);
+        web.requestFocus();
         android.webkit.CookieManager cookie = android.webkit.CookieManager.getInstance();
         cookie.setAcceptCookie(true);
         cookie.setAcceptThirdPartyCookies(web, true);
