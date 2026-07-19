@@ -130,7 +130,7 @@ class ContextUtil(val context: Context) {
 		when (host) {
 			TargetHost.YU_KE_TANG -> loginManager.loginForYuketang(imageView)
 		}
-		loginManager.setOnLoginListener(object : LoginListener {
+		loginManager.loginListener = object : LoginListener {
 			override fun onSuccess() {
 				afterLogin?.run()
 			}
@@ -138,14 +138,14 @@ class ContextUtil(val context: Context) {
 			override fun onError(code: String?, message: String?) {
 				handler.post { toast(message ?: "") }
 			}
-		})
+		}
 	}
 	
 	private fun performLogin(service: String?,
 	                         host: String,
 	                         account: Pair<String?, String?>,
 	                         afterLogin: Runnable?) {
-		loginManager.setOnLoginListener(object : LoginListener {
+		loginManager.loginListener = object : LoginListener {
 			override fun onSuccess() {
 				afterLogin?.run()
 			}
@@ -154,8 +154,8 @@ class ContextUtil(val context: Context) {
 				if ("SSO10002" == code || "30506" == code) changeAccount(service, host, afterLogin)
 				else handler.post { toast(message ?: "") }
 			}
-		})
-		loginManager.login(account.first, account.second, service)
+		}
+		loginManager.loginForSysu(account.first ?: "", account.second ?: "", service ?: "")
 	}
 	
 	fun login(url: String?, afterLogin: Runnable?) {
