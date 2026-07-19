@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -42,25 +41,29 @@ open class StaggeredFragment : BaseFragment() {
 	                          savedInstanceState: Bundle?): View? {
 		super.onCreateView(inflater, container, savedInstanceState)
 		binding = RecyclerViewScrollBinding.inflate(inflater)
-		staggeredGridLayoutManager = StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL)
+		staggeredGridLayoutManager = StaggeredGridLayoutManager(config.column,
+		                                                        StaggeredGridLayoutManager.VERTICAL)
 		binding!!.recyclerView.setLayoutManager(staggeredGridLayoutManager)
-		orientation.observe(getViewLifecycleOwner(), Observer { o: Int? ->
-			if (o != null) staggeredGridLayoutManager!!.setOrientation(o)
-		})
-		scrollBottom.observe(getViewLifecycleOwner(), Observer { runnable: Runnable? ->
-			if (runnable != null) binding!!.recyclerView.addOnScrollListener(object :
-																				 RecyclerView.OnScrollListener() {
+		orientation.observe(viewLifecycleOwner) { o: Int? ->
+			o?.let { staggeredGridLayoutManager!!.setOrientation(it) }
+		}
+		scrollBottom.observe(viewLifecycleOwner) { runnable: Runnable? ->
+			if (runnable != null) binding!!.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 				override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
 					if (!v.canScrollVertically(1) && dy > 0) runnable.run()
 				}
 			})
-		})
-		staggeredListener.observe(getViewLifecycleOwner(), Observer { listener: AdapterListener? -> staggeredAdapter.setListener(listener) })
-		hideNull.observe(getViewLifecycleOwner(), Observer { b: Boolean? ->
-			if (b != null) staggeredAdapter.hideNull = b
-		})
-		binding!!.recyclerView.setAdapter(staggeredAdapter)
-		nestedScrollingEnabled.observe(getViewLifecycleOwner(), Observer { enabled: Boolean? -> binding!!.recyclerView.isNestedScrollingEnabled = enabled!! })
+		}
+		staggeredListener.observe(viewLifecycleOwner) { listener: AdapterListener? ->
+			staggeredAdapter.setListener(listener)
+		}
+		hideNull.observe(viewLifecycleOwner) { b: Boolean? ->
+			b?.let { staggeredAdapter.hideNull = it }
+		}
+		binding!!.recyclerView.adapter = staggeredAdapter
+		nestedScrollingEnabled.observe(viewLifecycleOwner) { enabled: Boolean? ->
+			enabled?.let { binding!!.recyclerView.isNestedScrollingEnabled = it }
+		}
 		return binding!!.root
 	}
 	
@@ -134,15 +137,17 @@ open class StaggeredFragment : BaseFragment() {
 	}
 	
 	fun export(view: View, title: String?) {
-		startActivity(Intent(requireContext(), MarkdownViewActivity::class.java).putExtra("content", toTable())
-						  .putExtra("title", title), ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(), view, "miniapp")
-						  .toBundle())
+		startActivity(Intent(requireContext(), MarkdownViewActivity::class.java).putExtra("content",
+		                                                                                  toTable())
+			              .putExtra("title", title),
+		              ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),
+		                                                                 view,
+		                                                                 "miniapp").toBundle())
 	}
 	
 	class TwoColumnsAdapter(@JvmField var keys: MutableList<String?>,
 	                        @JvmField var values: MutableList<String?>,
-	                        val hideNull: Boolean) :
-		RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
+	                        val hideNull: Boolean) : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
 		var rowListener: AdapterListener? = null
 		val map: LinkedHashMap<String, String?> = linkedMapOf()
 		fun setValue(value: MutableList<String?>) {
@@ -160,11 +165,6 @@ open class StaggeredFragment : BaseFragment() {
 			values = value
 			notifyItemRangeChanged(0, itemCount)
 		}
-		
-		//fun add(key: String?, value: String?) {
-		//	add(key, value)
-		//}
-		
 		fun add(row: Int = itemCount - 1, key: String?, value: String?) {
 			if (row in 0..<itemCount) {
 				keys.add(key)
@@ -174,7 +174,9 @@ open class StaggeredFragment : BaseFragment() {
 		}
 		
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			val binding = ItemTwoColumnRowBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+			val binding = ItemTwoColumnRowBinding.inflate(LayoutInflater.from(parent.context),
+			                                              parent,
+			                                              false)
 			rowListener?.onCreate(this, binding)
 			return object : RecyclerView.ViewHolder(binding.root) {}
 		}
@@ -239,18 +241,19 @@ open class StaggeredFragment : BaseFragment() {
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 			val context = parent.context
 			val item = ItemCardBinding.inflate(LayoutInflater.from(context), parent, false)
-			item.card.addView(RecyclerViewBinding.inflate(LayoutInflater.from(context), item.root, false).root.apply {
-				this.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+			item.card.addView(RecyclerViewBinding.inflate(LayoutInflater.from(context),
+			                                              item.root,
+			                                              false).root.apply {
+				this.layoutManager = LinearLayoutManager(context,
+				                                         LinearLayoutManager.VERTICAL,
+				                                         false)
 				this.isNestedScrollingEnabled = false
 			})
 			adapterListener?.onCreate(this, item)
 			return object : RecyclerView.ViewHolder(item.root) {}
 		}
 		
-		fun getTwoColumnsAdapter(pos: Int): TwoColumnsAdapter? {
-			return twoColumnsAdapters[pos]
-		}
-		
+		fun getTwoColumnsAdapter(pos: Int): TwoColumnsAdapter? = twoColumnsAdapters[pos]
 		fun addRow(pos: Int = itemCount - 1, key: String?, value: String?) {
 			if (pos in 0..<itemCount) {
 				keys[pos]?.add(key)
@@ -271,20 +274,98 @@ open class StaggeredFragment : BaseFragment() {
 			} // 设置图标
 			item.title.text = titles[position] // 设置标题
 			val recyclerView = holder.itemView.findViewById<RecyclerView>(R.id.recycler_view)
-			var twoColumnsAdapter = recyclerView.adapter as TwoColumnsAdapter?
-			if (twoColumnsAdapter == null) {
-				twoColumnsAdapter = TwoColumnsAdapter(keys[position]!!, values[position]!!, hideNull)
-				recyclerView.setAdapter(twoColumnsAdapter)
+			val twoColumnsAdapter = recyclerView.adapter as TwoColumnsAdapter? ?: TwoColumnsAdapter(
+				keys[position]!!,
+				values[position]!!,
+				hideNull).apply {
+				recyclerView.adapter = this
 			}
-			else twoColumnsAdapter.setKeyAndValue(keys[position]!!, values[position]!!)
-			if (twoColumnsAdapters.size <= position || twoColumnsAdapters[position] == null) twoColumnsAdapters.add(position, twoColumnsAdapter)
-			
+			twoColumnsAdapter.setKeyAndValue(keys[position]!!, values[position]!!)
+			if (twoColumnsAdapters.size <= position || twoColumnsAdapters[position] == null) twoColumnsAdapters.add(
+				position,
+				twoColumnsAdapter)
 			adapterListener?.onBind(this, holder, position)
 		}
 		
 		override fun getItemCount(): Int = titles.size
-	}
+	}    //class StaggeredGridAdapter : RecyclerAdapter<MutableMap<String, Any?>>() {
 	
+	//	@JvmField val titles: MutableList<String?> = mutableListOf()
+	//	@JvmField val keys: MutableList<MutableList<String?>?> = mutableListOf()
+	//	@JvmField val icons: MutableList<Int?> = mutableListOf()
+	//	@JvmField val values: MutableList<MutableList<String?>?> = mutableListOf()
+	//	@JvmField val twoColumnsAdapters: MutableList<TwoColumnsAdapter?> = mutableListOf()
+	//	@JvmField var adapterListener: AdapterListener? = null
+	//	var hideNull: Boolean = false
+	//	fun setListener(listener: AdapterListener?) {
+	//		adapterListener = listener
+	//	}
+	//
+	//	fun add(title: String?,
+	//	        keys: MutableList<String?>?,
+	//	        values: MutableList<String?>?,
+	//	        icon: Int?) {
+	//		add(mutableMapOf("title" to title, "keys" to keys, "values" to values, "icon" to icon))
+	//		titles.add(title)
+	//		icons.add(icon)
+	//		this.keys.add(keys)
+	//		this.values.add(values)
+	//		notifyItemInserted(itemCount - 1)
+	//	}
+	//
+	//	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+	//		val context = parent.context
+	//		val item = ItemCardBinding.inflate(LayoutInflater.from(context), parent, false)
+	//		item.card.addView(RecyclerViewBinding.inflate(LayoutInflater.from(context),
+	//		                                              item.root,
+	//		                                              false).root.apply {
+	//			layoutManager = LinearLayoutManager(context,
+	//			                                         LinearLayoutManager.VERTICAL,
+	//			                                         false)
+	//			isNestedScrollingEnabled = false
+	//		})
+	//		adapterListener?.onCreate(this, item)
+	//		return object : RecyclerView.ViewHolder(item.root) {}
+	//	}
+	//
+	//	fun getTwoColumnsAdapter(pos: Int): TwoColumnsAdapter? = twoColumnsAdapters[pos]
+	//	fun addRow(pos: Int = itemCount - 1, key: String?, value: String?) {
+	//		if (pos in 0..<itemCount) {
+	//			val item = get(pos)
+	//			(item["keys"] as? MutableList<String>)?.add(key)
+	//			(item["values"] as? MutableList<String>)?.add(value)
+	//			notifyItemChanged(pos)
+	//		}
+	//	}
+	//
+	//	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+	//		val binding = ItemCardBinding.bind(holder.itemView)
+	//		val context = holder.itemView.context
+	//		val item = get(position)
+	//		item["icon"]?.let {
+	//			binding.title.setCompoundDrawablePadding(24)
+	//			AppCompatResources.getDrawable(context, it as Int)?.apply {
+	//				setBounds(0, 0, 72, 72)
+	//				binding.title.setCompoundDrawables(this, null, null, null)
+	//			}
+	//		} // 设置图标
+	//		item["title"]?.let {
+	//			if (it is String) binding.title.text = it
+	//			else if (it is Int) binding.title.setText(it)
+	//		}
+	//		val recyclerView = holder.itemView.findViewById<RecyclerView>(R.id.recycler_view)
+	//		val twoColumnsAdapter = recyclerView.adapter as TwoColumnsAdapter? ?: TwoColumnsAdapter(
+	//			item["keys"] as MutableList<String?>,
+	//			item["values"] as MutableList<String?>,
+	//			hideNull).apply {
+	//			recyclerView.adapter = this
+	//		}
+	//		twoColumnsAdapter.setKeyAndValue(item)
+	//		adapterListener?.onBind(this, holder, position)
+	//	}
+	//
+	//	override fun getItemCount(): Int = titles.size
+	//}
 	companion object {
 		fun newInstance(position: Int): StaggeredFragment {
 			val s = StaggeredFragment()

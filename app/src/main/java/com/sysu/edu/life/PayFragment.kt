@@ -1,9 +1,6 @@
 package com.sysu.edu.life
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,50 +16,49 @@ import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import com.sysu.edu.R
-import com.sysu.edu.api.AuthorizationJar
 import com.sysu.edu.api.CalendarManager
 import com.sysu.edu.api.CommonUtil.extractValue
-import com.sysu.edu.api.HttpManager
-import com.sysu.edu.api.TargetUrl
 import com.sysu.edu.databinding.FragmentPayNeedBinding
 import com.sysu.edu.databinding.FragmentPayRecordBinding
 import com.sysu.edu.databinding.FragmentPaySituationBinding
 import com.sysu.edu.databinding.ItemFilterChipBinding
+import com.sysu.edu.model.PayModel
 import com.sysu.edu.view.StaggeredFragment
 import java.time.LocalDate
 
 class PayFragment : StaggeredFragment() {
-	lateinit var http: HttpManager
+	
+	val model: PayModel by lazy { PayModel(requireContext()) }
 	val calendarManager: CalendarManager = CalendarManager()
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View? {
-		var view = super.onCreateView(inflater, container, savedInstanceState)
-		config.setCallback { page }
+		var view = super.onCreateView(inflater,
+		                              container,
+		                              savedInstanceState)        //config.setCallback { page }
 		var order = 0
 		when (position) {
 			0 -> {
-				val b0 = FragmentPayNeedBinding.inflate(inflater).apply {
+				val needBinding = FragmentPayNeedBinding.inflate(inflater).apply {
 					root.addView(view)
 					pay.setOnClickListener(config.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"))
 				}
 				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-						b0.chips.elevation = (if (recyclerView.canScrollVertically(-1)) 6 else 0).toFloat()
+						needBinding.chips.elevation = (if (recyclerView.canScrollVertically(-1)) 6 else 0).toFloat()
 						super.onScrolled(recyclerView, dx, dy)
 					}
 				})
-				view = b0.root
+				view = needBinding.root
 			}
 			2 -> {
-				val years = mutableListOf(getString(R.string.all), getString(R.string.no_interval_year))
+				val years = mutableListOf(getString(R.string.all),
+				                          getString(R.string.no_interval_year))
 				val yearCodes = mutableListOf<String?>("null", "-1")
-				var i = 0
-				while (i < 6) {
+				(0..5).forEach { i ->
 					val year = (calendarManager.year + 1 - i).toString()
 					years.add(year)
 					yearCodes.add(year)
-					i++
 				}
 				val fragmentPaySituationBinding = FragmentPaySituationBinding.inflate(inflater)
 					.apply {
@@ -77,7 +73,9 @@ class PayFragment : StaggeredFragment() {
 					}
 				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-						fragmentPaySituationBinding.p.elevation = (if (recyclerView.canScrollVertically(-1)) 6 else 0).toFloat()
+						fragmentPaySituationBinding.p.elevation = (if (recyclerView.canScrollVertically(
+								-1)) 6
+						else 0).toFloat()
 						super.onScrolled(recyclerView, dx, dy)
 					}
 				})
@@ -87,22 +85,24 @@ class PayFragment : StaggeredFragment() {
 				dm.fromDate = calendarManager.firstOfMonth
 				dm.toDate = calendarManager.endOfMonth
 				val fragmentPayRecordBinding = FragmentPayRecordBinding.inflate(inflater)
-				view = fragmentPayRecordBinding.root
 				fragmentPayRecordBinding.root.addView(view)
+				view = fragmentPayRecordBinding.root
 				fragmentPayRecordBinding.from.text = dm.fromDateString
 				fragmentPayRecordBinding.from.setOnClickListener {
 					val fromDatePicker = MaterialDatePicker.Builder.datePicker()
 						.setSelection(dm.fromDateTimeMillis)
 						.setCalendarConstraints(CalendarConstraints.Builder()
-													.setValidator(CompositeDateValidator.allOf(listOf(DateValidatorPointBackward.before(dm.toDateTimeMillis))))
-													.build())
+							                        .setValidator(CompositeDateValidator.allOf(
+								                        listOf(DateValidatorPointBackward.before(dm.toDateTimeMillis))))
+							                        .build())
 						.build()
-					fromDatePicker.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { selection: Long? ->
-						dm.fromDateTimeMillis = selection!!
-						fromDatePicker.dismissAllowingStateLoss()
-						fragmentPayRecordBinding.from.text = dm.fromDateString
-						dm.data
-					})
+					fromDatePicker.addOnPositiveButtonClickListener(
+						MaterialPickerOnPositiveButtonClickListener { selection: Long? ->
+							dm.fromDateTimeMillis = selection!!
+							fromDatePicker.dismissAllowingStateLoss()
+							fragmentPayRecordBinding.from.text = dm.fromDateString
+							dm.data
+						})
 					fromDatePicker.show(requireActivity().supportFragmentManager, null)
 				}
 				fragmentPayRecordBinding.to.text = dm.toDateString
@@ -110,57 +110,91 @@ class PayFragment : StaggeredFragment() {
 					val toDatePicker = MaterialDatePicker.Builder.datePicker()
 						.setSelection(dm.toDateTimeMillis)
 						.setCalendarConstraints(CalendarConstraints.Builder()
-													.setValidator(CompositeDateValidator.allOf(listOf(DateValidatorPointForward.from(dm.fromDateTimeMillis))))
-													.build())
+							                        .setValidator(CompositeDateValidator.allOf(
+								                        listOf(DateValidatorPointForward.from(dm.fromDateTimeMillis))))
+							                        .build())
 						.build()
-					toDatePicker.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { selection: Long? ->
-						dm.toDateTimeMillis = selection!!
-						toDatePicker.dismissAllowingStateLoss()
-						fragmentPayRecordBinding.to.text = dm.toDateString
-						dm.data
-					})
+					toDatePicker.addOnPositiveButtonClickListener(
+						MaterialPickerOnPositiveButtonClickListener { selection: Long? ->
+							dm.toDateTimeMillis = selection!!
+							toDatePicker.dismissAllowingStateLoss()
+							fragmentPayRecordBinding.to.text = dm.toDateString
+							dm.data
+						})
 					toDatePicker.show(requireActivity().supportFragmentManager, null)
 				}
 				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-						fragmentPayRecordBinding.row.elevation = (if (recyclerView.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
+						fragmentPayRecordBinding.row.elevation = (if (recyclerView.canScrollVertically(
+								-1)) config.dpToPx(2)
+						else 0).toFloat()
 					}
 				})
 			}
 		}
-		http = HttpManager(object : Handler(Looper.getMainLooper()) {
-			override fun handleMessage(msg: Message) {
-				if (msg.what == -1) config.toast(getString(R.string.no_net_connected))
-				else {
-					val response = JSONObject.parseObject(msg.obj as String?)
-					if (response != null && response.getInteger("code") == 200) {
-						if (response.get("data") != null) {
-							clear()
-							val data = response.getJSONArray("data")
-							when (msg.what) {
-								0, 1 -> data.forEach {
-									add((it as JSONObject).getString("itemName"), mutableListOf("学号", "交费区间", "当前应交", "本次交费"), extractValue(it, arrayOf("personCode", "intervalName", "nowMoney", "needMoney")))
-								}
-								2 -> data.forEach { a: Any? ->
-									add((a as JSONObject).getString("itemName"), mutableListOf("学号", "收费项目", "交费区间", "应交", "缓交", "实交"), extractValue(a, arrayOf("personCode", "itemName", "intervalName", "needPay", "laterPay", "realPay")))
-								}
-								3 -> data.forEach { a: Any? ->
-									add("${++order}", mutableListOf("订单编号", "金额", "支付方式", "支付时间", "支付编号"), extractValue(a as JSONObject, arrayOf("orderNo", "money", "payTypeName", "payTime", "outPayNo")))
-								}
-								4 -> data.forEach { a: Any? ->
-									add("${++order}", mutableListOf("收费项目", "收费区间", "退费金额", "退费日期", "退费状态"), extractValue(a as JSONObject, arrayOf("itemName", "intervalName", "refundMoney", "refundDate", "refundStateStr")))
-								}
-							}
+		model.message.observe(viewLifecycleOwner) { (code, response) ->
+			if (response.getInteger("code") == 200) {
+				if (response.get("data") != null) {
+					clear()
+					val data = response.getJSONArray("data")
+					when (code) {
+						0, 1 -> data.forEach {
+							add((it as JSONObject).getString("itemName"),
+							    mutableListOf("学号", "交费区间", "当前应交", "本次交费"),
+							    extractValue(it,
+							                 arrayOf("personCode",
+							                         "intervalName",
+							                         "nowMoney",
+							                         "needMoney")))
+						}
+						2 -> data.forEach { a: Any? ->
+							add((a as JSONObject).getString("itemName"),
+							    mutableListOf("学号",
+							                  "收费项目",
+							                  "交费区间",
+							                  "应交",
+							                  "缓交",
+							                  "实交"),
+							    extractValue(a,
+							                 arrayOf("personCode",
+							                         "itemName",
+							                         "intervalName",
+							                         "needPay",
+							                         "laterPay",
+							                         "realPay")))
+						}
+						3 -> data.forEach { a: Any? ->
+							add("${++order}",
+							    mutableListOf("订单编号",
+							                  "金额",
+							                  "支付方式",
+							                  "支付时间",
+							                  "支付编号"),
+							    extractValue(a as JSONObject,
+							                 arrayOf("orderNo",
+							                         "money",
+							                         "payTypeName",
+							                         "payTime",
+							                         "outPayNo")))
+						}
+						4 -> data.forEach { a: Any? ->
+							add("${++order}",
+							    mutableListOf("收费项目",
+							                  "收费区间",
+							                  "退费金额",
+							                  "退费日期",
+							                  "退费状态"),
+							    extractValue(a as JSONObject,
+							                 arrayOf("itemName",
+							                         "intervalName",
+							                         "refundMoney",
+							                         "refundDate",
+							                         "refundStateStr")))
 						}
 					}
-					else if (response != null && response.getInteger("code") == 4002) config.toast(response.getString("message")) else config.gotoLogin(TargetUrl.PAY)
 				}
 			}
-		}).apply {
-			setParams(this@PayFragment.config)
-			setReferrer("https://pay.sysu.edu.cn/")
-			setAuthorizationJar(AuthorizationJar(requireContext()))
-			setTokenRequired(true)
+			else config.toast(response.getString("message"))
 		}
 		page
 		return view
@@ -191,28 +225,31 @@ class PayFragment : StaggeredFragment() {
 		}
 	val toPayList: Unit
 		get() {
-			http.postRequest("https://pay.sysu.edu.cn/client/api/client/necessary/list", "{}", 0)
+			model.addAndNext("client/api/client/necessary/list", "{}", 0)
 		}
 	val selectivePayList: Unit
 		get() {
-			http.postRequest("https://pay.sysu.edu.cn/client/api/client/chooce/list", "{}", 1)
+			model.addAndNext("client/api/client/chooce/list", "{}", 1)
 		}
 	
 	fun getFeeList(year: String) {
-		http.postRequest("https://pay.sysu.edu.cn/client/api/client/record/feelist", "{\"year\":$year}", 2)
+		model.addAndNext("client/api/client/record/feelist", "{\"year\":$year}", 2)
 	}
 	
 	fun getPaymentList(from: String, to: String?) {
-		http.postRequest("https://pay.sysu.edu.cn/client/api/client/record/paymentlist", "{\"startTime\":\"$from\",\"overTime\":\"$to\"}", 3)
+		model.addAndNext("client/api/client/record/paymentlist",
+		                 "{\"startTime\":\"$from\",\"overTime\":\"$to\"}",
+		                 3)
 	}
 	
 	val paymentList: Unit
 		get() {
-			getPaymentList(calendarManager.toDateTimeString(calendarManager.firstOfMonth!!.atStartOfDay())!!, calendarManager.toDateTimeString(calendarManager.endOfMonth!!.atStartOfDay()))
+			getPaymentList(calendarManager.toDateTimeString(calendarManager.firstOfMonth!!.atStartOfDay())!!,
+			               calendarManager.toDateTimeString(calendarManager.endOfMonth!!.atStartOfDay()))
 		}
 	val refundList: Unit
 		get() {
-			http.postRequest("https://pay.sysu.edu.cn/client/api/client/refund/list", "{}", 4)
+			model.addAndNext("client/api/client/refund/list", "{}", 4)
 		}
 	
 	internal inner class DateManager {
@@ -234,7 +271,8 @@ class PayFragment : StaggeredFragment() {
 			}
 		val data: Unit
 			get() {
-				getPaymentList(calendarManager.toDateTimeString(fromDate!!.atStartOfDay())!!, calendarManager.toDateTimeString(toDate!!.atStartOfDay()))
+				getPaymentList(calendarManager.toDateTimeString(fromDate!!.atStartOfDay())!!,
+				               calendarManager.toDateTimeString(toDate!!.atStartOfDay()))
 			}
 	}
 	

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SYSUER美化辅助增强
 // @namespace    https://github.com/SYSU-Tang
-// @version      1.2
+// @version      1.6
 // @description  中大儿增强脚本，包括网页净化、在线教学平台视频自动速通、自动跳下一页、自动登录、跳过验证、自动跳转登录页。
 // @author       SYSU-Tang
 // @license      Apache-2.0
@@ -17,10 +17,10 @@
 // @match        *://appgw.sysu.edu.cn/*
 // @match        *://visitor.sysu.edu.cn/*
 // @match        *://visitor-443.webvpn.sysu.edu.cn/*
+// @match        *://pay.sysu.edu.cn/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
-// @run-at       document-end
 // ==/UserScript==
 
 (function () {
@@ -37,10 +37,11 @@
         password: GM_getValue('password', ''),
         videoComplete: GM_getValue('videoComplete', true),
         videoJump: GM_getValue('videoJump', true),
-        purify: GM_getValue('purify', true)
+        purify: GM_getValue('purify', true),
+        removeRatermark: GM_getValue('removeRatermark', true)
     };
 
-    const { autoLogin, autoVerify, autoWebvpn, autoJumpLogin, username, password, videoComplete, videoJump, purify } = config;
+    const { autoLogin, autoVerify, autoWebvpn, autoJumpLogin, username, password, videoComplete, videoJump, purify, removeRatermark } = config;
 
     const url = window.location.href;
     const host = window.location.hostname;
@@ -136,6 +137,9 @@
             <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
                 页面净化 <input type="checkbox" id="cfg-purify" ${config.purify ? 'checked' : ''}>
             </label>
+            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
+                移除水印 <input type="checkbox" id="cfg-removeRatermark" ${config.removeRatermark ? 'checked' : ''}>
+            </label>
 
             <hr style="border: 0; border-top: 1px dashed #ccc; margin: 5px 0;">
 
@@ -173,6 +177,7 @@
             GM_setValue('videoComplete', document.getElementById('cfg-videoComplete').checked);
             GM_setValue('videoJump', document.getElementById('cfg-videoJump').checked);
             GM_setValue('purify', document.getElementById('cfg-purify').checked);
+            GM_setValue('removeRatermark', document.getElementById('cfg-removeRatermark').checked);
             GM_setValue('username', document.getElementById('cfg-username').value);
             GM_setValue('password', document.getElementById('cfg-password').value);
 
@@ -377,7 +382,6 @@
                 click('.ant-notification-notice-close-x');
             }
         };
-        purifyJwxt();
         window.addEventListener('load', () => {
             purifyJwxt();
             toast.info('[SYSUER 脚本] 净化页面');
@@ -386,6 +390,43 @@
 
     if (videoComplete && /lms\.sysu\.edu\.cn\/mod\/.*?\/view\.php/.test(url)) {
         let retry = 0;
+        function upload(playerWrapper, playerdata, callback) {
+            const data = [{
+                index: 0,
+                methodname: 'mod_fsresource_set_time',
+                args: {
+                    fsresourceid: playerdata.fsresourceid,
+                    time: 4,
+                    finish: 1,
+                    progress: 100,
+                    unique: playerWrapper.pageId,
+                },
+            }];
+
+            fetch("https://lms.sysu.edu.cn/lib/ajax/service.php?sesskey=" + playerdata.sesskey, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    const progress = data[0].data.progress;
+                    const totaltime = data[0].data.totaltime;
+                    callback(progress, totaltime);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // 错误处理
+                });
+        }
         const runVideoSpeedRun = () => {
             console.log('[SYSUER 脚本] 检测到视频页面，开始执行视频速通...');
             var sourceData = playerdata && playerdata.source ? JSON.parse(playerdata.source) : {};
@@ -416,26 +457,47 @@
                     toast.error('[SYSUER 脚本] 视频时长获取失败，15次重试均失败，脚本已退出！');
                 }
             } else {
-                let count = 0;
-                const total = Math.floor(duration / 4) + 1;
-                const intervalId = setInterval(() => {
-                    playerWrapper.viewTotalTime = 4000;
-                    playerWrapper.ajaxOrder();
-                    count++;
-                    if (count >= total) {
-                        clearInterval(intervalId);
-                    }
-                }, 10);
-                toast.success('[SYSUER 脚本] 视频进度已全额提交！');
-                if (videoJump) {
-                    setTimeout(() => {
+                const jump = () => {
+                    if (videoJump) {
                         toast.info('[SYSUER 脚本] 视频速通完成，点击下一页...');
                         click('#next-activity-link');
-                    }, total * 10 + 1000);
+                    }
                 }
+                upload(playerWrapper, playerdata, (progress, totaltime) => {
+                    if (progress == "100") {
+                        toast.success('[SYSUER 脚本] 当前视频完成');
+                        if (videoJump) {
+                            jump();
+                        }
+                    } else {
+                        let count = 0;
+                        const total = Math.floor((totaltime - duration) / 4) + 1;
+                        const intervalId = setInterval(() => {
+                            playerWrapper.viewTotalTime = 4000;
+                            playerWrapper.ajaxOrder();
+                            count++;
+                            if (count >= total) {
+                                clearInterval(intervalId);
+                            }
+                        }, 10);
+                        toast.success('[SYSUER 脚本] 视频进度已全额提交！');
+                        if (videoJump) {
+                            const test = () => upload(playerWrapper, playerdata, (progress, totaltime) => {
+                                if (progress == "100") {
+                                    jump();
+                                } else {
+                                    setTimeout(test, 500);
+                                }
+                            });
+                        }
+                    }
+                });
             }
         };
         if (/lms\.sysu\.edu\.cn\/mod\/fsresource\/view\.php/.test(url)) {
+            if (removeWatermark) {
+                watermark.remove()
+            }
             let videoAttempts = 0;
             const videoInterval = setInterval(() => {
                 if ((typeof playerdata !== 'undefined' && typeof TCPlayerWrapper !== 'undefined') || videoAttempts > 10) {
@@ -500,10 +562,11 @@
         }
         const clickButton = {
             'jwxt.sysu.edu.cn/jwxt/#/login': 'button.ant-btn.ant-btn-primary',
-            'jwxt.sysu.edu.cn': 'button.ant-btn.ant-btn-primary',
+            'jwxt.sysu.edu.cn': '.ant-confirm-btns>button.ant-btn.ant-btn-primary',
             'lms.sysu.edu.cn/enrol/index.php?id=': '.continuebutton btn.btn-primary',
             'lms.sysu.edu.cn': '.loginBtn',
-            'portal.sysu.edu.cn/newClient/#/login': '.index-loginData-XCumn>button.ant-btn.index-submit-3jXSy'
+            'portal.sysu.edu.cn/newClient/#/login': '.index-loginData-XCumn>button.ant-btn.index-submit-3jXSy',
+            'pay.sysu.edu.cn': '.el-button.login_btns',
         };
         window.addEventListener('load', function () {
             Object.entries(clickButton).forEach(([key, value]) => {
@@ -516,9 +579,9 @@
             });
         });
     }
-
     if (autoLogin && /cas.+?sysu\.edu\.cn\/esc-sso\/login\/page/.test(url) && username && password) {
         login(username, password);
         toast.info('[SYSUER 脚本] 自动登录中');
     }
+
 })();
