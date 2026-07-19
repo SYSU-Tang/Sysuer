@@ -22,7 +22,7 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 					                                 false
 				                                 }
 			                                 })
-		model.message.observe(viewLifecycleOwner) { (code, response) ->
+		model.message.observe(this) { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				if (response.get("data") != null) {
 					if (code == 0) {

@@ -356,7 +356,7 @@ class LoginManager(private val context: Context) {
 			                                       .header("Referer", "https://pay.sysu.edu.cn/")
 			                                       .post(("{\"key\":\"https://cas.sysu.edu.cn/cas/serviceValidate?service=https://pay.sysu.edu.cn/sso&ticket=${
 				                                       getTicket(service)
-			                                       }\"").toRequestBody("application/json".toMediaTypeOrNull()))
+			                                       }\"}").toRequestBody("application/json".toMediaTypeOrNull()))
 			                                       .build()).execute().body.string())
 			.getString("data")
 	}
