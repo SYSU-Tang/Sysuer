@@ -56,7 +56,7 @@ class NewsActivity : BaseActivity() {
 				}
 			}
 		}
-		(0..<4).forEach { adapter.add(NewsFragment(it)) }
+		(0..<4).forEach { adapter.add(NewsFragment.getInstance(it)) }
 		val binding = ActivityNewsBinding.inflate(layoutInflater).apply {
 			pager.adapter = adapter
 			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.text = arrayOf("资讯", "公众号", "通知", "今日中大")[position] }.attach()
@@ -67,9 +67,9 @@ class NewsActivity : BaseActivity() {
 		config.setCallback { suggestions }
 		http = HttpManager(object : Handler(mainLooper) {
 			override fun handleMessage(msg: Message) {
-				val rdata = msg.getData()
-				val isJSON = rdata.getBoolean("isJSON")
-				val json = rdata.getString("data")
+				val response = msg.getData()
+				val isJSON = response.getBoolean("isJSON")
+				val json = response.getString("data")
 				if (json == null) {
 					config.toast(R.string.no_net_connected)
 					return
