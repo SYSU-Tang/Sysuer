@@ -23,10 +23,7 @@ import com.sysu.edu.view.AdapterListener
 import com.sysu.edu.view.RecyclerAdapter
 
 class GymListFragment : BaseFragment() {
-	val layoutManager: StaggeredGridLayoutManager by lazy {
-		StaggeredGridLayoutManager(config.column,
-		                           StaggeredGridLayoutManager.VERTICAL)
-	}
+	private var layoutManager: StaggeredGridLayoutManager? = null
 	val model: GymModel by lazy {
 		GymModel(requireContext())
 	}
@@ -34,6 +31,8 @@ class GymListFragment : BaseFragment() {
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
+		layoutManager = StaggeredGridLayoutManager(config.column,
+		                                           StaggeredGridLayoutManager.VERTICAL)
 		val fieldAdapter = FieldAdapter().apply {
 			action = { id: String? ->
 				findNavController().navigate(R.id.campus_to_field, Bundle().apply {
@@ -96,7 +95,7 @@ class GymListFragment : BaseFragment() {
 	
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
-		layoutManager.setSpanCount(config.column)
+		layoutManager?.setSpanCount(config.column)
 	}
 	
 	val campus: Unit

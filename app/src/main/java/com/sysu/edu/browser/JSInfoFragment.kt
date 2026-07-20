@@ -17,15 +17,20 @@ import com.sysu.edu.browser.data.BrowserRepository
 import com.sysu.edu.browser.data.JavaScriptEntity
 import com.sysu.edu.browser.data.JsModel
 import com.sysu.edu.browser.data.JsModelFactory
+import com.sysu.edu.browser.data.ScriptManager.checkForUpdate
+import com.sysu.edu.browser.data.ScriptParser.updateScriptByEntity
 import com.sysu.edu.preference.EditPreference
 import com.sysu.edu.view.EditTextDialog
+import kotlinx.coroutines.launch
 import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference
 
 class JSInfoFragment : PreferenceFragmentCompat() {
 	var data: JavaScriptEntity? = null
 	val model: JsModel by lazy {
-		ViewModelProvider(this, JsModelFactory(BrowserRepository(requireContext(), lifecycleScope)))[JsModel::class.java]
+		ViewModelProvider(this,
+		                  JsModelFactory(BrowserRepository(requireContext(),
+		                                                   lifecycleScope)))[JsModel::class.java]
 	}
 	val dialog: EditTextDialog by lazy { EditTextDialog(requireContext()) }
 	override fun onCreatePreferences(savedInstanceState: Bundle?, p1: String?) {
@@ -56,9 +61,11 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 						matchLink.add(pattern)
 					}
 			}
+			namespace = findPreference<EditPreference>("namespace")?.value
 			matches = matchLink
 			state = if (findPreference<MaterialSwitchPreference>("state")?.isChecked == true) 1 else 0
 			runAt = findPreference<SimpleMenuPreference>("run")?.value
+			updateScriptByEntity(this)
 		}
 		model.updateJs(entity, onResult)
 	}
@@ -68,6 +75,7 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 		model.getJs(jsId) {
 			if (it != null) {
 				data = it
+				println(it)
 				load()
 			}
 		}
@@ -81,14 +89,14 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		val navController = findNavController(view)
-		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object :
-			OnBackPressedCallback(true) {
-			override fun handleOnBackPressed() {
-				save {
-					navController.navigateUp()
-				}
-			}
-		})
+		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
+		                                                      object : OnBackPressedCallback(true) {
+			                                                      override fun handleOnBackPressed() {
+				                                                      save {
+					                                                      navController.navigateUp()
+				                                                      }
+			                                                      }
+		                                                      })
 		findPreference<Preference?>("edit")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
 			data?.let { entity ->
 				save {
@@ -154,6 +162,7 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 				findPreference<EditPreference>("title")?.value = title
 				findPreference<EditPreference>("description")?.value = description
 				findPreference<EditPreference>("author")?.value = author
+				findPreference<EditPreference>("namespace")?.value = namespace
 				removeAll("match")
 				matches.forEach { match ->
 					if (match is String) addMatch(match)
@@ -171,6 +180,15 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 				findPreference<EditPreference>("update")?.value = updateURL
 				findPreference<EditPreference>("homepage")?.value = homepage //				findPreference<EditPreference>("icon")?.value = icon
 				findPreference<EditPreference>("support")?.value = supportURL
+				
+				lifecycleScope.launch {
+					if (checkForUpdate(entity) != null) {
+						findPreference<Preference>("update_check")?.isVisible = true
+						findPreference<Preference>("update_check")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+							false
+						}
+					}
+				}
 			}
 		}
 	}
@@ -236,7 +254,8 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 	private fun removeAll(key: String) {
 		val preference = findPreference<PreferenceCategory>(key)
 		val count = preference?.preferenceCount?.takeIf { it > 1 } ?: return
-		((count - 1)..1).forEach {
+		((count - 1)downTo 1).forEach {
+			println(preference.getPreference(it))
 			preference.removePreference(preference.getPreference(it))
 		}
 	}

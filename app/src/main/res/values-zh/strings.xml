@@ -123,7 +123,7 @@
     <string name="version">版本</string>
     <string name="qq_group">QQ群</string>
     <string name="feedback">反馈</string>
-    <string name="launch_update">检测更新</string>
+    <string name="check_update">检测更新</string>
     <string name="permission">权限</string>
     <string name="scan">扫码</string>
     <string name="qrcode">逸仙码</string>
@@ -691,4 +691,8 @@
     <string name="total_score">总成绩</string>
     <string name="is_pass">是否达标</string>
     <string name="total_gym_credit">总体育积分</string>
+
+    <string name="import_js">导入</string>
+    <string name="import_fail">导入失败</string>
+    <string name="import_success">导入成功</string>
 </resources>

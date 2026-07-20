@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:title="@string/launch_update"
+            app:title="@string/check_update"
             app:titleCollapseMode="scale">
 
             <com.google.android.material.appbar.MaterialToolbar

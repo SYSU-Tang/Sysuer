@@ -7,36 +7,45 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigator
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.transition.MaterialContainerTransform
+import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
 import com.sysu.edu.browser.BrowserActivity.JSAdapter
 import com.sysu.edu.browser.data.BrowserRepository
 import com.sysu.edu.browser.data.JavaScriptEntity
 import com.sysu.edu.browser.data.JsModel
 import com.sysu.edu.browser.data.JsModelFactory
+import com.sysu.edu.browser.data.ScriptParser
 import com.sysu.edu.databinding.FragmentRecyclerFabBinding
 import com.sysu.edu.view.AdapterListener
+import com.sysu.edu.view.EditTextDialog
+import com.sysu.edu.widget.SpeedDialController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class JSListFragment : Fragment() {
+class JSListFragment : BaseFragment() {
 	val model: JsModel by lazy {
-		ViewModelProvider(this, JsModelFactory(BrowserRepository(requireContext(), lifecycleScope)))[JsModel::class.java]
+		ViewModelProvider(this,
+		                  JsModelFactory(BrowserRepository(requireContext(),
+		                                                   lifecycleScope)))[JsModel::class.java]
 	}
 	lateinit var binding: FragmentRecyclerFabBinding
 	private val jsAdapter: JSAdapter = JSAdapter()
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
+		super.onCreateView(inflater, container, savedInstanceState)
 		binding = FragmentRecyclerFabBinding.inflate(inflater)
-		model.loadJs { jsAdapter.set(it.toMutableList()) }
+		reload()
 		val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
 		toolbar.menu.setGroupVisible(R.id.editor_group, false)
 		jsAdapter.listener = object : AdapterListener {
@@ -50,9 +59,16 @@ class JSListFragment : Fragment() {
 						val bundle = Bundle().apply {
 							putLong("id", js.id)
 						}
-						findNavController(binding.root).navigate(R.id.list_to_info, bundle, null, FragmentNavigator.Extras.Builder()
-							.addSharedElement(this, "script")
-							.build())
+						model.updateJs(js){
+							findNavController().navigate(R.id.list_to_info,
+							                             bundle,
+							                             null,
+							                             FragmentNavigator.Extras.Builder()
+								                             .addSharedElement(this,
+								                                               "script")
+								                             .build())
+						}
+						
 					}
 					setOnLongClickListener {
 						val pop = PopupMenu(requireContext(), this)
@@ -93,18 +109,76 @@ class JSListFragment : Fragment() {
 		}
 		binding.recyclerViewScroll.root.layoutManager = LinearLayoutManager(requireContext())
 		binding.recyclerViewScroll.root.adapter = jsAdapter
-		binding.fab.setIconResource(R.drawable.add)
-		binding.fab.setText(R.string.add)
-		binding.fab.setContentDescription(getString(R.string.add))
-		binding.fab.setOnClickListener { add() }
+		val speedDialController = SpeedDialController(binding.speedDial.fabMain,
+		                                              binding.speedDial.subFabContainer,
+		                                              binding.speedDial.scrim)
+		binding.speedDial.fabAdd.setOnClickListener {
+			add()
+			speedDialController.collapse()
+		}
+		val dialog = EditTextDialog(requireContext())
+		dialog.setHint(R.string.link)
+		dialog.setTitle(R.string.link)
+		dialog.getDialog()
+			.setButton(android.app.AlertDialog.BUTTON_NEGATIVE,
+			           getString(R.string.cancel)) { _, _ ->
+			}
+		dialog.getDialog()
+			.setButton(android.app.AlertDialog.BUTTON_POSITIVE,
+			           getString(R.string.confirm)) { _, _ ->
+				if (dialog.getText().isNotEmpty()) {
+					lifecycleScope.launch {
+						val entity = withContext(Dispatchers.IO) {
+							ScriptParser.parseFromUrl(dialog.getText())
+						}
+						if (entity != null) {
+							model.addJs(entity) {
+								config.toast(R.string.import_success)
+								reload()
+							}
+						} else {
+							config.toast(R.string.import_fail)
+						}
+					}
+				}
+			}
+		binding.speedDial.fabImport.setOnClickListener {
+			dialog.show()
+			speedDialController.collapse()
+		}
+		
 		return binding.root
 	}
 	
 	fun add() {
-		model.addJs(JavaScriptEntity(title = getString(R.string.new_script), script = "")) { id ->
-			findNavController(binding.root).navigate(R.id.list_to_info, Bundle().apply { putLong("id", id) }, null, FragmentNavigator.Extras.Builder()
-				.addSharedElement(binding.fab, "miniapp")
-				.build())
+		model.addJs(JavaScriptEntity(title = getString(R.string.new_script),
+		                             namespace = "Your Namespace",
+		                             version = "1.0.0",
+		                             author = "You",
+		                             description = "Hello world!",
+		                             
+		                             script = """
+// ==UserScript==
+// @name         New Userscript
+// @namespace    Your Namespace
+// @version      1.0.0
+// @description  try to take over the world!
+// @author       You
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+	
+    // Your code here...
+})();
+		""".trimIndent())) { id ->
+			findNavController().navigate(R.id.list_to_info,
+			                             Bundle().apply { putLong("id", id) },
+			                             null,
+			                             FragmentNavigator.Extras.Builder()
+				                             .addSharedElement(binding.speedDial.fabMain, "miniapp")
+				                             .build())
 		}
 	}
 	
@@ -123,6 +197,10 @@ class JSListFragment : Fragment() {
 	
 	override fun onResume() {
 		super.onResume()
+		reload()
+	}
+	
+	private fun reload() {
 		jsAdapter.clear()
 		model.loadJs { jsAdapter.set(it.toMutableList()) }
 	}

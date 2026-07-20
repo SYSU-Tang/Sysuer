@@ -50,13 +50,21 @@ object ScriptManager {
                             version: "${(entity.version ?: "").replace("\"", "\\\"")}"
                         }
                     };
-                    const GM_setValue = (key, value) => AndroidGM.setValue("${scriptId.replace("\"", "\\\"")}", key, JSON.stringify(value));
+                    const GM_setValue = (key, value) => AndroidGM.setValue("${
+			scriptId.replace("\"", "\\\"")
+		}", key, JSON.stringify(value));
                     const GM_getValue = (key, defaultValue) => {
-                        const val = AndroidGM.getValue("${scriptId.replace("\"", "\\\"")}", key, null);
+                        const val = AndroidGM.getValue("${
+			scriptId.replace("\"", "\\\"")
+		}", key, null);
                         return val ? JSON.parse(val) : defaultValue;
                     };
-                    const GM_deleteValue = (key) => AndroidGM.deleteValue("${scriptId.replace("\"", "\\\"")}", key);
-                    const GM_listValues = () => JSON.parse(AndroidGM.listValues("${scriptId.replace("\"", "\\\"")}"));
+                    const GM_deleteValue = (key) => AndroidGM.deleteValue("${
+			scriptId.replace("\"", "\\\"")
+		}", key);
+                    const GM_listValues = () => JSON.parse(AndroidGM.listValues("${
+			scriptId.replace("\"", "\\\"")
+		}"));
                     const GM_addStyle = (css) => {
                         const style = document.createElement('style');
                         style.textContent = css;
@@ -72,7 +80,9 @@ object ScriptManager {
                             observer.observe(document.documentElement, { childList: true });
                         }
                     };
-                    const GM_log = (msg) => AndroidGM.log("${scriptName.replace("\"", "\\\"")}: " + msg);
+                    const GM_log = (msg) => AndroidGM.log("${
+			scriptName.replace("\"", "\\\"")
+		}: " + msg);
                     const GM_registerMenuCommand = (name, fn) => {
                         AndroidGM.registerMenuCommand("${scriptId.replace("\"", "\\\"")}", name);
                         if (!window.gm_commands) window.gm_commands = {};
@@ -91,6 +101,55 @@ $gmPolyfill
     }
 })();""".trimIndent()
 		webView.evaluateJavascript(wrappedScript, null)
+	}
+	
+	/**
+	 * 检测脚本更新
+	 * @return 如果有新版本，返回解析后的新实体，否则返回 null
+	 */
+	suspend fun checkForUpdate(entity: JavaScriptEntity): JavaScriptEntity? {
+		val updateUrl = entity.updateURL ?: entity.downloadURL ?: return null
+		val remoteEntity = ScriptParser.parseFromUrl(updateUrl) ?: return null
+		val localVersion = entity.version ?: "0"
+		val remoteVersion = remoteEntity.version ?: "0"
+		
+		if (compareVersion(remoteVersion, localVersion) > 0) {
+			return remoteEntity.apply {
+				id = entity.id
+				position = entity.position
+				state = entity.state
+			}
+		}
+		return null
+	}
+	
+	/**
+	 * 版本号对比
+	 * @return 1 if v1 > v2, -1 if v1 < v2, 0 if equal
+	 */
+	private fun compareVersion(v1: String, v2: String): Int {
+		val parts1 = v1.split(".", "-").filter { it.isNotEmpty() }
+		val parts2 = v2.split(".", "-").filter { it.isNotEmpty() }
+		val length = maxOf(parts1.size, parts2.size)
+		for (i in 0 until length) {
+			val p1 = parts1.getOrNull(i)
+			val p2 = parts2.getOrNull(i)
+			
+			if (p1 == p2) continue
+			if (p1 == null) return -1
+			if (p2 == null) return 1
+			val n1 = p1.toIntOrNull()
+			val n2 = p2.toIntOrNull()
+			
+			if (n1 != null && n2 != null) {
+				if (n1 != n2) return n1.compareTo(n2)
+			}
+			else {
+				val res = p1.compareTo(p2, ignoreCase = true)
+				if (res != 0) return res
+			}
+		}
+		return 0
 	}
 	
 	/**

@@ -109,7 +109,7 @@
     <string name="version">Version</string>
     <string name="qq_group">QQ Group</string>
     <string name="feedback">Feedback</string>
-    <string name="launch_update">Update Check</string>
+    <string name="check_update">Update Check</string>
     <string name="permission">Permission</string>
     <string name="scan">Scan</string>
     <string name="qrcode">SYSU Code</string>
@@ -693,4 +693,7 @@
     <string name="total_score">Score</string>
     <string name="is_pass">Pass Status</string>
     <string name="total_gym_credit">Total Gym Credits</string>
+    <string name="import_js">Import</string>
+    <string name="import_fail">Import Failed</string>
+    <string name="import_success">Import Success</string>
 </resources>

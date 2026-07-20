@@ -14,13 +14,13 @@ import androidx.room3.Update
 	@Query("SELECT * FROM js ORDER BY position ASC")
 	suspend fun getAllJavaScript(): List<JavaScriptEntity>
 	
-	@Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertJs(js: JavaScriptEntity): Long?
+	@Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertJs(js: JavaScriptEntity): Long?
 	
 	@Delete suspend fun deleteJs(js: JavaScriptEntity)
 	
 	@Query("DELETE FROM js WHERE jsId = :jsId") suspend fun deleteJS(jsId: Long)
 	
-	@Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertUa(ua: UserAgentEntity)
+	@Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertUa(ua: UserAgentEntity)
 	
 	@Update suspend fun updateJs(js: JavaScriptEntity)
 	

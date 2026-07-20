@@ -9,6 +9,7 @@ import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.api.CookieManager
 import com.sysu.edu.api.HttpManager
+import com.sysu.edu.api.TargetUrl
 import com.sysu.edu.databinding.ActivityPagerBinding
 import com.sysu.edu.view.AdapterListener
 import com.sysu.edu.view.Pager2Adapter
@@ -37,35 +38,10 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 		setContentView(binding.root)
 		val cm = CookieManager(this)
 		val urls = mutableListOf("m/tice", "m/kwjfList", "m/tice/studentSwim")
-		val links = mutableListOf(mutableListOf(), mutableListOf(), mutableListOf<String>())
 		val name = mutableListOf(R.string.total_score, R.string.total_gym_credit, R.string.is_pass)
+		val links = mutableListOf(mutableListOf(), mutableListOf(), mutableListOf<String>())
 		(0..2).forEach { i ->
-			config.contextUtil.disposable.add(Observable.fromCallable<Any> {
-				Jsoup.connect("https://tice.sysu.edu.cn/${urls[i]}")
-					.header("Cookie", cm.toSimpleString("tice.sysu.edu.cn"))
-					.userAgent("Mozilla/5.0 (Linux; Android 15.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36")
-					.timeout(3000)
-					.get()
-			}
-				                                  .retry(3)
-				                                  .subscribeOn(Schedulers.io())
-				                                  .observeOn(AndroidSchedulers.mainThread())
-				                                  .subscribe {
-					                                  (it as Document).select("a.weui-cell.weui-cell_access")
-						                                  .forEach { element ->
-							                                  val title = element.selectFirst(".weui-cell__bd p")
-								                                  ?.text()
-							                                  val score = element.selectFirst("span")
-								                                  ?.text()
-							                                  val link = element.attr("href")
-							                                  links[i].add(link)
-							                                  (adp.get(i) as StaggeredFragment).add(
-								                                  title,
-								                                  R.drawable.calendar,
-								                                  mutableListOf(getString(name[i])),
-								                                  mutableListOf(score))
-						                                  }
-				                                  })
+			get(cm, urls[i], links[i], adp.get(i) as StaggeredFragment, name[i])
 			(adp.get(i) as StaggeredFragment).setListener(object : AdapterListener {
 				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 				                    holder: RecyclerView.ViewHolder,
@@ -147,6 +123,42 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 				}
 			})
 		}
+	}
+	
+	private fun get(
+		cm: CookieManager,urls: String,
+	                links: MutableList<String>,
+	                adp: StaggeredFragment,
+	                name: Int) {
+		config.contextUtil.disposable.add(Observable.fromCallable<Any> {
+			Jsoup.connect("https://tice.sysu.edu.cn/${urls}")
+				.header("Cookie", cm.toSimpleString("tice.sysu.edu.cn"))
+				.userAgent("Mozilla/5.0 (Linux; Android 15.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36")
+				.timeout(3000)
+				.get()
+		}
+			                                  .retry(3)
+			                                  .subscribeOn(Schedulers.io())
+			                                  .observeOn(AndroidSchedulers.mainThread())
+			                                  .subscribe {
+				                                  if ((it as Document).getElementById("netid-login") != null) config.contextUtil.login(
+					                                  TargetUrl.TICE) {
+					                                  get(cm, urls, links, adp, name)
+				                                  }
+				                                  else it.select("a.weui-cell.weui-cell_access")
+					                                  .forEach { element ->
+						                                  val title = element.selectFirst(".weui-cell__bd p")
+							                                  ?.text()
+						                                  val score = element.selectFirst("span")
+							                                  ?.text()
+						                                  val link = element.attr("href")
+						                                  links.add(link)
+						                                  adp.add(title,
+						                                          R.drawable.calendar,
+						                                          mutableListOf(getString(name)),
+						                                          mutableListOf(score))
+					                                  }
+			                                  })
 	}
 	
 	override fun onDestroy() {

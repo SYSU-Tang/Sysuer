@@ -21,8 +21,9 @@ class JsModel(private val repository: BrowserRepository) : ViewModel() {
 	
 	fun addJs(js: JavaScriptEntity, onResult: (Long) -> Unit = {}) {
 		viewModelScope.launch {
-			val id = repository.insertJs(js)
-			if (id != null) {
+			val id = repository.insertJs(js) ?: -1L
+			println("addJs: $id")
+			if (id != -1L) {
 				loadJs()
 				onResult(id)
 			}

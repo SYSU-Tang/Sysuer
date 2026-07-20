@@ -15,14 +15,14 @@ data class UserAgentEntity(@PrimaryKey(autoGenerate = true) val id: Long = 0,
                            val title: String?,
                            val ua: String?,
                            val description: String?,
-                           @ColumnInfo(defaultValue = "CURRENT_TIMESTAMP", typeAffinity = ColumnInfo.TEXT)
-						   val time: String? = null)
+                           @ColumnInfo(defaultValue = "CURRENT_TIMESTAMP",
+                                       typeAffinity = ColumnInfo.TEXT) val time: String? = null)
 
 @Entity(tableName = "js", indices = [Index(value = ["jsId"], unique = true)])
-data class JavaScriptEntity(@PrimaryKey(autoGenerate = true) val id: Long = 0,
-                            val position: Int? = 0,
+data class JavaScriptEntity(@PrimaryKey(autoGenerate = true) var id: Long = 0,
+                            var position: Int? = 0,
                             var title: String?,
-                            val namespace: String? = null,
+                            var namespace: String? = null,
                             val jsId: Int? = (title + namespace).hashCode(),
                             val version: String? = null,
                             var author: String? = null,
@@ -30,28 +30,28 @@ data class JavaScriptEntity(@PrimaryKey(autoGenerate = true) val id: Long = 0,
                             val homepage: String? = null,
                             val icon: String? = null,
                             val updateURL: String? = null,
-                            val downloadURL: String? = null,
+                            var downloadURL: String? = null,
                             val supportURL: String? = null,
                             var script: String?,
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
                             var matches: JSONArray = JSONArray(),
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
-							val includes: JSONArray = JSONArray(),
+                            val includes: JSONArray = JSONArray(),
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
                             var excludes: JSONArray = JSONArray(),
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
-							val requires: JSONArray = JSONArray(),
+                            val requires: JSONArray = JSONArray(),
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
-							val resources: JSONArray = JSONArray(),
+                            val resources: JSONArray = JSONArray(),
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
-							val connects: JSONArray = JSONArray(),
+                            val connects: JSONArray = JSONArray(),
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
-							val grants: JSONArray = JSONArray(),
+                            val grants: JSONArray = JSONArray(),
                             @field:ColumnTypeConverters(StringJSONArrayConverter::class)
-							val antifeatures: JSONArray = JSONArray(),
+                            val antifeatures: JSONArray = JSONArray(),
                             var runAt: String? = "document-idle",
                             val noframes: Boolean? = false,
                             var state: Int = 1,
-                            val run: Int = 0,
-                            @ColumnInfo(defaultValue = "CURRENT_TIMESTAMP", typeAffinity = ColumnInfo.TEXT)
-							val time: String? = null)
+                            var run: Int = 0,
+                            @ColumnInfo(defaultValue = "CURRENT_TIMESTAMP",
+                                        typeAffinity = ColumnInfo.TEXT) var time: String? = null)

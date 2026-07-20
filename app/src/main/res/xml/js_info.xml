@@ -33,7 +33,12 @@
             app:summaryOff="@string/disable"
             app:summaryOn="@string/enable"
             app:title="@string/status" />
-
+        <Preference
+            app:icon="@drawable/down"
+            app:isPreferenceVisible="false"
+            app:key="update_check"
+            app:persistent="false"
+            app:title="@string/update" />
         <Preference
             app:icon="@drawable/edit"
             app:key="edit"
@@ -86,6 +91,11 @@
             app:key="author"
             app:persistent="false"
             app:title="@string/author" />
+        <com.sysu.edu.preference.EditPreference
+            app:icon="@drawable/account"
+            app:key="namespace"
+            app:persistent="false"
+            app:title="@string/namespace" />
         <com.sysu.edu.preference.EditPreference
             app:icon="@drawable/version"
             app:key="version"

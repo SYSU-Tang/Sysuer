@@ -101,7 +101,7 @@
             app:defaultValue="true"
             app:icon="@drawable/refresh"
             app:key="update"
-            app:title="@string/launch_update" />
+            app:title="@string/check_update" />
         <Preference
             app:icon="@drawable/developer"
             app:isPreferenceVisible="false"

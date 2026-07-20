@@ -6,8 +6,10 @@ import androidx.lifecycle.lifecycleScope
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.browser.data.BrowserRepository
+import com.sysu.edu.browser.data.JavaScriptEntity
 import com.sysu.edu.browser.data.JsModel
 import com.sysu.edu.browser.data.JsModelFactory
+import com.sysu.edu.browser.data.ScriptParser.updateEntityByScript
 import com.sysu.edu.databinding.ActivityJsEdiitorBinding
 import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
 import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
@@ -20,7 +22,9 @@ import org.eclipse.tm4e.core.registry.IThemeSource
 
 class JSEditorActivity : BaseActivity() {
 	val model: JsModel by lazy {
-		ViewModelProvider(this, JsModelFactory(BrowserRepository(this, lifecycleScope)))[JsModel::class.java]
+		ViewModelProvider(this,
+		                  JsModelFactory(BrowserRepository(this,
+		                                                   lifecycleScope)))[JsModel::class.java]
 	}
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +32,8 @@ class JSEditorActivity : BaseActivity() {
 		val binding = ActivityJsEdiitorBinding.inflate(layoutInflater)
 		setContentView(binding.root)
 		model.getJs(intent.getLongExtra("id", 0)) { data ->
-			data?.run {
+			if (data != null) {
+				var data: JavaScriptEntity = data
 				FileProviderRegistry.getInstance().addFileProvider(AssetsFileResolver(assets))
 				GrammarRegistry.getInstance().loadGrammars("textmate/languages.json")
 				binding.editor.setEditorLanguage(TextMateLanguage.create("source.js", true))
@@ -36,7 +41,10 @@ class JSEditorActivity : BaseActivity() {
 				val name = "light" // 主题名称
 				val themeAssetsPath = "textmate/$name.json"
 				val themeModel = ThemeModel(IThemeSource.fromInputStream(FileProviderRegistry.getInstance()
-																			 .tryGetInputStream(themeAssetsPath), themeAssetsPath, null), name)
+					                                                         .tryGetInputStream(
+						                                                         themeAssetsPath),
+				                                                         themeAssetsPath,
+				                                                         null), name)
 				try {
 					themeRegistry.loadTheme(themeModel)
 					themeRegistry.setTheme(name)
@@ -49,7 +57,7 @@ class JSEditorActivity : BaseActivity() {
 				binding.toolbar.setOnMenuItemClickListener {
 					when (it.itemId) {
 						R.id.save -> {
-							data.script = binding.editor.text.toString()
+							data = updateEntityByScript(data, binding.editor.text.toString())
 							model.updateJs(data)
 						}
 						R.id.redo -> binding.editor.redo()
