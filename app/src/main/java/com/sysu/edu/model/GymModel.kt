@@ -51,13 +51,4 @@ class GymModel(context: Context) : BaseModel(context) {
 		}
 		return result
 	}
-	
-	override fun updateRequest(request: Request): Request {
-		return request.newBuilder()
-			.url(request.url.newBuilder().host(authorizationManager.host).build())
-			.header("Cookie", cookieManager?.toSimpleString(authorizationManager.host) ?: "")
-			.header("Authorization",
-			        http.authorizationJar?.getAuthorization(authorizationManager.host) ?: "")
-			.build()
-	}
 }

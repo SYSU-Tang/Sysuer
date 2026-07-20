@@ -166,10 +166,12 @@ abstract class BaseModel(context: Context) {
 		get() = http.cookieManager
 	
 	open fun updateRequest(request: Request): Request {
-		return request.newBuilder()
+		val newRequest = request.newBuilder()
 			.url(request.url.newBuilder().host(host).build())
 			.header("Cookie", cookie)
-			.build()
+		if (http.isTokenRequired) newRequest.header("token", token)
+		if (http.isAuthorizationRequired) newRequest.header("Authorization", authorization)
+		return newRequest.build()
 	}
 	
 	fun dispose() {

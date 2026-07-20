@@ -35,7 +35,7 @@ open class PayModel(context: Context) : BaseModel(context) {
 			if (code == 1003) login(request)
 			else {
 				if (code != 200) http.handler.post {
-					contextUtil.toast(CommonUtil.toStringOrDefault(response.getString("message")))
+					contextUtil.toast(response.getString("message",""))
 				}
 				result = CommonUtil.Tuple2(request.second, response)
 				message.postValue(result)
