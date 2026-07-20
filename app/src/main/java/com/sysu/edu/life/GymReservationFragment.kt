@@ -41,8 +41,12 @@ import java.util.Locale
 
 class GymReservationFragment : BaseFragment() {
 	val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-	var viewModel: GymReservationViewModel? = null
-	private var concatAdapter: ConcatAdapter? = null
+	val viewModel: GymReservationViewModel by lazy {
+		ViewModelProvider(requireActivity())[GymReservationViewModel::class.java]
+	}
+	private val concatAdapter: ConcatAdapter = ConcatAdapter(ConcatAdapter.Config.Builder()
+	.setIsolateViewTypes(true)
+	.build())
 	lateinit var model: GymModel
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
@@ -50,17 +54,13 @@ class GymReservationFragment : BaseFragment() {
 		super.onCreateView(inflater, container, savedInstanceState)
 		model = GymModel(requireContext())
 		val calendarManager = CalendarManager()
-		viewModel = ViewModelProvider(requireActivity())[GymReservationViewModel::class.java]
-		concatAdapter = ConcatAdapter(ConcatAdapter.Config.Builder()
-			                              .setIsolateViewTypes(true)
-			                              .build())
 		val picker = MaterialDatePicker.Builder.datePicker()
 		val binding = FragmentGymOrderBinding.inflate(inflater, container, false).apply {
 			recyclerView.layoutManager = LinearLayoutManager(context)
 			recyclerView.adapter = concatAdapter
 			from.setOnClickListener {
-				viewModel!!.reservationFromTo.getValue()?.second?.let {
-					val datePicker = picker.setSelection(viewModel!!.reservationFromTo.getValue()!!.first)
+				viewModel.reservationFromTo.value?.second?.let {
+					val datePicker = picker.setSelection(viewModel.reservationFromTo.value!!.first)
 						.setCalendarConstraints(CalendarConstraints.Builder()
 							                        .setValidator(CompositeDateValidator.allOf(
 								                        listOf(DateValidatorPointBackward.before(it))))
@@ -69,13 +69,13 @@ class GymReservationFragment : BaseFragment() {
 					datePicker.show(getParentFragmentManager(), "datePicker")
 					datePicker.addOnPositiveButtonClickListener(
 						MaterialPickerOnPositiveButtonClickListener { selection: Long? ->
-							viewModel!!.reservationFromTo.value = CommonUtil.Tuple2(selection, it)
+							viewModel.reservationFromTo.value = CommonUtil.Tuple2(selection, it)
 						})
 				}
 			}
 			to.setOnClickListener {
-				viewModel!!.reservationFromTo.getValue()?.first?.let {
-					val datePicker = picker.setSelection(viewModel!!.reservationFromTo.getValue()!!.second)
+				viewModel.reservationFromTo.value?.first?.let {
+					val datePicker = picker.setSelection(viewModel.reservationFromTo.value!!.second)
 						.setCalendarConstraints(CalendarConstraints.Builder()
 							                        .setValidator(CompositeDateValidator.allOf(
 								                        listOf(DateValidatorPointForward.from(it))))
@@ -84,7 +84,7 @@ class GymReservationFragment : BaseFragment() {
 					datePicker.show(getParentFragmentManager(), "datePicker")
 					datePicker.addOnPositiveButtonClickListener(
 						MaterialPickerOnPositiveButtonClickListener { selection: Long? ->
-							viewModel!!.reservationFromTo.value = CommonUtil.Tuple2(it, selection)
+							viewModel.reservationFromTo.value = CommonUtil.Tuple2(it, selection)
 						})
 				}
 			}
@@ -104,9 +104,9 @@ class GymReservationFragment : BaseFragment() {
 						}
 					}
 				}
-				concatAdapter!!.addAdapter(titleAdapter)
-				concatAdapter!!.addAdapter(preferenceAdapter)
-				concatAdapter!!.addAdapter(buttonAdapter)
+				concatAdapter.addAdapter(titleAdapter)
+				concatAdapter.addAdapter(preferenceAdapter)
+				concatAdapter.addAdapter(buttonAdapter)
 				val value: ArrayList<String?> = extractValue(item,
 				                                             arrayOf("VenueName",
 				                                                     "StartDateTime",
@@ -145,10 +145,10 @@ class GymReservationFragment : BaseFragment() {
 				                      R.drawable.money)
 			}
 		}
-		viewModel!!.reservationFromTo.observe(getViewLifecycleOwner()) { o: CommonUtil.Tuple2<Long?, Long?>? ->
-			if (o != null && o.second != null && o.first != null) {
-				binding.from.text = calendarManager.toDateString(o.first!!)
-				binding.to.text = calendarManager.toDateString(o.second!!)
+		viewModel.reservationFromTo.observe(viewLifecycleOwner) { (from,to) ->
+			if (from != null && to != null) {
+				binding.from.text = calendarManager.toDateString(from)
+				binding.to.text = calendarManager.toDateString(to)
 				regetReservation()
 			}
 		}
@@ -161,16 +161,16 @@ class GymReservationFragment : BaseFragment() {
 	}
 	
 	fun reset() {
-		concatAdapter!!.adapters.forEach { adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder?>? ->
-			concatAdapter!!.removeAdapter(adapter!!)
+		concatAdapter.adapters.forEach { adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder?>? ->
+			concatAdapter.removeAdapter(adapter!!)
 		}
 	}
 	
 	val reservation: Unit
 		get() {
-			if (viewModel!!.reservationFromTo.getValue() != null && viewModel!!.reservationFromTo.getValue()!!.second != null && viewModel!!.reservationFromTo.getValue()!!.first != null) model.addAndNext(
-				"api/BookingRequestVenue?all=false&startDate=${dateFormat.format(viewModel!!.reservationFromTo.getValue()!!.first)}&endDate=${
-					dateFormat.format(viewModel!!.reservationFromTo.getValue()!!.second)
+			if (viewModel.reservationFromTo.value != null && viewModel.reservationFromTo.value!!.second != null && viewModel.reservationFromTo.value!!.first != null) model.addAndNext(
+				"api/BookingRequestVenue?all=false&startDate=${dateFormat.format(viewModel.reservationFromTo.value!!.first)}&endDate=${
+					dateFormat.format(viewModel.reservationFromTo.value!!.second)
 				}&waitingList=false",
 				0)
 		}

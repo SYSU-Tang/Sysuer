@@ -35,7 +35,9 @@ import java.util.regex.Pattern
 
 class GymDetailFragment : BaseFragment() {
 	val fee: MutableMap<String?, JSONObject?> = mutableMapOf()
-	var viewModel: GymReservationViewModel? = null
+	val viewModel: GymReservationViewModel by lazy {
+		ViewModelProvider(requireActivity())[GymReservationViewModel::class.java]
+	}
 	var id: String? = null
 	var hash: String? = null
 	var dateAdapter: DateAdapter? = null
@@ -49,7 +51,6 @@ class GymDetailFragment : BaseFragment() {
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
-		viewModel = ViewModelProvider(requireActivity())[GymReservationViewModel::class.java]
 		id = requireArguments().getString("id")
 		val gridLayoutManager = GridLayoutManager(requireContext(),
 		                                          4,
@@ -57,12 +58,12 @@ class GymDetailFragment : BaseFragment() {
 		                                          false)
 		val fieldAdapter = FieldAdapter().apply {
 			action = {
-				viewModel!!.selected.value = selected
+				viewModel.selected.value = selected
 			}
 		}
 		dateAdapter = DateAdapter().apply {
-			action = { value: Int? -> viewModel!!.position.value = value }
-			select((viewModel!!.position.value ?: 0))
+			action = { value: Int? -> viewModel.position.value = value }
+			select((viewModel.position.value ?: 0))
 		}
 		val binding = FragmentGymDetailBinding.inflate(inflater, container, false).apply {
 			date.recyclerView.adapter = dateAdapter
@@ -87,8 +88,8 @@ class GymDetailFragment : BaseFragment() {
 		}
 		val dialog = BottomSheetDialog(requireContext())
 		dialog.setContentView(dialogBinding.root)
-		if (viewModel!!.position.value == null) viewModel!!.position.postValue(0)
-		viewModel!!.position.observe(viewLifecycleOwner) { p: Int? ->
+		if (viewModel.position.value == null) viewModel.position.postValue(0)
+		viewModel.position.observe(viewLifecycleOwner) { p: Int? ->
 			if (p != null) info
 		}
 		model.message.observe(viewLifecycleOwner) { (code, response) ->
@@ -150,8 +151,8 @@ class GymDetailFragment : BaseFragment() {
 							}
 						}
 					}
-					if (viewModel!!.position.value != null) dateAdapter!!.setAvailableCapacity(
-						viewModel!!.position.value!!,
+					if (viewModel.position.value != null) dateAdapter!!.setAvailableCapacity(
+						viewModel.position.value!!,
 						availableCapacity)
 					getFee(id!!)
 				}
@@ -182,7 +183,7 @@ class GymDetailFragment : BaseFragment() {
 				}
 			}
 		}
-		viewModel!!.selected.observe(viewLifecycleOwner) { selected: MutableSet<Int>? ->
+		viewModel.selected.observe(viewLifecycleOwner) { selected: MutableSet<Int>? ->
 			fieldAdapter.selected = selected
 			val studentFee = fee["学生"]
 			if (studentFee != null) {
@@ -218,12 +219,12 @@ class GymDetailFragment : BaseFragment() {
 	fun reset(field: FieldAdapter) {
 		field.clear()
 		field.clearSelected()
-		viewModel!!.selected.value = HashSet()
+		viewModel.selected.value = HashSet()
 	}
 	
 	val info: Unit
 		get() {
-			viewModel!!.position.value?.let {
+			viewModel.position.value?.let {
 				getInfo(id!!,
 				        dateAdapter!!.getFormattedDate(it),
 				        dateAdapter!!.getFormattedDate(it))

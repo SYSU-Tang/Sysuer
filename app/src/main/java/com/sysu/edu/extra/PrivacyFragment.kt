@@ -1,24 +1,23 @@
 package com.sysu.edu.extra
 
 import android.os.Bundle
-import android.util.Pair
+import androidx.core.util.component1
+import androidx.core.util.component2
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.sysu.edu.R
-import com.sysu.edu.api.Config
 import com.sysu.edu.model.PayModel
 
 class PrivacyFragment : PreferenceFragmentCompat() {
 	val model: PayModel by lazy { PayModel(requireContext()) }
 	override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 		setPreferencesFromResource(R.xml.privacy, rootKey)
-		val config = Config(this)
-		model.contextUtil.disposable.add(config.contextUtil.accountManager.getActiveAccountAsync("sysu.edu.cn")
-			                                 .subscribe { activeAccount: Pair<String?, String?>? ->
+		model.contextUtil.disposable.add(model.contextUtil.accountManager.getActiveAccountAsync("sysu.edu.cn")
+			                                 .subscribe { (netId, password) ->
 				                                 (findPreference("netId") as Preference?)?.setSummary(
-					                                 activeAccount!!.first)
+					                                 netId)
 				                                 (findPreference("password") as Preference?)?.setOnPreferenceClickListener { _: Preference? ->
-					                                 config.toast(activeAccount?.second)
+					                                 model.contextUtil.toast(password)
 					                                 false
 				                                 }
 			                                 })
@@ -27,14 +26,14 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 				if (response.get("data") != null) {
 					if (code == 0) {
 						val data = response.getJSONObject("data")
-						arrayOf("姓名",
-						        "学号",
-						        "证件类别",
-						        "证件号码",
-						        "电话",
-						        "邮箱").forEachIndexed { i, name ->
+						arrayOf(R.string.name,
+						        R.string.student_id,
+						        R.string.id_type,
+						        R.string.id_num,
+						        R.string.phone,
+						        R.string.email).forEachIndexed { i, name ->
 							val p = Preference(requireContext()).apply {
-								title = name
+								setTitle(name)
 								summary = data.getString(arrayOf("userName",
 								                                 "userCode",
 								                                 "idTypeStr",
@@ -47,10 +46,10 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 								                   R.drawable.account,
 								                   R.drawable.phone,
 								                   R.drawable.email)[i])
-								setOnPreferenceClickListener { preference: Preference? ->
-									config.copy(preference!!.title as String?,
-									            preference.getSummary() as String?)
-									config.toast(R.string.copy_successfully)
+								setOnPreferenceClickListener { preference: Preference ->
+									model.contextUtil.copy(preference.title as String?,
+									                       preference.summary as String?)
+									model.contextUtil.toast(R.string.copy_successfully)
 									false
 								}
 							}
@@ -59,7 +58,7 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 					}
 				}
 			}
-			else config.toast(response.getString("message"))
+			else model.contextUtil.toast(response.getString("message"))
 		}
 		info
 	}
