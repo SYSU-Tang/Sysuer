@@ -688,4 +688,9 @@
     <string name="university">University</string>
     <string name="email">Email</string>
     <string name="account_info">Account Info</string>
+    <string name="id_type">ID Type</string>
+    <string name="id_num">ID Number</string>
+    <string name="total_score">Score</string>
+    <string name="is_pass">Pass Status</string>
+    <string name="total_gym_credit">Total Gym Credits</string>
 </resources>

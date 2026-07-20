@@ -685,4 +685,10 @@
     <string name="university">大学</string>
     <string name="email">邮箱</string>
     <string name="account_info">账户信息</string>
+
+    <string name="id_type">证件类型</string>
+    <string name="id_num">证件号码</string>
+    <string name="total_score">总成绩</string>
+    <string name="is_pass">是否达标</string>
+    <string name="total_gym_credit">总体育积分</string>
 </resources>
