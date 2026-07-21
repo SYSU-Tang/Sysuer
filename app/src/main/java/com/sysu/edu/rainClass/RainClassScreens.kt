@@ -1,8 +1,5 @@
 package com.sysu.edu.rainClass
 
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.widget.ImageView
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,10 +61,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.R
-import com.sysu.edu.api.ContextUtil
-import com.sysu.edu.api.CookieManager
-import com.sysu.edu.api.HttpManager
 import com.sysu.edu.api.TargetHost
+import com.sysu.edu.rainClass.RainClassModel.Companion.formatTerm
+import com.sysu.edu.rainClass.RainClassModel.Companion.getTermColor
 
 @Preview(showBackground = true)
 @Composable
@@ -81,43 +78,34 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 	var searchQuery by remember { mutableStateOf("") }
 	var active by remember { mutableStateOf(false) }
 	val context = LocalContext.current
-	val contextUtil = remember { ContextUtil(context) }
 	val courseList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
-	val http = remember {
-		HttpManager(object : Handler(Looper.getMainLooper()) {
-			override fun handleMessage(msg: Message) {
-				super.handleMessage(msg)
+	val model = remember { RainClassModel(context) }
+	val message by model.message.observeAsState()
+	
+	LaunchedEffect(message) {
+		message?.let { (what, response) ->
+			if (what == RainClassModel.GET_COURSE_LIST) {
 				isLoading.value = false
-				when (msg.what) {
-					0 -> {
-						val response = JSONObject.parseObject(msg.obj.toString())
-						if (response.containsKey("errcode") && response.getInteger("errcode") == 401002) {
-							onRequestScrollToAccount()
+				if (response.containsKey("errcode") && response.getInteger("errcode") == 401002) {
+					onRequestScrollToAccount()
+				}
+				else if (response.containsKey("errcode") && response.getInteger("errcode") == 0) {
+					val data = response.getJSONObject("data")
+					if (data != null) {
+						val list = data.getJSONArray("list")
+						if (list != null) {
+							courseList.value = list.map { it as JSONObject }
 						}
-						else if (response.containsKey("errcode") && response.getInteger("errcode") == 0) {
-							val data = response.getJSONObject("data")
-							if (data != null) {
-								val list = data.getJSONArray("list")
-								if (list != null) {
-									courseList.value = list.map { it as JSONObject }
-								}
-							}
-						}
-					}
-					-1 -> {
-						contextUtil.toast(R.string.no_net_connected)
 					}
 				}
 			}
-		}).apply {
-			cookieManager = CookieManager(context)
 		}
 	}
 	
 	fun getCourseList() {
 		isLoading.value = true
-		http.getRequest("https://www.yuketang.cn/v2/api/web/courses/list?identity=2", 0)
+		model.getCourseList()
 	}
 	
 	LaunchedEffect(Unit) {
@@ -225,41 +213,32 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 
 @Composable fun AccountScreen() {
 	val context = LocalContext.current
-	val contextUtil = remember { ContextUtil(context) }
 	val userInfo = remember { mutableStateOf<JSONObject?>(null) }
 	val isLoginRequired = remember { mutableStateOf(false) }
 	val isLoading = remember { mutableStateOf(true) }
 	val scrollState = rememberScrollState()
-	val http = remember {
-		HttpManager(object : Handler(Looper.getMainLooper()) {
-			override fun handleMessage(msg: Message) {
-				super.handleMessage(msg)
+	val model = remember { RainClassModel(context) }
+	val message by model.message.observeAsState()
+	
+	LaunchedEffect(message) {
+		message?.let { (what, response) ->
+			if (what == RainClassModel.GET_USER_INFO) {
 				isLoading.value = false
-				when (msg.what) {
-					0 -> {
-						val response = JSONObject.parseObject(msg.obj.toString())
-						if (response.containsKey("op") && response.getString("op") == "web_redirect") {
-							isLoginRequired.value = true
-						}
-						else {
-							userInfo.value = response.getJSONObject("data")
-								.getJSONObject("user_profile")
-							isLoginRequired.value = false
-						}
-					}
-					-1 -> {
-						contextUtil.toast(R.string.no_net_connected)
-					}
+				if (response.containsKey("op") && response.getString("op") == "web_redirect") {
+					isLoginRequired.value = true
+				}
+				else {
+					userInfo.value = response.getJSONObject("data")
+						?.getJSONObject("user_profile")
+					isLoginRequired.value = false
 				}
 			}
-		}).apply {
-			cookieManager = CookieManager(context)
 		}
 	}
 	
 	fun getUserInfo() {
 		isLoading.value = true
-		http.getRequest("https://www.yuketang.cn/v/course_meta/user_info", 0)
+		model.getUserInfo()
 	}
 	
 	LaunchedEffect(Unit) {
@@ -282,7 +261,7 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 			Card(elevation = CardDefaults.cardElevation()) {
 				AndroidView(factory = { ctx ->
 					ImageView(ctx).apply {
-						contextUtil.loginByQrCode(TargetHost.YU_KE_TANG, this) {
+						model.contextUtil.loginByQrCode(TargetHost.YU_KE_TANG, this) {
 							getUserInfo()
 						}
 					}
@@ -330,24 +309,3 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 	}
 }
 
-fun formatTerm(term: Int?): String {
-	if (term == null) return ""
-	val year = term / 100
-	val semesterStr = when (val semester = term % 100) {
-		1 -> "秋"
-		2 -> "春"
-		3 -> "夏"
-		else -> "$semester"
-	}
-	return "$year $semesterStr"
-}
-
-fun getTermColor(term: Int?): Color {
-	if (term == null) return Color(0xFF212121)
-	return when (term % 100) {
-		1 -> Color(0xFF1A237E) // 秋季 - 深蓝
-		2 -> Color(0xFF1B5E20) // 春季 - 深绿
-		3 -> Color(0xFFB71C1C) // 夏季 - 深红
-		else -> Color(0xFF424242)
-	}
-}
