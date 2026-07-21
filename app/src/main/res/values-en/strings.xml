@@ -696,4 +696,10 @@
     <string name="import_js">Import</string>
     <string name="import_fail">Import Failed</string>
     <string name="import_success">Import Success</string>
+
+    <string name="reinstall">Reinstall</string>
+    <string name="install_success">Install Success</string>
+    <string name="install_failed">Install Failed</string>
+    <string name="installing">Installing…</string>
+    <string name="updating">Updating…</string>
 </resources>

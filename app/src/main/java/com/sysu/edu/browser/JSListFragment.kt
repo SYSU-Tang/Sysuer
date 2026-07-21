@@ -59,16 +59,14 @@ class JSListFragment : BaseFragment() {
 						val bundle = Bundle().apply {
 							putLong("id", js.id)
 						}
-						model.updateJs(js){
+						model.updateJs(js) {
 							findNavController().navigate(R.id.list_to_info,
 							                             bundle,
 							                             null,
 							                             FragmentNavigator.Extras.Builder()
-								                             .addSharedElement(this,
-								                                               "script")
+								                             .addSharedElement(this, "script")
 								                             .build())
 						}
-						
 					}
 					setOnLongClickListener {
 						val pop = PopupMenu(requireContext(), this)
@@ -99,7 +97,7 @@ class JSListFragment : BaseFragment() {
 						}
 						false
 					}
-					alpha = if (js.state == 1) 1f else 0.5f
+					findViewById<View>(R.id.item_card).alpha = if (js.state == 1) 1f else 0.5f
 				}
 			}
 			
@@ -136,7 +134,8 @@ class JSListFragment : BaseFragment() {
 								config.toast(R.string.import_success)
 								reload()
 							}
-						} else {
+						}
+						else {
 							config.toast(R.string.import_fail)
 						}
 					}
@@ -156,7 +155,6 @@ class JSListFragment : BaseFragment() {
 		                             version = "1.0.0",
 		                             author = "You",
 		                             description = "Hello world!",
-		                             
 		                             script = """
 // ==UserScript==
 // @name         New Userscript

@@ -143,7 +143,7 @@ object ScriptParser {
 				return@withContext entity
 			}
 		} catch (e: IOException) {
-			System.err.println(e)
+			e.printStackTrace()
 		}
 		null
 	}

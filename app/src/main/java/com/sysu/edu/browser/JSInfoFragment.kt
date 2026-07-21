@@ -13,11 +13,13 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.children
 import com.alibaba.fastjson2.JSONArray
 import com.sysu.edu.R
+import com.sysu.edu.api.Config
 import com.sysu.edu.browser.data.BrowserRepository
 import com.sysu.edu.browser.data.JavaScriptEntity
 import com.sysu.edu.browser.data.JsModel
 import com.sysu.edu.browser.data.JsModelFactory
 import com.sysu.edu.browser.data.ScriptManager.checkForUpdate
+import com.sysu.edu.browser.data.ScriptParser.parseFromUrl
 import com.sysu.edu.browser.data.ScriptParser.updateScriptByEntity
 import com.sysu.edu.preference.EditPreference
 import com.sysu.edu.view.EditTextDialog
@@ -33,6 +35,7 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 		                                                   lifecycleScope)))[JsModel::class.java]
 	}
 	val dialog: EditTextDialog by lazy { EditTextDialog(requireContext()) }
+	val config: Config by lazy { Config(this) }
 	override fun onCreatePreferences(savedInstanceState: Bundle?, p1: String?) {
 		setPreferencesFromResource(R.xml.js_info, p1)
 	}
@@ -75,7 +78,6 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 		model.getJs(jsId) {
 			if (it != null) {
 				data = it
-				println(it)
 				load()
 			}
 		}
@@ -182,14 +184,44 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 				findPreference<EditPreference>("support")?.value = supportURL
 				
 				lifecycleScope.launch {
-					if (checkForUpdate(entity) != null) {
-						findPreference<Preference>("update_check")?.isVisible = true
-						findPreference<Preference>("update_check")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-							false
+					val newEntity = checkForUpdate(entity)
+					val updateCheck = findPreference<Preference>("update_check")
+					updateCheck?.isVisible = true
+					if (newEntity != null) {
+						updateCheck?.apply {
+							title = getString(R.string.update)
+							summary = "${data?.version} -> ${newEntity.version}"
+							onPreferenceClickListener = Preference.OnPreferenceClickListener {
+								reinstall(newEntity.updateURL ?: "")
+								config.toast(R.string.updating)
+								false
+							}
+						}
+					}
+					else {
+						updateCheck?.apply {
+							title = getString(R.string.reinstall)
+							summary = "${data?.version} -> ${data?.version}"
+							onPreferenceClickListener = Preference.OnPreferenceClickListener {
+								reinstall(entity.downloadURL ?: "")
+								config.toast(R.string.installing)
+								false
+							}
 						}
 					}
 				}
 			}
+		}
+	}
+	
+	private fun reinstall(url: String) {
+		lifecycleScope.launch {
+			parseFromUrl(url) ?.let { js ->
+				model.updateJs(js) {
+					load()
+					config.toast(R.string.install_success)
+				}
+			} ?: config.toast(R.string.install_failed)
 		}
 	}
 	
@@ -254,8 +286,7 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 	private fun removeAll(key: String) {
 		val preference = findPreference<PreferenceCategory>(key)
 		val count = preference?.preferenceCount?.takeIf { it > 1 } ?: return
-		((count - 1)downTo 1).forEach {
-			println(preference.getPreference(it))
+		((count - 1) downTo 1).forEach {
 			preference.removePreference(preference.getPreference(it))
 		}
 	}

@@ -9,6 +9,7 @@
     <com.google.android.material.listitem.ListItemCardView
         style="@style/Widget.Material3.ListItemCardView.Segmented"
         android:layout_width="match_parent"
+        android:id="@+id/item_card"
         android:layout_height="wrap_content">
 
         <androidx.constraintlayout.widget.ConstraintLayout

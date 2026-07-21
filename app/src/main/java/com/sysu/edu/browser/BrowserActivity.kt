@@ -78,7 +78,7 @@ import java.util.regex.Pattern
 
 class BrowserActivity : BaseActivity() {
 	val progress: MutableLiveData<Int?> = MutableLiveData<Int?>()
-	val disposable: CompositeDisposable = CompositeDisposable()
+	val disposable: CompositeDisposable by lazy { config.contextUtil.disposable }
 	lateinit var web: SysuerWebView
 	lateinit var binding: ActivityBrowserBinding
 	lateinit var webSettings: WebSettings
@@ -112,26 +112,35 @@ class BrowserActivity : BaseActivity() {
 				                                      request: WebResourceRequest): Boolean {
 					val url1 = request.url.toString()
 					if (url1.startsWith("https://") || url1.startsWith("http://")) view.loadUrl(url1)
-					else startActivity(Intent(Intent.ACTION_VIEW).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-										   .setData(url1.toUri()))
+					else {
+						Intent(Intent.ACTION_VIEW).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+							.setData(url1.toUri())
+							.takeIf { it.resolveActivity(packageManager) != null }
+							?.let {
+								startActivity(it)
+							}
+					}
 					return true
 				}
 				
 				override fun shouldInterceptRequest(view: WebView?,
 				                                    request: WebResourceRequest): WebResourceResponse? {
 					val url1 = request.url.toString()
-					if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/system-manage/infoRelease/downloadFile", Pattern.DOTALL)
-							.matcher(url1)
-							.find()) {
+					if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/system-manage/infoRelease/downloadFile",
+					                    Pattern.DOTALL).matcher(url1).find()) {
 						try {
 							val response = okHttpClient.newCall(Request.Builder()
-																	.url(url1)
-																	.header("Cookie", cookie.getCookie(url1))
-																	.header("Referer", "https://jwxt.sysu.edu.cn/jwxt/")
-																	.build()).execute()
+								                                    .url(url1)
+								                                    .header("Cookie",
+								                                            cookie.getCookie(url1))
+								                                    .header("Referer",
+								                                            "https://jwxt.sysu.edu.cn/jwxt/")
+								                                    .build()).execute()
 							val mediaType = response.body.contentType()
 							return WebResourceResponse(mediaType?.type
-														   ?: "application/octet-stream", "utf-8", response.body.byteStream())
+								                           ?: "application/octet-stream",
+							                           "utf-8",
+							                           response.body.byteStream())
 						} catch (_: IOException) {
 						}
 					}
@@ -141,38 +150,21 @@ class BrowserActivity : BaseActivity() {
 				override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
 					gmBridge?.clearCommands()
 					model.js.value?.let {
-						ScriptManager.executeScripts(web, ScriptManager.getMatchingScripts(url
-																							   ?: "", it), "document-start")
+						ScriptManager.executeScripts(web,
+						                             ScriptManager.getMatchingScripts(url ?: "",
+						                                                              it),
+						                             "document-start")
 					}
 					super.onPageStarted(view, url, favicon)
 				}
 				
-				override fun onPageFinished(view: WebView,
-				                            link: String) { //					if (Pattern.compile("//cas.+?sysu\\.edu\\.cn/esc-sso/login/page")
-					//							.matcher(link)
-					//							.find()) disposable.add(config.contextUtil.accountManager.getActiveAccountAsync("sysu.edu.cn")
-					//														.subscribe { (username, password) ->
-					//															if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password)) web.evaluateJavascript($$""" javascript:(function(){function waitElement(selector, callback) {const element = document.querySelector(selector);if (element) {callback();}else{setTimeout(() => {waitElement(selector,callback);}, 100);}}waitElement('.para-widget-account-psw', () => {var component=document.querySelector('.para-widget-account-psw');var data=component[Object.keys(component).filter(k => k.startsWith('jQuery') && k.endsWith('2'))[0]].widget_accountPsw;data.loginModel.dataField.username='$$username';data.loginModel.dataField.password='$$password';data.passwordInputVal='password';data.$loginBtn.click();});})()""".trimIndent()) {}
-					//														})
-					//					else if (Pattern.compile("://appgw.sysu.edu.cn/").matcher(link).find()) {
-					//						web.stopLoading()
-					//						web.loadUrl(url.replace(".sysu.edu.cn/", "-443.webvpn.sysu.edu.cn/"))
-					//					}
-					//					else if (Pattern.compile("://cas.*?sysu.edu.cn/login/mfaLogin.html")
-					//							.matcher(link)
-					//							.find()) {
-					//						cookie.setCookie("https://cas.sysu.edu.cn", "device_trust_Cookie=true; Path=/esc-sso; Domain=cas.sysu.edu.cn;")
-					//						try {
-					//							web.loadUrl(toStringOrDefault<String?>(Uri.parse(URLDecoder.decode(link, "utf-8"))
-					//																	   .getQueryParameter("appUrl")))
-					//						} catch (e: UnsupportedEncodingException) {
-					//							throw RuntimeException(e)
-					//						}
-					//					}
-					if (preference.isPC) view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));", null)
+				override fun onPageFinished(view: WebView, link: String) {
+					if (preference.isPC) view.evaluateJavascript("document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));",
+					                                             null)
 					model.js.value?.let {
-						ScriptManager.executeScripts(web, ScriptManager.getMatchingScripts(url, it), "document-end")
-						ScriptManager.executeScripts(web, ScriptManager.getMatchingScripts(url, it), "document-idle")
+						ScriptManager.executeScripts(web,
+						                             ScriptManager.getMatchingScripts(url, it),
+						                             listOf("document-idle", "document-end"))
 					}
 					super.onPageFinished(view, link)
 				}
@@ -240,21 +232,25 @@ class BrowserActivity : BaseActivity() {
 		}        /*
          * 下载弹窗
          * */
-		val downloadDialog = GridMenuDialog(this)
-		downloadDialog.setColumn(1)
-		downloadDialog.set<Int?>(mutableListOf(R.string.link, R.string.location), mutableListOf(R.drawable.link, R.drawable.save), mutableListOf(GridMenuDialog.onGridMenuClickListener {
-			startActivity(Intent(Intent.ACTION_VIEW, downloadDialog.getMenu(0)?.text.toString()
-				.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-		}, GridMenuDialog.onGridMenuClickListener { downloadDialog.dialog.dismiss() }))
-		downloadDialog.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
-		downloadDialog.setGravity(Gravity.START or Gravity.CENTER_VERTICAL)
-		downloadDialog.getMenu(0)?.setMaxLines(Int.MAX_VALUE)
-		downloadDialog.getMenu(0)?.setOnLongClickListener {
-			config.copy("link", downloadDialog.getMenu(0)?.text.toString())
-			config.toast(R.string.copy_successfully)
-			true
+		val downloadDialog = GridMenuDialog(this).apply {
+			setColumn(1)
+			set<Int?>(mutableListOf(R.string.link, R.string.location),
+			          mutableListOf(R.drawable.link, R.drawable.save),
+			          mutableListOf(GridMenuDialog.onGridMenuClickListener {
+				          startActivity(Intent(Intent.ACTION_VIEW,
+				                               getMenu(0)?.text.toString()
+					                               .toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+			          }, GridMenuDialog.onGridMenuClickListener { dialog.dismiss() }))
+			setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
+			setGravity(Gravity.START or Gravity.CENTER_VERTICAL)
+			getMenu(0)?.setMaxLines(Int.MAX_VALUE)
+			getMenu(0)?.setOnLongClickListener {
+				config.copy("link", getMenu(0)?.text.toString())
+				config.toast(R.string.copy_successfully)
+				true
+			}
+			setNegativeButton(R.string.cancel) { _, _: Int -> }
 		}
-		downloadDialog.setNegativeButton(R.string.cancel) { _, _: Int -> }
 		
 		web.setDownloadListener { url1: String?, _: String?, _: String?, _: String?, _: Long ->
 			val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -262,16 +258,21 @@ class BrowserActivity : BaseActivity() {
 			downloadDialog.getMenu(0)?.text = url1
 			downloadDialog.getMenu(1)?.text = path
 			downloadDialog.setPositiveButton(R.string.download) { _: DialogInterface?, _: Int ->
-				if (url1!!.contains("jwxt.sysu.edu.cn")) downloadFile(this, Request.Builder()
-					.url(url1)
-					.header("Cookie", cookie.getCookie(url1))
-					.header("Referer", "https://jwxt.sysu.edu.cn/jwxt/")
-					.build(), path)
+				if (url1!!.contains("jwxt.sysu.edu.cn")) downloadFile(this,
+				                                                      Request.Builder()
+					                                                      .url(url1)
+					                                                      .header("Cookie",
+					                                                              cookie.getCookie(
+						                                                              url1))
+					                                                      .header("Referer",
+					                                                              "https://jwxt.sysu.edu.cn/jwxt/")
+					                                                      .build(),
+				                                                      path)
 				else downloadFile(this, url1, path)
 			}
 			downloadDialog.show()
 		}
-		webSettings = web.getSettings().apply {
+		webSettings = web.settings.apply {
 			supportZoom()
 			javaScriptEnabled = preference.isJSEnabled
 			setSupportMultipleWindows(true)
@@ -297,8 +298,8 @@ class BrowserActivity : BaseActivity() {
 		(web.parent as FrameLayout).addView(anchorView)
 		val gesture = GestureDetector(this, object : SimpleOnGestureListener() {
 			override fun onLongPress(e: MotionEvent) {
-				anchorView.x = e.x.toInt().toFloat()
-				anchorView.y = e.y.toInt().toFloat()
+				anchorView.x = e.x
+				anchorView.y = e.y
 				val pop = PopupMenu(this@BrowserActivity, anchorView)
 				val result = web.getHitTestResult()
 				val type = result.type
@@ -337,11 +338,12 @@ class BrowserActivity : BaseActivity() {
 				}
 				holder.itemView.setOnLongClickListener { v: View? ->
 					val pop = PopupMenu(this@BrowserActivity, v!!)
-					pop.menuInflater.inflate(R.menu.js_item_menu, pop.menu)                    // 添加 GM 菜单命令
+					pop.menuInflater.inflate(R.menu.js_item_menu, pop.menu)
 					val scriptId = "${item.title}_${item.namespace ?: ""}"
 					gmBridge?.getCommands(scriptId)?.forEach { commandName ->
 						pop.menu.add(0, 0, 0, commandName).setOnMenuItemClickListener {
-							web.evaluateJavascript("if (window.gm_commands && window.gm_commands['${scriptId}_${commandName}']) window.gm_commands['${scriptId}_${commandName}']();", null)
+							web.evaluateJavascript("if (window.gm_commands && window.gm_commands['${scriptId}_${commandName}']) window.gm_commands['${scriptId}_${commandName}']();",
+							                       null)
 							true
 						}
 					}
@@ -354,7 +356,8 @@ class BrowserActivity : BaseActivity() {
 						when (menuItem.itemId) {
 							R.id.edit -> {
 								v.transitionName = "script"
-								startActivity(Intent(this@BrowserActivity, JSActivity::class.java).putExtras(Bundle().apply {
+								startActivity(Intent(this@BrowserActivity,
+								                     JSActivity::class.java).putExtras(Bundle().apply {
 									putLong("id", item.id)
 								}).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 								return@setOnMenuItemClickListener true
@@ -390,21 +393,49 @@ class BrowserActivity : BaseActivity() {
 			adapter = jsAdapter
 		}
 		jsBinding.manage.setOnClickListener { v: View? ->
-			startActivity(Intent(this, JSActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(this, v!!, "miniapp")
-				.toBundle())
+			startActivity(Intent(this, JSActivity::class.java),
+			              ActivityOptionsCompat.makeSceneTransitionAnimation(this, v!!, "miniapp")
+				              .toBundle())
 		}
 		jsBinding.add.setOnClickListener { v: View? ->
-			startActivity(Intent(this, JSActivity::class.java).putExtra("operation", "add"), ActivityOptionsCompat.makeSceneTransitionAnimation(this, v!!, "miniapp")
-				.toBundle())
+			startActivity(Intent(this, JSActivity::class.java).putExtra("operation", "add"),
+			              ActivityOptionsCompat.makeSceneTransitionAnimation(this, v!!, "miniapp")
+				              .toBundle())
 		}        /*
          * 菜单弹窗
          * */
 		val menuDialog = GridMenuDialog(this)
-		menuDialog.set<Int?>(mutableListOf(R.string.back, R.string.forward, R.string.refresh, R.string.exit, R.string.page_up, R.string.page_down, R.string.zoom_in, R.string.zoom_out, R.string.find_text), mutableListOf(R.drawable.left, R.drawable.right, R.drawable.refresh, R.drawable.exit, R.drawable.up, R.drawable.down, R.drawable.zoom_in, R.drawable.zoom_out, R.drawable.search), mutableListOf(GridMenuDialog.onGridMenuClickListener { goBack() }, GridMenuDialog.onGridMenuClickListener { goForward() }, GridMenuDialog.onGridMenuClickListener { refresh() }, GridMenuDialog.onGridMenuClickListener { supportFinishAfterTransition() }, GridMenuDialog.onGridMenuClickListener { pageUp() }, GridMenuDialog.onGridMenuClickListener { pageDown() }, GridMenuDialog.onGridMenuClickListener { web.zoomIn() }, GridMenuDialog.onGridMenuClickListener { web.zoomOut() }, GridMenuDialog.onGridMenuClickListener {
-			binding.searchContainer.visibility = View.VISIBLE
-			web.findAllAsync(binding.keyword.text.toString())
-			menuDialog.dismiss()
-		}))
+		menuDialog.set<Int?>(mutableListOf(R.string.back,
+		                                   R.string.forward,
+		                                   R.string.refresh,
+		                                   R.string.exit,
+		                                   R.string.page_up,
+		                                   R.string.page_down,
+		                                   R.string.zoom_in,
+		                                   R.string.zoom_out,
+		                                   R.string.find_text),
+		                     mutableListOf(R.drawable.left,
+		                                   R.drawable.right,
+		                                   R.drawable.refresh,
+		                                   R.drawable.exit,
+		                                   R.drawable.up,
+		                                   R.drawable.down,
+		                                   R.drawable.zoom_in,
+		                                   R.drawable.zoom_out,
+		                                   R.drawable.search),
+		                     mutableListOf(GridMenuDialog.onGridMenuClickListener { goBack() },
+		                                   GridMenuDialog.onGridMenuClickListener { goForward() },
+		                                   GridMenuDialog.onGridMenuClickListener { refresh() },
+		                                   GridMenuDialog.onGridMenuClickListener { supportFinishAfterTransition() },
+		                                   GridMenuDialog.onGridMenuClickListener { pageUp() },
+		                                   GridMenuDialog.onGridMenuClickListener { pageDown() },
+		                                   GridMenuDialog.onGridMenuClickListener { web.zoomIn() },
+		                                   GridMenuDialog.onGridMenuClickListener { web.zoomOut() },
+		                                   GridMenuDialog.onGridMenuClickListener {
+			                                   binding.searchContainer.visibility = View.VISIBLE
+			                                   web.findAllAsync(binding.keyword.text.toString())
+			                                   menuDialog.dismiss()
+		                                   }))
 		refreshButton = menuDialog.getMenu(2)        /*
          * UA 弹窗
          * */
@@ -423,10 +454,21 @@ class BrowserActivity : BaseActivity() {
 			val ua = withContext(Dispatchers.IO) {
 				repository.getAllUserAgents()
 			}
-			val iconList = listOf(R.drawable.laptop, R.drawable.laptop, R.drawable.laptop, R.drawable.mac, R.drawable.android, R.drawable.tablet, R.drawable.iphone, R.drawable.ipad, R.drawable.ua, R.drawable.laptop, R.drawable.laptop, R.drawable.android)
+			val iconList = listOf(R.drawable.laptop,
+			                      R.drawable.laptop,
+			                      R.drawable.laptop,
+			                      R.drawable.mac,
+			                      R.drawable.android,
+			                      R.drawable.tablet,
+			                      R.drawable.iphone,
+			                      R.drawable.ipad,
+			                      R.drawable.ua,
+			                      R.drawable.laptop,
+			                      R.drawable.laptop,
+			                      R.drawable.android)
 			ua.forEach { entity ->
-				uaDialog.add(entity.title ?: "", iconList.getOrElse(entity.uaId
-																		?: -1) { R.drawable.ua }) {
+				uaDialog.add(entity.title ?: "",
+				             iconList.getOrElse(entity.uaId ?: -1) { R.drawable.ua }) {
 					webSettings.userAgentString = entity.ua
 					preference.ua = entity.uaId ?: -1
 					web.reload()
@@ -437,101 +479,163 @@ class BrowserActivity : BaseActivity() {
 		}        /*
          * 主题弹窗
          * */
-		val themeDialog = GridMenuDialog(this)
-		themeDialog.setColumn(1)
-		themeDialog.setSelectable(true)
-		val themeTitle = mutableListOf(R.string.follow_system, R.string.dark_mode, R.string.light_mode)
-		val themeIcon = mutableListOf<Int?>(R.drawable.setting, R.drawable.dark, R.drawable.light)
-		val themeAction = mutableListOf(GridMenuDialog.onGridMenuClickListener { preference.theme = 0 }, GridMenuDialog.onGridMenuClickListener { preference.theme = 1 }, GridMenuDialog.onGridMenuClickListener { preference.theme = 2 })
-		themeDialog.set(themeTitle, themeIcon, themeAction)
-		themeDialog.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
-		themeDialog.setGravity(Gravity.CENTER_VERTICAL or Gravity.START)
-		themeDialog.selectMenu(preference.theme)/*
+		val themeDialog = GridMenuDialog(this).apply {
+			setColumn(1)
+			setSelectable(true)
+			val themeTitle = mutableListOf(R.string.follow_system,
+			                               R.string.dark_mode,
+			                               R.string.light_mode)
+			val themeIcon = mutableListOf<Int?>(R.drawable.setting,
+			                                    R.drawable.dark,
+			                                    R.drawable.light)
+			val themeAction = mutableListOf(GridMenuDialog.onGridMenuClickListener { preference.theme = 0 },
+			                                GridMenuDialog.onGridMenuClickListener { preference.theme = 1 },
+			                                GridMenuDialog.onGridMenuClickListener { preference.theme = 2 })
+			set(themeTitle, themeIcon, themeAction)
+			setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
+			setGravity(Gravity.CENTER_VERTICAL or Gravity.START)
+			selectMenu(preference.theme)
+		}        /*
          * Cookie 弹窗
          * */
-		val cookieModeDialog = GridMenuDialog(this)
-		cookieModeDialog.setColumn(1)
-		cookieModeDialog.setMultipleSelectable(true)
-		cookieModeDialog.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
-		cookieModeDialog.setGravity(Gravity.CENTER_VERTICAL or Gravity.START)
-		cookieModeDialog.set<Int?>(mutableListOf(R.string.cookie, R.string.third_party_cookie), mutableListOf(R.drawable.cookie, R.drawable.cookie), mutableListOf(GridMenuDialog.onGridMenuClickListener {
-			val accept = !preference.isCookieAccept
-			preference.isCookieAccept = accept
-			cookie.setAcceptCookie(accept)
-		}, GridMenuDialog.onGridMenuClickListener {
-			val accept = !preference.isThirdPartyCookieAccept
-			preference.isThirdPartyCookieAccept = accept
-			cookie.setAcceptThirdPartyCookies(web, accept)
-		}))
-		cookieModeDialog.toggleMenu(0, preference.isCookieAccept)
-		cookieModeDialog.toggleMenu(1, preference.isThirdPartyCookieAccept)/*
+		val cookieModeDialog = GridMenuDialog(this).apply {
+			setColumn(1)
+			setMultipleSelectable(true)
+			setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
+			setGravity(Gravity.CENTER_VERTICAL or Gravity.START)
+			set(mutableListOf(R.string.cookie, R.string.third_party_cookie),
+			    mutableListOf(R.drawable.cookie, R.drawable.cookie),
+			    mutableListOf(GridMenuDialog.onGridMenuClickListener {
+				    val accept = !preference.isCookieAccept
+				    preference.isCookieAccept = accept
+				    cookie.setAcceptCookie(accept)
+			    }, GridMenuDialog.onGridMenuClickListener {
+				    val accept = !preference.isThirdPartyCookieAccept
+				    preference.isThirdPartyCookieAccept = accept
+				    cookie.setAcceptThirdPartyCookies(web, accept)
+			    }))
+			toggleMenu(0, preference.isCookieAccept)
+			toggleMenu(1, preference.isThirdPartyCookieAccept)
+		}            /*
          * 网页弹窗
          * */
-		val browserDialog = GridMenuDialog(this)
-		val webTitle = mutableListOf(R.string.ua, if (preference.isPC) R.string.pc_mode else R.string.mobile_mode, if (preference.isImageBlocked) R.string.image_blocked else R.string.image, R.string.javascript, R.string.save_mobile_data_mode, R.string.theme, R.string.privacy_mode, R.string.cookie)
-		val webIcon = mutableListOf<Int?>(R.drawable.ua, if (preference.isPC) R.drawable.laptop else R.drawable.phone, if (preference.isImageBlocked) R.drawable.image_block else R.drawable.image, R.drawable.js, R.drawable.wifi, R.drawable.light, R.drawable.privacy, R.drawable.cookie)
-		val webAction = mutableListOf(GridMenuDialog.onGridMenuClickListener { uaDialog.show() }, GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
-			val pc = !preference.isPC
-			preference.isPC = pc
-			v!!.setText(if (pc) R.string.pc_mode else R.string.mobile_mode)
-			v.setIconResource(if (pc) R.drawable.laptop else R.drawable.phone)
-			web.reload()
-		}, GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
-			val imageBlocked = !preference.isImageBlocked
-			preference.isImageBlocked = imageBlocked
-			v!!.setText(if (imageBlocked) R.string.image_blocked else R.string.image)
-			v.setIconResource(if (imageBlocked) R.drawable.image_block else R.drawable.image)
-			webSettings.blockNetworkImage = imageBlocked
-		}, GridMenuDialog.onGridMenuClickListener {
-			val jsEnabled = !preference.isJSEnabled
-			preference.isJSEnabled = jsEnabled
-			webSettings.javaScriptEnabled = jsEnabled
-		}, GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
-			val saveMobileDataMode = !preference.isSaveMobileDataMode
-			preference.isSaveMobileDataMode = saveMobileDataMode
-			v!!.setIconResource(if (saveMobileDataMode) R.drawable.no_wifi else R.drawable.wifi)
-			webSettings.cacheMode = if (saveMobileDataMode) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_NO_CACHE
-		}, GridMenuDialog.onGridMenuClickListener {
-			themeDialog.show()            //                    String css = """
-			//                            body { background-color: #121212 !important; color: #e0e0e0 !important; }\
-			//                            a { color: #80cbc4 !important; }\
-			//                            img { filter: brightness(0.8) contrast(1.2); }""";
-			//                    web.evaluateJavascript("var style = document.createElement('style'); style.innerHTML = '" + css + "'; document.head.appendChild(style);", null);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) webSettings.setForceDark(WebSettings.FORCE_DARK_ON)
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) webSettings.setAlgorithmicDarkeningAllowed(true)
-		}, GridMenuDialog.onGridMenuClickListener {
-			val privacyMode = !preference.isPrivacyMode
-			setPrivacyMode(privacyMode)
-			preference.isPrivacyMode = privacyMode
-		}, GridMenuDialog.onGridMenuClickListener { cookieModeDialog.show() })
-		browserDialog.set(webTitle, webIcon, webAction)
-		browserDialog.setTogglable(intArrayOf(3, 4, 6), true)
-		browserDialog.setColumn(4)
-		browserDialog.toggleMenu(3, preference.isJSEnabled)
-		browserDialog.toggleMenu(4, preference.isSaveMobileDataMode)
-		browserDialog.toggleMenu(6, preference.isPrivacyMode)/*
+		val browserDialog = GridMenuDialog(this).apply {
+			val webTitle = mutableListOf(R.string.ua,
+			                             if (preference.isPC) R.string.pc_mode else R.string.mobile_mode,
+			                             if (preference.isImageBlocked) R.string.image_blocked else R.string.image,
+			                             R.string.javascript,
+			                             R.string.save_mobile_data_mode,
+			                             R.string.theme,
+			                             R.string.privacy_mode,
+			                             R.string.cookie)
+			val webIcon = mutableListOf<Int?>(R.drawable.ua,
+			                                  if (preference.isPC) R.drawable.laptop else R.drawable.phone,
+			                                  if (preference.isImageBlocked) R.drawable.image_block else R.drawable.image,
+			                                  R.drawable.js,
+			                                  R.drawable.wifi,
+			                                  R.drawable.light,
+			                                  R.drawable.privacy,
+			                                  R.drawable.cookie)
+			val webAction = mutableListOf(GridMenuDialog.onGridMenuClickListener { uaDialog.show() },
+			                              GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
+				                              val pc = !preference.isPC
+				                              preference.isPC = pc
+				                              v?.setText(if (pc) R.string.pc_mode else R.string.mobile_mode)
+				                              v?.setIconResource(if (pc) R.drawable.laptop else R.drawable.phone)
+				                              web.reload()
+			                              },
+			                              GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
+				                              val imageBlocked = !preference.isImageBlocked
+				                              preference.isImageBlocked = imageBlocked
+				                              v?.setText(if (imageBlocked) R.string.image_blocked else R.string.image)
+				                              v?.setIconResource(if (imageBlocked) R.drawable.image_block else R.drawable.image)
+				                              webSettings.blockNetworkImage = imageBlocked
+			                              },
+			                              GridMenuDialog.onGridMenuClickListener {
+				                              val jsEnabled = !preference.isJSEnabled
+				                              preference.isJSEnabled = jsEnabled
+				                              webSettings.javaScriptEnabled = jsEnabled
+			                              },
+			                              GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
+				                              val saveMobileDataMode = !preference.isSaveMobileDataMode
+				                              preference.isSaveMobileDataMode = saveMobileDataMode
+				                              v?.setIconResource(if (saveMobileDataMode) R.drawable.no_wifi else R.drawable.wifi)
+				                              webSettings.cacheMode = if (saveMobileDataMode) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_NO_CACHE
+			                              },
+			                              GridMenuDialog.onGridMenuClickListener {
+				                              themeDialog.show()            //                    String css = """
+				                              //                            body { background-color: #121212 !important; color: #e0e0e0 !important; }\
+				                              //                            a { color: #80cbc4 !important; }\
+				                              //                            img { filter: brightness(0.8) contrast(1.2); }""";
+				                              //                    web.evaluateJavascript("var style = document.createElement('style'); style.innerHTML = '" + css + "'; document.head.appendChild(style);", null);
+				                              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) webSettings.setForceDark(
+					                              WebSettings.FORCE_DARK_ON)
+				                              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) webSettings.setAlgorithmicDarkeningAllowed(
+					                              true)
+			                              },
+			                              GridMenuDialog.onGridMenuClickListener {
+				                              val privacyMode = !preference.isPrivacyMode
+				                              setPrivacyMode(privacyMode)
+				                              preference.isPrivacyMode = privacyMode
+			                              },
+			                              GridMenuDialog.onGridMenuClickListener { cookieModeDialog.show() })
+			set(webTitle, webIcon, webAction)
+			setTogglable(intArrayOf(3, 4, 6), true)
+			setColumn(4)
+			toggleMenu(3, preference.isJSEnabled)
+			toggleMenu(4, preference.isSaveMobileDataMode)
+			toggleMenu(6, preference.isPrivacyMode)
+		}        /*
          * Cookie 弹窗
          * */
-		val cookieDialog = EditTextDialog(this)
-		cookieDialog.setTitle(R.string.cookie)/*
+		val cookieDialog = EditTextDialog(this).apply {
+			setTitle(R.string.cookie)
+		}/*
          * 网站弹窗
          * */
-		val websiteDialog = GridMenuDialog(this)
-		websiteDialog.set<Int?>(mutableListOf(R.string.copy, R.string.share, R.string.open_in_browser, R.string.cookie, R.string.webpage_source), mutableListOf(R.drawable.copy, R.drawable.share, R.drawable.export, R.drawable.cookie, R.drawable.version), mutableListOf<GridMenuDialog.onGridMenuClickListener?>(GridMenuDialog.onGridMenuClickListener { config.copy("url:", web.url) }, GridMenuDialog.onGridMenuClickListener {
-			startActivity(Intent(Intent.ACTION_SEND).setType("text/plain")
-							  .putExtra(Intent.EXTRA_TEXT, trim(web.url)))
-		}, GridMenuDialog.onGridMenuClickListener { startActivity(Intent(Intent.ACTION_VIEW).setData(trim(web.url).toUri())) }, GridMenuDialog.onGridMenuClickListener {
-			val targetUrl = trim(web.url)
-			cookieDialog.value = cookie.getCookie(targetUrl)
-			cookieDialog.getDialog()
-				.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.save)) { _: DialogInterface?, _: Int -> cookie.setCookie(targetUrl, cookieDialog.getText()) }
-			cookieDialog.getDialog()
-				.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.clear)) { _: DialogInterface?, _: Int -> web.evaluateJavascript(BrowserCookieManager.clearAllCookies, null) }
-			cookieDialog.getDialog()
-				.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.copy)) { _: DialogInterface?, _: Int -> config.copy("Cookie:", cookieDialog.getText()) }
-			cookieDialog.show()
-		}, GridMenuDialog.onGridMenuClickListener { web.loadUrl("view-source:" + web.url) }))
-		websiteDialog.setColumn(4)
+		val websiteDialog = GridMenuDialog(this).apply {
+			set<Int?>(mutableListOf(R.string.copy,
+			                        R.string.share,
+			                        R.string.open_in_browser,
+			                        R.string.cookie,
+			                        R.string.webpage_source),
+			          mutableListOf(R.drawable.copy,
+			                        R.drawable.share,
+			                        R.drawable.export,
+			                        R.drawable.cookie,
+			                        R.drawable.version),
+			          mutableListOf<GridMenuDialog.onGridMenuClickListener?>(GridMenuDialog.onGridMenuClickListener {
+				          config.copy("url:", web.url)
+			          }, GridMenuDialog.onGridMenuClickListener {
+				          startActivity(Intent(Intent.ACTION_SEND).setType("text/plain")
+					                        .putExtra(Intent.EXTRA_TEXT, trim(web.url)))
+			          }, GridMenuDialog.onGridMenuClickListener {
+				          startActivity(Intent(Intent.ACTION_VIEW).setData(trim(web.url).toUri()))
+			          }, GridMenuDialog.onGridMenuClickListener {
+				          val targetUrl = trim(web.url)
+				          cookieDialog.value = cookie.getCookie(targetUrl)
+				          cookieDialog.getDialog()
+					          .setButton(DialogInterface.BUTTON_POSITIVE,
+					                     getString(R.string.save)) { _: DialogInterface?, _: Int ->
+						          cookie.setCookie(targetUrl, cookieDialog.getText())
+					          }
+				          cookieDialog.getDialog()
+					          .setButton(DialogInterface.BUTTON_NEGATIVE,
+					                     getString(R.string.clear)) { _: DialogInterface?, _: Int ->
+						          web.evaluateJavascript(BrowserCookieManager.clearAllCookies, null)
+					          }
+				          cookieDialog.getDialog()
+					          .setButton(DialogInterface.BUTTON_NEUTRAL,
+					                     getString(R.string.copy)) { _: DialogInterface?, _: Int ->
+						          config.copy("Cookie:", cookieDialog.getText())
+					          }
+				          cookieDialog.show()
+			          }, GridMenuDialog.onGridMenuClickListener {
+				          web.loadUrl("view-source:${web.url}")
+			          }))
+			setColumn(4)
+		}
+		
 		binding.js.setOnClickListener {
 			model.loadJs()
 			lifecycleScope.launch {
@@ -539,7 +643,7 @@ class BrowserActivity : BaseActivity() {
 					repository.getAllJavaScript()
 				}
 				jsAdapter.set(ScriptManager.getMatchingScripts(web.url ?: "", jsList)
-								  .toMutableList())
+					              .toMutableList())
 				jsDialog.show()
 			}
 		}
@@ -571,30 +675,34 @@ class BrowserActivity : BaseActivity() {
 		}
 		
 		progress.observe(this) { p: Int? ->
-			refreshButton!!.setIconResource(if (p == 100) R.drawable.refresh else R.drawable.close)
-			refreshButton!!.setText(if (p == 100) R.string.refresh else R.string.stop)
+			refreshButton?.setIconResource(if (p == 100) R.drawable.refresh else R.drawable.close)
+			refreshButton?.setText(if (p == 100) R.string.refresh else R.string.stop)
 		}
 		binding.back.setOnClickListener {
-			if (web.canGoBack()) web.goBack()
+			goBack()
 		}
 		binding.forward.setOnClickListener {
-			if (web.canGoForward()) web.goForward()
+			goForward()
 		}
 		if (intent.hasExtra("data") && intent.getStringExtra("data") != null) {
 			webSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36")
-			web.loadDataWithBaseURL("https://jwxt.sysu.edu.cn", intent.getStringExtra("data")!!, "text/html", "utf-8", "https://jwxt.sysu.edu.cn")
+			web.loadDataWithBaseURL("https://jwxt.sysu.edu.cn",
+			                        intent.getStringExtra("data") ?: "",
+			                        "text/html",
+			                        "utf-8",
+			                        "https://jwxt.sysu.edu.cn")
 		}
 		else web.loadUrl(url)
 		onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 			override fun handleOnBackPressed() {
-				if (progress.getValue() != null && progress.getValue() != 100) web.stopLoading()
+				if (progress.value != 100) web.stopLoading()
 				else if (web.canGoBack()) web.goBack()
 				else supportFinishAfterTransition()
 			}
 		})
 	}
 	
-	fun setPrivacyMode(enabled: Boolean) {        //        webSettings.setSaveFormData(!enabled);
+	fun setPrivacyMode(enabled: Boolean) {
 		webSettings.domStorageEnabled = !enabled
 		webSettings.allowFileAccess = !enabled
 		webSettings.allowContentAccess = !enabled
@@ -618,7 +726,7 @@ class BrowserActivity : BaseActivity() {
 	}
 	
 	fun refresh() {
-		if (progress.getValue() != null && progress.getValue() == 100) web.reload()
+		if (progress.value == 100) web.reload()
 		else web.stopLoading()
 	}
 	
@@ -631,15 +739,15 @@ class BrowserActivity : BaseActivity() {
 	}
 	
 	private fun showLinkMenu(url: String, popup: PopupMenu) {
-		popup.menu.add(R.string.open_in_browser).setOnMenuItemClickListener { _: MenuItem? ->
+		popup.menu.add(R.string.open_in_browser).setOnMenuItemClickListener {
 			web.loadUrl(url)
 			true
 		}
-		popup.menu.add(R.string.copy).setOnMenuItemClickListener { _: MenuItem? ->
+		popup.menu.add(R.string.copy).setOnMenuItemClickListener {
 			config.copy("link", url)
 			true
 		}
-		popup.menu.add(R.string.share).setOnMenuItemClickListener { _: MenuItem? ->
+		popup.menu.add(R.string.share).setOnMenuItemClickListener {
 			shareText(url)
 			true
 		}
@@ -648,36 +756,43 @@ class BrowserActivity : BaseActivity() {
 	
 	private fun showImageMenu(imageUrl: String, popup: PopupMenu) {
 		popup.menu.add(R.string.download)
-			.setOnMenuItemClickListener { _: MenuItem? -> //            System.out.println(imageUrl);
+			.setOnMenuItemClickListener { //            System.out.println(imageUrl);
 				//            System.out.println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + getString(R.string.app_name) + "/" + getFileName(imageUrl));
-				downloadFile(this, imageUrl, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-					.toString() + "/" + getString(R.string.app_name) + "/" + getFileName(imageUrl), object :
-								 DownloadManager.DownloadListener {
-					override fun onDownloadProgress(progress: Long, total: Long) {
-						println("$progress $total")
-					}
-					
-					override fun onDownloadComplete(path: String?) {
-						Snackbar.make(web, "下载完成，保存到：$path", Snackbar.LENGTH_LONG)
-							.setAction(R.string.open) { path?.let { openFile(this@BrowserActivity, it) } }
-							.show()
-					}
-					
-					override fun onDownloadError(code: Int, message: String?) {
-						println("$code $message")
-					}
-				})
+				downloadFile(this,
+				             imageUrl,
+				             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+					             .toString() + "/" + getString(R.string.app_name) + "/" + getFileName(
+					             imageUrl),
+				             object : DownloadManager.DownloadListener {
+					             override fun onDownloadProgress(progress: Long, total: Long) {
+						             println("$progress $total")
+					             }
+					             
+					             override fun onDownloadComplete(path: String?) {
+						             Snackbar.make(web,
+						                           "下载完成，保存到：$path",
+						                           Snackbar.LENGTH_LONG).setAction(R.string.open) {
+							             path?.let {
+								             openFile(this@BrowserActivity, it)
+							             }
+						             }.show()
+					             }
+					             
+					             override fun onDownloadError(code: Int, message: String?) {
+						             println("$code $message")
+					             }
+				             })
 				true
 			}
-		popup.menu.add(R.string.open_in_browser).setOnMenuItemClickListener { _: MenuItem? ->
+		popup.menu.add(R.string.open_in_browser).setOnMenuItemClickListener {
 			web.loadUrl(imageUrl)
 			true
 		}
-		popup.menu.add(R.string.copy).setOnMenuItemClickListener { _: MenuItem? ->
+		popup.menu.add(R.string.copy).setOnMenuItemClickListener {
 			config.copy("image", imageUrl)
 			true
 		}
-		popup.menu.add(R.string.share).setOnMenuItemClickListener { _: MenuItem? ->
+		popup.menu.add(R.string.share).setOnMenuItemClickListener {
 			shareText(imageUrl)
 			true
 		}
@@ -686,37 +801,37 @@ class BrowserActivity : BaseActivity() {
 	
 	private fun shareText(text: String?) {
 		startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
-											   .putExtra(Intent.EXTRA_TEXT, text), getString(R.string.share)))
+			                                   .putExtra(Intent.EXTRA_TEXT, text),
+		                                   getString(R.string.share)))
 	}
 	
 	fun getFileName(url: String?): String {
-		val path: String
+		var path = ""
 		try {
-			path = URLDecoder.decode(URI.create(url).getPath(), "utf-8")
+			path = URLDecoder.decode(URI.create(url).path, "utf-8")
 		} catch (e: UnsupportedEncodingException) {
-			throw RuntimeException(e)
+			e.printStackTrace()
 		}
 		val i = path.lastIndexOf("/")
 		return if (i >= 0) path.substring(i + 1) else path
 	}
 	
-	override fun onResume() {
-		super.onResume()
-	}
-	
 	internal class JSAdapter : RecyclerAdapter<JavaScriptEntity>() {
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 			return object : RecyclerView.ViewHolder(LayoutInflater.from(parent.context)
-														.inflate(R.layout.item_preference, parent, false)) {}
+				                                        .inflate(R.layout.item_preference,
+				                                                 parent,
+				                                                 false)) {}
 		}
 		
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-			val binding = ItemPreferenceBinding.bind(holder.itemView)
 			val item = get(position)
-			binding.itemTitle.text = item.title
-			binding.itemContent.text = item.description
-			binding.itemIcon.setImageResource(R.drawable.js)
-			binding.root.updateAppearance(position, getItemCount())
+			ItemPreferenceBinding.bind(holder.itemView).apply {
+				itemTitle.text = item.title
+				itemContent.text = item.description
+				itemIcon.setImageResource(R.drawable.js)
+				root.updateAppearance(position, itemCount)
+			}
 			super.onBindViewHolder(holder, position)
 		}
 	}

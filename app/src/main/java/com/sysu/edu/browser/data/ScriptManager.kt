@@ -38,6 +38,19 @@ object ScriptManager {
 		}
 	}
 	
+	/**
+	 * 执行匹配的脚本
+	 * @param webView 目标 WebView
+	 * @param scripts 过滤出的匹配脚本列表
+	 * @param runAt 运行阶段列表 (document-start, document-end, document-idle)
+	 */
+	fun executeScripts(webView: WebView, scripts: List<JavaScriptEntity>, runAt: List<String>) {
+		webView.post {
+			scripts.filter { script -> runAt.contains(script.runAt) }.forEach { script ->
+				executeScript(script, webView)
+			}
+		}
+	}
 	fun executeScript(entity: JavaScriptEntity, webView: WebView) {
 		val scriptContent = entity.script ?: return
 		val scriptName = entity.title ?: "Untitled"
@@ -112,13 +125,13 @@ $gmPolyfill
 		val remoteEntity = ScriptParser.parseFromUrl(updateUrl) ?: return null
 		val localVersion = entity.version ?: "0"
 		val remoteVersion = remoteEntity.version ?: "0"
-		
+		println("localVersion: $localVersion, remoteVersion: $remoteVersion")
 		if (compareVersion(remoteVersion, localVersion) > 0) {
-			return remoteEntity.apply {
+			return remoteEntity/*.apply {
 				id = entity.id
 				position = entity.position
 				state = entity.state
-			}
+			}*/
 		}
 		return null
 	}
@@ -131,11 +144,11 @@ $gmPolyfill
 		val parts1 = v1.split(".", "-").filter { it.isNotEmpty() }
 		val parts2 = v2.split(".", "-").filter { it.isNotEmpty() }
 		val length = maxOf(parts1.size, parts2.size)
-		for (i in 0 until length) {
+		(0 until length).forEach { i ->
 			val p1 = parts1.getOrNull(i)
 			val p2 = parts2.getOrNull(i)
 			
-			if (p1 == p2) continue
+			if (p1 == p2) return@forEach
 			if (p1 == null) return -1
 			if (p2 == null) return 1
 			val n1 = p1.toIntOrNull()
