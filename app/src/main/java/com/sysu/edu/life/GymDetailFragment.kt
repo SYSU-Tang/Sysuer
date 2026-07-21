@@ -88,7 +88,7 @@ class GymDetailFragment : BaseFragment() {
 		}
 		val dialog = BottomSheetDialog(requireContext())
 		dialog.setContentView(dialogBinding.root)
-		if (viewModel.position.value == null) viewModel.position.postValue(0)
+		if (viewModel.position.value == null) viewModel.position.value = 0
 		viewModel.position.observe(viewLifecycleOwner) { p: Int? ->
 			if (p != null) info
 		}
@@ -175,7 +175,7 @@ class GymDetailFragment : BaseFragment() {
 					}
 				}
 				4 -> {
-					println("Reserve: $response")                    //response.getJSONObject("data").run {
+					println("Reserve: $response")//response.getJSONObject("data").run {
 					if (response.getInteger("Code") == 200) config.toast(response.getString("data")
 						                                                     ?: getString(R.string.reserve_success))
 					else config.toast(response.getString("Result")) // 订单编号
@@ -266,7 +266,9 @@ class GymDetailFragment : BaseFragment() {
 	 * @return 生成的 Token
 	 */
 	fun genToken(uuid: String?, hash: String?): String {
-		val timestamp = System.currentTimeMillis() / 1000L
+		val timestamp = LocalDateTime.now()
+			.atZone(ZoneId.systemDefault())
+			.toEpochSecond()
 		return md5("SYSU888BOOKING-$uuid$timestamp") + "." + timestamp + "." + hash
 	}
 	

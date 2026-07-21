@@ -3,9 +3,7 @@ package com.sysu.edu.academic
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.core.app.ActivityOptionsCompat
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.alibaba.fastjson2.JSONObject
@@ -14,7 +12,6 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.databinding.ActivityPagerBinding
 import com.sysu.edu.model.JwxtModel
@@ -28,9 +25,12 @@ class AcademyNotification : BaseActivity() {
 		val pager2Adapter = Pager2Adapter(this)
 		val binding = ActivityPagerBinding.inflate(layoutInflater).apply {
 			toolbar.setTitle(R.string.academic_affair_notice)
-			toolbar.setNavigationOnClickListener { _: View? -> supportFinishAfterTransition() }
+			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			pager.adapter = pager2Adapter
-			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.setText(intArrayOf(R.string.academic_affair_notice, R.string.school_affair_notice)[position]) }.attach()
+			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int ->
+				tab?.setText(intArrayOf(R.string.academic_affair_notice,
+				                        R.string.school_affair_notice)[position])
+			}.attach()
 		}
 		setContentView(binding.getRoot())
 		model = JwxtModel(this)
@@ -43,10 +43,11 @@ class AcademyNotification : BaseActivity() {
 					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
 					                    holder: RecyclerView.ViewHolder,
 					                    position: Int) {
-						holder.itemView.setOnClickListener {(adapter as NewsFragment.NewsAdapter).get(position)?.let {
-									dialog.setTitle(it.getString("title"))
-									getContent(it.getString("id"))
-								}
+						holder.itemView.setOnClickListener {
+							(adapter as NewsFragment.NewsAdapter).get(position)?.let {
+								dialog.setTitle(it.getString("title"))
+								getContent(it.getString("id"))
+							}
 						}
 					}
 					
@@ -56,14 +57,14 @@ class AcademyNotification : BaseActivity() {
 				})
 			})
 		}
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
+		model.message.observe(this) { (code, response) ->
 			if (response.getInteger("code") == 200) {
-				when (message.first) {
-					0, 1 -> response.getJSONObject("data")
-						.getJSONArray("list")
-						.forEach { a: Any? -> (pager2Adapter.get(message.first) as NewsFragment).add(a as JSONObject?) }
-					2 -> startActivity(Intent(this, BrowserActivity::class.java).putExtra("data", ("""<!DOCTYPE html><html><head><style>
+				when (code) {
+					0, 1 -> response.getJSONObject("data").getJSONArray("list").forEach { a: Any? ->
+						(pager2Adapter.get(code) as NewsFragment).add(a as JSONObject?)
+					}
+					2 -> startActivity(Intent(this, BrowserActivity::class.java).putExtra("data",
+					                                                                      ("""<!DOCTYPE html><html><head><style>
                                             body{
                                             padding: 24px !important;
                                             }
@@ -82,19 +83,24 @@ class AcademyNotification : BaseActivity() {
                                                     border-collapse: collapse !important;
                                                     border: 2px solid windowtext !important;
                                                     }
-                                            </style></head><body>""".trimIndent() + response.getString("data") + "</body></html>").trim { it <= ' ' }), ActivityOptionsCompat.makeSceneTransitionAnimation(this, binding.toolbar, "miniapp")
-						.toBundle())
+                                            </style></head><body>""".trimIndent() + response.getString(
+						                                                                      "data") + "</body></html>").trim { it <= ' ' }),
+					                   ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+					                                                                      binding.toolbar,
+					                                                                      "miniapp")
+						                   .toBundle())
 				}
 				model.nextAll()
 			}
-		})
+		}
 		schoolNotices
 		notices
 		model.next()
 	}
 	
 	fun getList(column: String?, what: Int) {
-		model.add("jwxt/system-manage/info-delivery?column=$column&deliveryObject=02&status=1&resourceCode=jwgld", what)
+		model.add("jwxt/system-manage/info-delivery?column=$column&deliveryObject=02&status=1&resourceCode=jwgld",
+		          what)
 	}
 	
 	val notices: Unit

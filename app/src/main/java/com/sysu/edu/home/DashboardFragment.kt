@@ -401,12 +401,22 @@ class DashboardFragment : BaseFragment() {
 	}
 	
 	private fun openWechatScan() {
-		Intent().setComponent(ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI"))
-			.putExtra("LauncherUI.From.Scaner.Shortcut", true)
-			.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			.setAction("android.intent.initActionDialog.VIEW")
-			.takeIf { it.resolveActivity(requireContext().packageManager) != null }
-			?.let { startActivity(it) }
+		try {
+			val intent = Intent()
+			intent.component = ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
+			intent.putExtra("LauncherUI.From.Scaner.Shortcut", true)
+			intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+			intent.action = Intent.ACTION_VIEW
+			
+			if (intent.resolveActivity(requireContext().packageManager) != null) {
+				startActivity(intent)
+			} else {
+				model.contextUtil.toast(R.string.activity_not_found)
+			}
+		} catch (e: Exception) {
+			e.printStackTrace()
+			model.contextUtil.toast(R.string.activity_not_found)
+		}
 	}
 	
 	private fun openQrCode() {

@@ -20,7 +20,7 @@ import java.util.ArrayDeque
 
 abstract class BaseModel(context: Context) {
 	val contextUtil: ContextUtil = ContextUtil(context)
-	abstract val authorizationManager: AuthorizationManager //= AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn")
+	abstract val authorizationManager: AuthorizationManager
 	open val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
 		cookieManager = CookieManager(context)
 		setCache(context.cacheDir)
@@ -96,6 +96,7 @@ abstract class BaseModel(context: Context) {
 	}
 	
 	protected open fun handleFailure(request: CommonUtil.Tuple2<Request, Int>, e: IOException) {
+		e.printStackTrace()
 		http.handler.post { contextUtil.toast(R.string.no_net_connected) }
 	}
 	

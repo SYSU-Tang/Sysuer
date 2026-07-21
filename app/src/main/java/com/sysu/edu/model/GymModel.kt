@@ -46,6 +46,11 @@ class GymModel(context: Context) : BaseModel(context) {
 				if (!authorizationManager.isAuthorized(content)) login(request)
 				else if (Pattern.compile("人机识别检测").matcher(content).find()) login(request)
 				else if (!authorizationManager.isAccessible(content)) retry(request)
+				else http.handler.post { contextUtil.toast(content) }
+			}
+			400 -> {
+				println("GymModel: ${response.code} $content")
+				http.handler.post { contextUtil.toast(content) }
 			}
 			401 -> login(request)
 		}
