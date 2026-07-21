@@ -18,7 +18,7 @@ android {
 	defaultConfig {
 		val generation = "1"
 		val major = "4"
-		val minor = "4"
+		val minor = "5"
 		val beta = true
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
@@ -131,7 +131,7 @@ dependencies {
 	implementation(libs.miuix.squircle)
 	implementation(libs.jsoup)
 	implementation(libs.rxjava)
-	ksp(libs.androidx.room3.compiler)	/*configurations.all {
+	ksp(libs.androidx.room3.compiler)    /*configurations.all {
 		exclude("androidx.appcompat", "appcompat")
 	}*/    //api(libs.wechat.sdk.android)
 }
