@@ -246,7 +246,7 @@ class MainActivity : BaseActivity() {
 											                                                                0,
 											                                                                it1,
 											                                                                PendingIntent.FLAG_ONE_SHOT,
-											                                                                true)
+											                                                                false)
 									                                                                })
 								                                              .setProgress(1,
 								                                                           1,
@@ -268,7 +268,9 @@ class MainActivity : BaseActivity() {
 						                                              override fun onDownloadError(
 							                                              code: Int,
 							                                              message: String?) {
-							                                              config.toast(message)
+							                                              http.handler.post {
+								                                              config.toast(message)
+							                                              }
 						                                              }
 					                                              })
 				}
