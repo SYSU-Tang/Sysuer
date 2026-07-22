@@ -17,16 +17,16 @@ android {
 	
 	defaultConfig {
 		val generation = "1"
-		val major = "4"
-		val minor = "5"
-		val beta = true
+		val major = "5"
+		val minor = "0"
+		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
 		applicationId = "com.sysu.edu"
 		minSdk = 26
 		targetSdk = 37
-		versionCode = 1939
+		versionCode = 1940
 		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled = true
