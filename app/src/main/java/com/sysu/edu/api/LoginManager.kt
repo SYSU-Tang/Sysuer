@@ -32,16 +32,16 @@ import javax.crypto.spec.SecretKeySpec
 class LoginManager(private val context: Context) {
 	val authorizationJar: AuthorizationJar = AuthorizationJar(context)
 	private val timestamps = ArrayDeque<Long?>()
-	private val cookieManager: CookieManager = CookieManager(context)
-	private val cookieJar = CookieStore(cookieManager)
-	private val client = OkHttpClient.Builder()
+	val cookieManager: CookieManager = CookieManager(context)
+	val cookieJar: CookieStore = CookieStore(cookieManager)
+	val client: OkHttpClient = OkHttpClient.Builder()
 		.connectTimeout(TIMEOUT, TimeUnit.SECONDS)
 		.readTimeout(TIMEOUT, TimeUnit.SECONDS)
 		.writeTimeout(TIMEOUT, TimeUnit.SECONDS)
 		.followRedirects(true)
 		.cookieJar(cookieJar)
 		.build()
-	private val directClient = OkHttpClient.Builder()
+	val directClient: OkHttpClient = OkHttpClient.Builder()
 		.followRedirects(false)
 		.cookieJar(cookieJar)
 		.build()
@@ -60,10 +60,10 @@ class LoginManager(private val context: Context) {
 			}
 		}
 	
-	private fun doLogin(username: String?, password: String?, publicKeyId: String?): String {
+	private fun doLogin(username: String?, password: String?, publicKeyId: String?, captcha: String? = null): String {
 		try {
 			return client.newCall(Request.Builder()
-				                      .post(("{\"authType\":\"webLocalAuth\",\"dataField\":{\"username\":\"$username\",\"password\":\"$password\",\"publicKeyId\":\"$publicKeyId\"}}").toRequestBody(
+				                      .post(("{\"authType\":\"webLocalAuth\",\"dataField\":{\"username\":\"$username\",\"password\":\"$password\",\"publicKeyId\":\"$publicKeyId\"${if (captcha.isNullOrEmpty()) "" else ",\"vcode\":\"$captcha\""}}}").toRequestBody(
 					                      "application/json".toMediaTypeOrNull()))
 				                      .url("https://cas.sysu.edu.cn/esc-sso/api/v3/auth/doLogin")
 				                      .build()).execute().body.string()
@@ -184,7 +184,7 @@ class LoginManager(private val context: Context) {
 	 * @param password 密码
 	 * @param service  登录服务
 	 */
-	fun login(username: String, password: String, service: String, host: String) {
+	fun login(username: String, password: String, service: String, host: String?, captcha: String?) {
 		val now = System.currentTimeMillis()
 		if (!timestamps.isEmpty()) {
 			val top = timestamps.getLast()
@@ -197,7 +197,7 @@ class LoginManager(private val context: Context) {
 		timestamps.add(now)
 		CompletableFuture.supplyAsync {
 			return@supplyAsync when (host) {
-				TargetHost.SYSU -> loginSysu(username, password, service)
+				TargetHost.SYSU -> loginSysu(username, password, service, captcha)
 				TargetHost.KE_TANG_PIE -> loginForKTP(username, password)
 				else -> false
 			}
@@ -207,11 +207,18 @@ class LoginManager(private val context: Context) {
 		}
 	}
 	
-	fun loginForSysu(username: String, password: String, service: String) {
-		login(username, password, service, TargetHost.SYSU)
+	//fun loginForSysu(username: String, password: String, service: String) {
+	//	login(username, password, service, TargetHost.SYSU)
+	//}
+	
+	fun loginForSysu(username: String, password: String, service: String, captcha: String? = null) {
+		login(username, password, service, TargetHost.SYSU, captcha)
 	}
 	
-	private fun loginSysu(username: String?, password: String, service: String): Boolean {
+	private fun loginSysu(username: String?,
+	                      password: String,
+	                      service: String,
+	                      captcha: String?): Boolean {
 		try {
 			val host = service.toHttpUrl().host
 			val targetBaseUrl = "${service.toHttpUrl().scheme}://$host/"
@@ -254,7 +261,7 @@ class LoginManager(private val context: Context) {
 					.getJSONObject("param")
 				val redirect = redirect(doLogin(username,
 				                                encrypt(publicKey.getString("publicKey"), password),
-				                                publicKey.getString("publicKeyId")))
+				                                publicKey.getString("publicKeyId"), captcha))
 				if (redirect == null) return false
 				request(service, true)
 				when (service) {
@@ -445,12 +452,12 @@ class LoginManager(private val context: Context) {
 		fun onError(code: String?, message: String?)
 	}
 	
-	internal class CookieStore(val cookieManager: CookieManager) : AndroidCookieJar() {
+	class CookieStore(val cookieManager: CookieManager) : AndroidCookieJar() {
 		private val _cookieStore = mutableMapOf<String?, MutableList<Cookie>?>()
 		override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
 			val host = url.host
 			val currentCookies = _cookieStore[host]
-			val responseCookies: MutableList<Cookie> = java.util.ArrayList<Cookie>(cookies)
+			val responseCookies = cookies.toMutableList()
 			val keys: List<String> = responseCookies.map { it.name }
 			if (currentCookies != null && !responseCookies.isEmpty() && !currentCookies.isEmpty()) currentCookies.filter { currentCookie: Cookie ->
 				!responseCookies.contains(currentCookie) && (!currentCookie.value.isEmpty()) && (!keys.contains(

@@ -15,7 +15,7 @@ class PrivacyActivity : BaseActivity() {
 			setContentView(root)
 			toolbar.setNavigationOnClickListener {  supportFinishAfterTransition() }
 			toolbar.menu.add(R.string.edit).setIcon(R.drawable.edit).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener { _: MenuItem? ->
-				contextUtil.changeAccount(null, "sysu.edu.cn", null)
+				contextUtil.changeAccount(null, "sysu.edu.cn", null,null)
 				false
 			}
 		}

@@ -2,6 +2,11 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <data>
+
+        <import type="android.text.InputType" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -12,9 +17,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            app:hint="@{@string/username}"
+            app:hint="@{@string/net_id}"
             app:icon="@{@drawable/account}"
-            app:inputType="@{android.text.InputType.TYPE_CLASS_TEXT}"
+            app:inputType="@{InputType.TYPE_CLASS_TEXT}"
             app:layout_constraintBottom_toTopOf="@id/password"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -23,16 +28,55 @@
         <include
             android:id="@+id/password"
             layout="@layout/dialog_edit_text"
+            app:icon="@{@drawable/password}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/horizontal_margin"
             android:layout_marginVertical="@dimen/vertical_margin"
             app:hint="@{@string/password}"
-            app:icon="@{@drawable/password}"
-            app:inputType="@{android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD}"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:inputType="@{InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD}"
+            app:layout_constraintBottom_toTopOf="@+id/captcha_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/username" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/captcha_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="captcha_text,captcha_image" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/captcha_text"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/vertical_margin"
+            android:layout_marginStart="@dimen/horizontal_margin"
+            android:hint="@string/captcha"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/captcha_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/password"
+            app:startIconDrawable="@drawable/account">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/captcha_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/horizontal_margin"
+            android:contentDescription="@string/captcha"
+            app:layout_constraintBottom_toBottomOf="@+id/captcha_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/captcha_text"
+            app:layout_constraintTop_toTopOf="@+id/captcha_text"
+            app:srcCompat="@drawable/down" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

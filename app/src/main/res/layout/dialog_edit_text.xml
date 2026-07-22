@@ -4,9 +4,11 @@
 
     <data>
 
+        <import type="android.text.InputType" />
+
         <variable
             name="hint"
-            type="String" />
+            type="CharSequence" />
 
         <variable
             name="icon"
@@ -31,6 +33,6 @@
             android:id="@+id/edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="@{inputType == 0 ? android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE : inputType}" />
+            android:inputType="@{inputType == 0 ? (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE) : inputType}" />
     </com.google.android.material.textfield.TextInputLayout>
 </layout>

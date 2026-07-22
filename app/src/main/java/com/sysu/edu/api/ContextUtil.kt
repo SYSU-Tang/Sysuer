@@ -1,6 +1,5 @@
 package com.sysu.edu.api
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -11,7 +10,6 @@ import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Handler
 import android.os.Looper
-import android.text.TextUtils
 import android.util.Pair
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -21,12 +19,25 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.util.component1
+import androidx.core.util.component2
+import androidx.core.view.isVisible
+import androidx.fragment.app.FragmentActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.sysu.edu.R
 import com.sysu.edu.api.LoginManager.LoginListener
 import com.sysu.edu.databinding.DialogAccountBinding
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import okhttp3.Cookie
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Request
+import java.io.IOException
+import java.util.Base64
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import kotlin.math.roundToInt
 
 class ContextUtil(val context: Context) {
@@ -114,15 +125,17 @@ class ContextUtil(val context: Context) {
 	 * @param service    登录 URL,建议使用 TargeterURL 中的默认登录 URL
 	 * @param afterLogin 登录成功后的回调 Runnable 对象
 	 */
-	fun loginForUrl(service: String?, host: String, afterLogin: Runnable?) {
+	fun loginForUrl(service: String?, host: String, captcha: String?, afterLogin: Runnable?) {
 		disposable.add(accountManager.getActiveAccountAsync(host)
-			               .subscribe { activeAccount: Pair<String?, String?> ->
-				               if (!activeAccount.first.isNullOrEmpty() && !activeAccount.second.isNullOrEmpty() && !service.isNullOrEmpty()) performLogin(
+			               .subscribe { (username, password) ->
+				               if (!username.isNullOrEmpty() && !password.isNullOrEmpty() && !service.isNullOrEmpty()) performLogin(
 					               service,
 					               host,
-					               activeAccount,
+					               username,
+					               password,
+					               captcha,
 					               afterLogin)
-				               else changeAccount(service, host, afterLogin)
+				               else changeAccount(service, host, captcha, afterLogin)
 			               })
 	}
 	
@@ -143,7 +156,9 @@ class ContextUtil(val context: Context) {
 	
 	private fun performLogin(service: String?,
 	                         host: String,
-	                         account: Pair<String?, String?>,
+	                         username: String,
+	                         password: String,
+	                         captcha: String?,
 	                         afterLogin: Runnable?) {
 		loginManager.loginListener = object : LoginListener {
 			override fun onSuccess() {
@@ -151,34 +166,96 @@ class ContextUtil(val context: Context) {
 			}
 			
 			override fun onError(code: String?, message: String?) {
-				if ("SSO10002" == code || "30506" == code) changeAccount(service, host, afterLogin)
-				else handler.post { toast(message ?: "") }
+				println("Login error: $code, $message")
+				when (code) {
+					"SSO10002", "30506" -> {
+						changeAccount(service, host, null, afterLogin)
+						handler.post { toast(message) }
+					}
+					"SSO10093" -> {
+						changeAccount(service, host, captcha ?: "", afterLogin)
+					}
+					"SSO10023" -> {
+						changeAccount(service, host, "", afterLogin)
+						handler.post { toast(message) }
+					}
+					else -> handler.post { toast(message ?: "") }
+				}
 			}
 		}
-		loginManager.loginForSysu(account.first ?: "", account.second ?: "", service ?: "")
+		loginManager.loginForSysu(username, password, service ?: "", captcha)
 	}
 	
-	fun login(url: String?, afterLogin: Runnable?) {
-		loginForUrl(url, TargetHost.SYSU, afterLogin)
+	fun login(service: String?, afterLogin: Runnable?) {
+		loginForUrl(service, TargetHost.SYSU, null, afterLogin)
 	}
 	
-	fun changeAccount(url: String?, host: String, afterLogin: Runnable?) {
-		if (context is Activity && !context.isFinishing && !context.isDestroyed) {
-			if (dialog == null) dialog = MaterialAlertDialogBuilder(context).setView(binding.root)
-				.setTitle(R.string.privacy)
-				.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
-					val username = binding.username.edit.getText().toString()
-					val password = binding.password.edit.getText().toString()
-					if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) toast(R.string.username_password_warning)
-					else disposable.add(accountManager.setAccountAsync(host,
-					                                                   username,
-					                                                   password,
-					                                                   true).subscribe {
-						performLogin(url, host, Pair(username, password), afterLogin)
-					})
+	fun changeAccount(service: String?,
+	                  host: String,
+	                  captcha: String? = null,
+	                  afterLogin: Runnable? = null) {
+		if (context is FragmentActivity && !context.isFinishing && !context.isDestroyed) {
+			context.runOnUiThread {
+				if (captcha != null) {
+					binding.captchaGroup.isVisible = true
+					binding.captchaText.editText?.setText(captcha)
+					loginManager.cookieJar.saveFromResponse("https://cas.sysu.edu.cn/esc-sso/api/v1/image/getRandcode".toHttpUrl(),
+					                                        listOf(Cookie.Builder()
+						                                               .name("SESSION")
+						                                               .value(Base64.getEncoder()
+							                                                      .encodeToString(
+								                                                      UUID.randomUUID()
+									                                                      .toString()
+									                                                      .toByteArray()))
+						                                               .domain("cas.sysu.edu.cn")
+						                                               .build()))
+					fun loadCaptcha() {
+						CompletableFuture.supplyAsync {
+							try {
+								loginManager.client.newCall(Request.Builder()
+									                            .url("https://cas.sysu.edu.cn/esc-sso/api/v1/image/getRandcode")
+									                            .build())
+									.execute()
+									.use { response ->
+										if (response.isSuccessful) response.body.bytes()
+										else null
+									}
+							} catch (_: IOException) {
+								null
+							}
+						}.thenAccept { bytes ->
+							if (bytes != null) handler.post {
+								Glide.with(context)
+									.load(bytes)
+									.override(dpToPx(160), dpToPx(40))
+									.diskCacheStrategy(DiskCacheStrategy.NONE)
+									.skipMemoryCache(true)
+									.into(binding.captchaImage)
+							}
+						}
+					}
+					binding.captchaImage.setOnClickListener {
+						loadCaptcha()
+					}
+					loadCaptcha()
 				}
-				.setNegativeButton(R.string.cancel, null)
-				.create()
+				if (dialog == null) dialog = MaterialAlertDialogBuilder(context).setView(binding.root)
+					.setTitle(R.string.privacy)
+					.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
+						val username = binding.username.edit.text.toString()
+						val password = binding.password.edit.text.toString()
+						val captcha = binding.captchaText.editText?.text.toString()
+						if (username.isEmpty() || password.isEmpty()) toast(R.string.username_password_warning)
+						else disposable.add(accountManager.setAccountAsync(host,
+						                                                   username,
+						                                                   password,
+						                                                   true).subscribe {
+							performLogin(service, host, username, password, captcha, afterLogin)
+						})
+					}
+					.setNegativeButton(R.string.cancel, null)
+					.create()
+			}
 			disposable.add(accountManager.getActiveAccountAsync(host)
 				               .subscribe { account: Pair<String?, String?>? ->
 					               context.runOnUiThread {
