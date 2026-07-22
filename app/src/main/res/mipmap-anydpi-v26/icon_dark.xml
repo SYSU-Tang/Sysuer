@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/primary_dark" />
-    <foreground android:drawable="@drawable/logo_foreground_red" />
-    <monochrome android:drawable="@drawable/logo_foreground_red" />
+    <background android:drawable="@color/sysu_color" />
+    <foreground android:drawable="@drawable/logo_foreground_white" />
+    <monochrome android:drawable="@drawable/logo_foreground_white" />
 </adaptive-icon>
