@@ -1,70 +1,71 @@
 package com.sysu.edu.academic
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
+import androidx.lifecycle.ViewModelProvider
 import com.alibaba.fastjson2.JSONObject
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.browser.BrowserActivity
-import com.sysu.edu.databinding.ActivityPagerBinding
-import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.AdapterListener
-import com.sysu.edu.view.Pager2Adapter
+import com.sysu.edu.view.ActivityPager
+import com.sysu.edu.view.MenuItem
 
 class AcademyNotification : BaseActivity() {
-	lateinit var model: JwxtModel
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		val pager2Adapter = Pager2Adapter(this)
-		val binding = ActivityPagerBinding.inflate(layoutInflater).apply {
-			toolbar.setTitle(R.string.academic_affair_notice)
-			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-			pager.adapter = pager2Adapter
-			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int ->
-				tab?.setText(intArrayOf(R.string.academic_affair_notice,
-				                        R.string.school_affair_notice)[position])
-			}.attach()
-		}
-		setContentView(binding.getRoot())
-		model = JwxtModel(this)
-		val dialog = MaterialAlertDialogBuilder(this).setMessage("")
-			.setPositiveButton(R.string.confirm) { _: DialogInterface?, _: Int -> }
-			.create()
-		(0..1).forEach { _ ->
-			pager2Adapter.add(NewsFragment().apply {
-				setListener(object : AdapterListener {
-					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-					                    holder: RecyclerView.ViewHolder,
-					                    position: Int) {
-						holder.itemView.setOnClickListener {
-							(adapter as NewsFragment.NewsAdapter).get(position)?.let {
-								dialog.setTitle(it.getString("title"))
-								getContent(it.getString("id"))
-							}
-						}
-					}
-					
-					override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-					                      binding: ViewBinding?) {
-					}
-				})
-			})
-		}
-		model.message.observe(this) { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					0, 1 -> response.getJSONObject("data").getJSONArray("list").forEach { a: Any? ->
-						(pager2Adapter.get(code) as NewsFragment).add(a as JSONObject?)
-					}
-					2 -> startActivity(Intent(this, BrowserActivity::class.java).putExtra("data",
-					                                                                      ("""<!DOCTYPE html><html><head><style>
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        val viewModel = ViewModelProvider(this)[AcademyNotificationViewModel::class.java]
+        setContent {
+            val academicNotices by viewModel.academicNotices.observeAsState(emptyList())
+            val schoolNotices by viewModel.schoolNotices.observeAsState(emptyList())
+            val noticeContent by viewModel.noticeContent.observeAsState()
+            var sharedElementBounds by remember { mutableStateOf<Rect?>(null) }
+
+            LaunchedEffect(Unit) {
+                viewModel.fetchNotices()
+            }
+
+            LaunchedEffect(noticeContent) {
+                noticeContent?.let { content ->
+                    val intent = Intent(this@AcademyNotification,
+                                        BrowserActivity::class.java).putExtra("data",
+                                                                              ("""<!DOCTYPE html><html><head>
+																			  <style>
                                             body{
                                             padding: 24px !important;
                                             }
@@ -83,41 +84,123 @@ class AcademyNotification : BaseActivity() {
                                                     border-collapse: collapse !important;
                                                     border: 2px solid windowtext !important;
                                                     }
-                                            </style></head><body>""".trimIndent() + response.getString(
-						                                                                      "data") + "</body></html>").trim { it <= ' ' }),
-					                   ActivityOptionsCompat.makeSceneTransitionAnimation(this,
-					                                                                      binding.toolbar,
-					                                                                      "miniapp")
-						                   .toBundle())
-				}
-				model.nextAll()
-			}
-		}
-		schoolNotices
-		notices
-		model.next()
-	}
-	
-	fun getList(column: String?, what: Int) {
-		model.add("jwxt/system-manage/info-delivery?column=$column&deliveryObject=02&status=1&resourceCode=jwgld",
-		          what)
-	}
-	
-	val notices: Unit
-		get() {
-			getList("01", 0)
-		}
-	val schoolNotices: Unit
-		get() {
-			getList("02", 1)
-		}
-	
-	fun getContent(id: String?) {
-		model.addAndNext("jwxt/system-manage/info-delivery/noticeId?id=$id", 2)
-	}
-	
-	override fun onDestroy() {
-		super.onDestroy()
-		model.dispose()
-	}
+                                            </style></head><body>""".trimIndent() + content + "</body></html>").trim())
+                    
+                    val options = sharedElementBounds?.let { bounds ->
+                        val view = android.view.View(this@AcademyNotification).apply {
+                            x = bounds.left
+                            y = bounds.top
+                            layoutParams = android.view.ViewGroup.LayoutParams(
+                                bounds.width.toInt(),
+                                bounds.height.toInt()
+                            )
+                            transitionName = "miniapp"
+                        }
+                        (window.decorView as android.view.ViewGroup).addView(view)
+                        val opt = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            this@AcademyNotification,
+                            view,
+                            "miniapp"
+                        ).toBundle()
+                        // Remove the proxy view after transition starts
+                        window.decorView.postDelayed({ (window.decorView as android.view.ViewGroup).removeView(view) }, 1000)
+                        opt
+                    } ?: ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        this@AcademyNotification,
+                        android.view.View(this@AcademyNotification),
+                        "miniapp"
+                    ).toBundle()
+
+                    startActivity(intent, options)
+                    viewModel.clearNoticeContent()
+                }
+            }
+
+            SharedTransitionLayout {
+                ActivityPager(
+                    title = stringResource(id = R.string.academic_affair_notice),
+                    tabs = mutableListOf(MenuItem(stringResource(id = R.string.academic_affair_notice)),
+                                         MenuItem(stringResource(id = R.string.school_affair_notice))
+                    ),
+                    onNavigationClick = { supportFinishAfterTransition() },
+                    pageContent = { page ->
+                        AnimatedContent(targetState = page, label = "page_transition") { targetPage ->
+                            val notices = if (targetPage == 0) academicNotices else schoolNotices
+                            NewsList(
+                                newsList = notices,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = this@AnimatedContent
+                            ) { notice, bounds ->
+                                sharedElementBounds = bounds
+                                viewModel.fetchContent(notice.getString("id"))
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun NewsList(
+	newsList: List<JSONObject>,
+	sharedTransitionScope: SharedTransitionScope,
+	animatedVisibilityScope: AnimatedVisibilityScope,
+	onItemClick: (JSONObject, Rect) -> Unit,
+            ) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Adaptive(240.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(dimensionResource(R.dimen.content_padding)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_padding)),
+        verticalItemSpacing = dimensionResource(R.dimen.vertical_padding)
+    ) {
+        items(newsList, key = { it.getString("id") }) { item ->
+            NewsItem(
+                item = item,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope
+            ) { bounds ->
+                onItemClick(item, bounds)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun NewsItem(
+	item: JSONObject,
+	sharedTransitionScope: SharedTransitionScope,
+	animatedVisibilityScope: AnimatedVisibilityScope,
+	onClick: (Rect) -> Unit,
+            ) {
+    var currentBounds by remember { mutableStateOf(Rect.Zero) }
+    with(sharedTransitionScope) {
+        Card(
+            onClick = { onClick(currentBounds) },
+            modifier = Modifier
+	            .fillMaxWidth()
+	            .onGloballyPositioned { currentBounds = it.boundsInWindow() }
+	            .sharedBounds(rememberSharedContentState(key = "news_${item.getString("id")}"), animatedVisibilityScope = animatedVisibilityScope)
+        ) {
+            Column(
+                modifier = Modifier
+	                .padding(dimensionResource(R.dimen.content_padding))
+	                .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_padding))
+            ) {
+                Text(
+                    text = item.getString("title") ?: "",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = item.getString("deliveryDate") ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
 }
