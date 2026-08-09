@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Handler
 import android.os.Looper
-import android.util.Pair
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -257,11 +256,11 @@ class ContextUtil(val context: Context) {
 					.create()
 			}
 			disposable.add(accountManager.getActiveAccountAsync(host)
-				               .subscribe { account: Pair<String?, String?>? ->
+				               .subscribe { (username, password) ->
 					               context.runOnUiThread {
-						               if (!account?.first.isNullOrEmpty() && !account.second.isNullOrEmpty()) {
-							               binding.password.edit.setText(account.second)
-							               binding.username.edit.setText(account.first)
+						               if (!username.isNullOrEmpty() && !password.isNullOrEmpty()) {
+							               binding.password.edit.setText(password)
+							               binding.username.edit.setText(username)
 						               }
 						               dialog!!.show()
 					               }

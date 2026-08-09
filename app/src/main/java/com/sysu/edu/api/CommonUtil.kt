@@ -1,8 +1,11 @@
 package com.sysu.edu.api
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
+import com.sysu.edu.view.RowData
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
 /**
@@ -21,7 +24,19 @@ object CommonUtil {
 		for (i in keys) values.add(data.getString(i))
 		return values
 	}
+	@JvmStatic fun extractValue(context: Context, data: JSONObject, names: IntArray, keys: Array<String?>): SnapshotStateList<RowData> {
+		val values = mutableStateListOf<RowData>()
+		names.zip(keys).forEach { (name, key) -> values.add(RowData(context.getString(name),  data.getString(key)))
+		}
+		return values
+	}
 	
+	@JvmStatic fun extractValue(data: JSONObject, names: Array<String>, keys: Array<String>): SnapshotStateList<RowData> {
+		val values = mutableStateListOf<RowData>()
+		names.zip(keys).forEach { (name, key) -> values.add(RowData(name, data.getString(key)))
+		}
+		return values
+	}
 	/**
 	 * 从 JSONObject 中提取指定键的值
 	 * 
@@ -85,7 +100,6 @@ object CommonUtil {
 	@JvmStatic fun getString(context: Context, resource: IntArray): MutableList<String?> {
 		return resource.map { resId: Int -> context.getString(resId) }.toMutableList()
 	}
-	
 	/**
 	 * 从资源 ID 列表中获取对应的字符串数组
 	 * 
@@ -105,9 +119,11 @@ object CommonUtil {
 	 * @param valueKey 要提取的值键名
 	 * @return 包含提取值的 Tuple2 对象，其中第一个元素为名称数组，第二个元素为值数组
 	 */
-	@JvmStatic fun extractValue(array: JSONArray,
-	                            nameKey: String?,
-	                            valueKey: String?): Tuple2<ArrayList<String?>?, ArrayList<String?>?> {
+	@JvmStatic fun extractValue(
+		array: JSONArray,
+		nameKey: String?,
+		valueKey: String?,
+	                           ): Tuple2<ArrayList<String?>?, ArrayList<String?>?> {
 		val names = ArrayList<String?>()
 		val values = ArrayList<String?>()
 		array.forEach { i: Any? ->
