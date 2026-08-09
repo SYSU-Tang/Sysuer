@@ -9,7 +9,9 @@
     <dimen name="content_padding">16dp</dimen>
     <dimen name="card_elevation">1dp</dimen>
     <dimen name="icon_padding">4dp</dimen>
+    <dimen name="icon_text_gap">12dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="zero_space">0dp</dimen>
+    <dimen name="icon_size">24dp</dimen>
 </resources>

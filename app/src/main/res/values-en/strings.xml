@@ -98,7 +98,7 @@
     <string name="major_info">Major Query</string>
     <string name="school_work_warning">Academy Warning</string>
     <string name="course_completion">Course Progress</string>
-    <string name="pay">Payment</string>
+    <string name="pay_fee">Payment</string>
     <string name="between">~</string>
     <string name="student_job">Student Job</string>
     <string name="close">close</string>
@@ -702,4 +702,7 @@
     <string name="install_failed">Install Failed</string>
     <string name="installing">Installing…</string>
     <string name="updating">Updating…</string>
+
+    <string name="cancel_pay">Cancel Pay</string>
+    <string name="pay">Pay</string>
 </resources>

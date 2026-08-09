@@ -12,7 +12,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:name="com.sysu.edu.view.StaggeredFragment"
+        android:name="com.sysu.edu.view.StaggerFragment"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout="@layout/recycler_view_scroll" />
 

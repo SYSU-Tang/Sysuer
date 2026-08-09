@@ -116,7 +116,7 @@
     <string name="major_info">本科专业查询</string>
     <string name="school_work_warning">学业预警</string>
     <string name="course_completion">课程进度</string>
-    <string name="pay">缴费</string>
+    <string name="pay_fee">缴费</string>
     <string name="between">~</string>
     <string name="school_bus">校车</string>
     <string name="project">项目</string>
@@ -701,4 +701,7 @@
     <string name="install_failed">安装失败</string>
     <string name="installing">安装中…</string>
     <string name="updating">更新中…</string>
+
+    <string name="cancel_pay">取消支付</string>
+    <string name="pay">支付</string>
 </resources>
