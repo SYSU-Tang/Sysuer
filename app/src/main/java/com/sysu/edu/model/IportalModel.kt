@@ -14,7 +14,7 @@ import okhttp3.Request
 import okhttp3.Response
 
 class IportalModel(context: Context) : BaseModel(context) {
-	override val authorizationManager: AuthorizationManager = AuthorizationManager("iportal.sysu.edu.cn/", "iportal-443.webvpn.sysu.edu.cn/").also {
+	override val authorizationManager: AuthorizationManager = AuthorizationManager("iportal.sysu.edu.cn", "iportal-443.webvpn.sysu.edu.cn").also {
 		it.setTargetUrl(TargetUrl.NEWS, TargetUrl.NEWS_WEBVPN)
 	}
 	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
@@ -27,7 +27,6 @@ class IportalModel(context: Context) : BaseModel(context) {
 	                            response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
 		val content = response.body.string()
 		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
-		println(content)
 		when (response.code) {
 			302 -> login(request)
 			200 -> response.header("Content-Type")

@@ -46,6 +46,15 @@ abstract class BaseModel(context: Context) {
 		                                                 type).build(), what))
 	}
 	
+	fun set(path: String?, data: String? = null, type: String? = null, what: Int) {
+		queue.add(CommonUtil.Tuple2(http.generateRequest("$path", data, type).build(), what))
+	}
+	
+	fun setAndNext(path: String?, data: String? = null, type: String? = null, what: Int) {
+		queue.add(CommonUtil.Tuple2(http.generateRequest("$path", data, type).build(), what))
+		next()
+	}
+	
 	fun next() {
 		val request: CommonUtil.Tuple2<Request, Int>? = nextRequest
 		request?.let { request(it) }
@@ -84,7 +93,7 @@ abstract class BaseModel(context: Context) {
 	}
 	
 	fun request(request: CommonUtil.Tuple2<Request, Int>) {
-		http.client.newCall(request.first).enqueue(object : Callback {
+		run(request.first, object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
 				handleFailure(request, e)
 			}
