@@ -20,6 +20,7 @@ import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.R
 import com.sysu.edu.academic.AgendaActivity
+import com.sysu.edu.api.DataStoreManager
 import io.reactivex.rxjava3.functions.Function
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.time.LocalDate

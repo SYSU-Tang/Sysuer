@@ -17,6 +17,7 @@ import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.R
 import com.sysu.edu.academic.AgendaActivity
+import com.sysu.edu.api.DataStoreManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.time.LocalDate
 import java.time.LocalDateTime
