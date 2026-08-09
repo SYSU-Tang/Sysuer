@@ -47,7 +47,7 @@ class RainClassMainActivity : BaseActivity() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class) @Composable fun RainClassMainContent() {
-	val pagerState = rememberPagerState(pageCount = { 2 })
+	val pagerState = rememberPagerState(pageCount = { 3 })
 	val scope = rememberCoroutineScope()
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 	val context = LocalContext.current
@@ -59,7 +59,8 @@ class RainClassMainActivity : BaseActivity() {
 		         TopAppBar(title = {
 			         Text(stringResource(when (pagerState.currentPage) {
 				                             0 -> R.string.course
-				                             1 -> R.string.account
+				                             1 -> R.string.exam
+				                             2 -> R.string.account
 				                             else -> R.string.course
 			                             }))
 		         }, scrollBehavior = scrollBehavior, navigationIcon = {
@@ -84,6 +85,14 @@ class RainClassMainActivity : BaseActivity() {
 					         pagerState.animateScrollToPage(1)
 				         }
 			         }, icon = {
+				         Icon(painter = painterResource(id = R.drawable.exam),
+				              contentDescription = stringResource(R.string.exam))
+			         }, label = { Text(stringResource(R.string.exam)) })
+			         NavigationBarItem(selected = pagerState.currentPage == 2, onClick = {
+				         scope.launch {
+					         pagerState.animateScrollToPage(2)
+				         }
+			         }, icon = {
 				         Icon(painter = painterResource(id = R.drawable.account),
 				              contentDescription = stringResource(R.string.account))
 			         }, label = { Text(stringResource(R.string.account)) })
@@ -96,10 +105,15 @@ class RainClassMainActivity : BaseActivity() {
 			when (page) {
 				0 -> CourseScreen(onRequestScrollToAccount = {
 					scope.launch {
-						pagerState.animateScrollToPage(1)
+						pagerState.animateScrollToPage(2)
 					}
 				})
-				1 -> AccountScreen()
+				1 -> ExamScreen(onRequestScrollToAccount = {
+					scope.launch {
+						pagerState.animateScrollToPage(2)
+					}
+				})
+				2 -> AccountScreen()
 			}
 		}
 	}
