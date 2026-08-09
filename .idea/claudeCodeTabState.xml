@@ -6,10 +6,11 @@
         <entry key="0">
           <value>
             <TabSessionState>
-              <option name="provider" value="claude" />
-              <option name="cwd" value="$PROJECT_DIR$" />
-              <option name="model" value="claude-sonnet-4-6" />
-              <option name="permissionMode" value="bypassPermissions" />
+              <option name="provider" value="codex" />
+              <option name="sessionId" value="019fc80b-8769-7721-b267-f0f0814eddef" />
+              <option name="cwd" value="E:\sysuedu-compose" />
+              <option name="model" value="gpt-5.6-sol" />
+              <option name="permissionMode" value="default" />
             </TabSessionState>
           </value>
         </entry>

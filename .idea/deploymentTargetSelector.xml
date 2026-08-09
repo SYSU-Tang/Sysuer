@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-07-22T02:49:59.008328Z">
+        <DropdownSelection timestamp="2026-08-06T09:07:56.275845500Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="Default" identifier="serial=172.26.98.87:5555;connection=d13fb06d" />
+              <DeviceId pluginId="Default" identifier="serial=172.26.13.100:5555;connection=817bfcbd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -41,6 +41,17 @@
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Admin\.android\avd\Medium_Phone_2.avd" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="ActivityPagerPreview">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-08-05T10:58:16.177474600Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="Default" identifier="serial=10.18.43.167:5555;connection=518f3aeb" />
             </handle>
           </Target>
         </DropdownSelection>

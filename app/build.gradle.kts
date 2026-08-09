@@ -57,6 +57,7 @@ android {
 }
 dependencies {
 	implementation(libs.androidx.activity.ktx)
+	implementation(libs.androidx.animation)
 	implementation(libs.androidx.datastore.preferences.rxjava3)
 	implementation(libs.androidx.material3)
 	implementation(libs.androidx.preference.ktx)
@@ -81,6 +82,7 @@ dependencies {
 	implementation(libs.lifecycle.runtime.ktx)
 	implementation(libs.activity.compose)
 	implementation(libs.coil.compose)
+	implementation(libs.richtext.ui.material3)
 	implementation(libs.rxandroid)
 	implementation(libs.tink.android)
 	implementation(libs.ui)
@@ -97,13 +99,25 @@ dependencies {
 	}
 	implementation(libs.firebase.crashlytics)
 	implementation(libs.firebase.analytics)
-	implementation(libs.core)
-	implementation(libs.ext.tables)
-	implementation(libs.ext.strikethrough)
+	implementation(libs.markwon){
+		exclude("com.atlassian.commonmark", "commonmark")
+	}
+	implementation(libs.ext.tables){
+		exclude("com.atlassian.commonmark", "commonmark")
+	}
+	implementation(libs.ext.strikethrough){
+		exclude("com.atlassian.commonmark", "commonmark")
+	}
 	implementation(libs.google.material)
-	implementation(libs.recycler)
-	implementation(libs.recycler.table)
-	implementation(libs.inline.parser)
+	implementation(libs.recycler){
+		exclude("com.atlassian.commonmark", "commonmark")
+	}
+	implementation(libs.recycler.table){
+		exclude("com.atlassian.commonmark", "commonmark")
+	}
+	implementation(libs.inline.parser){
+		exclude("com.atlassian.commonmark", "commonmark")
+	}
 	implementation(libs.androidx.core.remoteviews)
 	implementation(libs.androidx.fragment)
 	implementation(libs.zxing.core)
@@ -116,7 +130,9 @@ dependencies {
 	debugImplementation(libs.ui.test.manifest)
 	implementation(libs.api)
 	implementation(libs.provider)
-	implementation(libs.html)
+	implementation(libs.html){
+		exclude("com.atlassian.commonmark", "commonmark")
+	}
 	implementation(platform(libs.editor.bom))
 	implementation(libs.editor)
 	implementation(libs.language.textmate)
@@ -131,7 +147,12 @@ dependencies {
 	implementation(libs.miuix.squircle)
 	implementation(libs.jsoup)
 	implementation(libs.rxjava)
-	ksp(libs.androidx.room3.compiler)    /*configurations.all {
-		exclude("androidx.appcompat", "appcompat")
-	}*/    //api(libs.wechat.sdk.android)
+	ksp(libs.androidx.room3.compiler)
+	implementation(libs.richtext.commonmark)
+	implementation(libs.commonmark.core)
+	implementation(libs.commonmark.tables)
+	configurations.all {
+		exclude(group = "com.atlassian.commonmark")
+		
+	}
 }
