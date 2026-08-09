@@ -19,8 +19,8 @@ class MarkdownViewActivity : BaseActivity() {
 		val content = intent.getStringExtra("content")
 		val title = intent.getStringExtra("title")
 		val adapter = MarkwonAdapter.builder(R.layout.item_textview, R.id.textView)
-			.include(TableBlock::class.java, TableEntry.create { builder: TableEntry.Builder? ->
-				builder!!.tableLayout(R.layout.item_table_layout, R.id.table_layout)
+			.include(TableBlock::class.java, TableEntry.create { builder: TableEntry.Builder ->
+				builder.tableLayout(R.layout.item_table_layout, R.id.table_layout)
 					.textLayoutIsRoot(R.layout.item_textview)
 			})
 			.build()
@@ -34,7 +34,7 @@ class MarkdownViewActivity : BaseActivity() {
 			recycler.layoutManager = LinearLayoutManager(this@MarkdownViewActivity)
 			recycler.adapter = adapter
 		}
-		setContentView(binding.getRoot())
+		setContentView(binding.root)
 		adapter.setMarkdown(Markwon.builder(this)
 								.usePlugin(TableEntryPlugin.create(this))
 								.usePlugin(SoftBreakAddsNewLinePlugin.create())                                //                .usePlugin(new AbstractMarkwonPlugin() {

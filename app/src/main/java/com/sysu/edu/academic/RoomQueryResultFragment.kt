@@ -11,9 +11,9 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.databinding.FragmentCourseQueryResultBinding
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
-class RoomQueryResultFragment : StaggeredFragment() {
+class RoomQueryResultFragment : StaggerFragment() {
 	lateinit var model: JwxtModel
 	override fun onDestroyView() {
 		super.onDestroyView()
@@ -26,7 +26,9 @@ class RoomQueryResultFragment : StaggeredFragment() {
 		val courseQueryResultBinding = FragmentCourseQueryResultBinding.inflate(inflater, container, false)
 			.apply {
 				root.addView(super.onCreateView(inflater, root, savedInstanceState), -1, -1)
-				fab.setOnClickListener { export(fab, getString(R.string.course)) }
+				fab.setOnClickListener {
+					export(fab, getString(R.string.course))
+				}
 			}
 		model = JwxtModel(requireContext())
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
@@ -40,7 +42,7 @@ class RoomQueryResultFragment : StaggeredFragment() {
 							values.add(it.getString("occupyReason", "") + "-" + it.getString("occupyUseDepartment", ""))
 						}
 					}
-					add("${item.getString("classroomNum")}/${item.getString("date")}", CommonUtil.getString(requireContext(), intArrayOf(R.string.year_term, R.string.date, R.string.week_range, R.string.week, R.string.campus, R.string.office, R.string.teaching_building_number, R.string.classroom_number, R.string.floor, R.string.classroom_id, R.string.seat_count, R.string.first_section, R.string.second_section, R.string.third_section, R.string.fourth_section, R.string.fifth_section, R.string.sixth_section, R.string.seventh_section, R.string.eighth_section, R.string.ninth_section, R.string.tenth_section, R.string.eleventh_section)/* getString(R.string.twelfth_section), getString(R.string.thirteenth_section), getString(R.string.fourteenth_section), getString(R.string.fifteenth_section), getString(R.string.sixteenth_section)*/), values)
+					addSection("${item.getString("classroomNum")}/${item.getString("date")}", CommonUtil.getString(requireContext(), intArrayOf(R.string.year_term, R.string.date, R.string.week_range, R.string.week, R.string.campus, R.string.office, R.string.teaching_building_number, R.string.classroom_number, R.string.floor, R.string.classroom_id, R.string.seat_count, R.string.first_section, R.string.second_section, R.string.third_section, R.string.fourth_section, R.string.fifth_section, R.string.sixth_section, R.string.seventh_section, R.string.eighth_section, R.string.ninth_section, R.string.tenth_section, R.string.eleventh_section)/* getString(R.string.twelfth_section), getString(R.string.thirteenth_section), getString(R.string.fourteenth_section), getString(R.string.fifteenth_section), getString(R.string.sixteenth_section)*/), values)
 				}
 		})
 		rooms

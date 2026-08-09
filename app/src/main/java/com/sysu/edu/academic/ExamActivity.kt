@@ -1,124 +1,156 @@
 package com.sysu.edu.academic
 
 import android.os.Bundle
-import android.view.View
-import android.widget.AdapterView
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
-import com.google.android.material.snackbar.Snackbar
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
-import com.sysu.edu.databinding.ActivityExamBinding
-import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.ActivityPager
+import com.sysu.edu.view.SectionData
+import com.sysu.edu.view.StaggerScreen
 
 class ExamActivity : BaseActivity() {
-	lateinit var model: JwxtModel
-	override fun onDestroy() {
-		super.onDestroy()
-		model.dispose()
-	}
-	
-	override fun onCreate(savedInstanceState: Bundle?) {
+	@OptIn(ExperimentalMaterial3Api::class) override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		val binding = ActivityExamBinding.inflate(layoutInflater).apply { }
-		model = JwxtModel(this)
 		val examViewModel = ViewModelProvider(this).get<ExamViewModel>(ExamViewModel::class.java)
-		examViewModel.termList.observe(this, Observer { terms: ArrayList<String?>? -> binding.terms.setSimpleItems(terms!!.toArray<String?>(arrayOf<String?>())) })
-		examViewModel.term.observe(this, Observer { term: String? ->
-			binding.terms.setText(term, false)
-			getExamWeek(term)
-		})
-		examViewModel.examWeekList.observe(this, Observer { examWeeks: ArrayList<String?>? -> binding.examWeeks.setSimpleItems(examWeeks!!.toArray<String?>(arrayOf<String?>())) })
-		setContentView(binding.getRoot())
-		binding.toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-		binding.fab.setOnClickListener {
-			if (examViewModel.term.value == null || examViewModel.examWeekId.value == null) Snackbar.make(binding.fab, R.string.please_select_exam_week, Snackbar.LENGTH_LONG)
-				.setAnchorView(R.id.fab)
-				.show()
-			else {
-				Snackbar.make(binding.fab, R.string.querying, Snackbar.LENGTH_LONG)
-					.setAnchorView(R.id.fab)
-					.show()
-				getResult(examViewModel.term.value, examViewModel.examWeekId.value)
+		setContent {
+			val terms by examViewModel.termList.observeAsState()
+			val term by examViewModel.term.observeAsState()
+			val examWeeks by examViewModel.examWeekList.observeAsState()
+			val examWeek by examViewModel.examWeek.observeAsState()
+			val result by examViewModel.examResult.observeAsState()
+			LaunchedEffect(Unit) {
+				examViewModel.getTerms()
 			}
-		}
-		binding.terms.setOnItemClickListener { _: AdapterView<*>?, _: View?, _: Int, _: Long ->
-			examViewModel.setTerm(binding.terms.getText().toString())
-		}
-		binding.examWeeks.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-			examViewModel.setExamWeekId(examViewModel.examWeekInfo.value?.get(i)!!
-											.getString("examWeekId"))
-			binding.date.text = "${
-				examViewModel.examWeekInfo.value!![i]?.getString("startDate")
-			}~${
-				examViewModel.examWeekInfo.value!![i]?.getString("endDate")
-			}"
-			examViewModel.setExamWeek(examViewModel.examWeekList.value?.get(i))
-		}
-		examViewModel.examResult.observe(this, Observer { result: String? ->
-			(binding.examFragment.getFragment<Fragment?>() as StaggeredFragment).clear()
-			JSONArray.parse(result).forEach { a: Any? ->
-				(a as JSONObject).getJSONObject("timetable").forEach { (_: String?, detail: Any?) ->
-					detail?.let{
-						val values = ArrayList<String?>()
-						(detail as JSONArray).forEach { o: Any? ->
-							for (i in arrayOf("examSubjectName", "classroomNumber", "durationTime", "examDate", "acadYear")) values.add((o as JSONObject).getString(i))
+			val names = arrayOf("科目", "考场", "时长", "日期", "学年")
+			val keys = arrayOf("examSubjectName", "classroomNumber", "durationTime", "examDate", "acadYear")
+			val sections: SnapshotStateList<SectionData> = remember(result) {
+				val sections: SnapshotStateList<SectionData> = mutableStateListOf()
+				result?.forEach { a: Any? ->
+					(a as JSONObject).getJSONObject("timetable").forEach { (_: String?, detail: Any?) ->
+						detail?.let {
+							(detail as JSONArray).forEach { o: Any? ->
+								sections.add(SectionData((o as JSONObject).getString("examSubjectName"), rows = extractValue(o, names, keys)))
+							}
 						}
-						(binding.examFragment.getFragment<Fragment?>() as StaggeredFragment).add(values[0], mutableListOf("科目", "考场", "时长", "日期", "学年"), values)
+					}
+				}
+				sections
+			}
+			var termExpanded by remember { mutableStateOf(false) }
+			var examExpanded by remember { mutableStateOf(false) }
+			ActivityPager(title = stringResource(R.string.exam), onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false, floatingActionButton = {
+				ExtendedFloatingActionButton(icon = { Icon(Icons.Filled.Search, null) }, text = { Text(stringResource(R.string.query)) }, onClick = {
+					examViewModel.getResult()
+				})
+			}) {
+				Column(modifier = Modifier.fillMaxSize()) {
+					FlowRow(modifier = Modifier
+						.fillMaxWidth()
+						.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
+						ExposedDropdownMenuBox(expanded = termExpanded, onExpandedChange = { termExpanded = it }) {
+							OutlinedTextField(
+								modifier = Modifier
+									.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+									.fillMaxWidth(),
+								value = term ?: "",
+								onValueChange = {},
+								readOnly = true,
+								singleLine = true,
+								label = { Text(stringResource(R.string.term)) },
+								trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = termExpanded) },
+								colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+							                 )
+							ExposedDropdownMenu(expanded = termExpanded, onDismissRequest = { termExpanded = false }) {
+								terms?.forEach { option ->
+									val termOption = (option as JSONObject).getString("acadYearSemester")
+									val isSelected = termOption == term
+									DropdownMenuItem(
+										text = { Text(termOption) },
+										onClick = {
+											examViewModel.term.value = termOption
+											termExpanded = false
+										},
+										contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+										modifier = Modifier.background(
+											if (isSelected) androidx.compose.ui.graphics.Color.LightGray else androidx.compose.ui.graphics.Color.Transparent
+										),
+									                )
+								}
+							}
+						}
+						ExposedDropdownMenuBox(expanded = examExpanded, onExpandedChange = { examExpanded = it }) {
+							OutlinedTextField(
+								modifier = Modifier
+									.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+									.fillMaxWidth(),
+								value = examWeek ?: "",
+								onValueChange = {},
+								readOnly = true,
+								singleLine = true,
+								label = { Text(stringResource(R.string.exam_week)) },
+								trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = examExpanded) },
+								colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+							                 )
+							ExposedDropdownMenu(expanded = examExpanded, onDismissRequest = { examExpanded = false }) {
+								examWeeks?.forEach { option ->
+									val examWeekName = (option as JSONObject).getString("examWeekName")
+									val examWeekId = option.getString("examWeekId")
+									val isSelected = examWeekName == examWeek
+									DropdownMenuItem(
+										text = { Text(examWeekName) },
+										onClick = {
+											examViewModel.examWeek.value = examWeekName
+											examViewModel.examWeekId.value = examWeekId
+											examExpanded = false
+										},
+										contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+										modifier = Modifier.background(
+											if (isSelected) androidx.compose.ui.graphics.Color.LightGray else androidx.compose.ui.graphics.Color.Transparent
+										),
+									                )
+								}
+							}
+						}
+					}
+					Box(modifier = Modifier.weight(1f)) {
+						StaggerScreen(sections)
 					}
 				}
 			}
-		})
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (response.getInteger("code") == 200) {
-				when (message.first) {
-					1 -> {
-						examViewModel.setTermList(extractValue(response.getJSONArray("data"), "acadYearSemester"))
-						term
-					}
-					2 -> examViewModel.setTerm(response.getJSONObject("data")
-												   .getString("acadYearSemester"))
-					3 -> {
-						val examWeeks = ArrayList<String?>()
-						val examWeekInfo = ArrayList<JSONObject?>()
-						response.getJSONArray("data").forEach { item: Any? ->
-							examWeeks.add((item as JSONObject).getString("examWeekName"))
-							examWeekInfo.add(item)
-						}
-						examViewModel.setExamWeekInfo(examWeekInfo)
-						examViewModel.setExamWeekList(examWeeks) //binding.examWeek.setText(response.getJSONObject("data").getString("examWeekName"),false);
-					}
-					4 -> examViewModel.setExamResult(response.getJSONArray("data").toJSONString())
-				}
-			}
-		})
-		terms
-	}
-	
-	val terms: Unit
-		get() {
-			model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
 		}
-	val term: Unit
-		get() {
-			model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
-		}
-	
-	fun getExamWeek(term: String?) {
-		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 3)
-	}
-	
-	fun getResult(term: String?, examWeek: String?) {
-		val data = JSONObject()
-		if (term != null) data["acadYear"] = term
-		if (examWeek != null) data["examWeekName"] = examWeek
-		model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo", "$data", 4)
 	}
 }

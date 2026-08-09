@@ -42,24 +42,23 @@ class CalendarActivity : BaseActivity() {
 		return saveImage(url, Environment.DIRECTORY_PICTURES + "/SYSUER", fileName, true)
 	}
 	
-	fun saveImage(url: String?,
-	              parentDir: String?,
-	              fileName: String,
-	              defaultDir: Boolean): Boolean {
+	fun saveImage(
+		url: String?,
+		parentDir: String?,
+		fileName: String,
+		defaultDir: Boolean,
+	             ): Boolean {
 		var fileInputStream: FileInputStream? = null
-		try {            // 1. 同步获取 Glide 下载好的缓存文件（必须在子线程调用，否则崩溃）
-			val resourceFile = Glide.with(this)
-				.asFile()
-				.load(url)
-				.submit()
-				.get() // 阻塞直到下载完成			// 2. 创建目标 Uri
+		try {
+			val resourceFile = Glide.with(this).asFile().load(url).submit().get()
 			val fileUri = if (defaultDir) {
 				contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, ContentValues().apply {
 					put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
 					put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
 					put(MediaStore.MediaColumns.RELATIVE_PATH, parentDir)
 				})
-			} else {
+			}
+			else {
 				Uri.fromFile(File(parentDir, fileName))
 			} ?: return false            // 3. 写入数据
 			contentResolver.openOutputStream(fileUri).use { outStream ->
@@ -67,7 +66,8 @@ class CalendarActivity : BaseActivity() {
 				fileInputStream = FileInputStream(resourceFile)
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 					FileUtils.copy(fileInputStream, outStream)
-				} else {
+				}
+				else {
 					val buffer = ByteArray(1024 * 4)
 					var bytesRead: Int
 					while (fileInputStream.read(buffer).also { bytesRead = it } != -1) {
@@ -93,10 +93,8 @@ class CalendarActivity : BaseActivity() {
 		setContentView(binding.getRoot())
 		binding.toolbar.setNavigationOnClickListener { _: View? -> finishAfterTransition() }
 		binding.scroll.setOnScrollChangeListener { _: NestedScrollView?, _: Int, scrollY: Int, _: Int, oldScrollY: Int ->
-			if (top > scrollY && binding.tabs.selectedTabPosition == 1 && scrollY < oldScrollY) binding.tabs.getTabAt(0)
-				?.select()
-			else if (top <= scrollY && binding.tabs.selectedTabPosition == 0 && scrollY > oldScrollY) binding.tabs.getTabAt(1)
-				?.select()
+			if (top > scrollY && binding.tabs.selectedTabPosition == 1 && scrollY < oldScrollY) binding.tabs.getTabAt(0)?.select()
+			else if (top <= scrollY && binding.tabs.selectedTabPosition == 0 && scrollY > oldScrollY) binding.tabs.getTabAt(1)?.select()
 		}
 		binding.tabs.addOnTabSelectedListener(object : OnTabSelectedListener {
 			override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -119,87 +117,70 @@ class CalendarActivity : BaseActivity() {
 		})
 		config.contextUtil.disposable.add(Observable.fromCallable<Any>(Callable {
 			Jsoup.connect("https://jwb.sysu.edu.cn/school-calendar").timeout(3000).get()
-		})
-											  .retry(3)
-											  .subscribeOn(Schedulers.io())
-											  .observeOn(AndroidSchedulers.mainThread())
-											  .subscribe({ a: Any ->
-															 (a as Document).selectFirst(".xiaoli")
-																 ?.children()
-																 ?.forEach { element: Element? ->
-																	 if (element!!.tagName() == "h2") binding.tabs.addTab(binding.tabs.newTab()
-																															  .setText(element.text()))
-																	 else  // if (element.className().equals("row"))
-																		 element.select(".xiaoliitem")
-																			 .forEach { li: Element? ->
-																				 val image = ImageView(this@CalendarActivity)
-																				 val url = "https://jwb.sysu.edu.cn" + li!!.selectFirst("a")
-																					 ?.attr("href") //																				 println(url)
-																				 Glide.with(this@CalendarActivity)
-																					 .load(url)
-																					 .skipMemoryCache(false)
-																					 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-																					 .into(image)
-																				 image.setOnClickListener {
-																					 startActivity(Intent(this@CalendarActivity, BrowserActivity::class.java).setData(url.toUri()), ActivityOptionsCompat.makeSceneTransitionAnimation(this@CalendarActivity, image, "miniapp")
-																						 .toBundle())
-																				 }
-																				 image.setOnLongClickListener { _: View? ->
-																					 val pop = PopupMenu(this@CalendarActivity, image, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
-																					 val menu = pop.menu
-																					 menu.add(R.string.save)
-																						 .setOnMenuItemClickListener { _: MenuItem? ->
-																							 config.contextUtil.disposable.add(Observable.fromCallable {
-																								 saveImage(url, System.currentTimeMillis()
-																									 .toString() + ".jpg")
-																							 }
-																																   .subscribeOn(Schedulers.io())
-																																   .observeOn(AndroidSchedulers.mainThread())
-																																   .subscribe({ success ->
-																																				  config.toast(if (success) R.string.save_successful else R.string.save_fail)
-																																			  }, {
-																																				  config.toast(R.string.save_fail)
-																																			  }))
-																							 config.toast(if (saveImage(url, System.currentTimeMillis()
-																									 .toString() + ".jpg")) R.string.save_successful else R.string.save_fail)
-																							 true
-																						 }
-																					 menu.add(R.string.copy_link)
-																						 .setOnMenuItemClickListener { _: MenuItem? ->
-																							 config.copy("link", url)
-																							 config.toast(R.string.copy_successfully)
-																							 true
-																						 }
-																					 menu.add(R.string.share)
-																						 .setOnMenuItemClickListener { _: MenuItem? ->
-																							 val fileName = System.currentTimeMillis()
-																								 .toString() + ".jpg"
-																							 config.contextUtil.disposable.add(Observable.fromCallable {
-																								 saveImage(url, externalCacheDir?.path, fileName, false)
-																							 }
-																																   .subscribeOn(Schedulers.io())
-																																   .observeOn(AndroidSchedulers.mainThread())
-																																   .subscribe({ success ->
-																																				  if (success && externalCacheDir != null) {
-																																					  openFile(this@CalendarActivity, externalCacheDir!!.path + "/" + fileName)
-																																				  } else {
-																																					  config.toast(R.string.save_fail) // 或者自定义提示
-																																				  }
-																																			  }, {
-																																				  config.toast(R.string.save_fail)
-																																			  }))
-																							 openFile(this@CalendarActivity, externalCacheDir!!.path + "/" + fileName)
-																							 true
-																						 }
-																					 pop.show()
-																					 true
-																				 }
-																				 binding.content.addView(image)
-																			 }
-																 }
-															 binding.progressBar.visibility = View.GONE
-														 }, {
-															 config.toast(R.string.no_net_connected)
-														 }))
+		}).retry(3).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ a: Any ->
+			                                                                                             (a as Document).selectFirst(".xiaoli")?.children()?.forEach { element: Element? ->
+					                                                                                             if (element!!.tagName() == "h2") binding.tabs.addTab(binding.tabs.newTab().setText(element.text()))
+					                                                                                             else  // if (element.className().equals("row"))
+						                                                                                             element.select(".xiaoliitem").forEach { li: Element? ->
+								                                                                                             val image = ImageView(this@CalendarActivity)
+								                                                                                             val url = "https://jwb.sysu.edu.cn" + li!!.selectFirst("a")?.attr("href") //																				 println(url)
+								                                                                                             Glide.with(this@CalendarActivity).load(url).skipMemoryCache(false).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(image)
+								                                                                                             image.setOnClickListener {
+									                                                                                             startActivity(Intent(this@CalendarActivity, BrowserActivity::class.java).setData(url.toUri()),
+									                                                                                                           ActivityOptionsCompat.makeSceneTransitionAnimation(this@CalendarActivity, image, "miniapp").toBundle())
+								                                                                                             }
+								                                                                                             image.setOnLongClickListener { _: View? ->
+									                                                                                             val pop = PopupMenu(this@CalendarActivity,
+									                                                                                                                 image,
+									                                                                                                                 0,
+									                                                                                                                 0,
+									                                                                                                                 com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
+									                                                                                             val menu = pop.menu
+									                                                                                             menu.add(R.string.save).setOnMenuItemClickListener { _: MenuItem? ->
+											                                                                                             config.contextUtil.disposable.add(Observable.fromCallable {
+												                                                                                             saveImage(url, System.currentTimeMillis().toString() + ".jpg")
+											                                                                                             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ success ->
+												                                                                                                                                                                                config.toast(if (success) R.string.save_successful else R.string.save_fail)
+											                                                                                                                                                                                }, {
+												                                                                                                                                                                                config.toast(R.string.save_fail)
+											                                                                                                                                                                                }))
+											                                                                                             config.toast(if (saveImage(url,
+											                                                                                                                        System.currentTimeMillis().toString() + ".jpg")) R.string.save_successful
+											                                                                                                          else R.string.save_fail)
+											                                                                                             true
+										                                                                                             }
+									                                                                                             menu.add(R.string.copy_link).setOnMenuItemClickListener { _: MenuItem? ->
+											                                                                                             config.copy("link", url)
+											                                                                                             config.toast(R.string.copy_successfully)
+											                                                                                             true
+										                                                                                             }
+									                                                                                             menu.add(R.string.share).setOnMenuItemClickListener { _: MenuItem? ->
+											                                                                                             val fileName = System.currentTimeMillis().toString() + ".jpg"
+											                                                                                             config.contextUtil.disposable.add(Observable.fromCallable {
+												                                                                                             saveImage(url, externalCacheDir?.path, fileName, false)
+											                                                                                             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ success ->
+												                                                                                                                                                                                if (success && externalCacheDir != null) {
+													                                                                                                                                                                                openFile(this@CalendarActivity,
+													                                                                                                                                                                                         externalCacheDir!!.path + "/" + fileName)
+												                                                                                                                                                                                }
+												                                                                                                                                                                                else {
+													                                                                                                                                                                                config.toast(R.string.save_fail) // 或者自定义提示
+												                                                                                                                                                                                }
+											                                                                                                                                                                                }, {
+												                                                                                                                                                                                config.toast(R.string.save_fail)
+											                                                                                                                                                                                }))
+											                                                                                             openFile(this@CalendarActivity, externalCacheDir!!.path + "/" + fileName)
+											                                                                                             true
+										                                                                                             }
+									                                                                                             pop.show()
+									                                                                                             true
+								                                                                                             }
+								                                                                                             binding.content.addView(image)
+							                                                                                             }
+				                                                                                             }
+			                                                                                             binding.progressBar.visibility = View.GONE
+		                                                                                             }, {
+			                                                                                             config.toast(R.string.no_net_connected)
+		                                                                                             }))
 	}
 }

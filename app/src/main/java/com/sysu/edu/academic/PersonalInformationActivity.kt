@@ -13,7 +13,7 @@ import com.sysu.edu.api.CommonUtil.toStringOrDefault
 import com.sysu.edu.databinding.ActivityPagerBinding
 import com.sysu.edu.model.XgxtModel
 import com.sysu.edu.view.Pager2Adapter
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
 class PersonalInformationActivity : BaseActivity() {
 	lateinit var model: XgxtModel
@@ -36,7 +36,8 @@ class PersonalInformationActivity : BaseActivity() {
 				.setOnMenuItemClickListener {
 					if (pager2Adapter.itemCount > 0) {
 						val currentItem = pager.currentItem
-						(pager2Adapter.get(currentItem) as StaggeredFragment).export(toolbar, tabs[currentItem])
+						val fragment = (pager2Adapter.get(currentItem) as StaggerFragment)
+						fragment.export(toolbar, tabs[currentItem] ?: "")
 					}
 					true
 				}
@@ -65,7 +66,7 @@ class PersonalInformationActivity : BaseActivity() {
 					(item as JSONObject).getJSONArray("fields").forEach { field: Any? ->
 						dict[(field as JSONObject).getString("zdmc")] = field.getString("zdzwm")
 					}
-					val list = StaggeredFragment()
+					val list = StaggerFragment()
 					tabs.add(item.getString("zdflmc"))
 					pager2Adapter.add(list)
 					if (item.getJSONObject("data").isEmpty()) {
@@ -78,7 +79,7 @@ class PersonalInformationActivity : BaseActivity() {
 								if ("gx" == k || "gxrzzmm" == k || "qdxl" == k) values.add((v as JSONObject).getString("label"))
 								else values.add(toStringOrDefault<Any?>(v))
 							}
-							list.add("${count++}", keys, values)
+							list.addSection("${count++}", keys, values)
 						}
 					} else {
 						val keys = ArrayList<String?>()
@@ -87,7 +88,7 @@ class PersonalInformationActivity : BaseActivity() {
 							keys.add(dict.getOrDefault(k, k))
 							values.add(toStringOrDefault<Any?>(v))
 						}
-						list.add(item.getString("zdflmc"), keys, values)
+						list.addSection(item.getString("zdflmc"), keys, values)
 					}
 				}
 			}

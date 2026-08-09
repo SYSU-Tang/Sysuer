@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alibaba.fastjson2.JSONObject
@@ -18,7 +17,7 @@ import com.sysu.edu.databinding.ActivityGradeBinding
 import com.sysu.edu.databinding.ItemScoreBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.RecyclerAdapter
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 import io.noties.markwon.Markwon
 import java.util.function.Consumer
 
@@ -117,7 +116,7 @@ class GradeActivity : BaseActivity() {
 			if (gradeManager.isFetching) model.contextUtil.toast(R.string.grade_fetching)
 			else {
 				val level = adp.get(position).getString("scoFinalScore")
-				if (level.isNotEmpty()) {
+				if (!level.isNullOrEmpty()) {
 					val minGrade = gradeMap.getOrDefault(level[0], 0)
 						.minus((if (level.length == 2) 0 else 6))
 					gradeManager.getGrade(adp.get(position).getString("scoCourseNumber"),
@@ -126,9 +125,9 @@ class GradeActivity : BaseActivity() {
 				}
 			}
 		}
-		val header = binding.header.getFragment<StaggeredFragment>()
+		val header = binding.header.getFragment<StaggerFragment>()
 		header.setNested(false)
-		trainType.observe(this, Observer { score })
+		trainType.observe(this) { score }
 		year.observe(this) { s: String? ->
 			if (s != binding.year.text) {
 				binding.year.text = s
@@ -204,26 +203,26 @@ class GradeActivity : BaseActivity() {
 						}
 						val total = pull.getString("stuTotal")
 						header.clear()
-						header.add(getString(R.string.total_year),
-						           CommonUtil.getString(this,
+						header.addSection(getString(R.string.total_year),
+						                  CommonUtil.getString(this,
 						                                intArrayOf(R.string.total_rank,
 						                                           R.string.total_credit,
 						                                           R.string.total_point)),
-						           mutableListOf("$totalRank/$total", totalCredit, totalPoint))
-						header.add(terms[term.value ?: 0],
-						           CommonUtil.getString(this,
+						                  mutableListOf("$totalRank/$total", totalCredit, totalPoint))
+						header.addSection(terms[term.value ?: 0],
+						                  CommonUtil.getString(this,
 						                                intArrayOf(R.string.current_rank,
 						                                           R.string.current_point)),
-						           mutableListOf("$rank/$total", point))
-						header.add(getString(R.string.credit),
-						           CommonUtil.getString(this,
+						                  mutableListOf("$rank/$total", point))
+						header.addSection(getString(R.string.credit),
+						                  CommonUtil.getString(this,
 						                                intArrayOf(R.string.term_credit,
 						                                           R.string.public_compulsory_credit,
 						                                           R.string.public_select_credit,
 						                                           R.string.major_compulsory_credit,
 						                                           R.string.major_select_credit,
 						                                           R.string.honor_credit)),
-						           extractValue(pull.getJSONObject("stuCredit"),
+						                  extractValue(pull.getJSONObject("stuCredit"),
 						                        arrayOf("allGetCredit",
 						                                "publicGetCredit",
 						                                "publicSelectGetCredit",
@@ -292,10 +291,10 @@ class GradeActivity : BaseActivity() {
 			binding.root.setOnClickListener {
 				if (info.getString("originalScore") == null) action?.accept(position)
 			}
-			val grade = MutableLiveData("")
+			var grade = ""
 			if (info.containsKey("scoreList")) info.getJSONArray("scoreList")
 				.forEach { a: Any? ->
-					grade.value = String.format("%s（%s）%s×%s%%+",
+					grade = String.format("%s（%s）%s×%s%%+",
 					                            grade,
 					                            (a as JSONObject).getString("FXMC"),
 					                            a.getString("FXCJ"),
@@ -322,7 +321,7 @@ class GradeActivity : BaseActivity() {
 				             }**\n- 成绩：**${
 					             if (info.getString("originalScore") == null) binding.root.context.getString(
 						             R.string.click_for_grade)
-					             else grade.value + "=" + info.getString("originalScore")
+					             else grade + "=" + info.getString("originalScore")
 				             }**")
 		}
 	}

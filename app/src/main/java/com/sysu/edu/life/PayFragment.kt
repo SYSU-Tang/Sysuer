@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.view.size
-import androidx.recyclerview.widget.RecyclerView
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.datepicker.CalendarConstraints
@@ -23,10 +25,11 @@ import com.sysu.edu.databinding.FragmentPayRecordBinding
 import com.sysu.edu.databinding.FragmentPaySituationBinding
 import com.sysu.edu.databinding.ItemFilterChipBinding
 import com.sysu.edu.model.PayModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.MenuItem
+import com.sysu.edu.view.StaggerFragment
 import java.time.LocalDate
 
-class PayFragment : StaggeredFragment() {
+class PayFragment : StaggerFragment() {
 	
 	val model: PayModel by lazy { PayModel(requireContext()) }
 	val calendarManager: CalendarManager = CalendarManager()
@@ -43,12 +46,9 @@ class PayFragment : StaggeredFragment() {
 					root.addView(view)
 					pay.setOnClickListener(config.browse("https://pay.sysu.edu.cn/#/confirm/pay-ticket?type=1"))
 				}
-				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-						needBinding.chips.elevation = (if (recyclerView.canScrollVertically(-1)) 6 else 0).toFloat()
-						super.onScrolled(recyclerView, dx, dy)
-					}
-				})
+				isScrolledToTop.observe(viewLifecycleOwner) { isTop ->
+					needBinding.chips.elevation = (if (isTop) 0 else 6).toFloat()
+				}
 				view = needBinding.root
 			}
 			2 -> {
@@ -71,14 +71,9 @@ class PayFragment : StaggeredFragment() {
 						}
 						view = root
 					}
-				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-						fragmentPaySituationBinding.p.elevation = (if (recyclerView.canScrollVertically(
-								-1)) 6
-						else 0).toFloat()
-						super.onScrolled(recyclerView, dx, dy)
-					}
-				})
+				isScrolledToTop.observe(viewLifecycleOwner) { isTop ->
+					fragmentPaySituationBinding.p.elevation = (if (isTop) 0 else 6).toFloat()
+				}
 			}
 			3 -> {
 				val dm = DateManager()
@@ -123,13 +118,9 @@ class PayFragment : StaggeredFragment() {
 						})
 					toDatePicker.show(requireActivity().supportFragmentManager, null)
 				}
-				binding?.recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-					override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-						fragmentPayRecordBinding.row.elevation = (if (recyclerView.canScrollVertically(
-								-1)) config.dpToPx(2)
-						else 0).toFloat()
-					}
-				})
+				isScrolledToTop.observe(viewLifecycleOwner) { isTop ->
+					fragmentPayRecordBinding.row.elevation = (if (isTop) 0 else config.dpToPx(2)).toFloat()
+				}
 			}
 		}
 		model.message.observe(viewLifecycleOwner) { (code, response) ->
@@ -139,23 +130,23 @@ class PayFragment : StaggeredFragment() {
 					val data = response.getJSONArray("data")
 					when (code) {
 						0, 1 -> data.forEach {
-							add((it as JSONObject).getString("itemName"),
-							    mutableListOf("学号", "交费区间", "当前应交", "本次交费"),
-							    extractValue(it,
+							addSection((it as JSONObject).getString("itemName"),
+							           mutableListOf("学号", "交费区间", "当前应交", "本次交费"),
+							           extractValue(it,
 							                 arrayOf("personCode",
 							                         "intervalName",
 							                         "nowMoney",
 							                         "needMoney")))
 						}
 						2 -> data.forEach { a: Any? ->
-							add((a as JSONObject).getString("itemName"),
-							    mutableListOf("学号",
+							addSection((a as JSONObject).getString("itemName"),
+							           mutableListOf("学号",
 							                  "收费项目",
 							                  "交费区间",
 							                  "应交",
 							                  "缓交",
 							                  "实交"),
-							    extractValue(a,
+							           extractValue(a,
 							                 arrayOf("personCode",
 							                         "itemName",
 							                         "intervalName",
@@ -164,13 +155,13 @@ class PayFragment : StaggeredFragment() {
 							                         "realPay")))
 						}
 						3 -> data.forEach { a: Any? ->
-							add("${++order}",
-							    mutableListOf("订单编号",
+							addSection("${++order}",
+							           mutableListOf("订单编号",
 							                  "金额",
 							                  "支付方式",
 							                  "支付时间",
 							                  "支付编号"),
-							    extractValue(a as JSONObject,
+							           extractValue(a as JSONObject,
 							                 arrayOf("orderNo",
 							                         "money",
 							                         "payTypeName",
@@ -178,13 +169,13 @@ class PayFragment : StaggeredFragment() {
 							                         "outPayNo")))
 						}
 						4 -> data.forEach { a: Any? ->
-							add("${++order}",
-							    mutableListOf("收费项目",
+							addSection("${++order}",
+							           mutableListOf("收费项目",
 							                  "收费区间",
 							                  "退费金额",
 							                  "退费日期",
 							                  "退费状态"),
-							    extractValue(a as JSONObject,
+							           extractValue(a as JSONObject,
 							                 arrayOf("itemName",
 							                         "intervalName",
 							                         "refundMoney",
@@ -200,16 +191,15 @@ class PayFragment : StaggeredFragment() {
 		return view
 	}
 	
-	override fun add(title: String?,
-	                 icon: Int?,
-	                 keys: MutableList<String?>,
-	                 values: MutableList<String?>) {
-		super.add(title, icon, keys, values)
+	override fun addSection(title: String?, icon: Int?, keys: MutableList<String?>, values: MutableList<String?>, footerMenus: SnapshotStateList<MenuItem>, footer: SnapshotStateList<@Composable (RowScope.() -> Unit?)>) {
+		super.addSection(title, icon, keys, values, footerMenus, footer)
 		if (position == 0) {
-			val chips = requireView().findViewById<ChipGroup>(R.id.chips)
-			val chip = ItemFilterChipBinding.inflate(getLayoutInflater(), chips, false).root
-			chip.text = title
-			chips.addView(chip, chips.size - 1)
+			val chips = view?.findViewById<ChipGroup>(R.id.chips)
+			if (chips != null) {
+				val chip = ItemFilterChipBinding.inflate(layoutInflater, chips, false).root
+				chip.text = title
+				chips.addView(chip, chips.size - 1)
+			}
 		}
 	}
 	

@@ -12,7 +12,7 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.databinding.FragmentTrainingResultBinding
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
 class TrainingResultFragment : Fragment() {
 	var page: Int = 0
@@ -28,12 +28,14 @@ class TrainingResultFragment : Fragment() {
 	                          savedInstanceState: Bundle?): View {
 		val binding = FragmentTrainingResultBinding.inflate(inflater, container, false)
 		model = JwxtModel(requireActivity())
-		val staggeredFragment = StaggeredFragment()
-		getParentFragmentManager().beginTransaction().add(R.id.result, staggeredFragment).commit()
-		staggeredFragment.setScrollBottom {
+		val staggerFragment = StaggerFragment()
+		getParentFragmentManager().beginTransaction().add(R.id.result, staggerFragment).commit()
+		staggerFragment.setScrollBottom {
 			if (total > page * 10) selectedCourses
 		}
-		binding.export.setOnClickListener { staggeredFragment.export(binding.export, getString(R.string.result)) }
+		binding.export.setOnClickListener {
+			staggerFragment.export(binding.export, getString(R.string.result))
+		}
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val response = message.second
 			if (response.getIntValue("code") == 200) {
@@ -41,7 +43,7 @@ class TrainingResultFragment : Fragment() {
 					val data = response.getJSONObject("data")
 					total = data.getInteger("total")
 					data.getJSONArray("rows").forEach { o: Any? ->
-						staggeredFragment.add((o as JSONObject).getString("name"), R.drawable.book, mutableListOf("专业", "年级", "学院", "培养类别", "修业年限", "学科门类", "学位", "专业代码", "专业ID"), extractValue(o, arrayOf("professionName", "grade", "manageUnitName", "trainTypeName", "educationalSystem", "disciplineCateName", "degreeGrantName", "professionCode", "professionId")))
+						staggerFragment.addSection((o as JSONObject).getString("name"), R.drawable.book, mutableListOf("专业", "年级", "学院", "培养类别", "修业年限", "学科门类", "学位", "专业代码", "专业ID"), extractValue(o, arrayOf("professionName", "grade", "manageUnitName", "trainTypeName", "educationalSystem", "disciplineCateName", "degreeGrantName", "professionCode", "professionId")))
 					}
 				}
 			}

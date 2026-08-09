@@ -115,7 +115,7 @@ class EnergyWaterFeeFragment : BaseFragment() {
 								preferenceAdapter.hideNull = true
 								val buttonAdapter = ButtonAdapter()
 								buttonAdapter.add(getString(R.string.view_detail))
-								if (paymentStatus == 1) buttonAdapter.add(getString(R.string.pay))
+								if (paymentStatus == 1) buttonAdapter.add(getString(R.string.pay_fee))
 								buttonAdapter.setListener { button: Button?, position: Int ->
 									when (position) {
 										0 -> button!!.setOnClickListener { getDetail(item.getString("id")) }

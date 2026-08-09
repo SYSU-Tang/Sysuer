@@ -12,9 +12,9 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.model.XgxtModel
 import com.sysu.edu.view.EditTextDialog
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
-class RecruitmentInfoFragment : StaggeredFragment() {
+class RecruitmentInfoFragment : StaggerFragment() {
 	lateinit var viewModel: StudentPartTimeViewModel
 	var total: Int = -1
 	var page: Int = 1
@@ -53,7 +53,7 @@ class RecruitmentInfoFragment : StaggeredFragment() {
 					0 -> {
 						total = data.getJSONObject("data").getInteger("total")
 						data.getJSONObject("data").getJSONArray("list").forEach { i: Any? ->
-							add((i as JSONObject).getString("qgzxgwmc"), mutableListOf("岗位名称", "岗位类型", "所在校区", "岗位地址", "开始时间", "结束时间", "状态", "设岗单位"), extractValue(i, arrayOf("qgzxgwmc", "qgzxgwlxmc", "qgzxszxymc", "qgzxdwdz", "qgzxgwzpkssj", "qgzxgwzpjssj", "state", "sgdwmc")))
+							addSection((i as JSONObject).getString("qgzxgwmc"), mutableListOf("岗位名称", "岗位类型", "所在校区", "岗位地址", "开始时间", "结束时间", "状态", "设岗单位"), extractValue(i, arrayOf("qgzxgwmc", "qgzxgwlxmc", "qgzxszxymc", "qgzxdwdz", "qgzxgwzpkssj", "qgzxgwzpjssj", "state", "sgdwmc")))
 						}
 					}
 					1, 2, 3 -> {

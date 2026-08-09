@@ -12,7 +12,7 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.databinding.ActivityPagerBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.Pager2Adapter
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
 class MajorInfoActivity : BaseActivity() {
 	lateinit var model: JwxtModel
@@ -35,7 +35,8 @@ class MajorInfoActivity : BaseActivity() {
 				.setIcon(R.drawable.export)
 				.setOnMenuItemClickListener {
 					val currentItem = pager.currentItem
-					(pager2Adapter.get(currentItem) as StaggeredFragment).export(toolbar, tabLayout.getTabAt(currentItem)?.text.toString())
+					val fragment = (pager2Adapter.get(currentItem) as StaggerFragment)
+					fragment.export(toolbar, tabLayout.getTabAt(currentItem)?.text.toString())
 					true
 				}
 			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab!!.text = categories[position] }.attach()

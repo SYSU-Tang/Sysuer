@@ -1,40 +1,39 @@
 package com.sysu.edu.academic
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.appcompat.widget.PopupMenu
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.api.CommonUtil.isEmpty
 import com.sysu.edu.databinding.DialogRegionBinding
-import com.sysu.edu.databinding.ItemCardBinding
 import com.sysu.edu.databinding.ItemTitleBinding
 import com.sysu.edu.model.XgxtModel
-import com.sysu.edu.view.AdapterListener
 import com.sysu.edu.view.RecyclerAdapter
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class LeaveReturnRegistrationFragment : StaggeredFragment() {
+class LeaveReturnRegistrationFragment : StaggerFragment() {
 	val leaveDate: MutableLiveData<Long?> = MutableLiveData<Long?>()
 	val returnDate: MutableLiveData<Long?> = MutableLiveData<Long?>()
 	var root: View? = null
@@ -87,7 +86,7 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 						0 -> {
 							clear()
 							val data = response.getJSONObject("data")
-							add("基本信息", mutableListOf("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段"), extractValue(data, arrayOf("xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj")))
+							addSection("基本信息", mutableListOf("姓名", "学号", "年级", "培养层次", "专业", "学院", "联系电话", "宿舍地址", "紧急联系人", "紧急联系人联系电话", "节假日名称", "节假日时间", "返校报到时间段"), extractValue(data, arrayOf("xm", "xh", "nj", "pycc", "zymc", "bmmc", "lxdh", "jjlxr", "jjlxrdh", "ssdz", "jjrmc", "jjrrq", "fxbdsj")))
 							isStay = data.getString("sflx")
 							if (data.containsKey("yjlxsj") && !data.getString("yjlxsj", "")
 									.isEmpty()) leaveDate.value = LocalDate.parse(data.getString("yjlxsj"))
@@ -104,8 +103,120 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 							city = data.getString("wcdcs", "")
 							leave.addAll(mutableListOf<String?>("离校", data.getString("yjlxsj", ""), data.getString("yjfxsj", ""), data.getString("qxlx", ""), data.getString("jtgj", ""), "$country $province $city"))
 							stay.addAll( mutableListOf<String?>("留校", data.getString("lxyy", "")))
-							if ("0" == isStay) add(getString(R.string.registration), leaveKeys, leave)
-							else add(getString(R.string.registration), stayKeys, stay)
+							if ("0" == isStay) addSection(getString(R.string.registration), leaveKeys, leave)
+							else addSection(getString(R.string.registration), stayKeys, stay)
+
+							val sectionIndex = sections.size - 1
+							val adapter = sectionAdapter.getTwoColumnsAdapter(sectionIndex)
+							
+							// Add Save Button Footer
+							sectionAdapter.addFooter(sectionIndex) {
+								Button(
+									onClick = {
+										if ("0" == isStay) save(
+											this@LeaveReturnRegistrationFragment.id!!,
+											isStay,
+											if (isEmpty<Long?>(leaveDate.value)) "" else Instant.ofEpochMilli(
+												leaveDate.value!!
+											)
+												.atZone(ZoneId.systemDefault())
+												.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+											if (isEmpty<Long?>(returnDate.value)) "" else Instant.ofEpochMilli(
+												returnDate.value!!
+											)
+												.atZone(ZoneId.systemDefault())
+												.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+											leave[3],
+											leave[4],
+											country,
+											province,
+											city
+										)
+										else save(this@LeaveReturnRegistrationFragment.id!!, isStay, stay[1])
+									},
+									modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+								) {
+									Text(getString(R.string.save))
+								}
+							}
+
+							// Setup Row Click Listeners for Registration Section
+							(0 until adapter.itemCount).forEach { rowPos ->
+								adapter.setRowClickListener(rowPos) {
+									if (rowPos == 0) {
+										// Show PopupMenu using a View from somewhere? 
+										// This is tricky in Compose. I can use LocalContext.current if I was in Composable.
+										// But here I'm in Fragment code. I can use requireView() as anchor if it exists.
+										// Or just use the ComposeView itself.
+										val menu = PopupMenu(requireContext(), requireView())
+										mutableListOf<String?>("离校", "留校").forEach { i: String? ->
+											menu.menu.add(i)
+												.setOnMenuItemClickListener {
+													isStay = if ("离校" == i) "0" else "1"
+													adapter.setValue(if ("离校" == i) leave else stay)
+													adapter.setKey(if ("离校" == i) leaveKeys else stayKeys)
+													true
+												}
+										}
+										menu.show()
+									}
+									if (adapter.itemCount == 6) {
+										when (rowPos) {
+											3, 4 -> {
+												val menu = PopupMenu(requireContext(), requireView())
+												(if (rowPos == 4) transportation else destination)!!.forEach { e: Any? ->
+													menu.menu.add((e as JSONObject).getString("label"))
+														.setOnMenuItemClickListener {
+															leave[rowPos] = e.getString("label")
+															adapter.setValue(leave)
+															true
+														}
+												}
+												menu.show()
+											}
+											2, 1 -> {
+												val calendar = MaterialDatePicker.Builder.datePicker()
+													.setSelection(
+														if (rowPos == 2) returnDate.value
+															?: MaterialDatePicker.todayInUtcMilliseconds() else leaveDate.value
+															?: MaterialDatePicker.todayInUtcMilliseconds()
+													)
+													.build()
+												calendar.show(parentFragmentManager, "calendar")
+												calendar.addOnPositiveButtonClickListener { aLong: Long? ->
+													leave[rowPos] = calendar.headerText
+													adapter.setValue(leave)
+													(if (rowPos == 2) returnDate else leaveDate).value = aLong
+												}
+											}
+											5 -> {
+												regionDialog.show()
+												dialogRegionBinding.confirm.setOnClickListener {
+													leave[rowPos] =
+														countryAdapter.result + " " + provinceAdapter.result + " " + cityAdapter.result
+													adapter.setValue(leave)
+													regionDialog.dismiss()
+												}
+											}
+										}
+									} else if (adapter.itemCount == 2) {
+										if (rowPos == 1) {
+											val menu = PopupMenu(requireContext(), requireView())
+											resources.getStringArray(R.array.registration_info_keys)
+												.forEach { i: String? ->
+													menu.menu.add(i)
+														.setOnMenuItemClickListener {
+															stay[rowPos] = i
+															adapter.setValue(stay)
+															true
+														}
+												}
+											menu.show()
+										}
+									}
+								}
+							}
+							
 							getDestination()
 							getTransportation()
 							getCountry()
@@ -155,111 +266,6 @@ class LeaveReturnRegistrationFragment : StaggeredFragment() {
 						}
 						else -> config.toast(response.getString("message"))
 					}
-				}
-			})
-			setListener(object : AdapterListener {
-				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                    holder: RecyclerView.ViewHolder,
-				                    position: Int) {
-					staggeredAdapter.getTwoColumnsAdapter(position)
-						?.setListener(object : AdapterListener {
-							override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-							                    holder: RecyclerView.ViewHolder,
-							                    position: Int) {
-								holder.itemView.setOnClickListener {
-//									if (this@LeaveReturnRegistrationFragment.position == 1) {
-										if (position == 0) {
-											val menu = PopupMenu(requireContext(), holder.itemView)
-											mutableListOf<String?>("离校", "留校").forEach { i: String? ->
-												menu.menu.add(i)
-													.setOnMenuItemClickListener { //value.set(pos, i);
-														isStay = if ("离校" == i) "0" else "1"
-														(adapter as TwoColumnsAdapter).setValue(if ("离校" == i) leave else stay)
-														adapter.setKey(if ("离校" == i) leaveKeys else stayKeys)
-														true
-													}
-											}
-											menu.show()
-										}
-										if (adapter.itemCount == 6) {
-											when (position) {
-												3, 4 -> {
-													val menu = PopupMenu(requireContext(), holder.itemView)
-													(if (position == 4) transportation else destination)!!.forEach { e: Any? ->
-														menu.menu.add((e as JSONObject).getString("label"))
-															.setOnMenuItemClickListener {
-																leave[position] = e.getString("label")
-																(adapter as TwoColumnsAdapter).setValue(leave)
-																true
-															}
-													}
-													menu.show()
-												}
-												2, 1 -> {
-													val calendar = MaterialDatePicker.Builder.datePicker()
-														.setSelection(if (position == 2) if (returnDate.getValue() != null) returnDate.getValue() else MaterialDatePicker.todayInUtcMilliseconds() else if (leaveDate.getValue() != null) leaveDate.getValue() else MaterialDatePicker.todayInUtcMilliseconds())
-														.build()
-													calendar.show(getParentFragmentManager(), "calendar")
-													calendar.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { aLong: Long? ->
-														leave[position] = calendar.headerText
-														(adapter as TwoColumnsAdapter).setValue(leave)
-														(if (position == 2) returnDate else leaveDate).value = aLong
-													})
-												}
-												5 -> {
-													regionDialog.show()
-													dialogRegionBinding.confirm.setOnClickListener {
-														leave[position] = countryAdapter.result + " " + provinceAdapter.result + " " + cityAdapter.result
-														(adapter as TwoColumnsAdapter).setValue(leave)
-														regionDialog.dismiss()
-													}
-												}
-											}
-										} else if (adapter.itemCount == 2) {
-											if (position == 1) {
-												val menu = PopupMenu(requireContext(), holder.itemView)
-												resources.getStringArray(R.array.registration_info_keys)
-													.forEach { i: String? ->
-														menu.menu.add(i)
-															.setOnMenuItemClickListener {
-																stay[position] = i
-																(adapter as TwoColumnsAdapter).setValue(stay)
-																true
-															}
-													}
-												menu.show()
-											}
-										}
-									}
-//								}
-							}
-							
-							override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-							                      binding: ViewBinding?) {
-							}
-						})
-					holder.itemView.findViewById<View>(R.id.button).visibility = if (position == 0) View.GONE else View.VISIBLE
-				}
-				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                      binding: ViewBinding?) {
-					(binding as ItemCardBinding).root.addView(MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle).apply {
-						id = R.id.button
-						layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-							.apply {
-								gravity = Gravity.END
-								setMargins(0, 0, config.dpToPx(16), config.dpToPx(16))
-							}
-						setOnClickListener {
-							if ("0" == isStay) save(this@LeaveReturnRegistrationFragment.id!!, isStay, if (isEmpty<Long?>(leaveDate.getValue())) "" else Instant.ofEpochMilli(leaveDate.getValue()!!)
-								.atZone(ZoneId.systemDefault())
-								.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), if (isEmpty<Long?>(returnDate.getValue())) "" else Instant.ofEpochMilli(returnDate.getValue()!!)
-								.atZone(ZoneId.systemDefault())
-								.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), leave[3], leave[4], country, province, city)
-							else save(this@LeaveReturnRegistrationFragment.id!!, isStay, stay[1])
-						}
-						setText(R.string.save)
-					})
 				}
 			})
 			getInfo(id)

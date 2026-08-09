@@ -11,7 +11,6 @@ import com.google.android.material.button.MaterialButton
 import com.sysu.edu.R
 import com.sysu.edu.databinding.DialogGridBinding
 import com.sysu.edu.databinding.ItemButtonGridBinding
-import java.util.function.Consumer
 
 class GridMenuDialog(private val activity: FragmentActivity) {
 	val referenceIds: MutableList<Int> = mutableListOf()

@@ -19,7 +19,7 @@ import com.sysu.edu.databinding.ActivityPagerBinding
 import com.sysu.edu.databinding.ItemSchoolBusNoticeBinding
 import com.sysu.edu.model.PortalModel
 import com.sysu.edu.view.Pager2Adapter
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 import java.util.stream.IntStream
 
 class SchoolBusActivity : BaseActivity() {
@@ -46,7 +46,8 @@ class SchoolBusActivity : BaseActivity() {
 				.setOnMenuItemClickListener {
 					if (pager2Adapter.itemCount > 0) {
 						val currentItem = pager.currentItem
-						(pager2Adapter.get(currentItem) as StaggeredFragment).export(toolbar, tabLayout.getTabAt(currentItem)?.text.toString())
+						val fragment = (pager2Adapter.get(currentItem) as StaggerFragment)
+						fragment.export(toolbar, tabLayout.getTabAt(currentItem)?.text.toString())
 					}
 					true
 				}
@@ -68,25 +69,25 @@ class SchoolBusActivity : BaseActivity() {
 			val key = if (b == true) "workDay" else "holiday"
 			data?.run {
 				if (getJSONArray(key).isEmpty()) IntStream.range(0, pager2Adapter.itemCount)
-					.forEach { j -> (pager2Adapter.get(j) as StaggeredFragment).clear() }
+					.forEach { j -> (pager2Adapter.get(j) as StaggerFragment).clear() }
 				else {
 					var i = 0
 					getJSONArray(key).forEach { item: Any? ->
-						val fragment: StaggeredFragment
+						val fragment: StaggerFragment
 						notice.setMessage((item as JSONObject).getString("note"))
 						if (pager2Adapter.itemCount > i) {
-							fragment = pager2Adapter.get(i) as StaggeredFragment
+							fragment = pager2Adapter.get(i) as StaggerFragment
 							fragment.clear()
 						}
 						else {
 							routes.add(item.getString("drivingDirectionName"))
-							fragment = StaggeredFragment()
+							fragment = StaggerFragment()
 							pager2Adapter.add(fragment)
 						}
 						i++
-						fragment.add(getString(R.string.route_detail), R.drawable.bus, CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.route,R.string.start,R.string.end)), extractValue(item, arrayOf("drivingDirectionName", "startStation", "endStation")))
+						fragment.addSection(getString(R.string.route_detail), R.drawable.bus, CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.route, R.string.start, R.string.end)), extractValue(item, arrayOf("drivingDirectionName", "startStation", "endStation")))
 						item.getJSONArray("schoolBusShuttleMomentList").forEach {
-							fragment.add((it as JSONObject).getString("time"), R.drawable.bus, CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.passenger,R.string.vehicles,R.string.time,R.string.route)), extractValue(it, arrayOf("passenger", "vehiclesType", "time", "drivingRoute")))
+							fragment.addSection((it as JSONObject).getString("time"), R.drawable.bus, CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.passenger, R.string.vehicles, R.string.time, R.string.route)), extractValue(it, arrayOf("passenger", "vehiclesType", "time", "drivingRoute")))
 						}
 					}
 					header.option.setSimpleItems(routes.toTypedArray<String?>())

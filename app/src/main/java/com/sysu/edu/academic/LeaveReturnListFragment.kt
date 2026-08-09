@@ -1,27 +1,25 @@
 package com.sysu.edu.academic
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import com.alibaba.fastjson2.JSONObject
-import com.google.android.material.button.MaterialButton
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
-import com.sysu.edu.databinding.ItemCardBinding
 import com.sysu.edu.model.XgxtModel
-import com.sysu.edu.view.AdapterListener
-import com.sysu.edu.view.StaggeredFragment
-import java.util.function.Consumer
+import com.sysu.edu.view.StaggerFragment
 
-class LeaveReturnListFragment : StaggeredFragment() {
+class LeaveReturnListFragment : StaggerFragment() {
 	lateinit var model: XgxtModel
 	override fun onDestroyView() {
 		super.onDestroyView()
@@ -39,41 +37,29 @@ class LeaveReturnListFragment : StaggeredFragment() {
 			val response = message.second
 			if (response.getInteger("code") == 200) {
 				clear()
-				response.getJSONArray("data").forEach(Consumer { e: Any? ->
-					add((e as JSONObject).getString("gzmc"), if (e.getInteger("gzztm") == 1) R.drawable.uncheck else R.drawable.check, resources.getStringArray(R.array.registration_keys).toMutableList(), extractValue(e, arrayOf("blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt")))
-				})
-				setListener(object : AdapterListener {
-					override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-					                    holder: RecyclerView.ViewHolder,
-					                    position: Int) {
-						val item = response.getJSONArray("data").getJSONObject(position)
-						val isRegistering = item.getInteger("gzztm") == 1
-						val status = item.getString("zt")
-						holder.itemView.findViewById<MaterialButton>(R.id.button).apply {
-							setText(if (isRegistering) if ("registering" == status) R.string.start_registration else R.string.modify_registration else R.string.view_detail)
-							setOnClickListener {
+				response.getJSONArray("data").forEachIndexed { index, e ->
+					val item = e as JSONObject
+					addSection(item.getString("gzmc"), if (item.getInteger("gzztm") == 1) R.drawable.uncheck else R.drawable.check, resources.getStringArray(R.array.registration_keys).toMutableList(), extractValue(item, arrayOf("blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt")))
+
+					val isRegistering = item.getInteger("gzztm") == 1
+					val status = item.getString("zt")
+
+					sectionAdapter.addFooter(index) {
+						Button(
+							onClick = {
 								if (isRegistering) requireActivity().supportFragmentManager.beginTransaction()
 									.replace(R.id.leave_return_list_fragment, LeaveReturnRegistrationFragment::class.java, Bundle().apply {
 										putString("Id", item.getString("cjlfxgzId"))
 									})
 									.addToBackStack(null)
 									.commit()
-							}
+							},
+							modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+						) {
+							Text(getString(if (isRegistering) if ("registering" == status) R.string.start_registration else R.string.modify_registration else R.string.view_detail))
 						}
 					}
-					
-					override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-					                      binding: ViewBinding?) {
-						(binding as ItemCardBinding).root.addView(MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonTonalStyle).apply {
-							setId(R.id.button)
-							setLayoutParams(LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-												.apply {
-													gravity = Gravity.END
-													setMargins(0, 0, model.contextUtil.dpToPx(16), model.contextUtil.dpToPx(16))
-												})
-						})
-					}
-				})
+				}
 			}
 		})
 		return view

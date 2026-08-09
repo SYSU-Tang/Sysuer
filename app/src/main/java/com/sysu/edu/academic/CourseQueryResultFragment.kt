@@ -11,9 +11,9 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.databinding.FragmentCourseQueryResultBinding
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
-class CourseQueryResultFragment : StaggeredFragment() {
+class CourseQueryResultFragment : StaggerFragment() {
 	var page: Int = 1
 	var total: Int = -1
 	lateinit var model: JwxtModel
@@ -22,14 +22,17 @@ class CourseQueryResultFragment : StaggeredFragment() {
 		model.dispose()
 	}
 	
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?,
+	                         ): View {
 		model = JwxtModel(requireContext())
-		val courseQueryResultBinding = FragmentCourseQueryResultBinding.inflate(inflater, container, false)
-			.apply {
+		val courseQueryResultBinding = FragmentCourseQueryResultBinding.inflate(inflater, container, false).apply {
 				root.addView(super.onCreateView(inflater, container, savedInstanceState), -1, -1)
-				fab.setOnClickListener { export(fab, getString(R.string.course)) }
+				fab.setOnClickListener {
+					export(fab, getString(R.string.course))
+				}
 			}
 		setScrollBottom {
 			if ((page - 1) * 10 < total) courses
@@ -39,10 +42,10 @@ class CourseQueryResultFragment : StaggeredFragment() {
 			if (response.getInteger("code") == 200) {
 				if (total == -1) total = response.getJSONObject("data").getInteger("total")
 				response.getJSONObject("data").getJSONArray("rows").forEach { e: Any? ->
-					val values: ArrayList<String?> = extractValue(e as JSONObject, arrayOf("yearTerm", "courseName", "courseNum", "openingUnitName", "courseCategoryName", "score", "teachingName", "limitNumber", "selectedNumber", "examMode", "teachingTimePlaceStr", "openingSchoolName", "readObj", "classNumber"))
-					if (values[10] != null) values[10] = values[10]!!.replace(",", "\n")
-						.replace("/", " | ")
-					add(e.getString("courseName"), mutableListOf("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values)
+					val values: ArrayList<String?> = extractValue(e as JSONObject,
+					                                              arrayOf("yearTerm", "courseName", "courseNum", "openingUnitName", "courseCategoryName", "score", "teachingName", "limitNumber", "selectedNumber", "examMode", "teachingTimePlaceStr", "openingSchoolName", "readObj", "classNumber"))
+					if (values[10] != null) values[10] = values[10]!!.replace(",", "\n").replace("/", " | ")
+					addSection(e.getString("courseName"), mutableListOf("学年学期", "课程名称", "课程编号", "开课单位", "课程类别", "学分", "主讲教师", "限选人数", "已选人数", "考试方式", "上课信息", "上课校区", "修读对象", "教学班号"), values)
 				}
 			}
 		})

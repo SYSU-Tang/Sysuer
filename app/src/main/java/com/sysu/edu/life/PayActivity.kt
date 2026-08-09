@@ -15,7 +15,7 @@ class PayActivity : BaseActivity() {
 		val tabs = resources.getStringArray(R.array.payment_key)
 		(0..<5).forEach { adp.add(PayFragment.newInstance(it)) }
 		ActivityPagerBinding.inflate(layoutInflater).apply {
-			toolbar.setTitle(R.string.pay)
+			toolbar.setTitle(R.string.pay_fee)
 			pager.adapter = adp
 			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.text = tabs[position] }.attach()
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }

@@ -111,7 +111,7 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 							preferenceAdapter.hideNull = true
 							val buttonAdapter = ButtonAdapter().apply {
 								add(getString(R.string.view_detail))
-								if (billStatus == 1) add(getString(R.string.pay))
+								if (billStatus == 1) add(getString(R.string.pay_fee))
 								setListener { button: Button?, position: Int ->
 									when (position) {
 										0 -> button!!.setOnClickListener { getDetail(item.getString("id"), roomCode.value) }

@@ -9,9 +9,9 @@ import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
-class CourseCompletionFragment : StaggeredFragment() {
+class CourseCompletionFragment : StaggerFragment() {
 	var page: Int = 0
 	lateinit var model: JwxtModel
 	override fun onDestroyView() {
@@ -32,7 +32,7 @@ class CourseCompletionFragment : StaggeredFragment() {
 					val values: ArrayList<String?> = extractValue(a as JSONObject, arrayOf("acadYearSemester", "courseNumber", "courseName", "courseCategoryName", "credit",  /**/"acadYearSemester", "achievementCourseNumber", "achievementCourseName", "achievementCourseCategoryName", "achievementCredit", "ispassed", "achievementPoint"))
 					if (values[0] != null) values[0] = values[0]!!.replace(",", "|")
 					if (values[5] != null) values[5] = values[5]!!.replace(",", "|")
-					add(a.getString("courseName"), mutableListOf("学年学期", "课程号", "课程名称", "课程类别", "学分", "成绩获取学年学期", "课程号", "课程名称", "课程类别", "学分", "是否及格", "成绩"), values)
+					addSection(a.getString("courseName"), mutableListOf("学年学期", "课程号", "课程名称", "课程类别", "学分", "成绩获取学年学期", "课程号", "课程名称", "课程类别", "学分", "是否及格", "成绩"), values)
 				}
 			}
 		})

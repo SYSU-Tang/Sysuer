@@ -9,7 +9,7 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.databinding.ActivityListBinding
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 import java.util.Locale
 
 class SchoolWorkWarning : BaseActivity() {
@@ -31,7 +31,7 @@ class SchoolWorkWarning : BaseActivity() {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 		}
 		setContentView(binding.root)
-		val fragment = binding.list.getFragment<StaggeredFragment>().apply {
+		val fragment = binding.list.getFragment<StaggerFragment>().apply {
 			setScrollBottom {
 				if (total > page * 10) warning
 			}
@@ -43,7 +43,7 @@ class SchoolWorkWarning : BaseActivity() {
 				if (total == -1) total = it.getInteger("total")
 				var order = 0
 				it.getJSONArray("rows").forEach { a: Any? ->
-					fragment.add("${++order}", R.drawable.warning, mutableListOf("预警结果", "预警操作学期", "预警学期", "生成预警档案时间", "档案ID", "警告程度"), extractValue(a as JSONObject, arrayOf("alarmResultName", "alarmOperationTerm", "alarmTerm", "createTime", "archivceID", "alarmResult")))
+					fragment.addSection("${++order}", R.drawable.warning, mutableListOf("预警结果", "预警操作学期", "预警学期", "生成预警档案时间", "档案ID", "警告程度"), extractValue(a as JSONObject, arrayOf("alarmResultName", "alarmOperationTerm", "alarmTerm", "createTime", "archivceID", "alarmResult")))
 				}
 			}
 		})

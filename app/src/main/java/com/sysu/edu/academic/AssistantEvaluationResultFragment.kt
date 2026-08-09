@@ -10,9 +10,9 @@ import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.databinding.FragmentResultBinding
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
-class AssistantEvaluationResultFragment : StaggeredFragment() {
+class AssistantEvaluationResultFragment : StaggerFragment() {
 	var page: Int = 1
 	var total: Int = -1
 	lateinit var model: JwxtModel
@@ -38,7 +38,7 @@ class AssistantEvaluationResultFragment : StaggeredFragment() {
 				val data = response.getJSONObject("data")
 				if (total == -1) total = data.getInteger("total")
 				data.getJSONArray("rows").forEach { item: Any? ->
-					add((order++).toString(), mutableListOf("学年学期", "助教学期", "助教姓名", "助教培养单位", "教学班号", "课程名称", "课程编码", "课程类别", "课程教学类型", "开课单位", "是否开班", "是否合班", "总教学班号", "任课教师", "课程学时", "助教承担的课程教学学时", "上课时间地点", "助教考核结论"), extractValue(item as JSONObject, arrayOf("yearTerm", "assistantNum", "assistantName", "assistantCollege", "classNum", "courseName", "courseNum", "courseType", "courseTeachingType", "courseCollege", "openClassFlag", "mergeClassFlag", "sumClassNum", "teacherName", "courseHours", "assistantHours", "teachingTimePlace", "conclusion")))
+					addSection((order++).toString(), mutableListOf("学年学期", "助教学期", "助教姓名", "助教培养单位", "教学班号", "课程名称", "课程编码", "课程类别", "课程教学类型", "开课单位", "是否开班", "是否合班", "总教学班号", "任课教师", "课程学时", "助教承担的课程教学学时", "上课时间地点", "助教考核结论"), extractValue(item as JSONObject, arrayOf("yearTerm", "assistantNum", "assistantName", "assistantCollege", "classNum", "courseName", "courseNum", "courseType", "courseTeachingType", "courseCollege", "openClassFlag", "mergeClassFlag", "sumClassNum", "teacherName", "courseHours", "assistantHours", "teachingTimePlace", "conclusion")))
 				}
 			}
 		})

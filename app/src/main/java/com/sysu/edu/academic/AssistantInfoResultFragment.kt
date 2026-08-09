@@ -9,9 +9,9 @@ import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 
-class AssistantInfoResultFragment : StaggeredFragment() {
+class AssistantInfoResultFragment : StaggerFragment() {
 	var page: Int = 1
 	var total: Int = -1
 	lateinit var model: JwxtModel
@@ -34,7 +34,7 @@ class AssistantInfoResultFragment : StaggeredFragment() {
 				if (message.first == 0) {
 					total = response.getJSONObject("data").getInteger("total")
 					response.getJSONObject("data").getJSONArray("rows").forEach { o: Any? ->
-							add((o as JSONObject).getString("courseName"), mutableListOf("序号", "学年学期", "校区", "开设单位", "课程名称", "课程编号", "课程学时", "班级编号", "实选人数", "任课教师", "上课时间地点", "修读对象", "上课学生名单", "助教信息", "助教职责"), extractValue(o, arrayOf("rowNum", "semester", "studyCampus", "openUnitName", "courseName", "courseNum", "courseHour", "classNumber", "apersonNum", "teacherName", "teachingTimePlace", "studyObj", "stuList", "assistantInfo", "jobDuty")))
+							addSection((o as JSONObject).getString("courseName"), mutableListOf("序号", "学年学期", "校区", "开设单位", "课程名称", "课程编号", "课程学时", "班级编号", "实选人数", "任课教师", "上课时间地点", "修读对象", "上课学生名单", "助教信息", "助教职责"), extractValue(o, arrayOf("rowNum", "semester", "studyCampus", "openUnitName", "courseName", "courseNum", "courseHour", "classNumber", "apersonNum", "teacherName", "teachingTimePlace", "studyObj", "stuList", "assistantInfo", "jobDuty")))
 						}
 				}
 			}

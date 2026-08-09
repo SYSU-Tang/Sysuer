@@ -22,7 +22,8 @@ import com.sysu.edu.api.CommonUtil.toStringOrDefault
 import com.sysu.edu.databinding.ActivityGradeForLevelBinding
 import com.sysu.edu.databinding.PreferenceEditBinding
 import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
+import com.sysu.edu.view.toMarkdown
 
 class GradeForLevelActivity : BaseActivity() {
 	val trainType: MutableLiveData<String?> = MutableLiveData<String?>()
@@ -33,7 +34,7 @@ class GradeForLevelActivity : BaseActivity() {
 	val minGrade: MutableLiveData<String?> = MutableLiveData<String?>()
 	var page: Int = 1
 	var total: Int = -1
-	lateinit var fragment: StaggeredFragment
+	lateinit var fragment: StaggerFragment
 	var yearPop: PopupMenu? = null
 	var trainTypePop: PopupMenu? = null
 	var courseTypePop: PopupMenu? = null
@@ -55,7 +56,7 @@ class GradeForLevelActivity : BaseActivity() {
 			if ((page - 1) * 10 < total) grade
 		}
 		binding.toolbar.menu.add("导出").setIcon(R.drawable.export).setOnMenuItemClickListener {
-			startActivity(Intent(this, MarkdownViewActivity::class.java).putExtra("content", fragment.toTable())
+			startActivity(Intent(this, MarkdownViewActivity::class.java).putExtra("content", fragment.sections.toMarkdown())
 							  .putExtra("title", "成绩"), ActivityOptionsCompat.makeSceneTransitionAnimation(this, binding.toolbar, "miniapp")
 							  .toBundle())
 			false
@@ -113,7 +114,7 @@ class GradeForLevelActivity : BaseActivity() {
 					3 -> {
 						if (total == -1) total = response.getJSONObject("data").getInteger("total")
 						response.getJSONObject("data").getJSONArray("rows").forEach { item: Any? ->
-							fragment.add((item as JSONObject).getString("courseName"), mutableListOf("绩点", "教学班编号", "课程类别", "课程ID", "课程名称", "课程编号", "学分", "考试性质", "等级", "年级", "开设单位", "学期", "总学时", "培养类别", "总成绩"), extractValue(item, arrayOf("achievementPoint", "classesNum", "courseCategoryName", "courseId", "courseName", "courseNum", "credit", "examNatureName", "finalAchievementStr", "grade", "openClassUnitName", "schoolSemester", "sumHours", "trainingCategoryName", "totalAchievement")))
+							fragment.addSection((item as JSONObject).getString("courseName"), mutableListOf("绩点", "教学班编号", "课程类别", "课程ID", "课程名称", "课程编号", "学分", "考试性质", "等级", "年级", "开设单位", "学期", "总学时", "培养类别", "总成绩"), extractValue(item, arrayOf("achievementPoint", "classesNum", "courseCategoryName", "courseId", "courseName", "courseNum", "credit", "examNatureName", "finalAchievementStr", "grade", "openClassUnitName", "schoolSemester", "sumHours", "trainingCategoryName", "totalAchievement")))
 						}
 					}
 					0, 1, 2 -> {

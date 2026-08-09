@@ -14,7 +14,7 @@ import com.sysu.edu.api.CommonUtil.getString
 import com.sysu.edu.databinding.ActivityPagerBinding
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.Pager2Adapter
-import com.sysu.edu.view.StaggeredFragment
+import com.sysu.edu.view.StaggerFragment
 import java.util.function.Consumer
 
 class SchoolEnrollmentActivity : BaseActivity() {
@@ -41,7 +41,8 @@ class SchoolEnrollmentActivity : BaseActivity() {
 					pager.currentItem.takeIf {
 						!pager2Adapter.isEmpty && it < pager2Adapter.itemCount
 					}?.let {
-						(pager2Adapter.get(it) as StaggeredFragment).export(toolbar, tabLayout.getTabAt(it)?.text.toString())
+						val fragment = (pager2Adapter.get(it) as StaggerFragment)
+						fragment.export(toolbar, tabLayout.getTabAt(it)?.text.toString())
 					}
 					true
 				}
@@ -59,14 +60,14 @@ class SchoolEnrollmentActivity : BaseActivity() {
 					val what: Int = massage.first
 					if (what == 0) {
 						dataMap.forEach { (title: Int, keyName: List<Int>) ->
-							(pager2Adapter.get(0) as StaggeredFragment).add(getString(title), R.drawable.calendar, getString(this, keyName.toMutableList()), extractValue(data, keys[listOf(R.string.school_enrollment_personal_info, R.string.school_enrollment_roll_info, R.string.school_enrollment_contact_info).indexOf(title)].toMutableList()))
+							(pager2Adapter.get(0) as StaggerFragment).addSection(getString(title), R.drawable.calendar, getString(this, keyName.toMutableList()), extractValue(data, keys[listOf(R.string.school_enrollment_personal_info, R.string.school_enrollment_roll_info, R.string.school_enrollment_contact_info).indexOf(title)].toMutableList()))
 						}
 						addNextPage(1)
 					} else {
 						var order = 1
 						data.getJSONArray("rows").forEach(Consumer { a: Any? ->
 							val keyName: IntArray = arrayOf<IntArray?>(intArrayOf(R.string.school_enrollment_relation, R.string.school_enrollment_family_name, R.string.school_enrollment_work_unit, R.string.school_enrollment_position, R.string.school_enrollment_family_phone, R.string.school_enrollment_family_birthday), intArrayOf(R.string.school_enrollment_study_start, R.string.school_enrollment_study_end, R.string.school_enrollment_study_unit, R.string.school_enrollment_study_address), intArrayOf(R.string.school_enrollment_exchange_start, R.string.school_enrollment_exchange_end, R.string.school_enrollment_sent_school, R.string.school_enrollment_sent_major, R.string.school_enrollment_exchange_status), intArrayOf(R.string.school_enrollment_issue_date, R.string.school_enrollment_issue_number, R.string.school_enrollment_move_type, R.string.school_enrollment_change_detail, R.string.school_enrollment_move_reason, R.string.school_enrollment_former_major, R.string.school_enrollment_after_major), intArrayOf(R.string.school_enrollment_minor_type, R.string.school_enrollment_minor_college, R.string.school_enrollment_minor_major, R.string.school_enrollment_minor_grade, R.string.school_enrollment_minor_graduation), intArrayOf(R.string.school_enrollment_academic_year, R.string.school_enrollment_checkin_status, R.string.school_enrollment_register_status, R.string.school_enrollment_payment_status), intArrayOf(R.string.school_enrollment_punish_date, R.string.school_enrollment_punish_brief, R.string.school_enrollment_punish_type, R.string.school_enrollment_punish_source, R.string.school_enrollment_punish_name, R.string.school_enrollment_punish_reason, R.string.school_enrollment_punish_time, R.string.school_enrollment_punish_proof, R.string.school_enrollment_punish_repeal_time, R.string.school_enrollment_punish_repeal_proof, R.string.school_enrollment_punish_graduate, R.string.school_enrollment_punish_degree, R.string.school_enrollment_punish_sponsor, R.string.school_enrollment_punish_department, R.string.school_enrollment_punish_clause, R.string.school_enrollment_punish_money, R.string.school_enrollment_punish_status, R.string.school_enrollment_punish_in_school))[what - 1]!!
-							(pager2Adapter.get(what) as StaggeredFragment).add("${order++}", R.drawable.calendar, getString(this, keyName), extractValue((a as JSONObject?)!!, arrayOf<Array<String?>?>(arrayOf("familyRelationName", "familyMemberName", "familyWorkUnit", "jobName", "familyPhone", "familyBirthday"), arrayOf("experBeginTime", "experEndTime", "experStudyUnit", "experSite"), arrayOf("startTime", "endTime", "sendToCollegeName", "sentToMajorName", "exchangeStatus"), arrayOf("issueDate", "issueNumber", "moveStyle", "changeDetail", "moveReason", "formerGradeMajorProf", "moveAfterGradeMajorProf"), arrayOf("mrollCultureGenreName", "mrollCollegeName", "mrollMajorFieldName", "mrollGrade", "minDouDegMajGradName"), arrayOf("academicYearTerm", "checkInStatusName", "registerStatusName", "payedStatusName"), arrayOf("rewPundate", "rewPunBriefing", "rewPunTypeName", "rewPunSourceName", "rewPunName", "rewPunCause", "rewPunTime", "rewPunProof", "rewPunRepealTime", "rewPunRepealProof", "rewPunWheGraduate", "rewPunWheDegree", "rewPunSponDeparName", "rewPunDeparName", "rewPunAdapt", "rewPunMoney", "rewPunSchrollState", "rewPunWhetherAtsch"))[what - 1]!!))
+							(pager2Adapter.get(what) as StaggerFragment).addSection("${order++}", R.drawable.calendar, getString(this, keyName), extractValue((a as JSONObject?)!!, arrayOf<Array<String?>?>(arrayOf("familyRelationName", "familyMemberName", "familyWorkUnit", "jobName", "familyPhone", "familyBirthday"), arrayOf("experBeginTime", "experEndTime", "experStudyUnit", "experSite"), arrayOf("startTime", "endTime", "sendToCollegeName", "sentToMajorName", "exchangeStatus"), arrayOf("issueDate", "issueNumber", "moveStyle", "changeDetail", "moveReason", "formerGradeMajorProf", "moveAfterGradeMajorProf"), arrayOf("mrollCultureGenreName", "mrollCollegeName", "mrollMajorFieldName", "mrollGrade", "minDouDegMajGradName"), arrayOf("academicYearTerm", "checkInStatusName", "registerStatusName", "payedStatusName"), arrayOf("rewPundate", "rewPunBriefing", "rewPunTypeName", "rewPunSourceName", "rewPunName", "rewPunCause", "rewPunTime", "rewPunProof", "rewPunRepealTime", "rewPunRepealProof", "rewPunWheGraduate", "rewPunWheDegree", "rewPunSponDeparName", "rewPunDeparName", "rewPunAdapt", "rewPunMoney", "rewPunSchrollState", "rewPunWhetherAtsch"))[what - 1]!!))
 						})
 						if (data.getInteger("total") > (page - 1) * 10) addNextPage(what)
 						else if (what < 7) {
@@ -77,7 +78,7 @@ class SchoolEnrollmentActivity : BaseActivity() {
 				}
 			}
 		})
-		(0..<8).forEach { pager2Adapter.add(StaggeredFragment.newInstance(it)) }
+		(0..<8).forEach { pager2Adapter.add(StaggerFragment.newInstance(it)) }
 		addNextPage(0)
 	}
 	

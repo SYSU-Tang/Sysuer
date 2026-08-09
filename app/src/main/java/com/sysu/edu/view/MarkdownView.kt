@@ -16,7 +16,7 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
 import com.sysu.edu.api.SettingManager
-import com.sysu.edu.browser.theme.SysuerTheme
+import com.sysu.edu.theme.SysuerTheme
 
 class MarkdownView @JvmOverloads constructor(
 	context: Context,

@@ -77,7 +77,7 @@ class EnergyAccountFragment : BaseFragment() {
 							.getString("balance"), R.drawable.money)
 						adapter.addAdapter(preferenceAdapter)
 						val buttonAdapter = ButtonAdapter()
-						buttonAdapter.add(getString(R.string.pay))
+						buttonAdapter.add(getString(R.string.pay_fee))
 						buttonAdapter.setListener { button: Button?, _: Int -> button!!.setOnClickListener { rechargeDialog.show() } }
 						adapter.addAdapter(buttonAdapter)
 					}
