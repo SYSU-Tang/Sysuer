@@ -1,199 +1,155 @@
 package com.sysu.edu.academic
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.view.MenuItem
-import android.view.View
-import android.view.WindowManager
-import android.widget.PopupWindow
-import androidx.appcompat.widget.PopupMenu
-import androidx.core.app.ActivityOptionsCompat
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import com.alibaba.fastjson2.JSONObject
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.ViewModelProvider
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.extractValue
-import com.sysu.edu.api.CommonUtil.isEmpty
-import com.sysu.edu.api.CommonUtil.toStringOrDefault
-import com.sysu.edu.databinding.ActivityGradeForLevelBinding
-import com.sysu.edu.databinding.PreferenceEditBinding
-import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.StaggerFragment
+import com.sysu.edu.api.DataStoreManager
+import com.sysu.edu.browser.RichTextActivity
+import com.sysu.edu.view.ActivityPager
+import com.sysu.edu.view.InputDialogChip
+import com.sysu.edu.view.SectionData
+import com.sysu.edu.view.SingleSelectChipDropdown
+import com.sysu.edu.view.StaggerScreen
 import com.sysu.edu.view.toMarkdown
 
 class GradeForLevelActivity : BaseActivity() {
-	val trainType: MutableLiveData<String?> = MutableLiveData<String?>()
-	val year: MutableLiveData<String?> = MutableLiveData<String?>()
-	val courseType: MutableLiveData<String?> = MutableLiveData<String?>()
-	val courseName: MutableLiveData<String?> = MutableLiveData<String?>()
-	val courseNumber: MutableLiveData<String?> = MutableLiveData<String?>()
-	val minGrade: MutableLiveData<String?> = MutableLiveData<String?>()
-	var page: Int = 1
-	var total: Int = -1
-	lateinit var fragment: StaggerFragment
-	var yearPop: PopupMenu? = null
-	var trainTypePop: PopupMenu? = null
-	var courseTypePop: PopupMenu? = null
-	var input: MutableLiveData<String?>? = null
-	lateinit var model: JwxtModel
-	override fun onDestroy() {
-		super.onDestroy()
-		model.dispose()
-	}
-	
-	override fun onCreate(savedInstanceState: Bundle?) {
+	@OptIn(ExperimentalLayoutApi::class) override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		val binding = ActivityGradeForLevelBinding.inflate(layoutInflater)
-		setContentView(binding.getRoot())
-		model = JwxtModel(this)
-		binding.toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-		fragment = binding.fragment.getFragment()
-		fragment.setScrollBottom {
-			if ((page - 1) * 10 < total) grade
-		}
-		binding.toolbar.menu.add("导出").setIcon(R.drawable.export).setOnMenuItemClickListener {
-			startActivity(Intent(this, MarkdownViewActivity::class.java).putExtra("content", fragment.sections.toMarkdown())
-							  .putExtra("title", "成绩"), ActivityOptionsCompat.makeSceneTransitionAnimation(this, binding.toolbar, "miniapp")
-							  .toBundle())
-			false
-		}.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-		yearPop = PopupMenu(this, binding.year)
-		trainTypePop = PopupMenu(this, binding.trainType)
-		courseTypePop = PopupMenu(this, binding.courseType)
-		val courseNameEditText = PreferenceEditBinding.inflate(layoutInflater)
-		val courseNamePop = getPopupWindow(courseNameEditText)
-		binding.year.setOnClickListener { yearPop!!.show() }
-		binding.trainType.setOnClickListener { trainTypePop!!.show() }
-		binding.courseType.setOnClickListener { courseTypePop!!.show() }
-		binding.courseName.setOnClickListener { v: View? ->
-			input = courseName
-			courseNamePop.showAsDropDown(v)
-			courseNameEditText.textInputLayout.setHint(R.string.course_name)
-			courseNameEditText.textInputLayout.requestFocus()
-			courseNameEditText.textField.setText(courseName.value)
-		}
-		binding.courseNumber.setOnClickListener { v: View? ->
-			input = courseNumber
-			courseNamePop.showAsDropDown(v)
-			courseNameEditText.textInputLayout.requestFocus()
-			courseNameEditText.textInputLayout.setHint(R.string.course_number)
-			courseNameEditText.textField.setText(courseNumber.value)
-		}
-		binding.minGrade.setOnClickListener { v: View? ->
-			input = minGrade
-			courseNamePop.showAsDropDown(v)
-			courseNameEditText.textInputLayout.requestFocus()
-			courseNameEditText.textInputLayout.setHint(R.string.min_grade)
-			courseNameEditText.textField.setText(minGrade.value)
-		}
-		year.observe(this, Observer { regetGrade() })
-		trainType.observe(this, Observer { regetGrade() })
-		courseType.observe(this, Observer { regetGrade() })
-		courseName.observe(this, Observer { s: String? ->
-			binding.courseName.text = if (s!!.isEmpty()) getString(R.string.course_name) else s
-			regetGrade()
-		})
-		courseNumber.observe(this, Observer { s: String? ->
-			binding.courseNumber.text = if (s!!.isEmpty()) getString(R.string.course_number) else s
-			regetGrade()
-		})
-		minGrade.observe(this, Observer { s: String? ->
-			binding.minGrade.text = if (s!!.isEmpty()) getString(R.string.min_grade) else s
-			regetGrade()
-		})
-		grade
-		(0..<3).forEach { getData(it) }
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (response.getInteger("code") == 200) {
-				when (val what: Int = message.first) {
-					3 -> {
-						if (total == -1) total = response.getJSONObject("data").getInteger("total")
-						response.getJSONObject("data").getJSONArray("rows").forEach { item: Any? ->
-							fragment.addSection((item as JSONObject).getString("courseName"), mutableListOf("绩点", "教学班编号", "课程类别", "课程ID", "课程名称", "课程编号", "学分", "考试性质", "等级", "年级", "开设单位", "学期", "总学时", "培养类别", "总成绩"), extractValue(item, arrayOf("achievementPoint", "classesNum", "courseCategoryName", "courseId", "courseName", "courseNum", "credit", "examNatureName", "finalAchievementStr", "grade", "openClassUnitName", "schoolSemester", "sumHours", "trainingCategoryName", "totalAchievement")))
-						}
-					}
-					0, 1, 2 -> {
-						val menu = listOf(trainTypePop, yearPop, courseTypePop)[what]?.menu //                        menu.dispose();
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) menu?.setGroupDividerEnabled(true)
-						val realLiveDataValue = listOf(trainType, year, courseType)[what]
-						val button = listOf(binding.trainType, binding.year, binding.courseType)[what]
-						menu?.add(0, 0, 0, R.string.reset)?.setOnMenuItemClickListener {
-							button.setText(listOf(R.string.train_type, R.string.year, R.string.course_type)[what])
-							realLiveDataValue.value = ""
-							true
-						}
-						response.getJSONArray("data").forEach { e: Any? ->
-							menu?.add(1, 0, 0, (e as JSONObject).getString(arrayOf("dataName", "acadYearSemester", "catName")[what]))
-								?.setOnMenuItemClickListener { item: MenuItem? ->
-									val menuValue = e.getString(arrayOf("dataNumber", "acadYearSemester", "catCode")[what])
-									if (menuValue != realLiveDataValue.value) {
-										button.text = item!!.title
-										realLiveDataValue.value = menuValue
-									}
-									true
-								}
-						}
+		enableEdgeToEdge()
+		val viewModel = ViewModelProvider(this)[GradeForLevelViewModel::class.java]
+		
+		setContent {
+			val gradeList by viewModel.gradeList.observeAsState(emptyList())
+			val trainTypeOptions by viewModel.trainTypeOptions.observeAsState(emptyList())
+			val yearOptions by viewModel.yearOptions.observeAsState(emptyList())
+			val courseTypeOptions by viewModel.courseTypeOptions.observeAsState(emptyList())
+			
+			LaunchedEffect(Unit) {
+				viewModel.fetchOptions()
+				viewModel.fetchGrade()
+			}
+			var trainTypeValue by remember { mutableStateOf<String?>(null) }
+			var yearValue by remember { mutableStateOf<String?>(null) }
+			var courseTypeValue by remember { mutableStateOf<String?>(null) }
+			var courseNameValue by remember { mutableStateOf("") }
+			var courseNumberValue by remember { mutableStateOf("") }
+			var minGradeValue by remember { mutableStateOf("") }
+			fun onFilterChange() {
+				viewModel.trainType = trainTypeValue
+				viewModel.year = yearValue
+				viewModel.courseType = courseTypeValue
+				viewModel.courseName = courseNameValue.ifEmpty { null }
+				viewModel.courseNumber = courseNumberValue.ifEmpty { null }
+				viewModel.minGrade = minGradeValue.ifEmpty { null }
+				viewModel.reFetchGrade()
+			}
+			
+			val sections = remember(gradeList) {
+				mutableStateListOf<SectionData>().also { list ->
+					gradeList.forEach { item ->
+						list.add(SectionData(title = item.getString("courseName"),
+						                     rows = extractValue(this@GradeForLevelActivity,
+						                                         item,
+						                                         intArrayOf(R.string.gpa,
+						                                                    R.string.class_number,
+						                                                    R.string.course_category,
+						                                                    R.string.course_id,
+						                                                    R.string.course_name,
+						                                                    R.string.course_number,
+						                                                    R.string.credit,
+						                                                    R.string.exam_nature,
+						                                                    R.string.level,
+						                                                    R.string.grade,
+						                                                    R.string.department,
+						                                                    R.string.semester,
+						                                                    R.string.total_hours,
+						                                                    R.string.training_category,
+						                                                    R.string.total_achievement),
+						                                         arrayOf("achievementPoint",
+						                                                 "classesNum",
+						                                                 "courseCategoryName",
+						                                                 "courseId",
+						                                                 "courseName",
+						                                                 "courseNum",
+						                                                 "credit",
+						                                                 "examNatureName",
+						                                                 "finalAchievementStr",
+						                                                 "grade",
+						                                                 "openClassUnitName",
+						                                                 "schoolSemester",
+						                                                 "sumHours",
+						                                                 "trainingCategoryName",
+						                                                 "totalAchievement"))))
 					}
 				}
-				model.nextAll()
 			}
-		})
-	}
-	
-	private fun getPopupWindow(courseNameEditText: PreferenceEditBinding): PopupWindow {
-		val courseNamePop = PopupWindow(this, null, rikka.preference.simplemenu.R.attr.popupMenuStyle).apply {
-			isFocusable = true
-			setContentView(courseNameEditText.getRoot())
-			isOutsideTouchable = false
-			softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
-			inputMethodMode = PopupWindow.INPUT_METHOD_NEEDED
-			width = -1
-			setOnDismissListener {
-				val text = toStringOrDefault<Editable?>(courseNameEditText.textField.getText())
-				if (input!!.value != text) input!!.value = text
+			
+			ActivityPager(title = stringResource(R.string.grade_for_level), onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false, actions = {
+				IconButton(onClick = {
+					val markdown = sections.toMarkdown()
+					DataStoreManager.saveContent(this@GradeForLevelActivity, getString(R.string.grade_for_level), markdown) {
+						startActivity(Intent(this@GradeForLevelActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.grade_for_level)))
+					}
+				}) {
+					Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
+				}
+			}) {
+				Column(modifier = Modifier.fillMaxSize()) {
+					FlowRow(modifier = Modifier
+						.fillMaxWidth()
+						.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
+					        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
+						SingleSelectChipDropdown(category = stringResource(R.string.train_type),
+						                         options = listOf(getString(R.string.reset)) + trainTypeOptions.map { it.getString("dataName") },
+						                         optionValues = listOf(null) + trainTypeOptions.map { it.getString("dataNumber") },
+						                         selectedValue = trainTypeValue,
+						                         onValueChange = { trainTypeValue = it; onFilterChange() })
+						SingleSelectChipDropdown(category = stringResource(R.string.year),
+						                         options = listOf(getString(R.string.reset)) + yearOptions.map { it.getString("acadYearSemester") },
+						                         optionValues = listOf(null) + yearOptions.map { it.getString("acadYearSemester") },
+						                         selectedValue = yearValue,
+						                         onValueChange = { yearValue = it; onFilterChange() })
+						SingleSelectChipDropdown(category = stringResource(R.string.course_type),
+						                         options = listOf(getString(R.string.reset)) + courseTypeOptions.map { it.getString("catName") },
+						                         optionValues = listOf(null) + courseTypeOptions.map { it.getString("catCode") },
+						                         selectedValue = courseTypeValue,
+						                         onValueChange = { courseTypeValue = it; onFilterChange() })
+						InputDialogChip(stringResource(R.string.course_name), courseNameValue) { courseNameValue = it; onFilterChange() }
+						InputDialogChip(stringResource(R.string.course_number), courseNumberValue) { courseNumberValue = it; onFilterChange() }
+						InputDialogChip(stringResource(R.string.min_grade), minGradeValue, KeyboardType.Number) { minGradeValue = it; onFilterChange() }
+					}
+					
+					StaggerScreen(sections = sections, onScrollBottom = {
+						if (viewModel.hasMore()) viewModel.fetchGrade()
+					})
+				}
 			}
 		}
-		
-		return courseNamePop
 	}
-	
-	private fun regetGrade() {
-		clear()
-		grade
-	}
-	
-	private fun clear() {
-		fragment.clear()
-		page = 1
-		total = -1
-	}
-	
-	val grade: Unit
-		get() {
-			model.addAndNext("jwxt/achievement-manage/achievement/selfPageList", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${args}}", 3)
-		}
-	
-	fun getData(pos: Int) {
-		model.add(mutableListOf<String?>("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", "jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", "jwxt/base-info/base-category/SfqyBox")[pos], pos)
-	}
-	
-	val args: JSONObject
-		/*
-			 * {"categoryCode":"01","schoolSemester":"2025-1","courseTypeCode":"10","courseNum":"编码","courseName":"名称","finalAchievement":0,"achievementState":null}
-			 * */
-		get() {
-			val args = JSONObject()
-			if (!isEmpty(trainType.value)) args["categoryCode"] = trainType.value
-			if (!isEmpty(year.value)) args["schoolSemester"] = year.value
-			if (!isEmpty(courseType.value)) args["courseTypeCode"] = courseType.value
-			if (!isEmpty(courseName.value)) args["courseName"] = courseName.value
-			if (!isEmpty(courseNumber.value)) args["courseNum"] = courseNumber.value
-			if (!isEmpty(minGrade.value)) args["finalAchievement"] = minGrade.value!!.toInt()
-			return args
-		}
 }

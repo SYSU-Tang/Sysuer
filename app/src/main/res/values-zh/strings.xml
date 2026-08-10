@@ -704,4 +704,46 @@
 
     <string name="cancel_pay">取消支付</string>
     <string name="pay">支付</string>
+
+    <string name="school_enrollment_student_report_info">学生报到信息</string>
+    <string name="registration_current_year">今年注册记录</string>
+    <string name="registration_payment">缴费信息</string>
+    <string name="registration_history">往年注册记录</string>
+    <string name="item_name">项目名称</string>
+    <string name="amount_yuan">金额（元）</string>
+    <string name="interval">区间</string>
+    <string name="grade_major">年级专业</string>
+    <string name="check_in_date">报到日期</string>
+    <string name="register_date">注册日期</string>
+    <string name="pay_to_pay">待交费用</string>
+    <string name="pay_selective">选交费用</string>
+    <string name="pay_fee_situation">交费情况</string>
+    <string name="pay_record">付款记录</string>
+    <string name="pay_refund">退费记录</string>
+    <string name="fee_interval">交费区间</string>
+    <string name="current_due">当前应交</string>
+    <string name="this_payment">本次交费</string>
+    <string name="fee_item">收费项目</string>
+    <string name="should_pay">应交</string>
+    <string name="deferred_pay">缓交</string>
+    <string name="actual_pay">实交</string>
+    <string name="order_number">订单编号</string>
+    <string name="pay_method">支付方式</string>
+    <string name="pay_number">支付编号</string>
+    <string name="refund_amount">退费金额</string>
+    <string name="refund_date">退费日期</string>
+    <string name="refund_status">退费状态</string>
+    <string name="charge_interval">收费区间</string>
+
+
+    <string name="grade_for_level">等级制成绩</string>
+    <string name="gpa">绩点</string>
+    <string name="course_category">课程类别</string>
+    <string name="course_id">课程ID</string>
+    <string name="exam_nature">考试性质</string>
+    <string name="level">等级</string>
+    <string name="semester">学期</string>
+    <string name="total_hours">总学时</string>
+    <string name="training_category">培养类别</string>
+    <string name="total_achievement">总成绩</string>
 </resources>

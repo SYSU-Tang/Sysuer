@@ -1,53 +1,48 @@
 package com.sysu.edu.academic
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
-import androidx.lifecycle.Observer
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import com.alibaba.fastjson2.JSONObject
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.toStringOrDefault
-import com.sysu.edu.databinding.ActivityPagerBinding
-import com.sysu.edu.model.XgxtModel
-import com.sysu.edu.view.Pager2Adapter
-import com.sysu.edu.view.StaggerFragment
+import com.sysu.edu.api.DataStoreManager
+import com.sysu.edu.browser.RichTextActivity
+import com.sysu.edu.view.ActivityPager
+import com.sysu.edu.view.MenuItem
+import com.sysu.edu.view.RowData
+import com.sysu.edu.view.SectionData
+import com.sysu.edu.view.StaggerScreen
+import com.sysu.edu.view.toMarkdown
 
 class PersonalInformationActivity : BaseActivity() {
-	lateinit var model: XgxtModel
-	override fun onDestroy() {
-		super.onDestroy()
-		model.dispose()
-	}
-	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		model = XgxtModel(this)
-		val tabs = mutableListOf<String?>()
-		val pager2Adapter = Pager2Adapter(this)
-		val binding = ActivityPagerBinding.inflate(layoutInflater).apply {
-			toolbar.setTitle(R.string.personal_info)
-			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-			toolbar.menu.add(R.string.export)
-				.setIcon(R.drawable.export)
-				.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-				.setOnMenuItemClickListener {
-					if (pager2Adapter.itemCount > 0) {
-						val currentItem = pager.currentItem
-						val fragment = (pager2Adapter.get(currentItem) as StaggerFragment)
-						fragment.export(toolbar, tabs[currentItem] ?: "")
-					}
-					true
-				}
-			pager.adapter = pager2Adapter
-			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.text = tabs[position] }.attach()
-		}
-		setContentView(binding.root)
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val data = message.second
-			if (data.containsKey("code") && data.getInteger("code") == 200) {
+		enableEdgeToEdge()
+		val viewModel = ViewModelProvider(this)[PersonalInformationViewModel::class.java]
+		
+		setContent {
+			val infoList by viewModel.infoList.observeAsState(emptyList())
+			
+			LaunchedEffect(Unit) {
+				viewModel.fetchPersonalInfo()
+			}
+			val tabTitles = remember(infoList) {
+				infoList.map { it.getString("zdflmc") }
+			}
+			val allSections = remember(infoList) {
 				val dict = HashMap<String?, String?>()
 				dict["bmmc"] = "部门"
 				dict["id"] = "ID"
@@ -62,42 +57,50 @@ class PersonalInformationActivity : BaseActivity() {
 				dict["cjrbjText"] = "残疾人标记"
 				dict["xxmc"] = "学校"
 				dict["hyzkmc"] = "婚姻状况描述"
-				data.getJSONArray("data").forEach { item: Any? ->
-					(item as JSONObject).getJSONArray("fields").forEach { field: Any? ->
-						dict[(field as JSONObject).getString("zdmc")] = field.getString("zdzwm")
+				
+				infoList.map { item ->
+					val sections = mutableStateListOf<SectionData>()
+					item.getJSONArray("fields")?.filterIsInstance<JSONObject>()?.forEach { field ->
+						dict[field.getString("zdmc")] = field.getString("zdzwm")
 					}
-					val list = StaggerFragment()
-					tabs.add(item.getString("zdflmc"))
-					pager2Adapter.add(list)
-					if (item.getJSONObject("data").isEmpty()) {
+					val data = item.getJSONObject("data")
+					if (data != null && !data.isEmpty()) {
+						val rows = mutableStateListOf<RowData>()
+						data.forEach { (k, v) ->
+							rows.add(RowData(dict.getOrDefault(k, k), toStringOrDefault<Any?>(v)))
+						}
+						sections.add(SectionData(title = item.getString("zdflmc"), rows = rows))
+					}
+					else {
 						var count = 1
-						item.getJSONArray("dataList").forEach { j: Any? ->
-							val keys = ArrayList<String?>()
-							val values = ArrayList<String?>()
-							(j as JSONObject).forEach { (k: String?, v: Any?) ->
-								keys.add(dict.getOrDefault(k, k))
-								if ("gx" == k || "gxrzzmm" == k || "qdxl" == k) values.add((v as JSONObject).getString("label"))
-								else values.add(toStringOrDefault<Any?>(v))
+						item.getJSONArray("dataList")?.filterIsInstance<JSONObject>()?.forEach { j ->
+							val rows = mutableStateListOf<RowData>()
+							j.forEach { (k, v) ->
+								val value = when (k) {
+									"gx", "gxrzzmm", "qdxl" -> (v as? JSONObject)?.getString("label")
+									else -> "$v"
+								}
+								rows.add(RowData(dict.getOrDefault(k, k), value))
 							}
-							list.addSection("${count++}", keys, values)
+							sections.add(SectionData(title = "${count++}", rows = rows))
 						}
-					} else {
-						val keys = ArrayList<String?>()
-						val values = ArrayList<String?>()
-						item.getJSONObject("data").forEach { (k: String?, v: Any?) ->
-							keys.add(dict.getOrDefault(k, k))
-							values.add(toStringOrDefault<Any?>(v))
-						}
-						list.addSection(item.getString("zdflmc"), keys, values)
 					}
+					sections
 				}
 			}
-		})
-		personalInfo
-	}
-	
-	val personalInfo: Unit
-		get() {
-			model.addAndNext("xsxx/api/sm-xsxx/info/student/view", 0)
+			
+			ActivityPager(title = stringResource(R.string.personal_info), tabs = tabTitles.map { MenuItem(it) }, actions = {
+				IconButton(onClick = {
+					val markdown = allSections.joinToString("\n\n") { it.toMarkdown() }
+					DataStoreManager.saveContent(this@PersonalInformationActivity, getString(R.string.personal_info), markdown) {
+						startActivity(Intent(this@PersonalInformationActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.personal_info)))
+					}
+				}) {
+					Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
+				}
+			}, onNavigationClick = { supportFinishAfterTransition() }) { page ->
+				allSections.getOrNull(page)?.let { StaggerScreen(it) }
+			}
 		}
+	}
 }

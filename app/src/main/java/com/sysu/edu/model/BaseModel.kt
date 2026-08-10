@@ -41,9 +41,7 @@ abstract class BaseModel(context: Context) {
 	}
 	
 	fun add(path: String?, data: String? = null, type: String? = null, what: Int) {
-		queue.add(CommonUtil.Tuple2(http.generateRequest("https://${authorizationManager.host}/$path",
-		                                                 data,
-		                                                 type).build(), what))
+		queue.add(CommonUtil.Tuple2(http.generateRequest("https://${authorizationManager.host}/$path", data, type).build(), what))
 	}
 	
 	fun set(path: String?, data: String? = null, type: String? = null, what: Int) {
@@ -109,37 +107,60 @@ abstract class BaseModel(context: Context) {
 		http.handler.post { contextUtil.toast(R.string.no_net_connected) }
 	}
 	
+	/**
+	 * 执行请求
+	 * @param request 请求
+	 * @return 响应
+	 * */
 	fun execute(request: CommonUtil.Tuple2<Request, Int>): CommonUtil.Tuple2<Int, JSONObject>? {
 		val call = http.client.newCall(request.first)
-		try {
-			return handleResponse(request, call.execute())
+		return try {
+			handleResponse(request, call.execute())
 		} catch (e: IOException) {
 			handleFailure(request, e)
+			null
 		}
-		return null
 	}
 	
+	/**
+	 * 执行请求
+	 * @param request 请求
+	 * @param code 状态码
+	 * @return 响应
+	 * */
 	fun execute(request: Request, code: Int): CommonUtil.Tuple2<Int, JSONObject>? {
-		try {
-			return handleResponse(CommonUtil.Tuple2(request, code),
-			                      http.client.newCall(request).execute())
+		return try {
+			handleResponse(CommonUtil.Tuple2(request, code), http.client.newCall(request).execute())
 		} catch (e: IOException) {
 			handleFailure(CommonUtil.Tuple2(request, code), e)
-			return null
+			null
 		}
 	}
 	
+	/**
+	 * 发送请求
+	 * @param path 路径
+	 * @param data 数据
+	 * @param type 类型
+	 * @param callback 回调
+	 * */
 	fun run(path: String, data: String? = null, type: String? = null, callback: Callback) {
-		run(http.generateRequest("https://${authorizationManager.host}/$path", data, type).build(),
-		    callback)
+		run(http.generateRequest("https://${authorizationManager.host}/$path", data, type).build(), callback)
 	}
 	
+	/**
+	 * 发送请求
+	 * @param request 请求
+	 * @param callback 回调
+	 * */
 	fun run(request: Request, callback: Callback) {
 		http.client.newCall(request).enqueue(callback)
 	}
 	
-	protected open fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,
-	                                  response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
+	protected open fun handleResponse(
+		request: CommonUtil.Tuple2<Request, Int>,
+		response: Response,
+	                                 ): CommonUtil.Tuple2<Int, JSONObject>? {
 		val content = response.body.string()
 		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
 		response.header("Content-Type")?.takeIf { it.contains("application/json") }?.let {
@@ -176,9 +197,7 @@ abstract class BaseModel(context: Context) {
 		get() = http.cookieManager
 	
 	open fun updateRequest(request: Request): Request {
-		val newRequest = request.newBuilder()
-			.url(request.url.newBuilder().host(host).build())
-			.header("Cookie", cookie)
+		val newRequest = request.newBuilder().url(request.url.newBuilder().host(host).build()).header("Cookie", cookie)
 		if (http.isTokenRequired) newRequest.header("token", token)
 		if (http.isAuthorizationRequired) newRequest.header("Authorization", authorization)
 		return newRequest.build()

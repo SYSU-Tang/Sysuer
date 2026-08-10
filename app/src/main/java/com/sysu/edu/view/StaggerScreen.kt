@@ -149,6 +149,7 @@ data class SectionData(
 		SelectionContainer {
 			Text(text = row.key ?: "", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
 		}
+		Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
 		SelectionContainer {
 			Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
 		}
@@ -178,8 +179,7 @@ data class SectionData(
 	if (!isNestedEnabled) {
 		FlowRow(modifier = Modifier
 			.fillMaxWidth()
-			.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
-		       verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
+			.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)), verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
 			sections.forEach { section ->
 				SectionCard(section, isHideNull = isHideNull)
 			}
@@ -220,7 +220,7 @@ fun List<SectionData>.toHtml(): String {
 	html.append("<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">")
 	var keys: List<String?> = emptyList()
 	
-	this.forEachIndexed { i, section ->
+	forEachIndexed { i, section ->
 		val sectionKeys = section.rows.map { it.key }
 		if (keys.isEmpty() || !sectionKeys.containsAll(keys)) {
 			keys = sectionKeys

@@ -2,7 +2,6 @@ package com.sysu.edu.view
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +14,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -37,6 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -46,9 +47,12 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.times
@@ -63,6 +67,7 @@ import kotlin.math.sin
 	tabs: List<MenuItem> = emptyList(),
 	navs: List<MenuItem> = emptyList(),
 	onNavigationClick: () -> Unit = { },
+	onPageChange: ((Int) -> Unit)? = null,
 	isNestedScrollEnabled: Boolean = true,
 	floatingActionButton: @Composable () -> Unit = {},
 	actions: @Composable RowScope.() -> Unit = {},
@@ -73,6 +78,10 @@ import kotlin.math.sin
 	})
 	val coroutineScope = rememberCoroutineScope()
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+	
+	LaunchedEffect(pagerState.currentPage) {
+		onPageChange?.invoke(pagerState.currentPage)
+	}
 	
 	SysuerTheme {
 		Scaffold(
@@ -108,16 +117,24 @@ import kotlin.math.sin
 									})
 								}
 							}
-							if (tabs.size > 5) {
-								PrimaryScrollableTabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.fillMaxWidth(), containerColor = Color.Transparent, divider = {}, tabs = tabContent, indicator = {
-									LiquidTabIndicator(pagerState = pagerState, modifier = Modifier.fillMaxWidth())
-								})
-							}
-							else {
-								PrimaryTabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.fillMaxWidth(), containerColor = Color.Transparent, divider = {}, tabs = tabContent, indicator = {
-									LiquidTabIndicator(pagerState = pagerState, modifier = Modifier.fillMaxWidth())
-								})
-							}
+							if (tabs.size > 4) PrimaryScrollableTabRow(edgePadding = 0.dp,
+							                                           selectedTabIndex = pagerState.currentPage,
+							                                           modifier = Modifier.fillMaxWidth(),
+							                                           containerColor = Color.Transparent,
+							                                           divider = {},
+							                                           tabs = tabContent,
+							                                           indicator = {
+								                                           TabRowDefaults.PrimaryIndicator(modifier = Modifier.tabIndicatorOffset(selectedTabIndex = pagerState.currentPage, matchContentSize = true),
+								                                                                           width = Dp.Unspecified,
+								                                                                           color = MaterialTheme.colorScheme.primary,
+								                                                                           shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
+							                                           })
+							else PrimaryTabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.fillMaxWidth(), containerColor = Color.Transparent, divider = {}, tabs = tabContent, indicator = {
+								TabRowDefaults.PrimaryIndicator(modifier = Modifier.tabIndicatorOffset(selectedTabIndex = pagerState.currentPage, matchContentSize = true),
+								                                width = Dp.Unspecified,
+								                                color = MaterialTheme.colorScheme.primary,
+								                                shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
+							})
 						}
 					}
 				}
@@ -155,7 +172,7 @@ import kotlin.math.sin
 							.padding(innerPadding)
 							.verticalScroll(rememberScrollState())
 							.nestedScroll(rememberNestedScrollInteropConnection()),
-					      ) {
+					   ) {
 						pageContent(0)
 					}
 				}
@@ -232,12 +249,12 @@ data class MenuItem(val title: String? = null, val icon: ImageVector? = null, va
 		val stretch = sin(progress * Math.PI).toFloat() * baseWidth * 0.45f
 		val indicatorWidth = baseWidth + stretch
 		val indicatorLeft = center - indicatorWidth / 2
-		val placeable = measurable.measure(Constraints.fixed(width = indicatorWidth.roundToPx(), height = 3.dp.roundToPx()))
+		val placeable = measurable.measure(Constraints.fixed(width = indicatorWidth.roundToPx(), height = 2.dp.roundToPx()))
 		
 		layout(constraints.maxWidth, constraints.maxHeight) {
 			placeable.placeRelative(x = indicatorLeft.roundToPx(), y = constraints.maxHeight - placeable.height)
 		}
-	}, height = 3.dp, shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+	}, height = 2.dp, shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
 }
 
 @Composable fun UnboundedTab(
@@ -246,14 +263,15 @@ data class MenuItem(val title: String? = null, val icon: ImageVector? = null, va
 	text: String?,
 	onClick: () -> Unit,
                             ) {
-	val interactionSource = remember { MutableInteractionSource() }
 	Box(modifier = Modifier
 		.height(48.dp)
-		.clickable(interactionSource = interactionSource, indication = ripple(bounded = false), onClick = onClick), contentAlignment = Alignment.Center) {
+		.selectable(selected = selected, onClick = onClick, role = Role.Tab, interactionSource = remember { MutableInteractionSource() }, indication = ripple(bounded = false))
+		.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding))        /*.clickable(interactionSource = interactionSource, indication = ripple(bounded = false), onClick = onClick)*/,
+	    contentAlignment = Alignment.Center) {
 		icon?.let { Icon(imageVector = it, contentDescription = text) }
 		text?.let {
 			Text(text = it, color = if (selected) MaterialTheme.colorScheme.primary
-			else MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.titleSmall)
+			else MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
 		}
 	}
 }

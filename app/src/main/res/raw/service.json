@@ -28,7 +28,7 @@
       {
         "id": 104,
         "name": "学业预警",
-        "activity": ".academic.SchoolWorkWarning",
+        "activity": ".academic.SchoolWorkWarningActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/schoolWorkWarning?code=jwxsd_wdxyyj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E5%25AD%25A6%25E4%25B8%259A%25E9%25A2%2584%25E8%25AD%25A6",
         "description": "学业预警系统，监控学习成绩、学分完成情况，及时发出预警通知"
       },

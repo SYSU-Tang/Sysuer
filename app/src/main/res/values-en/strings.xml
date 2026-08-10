@@ -705,4 +705,49 @@
 
     <string name="cancel_pay">Cancel Pay</string>
     <string name="pay">Pay</string>
+
+
+    <string name="school_enrollment_student_report_info">Student Check-in Information</string>
+    <string name="registration_current_year">Current Year Registration Record</string>
+    <string name="registration_payment">Payment Information</string>
+    <string name="registration_history">Previous Year Registration Record</string>
+    <string name="item_name">Item Name</string>
+    <string name="amount_yuan">Amount (Yuan)</string>
+    <string name="interval">Interval</string>
+    <string name="grade_major">Grade Major</string>
+    <string name="check_in_date">Check-in Date</string>
+    <string name="register_date">Register Date</string>
+
+
+    <string name="pay_to_pay">Pending Payment</string>
+    <string name="pay_selective">Selective Payment</string>
+    <string name="pay_fee_situation">Payment Situation</string>
+    <string name="pay_record">Payment Record</string>
+    <string name="pay_refund">Refund Record</string>
+    <string name="fee_interval">Payment Interval</string>
+    <string name="current_due">Current Due</string>
+    <string name="this_payment">This Payment</string>
+    <string name="fee_item">Payment Item</string>
+    <string name="should_pay">Should Pay</string>
+    <string name="deferred_pay">Deferred Pay</string>
+    <string name="actual_pay">Actual Pay</string>
+    <string name="order_number">Order Number</string>
+    <string name="pay_method">Payment Method</string>
+    <string name="pay_number">Payment Number</string>
+    <string name="refund_amount">Refund Amount</string>
+    <string name="refund_date">Refund Date</string>
+    <string name="refund_status">Refund Status</string>
+    <string name="charge_interval">Charge Interval</string>
+
+
+    <string name="grade_for_level">Level-based Grade</string>
+    <string name="gpa">GPA</string>
+    <string name="course_category">Course Category</string>
+    <string name="course_id">Course ID</string>
+    <string name="exam_nature">Exam Nature</string>
+    <string name="level">Level</string>
+    <string name="semester">Semester</string>
+    <string name="total_hours">Total Hours</string>
+    <string name="training_category">Training Category</string>
+    <string name="total_achievement">Total Achievement</string>
 </resources>
