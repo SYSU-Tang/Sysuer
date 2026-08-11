@@ -517,6 +517,20 @@
     <string name="cross_major">跨专业</string>
     <string name="public_selective">公选</string>
     <string name="study_hour">学时</string>
+    <string name="credit_period_distribution">学分学时分布</string>
+    <string name="public_compulsory_hour">公必学时</string>
+    <string name="major_compulsory_hour">专必学时</string>
+    <string name="major_select_hour">专选建议学时</string>
+    <string name="public_select_hour">公选学时</string>
+    <string name="major_select_set_credit">专选开设学分</string>
+    <string name="total_hour">总学时</string>
+    <string name="curriculum_count">课程门数</string>
+    <string name="total_all_credit">总学分</string>
+    <string name="total_all_period">总学时</string>
+    <string name="total_theoretical_period">理论学时</string>
+    <string name="total_practice_period">实践学时</string>
+    <string name="total_practice_period_week">实践周数</string>
+    <string name="practice_course">实践课程</string>
     <string name="course_outline">课程大纲</string>
     <string name="refresh">刷新</string>
     <string name="open_in_browser">在浏览器中打开</string>
@@ -746,4 +760,48 @@
     <string name="total_hours">总学时</string>
     <string name="training_category">培养类别</string>
     <string name="total_achievement">总成绩</string>
+
+
+    <string name="expand">展开</string>
+    <string name="major_code">专业代码</string>
+    <string name="major_name">专业名称</string>
+    <string name="schooling_length">学制</string>
+    <string name="study_period">修业年限</string>
+    <string name="discipline_category">学科门类</string>
+    <string name="degree_granting_category">学位授予门类</string>
+
+
+    <string name="course_arrangement">课程安排</string>
+    <string name="teaching_class_id">班级ID</string>
+    <string name="open_unit">开设学院</string>
+    <string name="search_course">搜索课程</string>
+    <string name="personal_training_program">个人培养方案</string>
+    <string name="training_adjust">培养方案调整</string>
+    <string name="course_table">课程表</string>
+    <string name="credit_requirement">学分要求</string>
+    <string name="major_select_sug_credit">专选建议学分</string>
+
+    <string name="training_target">培养目标</string>
+    <string name="graduation_requirement">毕业要求</string>
+    <string name="program_name">方案名称</string>
+    <string name="audit_status">审核状态</string>
+    <string name="current_process">当前流程</string>
+    <string name="degree_type">学位类型</string>
+    <string name="school_length">学制</string>
+    <string name="profession_code">专业代码</string>
+    <string name="req_practice_credit">要求实践学分</string>
+    <string name="adjust_review_state">调整审核状态</string>
+    <string name="adjust_type">调整类型</string>
+    <string name="week_period">周学时</string>
+    <string name="theoretical_period">理论学时</string>
+    <string name="practice_period">实践学时</string>
+    <string name="course_manager">课程负责人</string>
+    <string name="practice_credit">实践学分</string>
+    <string name="required_credit">要求学分</string>
+    <string name="credit_ratio">学分比例</string>
+    <string name="course_english_name">课程英文名</string>
+    <string name="course_sub_class">课程子类</string>
+    <string name="initiation_semester">开课学期</string>
+    <string name="confirmation_name">审核意见表</string>
+    <string name="basic_info">基本信息</string>
 </resources>

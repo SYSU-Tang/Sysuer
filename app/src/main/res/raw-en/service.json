@@ -353,6 +353,7 @@
       {
         "id": 709,
         "name": "Personal Training Plan",
+        "activity": ".academic.PersonalTrainingProgramActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView?code=jwxsd_grpyfack&resourceName=%25E4%25B8%25AA%25E4%25BA%25BA%25E5%259F%25B9%25E5%2585%25BB%25E6%2596%25B9%25E6%25A1%2588%25E6%259F%25A5%25E7%259C%258B",
         "description": "Personal training plan system, providing professional training plans, course planning, and academic guidance"
       },

@@ -519,6 +519,20 @@
     <string name="cross_major">Cross Major</string>
     <string name="public_selective">Public Selective</string>
     <string name="study_hour">Study Hour</string>
+    <string name="credit_period_distribution">Credit &amp; Hour Distribution</string>
+    <string name="public_compulsory_hour">Pub. Req. Hour</string>
+    <string name="major_compulsory_hour">Major Req. Hour</string>
+    <string name="major_select_hour">Major Suggest. Hour</string>
+    <string name="public_select_hour">Pub. Sel. Hour</string>
+    <string name="major_select_set_credit">Major Sel. Set Credit</string>
+    <string name="total_hour">Total Hour</string>
+    <string name="curriculum_count">Course Count</string>
+    <string name="total_all_credit">Total Credit</string>
+    <string name="total_all_period">Total Period</string>
+    <string name="total_theoretical_period">Theoretical Period</string>
+    <string name="total_practice_period">Practice Period</string>
+    <string name="total_practice_period_week">Practice Weeks</string>
+    <string name="practice_course">Practice Course</string>
     <string name="course_outline">Course Outline</string>
     <string name="refresh">Refresh</string>
     <string name="open_in_browser">Open in Browser</string>
@@ -750,4 +764,46 @@
     <string name="total_hours">Total Hours</string>
     <string name="training_category">Training Category</string>
     <string name="total_achievement">Total Achievement</string>
+
+    <string name="expand">Expand</string>
+    <string name="major_code">Major Code</string>
+    <string name="major_name">Major Name</string>
+    <string name="schooling_length">Schooling Length</string>
+    <string name="study_period">Study Period</string>
+    <string name="discipline_category">Discipline Category</string>
+    <string name="degree_granting_category">Degree Granting Category</string>
+
+    <string name="course_arrangement">Course Arrangement</string>
+    <string name="teaching_class_id">Teaching Class ID</string>
+    <string name="open_unit">Open Unit</string>
+    <string name="search_course">Search Course</string>
+    <string name="personal_training_program">Personal Training Program</string>
+    <string name="training_adjust">Training Adjust</string>
+    <string name="course_table">Course Table</string>
+    <string name="credit_requirement">Credit Requirement</string>
+    <string name="major_select_sug_credit">Major Select Suggestion Credit</string>
+
+    <string name="training_target">Training Target</string>
+    <string name="graduation_requirement">Graduation Requirement</string>
+    <string name="program_name">Program Name</string>
+    <string name="audit_status">Audit Status</string>
+    <string name="current_process">Current Process</string>
+    <string name="degree_type">Degree Type</string>
+    <string name="school_length">School Length</string>
+    <string name="profession_code">Profession Code</string>
+    <string name="req_practice_credit">Required Practice Credit</string>
+    <string name="adjust_review_state">Adjust Review State</string>
+    <string name="adjust_type">Adjust Type</string>
+    <string name="week_period">Week Period</string>
+    <string name="theoretical_period">Theoretical Period</string>
+    <string name="practice_period">Practice Periods</string>
+    <string name="course_manager">Course Manager</string>
+    <string name="practice_credit">Practice Credit</string>
+    <string name="required_credit">Required Credit</string>
+    <string name="credit_ratio">Credit Ratio</string>
+    <string name="course_english_name">Course English Name</string>
+    <string name="course_sub_class">Course Sub-class</string>
+    <string name="initiation_semester">Initiation Semester</string>
+    <string name="confirmation_name">Confirmation Name</string>
+    <string name="basic_info">Basic Information</string>
 </resources>
