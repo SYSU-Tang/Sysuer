@@ -2,165 +2,145 @@ package com.sysu.edu.academic
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.widget.SearchView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.ActivityOptionsCompat
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.alibaba.fastjson2.JSONObject
-import com.google.android.material.button.MaterialButton
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil
-import com.sysu.edu.api.Config
-import com.sysu.edu.databinding.ActivityCourseSelectedBinding
-import com.sysu.edu.databinding.ItemCourseSelectedBinding
-import com.sysu.edu.model.JwxtModel
-import com.sysu.edu.view.RecyclerAdapter
+import com.sysu.edu.api.CommonUtil.extractValue
+import com.sysu.edu.api.DataStoreManager
+import com.sysu.edu.browser.RichTextActivity
+import com.sysu.edu.view.ActivityPager
+import com.sysu.edu.view.RowData
+import com.sysu.edu.view.SectionData
+import com.sysu.edu.view.StaggerScreen
+import com.sysu.edu.view.toMarkdown
 import java.util.regex.Pattern
 
 class CourseSelectedActivity : BaseActivity() {
-	var page: Int = 0
-	lateinit var model: JwxtModel
-	override fun onDestroy() {
-		super.onDestroy()
-		model.dispose()
-	}
-	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		model = JwxtModel(this)
-		val courseAdapter = CourseSelectedAdapter()
-		val binding = ActivityCourseSelectedBinding.inflate(layoutInflater).apply {
-			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-			toolbar.menu
-				.add(R.string.export)
-				.setIcon(R.drawable.export)
-				.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-				.setOnMenuItemClickListener {
-					startActivity(Intent(this@CourseSelectedActivity, MarkdownViewActivity::class.java).putExtra("content", courseAdapter.toMarkdown())
-									  .putExtra("title", getString(R.string.course_selected)), ActivityOptionsCompat.makeSceneTransitionAnimation(this@CourseSelectedActivity, toolbar, "miniapp")
-									  .toBundle())
-					true
+		enableEdgeToEdge()
+		val viewModel = ViewModelProvider(this)[CourseSelectedViewModel::class.java]
+
+		setContent {
+			val courseList by viewModel.courseList.observeAsState(emptyList())
+
+			LaunchedEffect(Unit) {
+				viewModel.reFetchCourseList()
+			}
+
+			var searchQuery by remember { mutableStateOf("") }
+
+			val sections = remember(courseList) {
+				mutableStateListOf<SectionData>().also { list ->
+					courseList.forEach { item ->
+						val rows = mutableStateListOf<RowData>()
+						val teachingTimePlace = item.getString("teachingTimePlace")
+						if (teachingTimePlace.isNullOrEmpty()) {
+							rows.add(RowData(getString(R.string.course_arrangement), getString(R.string.none)))
+						} else {
+							Pattern.compile(",").splitAsStream(teachingTimePlace).forEach { s ->
+								rows.add(RowData(getString(R.string.course_arrangement), s.replace(";", "/")))
+							}
+						}
+						rows.addAll(extractValue(this@CourseSelectedActivity,
+							item,
+							intArrayOf(R.string.course_name,
+								R.string.course_category,
+								R.string.open_unit,
+								R.string.exam_time,
+								R.string.exam_mode,
+								R.string.credit,
+								R.string.teaching_class_id,
+								R.string.class_number,
+								R.string.class_name,
+								R.string.course_number),
+							arrayOf("courseName",
+								"courseCategoryName",
+								"courseUnitName",
+								"scheduleExamTime",
+								"examFormName",
+								"credit",
+								"teachingClassId",
+								"teachingClassNum",
+								"teachingClassName",
+								"courseNum")))
+						list.add(SectionData(
+							title = item.getString("courseName"),
+							rows = rows,
+							footerMenus = mutableStateListOf(com.sysu.edu.view.MenuItem(
+								title = getString(R.string.course_detail),
+								onClick = {
+									startActivity(Intent(this@CourseSelectedActivity, CourseDetailActivity::class.java)
+										.putExtra("id", item.getString("teachingClassId"))
+										.putExtra("code", item.getString("courseNum"))
+										.putExtra("class", item.getString("teachingClassNum")))
+									true
+								}
+							))
+						))
+					}
 				}
-			search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-				override fun onQueryTextSubmit(query: String?): Boolean {
-					return true
+			}
+
+			ActivityPager(
+				title = stringResource(R.string.course_selected),
+				onNavigationClick = { supportFinishAfterTransition() },
+				isNestedScrollEnabled = false,
+				actions = {
+					IconButton(onClick = {
+						val markdown = sections.toMarkdown()
+						DataStoreManager.saveContent(this@CourseSelectedActivity, getString(R.string.course_selected), markdown) {
+							startActivity(Intent(this@CourseSelectedActivity, RichTextActivity::class.java)
+								.putExtra("type", DataStoreManager.ContentType.MARKDOWN.name)
+								.putExtra("title", getString(R.string.course_selected)))
+						}
+					}) {
+						Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
+					}
 				}
-				
-				override fun onQueryTextChange(newText: String?): Boolean {
-					page = 0
-					courseAdapter.clear()
-					getSelectedCourses(newText)
-					return true
+			) {
+				Column(modifier = Modifier.fillMaxSize()) {
+					OutlinedTextField(
+						value = searchQuery,
+						onValueChange = { newQuery ->
+							searchQuery = newQuery
+							viewModel.courseName = newQuery
+							viewModel.reFetchCourseList()
+						},
+						label = { androidx.compose.material3.Text(stringResource(R.string.search_course)) },
+						singleLine = true,
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding))
+					)
+
+					StaggerScreen(
+						sections = sections,
+						onScrollBottom = {
+							if (viewModel.hasMore()) viewModel.fetchCourseList()
+						}
+					)
 				}
-			})
-			list.setLayoutManager(StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL))
-			list.setAdapter(courseAdapter)
-		}
-		setContentView(binding.root)
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (response.getInteger("code") == 200) {
-				val data = response.getJSONObject("data")
-				data.getJSONArray("rows")
-					.forEach { o: Any? -> courseAdapter.add(o as JSONObject?) }
-				if (data.getInteger("total") > page * 10) getSelectedCourses(binding.search.query.toString())
-			}
-		})
-		getSelectedCourses("")
-	}
-	
-	fun getSelectedCourses(courseName: String?) {
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format("{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", ++page, courseName), 1)
-	}
-	
-	class CourseSelectedAdapter : RecyclerAdapter<JSONObject?>() {
-		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return ViewHolder(ItemCourseSelectedBinding.inflate(LayoutInflater.from(parent.context), parent, false)).apply<ViewHolder> { setInfo(data[viewType]) }
-		}
-		
-		fun toMarkdown(): String {
-			val key: Array<String?> = arrayOf("courseName", "courseCategoryName", "courseUnitName", "scheduleExamTime", "examFormName", "credit", "teachingClassId", "teachingClassNum", "teachingClassName", "courseNum")
-			val md = StringBuilder().append("| 课程名称 | 课程类别 | 开设学院 | 考试时间 | 考核方式 | 学分 | 班级ID | 班级号 | 班级名 | 课程号 |\n")
-			.append("| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |\n")
-			data.forEach { item: JSONObject? ->
-				for (s in key) md.append(if (item!!.getString(s) == null) "无" else item.getString(s))
-					.append(" | ")
-				md.append("\n")
-			}
-			return "$md"
-		}
-		
-		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-			(holder as ViewHolder).setInfo(data[position])
-			holder.binding.root.setOnClickListener { view: View? ->
-				view!!.context.startActivity(Intent(view.context, CourseDetailActivity::class.java).putExtra("id", data[position]!!.getString("teachingClassId"))
-												 .putExtra("code", data[position]!!.getString("courseNum"))
-												 .putExtra("class", data[position]!!.getString("teachingClassNum")), ActivityOptionsCompat.makeSceneTransitionAnimation((view.context as android.app.Activity?)!!, holder.binding.title, "miniapp")
-												 .toBundle())
-			}
-			super.onBindViewHolder(holder, position)
-		}
-		
-		override fun getItemViewType(position: Int): Int {
-			return position
-		}
-		
-		internal class ViewHolder(val binding: ItemCourseSelectedBinding) :
-			RecyclerView.ViewHolder(binding.root) {
-			val ids: MutableList<Int?> = mutableListOf()
-			val info: MutableLiveData<JSONObject?> = MutableLiveData<JSONObject?>()
-			
-			init {
-				info.observe((binding.root.context as androidx.fragment.app.FragmentActivity?)!!, Observer { info: JSONObject? -> this.loadInfo(info!!) })
-			}
-			
-			fun setInfo(info: JSONObject?) {
-				this.info.postValue(info)
-			}
-			
-			fun loadInfo(info: JSONObject) {
-				val key: Array<String?> = arrayOf("courseName", "courseCategoryName", "courseUnitName", "scheduleExamTime", "examFormName", "credit", "teachingClassId", "teachingClassNum", "teachingClassName", "courseNum")
-				val name: Array<String?> = arrayOf("课程名称", "课程类别", "开设学院", "考试时间", "考核方式", "学分", "班级ID", "班级号", "班级名", "课程号")
-				ids.forEach { e: Int? -> binding.group.removeView(binding.group.findViewById(e!!)) }
-				ids.clear()
-				binding.title.text = info.getString("courseName")
-				val teachingTimePlace = info.getString("teachingTimePlace")
-				if (teachingTimePlace == null || teachingTimePlace.isEmpty()) ids.add(addItem(binding.root.context.getString(R.string.none), "课程安排")) else {
-					Pattern.compile(",")
-						.splitAsStream(teachingTimePlace)
-						.forEach { s: String? -> ids.add(addItem(s!!.replace(";", "/"), "课程安排")) }
-				}
-				key.indices.forEach {
-					ids.add(addItem(if (info.getString(key[it]) == null) binding.root.context.getString(R.string.none) else info.getString(key[it]), name[it]!!))
-				}
-				binding.courseInfo.setReferencedIds(ids.stream()
-														.mapToInt { obj: Int? -> obj!! }
-														.toArray())
-			}
-			
-			fun addItem(value: String?, name: String): Int {
-				val viewId = View.generateViewId()
-				val config = Config((binding.root.context as androidx.fragment.app.FragmentActivity?)!!)
-				binding.group.addView(MaterialButton(binding.root.context, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-					setTextAppearance(binding.root.context, com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-					layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-					setOnClickListener { config.copy(name, value) }
-					text = "$name: $value"
-					cornerRadius = config.dpToPx(8)
-					setPadding(config.dpToPx(8), config.dpToPx(6), config.dpToPx(8), config.dpToPx(6))
-					gravity =Gravity.CENTER
-					id = viewId
-				})
-				return viewId
 			}
 		}
 	}

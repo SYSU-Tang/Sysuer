@@ -102,7 +102,6 @@ class AcademyNotification : BaseActivity() {
                             view,
                             "miniapp"
                         ).toBundle()
-                        // Remove the proxy view after transition starts
                         window.decorView.postDelayed({ (window.decorView as android.view.ViewGroup).removeView(view) }, 1000)
                         opt
                     } ?: ActivityOptionsCompat.makeSceneTransitionAnimation(

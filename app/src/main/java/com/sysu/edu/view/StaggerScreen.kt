@@ -149,7 +149,7 @@ data class SectionData(
 		SelectionContainer {
 			Text(text = row.key ?: "", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
 		}
-		Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
+		if (row.value != null && row.key != null) Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
 		SelectionContainer {
 			Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
 		}

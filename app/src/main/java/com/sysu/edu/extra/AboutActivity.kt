@@ -4,16 +4,14 @@ import android.os.Bundle
 import android.view.View
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.Config
 import com.sysu.edu.databinding.ActivityInfoBinding
 
 class AboutActivity : BaseActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val binding = ActivityInfoBinding.inflate(layoutInflater)
-		setContentView(binding.getRoot())
+		setContentView(binding.root)
 		val click = ArrayList<Long?>()
-		val config = Config(this)
 		binding.toolbar.setNavigationOnClickListener { _: View? -> finishAfterTransition() }
 		binding.icon.setOnClickListener { _: View? ->
 			if (click.isEmpty() || System.currentTimeMillis() - click[click.size - 1]!! < 500) {

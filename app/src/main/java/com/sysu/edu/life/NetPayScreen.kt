@@ -40,15 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import com.sysu.edu.R
 import com.sysu.edu.view.KeyValueRow
 import com.sysu.edu.view.RowData
-import com.sysu.edu.view.StaggerScreen
-
-@Composable fun NetOrderPage(viewModel: NetPayViewModel) {
-	StaggerScreen(viewModel.orderSections)
-}
-
-@Composable fun NetStatusPage(viewModel: NetPayViewModel) {
-	StaggerScreen(viewModel.statusSections)
-}
 
 @OptIn(ExperimentalMaterial3Api::class) @Composable fun NetPayDialog(viewModel: NetPayViewModel) {
 	val sheetState = rememberBottomSheetState(SheetValue.Hidden)

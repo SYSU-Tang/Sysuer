@@ -15,6 +15,7 @@ import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.MenuItem
+import com.sysu.edu.view.StaggerScreen
 
 class NetPayActivity : BaseActivity() {
 	private val viewModel: NetPayViewModel by viewModels()
@@ -33,10 +34,11 @@ class NetPayActivity : BaseActivity() {
 					             ),
 					isNestedScrollEnabled = false,
 				             ) {
-					when (it) {
-						0 -> NetOrderPage(viewModel)
-						1 -> NetStatusPage(viewModel)
-					}
+					StaggerScreen(when (it) {
+						              0 -> viewModel.orderSections
+						              1 -> viewModel.statusSections
+						              else -> viewModel.orderSections
+					              })
 				}
 				NetPayDialog(viewModel)
 				NetPaySnackbar(viewModel)
