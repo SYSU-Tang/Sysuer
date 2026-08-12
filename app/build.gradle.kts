@@ -36,8 +36,7 @@ android {
 		release {
 			isMinifyEnabled = true
 			isShrinkResources = true
-			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),
-			              "proguard-rules.pro")
+			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 		}
 	}
 	compileOptions {
@@ -99,23 +98,23 @@ dependencies {
 	}
 	implementation(libs.firebase.crashlytics)
 	implementation(libs.firebase.analytics)
-	implementation(libs.markwon){
+	implementation(libs.markwon) {
 		exclude("com.atlassian.commonmark", "commonmark")
 	}
-	implementation(libs.ext.tables){
+	implementation(libs.ext.tables) {
 		exclude("com.atlassian.commonmark", "commonmark")
 	}
-	implementation(libs.ext.strikethrough){
+	implementation(libs.ext.strikethrough) {
 		exclude("com.atlassian.commonmark", "commonmark")
 	}
 	implementation(libs.google.material)
-	implementation(libs.recycler){
+	implementation(libs.recycler) {
 		exclude("com.atlassian.commonmark", "commonmark")
 	}
-	implementation(libs.recycler.table){
+	implementation(libs.recycler.table) {
 		exclude("com.atlassian.commonmark", "commonmark")
 	}
-	implementation(libs.inline.parser){
+	implementation(libs.inline.parser) {
 		exclude("com.atlassian.commonmark", "commonmark")
 	}
 	implementation(libs.androidx.core.remoteviews)
@@ -130,7 +129,7 @@ dependencies {
 	debugImplementation(libs.ui.test.manifest)
 	implementation(libs.api)
 	implementation(libs.provider)
-	implementation(libs.html){
+	implementation(libs.html) {
 		exclude("com.atlassian.commonmark", "commonmark")
 	}
 	implementation(platform(libs.editor.bom))
