@@ -778,6 +778,7 @@
     <string name="open_unit">Open Unit</string>
     <string name="search_course">Search Course</string>
     <string name="personal_training_program">Personal Training Program</string>
+    <string name="training_program_query">Training Program Query</string>
     <string name="training_adjust">Training Adjust</string>
     <string name="course_table">Course Table</string>
     <string name="credit_requirement">Credit Requirement</string>
@@ -806,4 +807,39 @@
     <string name="initiation_semester">Initiation Semester</string>
     <string name="confirmation_name">Confirmation Name</string>
     <string name="basic_info">Basic Information</string>
+
+    <string name="degree">Degree</string>
+    <string name="profession_id">Profession ID</string>
+    <string name="leave_slip">Leave Slip</string>
+    <string name="ask_for_leave">Ask For a Leave</string>
+    <string name="leave_day">Leave Days</string>
+    <string name="leave_reason">Leave Reason</string>
+    <string name="leave_type">Leave Type</string>
+    <string name="morning">Morning</string>
+    <string name="afternoon">Afternoon</string>
+    <string name="upload">Upload</string>
+    <string name="retire_warning">A single leave exceeding 40 days requires a formal suspension of studies.</string>
+    <string name="long_leave">Long Leave</string>
+    <string name="short_leave">Short Leave</string>
+    <string name="credit_hours_status">Credit &amp; Hours Status</string>
+    <string name="course_completion_status">Course Completion Status</string>
+    <string name="training_credit">Training Program Credit Requirement</string>
+    <string name="exempt_credit">Exempt Course Credit</string>
+    <string name="actual_credit">Actual Graduation Credit Requirement</string>
+    <string name="earned_credit">Earned Credit</string>
+    <string name="academic_year_semester">Academic Year &amp; Semester</string>
+    <string name="achievement_course_number">Grade Course Number</string>
+    <string name="achievement_course_name">Grade Course Name</string>
+    <string name="achievement_course_category">Grade Course Category</string>
+    <string name="achievement_credit">Grade Credit</string>
+    <string name="is_passed">Is Passed</string>
+    <string name="achievement_point">Achievement</string>
+    <string name="earned_point">Earned GPA</string>
+    <string name="arrears_warning">You have unpaid fees and cannot view grades. Unpaid items: %s</string>
+    <string name="select_pay_items">Select Payment Items</string>
+    <string name="total">Total</string>
+    <string name="ticket_title">Ticket Title</string>
+    <string name="ticket_remark">Ticket Remark</string>
+    <string name="ticket_title_tip">Default ticket title is your name</string>
+    <string name="pending_pay_order">Pending Orders</string>
 </resources>

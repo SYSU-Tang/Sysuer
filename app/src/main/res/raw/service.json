@@ -403,6 +403,13 @@
         "name": "助教考核",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/#/classroomCheckStu?code=jwxsd_jsskqkjkxjscx&resourceName=%25E6%2595%2599%25E5%25AE%25A4%25E4%25B8%258A%25E8%25AF%25BE%25E6%2583%2585%25E5%2586%25B5%25E5%258F%258A%25E7%25A9%25BA%25E9%2597%25B2%25E6%2595%2599%25E5%25AE%25A4%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "助教考核结果查询系统，显示助教姓名、负责课程、考核成绩等"
+      },
+      {
+        "id": 717,
+        "activity": ".academic.LeaveSlipActivity",
+        "name": "假条",
+        "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/studentAskLeaveInfo?code=jwxsd_qjsq&resourceName=%25E8%25AF%25B7%25E5%2581%2587%25E7%2594%25B3%25E8%25AF%25B7",
+        "description": "假条查询系统，显示学生姓名、请假时间、请假原因等"
       }
     ]
   },
