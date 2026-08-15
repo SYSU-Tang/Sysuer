@@ -1,9 +1,7 @@
 package com.sysu.edu.life
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Intent
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -18,30 +16,32 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.imageview.ShapeableImageView
 import com.sysu.edu.R
+import com.sysu.edu.api.FileManager
 import com.sysu.edu.databinding.FragmentComplaintMainBinding
 import com.sysu.edu.databinding.ItemFileBinding
 import com.sysu.edu.model.XinfangModel
 import com.sysu.edu.view.AdapterListener
 import com.sysu.edu.view.RecyclerAdapter
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okio.source
 
 class ComplaintMainFragment : com.sysu.edu.BaseFragment() {
 	val model: XinfangModel by lazy {
 		XinfangModel(requireContext())
 	}
 	
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: android.view.ViewGroup?,
-	                          savedInstanceState: android.os.Bundle?): android.view.View {
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: android.view.ViewGroup?,
+		savedInstanceState: android.os.Bundle?,
+	                         ): android.view.View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		val fileAdapter = FileAdapter().apply {
 			listener = object : AdapterListener {
-				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                    holder: RecyclerView.ViewHolder,
-				                    position: Int) {
+				override fun onBind(
+					adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+					holder: RecyclerView.ViewHolder,
+					position: Int,
+				                   ) {
 					ItemFileBinding.bind(holder.itemView).apply {
 						root.setOnClickListener(config.browse("https://${model.host}${
 							get(position).getString("path").toUri()
@@ -50,8 +50,10 @@ class ComplaintMainFragment : com.sysu.edu.BaseFragment() {
 					}
 				}
 				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                      binding: ViewBinding?) {
+				override fun onCreate(
+					adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+					binding: ViewBinding?,
+				                     ) {
 				}
 			}
 		}
@@ -109,46 +111,11 @@ class ComplaintMainFragment : com.sysu.edu.BaseFragment() {
 	}
 	
 	fun uploadAttachment(uri: android.net.Uri) {
-		val resolver: ContentResolver = requireContext().contentResolver
-		val type: String? = resolver.getType(uri)
-		var resolvedFileName: String? = null
-		var resolvedFileSize: Long = -1
-		try {
-			resolver.query(uri, null, null, null, null).use { cursor ->
-				if (cursor != null && cursor.moveToFirst()) {
-					val nameIndex: Int = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-					if (nameIndex != -1) {
-						resolvedFileName = cursor.getString(nameIndex)
-					}
-					val sizeIndex: Int = cursor.getColumnIndex(OpenableColumns.SIZE)
-					if (sizeIndex != -1) {
-						resolvedFileSize = cursor.getLong(sizeIndex)
-					}
-				}
-			}
-		} catch (e: java.lang.Exception) {
-			System.err.println("Failed to resolve file info: " + e.message)
-		}
-		val finalFileName = resolvedFileName ?: uri.lastPathSegment
-		val finalFileSize = resolvedFileSize
-		val requestBody: RequestBody = object : RequestBody() {
-			override fun contentType(): okhttp3.MediaType? {
-				return type?.toMediaTypeOrNull() ?: "application/octet-stream".toMediaTypeOrNull()
-			}
-			
-			override fun contentLength(): Long = finalFileSize
-			@Throws(java.io.IOException::class) override fun writeTo(sink: okio.BufferedSink) {
-				resolver.openInputStream(uri).use { inputStream ->
-					inputStream?.source().use { source ->
-						source?.let { sink.writeAll(it) }
-					}
-				}
-			}
-		}
+		val fileRequestBody = FileManager.getAttachmentRequestBody(requireContext(), uri)
 		model.request(model.http.generateRequest("https://${model.host}/jsp_api/upload", null, null)
 						  .post(MultipartBody.Builder()
 									.setType(MultipartBody.FORM)
-									.addFormDataPart("file", finalFileName, requestBody)
+									.addFormDataPart("file", fileRequestBody.fileName, fileRequestBody.file)
 									.build())
 						  .build(), 0)
 	}
@@ -163,8 +130,10 @@ class ComplaintMainFragment : com.sysu.edu.BaseFragment() {
 	}
 	
 	internal class FileAdapter : RecyclerAdapter<JSONObject>() {
-		override fun onCreateViewHolder(parent: android.view.ViewGroup,
-		                                viewType: Int): RecyclerView.ViewHolder {
+		override fun onCreateViewHolder(
+			parent: android.view.ViewGroup,
+			viewType: Int,
+		                               ): RecyclerView.ViewHolder {
 			return object : RecyclerView.ViewHolder(
 				LayoutInflater.from(parent.context).inflate(R.layout.item_file, parent, false)) {}
 		}
