@@ -24,15 +24,18 @@ import com.sysu.edu.view.ButtonAdapter
 import com.sysu.edu.view.PreferenceAdapter
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import java.io.IOException
 
 class EnergyAccountFragment : BaseFragment() {
 	val model: ZhnyModel by lazy { ZhnyModel(requireContext()) }
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?,
+	                         ): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		val rooms: ArraySet<CommonUtil.Tuple2<String?, String?>?> = arraySetOf()
 		var roomCode: String? = null
@@ -45,7 +48,8 @@ class EnergyAccountFragment : BaseFragment() {
 				recharge(it, roomCode, rechargeBinding.remark.text.toString())
 			}
 		}
-		model.message.observe(getViewLifecycleOwner()) { (code, response) ->
+		model.message.observe(viewLifecycleOwner) { (code, response) ->
+			println("code = $code , response = $response")
 			if (response.getInteger("code") == 200) {
 				when (code) {
 					0 -> {
@@ -73,16 +77,14 @@ class EnergyAccountFragment : BaseFragment() {
 					2 -> {
 						adapter.addAdapter(TitleAdapter(getString(R.string.balance)))
 						val preferenceAdapter = PreferenceAdapter()
-						preferenceAdapter.add(getString(R.string.balance), response.getJSONObject("data")
-							.getString("balance"), R.drawable.money)
+						preferenceAdapter.add(getString(R.string.balance), response.getJSONObject("data").getString("balance"), R.drawable.money)
 						adapter.addAdapter(preferenceAdapter)
 						val buttonAdapter = ButtonAdapter()
 						buttonAdapter.add(getString(R.string.pay_fee))
 						buttonAdapter.setListener { button: Button?, _: Int -> button!!.setOnClickListener { rechargeDialog.show() } }
 						adapter.addAdapter(buttonAdapter)
 					}
-					3 ->  /*https://fee.sysu.edu.cn/gateway/cashier/app/order?orderno=1487527133151629312&scene=wx&showwxpaytitle=1&response_type=code&scope=snsapi_base&state=1&connect_redirect=1#wechat_redirect*/
-						gotoWechat(response.getJSONObject("data").getJSONObject("data"))
+					3 -> gotoWechat(response.getJSONObject("data").getJSONObject("data"))
 				}
 			}
 		}
@@ -96,32 +98,30 @@ class EnergyAccountFragment : BaseFragment() {
 	
 	val userInfo: Unit
 		get() {
-			model.addAndNext("hkbp/auth/userInfo", 0)
+			model.addAndNext("kbp/auth/userInfo", 0)
 		}
 	
 	fun getRoom(username: String?) {
-		model.addAndNext("hkbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 1)
+		model.addAndNext("kbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 1)
 	}
 	
 	fun getBalance(room: String?) {
-		model.addAndNext("hkbp/pay/roomBalance?roomCode=$room", 2)
+		model.addAndNext("kbp/pay/roomBalance?roomCode=$room", 2)
 	}
 	
 	fun recharge(amount: Int, room: String?, remark: String?) {
-		model.addAndNext("hkbp/pay/recharge/zdPay", "{\"payAmount\":$amount,\"body\":\"房间钱包充值\",\"rechargeChannel\":6,\"accountType\":7,\"rechargeType\":7,\"params\":{\"roomCode\":\"$room\"},\"remark\":\"$remark\"}", 3)
+		model.addAndNext("kbp/pay/recharge/zdPay", "{\"payAmount\":$amount,\"body\":\"房间钱包充值\",\"rechargeChannel\":6,\"accountType\":7,\"rechargeType\":7,\"params\":{\"roomCode\":\"$room\"},\"remark\":\"$remark\"}", 3)
 	}
 	
 	fun gotoWechat(data: JSONObject) {
-		val info = StringBuilder()
+		val form = FormBody.Builder()
 		data.forEach { (key: String?, value: Any?) ->
-			info.append("&").append(key).append("=").append(value)
+			key?.let { form.add(it, "$value") }
 		}
-		info.substring(0)
 		OkHttpClient.Builder()
 			.followRedirects(false)
 			.build()
-			.newCall(model.http.generateRequest("https://fee.sysu.edu.cn/gateway/unifiedorder/pagepay", "$info", "application/x-www-form-urlencoded")
-						 .build())
+			.newCall(model.http.generateRequest("https://fee.sysu.edu.cn/gateway/unifiedorder/pagepay", null, null).post(form.build()).header("Content-Type", "application/x-www-form-urlencoded").build())
 			.enqueue(object : Callback {
 				override fun onFailure(call: Call, e: IOException) {
 				}
@@ -131,10 +131,8 @@ class EnergyAccountFragment : BaseFragment() {
 					if (!location.isNullOrEmpty()) {
 						model.http.handler.post {
 							config.copy("recharge", location)
-							val intent = Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
-																  .putExtra(Intent.EXTRA_TEXT, location)
-																  .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.recharge))
-																  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), getString(R.string.share))
+							val intent = Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, location).putExtra(Intent.EXTRA_SUBJECT, getString(R.string.recharge)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+							                                  getString(R.string.share))
 							if (intent.resolveActivity(requireContext().packageManager) != null) startActivity(intent)
 						}
 					}

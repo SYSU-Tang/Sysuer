@@ -9,7 +9,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alibaba.fastjson2.JSONObject
@@ -70,7 +69,7 @@ class EnergyWaterFeeFragment : BaseFragment() {
 		}
 		val detailDialog = PreferenceDialog(requireContext())
 		val paymentStatuses = resources.getStringArray(R.array.payment_status)
-		model.message.observe(getViewLifecycleOwner()) { (code, response) ->
+		model.message.observe(viewLifecycleOwner) { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				when (code) {
 					0 -> getRoom(response.getJSONObject("data").getString("username"))
@@ -81,20 +80,23 @@ class EnergyWaterFeeFragment : BaseFragment() {
 							rooms.add(CommonUtil.Tuple2((it as JSONObject).getString("roomName"), it.getString("roomCode")))
 							items.add(it.getString("roomName"))
 						}
+						
 					}
 					2 -> {
 						val preferenceAdapter = PreferenceAdapter()
+						println(response)
 						response.getJSONObject("data")
 							.getJSONArray("waterUsageList")
 							.forEach { item: Any? ->
 								val totalWaterUsage: Any? = (item as JSONObject).getString("totalWaterUsage")
 								val content = totalWaterUsage?.toString()
 									?: getString(R.string.no_data_available)
-								val calendar = Calendar()
-								calendar.scheme = content
-								calendar.year = binding.calendarView.selectedCalendar.year
-								calendar.month = binding.calendarView.selectedCalendar.month
-								calendar.day = item.getString("timeLabel").toInt()
+								val calendar = Calendar().apply {
+									scheme = content
+									year = binding.calendarView.selectedCalendar.year
+									month = binding.calendarView.selectedCalendar.month
+									day = item.getInteger("timeLabel")
+								}
 								binding.calendarView.addSchemeDate(calendar)
 							}
 						adapter.addAdapter(preferenceAdapter)
@@ -149,13 +151,13 @@ class EnergyWaterFeeFragment : BaseFragment() {
 			else if (response.getInteger("code") == 201) config.toast(response.getString("msg", ""))
 		}
 		userInfo
-		roomCode.observe(getViewLifecycleOwner(), Observer { v: String? ->
+		roomCode.observe(viewLifecycleOwner) { v: String? ->
 			v?.let {
-				getWaterConsumption(it, LocalDate.of(binding.calendarView.selectedCalendar.year, binding.calendarView.selectedCalendar.month, 1)
-					.format(formatter))
+				getWaterConsumption(it, LocalDate.of(binding.calendarView.selectedCalendar.year, binding.calendarView.selectedCalendar.month, 1).format(formatter))
 				getWaterBill(it)
+				model.nextAll()
 			}
-		})
+		}
 		return binding.root
 	}
 	

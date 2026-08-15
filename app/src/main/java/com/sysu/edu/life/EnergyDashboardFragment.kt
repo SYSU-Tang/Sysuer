@@ -37,7 +37,7 @@ class EnergyDashboardFragment : BaseFragment() {
 			list.adapter = adapter
 		}
 		model.message.observe(getViewLifecycleOwner()) { (code, response) ->
-			println("code = $code , response = $response")
+//			println("code = $code , response = $response")
 			if (response.getInteger("code") == 200) {
 				val data = response.getJSONObject("data")
 				when (code) {
