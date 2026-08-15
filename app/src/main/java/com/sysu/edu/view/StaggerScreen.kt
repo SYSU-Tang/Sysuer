@@ -12,13 +12,14 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -53,7 +54,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sysu.edu.R
@@ -64,12 +64,14 @@ data class RowData(
 	var onClick: (() -> Unit)? = null,
                   )
 
+enum class RowOrientation { Horizontal, Vertical }
 data class SectionData(
 	val title: String?,
 	val icon: Int? = null,
 	val rows: SnapshotStateList<RowData> = mutableStateListOf(),
+	val rowOrientation: RowOrientation = RowOrientation.Horizontal,
 	val footerMenus: SnapshotStateList<MenuItem> = mutableStateListOf(),
-	val footer: SnapshotStateList<@Composable RowScope.() -> Unit?> = mutableStateListOf(),
+	var footer: (@Composable ColumnScope.() -> Unit)? = null,
                       )
 
 @Composable fun SectionCard(
@@ -104,7 +106,7 @@ data class SectionData(
 				Column {
 					section.rows.forEach { row ->
 						if (!isHideNull || !row.value.isNullOrEmpty()) {
-							KeyValueRow(row)
+							KeyValueRow(row, section.rowOrientation)
 						}
 					}
 				}
@@ -128,13 +130,18 @@ data class SectionData(
 					}
 				}
 			}
+			section.footer?.let {
+				Column(modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding)), content = it)
+			}
 		}
 	}
 }
 
-@Composable fun KeyValueRow(row: RowData) {
+@Composable fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horizontal) {
 	val context = LocalContext.current
-	Row(modifier = Modifier
+	val modifier = Modifier
 		.fillMaxWidth()
 		.clickable {
 			if (row.onClick != null) {
@@ -145,13 +152,27 @@ data class SectionData(
 				clip.setPrimaryClip(ClipData.newPlainText(row.key, row.value))
 			}
 		}
-		.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding)), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-		SelectionContainer {
-			Text(text = row.key ?: "", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+		.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding))
+	if (orientation == RowOrientation.Horizontal) {
+		Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+			SelectionContainer {
+				Text(text = row.key ?: "", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+			}
+			if (row.value != null && row.key != null) Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
+			SelectionContainer {
+				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary)
+			}
 		}
-		if (row.value != null && row.key != null) Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
-		SelectionContainer {
-			Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+	}
+	else {
+		Column(modifier = modifier) {
+			SelectionContainer {
+				Text(text = row.key ?: "", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+			}
+			if (row.value != null && row.key != null) Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
+			SelectionContainer {
+				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth())
+			}
 		}
 	}
 }

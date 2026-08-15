@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -87,17 +87,18 @@ open class StaggerFragment : BaseFragment() {
 		icon: Int?,
 		keys: MutableList<String?>,
 		values: MutableList<String?>,
+		rowOrientation: RowOrientation = RowOrientation.Horizontal,
 		footerMenus: SnapshotStateList<com.sysu.edu.view.MenuItem> = mutableStateListOf(),
-		footer: SnapshotStateList<@Composable RowScope.() -> Unit?> = mutableStateListOf(),
+		footer: (@Composable ColumnScope.() -> Unit)? = null,
 		
 	                   ) {
 		val rows = mutableStateListOf<RowData>()
 		keys.zip(values) { k, v -> rows.add(RowData(k, v)) }
-		sections.add(SectionData(title, icon, rows, footerMenus, footer))
+		sections.add(SectionData(title, icon, rows, rowOrientation, footerMenus, footer))
 	}
 	
-	fun addSection(title: String?, keys: MutableList<String?>, values: MutableList<String?>) {
-		addSection(title, null, keys, values)
+	fun addSection(title: String?, keys: MutableList<String?>, values: MutableList<String?>, rowOrientation: RowOrientation = RowOrientation.Horizontal) {
+		addSection(title, null, keys, values, rowOrientation)
 	}
 	
 	fun addRow(pos: Int = sections.size - 1, key: String?, value: String?) {
@@ -152,20 +153,20 @@ open class StaggerFragment : BaseFragment() {
 		
 		fun clear(): Unit = this@StaggerFragment.clear()
 		fun getTwoColumnsAdapter(pos: Int): TwoColumnsAdapter = TwoColumnsAdapter(pos)
-		fun addRow(pos: Int = itemCount - 1, key: String?, value: String?) {
+		/*fun addRow(pos: Int = itemCount - 1, key: String?, value: String?) {
 			this@StaggerFragment.addRow(pos, key, value)
 		}
 		
 		fun addFooter(pos: Int = itemCount - 1, content: com.sysu.edu.view.MenuItem) {
 			if (pos in sections.indices) sections[pos].footerMenus.add(content)
-		}
+		}*/
 		
-		fun addFooter(pos: Int = itemCount - 1, content: @Composable RowScope.() -> Unit) {
-			if (pos in sections.indices) sections[pos].footer.add(content)
+		fun setSectionFooter(pos: Int = itemCount - 1, content: (@Composable ColumnScope.() -> Unit)? = null) {
+			if (pos in sections.indices) sections[pos].footer = content
 		}
-		fun setListener(listener: AdapterListener?) {
+		/*fun setListener(listener: AdapterListener?) {
 			staggeredListener.value = listener
-		}
+		}*/
 		
 		val itemCount: Int get() = sections.size
 	}
