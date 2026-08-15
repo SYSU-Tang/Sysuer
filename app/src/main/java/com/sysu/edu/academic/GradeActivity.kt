@@ -46,11 +46,7 @@ class GradeActivity : BaseActivity() {
 			scores.layoutManager = gridLayoutManager
 		}
 		setContentView(binding.root)
-		val termPop = PopupMenu(this,
-		                        binding.term,
-		                        0,
-		                        0,
-		                        com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
+		val termPop = PopupMenu(this, binding.term, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
 		val terms = getResources().getStringArray(R.array.terms)
 		terms.forEachIndexed { i, t ->
 			termPop.menu.add(t).setOnMenuItemClickListener {
@@ -58,24 +54,14 @@ class GradeActivity : BaseActivity() {
 				false
 			}
 		}
-		val yearPop = PopupMenu(this,
-		                        binding.year,
-		                        0,
-		                        0,
-		                        com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
-		val typePop = PopupMenu(this,
-		                        binding.type,
-		                        0,
-		                        0,
-		                        com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
+		val yearPop = PopupMenu(this, binding.year, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
+		val typePop = PopupMenu(this, binding.type, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
 		binding.term.setOnClickListener { termPop.show() }
 		binding.year.setOnClickListener { yearPop.show() }
 		binding.type.setOnClickListener { typePop.show() }
 		yearPop.menu.add(R.string.all).setOnMenuItemClickListener {
-			model.addAndNext("jwxt/achievement-manage/score-check/list?trainTypeCode=${trainType.value}&addScoreFlag=true",
-			                 1)
-			model.addAndNext("jwxt/achievement-manage/score-check/getSortByYear?trainTypeCode=${trainType.value}&addScoreFlag=true",
-			                 4)
+			model.addAndNext("jwxt/achievement-manage/score-check/list?trainTypeCode=${trainType.value}&addScoreFlag=true", 1)
+			model.addAndNext("jwxt/achievement-manage/score-check/getSortByYear?trainTypeCode=${trainType.value}&addScoreFlag=true", 4)
 			binding.year.setText(R.string.all)
 			false
 		}
@@ -111,17 +97,15 @@ class GradeActivity : BaseActivity() {
 				isFetching = false
 			}
 		}
+		
 		val gradeManager = GradeManager()
 		adp.action = { position: Int ->
 			if (gradeManager.isFetching) model.contextUtil.toast(R.string.grade_fetching)
 			else {
 				val level = adp.get(position).getString("scoFinalScore")
 				if (!level.isNullOrEmpty()) {
-					val minGrade = gradeMap.getOrDefault(level[0], 0)
-						.minus((if (level.length == 2) 0 else 6))
-					gradeManager.getGrade(adp.get(position).getString("scoCourseNumber"),
-					                      position,
-					                      minGrade)
+					val minGrade = gradeMap.getOrDefault(level[0], 0).minus((if (level.length == 2) 0 else 6))
+					gradeManager.getGrade(adp.get(position).getString("scoCourseNumber"), position, minGrade)
 				}
 			}
 		}
@@ -152,12 +136,11 @@ class GradeActivity : BaseActivity() {
 						val type = pull.getJSONArray("selectTrainType")
 						type.forEach { a: Any? ->
 							val typeItem = a as JSONObject
-							typePop.menu.add(typeItem.getString("dataName"))
-								.setOnMenuItemClickListener {
-									binding.type.text = typeItem.getString("dataName")
-									trainType.value = typeItem.getString("dataNumber")
-									false
-								}
+							typePop.menu.add(typeItem.getString("dataName")).setOnMenuItemClickListener {
+								binding.type.text = typeItem.getString("dataName")
+								trainType.value = typeItem.getString("dataNumber")
+								false
+							}
 						} // 选择培养类型的第一个选项
 						if (!type.isEmpty()) {
 							binding.type.text = type.getJSONObject(0).getString("dataName")
@@ -178,19 +161,17 @@ class GradeActivity : BaseActivity() {
 					}
 					3 -> { // 初始化学期选项
 						val pull = response.getJSONObject("data")
-						if (!years.contains(pull.getString("acadYear"))) yearPop.menu.add(pull.getString(
-							"acadYear")).setOnMenuItemClickListener {
-								term.value = pull.getInteger("acadSemester")
-								year.value = pull.getString("acadYear")
-								false
-							}
+						if (!years.contains(pull.getString("acadYear"))) yearPop.menu.add(pull.getString("acadYear")).setOnMenuItemClickListener {
+							term.value = pull.getInteger("acadSemester")
+							year.value = pull.getString("acadYear")
+							false
+						}
 						term.value = pull.getInteger("acadSemester")
 						year.value = pull.getString("acadYear")
 					}
 					4 -> {
 						val pull = response.getJSONObject("data")
-						val compulsorySelectTotal = pull.getJSONArray("compulsorySelectTotal")
-							.getJSONObject(0)
+						val compulsorySelectTotal = pull.getJSONArray("compulsorySelectTotal").getJSONObject(0)
 						val totalRank = compulsorySelectTotal.getString("rank")
 						val totalPoint = compulsorySelectTotal.getString("vegPoint")
 						val totalCredit = compulsorySelectTotal.getString("totalCredit")
@@ -203,39 +184,21 @@ class GradeActivity : BaseActivity() {
 						}
 						val total = pull.getString("stuTotal")
 						header.clear()
-						header.addSection(getString(R.string.total_year),
-						                  CommonUtil.getString(this,
-						                                intArrayOf(R.string.total_rank,
-						                                           R.string.total_credit,
-						                                           R.string.total_point)),
-						                  mutableListOf("$totalRank/$total", totalCredit, totalPoint))
-						header.addSection(terms[term.value ?: 0],
-						                  CommonUtil.getString(this,
-						                                intArrayOf(R.string.current_rank,
-						                                           R.string.current_point)),
-						                  mutableListOf("$rank/$total", point))
+						header.addSection(getString(R.string.total_year), CommonUtil.getString(this, intArrayOf(R.string.total_rank, R.string.total_credit, R.string.total_point)), mutableListOf("$totalRank/$total", totalCredit, totalPoint))
+						header.addSection(terms[term.value ?: 0], CommonUtil.getString(this, intArrayOf(R.string.current_rank, R.string.current_point)), mutableListOf("$rank/$total", point))
 						header.addSection(getString(R.string.credit),
 						                  CommonUtil.getString(this,
-						                                intArrayOf(R.string.term_credit,
-						                                           R.string.public_compulsory_credit,
-						                                           R.string.public_select_credit,
-						                                           R.string.major_compulsory_credit,
-						                                           R.string.major_select_credit,
-						                                           R.string.honor_credit)),
-						                  extractValue(pull.getJSONObject("stuCredit"),
-						                        arrayOf("allGetCredit",
-						                                "publicGetCredit",
-						                                "publicSelectGetCredit",
-						                                "majorGetCredit",
-						                                "majorSelectGetCredit",
-						                                "honorCourseGetCredit")))
+						                                       intArrayOf(R.string.term_credit, R.string.public_compulsory_credit, R.string.public_select_credit, R.string.major_compulsory_credit, R.string.major_select_credit, R.string.honor_credit)),
+						                  extractValue(pull.getJSONObject("stuCredit"), arrayOf("allGetCredit", "publicGetCredit", "publicSelectGetCredit", "majorGetCredit", "majorSelectGetCredit", "honorCourseGetCredit")))
 					}
 					5 -> {
-						if (response.containsKey("data") && response.getJSONObject("data")
-								.getInteger("total") != 0) gradeManager.setGrade()
+						if (response.containsKey("data") && response.getJSONObject("data").getInteger("total") != 0) gradeManager.setGrade()
 						else gradeManager.getGrade()
 					}
 				}
+			}
+			else if (response.getInteger("code") == 52011421) {
+				model.contextUtil.toast(String.format(getString(R.string.arrears_warning), response.getString("message")))
 			}
 		}
 		pull
@@ -243,7 +206,7 @@ class GradeActivity : BaseActivity() {
 	
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
-		gridLayoutManager!!.setSpanCount(config.column)
+		gridLayoutManager?.spanCount = config.column
 	}
 	
 	val now: Unit
@@ -259,13 +222,11 @@ class GradeActivity : BaseActivity() {
 		}
 	
 	fun getScore(year: String?, term: Int?, type: String?) {
-		model.addAndNext("jwxt/achievement-manage/score-check/list?scoSchoolYear=$year&trainTypeCode=$type&addScoreFlag=true&scoSemester=${if (term == 0) "" else term}",
-		                 1)
+		model.addAndNext("jwxt/achievement-manage/score-check/list?scoSchoolYear=$year&trainTypeCode=$type&addScoreFlag=true&scoSemester=${if (term == 0) "" else term}", 1)
 	}
 	
 	fun getTotalScore(year: String?, term: Int?, type: String?) {
-		model.addAndNext("jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=${year ?: ""}&trainTypeCode=$type&addScoreFlag=true&scoSemester=${if (term == 0) "" else term}",
-		                 4)
+		model.addAndNext("jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=${year ?: ""}&trainTypeCode=$type&addScoreFlag=true&scoSemester=${if (term == 0) "" else term}", 4)
 	}
 	
 	val pull: Unit
@@ -276,8 +237,7 @@ class GradeActivity : BaseActivity() {
 	internal class ScoreAdapter : RecyclerAdapter<JSONObject>() {
 		var action: Consumer<in Int>? = null
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object : RecyclerView.ViewHolder(ItemScoreBinding.inflate(LayoutInflater.from(
-				parent.context), parent, false).root) {}
+			return object : RecyclerView.ViewHolder(ItemScoreBinding.inflate(LayoutInflater.from(parent.context), parent, false).root) {}
 		}
 		
 		fun setGrade(position: Int, grade: String?) {
@@ -292,37 +252,28 @@ class GradeActivity : BaseActivity() {
 				if (info.getString("originalScore") == null) action?.accept(position)
 			}
 			var grade = ""
-			if (info.containsKey("scoreList")) info.getJSONArray("scoreList")
-				.forEach { a: Any? ->
-					grade = String.format("%s（%s）%s×%s%%+",
-					                            grade,
-					                            (a as JSONObject).getString("FXMC"),
-					                            a.getString("FXCJ"),
-					                            a.getString("MRQZ"))
-				}
+			if (info.containsKey("scoreList")) info.getJSONArray("scoreList").forEach { a: Any? ->
+				grade = String.format("%s（%s）%s×%s%%+", grade, (a as JSONObject).getString("FXMC"), a.getString("FXCJ"), a.getString("MRQZ"))
+			}
 			binding.subject.text = info.getString("scoCourseName")
 			binding.score.text = "${info.getString("scoFinalScore")}${
 				if (info.getString("scoPoint") == null) ""
 				else "/" + info.getString("scoPoint")
 			}"
-			Markwon.builder(binding.root.context)
-				.build()
-				.setMarkdown(binding.info,
-				             "- 学期：**${"${info.getString("scoSchoolYear")}第${info.getString("scoSemester")}学期"}**\n- 学分：**${
-					             info.getString("scoCredit")
-				             }**\n- 班级排名：**${info.getString("teachClassRank")}**\n- 年级排名：**${
-					             info.getString("gradeMajorRank")
-				             }**\n- 课程类别：**${info.getString("scoCourseCategoryName")}**\n- 老师：**${
-					             info.getString("scoTeacherName")
-				             }**\n- 是否通过：**${info.getString("accessFlag")}**\n- 考试性质：**${
-					             info.getString("examCharacter")
-				             }**\n- 班级号：**${info.getString("scoCourseNumber")}**\n- 教学班号：**${
-					             info.getString("teachClassNumber")
-				             }**\n- 成绩：**${
-					             if (info.getString("originalScore") == null) binding.root.context.getString(
-						             R.string.click_for_grade)
-					             else grade + "=" + info.getString("originalScore")
-				             }**")
+			Markwon.builder(binding.root.context).build().setMarkdown(binding.info, "- 学期：**${"${info.getString("scoSchoolYear")}第${info.getString("scoSemester")}学期"}**\n- 学分：**${
+				info.getString("scoCredit")
+			}**\n- 班级排名：**${info.getString("teachClassRank")}**\n- 年级排名：**${
+				info.getString("gradeMajorRank")
+			}**\n- 课程类别：**${info.getString("scoCourseCategoryName")}**\n- 老师：**${
+				info.getString("scoTeacherName")
+			}**\n- 是否通过：**${info.getString("accessFlag")}**\n- 考试性质：**${
+				info.getString("examCharacter")
+			}**\n- 班级号：**${info.getString("scoCourseNumber")}**\n- 教学班号：**${
+				info.getString("teachClassNumber")
+			}**\n- 成绩：**${
+				if (info.getString("originalScore") == null) binding.root.context.getString(R.string.click_for_grade)
+				else grade + "=" + info.getString("originalScore")
+			}**")
 		}
 	}
 }

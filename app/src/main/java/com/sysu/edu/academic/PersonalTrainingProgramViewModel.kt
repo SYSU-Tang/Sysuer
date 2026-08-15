@@ -1,6 +1,9 @@
 package com.sysu.edu.academic
 
 import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,7 +18,7 @@ class PersonalTrainingProgramViewModel(application: Application) : AndroidViewMo
 	val courseTable: LiveData<JSONObject?> = _courseTable
 	private val _creditList = MutableLiveData<List<JSONObject>>(emptyList())
 	val creditList: LiveData<List<JSONObject>> = _creditList
-	private var programId: String = ""
+	var programId: String? by mutableStateOf(null)
 	
 	init {
 		model.message.observeForever { (code, response) ->
@@ -24,8 +27,6 @@ class PersonalTrainingProgramViewModel(application: Application) : AndroidViewMo
 					0 -> {
 						val data = response.getJSONArray("data").getJSONObject(0)
 						programId = data.getString("TEACHPLANNUMBER") ?: ""
-						println("programId: $programId")
-						fetchBasicInfo()
 					}
 					1 -> _courseTable.value = response.getJSONObject("data")
 					2 -> {
@@ -45,7 +46,7 @@ class PersonalTrainingProgramViewModel(application: Application) : AndroidViewMo
 		model.addAndNext("jwxt/training-programe/training-programe/undergradute/student/personalMainProgram", 0)
 	}
 	
-	private fun fetchBasicInfo() {
+	fun fetchBasicInfo() {
 		model.addAndNext("jwxt/training-programe/trainingBasicInfo/getBasicInformation?id=$programId", 2)
 	}
 	

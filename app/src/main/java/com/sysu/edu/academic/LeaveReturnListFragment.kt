@@ -44,7 +44,7 @@ class LeaveReturnListFragment : StaggerFragment() {
 					val isRegistering = item.getInteger("gzztm") == 1
 					val status = item.getString("zt")
 
-					sectionAdapter.addFooter(index) {
+					sectionAdapter.setSectionFooter(index) {
 						Button(
 							onClick = {
 								if (isRegistering) requireActivity().supportFragmentManager.beginTransaction()

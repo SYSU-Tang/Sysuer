@@ -30,9 +30,11 @@ import com.sysu.edu.view.RecyclerViewHolder
 class EvaluationQuestionnaireFragment : BaseFragment() {
 	val answers: JSONObject = JSONObject.parseObject("{\"pjidlist\":[],\"pjjglist\":[],\"pjzt\": \"2\"}")
 	lateinit var model: PjxtModel
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?,
+	                         ): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		model = PjxtModel(requireContext())
 		val layoutManager = LinearLayoutManager(requireContext())
@@ -59,7 +61,7 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
 			val data = message.second
-			println(data)
+//			println(data)
 			if (data.get("code") == "200") {
 				when (message.first) {
 					1 -> data.getJSONObject("result")
@@ -151,15 +153,17 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		return "$sb"
 	}
 	
-	fun getEvaluation(rwid: String,
-	                  wjid: String?,
-	                  sxz: String?,
-	                  pjrdm: String?,
-	                  bpdm: String?,
-	                  kcdm: String?,
-	                  rwh: String?,
-	                  pjzt: String?,
-	                  bpmc: String?) {
+	fun getEvaluation(
+		rwid: String,
+		wjid: String?,
+		sxz: String?,
+		pjrdm: String?,
+		bpdm: String?,
+		kcdm: String?,
+		rwh: String?,
+		pjzt: String?,
+		bpmc: String?,
+	                 ) {
 		model.addAndNext("evaluationPattern/getQuestionnaireTopic?rwid=$rwid&wjid=$wjid&sxz=$sxz&pjrdm=$pjrdm&bpdm=$bpdm&kcdm=$kcdm&rwh=${rwh?.encodeNonAscii()}&pjzt=$pjzt&bpmc=$bpmc", 1)
 	}
 	
@@ -232,9 +236,7 @@ internal class OptionAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() 
 		}
 	}
 	
-	override fun getItemCount(): Int {
-		return data.size
-	}
+	override fun getItemCount(): Int = data.size
 }
 
 internal class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
@@ -289,8 +291,10 @@ internal class BlanketAdapter : RecyclerView.Adapter<RecyclerViewHolder<DialogEd
 			notifyItemChanged(0)
 		}
 	
-	override fun onCreateViewHolder(parent: ViewGroup,
-	                                viewType: Int): RecyclerViewHolder<DialogEditTextBinding> {
+	override fun onCreateViewHolder(
+		parent: ViewGroup,
+		viewType: Int,
+	                               ): RecyclerViewHolder<DialogEditTextBinding> {
 		return object :
 			RecyclerViewHolder<DialogEditTextBinding>(DialogEditTextBinding.inflate(LayoutInflater.from(parent.context), parent, false)) {}
 	}
@@ -305,8 +309,10 @@ internal class BlanketAdapter : RecyclerView.Adapter<RecyclerViewHolder<DialogEd
 		notifyItemChanged(0)
 	}
 	
-	override fun onBindViewHolder(holder: RecyclerViewHolder<DialogEditTextBinding>,
-	                              position: Int) {
+	override fun onBindViewHolder(
+		holder: RecyclerViewHolder<DialogEditTextBinding>,
+		position: Int,
+	                             ) {
 		holder.binding?.apply {
 			editLayout.setHint(R.string.please_enter_content)
 			if (!content.isNullOrEmpty()) {
@@ -317,10 +323,12 @@ internal class BlanketAdapter : RecyclerView.Adapter<RecyclerViewHolder<DialogEd
 				override fun afterTextChanged(editable: Editable?) {
 				}
 				
-				override fun beforeTextChanged(charSequence: CharSequence?,
-				                               i: Int,
-				                               i1: Int,
-				                               i2: Int) {
+				override fun beforeTextChanged(
+					charSequence: CharSequence?,
+					i: Int,
+					i1: Int,
+					i2: Int,
+				                              ) {
 				}
 				
 				override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {

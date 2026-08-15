@@ -110,7 +110,7 @@ class LeaveReturnRegistrationFragment : StaggerFragment() {
 							val adapter = sectionAdapter.getTwoColumnsAdapter(sectionIndex)
 							
 							// Add Save Button Footer
-							sectionAdapter.addFooter(sectionIndex) {
+							sectionAdapter.setSectionFooter(sectionIndex) {
 								Button(
 									onClick = {
 										if ("0" == isStay) save(

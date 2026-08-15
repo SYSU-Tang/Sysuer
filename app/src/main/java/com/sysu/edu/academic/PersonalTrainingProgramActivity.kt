@@ -38,9 +38,11 @@ class PersonalTrainingProgramActivity : BaseActivity() {
 			val basicInfo by viewModel.basicInfo.observeAsState(null)
 			val courseTable by viewModel.courseTable.observeAsState(null)
 			val creditList by viewModel.creditList.observeAsState(emptyList())
-			
-			LaunchedEffect(Unit) {
-				viewModel.fetchMyProgram()
+			intent.getStringExtra("programId")?.let {
+				viewModel.programId = it
+			} ?: viewModel.fetchMyProgram()
+			LaunchedEffect(viewModel.programId) {
+				viewModel.fetchBasicInfo()
 			}
 			val basicInfoSections = remember(basicInfo) {
 				mutableStateListOf<SectionData>().also { list ->

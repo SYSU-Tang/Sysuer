@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -30,8 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
@@ -72,6 +75,7 @@ class ExamActivity : BaseActivity() {
 			}
 			var termExpanded by remember { mutableStateOf(false) }
 			var examExpanded by remember { mutableStateOf(false) }
+			val maxMenuHeight = LocalConfiguration.current.screenHeightDp.dp * 0.5f
 			ActivityPager(title = stringResource(R.string.exam), onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false, floatingActionButton = {
 				ExtendedFloatingActionButton(icon = { Icon(Icons.Filled.Search, null) }, text = { Text(stringResource(R.string.query)) }, onClick = {
 					examViewModel.getResult()
@@ -94,7 +98,7 @@ class ExamActivity : BaseActivity() {
 								trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = termExpanded) },
 								colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
 							                 )
-							ExposedDropdownMenu(expanded = termExpanded, onDismissRequest = { termExpanded = false }) {
+							ExposedDropdownMenu(expanded = termExpanded, onDismissRequest = { termExpanded = false }, modifier = Modifier.fillMaxWidth().heightIn(max = maxMenuHeight)) {
 								terms?.forEach { option ->
 									val termOption = (option as JSONObject).getString("acadYearSemester")
 									val isSelected = termOption == term
@@ -125,7 +129,7 @@ class ExamActivity : BaseActivity() {
 								trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = examExpanded) },
 								colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
 							                 )
-							ExposedDropdownMenu(expanded = examExpanded, onDismissRequest = { examExpanded = false }) {
+							ExposedDropdownMenu(expanded = examExpanded, onDismissRequest = { examExpanded = false }, modifier = Modifier.fillMaxWidth().heightIn(max = maxMenuHeight)) {
 								examWeeks?.forEach { option ->
 									val examWeekName = (option as JSONObject).getString("examWeekName")
 									val examWeekId = option.getString("examWeekId")

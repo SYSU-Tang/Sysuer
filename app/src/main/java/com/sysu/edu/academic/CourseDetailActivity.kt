@@ -35,7 +35,7 @@ class CourseDetailActivity : BaseActivity() {
 //		println(code)
 //		println(id)
 //		println(classNum)
- model.message.observe(this) { (code, response) ->
+        model.message.observe(this) { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				val data = response.getJSONObject("data")
 				if (data != null) when (code) {

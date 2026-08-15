@@ -11,9 +11,9 @@ class HomeworkActivity : BaseActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val binding = ActivityHomeWorkBinding.inflate(layoutInflater)
-		setContentView(binding.getRoot())
+		setContentView(binding.root)
 		val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment
-		 setupWithNavController(binding.bottomNav, navHostFragment.navController)
+		setupWithNavController(binding.bottomNav, navHostFragment.navController)
 		binding.toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 	}
 }
