@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
@@ -34,6 +35,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialContainerTransform
 import com.sysu.edu.BaseFragment
@@ -57,8 +59,7 @@ import java.util.function.Consumer
 class CourseSelectionMainFragment : BaseFragment() {
 	val type: MutableLiveData<Int?> = MutableLiveData<Int?>()
 	val category: MutableLiveData<Int?> = MutableLiveData<Int?>()
-	val typeCate: MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?> = MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?>(
-		CommonUtil.Tuple2(1, 11)).apply {
+	val typeCate: MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?> = MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?>(CommonUtil.Tuple2(1, 11)).apply {
 		addSource<Int?>(type, Observer {
 			typeCate.value = CommonUtil.Tuple2(type.value ?: 1, getCategory())
 		})
@@ -79,9 +80,11 @@ class CourseSelectionMainFragment : BaseFragment() {
 		model.dispose()
 	}
 	
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?,
+	                         ): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		model = JwxtModel(requireContext())
 		gm = StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL)
@@ -90,11 +93,12 @@ class CourseSelectionMainFragment : BaseFragment() {
 		val pe = DialogServiceOrderBinding.inflate(inflater, container, false).apply {
 			recyclerView.layoutManager = LinearLayoutManager(requireContext())
 			recyclerView.adapter = peAdapter
-			ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-			                                                        0) {
-				override fun onMove(r: RecyclerView,
-				                    s: RecyclerView.ViewHolder,
-				                    t: RecyclerView.ViewHolder): Boolean {
+			ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+				override fun onMove(
+					r: RecyclerView,
+					s: RecyclerView.ViewHolder,
+					t: RecyclerView.ViewHolder,
+				                   ): Boolean {
 					peAdapter.swap(s.bindingAdapterPosition, t.bindingAdapterPosition)
 					return true
 				}
@@ -104,10 +108,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 			confirm.setOnClickListener {
 				val data = JSONArray()
 				peAdapter.data.forEachIndexed { i, v ->
-					data.add(JSONObject.of("studentFilterID",
-					                       v.getString("studentFilterID"),
-					                       "volunteerNum",
-					                       i + 1))
+					data.add(JSONObject.of("studentFilterID", v.getString("studentFilterID"), "volunteerNum", i + 1))
 				}
 				sortPE("$data")
 			}
@@ -138,9 +139,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 			course.addItemDecoration(SpacesItemDecoration(config.dpToPx(8)))
 			course.adapter = CourseAdapter().apply {
 				selectAction = { position: Int? ->
-					if (get(position!!).getInteger("selectedStatus") == 3 || get(position).getInteger(
-							"selectedStatus") == 4) unselect(convert(position, "courseId"),
-					                                         convert(position, "teachingClassId"))
+					if (get(position!!).getInteger("selectedStatus") == 3 || get(position).getInteger("selectedStatus") == 4) unselect(convert(position, "courseId"), convert(position, "teachingClassId"))
 					else select(convert(position, "teachingClassId"))
 				}
 				likeAction = { code: String? -> like(code!!) }
@@ -177,28 +176,18 @@ class CourseSelectionMainFragment : BaseFragment() {
 						getJSONArray("rows").forEach { e: Any? -> adp!!.add(e as JSONObject) }
 					}
 					3 -> {
-						config.toast(response.getString("data"))
+						config.toast(response.getString("data",""))
 						regetCourseList()
 					}
 					4 -> {
 						peAdapter.clear()
-						if (response.getJSONArray("data")
-								.isEmpty()) binding.head.peSort.isVisible = false
+						if (response.getJSONArray("data").isEmpty()) binding.head.peSort.isVisible = false
 						else {
-							response.getJSONArray("data")
-								.sortedBy { (it as JSONObject).getInteger("volunteerNum") }
-								.forEach { e: Any? ->
-									peAdapter.add(JSONObject.of("title",
-									                            "${(e as JSONObject).getString("courseNum")}-${
-										                            e.getString("courseName")
-									                            }",
-									                            "content",
-									                            e.getString("teachingTimePlace"),
-									                            "icon",
-									                            R.drawable.menu,
-									                            "studentFilterID",
-									                            e.getString("studentFilterID")))
-								}
+							response.getJSONArray("data").sortedBy { (it as JSONObject).getInteger("volunteerNum") }.forEach { e: Any? ->
+								peAdapter.add(JSONObject.of("title", "${(e as JSONObject).getString("courseNum")}-${
+									e.getString("courseName")
+								}", "content", e.getString("teachingTimePlace"), "icon", R.drawable.menu, "studentFilterID", e.getString("studentFilterID")))
+							}
 							binding.head.peSort.isVisible = true
 						}
 					}
@@ -233,31 +222,21 @@ class CourseSelectionMainFragment : BaseFragment() {
 	var filterValue: CourseFilterValueData = CourseFilterValueData()
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		val navController = findNavController(view)
-		navController.currentBackStackEntry?.savedStateHandle?.getLiveData<CourseFilterNameData>("filter_name")
-			?.observe(viewLifecycleOwner) { result ->
-				loadFilter(result)
-				filterName = result
-				navController.currentBackStackEntry?.savedStateHandle?.remove<CourseFilterNameData>(
-					"filter_name")
-			}
-		navController.currentBackStackEntry?.savedStateHandle?.getLiveData<CourseFilterValueData>("filter_value")
-			?.observe(viewLifecycleOwner) { result ->
-				filterValue = result
-				navController.currentBackStackEntry?.savedStateHandle?.remove<CourseFilterValueData>(
-					"filter_value")
-			}
+		navController.currentBackStackEntry?.savedStateHandle?.getLiveData<CourseFilterNameData>("filter_name")?.observe(viewLifecycleOwner) { result ->
+			loadFilter(result)
+			filterName = result
+			navController.currentBackStackEntry?.savedStateHandle?.remove<CourseFilterNameData>("filter_name")
+		}
+		navController.currentBackStackEntry?.savedStateHandle?.getLiveData<CourseFilterValueData>("filter_value")?.observe(viewLifecycleOwner) { result ->
+			filterValue = result
+			navController.currentBackStackEntry?.savedStateHandle?.remove<CourseFilterValueData>("filter_value")
+		}
 		binding.head.addFilter.setOnClickListener { v: View? ->
-			val action: NavDirections = CourseSelectionMainFragmentDirections.selectionToFilter()
-				.apply {
-					setCourseSelectionNameFilter(filterName)
-					setCourseSelectionValueFilter(filterValue)
-				}
-			findNavController(view).navigate(action.actionId,
-			                                 action.arguments,
-			                                 null,
-			                                 FragmentNavigator.Extras.Builder()
-				                                 .addSharedElement(v!!, "miniapp")
-				                                 .build())
+			val action: NavDirections = CourseSelectionMainFragmentDirections.selectionToFilter().apply {
+				setCourseSelectionNameFilter(filterName)
+				setCourseSelectionValueFilter(filterValue)
+			}
+			findNavController(view).navigate(action.actionId, action.arguments, null, FragmentNavigator.Extras.Builder().addSharedElement(v!!, "miniapp").build())
 		}
 		val transition = MaterialContainerTransform().apply {
 			scrimColor = Color.TRANSPARENT
@@ -270,14 +249,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 	
 	fun loadFilter(filter: CourseFilterNameData) {
 		binding.head.seniorFilter.removeAllViews()
-		listOf(filter.courseName,
-		       filter.studyCampusId,
-		       filter.week,
-		       filter.classTimes,
-		       filter.courseUnitNum,
-		       filter.teachingTeacherNum,
-		       filter.teachingLanguageCode,
-		       filter.specialClassCode).forEach { v ->
+		listOf(filter.courseName, filter.studyCampusId, filter.week, filter.classTimes, filter.courseUnitNum, filter.teachingTeacherNum, filter.teachingLanguageCode, filter.specialClassCode).forEach { v ->
 			if (!v.isNullOrEmpty()) {
 				val item = ItemActionChipBinding.inflate(layoutInflater, binding.head.filter, false)
 				item.root.text = v
@@ -333,9 +305,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 	}
 	
 	fun like(code: String) {
-		model.addAndNext("jwxt/choose-course-front-server/stuCollectedCourse/create",
-		                 "{\"classesID\":\"$code\",\"selectedType\":\"1\"}",
-		                 3)
+		model.addAndNext("jwxt/choose-course-front-server/stuCollectedCourse/create", "{\"classesID\":\"$code\",\"selectedType\":\"1\"}", 3)
 	}
 	
 	val info: Unit
@@ -344,52 +314,39 @@ class CourseSelectionMainFragment : BaseFragment() {
 		}
 	
 	fun select(code: String) {
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose",
-		                 String.format(Locale.getDefault(),
-		                               "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}",
-		                               code,
-		                               getType(),
-		                               getCategory()),
-		                 3)
+		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose", String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, getType(), getCategory()), 3)
 	}
 	
 	fun getType(): Int = typeCate.value?.first ?: 1
 	fun getCategory(): Int = typeCate.value?.second ?: 11
 	fun unselect(classId: String, code: String?) {
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/back",
-		                 String.format(Locale.getDefault(),
-		                               "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}",
-		                               classId,
-		                               code,
-		                               getType()),
-		                 3)
+		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/back", String.format(Locale.getDefault(), "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}", classId, code, getType()), 3)
 	}
 	
 	fun sortPE(data: String) {
-		model.run("jwxt/choose-course-front-server/selectedCourse/updateSportsSelectedlist",
-		          data,
-		          null,
-		          object : Callback {
-			          override fun onFailure(call: Call, e: IOException) {
-				          model.http.handler.post { config.toast(R.string.save_fail) }
-			          }
-			          
-			          override fun onResponse(call: Call, response: Response) {
-				          if (response.isSuccessful && response.code == 200) model.http.handler.post {
-					          config.toast(R.string.save_successful)
-				          }
-				          else model.login {
-					          sortPE(data)
-				          }
-			          }
-		          })
+		model.run("jwxt/choose-course-front-server/selectedCourse/updateSportsSelectedlist", data, null, object : Callback {
+			override fun onFailure(call: Call, e: IOException) {
+				model.http.handler.post { config.toast(R.string.save_fail) }
+			}
+			
+			override fun onResponse(call: Call, response: Response) {
+				if (response.isSuccessful && response.code == 200) model.http.handler.post {
+					config.toast(R.string.save_successful)
+				}
+				else model.login {
+					sortPE(data)
+				}
+			}
+		})
 	}
 	
 	internal class SpacesItemDecoration(private val space: Int) : RecyclerView.ItemDecoration() {
-		override fun getItemOffsets(outRect: Rect,
-		                            view: View,
-		                            parent: RecyclerView,
-		                            state: RecyclerView.State) {
+		override fun getItemOffsets(
+			outRect: Rect,
+			view: View,
+			parent: RecyclerView,
+			state: RecyclerView.State,
+		                           ) {
 			outRect.top = space / 2
 			outRect.right = space
 			outRect.left = space
@@ -398,25 +355,16 @@ class CourseSelectionMainFragment : BaseFragment() {
 	}
 	
 	class CourseAdapter : RecyclerAdapter<JSONObject>() {
-		val info: Array<String?> = arrayOf("credit",
-		                                   "clazzNum",
-		                                   "scheduleExamTime",
-		                                   "examFormName",
-		                                   "statusName")
+		val info: Array<String?> = arrayOf("credit", "clazzNum", "scheduleExamTime", "examFormName", "statusName")
 		var selectAction: Consumer<in Int?>? = null
 		var likeAction: Consumer<in String?>? = null
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 			val context = parent.context
-			val binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context),
-			                                                 parent,
-			                                                 false)
+			val binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context), parent, false)
 			info.indices.forEach { _ ->
-				binding.courseInfo.addView(ItemActionChipBinding.inflate(LayoutInflater.from(context),
-				                                                         binding.courseInfo,
-				                                                         false).root.apply {
+				binding.courseInfo.addView(ItemActionChipBinding.inflate(LayoutInflater.from(context), binding.courseInfo, false).root.apply {
 					setOnLongClickListener {
-						(context.getSystemService(ClipboardManager::class.java)).setPrimaryClip(
-							ClipData.newPlainText("", text))
+						(context.getSystemService(ClipboardManager::class.java)).setPrimaryClip(ClipData.newPlainText("", text))
 						false
 					}
 					setOnClickListener {
@@ -424,6 +372,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 					}
 				})
 			}
+			
 			return object : RecyclerView.ViewHolder(binding.root) {}
 		}
 		
@@ -435,44 +384,39 @@ class CourseSelectionMainFragment : BaseFragment() {
 				convert(position, "courseName")
 			}"
 			val selectedStatus = item.getInteger("selectedStatus")
-			item.fluentPut("statusName",
-			               context.getString(if (selectedStatus == 4) R.string.status_selected else if (selectedStatus == 3) R.string.filtering else if (selectedStatus == 1) R.string.retired else R.string.unselected))
-			binding.like.setSelected(item.containsKey("collectionStatus") && item.getInteger("collectionStatus") == 1)
-			binding.select.setSelected(item.containsKey("selectedStatus") && (selectedStatus == 3 || selectedStatus == 4))
-			binding.select.text = context.getString(if (binding.select.isSelected) R.string.drop_course else R.string.select_course)
+			item.fluentPut("statusName", context.getString(if (selectedStatus == 4) R.string.status_selected else if (selectedStatus == 3) R.string.filtering else if (selectedStatus == 1) R.string.retired else R.string.unselected))
+			val isLike = item.containsKey("collectionStatus") && item.getInteger("collectionStatus") == 1
+			binding.like.setSelected(isLike)
+			val isSelected = item.containsKey("selectedStatus") && (selectedStatus == 3 || selectedStatus == 4)
+			binding.select.setSelected(isSelected)
+			binding.select.text = context.getString(if (isSelected) R.string.drop_course else R.string.select_course)
+			val selectBg = if (isSelected) MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorPrimaryContainer) else Color.TRANSPARENT
+			val selectFg = MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorOnPrimaryContainer)
+			val likeBg = if (isLike) MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorPrimaryContainer) else Color.TRANSPARENT
+			val likeFg = MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorOnPrimaryContainer)
+			binding.select.backgroundTintList = ColorStateList.valueOf(selectBg)
+			binding.select.setTextColor(ColorStateList.valueOf(selectFg))
+			binding.select.setIconTint(ColorStateList.valueOf(selectFg))
+			binding.like.backgroundTintList = ColorStateList.valueOf(likeBg)
+			binding.like.setTextColor(ColorStateList.valueOf(likeFg))
+			binding.like.setIconTint(ColorStateList.valueOf(likeFg))
 			binding.like.text = context.getString(if (binding.like.isSelected) R.string.unlike else R.string.like)
 			binding.select.setOnClickListener {
-				Snackbar.make(it,
-				              "${binding.select.text}? ${convert(position, "courseName")}",
-				              Snackbar.LENGTH_LONG)
-					.setAction(context.getString(R.string.confirm)) { _ ->
-						selectAction?.accept(position)
-					}
-					.show()
+				Snackbar.make(it, "${binding.select.text}? ${convert(position, "courseName")}", Snackbar.LENGTH_LONG).setAction(context.getString(R.string.confirm)) { _ ->
+					selectAction?.accept(position)
+				}.show()
 			}
 			binding.like.setOnClickListener { v: View? ->
-				Snackbar.make(v!!,
-				              context.getString(R.string.already) + (v as MaterialButton).getText(),
-				              Snackbar.LENGTH_LONG).show()
+				Snackbar.make(v!!, context.getString(R.string.already) + (v as MaterialButton).getText(), Snackbar.LENGTH_LONG).show()
 				v.text = context.getString(if (v.isSelected) R.string.unlike else R.string.like)
 				likeAction?.accept(convert(position, "teachingClassId"))
 				v.setSelected(!v.isSelected)
 			}
 			binding.open.setOnClickListener { v: View? ->
-				context.startActivity(Intent(context,
-				                             CourseDetailActivity::class.java).putExtra("code",
-				                                                                        convert(
-					                                                                        position,
-					                                                                        "courseNum"))
-					                      .putExtra("id", convert(position, "courseId"))
-					                      .putExtra("class", convert(position, "clazzNum")),
-				                      ActivityOptionsCompat.makeSceneTransitionAnimation(context as Activity,
-				                                                                         v!!,
-				                                                                         "miniapp")
-					                      .toBundle())
+				context.startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code", convert(position, "courseNum")).putExtra("id", convert(position, "courseId")).putExtra("class", convert(position, "clazzNum")),
+				                      ActivityOptionsCompat.makeSceneTransitionAnimation(context as Activity, v!!, "miniapp").toBundle())
 			}
-			binding.head.text = convert(position, "teachingTimePlace").replace(";", " | ")
-				.replace(",", "\n")
+			binding.head.text = convert(position, "teachingTimePlace").replace(";", " | ").replace(",", "\n")
 			val courseInfoLabels = context.resources.getStringArray(R.array.course_info_labels)
 			val seatInfoLabels = context.resources.getStringArray(R.array.seat_info_labels)
 			info.forEachIndexed { i, s ->
@@ -480,9 +424,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 					convert(position, s)
 				}"
 			}
-			arrayOf("baseReceiveNum",
-			        "filterSelectedNum",
-			        "courseSelectedNum").forEachIndexed { i, s ->
+			arrayOf("baseReceiveNum", "filterSelectedNum", "courseSelectedNum").forEachIndexed { i, s ->
 				val button = arrayOf(binding.left, binding.filtering, binding.selected)[i]
 				val newText = "${seatInfoLabels[i]}\n${convert(position, s)}"
 				if (button.text != newText) {
@@ -491,8 +433,6 @@ class CourseSelectionMainFragment : BaseFragment() {
 			}
 		}
 		
-		fun convert(position: Int, key: String?): String =
-			trim(get(position).getString(key)).replace("\n\n", "\n")
+		fun convert(position: Int, key: String?): String = trim(get(position).getString(key)).replace("\n\n", "\n")
 	}
 }
-
