@@ -43,6 +43,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -53,16 +54,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.net.toUri
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.CalendarManager
 import com.sysu.edu.api.DataStoreManager
+import com.sysu.edu.api.DateTimeManager
 import com.sysu.edu.api.FileManager
+import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.MenuItem
@@ -89,16 +93,33 @@ class LeaveSlipActivity : BaseActivity() {
 		
 		setContent {
 			var apply by rememberSaveable { mutableStateOf(false) }
-			LaunchedEffect(Unit) { viewModel.fetchLeaveSlips() }
+			val submitSuccess by viewModel.submitSuccess.observeAsState(initial = false)
+			LaunchedEffect(Unit) {
+				viewModel.fetchLeaveSlips()
+				viewModel.fetchTerms()
+			}
+			LaunchedEffect(submitSuccess) {
+				if (submitSuccess) {
+					apply = false
+				}
+			}
 			BackHandler {
 				if (apply) apply = false
 				else supportFinishAfterTransition()
 			}
 			ActivityPager(title = stringResource(R.string.leave_slip), floatingActionButton = {
-				ExtendedFloatingActionButton(onClick = { apply = true },
+				ExtendedFloatingActionButton(onClick = {
+					if (apply) {
+						viewModel.submitLeaveSlip()
+					}
+					else {
+						viewModel.resetSubmitSuccess()
+						apply = true
+					}
+				},
 				                             modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
 				                             icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.ask_for_leave)) },
-				                             text = { Text(stringResource(R.string.ask_for_leave)) })
+				                             text = { Text(stringResource(if (apply) R.string.submit else R.string.ask_for_leave)) })
 			}, onNavigationClick = { if (apply) apply = false else supportFinishAfterTransition() }, isNestedScrollEnabled = false, actions = {
 				IconButton(onClick = {
 					val markdown = viewModel.sections.toMarkdown()
@@ -129,28 +150,51 @@ class LeaveSlipActivity : BaseActivity() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class) @Composable fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
-	var leaveDays by rememberSaveable { mutableStateOf("") }
-	val leaveReasonDescription = rememberSaveable { mutableStateOf("") }
-	var selectedType by rememberSaveable { mutableStateOf<String?>(null) }
-	var selectedStartPeriod by rememberSaveable { mutableIntStateOf(0) }
-	var selectedEndPeriod by rememberSaveable { mutableIntStateOf(0) }
+	var leaveDays by rememberSaveable { mutableStateOf(viewModel.leaveDays) }
+	var leaveReasonDescription by rememberSaveable { mutableStateOf(viewModel.leaveReasonDescription) }
+	var leaveReason by rememberSaveable { mutableStateOf(viewModel.leaveReason) }
+	var leaveReasonName by rememberSaveable { mutableStateOf(viewModel.leaveReasonName) }
+	var startPeriod by rememberSaveable { mutableIntStateOf(viewModel.startPeriod) }
+	var endPeriod by rememberSaveable { mutableIntStateOf(viewModel.endPeriod) }
 	var showStartDatePicker by rememberSaveable { mutableStateOf(false) }
 	var showEndDatePicker by rememberSaveable { mutableStateOf(false) }
-	val leaveTypes = viewModel.types
-	val calendarManager = CalendarManager()
-	var startMillis by rememberSaveable { mutableLongStateOf(System.currentTimeMillis()) }
-	var endMillis by rememberSaveable { mutableLongStateOf(System.currentTimeMillis()) }
-	val hasSelectedAttachment = viewModel.selectedAttachmentIndex >= 0
+	val leaveReasons = viewModel.leaveReasons
+	var startMillis by rememberSaveable { mutableLongStateOf(viewModel.startMillis) }
+	var endMillis by rememberSaveable { mutableLongStateOf(viewModel.endMillis) }
+	val attachment by viewModel.attachment.observeAsState(null)
+	val hasAttachment = attachment != null
+	val context = LocalContext.current
 	val days = leaveDays.toDoubleOrNull()
-	val leaveType = when {
+	val leaveTypeName = when {
 		days == null -> ""
 		days > 40 -> stringResource(R.string.retire_warning)
 		days >= 8 -> stringResource(R.string.long_leave)
 		else -> stringResource(R.string.short_leave)
 	}
-	LaunchedEffect(Unit) {
-		if (leaveTypes.isEmpty()) viewModel.fetchLeaveTypes()
+	val leaveType = remember(days) {
+		when {
+			days == null -> "1"
+			days > 40 -> "3"
+			days >= 8 -> "2"
+			else -> "1"
+		}
 	}
+	LaunchedEffect(Unit) {
+		if (leaveReasons.isEmpty()) viewModel.fetchLeaveTypes()
+	}
+	LaunchedEffect(leaveDays, leaveReasonDescription, leaveReason, leaveReasonName, startPeriod, endPeriod, startMillis, endMillis, leaveType, leaveTypeName) {
+		viewModel.leaveDays = leaveDays
+		viewModel.leaveReasonDescription = leaveReasonDescription
+		viewModel.leaveReason = leaveReason
+		viewModel.leaveReasonName = leaveReasonName
+		viewModel.startPeriod = startPeriod
+		viewModel.endPeriod = endPeriod
+		viewModel.startMillis = startMillis
+		viewModel.endMillis = endMillis
+		viewModel.leaveType = leaveType
+		viewModel.leaveTypeName = leaveTypeName
+	}
+	
 	if (showStartDatePicker) {
 		val startDatePickerState = rememberDatePickerState(initialSelectedDateMillis = startMillis)
 		DatePickerDialog(onDismissRequest = { showStartDatePicker = false }, confirmButton = {
@@ -202,23 +246,27 @@ class LeaveSlipActivity : BaseActivity() {
 			                  else filtered
 		                  },
 		                  label = { Text(stringResource(R.string.leave_day)) },
-		                  supportingText = { Text(leaveType) },
+		                  supportingText = { Text(leaveTypeName) },
 		                  keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
 		
 		OutlinedTextField(modifier = Modifier.fillMaxWidth(),
-		                  value = leaveReasonDescription.value,
-		                  onValueChange = { leaveReasonDescription.value = it },
+		                  value = leaveReasonDescription,
+		                  onValueChange = { leaveReasonDescription = it },
 		                  label = { Text(stringResource(R.string.leave_reason)) },
 		                  leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.leave_reason)) })
 		FlowRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
-			AssistChip(label = { Text(stringResource(R.string.leave_type)) }, onClick = { })
-			leaveTypes.forEach { item ->
+			AssistChip(label = { Text(stringResource(R.string.leave_reason)) }, onClick = { })
+			leaveReasons.forEach { item ->
 				val dataNumber = item.getString("dataNumber")
-				val isSelected = dataNumber == selectedType
+				val dataName = item.getString("dataName")
+				val isSelected = dataNumber == leaveReason
 				ElevatedFilterChip(
-					onClick = { selectedType = if (isSelected) null else dataNumber },
+					onClick = {
+						leaveReason = if (isSelected) null else dataNumber
+						leaveReasonName = if (isSelected) null else dataName
+					},
 					label = {
-						Text(item.getString("dataName"))
+						Text(dataName)
 					},
 					selected = isSelected,
 					leadingIcon = if (isSelected) {
@@ -233,7 +281,7 @@ class LeaveSlipActivity : BaseActivity() {
 		Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)), verticalAlignment = Alignment.CenterVertically) {
 			OutlinedTextField(
 				modifier = Modifier.weight(1f),
-				value = calendarManager.toDateString(startMillis) ?: "",
+				value = DateTimeManager.toDateString(startMillis) ?: "",
 				onValueChange = {},
 				readOnly = true,
 				singleLine = true,
@@ -248,8 +296,8 @@ class LeaveSlipActivity : BaseActivity() {
 				listOf(R.string.morning, R.string.afternoon).forEachIndexed { index, label ->
 					SegmentedButton(
 						shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
-						onClick = { selectedStartPeriod = index },
-						selected = index == selectedStartPeriod,
+						onClick = { startPeriod = index },
+						selected = index == startPeriod,
 					               ) {
 						Text(stringResource(label))
 					}
@@ -259,7 +307,7 @@ class LeaveSlipActivity : BaseActivity() {
 		Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)), verticalAlignment = Alignment.CenterVertically) {
 			OutlinedTextField(
 				modifier = Modifier.weight(1f),
-				value = calendarManager.toDateString(endMillis) ?: "",
+				value = DateTimeManager.toDateString(endMillis) ?: "",
 				onValueChange = {},
 				readOnly = true,
 				singleLine = true,
@@ -274,8 +322,8 @@ class LeaveSlipActivity : BaseActivity() {
 				listOf(R.string.morning, R.string.afternoon).forEachIndexed { index, label ->
 					SegmentedButton(
 						shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
-						onClick = { selectedEndPeriod = index },
-						selected = index == selectedEndPeriod,
+						onClick = { endPeriod = index },
+						selected = index == endPeriod,
 					               ) {
 						Text(stringResource(label))
 					}
@@ -285,9 +333,11 @@ class LeaveSlipActivity : BaseActivity() {
 		val upload = stringResource(R.string.upload)
 		val delete = stringResource(R.string.delete)
 		val preview = stringResource(R.string.preview)
-		SectionCard(section = SectionData(title = stringResource(R.string.attachment), rows = viewModel.attachmentRows, rowOrientation = RowOrientation.Vertical, footerMenus = remember(hasSelectedAttachment) {
-			mutableStateListOf(MenuItem(upload) { onUpload(); true }, MenuItem(delete, enabled = hasSelectedAttachment) { true }, MenuItem(preview, enabled = hasSelectedAttachment) {
-				viewModel.deleteAttachment()
+		SectionCard(section = SectionData(title = stringResource(R.string.attachment), rows = viewModel.attachmentRows, rowOrientation = RowOrientation.Vertical, footerMenus = remember(attachment) {
+			mutableStateListOf(MenuItem(upload, enabled = !hasAttachment) { onUpload(); true }, MenuItem(delete, enabled = hasAttachment) { viewModel.deleteAttachment(); true }, MenuItem(preview, enabled = hasAttachment) {
+				context.startActivity(Intent(context, BrowserActivity::class.java).setData("https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${attachment?.getString("filePath")}&fileName=${
+					attachment?.getString("fileName")
+				}".toUri()))
 				true
 			})
 		}))

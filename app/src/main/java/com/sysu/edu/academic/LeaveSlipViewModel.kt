@@ -4,13 +4,19 @@ import android.app.Application
 import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.alibaba.fastjson2.JSONObject
+import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.extractValue
+import com.sysu.edu.api.DateTimeManager
 import com.sysu.edu.api.FileRequestBody
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.model.JwxtModel
@@ -21,13 +27,27 @@ import okhttp3.MultipartBody
 class LeaveSlipViewModel(application: Application) : AndroidViewModel(application) {
 	private val model = JwxtModel(application)
 	val sections: SnapshotStateList<SectionData> = mutableStateListOf()
-	val types: SnapshotStateList<JSONObject> = mutableStateListOf()
-	val attachments: SnapshotStateList<JSONObject> = mutableStateListOf()
+	val leaveReasons: SnapshotStateList<JSONObject> = mutableStateListOf()
+	val attachment: MutableLiveData<JSONObject?> = MutableLiveData()
 	val attachmentRows: SnapshotStateList<RowData> = mutableStateListOf()
-	var selectedAttachmentIndex: Int by mutableIntStateOf(-1)
 	private var page by mutableIntStateOf(0)
 	private var total by mutableIntStateOf(-1)
 	val hasMore: Boolean get() = total > page * 10
+	private val _submitSuccess = MutableLiveData<Boolean>()
+	val submitSuccess: LiveData<Boolean> = _submitSuccess
+	val leaveData: JSONObject = JSONObject.of("whetherStuApply", "1")
+	
+	/*{"semester":"2025-2","askLeaveDaysCount":0.5,"askLeaveTypeCode":"1","askLeaveTypeName":"短假","askLeaveBeginDate":"2026-08-16 08:00:00","askLeaveEndDate":"2026-08-16 12:00:00","askLeaveReasonCode":"1","askLeaveReasonExplanation":".","fileName":"中山大学logo.png","filePath":"reports-register/2026-08/16/2088838751325556736.png","whetherStuApply":"1"}*/
+	var leaveDays: String by mutableStateOf("")
+	var leaveType: String by mutableStateOf("")
+	var leaveTypeName: String by mutableStateOf("")
+	var leaveReasonDescription: String by mutableStateOf("")
+	var leaveReason: String? by mutableStateOf(null)
+	var leaveReasonName: String? by mutableStateOf(null)
+	var startPeriod: Int by mutableIntStateOf(0)
+	var endPeriod: Int by mutableIntStateOf(0)
+	var startMillis: Long by mutableLongStateOf(System.currentTimeMillis())
+	var endMillis: Long by mutableLongStateOf(System.currentTimeMillis())
 	
 	init {
 		model.message.observeForever { (code, response) ->
@@ -83,42 +103,111 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 									                         getApplication<Application>().startActivity(Intent(getApplication(), BrowserActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 										                                                                     .setData("https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${item.getString("filePath")}&fileName=${
 											                                                                     item.getString("fileName")
-										                                                                     }".toUri()))/*reports-register/2026-04/12/2043290312362156032.jpg*/                            /*https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=reports-register/2026-04/12/2043290312362156032.jpg&fileName=Screenshot_2026-04-12-19-27-43-978_com.tencent.mm.jpg*/
+										                                                                     }".toUri()))
 								                         }
 							                         }))
 						}
 					}
 				}
 				1 -> {
-					types.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
+					leaveReasons.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
 				}
 				2 -> {
 					val data = response.getJSONObject("data")
-					attachments.add(data)
+					attachment.value = data
+					attachmentRows.clear()
 					attachmentRows.add(RowData(data.getString("filePath"), data.getString("fileName")) {
-						selectedAttachmentIndex = attachments.indexOf(data).takeUnless { selectedAttachmentIndex == it } ?: -1
-					})                    /*{
-    "code": 200,
-    "data": {
-        "fileName": "????????????logo.png",
-        "filePath": "reports-register/2026-08/13/2087895235720155136.png"
-    }
-}*/
+						val app = getApplication<Application>()
+						app.startActivity(Intent(app,
+						                                                   BrowserActivity::class.java).setData("https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${data.getString("filePath")}&fileName=${
+							data.getString("fileName")
+						}".toUri()))
+					})
+				}
+				3 -> {
+					model.contextUtil.toast(response.getString("message"))
+					reset()
+					_submitSuccess.postValue(true)
+					refreshLeaveSlips()
+				}
+				4 -> {
+					val acadYearSemester = response.getJSONObject("data").getString("acadYearSemester")
+					leaveData["semester"] = acadYearSemester
 				}
 			}
 		}
+	}
+	
+	private fun reset() {
+		leaveDays = ""
+		leaveType = ""
+		leaveTypeName = ""
+		leaveReasonDescription = ""
+		leaveReason = null
+		leaveReasonName = null
+		startPeriod = 0
+		endPeriod = 0
+		startMillis = System.currentTimeMillis()
+		endMillis = System.currentTimeMillis()
+		attachment.value = null
+		attachmentRows.clear()
 	}
 	
 	fun fetchLeaveSlips() {
 		model.addAndNext("jwxt/reports-register/askLeaveAgg/selfAskLeaveInfoList", "{\"param\":{},\"pageNo\":${++page},\"pageSize\":10,\"total\":true}", 0)
 	}
 	
+	fun refreshLeaveSlips() {
+		page = 0
+		total = -1
+		sections.clear()
+		fetchLeaveSlips()
+	}
+	
 	fun fetchLeaveTypes() {
 		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=436", 1)
 	}
 	
+	/*{"semester":"2025-2","askLeaveDaysCount":0.5,"askLeaveTypeCode":"1","askLeaveTypeName":"短假","askLeaveBeginDate":"2026-08-16 08:00:00","askLeaveEndDate":"2026-08-16 12:00:00","askLeaveReasonCode":"1","askLeaveReasonExplanation":".","fileName":"中山大学logo.png","filePath":"reports-register/2026-08/16/2088838751325556736.png","whetherStuApply":"1"}*/
+	fun resetSubmitSuccess() {
+		_submitSuccess.postValue(false)
+	}
+	
 	fun submitLeaveSlip() {
-		model.addAndNext("jwxt/reports-register/askLeaveAgg/askLeaveApply", "", 3)
+		val days = leaveDays.toDoubleOrNull()
+		if (days == null || days <= 0) {
+			model.contextUtil.toast(R.string.enter_valid_leave_days)
+			return
+		}
+		if (leaveReason.isNullOrEmpty()) {
+			model.contextUtil.toast(R.string.select_leave_reason)
+			return
+		}
+		if (leaveReasonName.isNullOrEmpty()) {
+			model.contextUtil.toast(R.string.select_leave_reason)
+			return
+		}
+		val startDateFormat = DateTimeManager.toDateString(startMillis)
+		val endDateFormat = DateTimeManager.toDateString(endMillis)
+		val startTime = if (startPeriod == 0) "08:00:00" else "14:00:00"
+		val endTime = if (endPeriod == 0) "12:00:00" else "18:00:00"
+		leaveData["askLeaveTypeCode"] = leaveType
+		leaveData["askLeaveTypeName"] = leaveTypeName
+		leaveData["askLeaveDaysCount"] = days
+		leaveData["askLeaveBeginDate"] = "$startDateFormat $startTime"
+		leaveData["askLeaveEndDate"] = "$endDateFormat $endTime"
+		leaveData["askLeaveReasonCode"] = leaveReason
+		leaveData["askLeaveReasonExplanation"] = leaveReasonDescription
+		attachment.value?.let {
+			leaveData["fileName"] = it.getString("fileName")
+			leaveData["filePath"] = it.getString("filePath")
+		}
+		println(leaveData.toJSONString())
+//		model.addAndNext("jwxt/reports-register/askLeaveAgg/applyLeave", leaveData.toJSONString(), 3)
+	}
+	
+	fun fetchTerms() {
+		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 4)
 	}
 	
 	fun uploadAttachment(fileRequestBody: FileRequestBody) {
@@ -128,11 +217,8 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 	
 	fun deleteAttachment() {
-		if (selectedAttachmentIndex >= 0) {
-			attachments.removeAt(selectedAttachmentIndex)
-			attachmentRows.removeAt(selectedAttachmentIndex)
-			selectedAttachmentIndex = -1
-		}
+		attachment.value = null
+		attachmentRows.clear()
 	}
 	
 	override fun onCleared() {
