@@ -370,6 +370,7 @@ class PayActivity : BaseActivity() {
 									}
 									TextButton(onClick = {
 										viewModel.cancel(orderNo)
+										viewModel.clearPendingPay()
 									}, shapes = ButtonDefaults.shapes()) {
 										Text(stringResource(R.string.cancel_pay))
 									}

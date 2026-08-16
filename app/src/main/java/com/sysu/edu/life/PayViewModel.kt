@@ -38,8 +38,7 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	
 	init {
 		model.message.observeForever { (code, response) ->
-			println(response)
-			if (response.getInteger("code") == 200 && response.get("data") != null) {
+			if (response.getInteger("code") == 200) {
 				when (code) {
 					0 -> _toPayList.value = response.getJSONArray("data")
 					1 -> _selectivePayList.value = response.getJSONArray("data")
@@ -49,48 +48,39 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 					5 -> {
 						val data = response.getJSONObject("data")
 						toPayItems.fluentPut("ticketTitle", data.getString("ticketTitle"))
-							.fluentPut("sucUrl", data.getString("https://pay.sysu.edu.cn/#/result/pay_suc"))
+							.fluentPut("sucUrl", "https://pay.sysu.edu.cn/#/result/pay_suc")
 							.fluentPut("pendFees", data.getJSONArray("pendFees"))
 							.fluentPut("allMoney", data.getInteger("allMoney"))
-							.fluentPut("enableUseCompanyTitle", data.getBoolean("enableUseCompanyTitle")) //							?.fluentPut("userRegNum", null)
-						//							?.fluentPut("userAddress", null)
-						//							?.fluentPut("userTele", null)
-						//							?.fluentPut("userBank", null)
-						//							?.fluentPut("userBankNum",
-						//							            null)						/*"userRegNum":null,"userAddress":null,"userTele":null,"userBank":null,"userBankNum":null,*/                        /*{"code":200,"data":{"pendFees":[{"itemId":50,"itemName":"医保","canPay":true,"enableUseCompanyTitle":false,"arrearId":3336991,"nowMoney":450,"intervalId":11890,"intervalName":"2027"}],"allMoney":450.0,"ticketTitle":"唐贤标","userCode":"24308152","userName":"唐贤标","enableUseCompanyTitle":false,"operType":"FEE_MUST","invoiceIsDelay":0},"message":"Processes successfully."}*/
+							.fluentPut("enableUseCompanyTitle", data.getBoolean("enableUseCompanyTitle"))
 						submit()
 					}
 					6 -> {
 						val builder = FormBody.Builder()
-						builder.add("page_url", "https%3A%2F%2Fpay.sysu.edu.cn%2F%23%2Fresult%2Fpay_suc")
-						//val table = mutableListOf("page_url=https%3A%2F%2Fpay.sysu.edu.cn%2F%23%2Fresult%2Fpay_suc")
-						println(response.getString("data"))
 						val doc = parse(response.getString("data"))
 						doc.selectFirst("input[name='out_trade_no']")?.attr("value")?.also {
 							pendingPay.add(it)
 						}
 						doc.select("input[type=hidden]").forEach {
-								val name = it.attr("name")
-								val value = it.attr("value")
-								if (name.isNotBlank()) {
-									builder.add(name, value)
-								}
+							val name = it.attr("name")
+							val value = it.attr("value")
+							if (name.isNotBlank()) {
+								builder.add(name, value)
 							}
-							viewModelScope.launch {
-								model.contextUtil.toast(R.string.order_success)
-								gotoWechat(builder.build())
-							}
+						}
+						viewModelScope.launch {
+							model.contextUtil.toast(R.string.order_success)
+							gotoWechat(builder.build())
+						}
 					}
-					7 -> model.contextUtil.toast(response.getString("message"))
+					7 -> {
+						model.contextUtil.toast(response.getString("message"))
+					}
 				}
 			}
 			else if (response.getInteger("code") == 5001) {
 				when (code) {
 					5 -> {
-						pendingPay.addAll(response.getJSONArray("data").filterIsInstance<String>()) //						response.getJSONArray("data").forEach {
-						//							model.contextUtil.copy("payOrder", "$it")
-						//							openWechat("https://fee.sysu.edu.cn/gateway/cashier/order?orderno=${it}&scene=web")
-						//						}
+						pendingPay.addAll(response.getJSONArray("data").filterIsInstance<String>())
 					}
 				}
 			}
@@ -122,7 +112,6 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	}
 	
 	fun submit() {
-		println(toPayItems)
 		model.addAndNext("client/api/client/necessary/submitOrder", toPayItems.toJSONString(), 6)
 	}
 	
@@ -141,8 +130,6 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 				}
 				
 				override fun onResponse(call: Call, response: Response) {
-					println(response.body.string())
-					println(response.headers.toMutableList())
 					val location = response.header("Location")
 					if (!location.isNullOrEmpty()) {
 						model.contextUtil.copy("payOrder", location)
