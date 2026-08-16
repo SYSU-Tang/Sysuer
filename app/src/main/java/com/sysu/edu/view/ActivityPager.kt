@@ -190,7 +190,7 @@ import kotlin.math.sin
 	}
 }
 
-data class MenuItem(val title: String? = null, val icon: ImageVector? = null, val enabled: Boolean = true, val onClick: () -> Boolean = { false })
+data class MenuItem(val title:String? = null, val icon: ImageVector? = null, val enabled: Boolean = true, val onClick: () -> Boolean = { false })
 
 @Preview(showBackground = true) @Composable fun ActivityPagerPreview() {
 	SysuerTheme {

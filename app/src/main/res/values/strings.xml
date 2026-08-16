@@ -806,6 +806,8 @@
     <string name="retire_warning">单次请假时间超过40天，请办理休学</string>
     <string name="long_leave">长假</string>
     <string name="short_leave">短假</string>
+    <string name="enter_valid_leave_days">请输入有效的请假天数</string>
+    <string name="select_leave_reason">请选择请假原因</string>
     <string name="credit_hours_status">学分学时情况</string>
     <string name="course_completion_status">课程完成情况</string>
     <string name="training_credit">培养方案学分要求</string>
@@ -827,4 +829,5 @@
     <string name="ticket_remark">票据备注</string>
     <string name="ticket_title_tip">默认发票抬头是姓名</string>
     <string name="pending_pay_order">待支付订单</string>
+    <string name="enter_leave_type_name">请选择假期类型</string>
 </resources>

@@ -821,6 +821,8 @@
     <string name="retire_warning">A single leave exceeding 40 days requires a formal suspension of studies.</string>
     <string name="long_leave">Long Leave</string>
     <string name="short_leave">Short Leave</string>
+    <string name="enter_valid_leave_days">Please enter a valid number of leave days</string>
+    <string name="select_leave_reason">Please select a leave reason</string>
     <string name="credit_hours_status">Credit &amp; Hours Status</string>
     <string name="course_completion_status">Course Completion Status</string>
     <string name="training_credit">Training Program Credit Requirement</string>
