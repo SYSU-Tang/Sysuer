@@ -1,23 +1,24 @@
 // ==UserScript==
 // @name         SYSUER美化辅助增强
 // @namespace    https://github.com/SYSU-Tang
-// @version      1.6
-// @description  中大儿增强脚本，包括网页净化、在线教学平台视频自动速通、自动跳下一页、自动登录、跳过验证、自动跳转登录页。
+// @version      2.1
+// @description  中大儿增强脚本，包括网页净化、在线教学平台视频自动速通、自动跳下一页、自动登录、跳过验证、自动跳转登录页、等级制查看原始分。
 // @author       SYSU-Tang
 // @license      Apache-2.0
-// @updateURL    https://github.com/SYSU-Tang/sysuer.user.js/raw/main/sysuer.meta.js
-// @downloadURL  https://github.com/SYSU-Tang/sysuer.user.js/raw/main/sysuer.user.js
-// @homepage     https://github.com/SYSU-Tang/sysuer.user.js
+// @updateURL    https://github.com/SYSU-Tang/sysuer-script/raw/refs/heads/main/sysuer.meta.js
+// @downloadURL  https://github.com/SYSU-Tang/sysuer-script/raw/refs/heads/main/sysuer.user.js
+// @homepage     https://github.com/SYSU-Tang/sysuer-script
 // @match        *://www.sysu.edu.cn/*
 // @match        *://jwxt.sysu.edu.cn/*
 // @match        *://portal.sysu.edu.cn/*
-// @match        *://cas.sysu.edu.cn/esc-sso/login/page
 // @match        *://lms.sysu.edu.cn/*
 // @match        *://cas.sysu.edu.cn/*
 // @match        *://appgw.sysu.edu.cn/*
 // @match        *://visitor.sysu.edu.cn/*
 // @match        *://visitor-443.webvpn.sysu.edu.cn/*
 // @match        *://pay.sysu.edu.cn/*
+// @match        *://xgxt.sysu.edu.cn/*
+// @match        *://xgxt-443.webvpn.sysu.edu.cn/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
@@ -38,10 +39,11 @@
         videoComplete: GM_getValue('videoComplete', true),
         videoJump: GM_getValue('videoJump', true),
         purify: GM_getValue('purify', true),
-        removeRatermark: GM_getValue('removeRatermark', true)
+        removeWatermark: GM_getValue('removeWatermark', true),
+        gradeDisplay: GM_getValue('gradeDisplay', true)
     };
 
-    const { autoLogin, autoVerify, autoWebvpn, autoJumpLogin, username, password, videoComplete, videoJump, purify, removeRatermark } = config;
+    const { autoLogin, autoVerify, autoWebvpn, autoJumpLogin, username, password, videoComplete, videoJump, purify, removeWatermark, gradeDisplay } = config;
 
     const url = window.location.href;
     const host = window.location.hostname;
@@ -138,7 +140,10 @@
                 页面净化 <input type="checkbox" id="cfg-purify" ${config.purify ? 'checked' : ''}>
             </label>
             <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                移除水印 <input type="checkbox" id="cfg-removeRatermark" ${config.removeRatermark ? 'checked' : ''}>
+                移除水印 <input type="checkbox" id="cfg-removeWatermark" ${config.removeWatermark ? 'checked' : ''}>
+            </label>
+            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
+                等级制显示原始分 <input type="checkbox" id="cfg-gradeDisplay" ${config.gradeDisplay ? 'checked' : ''}>
             </label>
 
             <hr style="border: 0; border-top: 1px dashed #ccc; margin: 5px 0;">
@@ -177,7 +182,8 @@
             GM_setValue('videoComplete', document.getElementById('cfg-videoComplete').checked);
             GM_setValue('videoJump', document.getElementById('cfg-videoJump').checked);
             GM_setValue('purify', document.getElementById('cfg-purify').checked);
-            GM_setValue('removeRatermark', document.getElementById('cfg-removeRatermark').checked);
+            GM_setValue('removeWatermark', document.getElementById('cfg-removeWatermark').checked);
+            GM_setValue('gradeDisplay', document.getElementById('cfg-gradeDisplay').checked);
             GM_setValue('username', document.getElementById('cfg-username').value);
             GM_setValue('password', document.getElementById('cfg-password').value);
 
@@ -345,49 +351,168 @@
         window.toast.info = (msg, options) => showToast(msg, { ...options, type: 'info' });
     })();
 
-    if (purify && host === 'www.sysu.edu.cn') {
-        hide(['.ftb']);
-    }
-    if (purify && host === 'jwxt.sysu.edu.cn') {
-        const purifyJwxt = () => {
-            hide(['.sys-header', '.sys-footer', '.ant-breadcrumb']);
-            if (url.includes('/jwxt/mk/')) {
-                const stuCon = document.querySelector('.stu-con');
-                if (stuCon) stuCon.style.padding = '0px';
-            }
-            if (url.includes('jwxt/mk/#/personalTrainingProgramView')) {
-                hide(['.ant-tabs-bar']);
-                document.querySelectorAll('col').forEach(element => { element.style.minWidth = "0px"; });
-                const stuCon = document.querySelector('.stu-con');
-                if (stuCon) stuCon.style.padding = '0px';
-            }
-            if (url.includes('jwxt/#/student')) {
-                hide(['.sys-header', '.sys-footer']);
-                waitElement('.invest2', content => { content.style.display = 'none'; });
-                const content = document.querySelector('.ant-layout-content');
-                if (content) content.style.paddingTop = '0px';
-                waitElement('col', content => {
+    if (purify) {
+        if (host === 'www.sysu.edu.cn') {
+            hide(['.ftb']);
+        }
+        if (host === 'lms.sysu.edu.cn') {
+            document.querySelectorAll(".editButton").forEach(e => e.style.display = 'none');
+            hide(['footer']);
+        }
+        if (host === 'xgxt.sysu.edu.cn' || host === 'xgxt-443.webvpn.sysu.edu.cn') {
+            hide(['.banner-ca39d', 'footer']);
+            waitElement('.wrap-e806d', content => { content.style.backgroundSize = '0px'; });
+            waitElement('.scrollbars-22121', content => { content.style.height = '100%'; });
+        }
+        if (host === 'jwxt.sysu.edu.cn') {
+            const purifyJwxt = () => {
+                hide(['.sys-header', '.sys-footer', '.ant-breadcrumb']);
+                if (url.includes('/jwxt/mk/')) {
+                    const stuCon = document.querySelector('.stu-con');
+                    if (stuCon) stuCon.style.padding = '0px';
+                }
+                if (url.includes('jwxt/mk/#/personalTrainingProgramView')) {
+                    hide(['.ant-tabs-bar']);
                     document.querySelectorAll('col').forEach(element => { element.style.minWidth = "0px"; });
+                    const stuCon = document.querySelector('.stu-con');
+                    if (stuCon) stuCon.style.padding = '0px';
+                }
+                if (url.includes('jwxt/#/student')) {
+                    hide(['.sys-header', '.sys-footer']);
+                    waitElement('.invest2', content => { content.style.display = 'none'; });
+                    const content = document.querySelector('.ant-layout-content');
+                    if (content) content.style.paddingTop = '0px';
+                    waitElement('col', content => {
+                        document.querySelectorAll('col').forEach(element => { element.style.minWidth = "0px"; });
+                    });
+                }
+                if (url.includes('jwxt/mk/studentWeb/#/stuAchievementView') || url.includes('jwxt/mk/gradua/#/completionstatusStu')) {
+                    waitElement('.cj-yxsh-con.cj-cx', content => { content.style.width = '100%'; content.style.margin = '0px'; });
+                }
+                if (url.includes('#/notice/')) {
+                    waitElement('main', content => { content.style.padding = '0px'; });
+                    waitElement('.style-bread-3mo7c', content => { content.style.maxWidth = '100%'; });
+                    waitElement('.style-wrapper-3Oy8W', content => { content.style.maxWidth = '100%'; });
+                }
+                if (url.includes('/jwxt/mk/courseSelection')) {
+                    click('.ant-notification-notice-close-x');
+                }
+            };
+            purifyJwxt();
+            window.addEventListener('load', () => {
+                purifyJwxt();
+                toast.info('[SYSUER 脚本] 净化页面');
+            });
+        }
+    }
+    if (gradeDisplay && url.includes('jwxt/mk/studentWeb/#/stuAchievementView')) {
+        waitElement('div.stu-w', content => {
+            const node = content[Object.keys(content).find(k => k.startsWith('__reactInternalInstance'))].return.stateNode;
+            const state = node.state;
+            const onSearch = node.onSearch;
+            if (state.isInLetterRange) {
+                function getAchievementList(semester, isAppend = false) {
+                    const state = node.state;
+                    fetch("https://jwxt.sysu.edu.cn/jwxt/achievement-manage/achievement/selfPageList", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ "pageNo": 1, "pageSize": 200, "total": true, "param": { "schoolSemester": semester, "achievementState": null } })
+                    }).then(response => response.json()).then(data => {
+                        if (data.code === 200) {
+                            const transformedRows = data.data.rows.map(row => {
+                                const semParts = (row.schoolSemester || '').split('-');
+                                const year = semParts[0];
+                                const scoSchoolYear = year ? `${year}-${parseInt(year) + 1}` : '';
+                                const scoSemester = semParts[1] || '';
+                                const teacherName = row.classesName || '';
+                                const gradeAchievement = row.totalAchievement || '';
+                                const finalAchievementStr = (row.finalAchievementStr || '').trim();
+                                const scoFinalScore = gradeAchievement && finalAchievementStr
+                                    ? `${gradeAchievement}/${finalAchievementStr}`
+                                    : (gradeAchievement || finalAchievementStr);
+                                return {
+                                    id: row.highestAchievementProgressId || row.id,
+                                    scoSchoolYear,
+                                    scoSemester,
+                                    scoCourseNumber: row.courseNum || '',
+                                    scoCourseName: row.courseName || '',
+                                    scoCourseCategory: row.courseCategoryCode || '',
+                                    scoCourseCategoryName: row.courseCategoryName || '',
+                                    scoCredit: row.credit || 0,
+                                    scoStudentNumber: '',
+                                    teachClassNumber: row.classesNum || '',
+                                    scoFinalScore,
+                                    scoPoint: row.achievementPoint || 0,
+                                    scoTeacherName: teacherName,
+                                    accessFlag: '是',
+                                    recordStyle: row.recordModeCode || '',
+                                    classesRecordModeCode: '01',
+                                    examCharacter: row.examNatureName || '',
+                                    teachNumber: '',
+                                    teachClassRank: '',
+                                    gradeMajorNumber: '',
+                                    gradeMajorRank: '',
+                                    jdjs: '1',
+                                    tjjs: '1',
+                                    isInLetterRange: state.isInLetterRange ? '1' : '0',
+                                    isHonorCourse: '0',
+                                    checkedSign: false,
+                                };
+                            });
+                            node.setState({
+                                achieveList: isAppend ? [...state.achieveList, ...transformedRows] : transformedRows,
+                            });
+                            toast.success(`[SYSUER 脚本] 等级制显示原始分成功`);
+                        }
+                    });
+                }
+
+                function search() {
+                    const state = node.state;
+                    var year = state.schoolYear?.split('-')[0] || '';
+                    var semester = state.schoolSemester || '';
+                    if (year && semester) {
+                        getAchievementList(year + '-' + semester);
+                    } else if (semester) {
+                        state.achieveList = [];
+                        state.schoolYearList.forEach(item => {
+                            getAchievementList(item.dataNumber.split('-')[0] + '-' + semester, true);
+                        });
+                    } else if (year) {
+                        state.achieveList = [];
+                        state.schoolSemesterList.forEach(item => {
+                            getAchievementList(year + '-' + item.value, true);
+                        });
+                    } else {
+                        state.achieveList = [];
+                        state.schoolYearList.forEach(item => {
+                            state.schoolSemesterList.forEach(item2 => {
+                                getAchievementList(item.dataNumber.split('-')[0] + '-' + item2.value, true);
+                            });
+                        });
+                    }
+                }
+
+                // node.onSearch = (e) => {
+                //     onSearch(node.state);
+                //     node.setState({
+                //         achieveList: [],
+                //     });
+                //     search();
+                // };
+
+                waitElement('.search-div-btn', container => {
+                    const btn = document.createElement('button');
+                    btn.className = 'ant-btn ant-btn-primary';
+                    btn.textContent = '原始分';
+                    btn.addEventListener('click', () => search());
+                    container.appendChild(btn);
                 });
             }
-            if (url.includes('jwxt/mk/studentWeb/#/stuAchievementView') || url.includes('jwxt/mk/gradua/#/completionstatusStu')) {
-                waitElement('.cj-yxsh-con.cj-cx', content => { content.style.width = '100%'; content.style.margin = '0px'; });
-            }
-            if (url.includes('#/notice/')) {
-                waitElement('main', content => { content.style.padding = '0px'; });
-                waitElement('.style-bread-3mo7c', content => { content.style.maxWidth = '100%'; });
-                waitElement('.style-wrapper-3Oy8W', content => { content.style.maxWidth = '100%'; });
-            }
-            if (url.includes('/jwxt/mk/courseSelection')) {
-                click('.ant-notification-notice-close-x');
-            }
-        };
-        window.addEventListener('load', () => {
-            purifyJwxt();
-            toast.info('[SYSUER 脚本] 净化页面');
         });
     }
-
     if (videoComplete && /lms\.sysu\.edu\.cn\/mod\/.*?\/view\.php/.test(url)) {
         let retry = 0;
         function upload(playerWrapper, playerdata, callback) {
@@ -464,14 +589,14 @@
                     }
                 }
                 upload(playerWrapper, playerdata, (progress, totaltime) => {
-                    if (progress == "100") {
+                    if (parseInt(progress.replace(/,/g, ''), 10) >= 100) {
                         toast.success('[SYSUER 脚本] 当前视频完成');
                         if (videoJump) {
                             jump();
                         }
                     } else {
                         let count = 0;
-                        const total = Math.floor((totaltime - duration) / 4) + 1;
+                        const total = Math.floor((duration - totaltime) / 4);
                         const intervalId = setInterval(() => {
                             playerWrapper.viewTotalTime = 4000;
                             playerWrapper.ajaxOrder();
@@ -480,22 +605,23 @@
                                 clearInterval(intervalId);
                             }
                         }, 10);
-                        toast.success('[SYSUER 脚本] 视频进度已全额提交！');
                         if (videoJump) {
-                            const test = () => upload(playerWrapper, playerdata, (progress, totaltime) => {
-                                if (progress == "100") {
+                            const checkProgress = () => upload(playerWrapper, playerdata, (progress, totaltime) => {
+                                if (parseInt(progress.replace(/,/g, ''), 10) >= 100) {
+                                    toast.success('[SYSUER 脚本] 视频进度已全额提交！');
                                     jump();
                                 } else {
-                                    setTimeout(test, 500);
+                                    setTimeout(checkProgress, 500);
                                 }
                             });
+                            checkProgress();
                         }
                     }
                 });
             }
         };
         if (/lms\.sysu\.edu\.cn\/mod\/fsresource\/view\.php/.test(url)) {
-            if (removeWatermark) {
+            if (removeWatermark && watermark) {
                 watermark.remove()
             }
             let videoAttempts = 0;
@@ -562,13 +688,13 @@
         }
         const clickButton = {
             'jwxt.sysu.edu.cn/jwxt/#/login': 'button.ant-btn.ant-btn-primary',
-            'jwxt.sysu.edu.cn': '.ant-confirm-btns>button.ant-btn.ant-btn-primary',
-            'lms.sysu.edu.cn/enrol/index.php?id=': '.continuebutton btn.btn-primary',
+            'jwxt.sysu.edu.cn': 'button.ant-btn.ant-btn-primary',
+            'lms.sysu.edu.cn/enrol/index.php?id=': '.continuebutton .btn.btn-primary',
             'lms.sysu.edu.cn': '.loginBtn',
             'portal.sysu.edu.cn/newClient/#/login': '.index-loginData-XCumn>button.ant-btn.index-submit-3jXSy',
             'pay.sysu.edu.cn': '.el-button.login_btns',
         };
-        window.addEventListener('load', function () {
+        const autoJump = () => {
             Object.entries(clickButton).forEach(([key, value]) => {
                 if (url.includes(key)) {
                     waitElement(value, e => {
@@ -577,7 +703,9 @@
                     });
                 }
             });
-        });
+        }
+        autoJump();
+        window.addEventListener('load', autoJump);
     }
     if (autoLogin && /cas.+?sysu\.edu\.cn\/esc-sso\/login\/page/.test(url) && username && password) {
         login(username, password);
