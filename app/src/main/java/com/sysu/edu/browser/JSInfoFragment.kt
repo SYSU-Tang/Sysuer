@@ -30,9 +30,7 @@ import rikka.preference.SimpleMenuPreference
 class JSInfoFragment : PreferenceFragmentCompat() {
 	var data: JavaScriptEntity? = null
 	val model: JsModel by lazy {
-		ViewModelProvider(this,
-		                  JsModelFactory(BrowserRepository(requireContext(),
-		                                                   lifecycleScope)))[JsModel::class.java]
+		ViewModelProvider(this, JsModelFactory(BrowserRepository(requireContext(), lifecycleScope)))[JsModel::class.java]
 	}
 	val dialog: EditTextDialog by lazy { EditTextDialog(requireContext()) }
 	val config: Config by lazy { Config(this) }
@@ -52,17 +50,15 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 			val excludeLink = JSONArray()
 			val matchLink = JSONArray()
 			findPreference<PreferenceCategory>("exclude")?.children?.forEach {
-				if (it is EditPreference) it.value?.takeIf { it1 -> it1.isNotEmpty() }
-					?.let { pattern ->
-						excludeLink.add(pattern)
-					}
+				if (it is EditPreference) it.value?.takeIf { it1 -> it1.isNotEmpty() }?.let { pattern ->
+					excludeLink.add(pattern)
+				}
 			}
 			excludes = excludeLink
 			findPreference<PreferenceCategory>("match")?.children?.forEach {
-				if (it is EditPreference) it.value?.takeIf { it1 -> it1.isNotEmpty() }
-					?.let { pattern ->
-						matchLink.add(pattern)
-					}
+				if (it is EditPreference) it.value?.takeIf { it1 -> it1.isNotEmpty() }?.let { pattern ->
+					matchLink.add(pattern)
+				}
 			}
 			namespace = findPreference<EditPreference>("namespace")?.value
 			matches = matchLink
@@ -91,14 +87,13 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		val navController = findNavController(view)
-		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner,
-		                                                      object : OnBackPressedCallback(true) {
-			                                                      override fun handleOnBackPressed() {
-				                                                      save {
-					                                                      navController.navigateUp()
-				                                                      }
-			                                                      }
-		                                                      })
+		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() {
+				save {
+					navController.navigateUp()
+				}
+			}
+		})
 		findPreference<Preference?>("edit")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
 			data?.let { entity ->
 				save {
@@ -192,7 +187,9 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 							title = getString(R.string.update)
 							summary = "${data?.version} -> ${newEntity.version}"
 							onPreferenceClickListener = Preference.OnPreferenceClickListener {
-								reinstall(newEntity.updateURL ?: "")
+								newEntity.downloadURL?.let { url -> reinstall(url) } ?: run {
+									entity.downloadURL?.let { url -> reinstall(url) }
+								}
 								config.toast(R.string.updating)
 								false
 							}
@@ -216,7 +213,7 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 	
 	private fun reinstall(url: String) {
 		lifecycleScope.launch {
-			parseFromUrl(url) ?.let { js ->
+			parseFromUrl(url)?.let { js ->
 				model.updateJs(js) {
 					load()
 					config.toast(R.string.install_success)
@@ -234,19 +231,17 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 				onPreferenceClickListener = {
 					dialog.setTitle(R.string.matches)
 					dialog.value = value
-					dialog.getDialog()
-						.setButton(Dialog.BUTTON_POSITIVE, getString(R.string.confirm)) { _, _ ->
-							dialog.getText().takeIf { it.isNotEmpty() && it != value }?.let {
-								value = it
-							}
+					dialog.getDialog().setButton(Dialog.BUTTON_POSITIVE, getString(R.string.confirm)) { _, _ ->
+						dialog.getText().takeIf { it.isNotEmpty() && it != value }?.let {
+							value = it
 						}
-					dialog.getDialog()
-						.setButton(Dialog.BUTTON_NEUTRAL, getString(R.string.delete)) { _, _ ->
-							dialog.getText().takeIf { it.isNotEmpty() }?.let {
-								preference?.removePreference(this)
-								save()
-							}
+					}
+					dialog.getDialog().setButton(Dialog.BUTTON_NEUTRAL, getString(R.string.delete)) { _, _ ->
+						dialog.getText().takeIf { it.isNotEmpty() }?.let {
+							preference?.removePreference(this)
+							save()
 						}
+					}
 					dialog.show()
 					true
 				}
@@ -264,17 +259,15 @@ class JSInfoFragment : PreferenceFragmentCompat() {
 				onPreferenceClickListener = {
 					dialog.setTitle(R.string.matches)
 					dialog.value = value
-					dialog.getDialog()
-						.setButton(Dialog.BUTTON_POSITIVE, getString(R.string.confirm)) { _, _ ->
-							dialog.getText().takeIf { it.isNotEmpty() && it != value }?.let {
-								value = it
-							}
+					dialog.getDialog().setButton(Dialog.BUTTON_POSITIVE, getString(R.string.confirm)) { _, _ ->
+						dialog.getText().takeIf { it.isNotEmpty() && it != value }?.let {
+							value = it
 						}
-					dialog.getDialog()
-						.setButton(Dialog.BUTTON_NEUTRAL, getString(R.string.delete)) { _, _ ->
-							preference?.removePreference(this)
-							save()
-						}
+					}
+					dialog.getDialog().setButton(Dialog.BUTTON_NEUTRAL, getString(R.string.delete)) { _, _ ->
+						preference?.removePreference(this)
+						save()
+					}
 					dialog.show()
 					true
 				}

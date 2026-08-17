@@ -82,7 +82,7 @@ class BrowserActivity : BaseActivity() {
 	lateinit var web: SysuerWebView
 	lateinit var binding: ActivityBrowserBinding
 	lateinit var webSettings: WebSettings
-	val cookie: CookieManager = CookieManager.getInstance()
+	val cookieManager: CookieManager = CookieManager.getInstance()
 	var refreshButton: MaterialButton? = null
 	val repository: BrowserRepository by lazy {
 		BrowserRepository(this, lifecycleScope)
@@ -92,7 +92,8 @@ class BrowserActivity : BaseActivity() {
 	}
 	private var gmBridge: com.sysu.edu.browser.data.GMBridge? = null
 	@SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility") override fun onCreate(
-		savedInstanceState: Bundle?) {
+		savedInstanceState: Bundle?,
+	                                                                                         ) {
 		super.onCreate(savedInstanceState)
 		binding = ActivityBrowserBinding.inflate(layoutInflater)
 		setContentView(binding.root)
@@ -108,8 +109,10 @@ class BrowserActivity : BaseActivity() {
 			isFocusableInTouchMode = true
 			requestFocus()
 			webViewClient = object : WebViewClient() {
-				override fun shouldOverrideUrlLoading(view: WebView,
-				                                      request: WebResourceRequest): Boolean {
+				override fun shouldOverrideUrlLoading(
+					view: WebView,
+					request: WebResourceRequest,
+				                                     ): Boolean {
 					val url1 = request.url.toString()
 					if (url1.startsWith("https://") || url1.startsWith("http://")) view.loadUrl(url1)
 					else {
@@ -123,8 +126,10 @@ class BrowserActivity : BaseActivity() {
 					return true
 				}
 				
-				override fun shouldInterceptRequest(view: WebView?,
-				                                    request: WebResourceRequest): WebResourceResponse? {
+				override fun shouldInterceptRequest(
+					view: WebView?,
+					request: WebResourceRequest,
+				                                   ): WebResourceResponse? {
 					val url1 = request.url.toString()
 					if (Pattern.compile("//jwxt.sysu.edu.cn/jwxt/system-manage/infoRelease/downloadFile",
 					                    Pattern.DOTALL).matcher(url1).find()) {
@@ -132,7 +137,7 @@ class BrowserActivity : BaseActivity() {
 							val response = okHttpClient.newCall(Request.Builder()
 								                                    .url(url1)
 								                                    .header("Cookie",
-								                                            cookie.getCookie(url1))
+								                                            cookieManager.getCookie(url1))
 								                                    .header("Referer",
 								                                            "https://jwxt.sysu.edu.cn/jwxt/")
 								                                    .build()).execute()
@@ -170,10 +175,12 @@ class BrowserActivity : BaseActivity() {
 				}
 			}
 			webChromeClient = object : WebChromeClient() {
-				override fun onJsConfirm(view: WebView?,
-				                         url: String?,
-				                         message: String?,
-				                         result: JsResult): Boolean {
+				override fun onJsConfirm(
+					view: WebView?,
+					url: String?,
+					message: String?,
+					result: JsResult,
+				                        ): Boolean {
 					MaterialAlertDialogBuilder(this@BrowserActivity).setMessage(message)
 						.setPositiveButton(R.string.confirm) { _: DialogInterface?, _: Int -> result.confirm() }
 						.create()
@@ -181,10 +188,12 @@ class BrowserActivity : BaseActivity() {
 					return true
 				}
 				
-				override fun onJsAlert(view: WebView?,
-				                       url: String?,
-				                       message: String?,
-				                       result: JsResult): Boolean {
+				override fun onJsAlert(
+					view: WebView?,
+					url: String?,
+					message: String?,
+					result: JsResult,
+				                      ): Boolean {
 					MaterialAlertDialogBuilder(this@BrowserActivity).setMessage(message)
 						.setPositiveButton(R.string.confirm) { _: DialogInterface?, _: Int -> result.confirm() }
 						.create()
@@ -192,14 +201,18 @@ class BrowserActivity : BaseActivity() {
 					return true
 				}
 				
-				override fun onCreateWindow(view: WebView?,
-				                            isDialog: Boolean,
-				                            isUserGesture: Boolean,
-				                            resultMsg: Message): Boolean {
+				override fun onCreateWindow(
+					view: WebView?,
+					isDialog: Boolean,
+					isUserGesture: Boolean,
+					resultMsg: Message,
+				                           ): Boolean {
 					val newWebView = WebView(this@BrowserActivity)
 					newWebView.setWebViewClient(object : WebViewClient() {
-						override fun shouldOverrideUrlLoading(view: WebView?,
-						                                      request: WebResourceRequest): Boolean {
+						override fun shouldOverrideUrlLoading(
+							view: WebView?,
+							request: WebResourceRequest,
+						                                     ): Boolean {
 							web.loadUrl(request.url.toString())
 							newWebView.destroy()
 							return super.shouldOverrideUrlLoading(view, request)
@@ -262,7 +275,7 @@ class BrowserActivity : BaseActivity() {
 				                                                      Request.Builder()
 					                                                      .url(url1)
 					                                                      .header("Cookie",
-					                                                              cookie.getCookie(
+					                                                              cookieManager.getCookie(
 						                                                              url1))
 					                                                      .header("Referer",
 					                                                              "https://jwxt.sysu.edu.cn/jwxt/")
@@ -289,8 +302,8 @@ class BrowserActivity : BaseActivity() {
 		}
 		
 		setPrivacyMode(preference.isPrivacyMode)
-		cookie.setAcceptCookie(preference.isCookieAccept)
-		cookie.setAcceptThirdPartyCookies(web, preference.isThirdPartyCookieAccept)/*
+		cookieManager.setAcceptCookie(preference.isCookieAccept)
+		cookieManager.setAcceptThirdPartyCookies(web, preference.isThirdPartyCookieAccept)/*
          * 长按菜单
          * */
 		val anchorView = View(this)
@@ -329,9 +342,11 @@ class BrowserActivity : BaseActivity() {
 		jsDialog.setTitle(R.string.js)
 		val jsAdapter = JSAdapter()
 		jsAdapter.listener = object : AdapterListener {
-			override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-			                    holder: RecyclerView.ViewHolder,
-			                    position: Int) {
+			override fun onBind(
+				adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+				holder: RecyclerView.ViewHolder,
+				position: Int,
+			                   ) {
 				val item = jsAdapter.get(position)
 				holder.itemView.setOnClickListener {
 					ScriptManager.executeScript(item, web)
@@ -384,8 +399,10 @@ class BrowserActivity : BaseActivity() {
 				}
 			}
 			
-			override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-			                      binding: ViewBinding?) {
+			override fun onCreate(
+				adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+				binding: ViewBinding?,
+			                     ) {
 			}
 		}
 		jsBinding.recyclerView.root.apply {
@@ -508,11 +525,11 @@ class BrowserActivity : BaseActivity() {
 			    mutableListOf(GridMenuDialog.onGridMenuClickListener {
 				    val accept = !preference.isCookieAccept
 				    preference.isCookieAccept = accept
-				    cookie.setAcceptCookie(accept)
+				    cookieManager.setAcceptCookie(accept)
 			    }, GridMenuDialog.onGridMenuClickListener {
 				    val accept = !preference.isThirdPartyCookieAccept
 				    preference.isThirdPartyCookieAccept = accept
-				    cookie.setAcceptThirdPartyCookies(web, accept)
+				    cookieManager.setAcceptThirdPartyCookies(web, accept)
 			    }))
 			toggleMenu(0, preference.isCookieAccept)
 			toggleMenu(1, preference.isThirdPartyCookieAccept)
@@ -613,16 +630,25 @@ class BrowserActivity : BaseActivity() {
 				          startActivity(Intent(Intent.ACTION_VIEW).setData(trim(web.url).toUri()))
 			          }, GridMenuDialog.onGridMenuClickListener {
 				          val targetUrl = trim(web.url)
-				          cookieDialog.value = cookie.getCookie(targetUrl)
+				          cookieDialog.value = cookieManager.getCookie(targetUrl)
 				          cookieDialog.getDialog()
 					          .setButton(DialogInterface.BUTTON_POSITIVE,
 					                     getString(R.string.save)) { _: DialogInterface?, _: Int ->
-						          cookie.setCookie(targetUrl, cookieDialog.getText())
+						          cookieManager.setCookie(targetUrl, cookieDialog.getText())
 					          }
 				          cookieDialog.getDialog()
 					          .setButton(DialogInterface.BUTTON_NEGATIVE,
 					                     getString(R.string.clear)) { _: DialogInterface?, _: Int ->
-						          web.evaluateJavascript(BrowserCookieManager.clearAllCookies, null)
+									val cookies = cookieManager.getCookie(targetUrl) ?: return@setButton
+									val cookieList = cookies.split(";")
+									for (cookie in cookieList) {
+									val cookieName = cookie.substringBefore("=").trim()
+									val expiredCookie = "$cookieName=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/"
+									cookieManager.setCookie(targetUrl, expiredCookie)
+									}
+									cookieManager.flush()
+						          cookieDialog.value = ""
+						          web.reload()
 					          }
 				          cookieDialog.getDialog()
 					          .setButton(DialogInterface.BUTTON_NEUTRAL,
