@@ -70,6 +70,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	actions: @Composable RowScope.() -> Unit = {},
 	pageContent: @Composable (page: Int) -> Unit = {},
                                                                                                        ) {
+	
 	val pagerState = rememberPagerState(pageCount = {
 		if (tabs.isNotEmpty()) tabs.size else if (navs.isNotEmpty()) navs.size else 1
 	})
@@ -179,7 +180,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 					               ) { page ->
 						pageContent(page)
 					}
-					if (supportsBlur) {
+					if (supportsBlur && navs.isNotEmpty()) {
 						LiquidGlassNavBar(pagerState = pagerState, items = navs, backdrop = backdrop, onItemClick = { index ->
 							coroutineScope.launch {
 								pagerState.animateScrollToPage(index)

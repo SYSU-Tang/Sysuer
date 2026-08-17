@@ -860,4 +860,5 @@
     <string name="application_date">Application Date</string>
     <string name="approval_date">Approval Date</string>
     <string name="leave_slip_filename">LeaveSlip_%1$s.pdf</string>
+    <string name="importing">Importing…</string>
 </resources>
