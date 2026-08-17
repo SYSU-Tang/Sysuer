@@ -12,13 +12,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
+import com.sysu.edu.api.DataStoreManager
+import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.StaggerScreen
 import com.sysu.edu.view.toMarkdown
 
 class SchoolWorkWarningActivity : BaseActivity() {
 	private val viewModel: SchoolWorkWarningViewModel by viewModels()
-
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
@@ -33,20 +34,21 @@ class SchoolWorkWarningActivity : BaseActivity() {
 				isNestedScrollEnabled = false,
 				actions = {
 					IconButton(onClick = {
-						startActivity(Intent(this@SchoolWorkWarningActivity, MarkdownViewActivity::class.java)
-							.putExtra("content", viewModel.sections.toMarkdown())
-							.putExtra("title", getString(R.string.school_work_warning)))
+						val markdown = viewModel.sections.toMarkdown()
+						DataStoreManager.saveContent(this@SchoolWorkWarningActivity, getString(R.string.school_work_warning), markdown) {
+							startActivity(Intent(this@SchoolWorkWarningActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.school_work_warning)))
+						}
 					}) {
 						Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
 					}
 				},
-			) {
+			             ) {
 				StaggerScreen(
 					sections = sections,
 					onScrollBottom = {
 						if (viewModel.hasMore) viewModel.fetchWarning()
 					},
-				)
+				             )
 			}
 		}
 	}

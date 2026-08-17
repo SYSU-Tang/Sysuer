@@ -158,7 +158,8 @@ class TrainingProgramActivity : BaseActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class) @Composable private fun CollegeDropdown(viewModel: TrainingProgramViewModel) {
 	var expanded by remember { mutableStateOf(false) }
-	val maxMenuHeight = LocalConfiguration.current.screenHeightDp.dp * 0.5f
+	val configuration = LocalConfiguration.current
+	val maxMenuHeight = configuration.screenHeightDp.dp * 0.5f
 	
 	ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
 		OutlinedTextField(value = viewModel.selectedCollegeName ?: "",

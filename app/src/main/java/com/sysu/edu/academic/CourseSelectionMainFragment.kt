@@ -391,9 +391,9 @@ class CourseSelectionMainFragment : BaseFragment() {
 			binding.select.setSelected(isSelected)
 			binding.select.text = context.getString(if (isSelected) R.string.drop_course else R.string.select_course)
 			val selectBg = if (isSelected) MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorPrimaryContainer) else Color.TRANSPARENT
-			val selectFg = MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorOnPrimaryContainer)
+			val selectFg = MaterialColors.getColor(binding.select, if (isSelected) com.google.android.material.R.attr.colorOnPrimaryContainer else com.google.android.material.R.attr.colorOnSurface)
 			val likeBg = if (isLike) MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorPrimaryContainer) else Color.TRANSPARENT
-			val likeFg = MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorOnPrimaryContainer)
+			val likeFg = MaterialColors.getColor(binding.select, if (isLike) com.google.android.material.R.attr.colorOnPrimaryContainer else com.google.android.material.R.attr.colorOnSurface)
 			binding.select.backgroundTintList = ColorStateList.valueOf(selectBg)
 			binding.select.setTextColor(ColorStateList.valueOf(selectFg))
 			binding.select.setIconTint(ColorStateList.valueOf(selectFg))
