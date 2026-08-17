@@ -59,6 +59,7 @@ import com.sysu.edu.R
 import com.sysu.edu.api.CalendarManager
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.api.DataStoreManager
+import com.sysu.edu.theme.SysuerTheme
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.MenuItem
 import com.sysu.edu.view.SectionData
@@ -78,6 +79,7 @@ class PayActivity : BaseActivity() {
 		val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 		
 		setContent {
+			SysuerTheme {
 			val toPayList by viewModel.toPayList.observeAsState(JSONArray())
 			val selectivePayList by viewModel.selectivePayList.observeAsState(JSONArray())
 			val feeList by viewModel.feeList.observeAsState(JSONArray())
@@ -387,6 +389,7 @@ class PayActivity : BaseActivity() {
 					}
 				})
 			}
+		}
 		}
 	}
 }
