@@ -67,34 +67,35 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 						if (total == -1) total = it.getInteger("total")
 						it.getJSONArray("rows").forEach { item: Any? ->
 							val title = "${(item as JSONObject).getString("askLeaveReasonName")} · ${item.getString("askLeaveTypeName")}"
-							sections.add(SectionData(title,
+							val context = getApplication<Application>()
+						sections.add(SectionData(title,
 							                         footerMenus = mutableStateListOf(
-														 MenuItem("打印请假单", Icons.Rounded.Print){
-															 printLeaveSlip(item.getString("askLeaveId"))
-															 true
-														 }
-																						  ),
-							                         rows = extractValue(item,
-							                                             arrayOf("请假原因",
-							                                                     "请假类型",
-							                                                     "开始时间",
-							                                                     "结束时间",
-							                                                     "开始日期",
-							                                                     "结束日期",
-							                                                     "请假天数",
-							                                                     "实际请假天数",
-							                                                     "学期累计请假",
-							                                                     "审批状态",
-							                                                     "审批阶段",
-							                                                     "销假",
-							                                                     "是否取消",
-							                                                     "原因说明",
-							                                                     "申请日期",
-							                                                     "审批日期",
-							                                                     "学期",
-							                                                     "校区",
-							                                                     "年级专业",
-							                                                     "附件"),
+													 MenuItem(context.getString(R.string.print_leave_slip), Icons.Rounded.Print){
+														 printLeaveSlip(item.getString("askLeaveId"))
+														 true
+													 }
+																					  ),
+							                         rows = extractValue(context,item,
+							                                             intArrayOf(R.string.leave_reason,
+													                                                     R.string.leave_type,
+													                                                     R.string.leave_start_time,
+													                                                     R.string.leave_end_time,
+													                                                     R.string.leave_start_date,
+													                                                     R.string.leave_end_date,
+													                                                     R.string.leave_day,
+													                                                     R.string.actual_leave_days,
+													                                                     R.string.semester_cumulative_leave,
+													                                                     R.string.approval_status,
+													                                                     R.string.approval_stage,
+													                                                     R.string.cancel_leave,
+													                                                     R.string.is_canceled,
+													                                                     R.string.reason_explanation,
+													                                                     R.string.application_date,
+													                                                     R.string.approval_date,
+													                                                     R.string.term,
+													                                                     R.string.campus,
+													                                                     R.string.grade_major,
+													                                                     R.string.attachment),
 							                                             arrayOf("askLeaveReasonName",
 							                                                     "askLeaveTypeName",
 							                                                     "askLeaveBeginTime",
@@ -136,11 +137,11 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 						application.startActivity(Intent(application,
 						                                                   BrowserActivity::class.java).setData("https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${data.getString("filePath")}&fileName=${
 							data.getString("fileName")
-						}".toUri()))
+						}".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 					})
 				}
 				3 -> {
-					model.contextUtil.toast(response.getString("message"))
+					model.contextUtil.toast(response.getString("message",""))
 					reset()
 					_submitSuccess.postValue(true)
 					refreshLeaveSlips()
@@ -237,21 +238,21 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 	fun printLeaveSlip(askLeaveId : String) {
 		val path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-		                             }/请假单_${askLeaveId}.pdf"
+		                             }/${getApplication<Application>().getString(R.string.leave_slip_filename, askLeaveId)}"
 		DownloadManager.downloadFile(application,"https://${model.host}/jwxt/reports-register/askLeaveAgg/selfAskLeavePaper?askLeaveId=$askLeaveId",
 		                             path,object : DownloadManager.DownloadListener {
-				override fun onDownloadProgress(progress: Long, total: Long) {
+			override fun onDownloadProgress(progress: Long, total: Long) {
+			}
+			
+			override fun onDownloadComplete(path: String?) {
+				viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_complete)}：$path")
 				}
-				
-				override fun onDownloadComplete(path: String?) {
-					viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_complete) }：$path")
-					}
+			}
+			
+			override fun onDownloadError(code: Int, message: String?) {
+				viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_error)}：$message")
 				}
-				
-				override fun onDownloadError(code: Int, message: String?) {
-					viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_error) }：$message")
-					}
-				}})
+			}})
 	}
 	
 	override fun onCleared() {

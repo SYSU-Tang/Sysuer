@@ -823,6 +823,7 @@
     <string name="short_leave">Short Leave</string>
     <string name="enter_valid_leave_days">Please enter a valid number of leave days</string>
     <string name="select_leave_reason">Please select a leave reason</string>
+    <string name="download_error">Download Failed</string>
     <string name="credit_hours_status">Credit &amp; Hours Status</string>
     <string name="course_completion_status">Course Completion Status</string>
     <string name="training_credit">Training Program Credit Requirement</string>
@@ -844,4 +845,19 @@
     <string name="ticket_remark">Ticket Remark</string>
     <string name="ticket_title_tip">Default ticket title is your name</string>
     <string name="pending_pay_order">Pending Orders</string>
+    <string name="print_leave_slip">Print Leave Slip</string>
+    <string name="leave_start_time">Start Time</string>
+    <string name="leave_end_time">End Time</string>
+    <string name="leave_start_date">Start Date</string>
+    <string name="leave_end_date">End Date</string>
+    <string name="actual_leave_days">Actual Leave Days</string>
+    <string name="semester_cumulative_leave">Semester Cumulative Leave</string>
+    <string name="approval_status">Approval Status</string>
+    <string name="approval_stage">Approval Stage</string>
+    <string name="cancel_leave">Cancel Leave</string>
+    <string name="is_canceled">Is Canceled</string>
+    <string name="reason_explanation">Reason Explanation</string>
+    <string name="application_date">Application Date</string>
+    <string name="approval_date">Approval Date</string>
+    <string name="leave_slip_filename">LeaveSlip_%1$s.pdf</string>
 </resources>

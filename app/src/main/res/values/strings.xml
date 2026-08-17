@@ -831,4 +831,19 @@
     <string name="pending_pay_order">待支付订单</string>
     <string name="enter_leave_type_name">请选择假期类型</string>
     <string name="download_error">下载失败</string>
+    <string name="print_leave_slip">打印请假单</string>
+    <string name="leave_start_time">开始时间</string>
+    <string name="leave_end_time">结束时间</string>
+    <string name="leave_start_date">开始日期</string>
+    <string name="leave_end_date">结束日期</string>
+    <string name="actual_leave_days">实际请假天数</string>
+    <string name="semester_cumulative_leave">学期累计请假</string>
+    <string name="approval_status">审批状态</string>
+    <string name="approval_stage">审批阶段</string>
+    <string name="cancel_leave">销假</string>
+    <string name="is_canceled">是否取消</string>
+    <string name="reason_explanation">原因说明</string>
+    <string name="application_date">申请日期</string>
+    <string name="approval_date">审批日期</string>
+    <string name="leave_slip_filename">请假单_%1$s.pdf</string>
 </resources>
