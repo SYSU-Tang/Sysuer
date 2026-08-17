@@ -45,6 +45,7 @@ class SettingManager(val context: Context) {
 	* 2: 系统主题
 	* */
 	fun getTheme(): Int = preferences.getString("theme", "2")?.toInt() ?: 2
+	val isDarkTheme: Boolean = getTheme() == 1 || (getTheme() == 2 && AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES)
 	
 	companion object {
 		@JvmStatic var defaultFontSize: Float = 0.0f
@@ -57,9 +58,7 @@ class SettingManager(val context: Context) {
 	
 	var fontSize: Float = defaultFontSize
 		get() {
-			return preferences.getString("fontSize", "0")?.takeIf { "0" != it }
-				?.let { floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)[it.toInt() - 1] }
-				?: defaultFontSize
+			return preferences.getString("fontSize", "0")?.takeIf { "0" != it }?.let { floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)[it.toInt() - 1] } ?: defaultFontSize
 		}
 		set(value) {
 			field = value
@@ -89,5 +88,4 @@ class SettingManager(val context: Context) {
 			field = value
 			preferences.edit { putString("qrcode", value) }
 		}
-	
 }

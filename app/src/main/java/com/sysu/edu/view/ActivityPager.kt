@@ -1,7 +1,8 @@
 package com.sysu.edu.view
 
-import androidx.compose.animation.core.FastOutSlowInEasing
+import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -30,7 +30,6 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TabIndicatorScope
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -46,21 +45,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
-import androidx.compose.ui.unit.times
 import com.sysu.edu.R
+import com.sysu.edu.api.SettingManager
 import com.sysu.edu.theme.SysuerTheme
 import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.math.sin
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable fun ActivityPager(
 	title: String = "",
@@ -78,12 +75,18 @@ import kotlin.math.sin
 	})
 	val coroutineScope = rememberCoroutineScope()
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-	
+	val supportsBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+	val settingManager = SettingManager(LocalContext.current)
 	LaunchedEffect(pagerState.currentPage) {
 		onPageChange?.invoke(pagerState.currentPage)
 	}
 	
 	SysuerTheme {
+		val backgroundColor = MaterialTheme.colorScheme.surface
+		val backdrop = rememberLayerBackdrop {
+			drawRect(backgroundColor)
+			drawContent()
+		}
 		Scaffold(
 			modifier = Modifier
 				.fillMaxSize()
@@ -141,35 +144,54 @@ import kotlin.math.sin
 			},
 			bottomBar = {
 				if (navs.isNotEmpty()) {
-					NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-						navs.forEachIndexed { index, navItem ->
-							NavigationBarItem(selected = pagerState.currentPage == index, label = { Text(text = navItem.title ?: "") }, onClick = {
-								coroutineScope.launch {
-									pagerState.animateScrollToPage(index)
-								}
-							}, icon = navItem.icon?.let { { Icon(imageVector = it, contentDescription = "") } } ?: {})
+					if (!supportsBlur) {
+						NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+							navs.forEachIndexed { index, navItem ->
+								NavigationBarItem(selected = pagerState.currentPage == index, label = { Text(text = navItem.title ?: "") }, onClick = {
+									coroutineScope.launch {
+										pagerState.animateScrollToPage(index)
+									}
+								}, icon = navItem.icon?.let { { Icon(imageVector = it, contentDescription = "") } } ?: {})
+							}
 						}
 					}
 				}
 			},
 			floatingActionButton = floatingActionButton,
 		        ) { innerPadding ->
-			if (tabs.isNotEmpty() || navs.size > 1) {
-				HorizontalPager(
-					state = pagerState,
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(innerPadding),
-				               ) { page ->
-					pageContent(page)
+			val contentModifier = if (supportsBlur && navs.isNotEmpty()) {
+				Modifier
+					.fillMaxSize()
+					.padding(innerPadding)
+					.background(MaterialTheme.colorScheme.surface)
+					.layerBackdrop(backdrop)
+			}
+			else {
+				Modifier
+					.fillMaxSize()
+					.padding(innerPadding)
+			}
+			if (tabs.isNotEmpty() || navs.isNotEmpty()) {
+				Box(modifier = Modifier.fillMaxSize()) {
+					HorizontalPager(
+						state = pagerState,
+						modifier = contentModifier,
+					               ) { page ->
+						pageContent(page)
+					}
+					if (supportsBlur) {
+						LiquidGlassNavBar(pagerState = pagerState, items = navs, backdrop = backdrop, onItemClick = { index ->
+							coroutineScope.launch {
+								pagerState.animateScrollToPage(index)
+							}
+						}, isDark = settingManager.isDarkTheme, modifier = Modifier.align(Alignment.BottomCenter))
+					}
 				}
 			}
 			else {
 				if (isNestedScrollEnabled) {
 					Box(
-						modifier = Modifier
-							.fillMaxSize()
-							.padding(innerPadding)
+						modifier = contentModifier
 							.verticalScroll(rememberScrollState())
 							.nestedScroll(rememberNestedScrollInteropConnection()),
 					   ) {
@@ -178,9 +200,7 @@ import kotlin.math.sin
 				}
 				else {
 					Box(
-						modifier = Modifier
-							.fillMaxSize()
-							.padding(innerPadding),
+						modifier = contentModifier,
 					   ) {
 						pageContent(0)
 					}
@@ -190,72 +210,7 @@ import kotlin.math.sin
 	}
 }
 
-data class MenuItem(val title:String? = null, val icon: ImageVector? = null, val enabled: Boolean = true, val onClick: () -> Boolean = { false })
-
-@Preview(showBackground = true) @Composable fun ActivityPagerPreview() {
-	SysuerTheme {
-		ActivityPager(
-			title = "标题",
-			tabs = listOf(
-				MenuItem(title = "教务通知"),
-				MenuItem(title = "教务通知"),
-			             ),
-			pageContent = { page ->
-				Box(
-					modifier = Modifier.fillMaxSize(),
-					contentAlignment = Alignment.Center,
-				   ) {
-					Text(text = "Page ${page + 1} content")
-				}
-			},
-		             )
-	}
-}
-
-@Composable fun TabIndicatorScope.LiquidTabIndicator(
-	pagerState: PagerState,
-	modifier: Modifier = Modifier,
-                                                    ) {
-	TabRowDefaults.PrimaryIndicator(modifier = modifier.tabIndicatorLayout { measurable, constraints, tabPositions ->
-		if (tabPositions.isEmpty()) {
-			return@tabIndicatorLayout layout(0, 0) {}
-		}
-		val pagePosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
-		val fromPage = pagePosition.toInt().coerceIn(0, tabPositions.lastIndex)
-		val toPage = if (pagePosition >= fromPage) {
-			(fromPage + 1).coerceAtMost(tabPositions.lastIndex)
-		}
-		else {
-			(fromPage - 1).coerceAtLeast(0)
-		}
-		val progress = abs(pagePosition - fromPage).coerceIn(0f, 1f)
-		val currentTab = tabPositions[fromPage]
-		val targetTab = tabPositions[toPage]                /*
-				 * Material You 动画曲线
-				 */
-		val smoothProgress = FastOutSlowInEasing.transform(progress)                /*
-				 * Tab中心移动
-				 */
-		val currentCenter = currentTab.left + currentTab.width / 2
-		val targetCenter = targetTab.left + targetTab.width / 2
-		val center = lerp(currentCenter, targetCenter, smoothProgress)                /*
-				 * 宽度平滑变化
-				 */
-		val baseWidth = lerp(currentTab.width, targetTab.width, smoothProgress)                /*
-				 * 液态拉伸
-				 *
-				 * 中间最大
-				 */
-		val stretch = sin(progress * Math.PI).toFloat() * baseWidth * 0.45f
-		val indicatorWidth = baseWidth + stretch
-		val indicatorLeft = center - indicatorWidth / 2
-		val placeable = measurable.measure(Constraints.fixed(width = indicatorWidth.roundToPx(), height = 2.dp.roundToPx()))
-		
-		layout(constraints.maxWidth, constraints.maxHeight) {
-			placeable.placeRelative(x = indicatorLeft.roundToPx(), y = constraints.maxHeight - placeable.height)
-		}
-	}, height = 2.dp, shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
-}
+data class MenuItem(val title: String? = null, val icon: ImageVector? = null, val enabled: Boolean = true, val onClick: () -> Boolean = { false })
 
 @Composable fun UnboundedTab(
 	selected: Boolean,
