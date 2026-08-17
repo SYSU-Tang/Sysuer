@@ -120,7 +120,7 @@ data class SectionData(
 					section.footerMenus.forEach { item ->
 						FilledTonalButton(onClick = { item.onClick() }, modifier = Modifier.weight(1f), shapes = ButtonDefaults.shapes(), enabled = item.enabled) {
 							item.icon?.let {
-								Icon(it, contentDescription = item.title, modifier = Modifier.size(dimensionResource(R.dimen.icon_size)), tint = MaterialTheme.colorScheme.primary)
+								Icon(it, contentDescription = item.title, modifier = Modifier.size(dimensionResource(R.dimen.icon_size)))
 								Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 							}
 							item.title?.let {

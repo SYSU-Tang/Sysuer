@@ -2,6 +2,9 @@ package com.sysu.edu.academic
 
 import android.app.Application
 import android.content.Intent
+import android.os.Environment
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Print
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -13,15 +16,20 @@ import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.application
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.api.DateTimeManager
+import com.sysu.edu.api.DownloadManager
 import com.sysu.edu.api.FileRequestBody
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.model.JwxtModel
+import com.sysu.edu.view.MenuItem
 import com.sysu.edu.view.RowData
 import com.sysu.edu.view.SectionData
+import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
 class LeaveSlipViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,6 +41,8 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	private var page by mutableIntStateOf(0)
 	private var total by mutableIntStateOf(-1)
 	val hasMore: Boolean get() = total > page * 10
+	private var resetVersion by mutableIntStateOf(0)
+	val resetTrigger: Int get() = resetVersion
 	private val _submitSuccess = MutableLiveData<Boolean>()
 	val submitSuccess: LiveData<Boolean> = _submitSuccess
 	val leaveData: JSONObject = JSONObject.of("whetherStuApply", "1")
@@ -58,6 +68,12 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 						it.getJSONArray("rows").forEach { item: Any? ->
 							val title = "${(item as JSONObject).getString("askLeaveReasonName")} · ${item.getString("askLeaveTypeName")}"
 							sections.add(SectionData(title,
+							                         footerMenus = mutableStateListOf(
+														 MenuItem("打印请假单", Icons.Rounded.Print){
+															 printLeaveSlip(item.getString("askLeaveId"))
+															 true
+														 }
+																						  ),
 							                         rows = extractValue(item,
 							                                             arrayOf("请假原因",
 							                                                     "请假类型",
@@ -117,8 +133,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 					attachment.value = data
 					attachmentRows.clear()
 					attachmentRows.add(RowData(data.getString("filePath"), data.getString("fileName")) {
-						val app = getApplication<Application>()
-						app.startActivity(Intent(app,
+						application.startActivity(Intent(application,
 						                                                   BrowserActivity::class.java).setData("https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${data.getString("filePath")}&fileName=${
 							data.getString("fileName")
 						}".toUri()))
@@ -131,14 +146,13 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 					refreshLeaveSlips()
 				}
 				4 -> {
-					val acadYearSemester = response.getJSONObject("data").getString("acadYearSemester")
-					leaveData["semester"] = acadYearSemester
+					leaveData["semester"] = response.getJSONObject("data").getString("acadYearSemester")
 				}
 			}
 		}
 	}
 	
-	private fun reset() {
+	fun reset() {
 		leaveDays = ""
 		leaveType = ""
 		leaveTypeName = ""
@@ -151,6 +165,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 		endMillis = System.currentTimeMillis()
 		attachment.value = null
 		attachmentRows.clear()
+		resetVersion++
 	}
 	
 	fun fetchLeaveSlips() {
@@ -202,8 +217,8 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 			leaveData["fileName"] = it.getString("fileName")
 			leaveData["filePath"] = it.getString("filePath")
 		}
-		println(leaveData.toJSONString())
-//		model.addAndNext("jwxt/reports-register/askLeaveAgg/applyLeave", leaveData.toJSONString(), 3)
+//		println(leaveData.toJSONString())
+		model.addAndNext("jwxt/reports-register/askLeaveAgg/applyLeave", leaveData.toJSONString(), 3)
 	}
 	
 	fun fetchTerms() {
@@ -219,6 +234,24 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	fun deleteAttachment() {
 		attachment.value = null
 		attachmentRows.clear()
+	}
+	fun printLeaveSlip(askLeaveId : String) {
+		val path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+		                             }/请假单_${askLeaveId}.pdf"
+		DownloadManager.downloadFile(application,"https://${model.host}/jwxt/reports-register/askLeaveAgg/selfAskLeavePaper?askLeaveId=$askLeaveId",
+		                             path,object : DownloadManager.DownloadListener {
+				override fun onDownloadProgress(progress: Long, total: Long) {
+				}
+				
+				override fun onDownloadComplete(path: String?) {
+					viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_complete) }：$path")
+					}
+				}
+				
+				override fun onDownloadError(code: Int, message: String?) {
+					viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_error) }：$message")
+					}
+				}})
 	}
 	
 	override fun onCleared() {

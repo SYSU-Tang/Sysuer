@@ -1,6 +1,5 @@
 package com.sysu.edu.api
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -11,6 +10,7 @@ import androidx.core.content.FileProvider
 import com.sysu.edu.R
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -21,7 +21,7 @@ import java.util.Locale
 
 object DownloadManager {
 	private val handler = Handler(Looper.getMainLooper())
-	
+	val okHttpClient: OkHttpClient = OkHttpClient.Builder().build()
 	/**
 	 * 下载网络文件到指定路径
 	 * 
@@ -29,8 +29,10 @@ object DownloadManager {
 	 * @param url     网络文件 URL
 	 * @param path    本地文件保存路径
 	 */
-	@JvmStatic fun downloadFile(context: Activity?, url: String, path: String, listener: DownloadListener?) {
-		downloadFile(context, Request.Builder().url(url).build(), path, listener)
+	@JvmStatic fun downloadFile(context: Context, url: String, path: String, listener: DownloadListener? = null) {
+		downloadFile(context, Request.Builder()
+			.header("Cookie", CookieManager(context).toSimpleString(url.toHttpUrl().host))
+			.url(url).build(), path, listener)
 	}
 	
 	/**
@@ -40,9 +42,9 @@ object DownloadManager {
 	 * @param url     网络文件 URL
 	 * @param path    本地文件保存路径
 	 */
-	@JvmStatic fun downloadFile(context: Activity?, url: String, path: String) {
-		downloadFile(context, Request.Builder().url(url).build(), path, null)
-	}
+//	@JvmStatic fun downloadFile(context: Context, url: String, path: String) {
+//		downloadFile(context, url,path, null)
+//	}
 	
 	/**
 	 * 下载网络文件到指定路径
@@ -50,7 +52,7 @@ object DownloadManager {
 	 * @param context 上下文对象
 	 * @param request 网络请求对象
 	 */
-	@JvmStatic fun downloadFile(context: Activity?, request: Request, path: String) {
+	@JvmStatic fun downloadFile(context: Context, request: Request, path: String) {
 		downloadFile(context, request, path, null)
 	}
 	
@@ -62,8 +64,8 @@ object DownloadManager {
 	 * @param path     本地文件保存路径
 	 * @param listener 下载监听器
 	 */
-	@JvmStatic fun downloadFile(context: Context?, request: Request, path: String, listener: DownloadListener?) {
-		OkHttpClient().newCall(request).enqueue(object : Callback {
+	@JvmStatic fun downloadFile(context: Context, request: Request, path: String, listener: DownloadListener?) {
+okHttpClient.newCall(request).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
 				println("下载网络文件报错：" + e.message)
 				handler.post { Toast.makeText(context, "下载网络文件报错：" + e.message, Toast.LENGTH_SHORT).show() }

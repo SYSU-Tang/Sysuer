@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -77,6 +78,7 @@ import com.sysu.edu.view.StaggerScreen
 import com.sysu.edu.view.WarningCard
 import com.sysu.edu.view.toMarkdown
 
+@OptIn(ExperimentalMaterial3Api::class)
 class LeaveSlipActivity : BaseActivity() {
 	private val viewModel: LeaveSlipViewModel by viewModels()
 	private val fileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
@@ -93,6 +95,7 @@ class LeaveSlipActivity : BaseActivity() {
 		
 		setContent {
 			var apply by rememberSaveable { mutableStateOf(false) }
+			var fabExpanded by rememberSaveable { mutableStateOf(true) }
 			val submitSuccess by viewModel.submitSuccess.observeAsState(initial = false)
 			LaunchedEffect(Unit) {
 				viewModel.fetchLeaveSlips()
@@ -108,18 +111,23 @@ class LeaveSlipActivity : BaseActivity() {
 				else supportFinishAfterTransition()
 			}
 			ActivityPager(title = stringResource(R.string.leave_slip), floatingActionButton = {
-				ExtendedFloatingActionButton(onClick = {
-					if (apply) {
-						viewModel.submitLeaveSlip()
+				if (apply) {
+					Column(modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
+						ExtendedFloatingActionButton(expanded = fabExpanded, onClick = { viewModel.reset() }, text = { Text(stringResource(R.string.reset)) }, icon = { Icon(imageVector = Icons.Rounded.Refresh, contentDescription = stringResource(R.string.reset)) })
+						ExtendedFloatingActionButton(expanded = fabExpanded, onClick = {
+							viewModel.submitLeaveSlip()
+						}, icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.submit)) }, text = { Text(stringResource(R.string.submit)) })
 					}
-					else {
+				}
+				else {
+					ExtendedFloatingActionButton(expanded = fabExpanded, onClick = {
 						viewModel.resetSubmitSuccess()
 						apply = true
-					}
-				},
-				                             modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
-				                             icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.ask_for_leave)) },
-				                             text = { Text(stringResource(if (apply) R.string.submit else R.string.ask_for_leave)) })
+					},
+					                             modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
+					                             icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.ask_for_leave)) },
+					                             text = { Text(stringResource(R.string.ask_for_leave)) })
+				}
 			}, onNavigationClick = { if (apply) apply = false else supportFinishAfterTransition() }, isNestedScrollEnabled = false, actions = {
 				IconButton(onClick = {
 					val markdown = viewModel.sections.toMarkdown()
@@ -143,6 +151,7 @@ class LeaveSlipActivity : BaseActivity() {
 					onScrollBottom = {
 						if (viewModel.hasMore) viewModel.fetchLeaveSlips()
 					},
+					onScrollTopChanged = { fabExpanded = it },
 				                  )
 			}
 		}
@@ -181,6 +190,16 @@ class LeaveSlipActivity : BaseActivity() {
 	}
 	LaunchedEffect(Unit) {
 		if (leaveReasons.isEmpty()) viewModel.fetchLeaveTypes()
+	}
+	LaunchedEffect(viewModel.resetTrigger) {
+		leaveDays = viewModel.leaveDays
+		leaveReasonDescription = viewModel.leaveReasonDescription
+		leaveReason = viewModel.leaveReason
+		leaveReasonName = viewModel.leaveReasonName
+		startPeriod = viewModel.startPeriod
+		endPeriod = viewModel.endPeriod
+		startMillis = viewModel.startMillis
+		endMillis = viewModel.endMillis
 	}
 	LaunchedEffect(leaveDays, leaveReasonDescription, leaveReason, leaveReasonName, startPeriod, endPeriod, startMillis, endMillis, leaveType, leaveTypeName) {
 		viewModel.leaveDays = leaveDays

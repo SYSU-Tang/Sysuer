@@ -830,4 +830,5 @@
     <string name="ticket_title_tip">默认发票抬头是姓名</string>
     <string name="pending_pay_order">待支付订单</string>
     <string name="enter_leave_type_name">请选择假期类型</string>
+    <string name="download_error">下载失败</string>
 </resources>
