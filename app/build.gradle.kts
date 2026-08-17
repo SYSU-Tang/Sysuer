@@ -63,6 +63,7 @@ dependencies {
 	implementation(libs.androidx.room3.runtime)
 	implementation(libs.androidx.runtime.livedata)
 	implementation(libs.glide)
+//    implementation(libs.haze)
 	implementation(libs.material.icons.extended)
 	implementation(libs.multiplatform.markdown.renderer.android)
 	implementation(libs.multiplatform.markdown.renderer.m3)
@@ -98,25 +99,13 @@ dependencies {
 	}
 	implementation(libs.firebase.crashlytics)
 	implementation(libs.firebase.analytics)
-	implementation(libs.markwon) {
-		exclude("com.atlassian.commonmark", "commonmark")
-	}
-	implementation(libs.ext.tables) {
-		exclude("com.atlassian.commonmark", "commonmark")
-	}
-	implementation(libs.ext.strikethrough) {
-		exclude("com.atlassian.commonmark", "commonmark")
-	}
+	implementation(libs.markwon) 
+	implementation(libs.ext.tables) 
+	implementation(libs.ext.strikethrough) 
 	implementation(libs.google.material)
-	implementation(libs.recycler) {
-		exclude("com.atlassian.commonmark", "commonmark")
-	}
-	implementation(libs.recycler.table) {
-		exclude("com.atlassian.commonmark", "commonmark")
-	}
-	implementation(libs.inline.parser) {
-		exclude("com.atlassian.commonmark", "commonmark")
-	}
+	implementation(libs.recycler) 
+	implementation(libs.recycler.table) 
+	implementation(libs.inline.parser) 
 	implementation(libs.androidx.core.remoteviews)
 	implementation(libs.androidx.fragment)
 	implementation(libs.zxing.core)
@@ -129,9 +118,7 @@ dependencies {
 	debugImplementation(libs.ui.test.manifest)
 	implementation(libs.api)
 	implementation(libs.provider)
-	implementation(libs.html) {
-		exclude("com.atlassian.commonmark", "commonmark")
-	}
+	implementation(libs.html) 
 	implementation(platform(libs.editor.bom))
 	implementation(libs.editor)
 	implementation(libs.language.textmate)
