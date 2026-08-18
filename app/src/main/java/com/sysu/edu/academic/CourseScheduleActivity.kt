@@ -9,7 +9,6 @@ import android.widget.GridLayout
 import android.widget.PopupMenu
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textview.MaterialTextView
@@ -17,6 +16,7 @@ import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.CommonUtil.toStringOrDefault
+import com.sysu.edu.api.DownloadManager
 import com.sysu.edu.databinding.ActivityCourseScheduleBinding
 import com.sysu.edu.databinding.ItemAgendaBinding
 import com.sysu.edu.databinding.ItemDetailBinding
@@ -52,9 +52,13 @@ class CourseScheduleActivity : BaseActivity() {
 		val terms: MutableList<String?> = mutableListOf()
 		binding = ActivityCourseScheduleBinding.inflate(layoutInflater).apply {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-			toolbar.getMenu().add(R.string.today).setOnMenuItemClickListener {
+			toolbar.menu.add(R.string.today).setOnMenuItemClickListener {
 				changeTerm(realTime.first!!)
 				changeWeek(realTime.second!!)
+				false
+			}.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+			toolbar.menu.add(R.string.export).setOnMenuItemClickListener {
+				printTable()
 				false
 			}.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
 			month.text = resources.getStringArray(R.array.months)[LocalDate.now().monthValue - 1]
@@ -64,11 +68,10 @@ class CourseScheduleActivity : BaseActivity() {
 				if (termPop == null) {
 					termPop = PopupMenu(term.context, v, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
 					terms.forEach { e: String? ->
-						termPop.menu.add(String.format(getString(R.string.term_x), e))
-							.setOnMenuItemClickListener {
-								changeTerm(e!!)
-								true
-							}
+						termPop.menu.add(String.format(getString(R.string.term_x), e)).setOnMenuItemClickListener {
+							changeTerm(e!!)
+							true
+						}
 					}
 				}
 				termPop.show()
@@ -77,26 +80,24 @@ class CourseScheduleActivity : BaseActivity() {
 				if (weekPop == null) {
 					weekPop = PopupMenu(weekTime.context, v, 0, 0, com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
 					weeks.forEach { e: Int? ->
-						weekPop.menu.add(String.format(getString(R.string.week_d), e))
-							.setOnMenuItemClickListener {
-								changeWeek(weeks.indexOf(e))
-								true
-							}
+						weekPop.menu.add(String.format(getString(R.string.week_d), e)).setOnMenuItemClickListener {
+							changeWeek(weeks.indexOf(e))
+							true
+						}
 					}
 				}
 				weekPop.show()
 			} // 初始化周次选择
 		}
 		setContentView(binding.root)
-		val duration = getResources().getStringArray(R.array.duration)
+		val duration = resources.getStringArray(R.array.duration)
 		val weekday = LocalDate.now().getDayOfWeek().value - 1
 		duration.forEachIndexed { i, period ->
-			val durationBinding = ItemDurationBinding.inflate(layoutInflater, binding.day, false)
-				.apply {
-					courseDuration.text = period!!.replace("~", "\n")
-					courseOrder.text = "${i + 1}"
-					root.setLayoutParams(GridLayout.LayoutParams())
-				}
+			val durationBinding = ItemDurationBinding.inflate(layoutInflater, binding.day, false).apply {
+				courseDuration.text = period!!.replace("~", "\n")
+				courseOrder.text = "${i + 1}"
+				root.setLayoutParams(GridLayout.LayoutParams())
+			}
 			if (i == 10) {
 				durationBinding.root.measure(View.MEASURED_SIZE_MASK, View.MEASURED_SIZE_MASK)
 				binding.month.layoutParams.width = durationBinding.root.measuredWidth
@@ -115,22 +116,21 @@ class CourseScheduleActivity : BaseActivity() {
 				itemBinding.root.setBackgroundResource(R.drawable.weekday)
 				column.setBackgroundColor(color)
 			}
-			column.setLayoutParams(GridLayout.LayoutParams(GridLayout.spec(0, 11, 1.0f), GridLayout.spec(i + 1, 1.0f))
-									   .apply {
-										   width = 0
-										   height = 0
-										   setGravity(Gravity.FILL)
-									   })
+			column.setLayoutParams(GridLayout.LayoutParams(GridLayout.spec(0, 11, 1.0f), GridLayout.spec(i + 1, 1.0f)).apply {
+				width = 0
+				height = 0
+				setGravity(Gravity.FILL)
+			})
 			binding.day.addView(column)
 			binding.week.addView(itemBinding.root)
 		} // 初始化周历
 		val detailDialog = BottomSheetDialog(this)
 		detailBinding = ItemDetailBinding.inflate(layoutInflater)
 		detailDialog.setContentView(detailBinding.root)
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
+		model.message.observe(this) { (code, response) ->
+			println("$code $response")
 			if (response.getInteger("code") == 200) {
-				when (message.first) {
+				when (code) {
 					1 -> {
 						views.forEach { e: View? -> binding.day.removeView(e) }
 						views.clear()
@@ -188,51 +188,49 @@ class CourseScheduleActivity : BaseActivity() {
 							val date = LocalDate.parse(data.getString("startTime"), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 							if (date != null) {
 								binding.month.text = resources.getStringArray(R.array.months)[date.monthValue - 1]
-								for (i in 0..6) (binding.week.getChildAt(i + 1)
-									.findViewById<View?>(R.id.course_date) as MaterialTextView).text = String.format(Locale.getDefault(), "%2d%s", date.plusDays(i.toLong()).dayOfMonth, getString(R.string.day))
+								for (i in 0..6) (binding.week.getChildAt(i + 1).findViewById<View?>(R.id.course_date) as MaterialTextView).text = String.format(Locale.getDefault(),
+								                                                                                                                                "%2d%s",
+								                                                                                                                                date.plusDays(i.toLong()).dayOfMonth,
+								                                                                                                                                getString(R.string.day))
 							}
 						}
 					}
 					4 -> {
 						terms.clear()
-						response.getJSONArray("data")
-							.forEach { e: Any? -> terms.add((e as JSONObject).getString("acadYearSemester")) }
+						response.getJSONArray("data").forEach { e: Any? -> terms.add((e as JSONObject).getString("acadYearSemester")) }
 					}
 					5 -> {
 						weeks.clear()
 						val nowWeekly = response.getJSONObject("data").getString("nowWeekly")
 						if (nowWeekly != null) currentWeek = nowWeekly.toInt()
-						response.getJSONObject("data")
-							.getJSONArray("weeklyList")
-							.forEach { e: Any? -> weeks.add((e as JSONObject).getInteger("weekly")) }
+						response.getJSONObject("data").getJSONArray("weeklyList").forEach { e: Any? -> weeks.add((e as JSONObject).getInteger("weekly")) }
 						currentWeekIndex = weeks.indexOf(currentWeek)
 						binding.weekTime.text = String.format(getString(R.string.week_d), currentWeek)
 						getTable(currentTerm, currentWeek)
 						realTime.second = currentWeekIndex
 					}
-					6 -> response.getJSONObject("data")
-						.getJSONArray("rows")
-						.takeIf { it.isNotEmpty() }
-						?.first {
-							(it as JSONObject).getString("courseName") == targetSubject
-						}
-						?.also {
-							startActivity(Intent(this, CourseDetailActivity::class.java).putExtra("id", (it as JSONObject).getString("teachingClassId"))
-											  .putExtra("code", it.getString("courseNum"))
-											  .putExtra("class", it.getString("teachingClassNum")), ActivityOptionsCompat.makeSceneTransitionAnimation(this, binding.toolbar, "miniapp")
-											  .toBundle())
-						}
+					6 -> response.getJSONObject("data").getJSONArray("rows").takeIf { it.isNotEmpty() }?.first {
+						(it as JSONObject).getString("courseName") == targetSubject
+					}?.also {
+						startActivity(Intent(this, CourseDetailActivity::class.java).putExtra("id", (it as JSONObject).getString("teachingClassId")).putExtra("code", it.getString("courseNum")).putExtra("class", it.getString("teachingClassNum")),
+						              ActivityOptionsCompat.makeSceneTransitionAnimation(this, binding.toolbar, "miniapp").toBundle())
+					}
 				}
 				model.nextAll()
 			}
-		})
+		}
 		term
 		model.next()
 	}
 	
 	fun getSelectedCourses(courseName: String?) {
 		targetSubject = courseName
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list", String.format(Locale.getDefault(), "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}", 1, courseName), 6)
+		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list",
+		                 String.format(Locale.getDefault(),
+		                               "{\"pageNo\":%d,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"%s\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
+		                               1,
+		                               courseName),
+		                 6)
 	}
 	
 	fun getAvailableWeeks(academicYear: String?) {
@@ -245,8 +243,7 @@ class CourseScheduleActivity : BaseActivity() {
 		}
 	
 	fun getOldDate(distanceDay: Int): String {
-		return LocalDate.now()
-			.plusDays(distanceDay.toLong()).dayOfMonth.toString() + getString(R.string.day)
+		return LocalDate.now().plusDays(distanceDay.toLong()).dayOfMonth.toString() + getString(R.string.day)
 	}
 	
 	fun changeTerm(newTerm: String) {
@@ -264,11 +261,13 @@ class CourseScheduleActivity : BaseActivity() {
 		model.add(String.format(Locale.getDefault(), "jwxt/base-info/school-calender?academicYear=%s&weekly=%d", academicYear, week), 3)
 	}
 	
-	fun setDialogDetail(course: String?,
-	                    location: String?,
-	                    teacher: String?,
-	                    classTime: String?,
-	                    assistant: String?) {
+	fun setDialogDetail(
+		course: String?,
+		location: String?,
+		teacher: String?,
+		classTime: String?,
+		assistant: String?,
+	                   ) {
 		detailBinding.course.text = course
 		detailBinding.location.text = location
 		detailBinding.teacher.text = teacher
@@ -293,6 +292,15 @@ class CourseScheduleActivity : BaseActivity() {
 	
 	fun getTable(academicYear: String, week: Int) {
 		if (academicYear.isNotEmpty() && week > 0) model.add("jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=$academicYear&weekly=$week", 1)
+	}
+	
+	fun printTable() {
+		val request = model.http.generateRequest("https://${model.host}/jwxt/timetable-search/stuTimeTabPrint/output", "acadYear=$currentTerm&submitFlag=1&containKey=1%2C2%2C3%2C4%2C5", "application/x-www-form-urlencoded")
+			.header("Cookie", model.cookie)
+			.header("Referer", "https://jwxt.sysu.edu.cn/")
+			.header("Accept-Encoding", "identity")
+			.build()
+		DownloadManager.downloadFile(this, request, "")
 	}
 	
 	val term: Unit
