@@ -22,7 +22,7 @@ navigationFragment = "2.9.8"
 navigationUi = "2.9.8"
 legacySupportV4 = "1.0.0"
 activity = "1.13.0"
-okhttp = "5.4.0"
+okhttp = "5.5.0"
 okio = "3.18.1"
 annotation = "1.10.0"
 kotlin = "2.4.10"
@@ -45,7 +45,7 @@ extStrikethrough = "4.6.2"
 recycler = "4.6.2"
 recyclerTable = "4.6.2"
 inlineParser = "4.6.2"
-okhttpJavaNetCookiejar = "5.4.0"
+okhttpJavaNetCookiejar = "5.5.0"
 uiManifest = "1.12.0"
 languageTextmate = "0.24.6"
 coreRemoteviewsVersion = "1.1.0"
@@ -66,7 +66,7 @@ animation = "1.12.0"
 richtextUiMaterial3 = "1.0.0-alpha05"
 zxingCore = "3.5.4"
 commonmark = "0.30.0"
-haze = "1.7.2"
+#haze = "1.7.2"
 
 [libraries]
 androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationFragment" }
@@ -152,7 +152,7 @@ androidx-animation = { group = "androidx.compose.animation", name = "animation",
 richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richtextUiMaterial3" }
 commonmark-core = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
 commonmark-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
-haze = {group = "dev.chrisbanes.haze",name = "haze",version.ref = "haze" }
+#haze = {group = "dev.chrisbanes.haze",name = "haze",version.ref = "haze" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
