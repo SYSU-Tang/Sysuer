@@ -343,7 +343,7 @@
       },
       {
         "id": 708,
-        "name": "课程",
+        "name": "全校开课课程",
         "activity": ".academic.CourseQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/openingCoursesStu?code=jwxsd_qxkckk&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%25BC%2580%25E8%25AF%25BE%25E8%25AF%25BE%25E7%25A8%258B",
         "description": "课程信息管理系统，课程大纲、教学资源、作业提交等学习支持"
@@ -358,13 +358,13 @@
       {
         "id": 710,
         "activity": ".academic.TrainingProgramActivity",
-        "name": "培养方案",
+        "name": "全校培养方案",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/allSchoolTrainingProgramView?code=jwxsd_qxpyfack&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%259F%25B9%25E5%2585%25BB%25E6%2596%25B9%25E6%25A1%2588%25E6%259F%25A5%25E7%259C%258B",
         "description": "培养方案查询系统，各专业培养目标、课程设置、毕业要求等"
       },
       {
         "id": 711,
-        "name": "专业",
+        "name": "本科专业库",
         "activity": ".academic.MajorInfoActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/majorInfoView?code=jwxsd_bkzycx&resourceName=%25E6%259C%25AC%25E7%25A7%2591%25E4%25B8%2593%25E4%25B8%259A%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "专业信息查询系统，专业介绍、师资力量、就业方向等详细信息"
@@ -393,7 +393,7 @@
       {
         "id": 715,
         "activity": ".academic.RoomQueryActivity",
-        "name": "教室占用",
+        "name": "教室占用情况",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/#/classroomCheckStu?code=jwxsd_jsskqkjkxjscx&resourceName=%25E6%2595%2599%25E5%25AE%25A4%25E4%25B8%258A%25E8%25AF%25BE%25E6%2583%2585%25E5%2586%25B5%25E5%258F%258A%25E7%25A9%25BA%25E9%2597%25B2%25E6%2595%2599%25E5%25AE%25A4%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "教室查询系统，显示教学楼、实验楼等教室的空闲时间、占用情况等"
       },

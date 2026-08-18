@@ -345,7 +345,7 @@
       },
       {
         "id": 708,
-        "name": "Courses",
+        "name": "All School Opening Courses",
         "activity": ".academic.CourseQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/openingCoursesStu?code=jwxsd_qxkckk&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%25BC%2580%25E8%25AF%25BE%25E8%25AF%25BE%25E7%25A8%258B",
         "description": "Course information management system, providing learning support such as course outlines, teaching resources, and assignment submissions"
@@ -359,13 +359,13 @@
       },
       {
         "id": 710,
-        "name": "Training Plan",
+        "name": "All School Training Plan",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/allSchoolTrainingProgramView?code=jwxsd_qxpyfack&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%259F%25B9%25E5%2585%25BB%25E6%2596%25B9%25E6%25A1%2588%25E6%259F%25A5%25E7%259C%258B",
         "description": "Training plan inquiry system, providing details on training objectives, course settings, and graduation requirements for each major"
       },
       {
         "id": 711,
-        "name": "Majors",
+        "name": "Undergraduate Majors Library",
         "activity": ".academic.MajorInfoActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/majorInfoView?code=jwxsd_bkzycx&resourceName=%25E6%259C%25AC%25E7%25A7%2591%25E4%25B8%2593%25E4%25B8%259A%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "Major information inquiry system, providing detailed information such as major introductions, faculty, and employment direction"
@@ -393,11 +393,12 @@
       },
       {
         "id": 715,
-        "name": "Classroom Occupation",
+        "name": "Classroom Occupation Status",
         "activity": ".academic.RoomQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/#/classroomCheckStu?code=jwxsd_jsskqkjkxjscx&resourceName=%25E6%2595%2599%25E5%25AE%25A4%25E4%25B8%258A%25E8%25AF%25BE%25E6%2583%2585%25E5%2586%25B5%25E5%258F%258A%25E7%25A9%25BA%25E9%2597%25B2%25E6%2595%2599%25E5%25AE%25A4%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "Classroom inquiry system, with functions such as available classrooms, class schedule, and room capacity inquiry"
-      },{
+      },
+      {
         "id": 716,
         "name": "Assistant Evaluation",
         "activity": ".academic.AssistantEvaluationActivity",
@@ -411,7 +412,6 @@
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/studentAskLeaveInfo?code=jwxsd_qjsq&resourceName=%25E8%25AF%25B7%25E5%2581%2587%25E7%2594%25B3%25E8%25AF%25B7",
         "description": "Leave slip inquiry system, with functions such as student names, leave times, and leave reasons"
       }
-
     ]
   },
   {

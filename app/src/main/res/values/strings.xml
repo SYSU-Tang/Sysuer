@@ -502,7 +502,7 @@
     <string name="occupy_source">占用来源</string>
     <string name="occupy_reason">占用原因</string>
     <string name="click_for_grade">点击查看总成绩</string>
-    <string name="download_complete">完成下载</string>
+    <string name="download_complete">下载完成</string>
     <string name="sponsor_appreciation">感谢你的捐赠 🤑</string>
     <string name="permission_granted">权限已获取</string>
     <string name="agree">同意</string>
@@ -847,4 +847,5 @@
     <string name="approval_date">审批日期</string>
     <string name="leave_slip_filename">请假单_%1$s.pdf</string>
     <string name="importing">导入中…</string>
+    <string name="no_outline_found">未查询到大纲</string>
 </resources>

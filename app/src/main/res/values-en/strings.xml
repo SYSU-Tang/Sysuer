@@ -861,4 +861,7 @@
     <string name="approval_date">Approval Date</string>
     <string name="leave_slip_filename">LeaveSlip_%1$s.pdf</string>
     <string name="importing">Importing…</string>
+
+    <string name="no_outline_found">No outline found</string>
+    <string name="enter_leave_type_name">Please enter leave type name</string>
 </resources>

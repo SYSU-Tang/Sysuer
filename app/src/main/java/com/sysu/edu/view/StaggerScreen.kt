@@ -160,7 +160,7 @@ data class SectionData(
 			}
 			if (row.value != null && row.key != null) Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
 			SelectionContainer {
-				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary)
+				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary)
 			}
 		}
 	}
@@ -171,7 +171,7 @@ data class SectionData(
 			}
 			if (row.value != null && row.key != null) Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
 			SelectionContainer {
-				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth())
+				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth())
 			}
 		}
 	}

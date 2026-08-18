@@ -1,8 +1,11 @@
 package com.sysu.edu.view
 
 import android.os.Build
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +66,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	title: String = "",
 	tabs: List<MenuItem> = emptyList(),
 	navs: List<MenuItem> = emptyList(),
+	topBarContent: @Composable (Int) -> Unit = {},
 	onNavigationClick: () -> Unit = { },
 	onPageChange: ((Int) -> Unit)? = null,
 	isNestedScrollEnabled: Boolean = true,
@@ -70,7 +74,6 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	actions: @Composable RowScope.() -> Unit = {},
 	pageContent: @Composable (page: Int) -> Unit = {},
                                                                                                        ) {
-	
 	val pagerState = rememberPagerState(pageCount = {
 		if (tabs.isNotEmpty()) tabs.size else if (navs.isNotEmpty()) navs.size else 1
 	})
@@ -83,9 +86,9 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	}
 	
 	SysuerTheme {
-		val backgroundColor = MaterialTheme.colorScheme.surface
+		val surface = MaterialTheme.colorScheme.surface
 		val backdrop = rememberLayerBackdrop {
-			drawRect(backgroundColor)
+			drawRect(surface)
 			drawContent()
 		}
 		Scaffold(
@@ -94,8 +97,20 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 				.nestedScroll(scrollBehavior.nestedScrollConnection),
 			topBar = {
 				val backgroundColor = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceContainer, scrollBehavior.state.overlappedFraction)
+//				val topBackdrop = rememberLayerBackdrop {
+//					drawRect(backgroundColor)
+//					drawContent()
+//				}
+				val modifier = Modifier
+					.fillMaxWidth()
+//					.textureBlur(
+//						backdrop = backdrop,
+//						shape = RoundedCornerShape(4.dp),
+//						blurRadius = 36f,
+//						highlight = if (settingManager.isDarkTheme) Highlight.GlassStrokeMiddleDark else Highlight.GlassStrokeMiddleLight,
+//					            )
 				Surface(color = backgroundColor) {
-					Column {
+					Column{
 						TopAppBar(
 							title = { Text(text = title) },
 							navigationIcon = {
@@ -121,24 +136,22 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 									})
 								}
 							}
-							if (tabs.size > 4) PrimaryScrollableTabRow(edgePadding = 0.dp,
-							                                           selectedTabIndex = pagerState.currentPage,
-							                                           modifier = Modifier.fillMaxWidth(),
-							                                           containerColor = Color.Transparent,
-							                                           divider = {},
-							                                           tabs = tabContent,
-							                                           indicator = {
-								                                           TabRowDefaults.PrimaryIndicator(modifier = Modifier.tabIndicatorOffset(selectedTabIndex = pagerState.currentPage, matchContentSize = true),
-								                                                                           width = Dp.Unspecified,
-								                                                                           color = MaterialTheme.colorScheme.primary,
-								                                                                           shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
-							                                           })
-							else PrimaryTabRow(selectedTabIndex = pagerState.currentPage, modifier = Modifier.fillMaxWidth(), containerColor = Color.Transparent, divider = {}, tabs = tabContent, indicator = {
+							
+							if (tabs.size > 4) PrimaryScrollableTabRow(edgePadding = 0.dp, selectedTabIndex = pagerState.currentPage, modifier = modifier, containerColor = Color.Transparent, divider = {}, tabs = tabContent, indicator = {
 								TabRowDefaults.PrimaryIndicator(modifier = Modifier.tabIndicatorOffset(selectedTabIndex = pagerState.currentPage, matchContentSize = true),
 								                                width = Dp.Unspecified,
 								                                color = MaterialTheme.colorScheme.primary,
 								                                shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
 							})
+							else PrimaryTabRow(selectedTabIndex = pagerState.currentPage, modifier = modifier, containerColor = Color.Transparent, divider = {}, tabs = tabContent, indicator = {
+								TabRowDefaults.PrimaryIndicator(modifier = Modifier.tabIndicatorOffset(selectedTabIndex = pagerState.currentPage, matchContentSize = true),
+								                                width = Dp.Unspecified,
+								                                color = MaterialTheme.colorScheme.primary,
+								                                shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
+							})
+						}
+						AnimatedContent(targetState = pagerState.currentPage, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "topBarFade") { page ->
+							topBarContent(page)
 						}
 					}
 				}
@@ -160,23 +173,14 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 			},
 			floatingActionButton = floatingActionButton,
 		        ) { innerPadding ->
-			val contentModifier = if (supportsBlur && navs.isNotEmpty()) {
-				Modifier
-					.fillMaxSize()
-					.padding(innerPadding)
-					.background(MaterialTheme.colorScheme.surface)
-					.layerBackdrop(backdrop)
-			}
-			else {
-				Modifier
-					.fillMaxSize()
-					.padding(innerPadding)
-			}
 			if (tabs.isNotEmpty() || navs.isNotEmpty()) {
 				Box(modifier = Modifier.fillMaxSize()) {
 					HorizontalPager(
 						state = pagerState,
-						modifier = contentModifier,
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(innerPadding)
+							.layerBackdrop(backdrop),
 					               ) { page ->
 						pageContent(page)
 					}
@@ -190,21 +194,21 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 				}
 			}
 			else {
-				if (isNestedScrollEnabled) {
-					Box(
-						modifier = contentModifier
-							.verticalScroll(rememberScrollState())
-							.nestedScroll(rememberNestedScrollInteropConnection()),
-					   ) {
-						pageContent(0)
-					}
+				if (isNestedScrollEnabled) Box(
+					modifier = Modifier
+						.fillMaxSize()
+						.padding(innerPadding)
+						.verticalScroll(rememberScrollState())
+						.nestedScroll(rememberNestedScrollInteropConnection()),
+				                              ) {
+					pageContent(0)
 				}
-				else {
-					Box(
-						modifier = contentModifier,
-					   ) {
-						pageContent(0)
-					}
+				else Box(
+					modifier = Modifier
+						.fillMaxSize()
+						.padding(innerPadding),
+				        ) {
+					pageContent(0)
 				}
 			}
 		}
