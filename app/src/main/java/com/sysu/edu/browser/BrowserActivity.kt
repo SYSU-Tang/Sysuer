@@ -68,12 +68,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
-import java.io.UnsupportedEncodingException
-import java.net.URI
-import java.net.URLDecoder
 import java.util.regex.Pattern
 
 class BrowserActivity : BaseActivity() {
@@ -83,6 +81,7 @@ class BrowserActivity : BaseActivity() {
 	lateinit var binding: ActivityBrowserBinding
 	lateinit var webSettings: WebSettings
 	val cookieManager: CookieManager = CookieManager.getInstance()
+	val httpCookieManager by lazy { com.sysu.edu.api.CookieManager(this) }
 	var refreshButton: MaterialButton? = null
 	val repository: BrowserRepository by lazy {
 		BrowserRepository(this, lifecycleScope)
@@ -265,23 +264,22 @@ class BrowserActivity : BaseActivity() {
 			setNegativeButton(R.string.cancel) { _, _: Int -> }
 		}
 		
-		web.setDownloadListener { url1: String?, _: String?, _: String?, _: String?, _: Long ->
-			val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-				.toString() + "/" + getFileName(url1)
-			downloadDialog.getMenu(0)?.text = url1
+		web.setDownloadListener { downloadLink: String, _: String?, _: String?, _: String?, _: Long ->
+			val path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}/${getFileName(downloadLink)}"
+			downloadDialog.getMenu(0)?.text = downloadLink
 			downloadDialog.getMenu(1)?.text = path
 			downloadDialog.setPositiveButton(R.string.download) { _: DialogInterface?, _: Int ->
-				if (url1!!.contains("jwxt.sysu.edu.cn")) downloadFile(this,
-				                                                      Request.Builder()
-					                                                      .url(url1)
-					                                                      .header("Cookie",
-					                                                              cookieManager.getCookie(
-						                                                              url1))
+				println(downloadLink)
+				if (downloadLink.toHttpUrlOrNull()?.host == "jwxt.sysu.edu.cn") downloadFile(this,
+				                                                    Request.Builder()
+					                                                      .url(downloadLink)
+					                                                      .header("Cookie", httpCookieManager.toSimpleString("jwxt.sysu.edu.cn"))
 					                                                      .header("Referer",
-					                                                              "https://jwxt.sysu.edu.cn/jwxt/")
+					                                                              "https://jwxt.sysu.edu.cn/")
 					                                                      .build(),
-				                                                      path)
-				else downloadFile(this, url1, path)
+				                                                    path)
+				else downloadFile(this, downloadLink, path)
+				downloadDialog.dismiss()
 			}
 			downloadDialog.show()
 		}
@@ -453,7 +451,8 @@ class BrowserActivity : BaseActivity() {
 			                                   web.findAllAsync(binding.keyword.text.toString())
 			                                   menuDialog.dismiss()
 		                                   }))
-		refreshButton = menuDialog.getMenu(2)        /*
+		refreshButton = menuDialog.getMenu(2)
+		/*
          * UA 弹窗
          * */
 		val uaDialog = GridMenuDialog(this).apply {
@@ -493,7 +492,8 @@ class BrowserActivity : BaseActivity() {
 			}
 			uaDialog.selectMenu(preference.ua + 1)
 			uaDialog.clickMenu(preference.ua + 1)
-		}        /*
+		}
+		/*
          * 主题弹窗
          * */
 		val themeDialog = GridMenuDialog(this).apply {
@@ -580,7 +580,8 @@ class BrowserActivity : BaseActivity() {
 				                              webSettings.cacheMode = if (saveMobileDataMode) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_NO_CACHE
 			                              },
 			                              GridMenuDialog.onGridMenuClickListener {
-				                              themeDialog.show()            //                    String css = """
+				                              themeDialog.show()
+				                              //                    String css = """
 				                              //                            body { background-color: #121212 !important; color: #e0e0e0 !important; }\
 				                              //                            a { color: #80cbc4 !important; }\
 				                              //                            img { filter: brightness(0.8) contrast(1.2); }""";
@@ -602,7 +603,8 @@ class BrowserActivity : BaseActivity() {
 			toggleMenu(3, preference.isJSEnabled)
 			toggleMenu(4, preference.isSaveMobileDataMode)
 			toggleMenu(6, preference.isPrivacyMode)
-		}        /*
+		}
+		/*
          * Cookie 弹窗
          * */
 		val cookieDialog = EditTextDialog(this).apply {
@@ -782,16 +784,18 @@ class BrowserActivity : BaseActivity() {
 	
 	private fun showImageMenu(imageUrl: String, popup: PopupMenu) {
 		popup.menu.add(R.string.download)
-			.setOnMenuItemClickListener { //            System.out.println(imageUrl);
-				//            System.out.println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + getString(R.string.app_name) + "/" + getFileName(imageUrl));
+			.setOnMenuItemClickListener {
+//            System.out.println(imageUrl);
+//            System.out.println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + getString(R.string.app_name) + "/" + getFileName(imageUrl));
 				downloadFile(this,
 				             imageUrl,
 				             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
 					             .toString() + "/" + getString(R.string.app_name) + "/" + getFileName(
 					             imageUrl),
+				             true,
 				             object : DownloadManager.DownloadListener {
 					             override fun onDownloadProgress(progress: Long, total: Long) {
-						             println("$progress $total")
+//						             println("$progress $total")
 					             }
 					             
 					             override fun onDownloadComplete(path: String?) {
@@ -805,7 +809,7 @@ class BrowserActivity : BaseActivity() {
 					             }
 					             
 					             override fun onDownloadError(code: Int, message: String?) {
-						             println("$code $message")
+//						             println("$code $message")
 					             }
 				             })
 				true
@@ -831,15 +835,26 @@ class BrowserActivity : BaseActivity() {
 		                                   getString(R.string.share)))
 	}
 	
-	fun getFileName(url: String?): String {
-		var path = ""
-		try {
-			path = URLDecoder.decode(URI.create(url).path, "utf-8")
-		} catch (e: UnsupportedEncodingException) {
-			e.printStackTrace()
+	fun getFileName(url: String): String {
+		return url.toUri().let{
+			it.getQueryParameter("fileName")
+				?: run{
+					it.path?.run{
+						if (isNotEmpty()){
+							val i = lastIndexOf("/")
+						if (i >= 0) substring(i + 1)
+					}
+					} ?: "unknown"
+				} as String
 		}
-		val i = path.lastIndexOf("/")
-		return if (i >= 0) path.substring(i + 1) else path
+//		var path = ""
+//		try {
+//			path = URLDecoder.decode(URI.create(url).path, "utf-8")
+//		} catch (e: UnsupportedEncodingException) {
+//			e.printStackTrace()
+//		}
+//		val i = path.lastIndexOf("/")
+//		return if (i >= 0) path.substring(i + 1) else path
 	}
 	
 	internal class JSAdapter : RecyclerAdapter<JavaScriptEntity>() {

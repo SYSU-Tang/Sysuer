@@ -10,11 +10,11 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -196,62 +197,62 @@ class PayActivity : BaseActivity() {
 				              }
 			              },
 			              onNavigationClick = { supportFinishAfterTransition() },
+			              topBarContent = {
+				              when (it) {
+					              2 -> {
+						              ExposedDropdownMenuBox(expanded = yearExpanded, onExpandedChange = { yearExpanded = it }) {
+							              OutlinedTextField(
+								              modifier = Modifier
+									              .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+									              .padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))
+									              .fillMaxWidth(),
+								              value = selectedYear,
+								              onValueChange = {},
+								              readOnly = true,
+								              singleLine = true,
+								              label = { Text(stringResource(R.string.year)) },
+								              trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = yearExpanded) },
+								              colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+							                               )
+							              ExposedDropdownMenu(expanded = yearExpanded, onDismissRequest = { yearExpanded = false }, modifier = Modifier
+								              .fillMaxWidth()
+								              .heightIn(max = maxMenuHeight)) {
+								              yearItems.forEachIndexed { index, option ->
+									              val isSelected = option == selectedYear
+									              DropdownMenuItem(
+										              text = { Text(option) },
+										              onClick = {
+											              selectedYear = option
+											              yearExpanded = false
+											              viewModel.fetchFeeList(yearCodes[index])
+										              },
+										              contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+										              modifier = Modifier.background(if (isSelected) androidx.compose.ui.graphics.Color.LightGray else androidx.compose.ui.graphics.Color.Transparent),
+									                              )
+								              }
+							              }
+						              }
+					              }
+					              3 -> {
+						              Row(verticalAlignment = Alignment.CenterVertically,
+						                  horizontalArrangement = Arrangement.Center,
+						                  modifier = Modifier
+							                  .fillMaxWidth()
+							                  .padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
+							              OutlinedButton(onClick = { showFromPicker = true }, shapes = ButtonDefaults.shapes()) {
+								              Text(fromDate?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: "")
+							              }
+							              Text(" ~ ")
+							              OutlinedButton(onClick = { showToPicker = true }, shapes = ButtonDefaults.shapes()) {
+								              Text(toDate?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: "")
+							              }
+						              }
+					              }
+				              }
+						  },
 			              onPageChange = { currentPage = it }) { page ->
-				Column(modifier = Modifier.fillMaxSize()) {
-					when (page) {
-						2 -> {
-							ExposedDropdownMenuBox(expanded = yearExpanded, onExpandedChange = { yearExpanded = it }) {
-								OutlinedTextField(
-									modifier = Modifier
-										.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-										.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))
-										.fillMaxWidth(),
-									value = selectedYear,
-									onValueChange = {},
-									readOnly = true,
-									singleLine = true,
-									label = { Text(stringResource(R.string.year)) },
-									trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = yearExpanded) },
-									colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-								                 )
-								ExposedDropdownMenu(expanded = yearExpanded, onDismissRequest = { yearExpanded = false }, modifier = Modifier
-									.fillMaxWidth()
-									.heightIn(max = maxMenuHeight)) {
-									yearItems.forEachIndexed { index, option ->
-										val isSelected = option == selectedYear
-										DropdownMenuItem(
-											text = { Text(option) },
-											onClick = {
-												selectedYear = option
-												yearExpanded = false
-												viewModel.fetchFeeList(yearCodes[index])
-											},
-											contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-											modifier = Modifier.background(if (isSelected) androidx.compose.ui.graphics.Color.LightGray else androidx.compose.ui.graphics.Color.Transparent),
-										                )
-									}
-								}
-							}
-						}
-						3 -> {
-							Row(verticalAlignment = Alignment.CenterVertically,
-							    horizontalArrangement = Arrangement.Center,
-							    modifier = Modifier
-								    .fillMaxWidth()
-								    .padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
-								OutlinedButton(onClick = { showFromPicker = true }, shapes = ButtonDefaults.shapes()) {
-									Text(fromDate?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: "")
-								}
-								Text(" ~ ")
-								OutlinedButton(onClick = { showToPicker = true }, shapes = ButtonDefaults.shapes()) {
-									Text(toDate?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: "")
-								}
-							}
-						}
-					}
 					allSections.getOrNull(page)?.let { sections ->
-						StaggerScreen(sections = sections)
-					}
+						StaggerScreen(sections)
 				}
 			}
 			
@@ -301,6 +302,7 @@ class PayActivity : BaseActivity() {
 							val needMoney = item.getString("needMoney")
 							Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
 								.fillMaxWidth()
+								.clip(RoundedCornerShape(dimensionResource(R.dimen.content_padding)))
 								.clickable(interactionSource = remember { MutableInteractionSource() }, indication = ripple(bounded = true)) {
 									if (selectedPayItems.contains(index)) selectedPayItems.remove(index) else selectedPayItems.add(index)
 								}
@@ -311,7 +313,7 @@ class PayActivity : BaseActivity() {
 								Column(modifier = Modifier.weight(1f)) {
 									Text(itemName ?: "", style = MaterialTheme.typography.titleMedium)
 									if (!needMoney.isNullOrEmpty()) {
-										Text("${stringResource(R.string.this_payment)}: ¥$needMoney", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+										Text("¥$needMoney", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 									}
 								}
 							}
@@ -365,7 +367,6 @@ class PayActivity : BaseActivity() {
 								.fillMaxWidth()
 								.padding(vertical = dimensionResource(R.dimen.vertical_margin))) {
 								Text("${index + 1}. $orderNo", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-//								Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
 									TextButton(onClick = {
 										viewModel.openWechat("https://fee.sysu.edu.cn/gateway/cashier/order?orderno=$orderNo&scene=web")
 									}, shapes = ButtonDefaults.shapes()) {
@@ -377,7 +378,6 @@ class PayActivity : BaseActivity() {
 									}, shapes = ButtonDefaults.shapes()) {
 										Text(stringResource(R.string.cancel_pay))
 									}
-//								}
 							}
 						}
 					}

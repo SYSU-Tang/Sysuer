@@ -240,7 +240,9 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 		val path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 		                             }/${getApplication<Application>().getString(R.string.leave_slip_filename, askLeaveId)}"
 		DownloadManager.downloadFile(application,"https://${model.host}/jwxt/reports-register/askLeaveAgg/selfAskLeavePaper?askLeaveId=$askLeaveId",
-		                             path,object : DownloadManager.DownloadListener {
+		                             path,
+		                             true,
+		                             object : DownloadManager.DownloadListener {
 			override fun onDownloadProgress(progress: Long, total: Long) {
 			}
 			

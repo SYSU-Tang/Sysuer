@@ -5,10 +5,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -119,36 +117,34 @@ class GradeForLevelActivity : BaseActivity() {
 				}) {
 					Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
 				}
-			}) {
-				Column(modifier = Modifier.fillMaxSize()) {
-					FlowRow(modifier = Modifier
-						.fillMaxWidth()
-						.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
-					        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
-						SingleSelectChipDropdown(category = stringResource(R.string.train_type),
-						                         options = listOf(getString(R.string.reset)) + trainTypeOptions.map { it.getString("dataName") },
-						                         optionValues = listOf(null) + trainTypeOptions.map { it.getString("dataNumber") },
-						                         selectedValue = trainTypeValue,
-						                         onValueChange = { trainTypeValue = it; onFilterChange() })
-						SingleSelectChipDropdown(category = stringResource(R.string.year),
-						                         options = listOf(getString(R.string.reset)) + yearOptions.map { it.getString("acadYearSemester") },
-						                         optionValues = listOf(null) + yearOptions.map { it.getString("acadYearSemester") },
-						                         selectedValue = yearValue,
-						                         onValueChange = { yearValue = it; onFilterChange() })
-						SingleSelectChipDropdown(category = stringResource(R.string.course_type),
-						                         options = listOf(getString(R.string.reset)) + courseTypeOptions.map { it.getString("catName") },
-						                         optionValues = listOf(null) + courseTypeOptions.map { it.getString("catCode") },
-						                         selectedValue = courseTypeValue,
-						                         onValueChange = { courseTypeValue = it; onFilterChange() })
-						InputDialogChip(stringResource(R.string.course_name), courseNameValue) { courseNameValue = it; onFilterChange() }
-						InputDialogChip(stringResource(R.string.course_number), courseNumberValue) { courseNumberValue = it; onFilterChange() }
-						InputDialogChip(stringResource(R.string.min_grade), minGradeValue, KeyboardType.Number) { minGradeValue = it; onFilterChange() }
-					}
-					
-					StaggerScreen(sections = sections, onScrollBottom = {
-						if (viewModel.hasMore()) viewModel.fetchGrade()
-					})
+			}, topBarContent = {
+				FlowRow(modifier = Modifier
+					.fillMaxWidth()
+					.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
+				        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
+					SingleSelectChipDropdown(category = stringResource(R.string.train_type),
+					                         options = listOf(getString(R.string.reset)) + trainTypeOptions.map { it.getString("dataName") },
+					                         optionValues = listOf(null) + trainTypeOptions.map { it.getString("dataNumber") },
+					                         selectedValue = trainTypeValue,
+					                         onValueChange = { trainTypeValue = it; onFilterChange() })
+					SingleSelectChipDropdown(category = stringResource(R.string.year),
+					                         options = listOf(getString(R.string.reset)) + yearOptions.map { it.getString("acadYearSemester") },
+					                         optionValues = listOf(null) + yearOptions.map { it.getString("acadYearSemester") },
+					                         selectedValue = yearValue,
+					                         onValueChange = { yearValue = it; onFilterChange() })
+					SingleSelectChipDropdown(category = stringResource(R.string.course_type),
+					                         options = listOf(getString(R.string.reset)) + courseTypeOptions.map { it.getString("catName") },
+					                         optionValues = listOf(null) + courseTypeOptions.map { it.getString("catCode") },
+					                         selectedValue = courseTypeValue,
+					                         onValueChange = { courseTypeValue = it; onFilterChange() })
+					InputDialogChip(stringResource(R.string.course_name), courseNameValue) { courseNameValue = it; onFilterChange() }
+					InputDialogChip(stringResource(R.string.course_number), courseNumberValue) { courseNumberValue = it; onFilterChange() }
+					InputDialogChip(stringResource(R.string.min_grade), minGradeValue, KeyboardType.Number) { minGradeValue = it; onFilterChange() }
 				}
+			}) {
+				StaggerScreen(sections = sections, onScrollBottom = {
+					if (viewModel.hasMore()) viewModel.fetchGrade()
+				})
 			}
 		}
 	}

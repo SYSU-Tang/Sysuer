@@ -2,7 +2,6 @@ package com.sysu.edu
 
 import android.Manifest
 import android.app.DownloadManager
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -19,11 +18,8 @@ import android.os.Handler
 import android.os.Message
 import android.view.View
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.PendingIntentCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
@@ -52,7 +48,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
-import java.util.Locale
 
 class MainActivity : BaseActivity() {
 	var downloadId: Long = 0
@@ -148,47 +143,47 @@ class MainActivity : BaseActivity() {
 			}.setCancelable(!response.getBoolean("enforce")).setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
 				val notificationManager = NotificationManagerCompat.from(this)
 				notificationManager.createNotificationChannel(NotificationChannelCompat.Builder("update", NotificationManagerCompat.IMPORTANCE_DEFAULT).setDescription("APP下载通知").setName("下载进度通知").build())
-				com.sysu.edu.api.DownloadManager.downloadFile(this, releaseLink, path, object : com.sysu.edu.api.DownloadManager.DownloadListener {
+				com.sysu.edu.api.DownloadManager.downloadFile(this, releaseLink, path, true, object : com.sysu.edu.api.DownloadManager.DownloadListener {
 					override fun onDownloadProgress(
 						progress: Long,
 						total: Long,
 					                               ) {
-						val progressString = String.format(Locale.getDefault(), "%.2fMB/%.2fMB", progress / 1024.0f / 1024.0f, total / 1024.0f / 1024.0f)
-						val builder = NotificationCompat.Builder(this@MainActivity, "update")
-							.setContentTitle(getString(R.string.download))
-							.setContentText(progressString)
-							.setSmallIcon(R.drawable.down)
-							.setStyle(NotificationCompat.BigTextStyle().bigText(progressString))
-							.setProgress((total).toInt(), progress.toInt(), false)
-							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-						if (ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
+//						val progressString = String.format(Locale.getDefault(), "%.2fMB/%.2fMB", progress / 1024.0f / 1024.0f, total / 1024.0f / 1024.0f)
+//						val builder = NotificationCompat.Builder(this@MainActivity, "update")
+//							.setContentTitle(getString(R.string.download))
+//							.setContentText(progressString)
+//							.setSmallIcon(R.drawable.down)
+//							.setStyle(NotificationCompat.BigTextStyle().bigText(progressString))
+//							.setProgress((total).toInt(), progress.toInt(), false)
+//							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//						if (ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
 					}
 					
 					override fun onDownloadComplete(
 						path: String?,
 					                               ) {
-						val builder = NotificationCompat.Builder(this@MainActivity, "update")
-							.setContentTitle(getString(R.string.download))
-							.setContentText(getString(R.string.apk_next_step_notice))
-							.setSmallIcon(R.drawable.down)
-							.setContentIntent(com.sysu.edu.api.DownloadManager.getOpenFileIntent(this@MainActivity, path)?.let { it1 ->
-								PendingIntentCompat.getActivity(this@MainActivity, 0, it1, PendingIntent.FLAG_ONE_SHOT, false)
-							})
-							.setProgress(1, 1, false)
-							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-						if (ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
-						path?.let { it1 ->
-							com.sysu.edu.api.DownloadManager.openFile(this@MainActivity, it1)
-						}
+//						val builder = NotificationCompat.Builder(this@MainActivity, "update")
+//							.setContentTitle(getString(R.string.download))
+//							.setContentText(getString(R.string.apk_next_step_notice))
+//							.setSmallIcon(R.drawable.down)
+//							.setContentIntent(com.sysu.edu.api.DownloadManager.getOpenFileIntent(this@MainActivity, path)?.let { it1 ->
+//								PendingIntentCompat.getActivity(this@MainActivity, 0, it1, PendingIntent.FLAG_ONE_SHOT, false)
+//							})
+//							.setProgress(1, 1, false)
+//							.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//						if (ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) notificationManager.notify(1002, builder.build())
+//						path?.let { it1 ->
+//							com.sysu.edu.api.DownloadManager.openFile(this@MainActivity, it1)
+//						}
 					}
 					
 					override fun onDownloadError(
 						code: Int,
 						message: String?,
 					                            ) {
-						http.handler.post {
-							config.toast(message)
-						}
+//						http.handler.post {
+//							config.toast(message)
+//						}
 					}
 				})
 			}.create().apply {
