@@ -848,4 +848,7 @@
     <string name="leave_slip_filename">请假单_%1$s.pdf</string>
     <string name="importing">导入中…</string>
     <string name="no_outline_found">未查询到大纲</string>
+    <string name="recent">最近</string>
+    <string name="more">更多</string><string name="edit_todo">编辑待办</string>
+    <string name="no_todo">没有待办</string>
 </resources>

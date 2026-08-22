@@ -169,7 +169,7 @@ abstract class BaseModel(context: Context) {
 			if (code == 53000007) login(request)
 			else {
 				if (code != 200) http.handler.post {
-					contextUtil.toast(CommonUtil.toStringOrDefault(contentJSON.getString("message")))
+					contextUtil.toast(contentJSON.getString("message",""))
 				}
 				result = CommonUtil.Tuple2(request.second, contentJSON)
 				message.postValue(result)

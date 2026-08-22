@@ -2,8 +2,11 @@ package com.sysu.edu.view
 
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -40,13 +43,19 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
@@ -67,7 +76,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	tabs: List<MenuItem> = emptyList(),
 	navs: List<MenuItem> = emptyList(),
 	topBarContent: @Composable (Int) -> Unit = {},
-	onNavigationClick: () -> Unit = { },
+	onNavigationClick: (() -> Unit)? = null,
 	onPageChange: ((Int) -> Unit)? = null,
 	isNestedScrollEnabled: Boolean = true,
 	floatingActionButton: @Composable () -> Unit = {},
@@ -81,6 +90,16 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 	val supportsBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 	val settingManager = SettingManager(LocalContext.current)
+	var isNavBarVisible by remember { mutableStateOf(true) }
+	val navBarScrollConnection = remember {
+		object : NestedScrollConnection {
+			override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+				if (available.y < -1) isNavBarVisible = false
+				else if (available.y > 1) isNavBarVisible = true
+				return Offset.Zero
+			}
+		}
+	}
 	LaunchedEffect(pagerState.currentPage) {
 		onPageChange?.invoke(pagerState.currentPage)
 	}
@@ -94,7 +113,8 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 		Scaffold(
 			modifier = Modifier
 				.fillMaxSize()
-				.nestedScroll(scrollBehavior.nestedScrollConnection),
+				.nestedScroll(scrollBehavior.nestedScrollConnection)
+				.nestedScroll(navBarScrollConnection),
 			topBar = {
 				val backgroundColor = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceContainer, scrollBehavior.state.overlappedFraction)
 //				val topBackdrop = rememberLayerBackdrop {
@@ -114,6 +134,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 						TopAppBar(
 							title = { Text(text = title) },
 							navigationIcon = {
+								if (onNavigationClick != null)
 								IconButton(onClick = onNavigationClick) {
 									Icon(
 										imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -150,7 +171,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 								                                shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp))
 							})
 						}
-						AnimatedContent(targetState = pagerState.currentPage, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "topBarFade") { page ->
+						AnimatedContent(targetState = pagerState.currentPage, transitionSpec = { expandVertically() togetherWith shrinkVertically() }, label = "topBarExpand") { page ->
 							topBarContent(page)
 						}
 					}
@@ -159,13 +180,19 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 			bottomBar = {
 				if (navs.isNotEmpty()) {
 					if (!supportsBlur) {
-						NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-							navs.forEachIndexed { index, navItem ->
-								NavigationBarItem(selected = pagerState.currentPage == index, label = { Text(text = navItem.title ?: "") }, onClick = {
-									coroutineScope.launch {
-										pagerState.animateScrollToPage(index)
-									}
-								}, icon = navItem.icon?.let { { Icon(imageVector = it, contentDescription = "") } } ?: {})
+						AnimatedVisibility(
+							visible = isNavBarVisible,
+							enter = slideInVertically(initialOffsetY = { it }),
+							exit = slideOutVertically(targetOffsetY = { it })
+						) {
+							NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+								navs.forEachIndexed { index, navItem ->
+									NavigationBarItem(selected = pagerState.currentPage == index, label = { Text(text = navItem.title ?: "") }, onClick = {
+										coroutineScope.launch {
+											pagerState.animateScrollToPage(index)
+										}
+									}, icon = navItem.icon?.let { { Icon(imageVector = it, contentDescription = "") } } ?: {})
+								}
 							}
 						}
 					}
@@ -185,11 +212,18 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 						pageContent(page)
 					}
 					if (supportsBlur && navs.isNotEmpty()) {
-						LiquidGlassNavBar(pagerState = pagerState, items = navs, backdrop = backdrop, onItemClick = { index ->
-							coroutineScope.launch {
-								pagerState.animateScrollToPage(index)
-							}
-						}, isDark = settingManager.isDarkTheme, modifier = Modifier.align(Alignment.BottomCenter))
+						AnimatedVisibility(
+							visible = isNavBarVisible,
+							enter = slideInVertically(initialOffsetY = { it }),
+							exit = slideOutVertically(targetOffsetY = { it }),
+							modifier = Modifier.align(Alignment.BottomCenter)
+						) {
+							LiquidGlassNavBar(pagerState = pagerState, items = navs, backdrop = backdrop, onItemClick = { index ->
+								coroutineScope.launch {
+									pagerState.animateScrollToPage(index)
+								}
+							}, isDark = settingManager.isDarkTheme)
+						}
 					}
 				}
 			}

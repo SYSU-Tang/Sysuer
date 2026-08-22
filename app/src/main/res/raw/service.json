@@ -9,42 +9,42 @@
         "name": "学籍",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/myStuRoll?code=jwxsd_wdxj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E5%25AD%25A6%25E7%25B1%258D",
         "activity": ".academic.SchoolEnrollmentActivity",
-        "description": "学籍信息查询系统，查看个人学籍状态、入学信息、专业班级等基本信息"
+        "description": "学籍信息查询，查看个人学籍、个人基本信息、个人联系方式、家庭成员及社会关系、学历及经历、交流经历、异动情况、双专业双学位辅修情况、注册状态、惩处等基本信息"
       },
       {
         "id": 102,
         "name": "四六级",
         "activity": ".academic.CETActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/stuEnglishGradeAchievement?code=jwxsd_sljcjcx&resourceName=%25E5%259B%259B%25E5%2585%25AD%25E7%25BA%25A7%25E6%2588%2590%25E7%25BB%25A9%25E6%259F%25A5%25E8%25AF%25A2",
-        "description": "大学英语四六级考试信息查询，包括报名时间、考试安排、成绩查询等"
+        "description": "大学英语四六级考试信息查询，包括考试年份、考试时间、考试学校校区、笔试和口语考试成绩、准考证号、笔试分数分布等"
       },
       {
         "id": 103,
         "name": "注册",
         "activity": ".academic.RegistrationActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/myStuRoll?code=jwxsd_xk&resourceName=%25E6%2588%2591%25E7%259A%2584%25E8%25AF%25B7%25E6%25B3%2595%25E6%258B%258D%25E8%25AF%25B7",
-        "description": "注册信息管理系统，每学期学生注册状态查询和确认"
+        "description": "注册信息查询，包括今年学生注册报道信息、缴费信息、往年注册记录等"
       },
       {
         "id": 104,
         "name": "学业预警",
         "activity": ".academic.SchoolWorkWarningActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/schoolWorkWarning?code=jwxsd_wdxyyj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E5%25AD%25A6%25E4%25B8%259A%25E9%25A2%2584%25E8%25AD%25A6",
-        "description": "学业预警系统，监控学习成绩、学分完成情况，及时发出预警通知"
+        "description": "学业预警查询，查看个人学业预警状态、预警内容、预警时间等信息"
       },
       {
         "id": 105,
         "name": "课程进度",
         "activity": ".academic.CourseCompletionActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/gradua/#/completionstatusStu?code=jwxsd_kcwcqtj&resourceName=%25E8%25AF%25BE%25E7%25A8%258B%25E5%25AE%258C%25E6%2588%2590%25E6%2583%2585%25E5%2586%25B5%25E7%25BB%259F%25E8%25AE%25A1",
-        "description": "课程完成情况查询，查看已修课程、学分统计、毕业要求完成进度"
+        "description": "课程完成情况查询，查看已修课程的学分学时分布情况与毕业要求的学分学时分布情况进度对比、已修课程的学分统计和成绩详情"
       },
       {
         "id": 106,
         "name": "离返校登记",
         "activity": ".academic.LeaveReturnRegistrationActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/#/leaveAndReturn?blxn=%222025-2026%22",
-        "description": "离返校登记系统，学生在学期结束前提交离返校申请，记录离返校时间、原因等"
+        "description": "离返校登记，学生在假期前提交离返校情况，记录离返校时间、原因等"
       },
       {
         "id": 107,
@@ -58,7 +58,7 @@
         "name": "宿舍",
         "activity": ".academic.DormActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/ssgl/",
-        "description": "宿舍信息查询系统，查看个人宿舍状态、分配情况、费用缴纳等"
+        "description": "宿舍信息查询，查看个人宿舍状态、分配情况、费用缴纳等"
       },
       {
         "id": 109,

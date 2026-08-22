@@ -1,805 +1,829 @@
 package com.sysu.edu.home
 
 import android.app.PendingIntent
-import android.content.ComponentName
+import android.content.ClipData
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
-import android.os.Bundle
-import android.text.style.ForegroundColorSpan
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.appcompat.widget.PopupMenu
+import android.text.TextUtils
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Shortcut
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Book
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.ClearAll
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.KeyboardVoice
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Output
+import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material.icons.rounded.QrCodeScanner
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
-import androidx.core.widget.NestedScrollView
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
-import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
-import androidx.work.workDataOf
-import com.alibaba.fastjson2.JSON
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alibaba.fastjson2.JSONObject
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.sysu.edu.BaseFragment
-import com.sysu.edu.ClassNotificationWorker
+import com.mikepenz.markdown.compose.Markdown
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.rememberMarkdownState
 import com.sysu.edu.MainActivity
 import com.sysu.edu.R
 import com.sysu.edu.academic.AgendaActivity
 import com.sysu.edu.academic.CourseDetailActivity
 import com.sysu.edu.academic.CourseScheduleActivity
 import com.sysu.edu.academic.ExamActivity
-import com.sysu.edu.api.CalendarManager
 import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.api.ContextUtil
 import com.sysu.edu.api.PreferenceViewModel
+import com.sysu.edu.api.TodoManager
 import com.sysu.edu.browser.BrowserActivity
-import com.sysu.edu.databinding.DialogServiceActionBinding
-import com.sysu.edu.databinding.DialogServiceOrderBinding
-import com.sysu.edu.databinding.FragmentDashboardBinding
-import com.sysu.edu.databinding.ItemExamBinding
-import com.sysu.edu.databinding.ItemHomeCourseBinding
-import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.todo.TodoActivity
-import com.sysu.edu.todo.TodoManager
-import com.sysu.edu.view.AdapterListener
-import com.sysu.edu.view.RecyclerAdapter
-import io.noties.markwon.AbstractMarkwonPlugin
-import io.noties.markwon.Markwon
-import io.noties.markwon.MarkwonSpansFactory
-import io.noties.markwon.MarkwonVisitor
-import io.noties.markwon.core.CoreProps
-import org.commonmark.node.Heading
-import org.commonmark.node.Node
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.LinkedList
-import java.util.Locale
-import java.util.concurrent.TimeUnit
+import com.sysu.edu.todo.TodoEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-class DashboardFragment : BaseFragment() {
-	private val todayCourse = mutableListOf<JSONObject>()
-	private val tomorrowCourse = mutableListOf<JSONObject>()
-	private val week18Exams = LinkedList<JSONObject>()
-	private val week19Exams = LinkedList<JSONObject>()
-	private val todoDate = MutableLiveData<String>()
-	lateinit var model: JwxtModel
-	var db: HomeCollectionHelper? = null
-	lateinit var binding: FragmentDashboardBinding
-	var isRefreshRequired: Boolean = true
-	var viewModel: HomeViewModel? = null
-	var orderDialog: BottomSheetDialog? = null
-	val calendar: CalendarManager = CalendarManager()
-	private var collectionAdapter: ServiceFragment.CollectionAdapter? = null
-	var actionDialog: BottomSheetDialog? = null
-	var actionBinding: DialogServiceActionBinding? = null
-	private var todoManager: TodoManager? = null
-	var termString: String? = null
-	var week: String? = null
-	private var examSubject = ""
-	private val markwon by lazy {
-		Markwon.builder(requireContext()).usePlugin(object : AbstractMarkwonPlugin() {
-			override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
-				builder.appendFactory(Heading::class.java) { _, configuration ->
-					if (CoreProps.HEADING_LEVEL.require(configuration) == 3) ForegroundColorSpan(
-						model.contextUtil.getColorFromAttr(androidx.appcompat.R.attr.colorPrimary))
-					else null
+@Composable internal fun DashboardScreen(
+	dashboardViewModel: DashboardViewModel,
+	homeViewModel: HomeViewModel,
+	spm: PreferenceViewModel,
+	todoManager: TodoManager,
+                                        ) {
+	val context = LocalContext.current
+	val activity = remember { context as FragmentActivity }
+	val config = remember { ContextUtil(context) }
+	val coroutineScope = rememberCoroutineScope()
+	LaunchedEffect(Unit) {
+		if (spm.isAgree) dashboardViewModel.getTerm()
+	}
+	LaunchedEffect(Unit) {
+		homeViewModel.updateDashboardShortcut.observeForever {
+			if (it == true) dashboardViewModel.loadDashboardShortcuts()
+		}
+	}
+	val term by dashboardViewModel.term.collectAsStateWithLifecycle()
+	val finalExamWeek by dashboardViewModel.finalExamWeek.collectAsStateWithLifecycle()
+	val navigateToCourseDetail by dashboardViewModel.navigateToCourseDetail.collectAsStateWithLifecycle()
+	var showToday by rememberSaveable { mutableStateOf(dashboardViewModel.isShowToday.value) }
+	var showWeek18 by rememberSaveable { mutableStateOf(dashboardViewModel.isShowWeek18.value) }
+	val todayCourses = dashboardViewModel.todayCourses
+	val tomorrowCourses = dashboardViewModel.tomorrowCourses
+	val week18Exams = dashboardViewModel.week18Exams
+	val week19Exams = dashboardViewModel.week19Exams
+	val todayExamIndex by dashboardViewModel.todayExamIndex.collectAsStateWithLifecycle()
+	val nextClassIndex by dashboardViewModel.progressCurrent.collectAsStateWithLifecycle()
+	val nextClassMarkdown by dashboardViewModel.nextClassMarkdown.collectAsStateWithLifecycle()
+	val clipboard = LocalClipboard.current
+	val visibleSections by spm.dashboardLiveData.observeAsState((0..5).map { "$it" }.toMutableSet())
+	val selectedSet = visibleSections?.mapNotNull { it?.toIntOrNull() }?.toSet().orEmpty()
+	var showActionItem by remember { mutableStateOf<JSONObject?>(null) }
+	var showOrderDialog by rememberSaveable { mutableStateOf(false) }
+	
+	LaunchedEffect(navigateToCourseDetail) {
+		navigateToCourseDetail?.let { json ->
+			context.startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("id", json.getString("teachingClassId")).putExtra("code", json.getString("courseNum")).putExtra("class", json.getString("teachingClassNum")),
+			                      ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+			dashboardViewModel.onNavigatedToCourseDetail()
+		}
+	}
+	LaunchedEffect(term) {
+		if (term.isNotEmpty()) dashboardViewModel.getWeek(term)
+	}
+	
+	DashboardOrderDialog(
+		show = showOrderDialog,
+		onDismiss = { showOrderDialog = false },
+		dashboardViewModel = dashboardViewModel,
+	                    )
+	
+	DashboardActionDialog(
+		item = showActionItem,
+		onDismiss = { showActionItem = null },
+		onShowOrder = { showActionItem = null; showOrderDialog = true },
+		dashboardViewModel = dashboardViewModel,
+		homeViewModel = homeViewModel,
+		config = config,
+	                     )
+	
+	FlowRow(modifier = Modifier
+		.fillMaxSize()
+		.nestedScroll(rememberNestedScrollInteropConnection())
+		.verticalScroll(rememberScrollState())
+		.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
+	        maxItemsInEachRow = 2,
+	        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
+		if (0 in selectedSet) ShortcutSection(dashboardViewModel, config, activity) { showActionItem = it }
+		
+		if (1 in selectedSet || 2 in selectedSet) {
+			ScheduleSection(nextClassMarkdown = nextClassMarkdown, dateText = dashboardViewModel.dateText, onNextClassClick = {
+				context.startActivity(Intent(context, CourseScheduleActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+			}, onTimeCardClick = {
+				context.startActivity(Intent(context, AgendaActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+			})
+		}
+		
+		if (3 in selectedSet) {
+			LaunchedEffect(Unit) {
+				dashboardViewModel.getTodayCourses()
+			}
+			CourseSection(todayCourses = todayCourses, tomorrowCourses = tomorrowCourses, showToday = showToday, nextClassIndex = nextClassIndex, onToggle = { showToday = it; dashboardViewModel.setShowToday(it) }, onCourseClick = { json ->
+				context.startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code", json.getString("courseNum")).putExtra("class", json.getString("classesNum")),
+				                      ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+			}, onCourseLongClick = { json, key ->
+				coroutineScope.launch {
+					clipboard.setClipEntry(ClipData.newPlainText(key, json.getString(key)).toClipEntry())
+				}
+				config.toast(R.string.copy_successfully)
+			}, activity = activity)
+		}
+		
+		if (4 in selectedSet) {
+			LaunchedEffect(term) {
+				if (term.isNotEmpty()) {
+					dashboardViewModel.getExamWeekName(term)
 				}
 			}
 			
-			override fun configureVisitor(builder: MarkwonVisitor.Builder) {
-				builder.blockHandler(object : MarkwonVisitor.BlockHandler {
-					override fun blockStart(visitor: MarkwonVisitor, node: Node) {}
-					override fun blockEnd(visitor: MarkwonVisitor, node: Node) {
-						if (visitor.hasNext(node)) visitor.ensureNewLine()
-					}
-				})
+			LaunchedEffect(finalExamWeek) {
+				if (term.isNotEmpty() && finalExamWeek.isNotEmpty()) {
+					dashboardViewModel.getExams(term, finalExamWeek)
+				}
 			}
-		}).build()
-	}
-	val spm: PreferenceViewModel by lazy { ViewModelProvider(requireActivity())[PreferenceViewModel::class.java] }
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): NestedScrollView {
-		if (isRefreshRequired) {
-			super.onCreateView(inflater, container, savedInstanceState)
-			binding = FragmentDashboardBinding.inflate(inflater, container, false)
-			initViews(inflater)
-			initObservers()
+			
+			ExamSection(week18Exams = week18Exams, week19Exams = week19Exams, showWeek18 = showWeek18, todayExamIndex = todayExamIndex, onToggle = { showWeek18 = it; dashboardViewModel.setShowWeek18(it) }, onExamClick = { json ->
+				dashboardViewModel.getSelectedCourses(json.getString("examSubjectName"))
+			}, onExamLongClick = { text ->
+				coroutineScope.launch {
+					clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
+				}
+				config.toast(R.string.copy_successfully)
+			}, activity = activity, coroutineScope = coroutineScope)
 		}
-		return binding.root
+		
+		if (5 in selectedSet) {
+			LaunchedEffect(Unit) { todoManager.init() }
+			val todoList by todoManager.todoModel.todoList.observeAsState(emptyList())
+			var todoRefreshKey by rememberSaveable { mutableIntStateOf(0) }
+			LaunchedEffect(todoRefreshKey) {
+				val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+				todoManager.refresh("(due_date = ? OR ddl = ?)", arrayOf(today, today))
+			}
+			todoManager.refreshListener = { todoRefreshKey++ }
+			TodoSection(todoList = todoList, onViewAllClick = {
+				context.startActivity(Intent(context, TodoActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+			}, todoManager = todoManager)
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3Api::class) @Composable private fun DashboardOrderDialog(
+	show: Boolean,
+	onDismiss: () -> Unit,
+	dashboardViewModel: DashboardViewModel,
+                                                                                    ) {
+	if (!show) return
+	val shortcuts = dashboardViewModel.orderShortcuts
+	val confirmText = stringResource(R.string.confirm)
+	val orderText = stringResource(R.string.service_order)
+	ModalBottomSheet(onDismissRequest = onDismiss) {
+		Column(modifier = Modifier.fillMaxWidth()) {
+			Text(orderText, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp))
+			LazyColumn(modifier = Modifier.fillMaxWidth()) {
+				itemsIndexed(shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
+					val shortcut = remember(entity.shortcutId) { JSONObject.parse(entity.shortcutJson ?: "") }
+					val name = shortcut.getString("name") ?: ""
+					ListItem(overlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) }, leadingContent = {
+						Row {
+							IconButton(onClick = {
+								if (index > 0) dashboardViewModel.moveOrderShortcut(index, index - 1)
+							}, enabled = index > 0) {
+								Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = null)
+							}
+							IconButton(onClick = {
+								if (index < shortcuts.lastIndex) dashboardViewModel.moveOrderShortcut(index, index + 1)
+							}, enabled = index < shortcuts.lastIndex) {
+								Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = null)
+							}
+						}
+					}, modifier = Modifier.animateItem()) {}
+				}
+			}
+			Row(modifier = Modifier
+				.fillMaxWidth()
+				.padding(end = 24.dp, bottom = 24.dp), horizontalArrangement = Arrangement.End) {
+				TextButton(onClick = {
+					dashboardViewModel.saveOrderShortcuts()
+					onDismiss()
+				}) { Text(confirmText) }
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable private fun DashboardActionDialog(
+	item: JSONObject?,
+	onDismiss: () -> Unit,
+	onShowOrder: () -> Unit,
+	dashboardViewModel: DashboardViewModel,
+	homeViewModel: HomeViewModel,
+	config: ContextUtil,
+                                                                                                                       ) {
+	if (item == null) return
+	val context = LocalContext.current
+	val coroutineScope = rememberCoroutineScope()
+	val itemId = item.getIntValue("id")
+	var isServiceCollected by remember { mutableStateOf(false) }
+	var isShortcutCollected by remember { mutableStateOf(false) }
+	val name = item.getString("name", "")
+	val description = item.getString("description", "")
+	val url = item.getString("url", "")
+	val markdown = StringBuilder("### $name\n$description")
+	if (url.isNotBlank()) markdown.append("\n`$url`")
+	
+	LaunchedEffect(item) {
+		isServiceCollected = dashboardViewModel.isServiceCollected(itemId)
+		isShortcutCollected = dashboardViewModel.isDashboardShortcutCollected(itemId)
 	}
 	
-	private fun initViews(inflater: LayoutInflater) {
-		val date = LocalDate.now()
-			.format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
-		val examAdapter = ExamAdapter().apply {
-			setParams(config)
-			listener = object : AdapterListener {
-				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                    holder: RecyclerView.ViewHolder,
-				                    position: Int) {
-					holder.itemView.setOnClickListener {
-						examSubject = get(position).getString("examSubjectName")
-						getSelectedCourses(examSubject)
+	ModalBottomSheet(onDismissRequest = onDismiss) {
+		Column(modifier = Modifier.fillMaxWidth()) {
+			Card(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)),
+				shape = MaterialTheme.shapes.medium,
+			    ) {
+				Markdown(
+					rememberMarkdownState("$markdown"),
+					colors = markdownColor(),
+					typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
+					modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+				        )
+			}
+			
+			FlowRow(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)),
+				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap)),
+			       ) {
+				GenericTonalButton(image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder, text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)) {
+					isServiceCollected = !isServiceCollected
+					coroutineScope.launch {
+						if (isServiceCollected) {
+							dashboardViewModel.addService(itemId, item.toJSONString(), null)
+							config.toast(R.string.collect_success)
+						}
+						else {
+							dashboardViewModel.deleteService(itemId)
+							config.toast(R.string.cancel_collect_success)
+						}
 					}
 				}
 				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                      binding: ViewBinding?) {
-				}
-			}
-		}
-		val courseAdapter = CourseAdapter().apply {
-			setParams(config)
-			setClick { json, view ->
-				startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code",
-				                                                                         json!!.getString(
-					                                                                         "courseNum"))
-					              .putExtra("class", json.getString("classesNum")),
-				              ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),
-				                                                                 view
-					                                                                 ?: requireView(),
-				                                                                 "miniapp")
-					              .toBundle())
-			}
-		}
-		todoManager = TodoManager(requireActivity(),
-		                          ConcatAdapter().also { binding.todoList.adapter = it })
-		with(binding) {
-			setupClickListeners()
-			courseList.addItemDecoration(DividerItemDecoration(requireContext(), 0))
-			courseList.layoutManager = LinearLayoutManager(requireContext(),
-			                                               LinearLayoutManager.HORIZONTAL,
-			                                               false)
-			courseList.adapter = courseAdapter
-			examList.addItemDecoration(DividerItemDecoration(requireContext(), 0))
-			examList.layoutManager = LinearLayoutManager(requireContext(),
-			                                             LinearLayoutManager.HORIZONTAL,
-			                                             false) //			examList.itemAnimator = null
-			examList.adapter = examAdapter
-			toggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
-				if (checkedId == R.id.today) {
-					courseAdapter.set(if (isChecked) todayCourse else tomorrowCourse)
-					noClass.visibility = if (courseAdapter.itemCount == 0) View.VISIBLE else View.GONE
-				}
-			}
-			toggle2.addOnButtonCheckedListener { _, checkedId, isChecked ->
-				if (checkedId == R.id.week_18) {
-					val newData = if (isChecked) week18Exams else week19Exams
-					examList.post {
-						examAdapter.set(newData.toMutableList())
-						noExam.visibility = if (examAdapter.itemCount == 0) View.VISIBLE else View.GONE
-					}
-				}
-			}
-			toggle3.addOnButtonCheckedListener { _, checkedId, _ -> if (checkedId == R.id.filter_todo) refresh() }
-			dateView.text = getString(R.string.dashboard_day,
-			                          date,
-			                          resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1])
-			todoList.layoutManager = LinearLayoutManager(requireActivity(),
-			                                             LinearLayoutManager.VERTICAL,
-			                                             false)
-			add.setOnClickListener { todoManager?.showTodoAddDialog() }
-			todoDateButton.setOnClickListener { showTodoPopup() }
-		}
-		db = HomeCollectionHelper(requireContext())
-		initOrder(inflater)
-		initAction(inflater)
-		shortcutCollection
-	}
-	
-	private fun FragmentDashboardBinding.setupClickListeners() {
-		val scheduleClick = gotoActivity(CourseScheduleActivity::class.java)
-		scan.setOnClickListener { openWechatScan() }
-		qrcode.setOnClickListener { openQrCode() }
-		agenda.setOnClickListener(scheduleClick)
-		courseTitle.setOnClickListener(scheduleClick)
-		examTitle.setOnClickListener(gotoActivity(ExamActivity::class.java))
-		todoTitle.setOnClickListener(gotoActivity(TodoActivity::class.java))
-		nextClass.setOnClickListener(scheduleClick)
-		nextClassCard.setOnClickListener(scheduleClick)
-		timeCard.setOnClickListener(gotoActivity(AgendaActivity::class.java))
-		todoView.setOnClickListener(gotoActivity(TodoActivity::class.java))
-	}
-	
-	private fun initObservers() {
-		model = JwxtModel(requireContext()).apply {
-			message.observe(requireActivity()) { (id, data) ->
-				if (data.getInteger("code") == 200) {
-					when (id) {
-						1 -> handleCourses(data)
-						2 -> handleExams(data)
-						3 -> handleTerm(data)
-						4 -> handleWeek(data)
-						5 -> handleFinalExam(data)
-						6 -> handleSelectedCourses(data)
-					}
-				}
-			}
-		}
-		viewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java].apply {
-			updateDashboardShortcut.observe(requireActivity()) { shortcutCollection }
-		}
-		todoDate.observe(viewLifecycleOwner) { refresh() }
-		todoManager?.setOnRefreshListener { refresh() }
-		spm.isAgreeLiveData.observe(viewLifecycleOwner) {
-			if (it) term
-		}
-		val selectedSet = spm.dashboard?.mapNotNull { it?.toIntOrNull() }?.toSet().orEmpty()
-		(0..5).toSet().minus(selectedSet).forEach {
-			listOf(binding.shortcutGroup,
-			       binding.scheduleGroup,
-			       binding.timeCard,
-			       binding.courseGroup,
-			       binding.examGroup,
-			       binding.todoGroup)[it].visibility = View.GONE
-		}
-	}
-	
-	private fun handleCourses(data: JSONObject) {
-		val courseArray = data.getJSONArray("data") ?: return
-		todayCourse.clear()
-		tomorrowCourse.clear()
-		val (beforeArray, afterArray) = courseArray.map { it as JSONObject }.filter { item ->
-			val status = getTimePosition("${item.getString("teachingDate")} ${item.getString("startTime")}",
-			                             "${item.getString("teachingDate")} ${item.getString("endTime")}")
-			item["status"] = status
-			item["time"] = "${item.getString("startTime")}~${item.getString("endTime")}"
-			item["course"] = "第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
-			val isToday = "TD" == item.getString("useflag")
-			if (isToday) todayCourse.add(item) else tomorrowCourse.add(item)
-			isToday
-		}.partition { it.getString("status") == "before" }
-		
-		binding.progress.max = todayCourse.size
-		binding.progress.progress = beforeArray.size
-		binding.courseList.scrollToPosition(beforeArray.size)
-		
-		updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
-		scheduleNotification(beforeArray.size, afterArray.isEmpty())
-		
-		binding.toggle.clearChecked()
-		binding.toggle.check(R.id.today)
-	}
-	
-	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
-		val markdown = if (isAfterEmpty) {
-			val next = tomorrowCourse.getOrNull(0)
-			"### ${getString(R.string.noClass)}\n\n${getString(R.string.next_class)}：**${
-				next?.getString("courseName") ?: getString(R.string.none)
-			}**\n\n${getString(R.string.location)}：**${
-				next?.getString("teachingPlace") ?: getString(R.string.none)
-			}**\n\n${getString(R.string.time)}：**${next?.getString("time") ?: getString(R.string.none)}**"
-		}
-		else {
-			val current = todayCourse.getOrNull(beforeSize)
-			"### ${current?.getString("courseName") ?: getString(R.string.none)}\n\n${getString(R.string.location)}：**${
-				current?.getString("teachingPlace") ?: getString(R.string.none)
-			}**\n\n${getString(R.string.time)}：**${current?.getString("time") ?: getString(R.string.none)}**\n\n${
-				getString(R.string.date)
-			}：**${current?.getString("teachingDate") ?: getString(R.string.none)}**"
-		}
-		markwon.setMarkdown(binding.nextClass, markdown)
-	}
-	
-	private fun scheduleNotification(beforeSize: Int, isAfterEmpty: Boolean) {
-		(if (isAfterEmpty) tomorrowCourse.getOrNull(0) else todayCourse.getOrNull(beforeSize))?.run {
-			val startTimeStr = "${getString("teachingDate")} ${getString("startTime")}"
-			val delta = LocalDateTime.parse(startTimeStr,
-			                                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-				.atZone(ZoneId.systemDefault())
-				.toInstant()
-				.toEpochMilli() - System.currentTimeMillis()
-			if (delta > 0) {
-				val delay = if (delta < 15 * 60 * 1000) 0L else delta - 15 * 60 * 1000
-				val workRequest = OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java)
-					.setInputData(workDataOf("courseName" to getString("courseName"),
-					                         "teachingPlace" to getString("teachingPlace"),
-					                         "time" to getString("time")))
-					.setInitialDelay(delay, TimeUnit.MILLISECONDS)
-					.build()
-				WorkManager.getInstance(requireContext().applicationContext)
-					.enqueueUniqueWork("next_class_notification_update",
-					                   ExistingWorkPolicy.KEEP,
-					                   workRequest)
-			}
-		}
-	}
-	
-	private fun handleExams(data: JSONObject) {
-		data.getJSONArray("data")?.forEachIndexed { i, v ->
-			val exams = if (i == 0) week18Exams else week19Exams
-			val timetable = (v as JSONObject).getJSONObject("timetable")
-			val sortedKeys = timetable.keys.mapNotNull { it.toIntOrNull() }.sorted()
-			sortedKeys.forEach { key ->
-				timetable.getJSONArray("$key")?.forEach { c ->
-					val exam = c as JSONObject
-					exam["status"] = getDatePosition(exam.getString("examDate"))
-					if (key == sortedKeys.first()) exams.addFirst(exam) else exams.addLast(exam)
-				}
-			}
-		}
-		val weekExams = if ("19" == week) week19Exams else week18Exams
-		val index = weekExams.indexOfFirst { it.getString("status") == "in" }.let {
-			if (it < 0) weekExams.indexOfFirst { e -> e.getString("status") == "after" } else it
-		}
-		binding.examList.scrollToPosition(if (index < 0 || index >= weekExams.size) 0 else index)
-		binding.toggle2.check(if ("19" == week) R.id.week_19 else R.id.week_18)
-		binding.noExam.visibility = if (weekExams.isEmpty()) View.VISIBLE else View.GONE
-		(binding.examList.adapter as? ExamAdapter)?.let { adapter ->
-			binding.examList.post {
-				adapter.set(weekExams.toMutableList())
-			}
-		}
-		isRefreshRequired = false
-	}
-	
-	private fun handleTerm(data: JSONObject) {
-		data.getJSONObject("data").getString("acadYearSemester").let {
-			termString = it
-			val date = LocalDate.now()
-				.format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
-			binding.dateView.text = getString(R.string.dashboard_time,
-			                                  it,
-			                                  date,
-			                                  resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1])
-			getWeek(it)
-			getTodayCourses(it)
-		}
-	}
-	
-	private fun handleWeek(data: JSONObject) {
-		data.getJSONArray("data").getJSONObject(0).getString("weekTimes").let {
-			binding.dateView.text = getString(R.string.dashboard_week, it, binding.dateView.text)
-			week = it
-			termString?.let { t -> getFinalExam(t) }
-		}
-	}
-	
-	private fun handleFinalExam(data: JSONObject) {
-		data.getJSONArray("data")
-			.firstOrNull { (it as JSONObject).getString("examWeekName") == "18-19周期末考" }
-			?.let {
-				termString?.let { term ->
-					getExams(term,
-					         (it as JSONObject).getString("examWeekId"))
-				}
-			}
-	}
-	
-	private fun handleSelectedCourses(data: JSONObject) {
-		data.getJSONObject("data").getJSONArray("rows").takeIf { it.isNotEmpty() }?.firstOrNull {
-			(it as JSONObject).getString("courseName") == examSubject
-		}?.also {
-			startActivity(Intent(requireContext(), CourseDetailActivity::class.java).putExtra("id",
-			                                                                                  (it as JSONObject).getString(
-				                                                                                  "teachingClassId"))
-				              .putExtra("code", it.getString("courseNum"))
-				              .putExtra("class", it.getString("teachingClassNum")),
-			              ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),
-			                                                                 binding.examList,
-			                                                                 "miniapp").toBundle())
-		}
-	}
-	
-	private fun openWechatScan() {
-		try {
-			val intent = Intent()
-			intent.component = ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI")
-			intent.putExtra("LauncherUI.From.Scaner.Shortcut", true)
-			intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-			intent.action = Intent.ACTION_VIEW
-			
-			if (intent.resolveActivity(requireContext().packageManager) != null) {
-				startActivity(intent)
-			} else {
-				model.contextUtil.toast(R.string.activity_not_found)
-			}
-		} catch (e: Exception) {
-			e.printStackTrace()
-			model.contextUtil.toast(R.string.activity_not_found)
-		}
-	}
-	
-	private fun openQrCode() {
-		PreferenceManager.getDefaultSharedPreferences(requireContext())
-			.getString("qrcode", "")
-			?.takeIf { it.isNotEmpty() }
-			?.run {
-				Intent(Intent.ACTION_VIEW,
-				       toUri()).takeIf { it.resolveActivity(requireContext().packageManager) != null }
-					?.let { startActivity(it) }
-					?: model.contextUtil.toast(R.string.fix_sysu_code_warning)
-			} ?: model.contextUtil.toast(R.string.set_sysu_code_warning)
-	}
-	
-	private fun showTodoPopup() {
-		val pop = PopupMenu(requireActivity(),
-		                    binding.todoDateButton,
-		                    0,
-		                    0,
-		                    com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow)
-		val datePicker = MaterialDatePicker.Builder.datePicker()
-		pop.menu.apply {
-			add(0, Menu.NONE, 0, R.string.all).setChecked(true)
-				.setOnMenuItemClickListener { todoDate.value = ""; false }
-			add(0,
-			    Menu.NONE,
-			    0,
-			    R.string.today).setOnMenuItemClickListener {
-				todoDate.value = calendar.toDateStringPLus(0); false
-			}
-			add(0,
-			    Menu.NONE,
-			    0,
-			    R.string.tomorrow).setOnMenuItemClickListener {
-				todoDate.value = calendar.toDateStringPLus(1); false
-			}
-			add(1, Menu.NONE, 0, R.string.select).setOnMenuItemClickListener {
-				todoDate.value?.takeIf { it.isNotEmpty() }
-					?.let { datePicker.setSelection(calendar.toMillis(it) + 86400000) }
-				datePicker.build().apply {
-					show(this@DashboardFragment.childFragmentManager, "date_picker")
-					addOnPositiveButtonClickListener { l ->
-						todoDate.value = l?.let {
-							calendar.toDateString(it)
+				GenericTonalButton(image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut, text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)) {
+					isShortcutCollected = !isShortcutCollected
+					coroutineScope.launch {
+						if (isShortcutCollected) {
+							dashboardViewModel.addDashboardShortcut(itemId, item.toJSONString(), null)
+							config.toast(R.string.add_shortcut_success)
 						}
+						else {
+							dashboardViewModel.deleteDashboardShortcut(itemId)
+							config.toast(R.string.cancel_add_shortcut_success)
+						}
+						dashboardViewModel.loadDashboardShortcuts()
+						homeViewModel.updateDashboardShortcut.value = true
 					}
 				}
-				false
-			}
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) setGroupDividerEnabled(true)
-		}
-		pop.show()
-	}
-	
-	override fun onDestroyView() {
-		super.onDestroyView()
-		model.dispose()
-	}
-	
-	private fun gotoActivity(cls: Class<*>?): View.OnClickListener = View.OnClickListener { v ->
-		startActivity(Intent(context, cls),
-		              ActivityOptionsCompat.makeSceneTransitionAnimation(requireActivity(),
-		                                                                 v!!,
-		                                                                 "miniapp").toBundle())
-	}
-	
-	fun refresh() {
-		binding.todoDateButton.text = todoDate.value?.takeIf { it.isNotEmpty() }?.let {
-			todoManager?.refresh("due_date = ? AND status = ?",
-			                     arrayOf(it, if (binding.filterTodo.isChecked) "0" else "1"))
-			it
-		} ?: run {
-			todoManager?.refresh("status = ?",
-			                     arrayOf(if (binding.filterTodo.isChecked) "0" else "1"))
-			getString(R.string.all)
-		}
-	}
-	
-	val term: Unit
-		get() = model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 3)
-	
-	fun getWeek(term: String?): Unit =
-		model.addAndNext("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 4)
-	
-	fun getTodayCourses(term: String?): Unit =
-		model.addAndNext("jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term",
-		                 1)
-	
-	fun getExams(term: String, weekId: String?): Unit =
-		model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck",
-		                 "{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}",
-		                 2)
-	
-	fun getFinalExam(term: String): Unit =
-		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term",
-		                 5)
-	
-	fun getSelectedCourses(courseName: String?): Unit =
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list",
-		                 "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
-		                 6)
-	
-	fun getTimePosition(from: String?, to: String?): String {
-		val now = LocalDateTime.now()
-		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-		val start = LocalDateTime.parse(from, formatter)
-		val end = LocalDateTime.parse(to, formatter)
-		return when {
-			now.isBefore(start) -> "after"
-			now.isAfter(end) -> "before"
-			else -> "in"
-		}
-	}
-	
-	fun getDatePosition(date: String): String {
-		val now = LocalDate.now()
-		val d = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-		return when {
-			now.isBefore(d) -> "after"
-			now.isAfter(d) -> "before"
-			else -> "in"
-		}
-	}
-	
-	val shortcutCollection: Unit
-		get() {
-			binding.shortcutGroup.childCount.takeIf { it > 4 }
-				?.let { repeat(it - 4) { binding.shortcutGroup.removeViewAt(3) } }
-			db?.writableDatabase?.query("dashboard_shortcut_collection",
-			                            null,
-			                            null,
-			                            null,
-			                            null,
-			                            null,
-			                            "position")?.use { cursor ->
-					if (cursor.moveToFirst()) {
-						collectionAdapter?.clear()
-						do {
-							val id = cursor.getInt(cursor.getColumnIndexOrThrow("shortcutId"))
-							val shortcut = JSON.parseObject(cursor.getString(cursor.getColumnIndexOrThrow(
-								"shortcutJson")))
-							val button = MaterialButton(requireContext(),
-							                            null,
-							                            com.google.android.material.R.attr.materialButtonTonalStyle).apply {
-								text = shortcut.getString("name")
-								setOnClickListener { v ->
-									viewModel?.actionMap?.get(id)?.run {
-										onClick(v)
-									} ?: run {
-										val activity = shortcut.getString("activity")
-										val url = shortcut.getString("url")
-										when {
-											!activity.isNullOrEmpty() -> {
-												Intent(requireContext(),
-												       Class.forName(requireContext().packageName + activity)).takeIf {
-													it.resolveActivity(requireContext().packageManager) != null
-												}?.let {
-														startActivity(it,
-														              ActivityOptionsCompat.makeSceneTransitionAnimation(
-															              requireActivity(),
-															              v!!,
-															              "miniapp").toBundle())
-													}
-													?: model.contextUtil.toast(R.string.activity_not_found)
-											}
-											!url.isNullOrEmpty() -> startActivity(Intent(
-												requireContext(),
-												BrowserActivity::class.java).setData(url.toUri()),
-											                                      ActivityOptionsCompat.makeSceneTransitionAnimation(
-												                                      requireActivity(),
-												                                      v!!,
-												                                      "miniapp")
-												                                      .toBundle())
-											else -> model.contextUtil.toast(R.string.undeveloped)
-										}
-									}
+				
+				GenericTonalButton(image = Icons.Rounded.Output, text = stringResource(R.string.add_to_launcher)) {
+					if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
+						val intent = when {
+							item.containsKey("activity") -> {
+								try {
+									Intent(context, Class.forName(context.packageName + item.getString("activity")))
+								} catch (_: Exception) {
+									Intent(context, MainActivity::class.java)
 								}
-								setOnLongClickListener { showActionDialog(shortcut) }
 							}
-							binding.shortcutGroup.addView(button)
-							collectionAdapter?.add(shortcut)
-						} while (cursor.moveToNext())
-					}
-				}
-		}
-	
-	fun initOrder(inflater: LayoutInflater) {
-		orderDialog = BottomSheetDialog(requireContext())
-		val orderBinding = DialogServiceOrderBinding.inflate(inflater).apply {
-			recyclerView.layoutManager = LinearLayoutManager(requireContext())
-			recyclerView.adapter = ServiceFragment.CollectionAdapter()
-				.also { collectionAdapter = it }
-			confirm.setOnClickListener { updateShortcut(); shortcutCollection; orderDialog?.dismiss() }
-		}
-		orderDialog?.setContentView(orderBinding.root)
-		ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-		                                                        0) {
-			override fun onMove(r: RecyclerView,
-			                    s: RecyclerView.ViewHolder,
-			                    t: RecyclerView.ViewHolder): Boolean {
-				collectionAdapter?.swap(s.bindingAdapterPosition, t.bindingAdapterPosition)
-				return true
-			}
-			
-			override fun onSwiped(vh: RecyclerView.ViewHolder, d: Int) {}
-		}).attachToRecyclerView(orderBinding.recyclerView)
-	}
-	
-	fun updateShortcut() {
-		repeat(collectionAdapter?.itemCount ?: 0) {
-			db?.updateDashboardShortcutPosition(collectionAdapter!!.get(it).getInteger("id"), it)
-		}
-	}
-	
-	fun initAction(inflater: LayoutInflater) {
-		actionDialog = BottomSheetDialog(requireContext())
-		actionBinding = DialogServiceActionBinding.inflate(inflater)
-			.apply { order.setOnClickListener { orderDialog?.show() } }
-		actionDialog?.setContentView(actionBinding!!.root)
-	}
-	
-	fun showActionDialog(item: JSONObject): Boolean {
-		val itemId = item.getIntValue("id")
-		val isServiceCollected = MutableLiveData(db?.isServiceCollected(itemId))
-		val isShortcutCollected = MutableLiveData(db?.isDashboardShortcutCollected(itemId))
-		with(actionBinding!!) {
-			collect.text = getString(if (isServiceCollected.value == true) R.string.cancel_collect else R.string.collect)
-			addToDashboard.text = getString(if (isShortcutCollected.value == true) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
-			addToLauncher.setOnClickListener {
-				if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
-					val intent = when {
-						item.containsKey("activity") -> {
-							try {
-								Intent(requireContext(),
-								       Class.forName(requireContext().packageName + item.getString("activity")))
-							} catch (_: Exception) {
-								Intent(requireContext(), MainActivity::class.java)
-							}
+							item.containsKey("url") -> Intent(context, BrowserActivity::class.java).setData(item.getString("url").toUri())
+							else -> Intent(context, MainActivity::class.java)
 						}
-						item.containsKey("url") -> Intent(requireContext(),
-						                                  BrowserActivity::class.java).setData(
-							CommonUtil.trim(item.getString("url")).toUri())
-						else -> Intent(requireContext(), MainActivity::class.java)
+						val info = ShortcutInfoCompat.Builder(context, "$itemId").setShortLabel(name).setLongLabel(name).setIcon(IconCompat.createWithResource(context, R.mipmap.icon)).setIntent(intent.setAction(Intent.ACTION_VIEW)).build()
+						ShortcutManagerCompat.requestPinShortcut(context, info, PendingIntent.getBroadcast(context, 0, ShortcutManagerCompat.createShortcutResultIntent(context, info), PendingIntent.FLAG_IMMUTABLE).intentSender)
 					}
-					val info = ShortcutInfoCompat.Builder(requireContext(), "$itemId")
-						.setShortLabel(item.getString("name"))
-						.setLongLabel(item.getString("name"))
-						.setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
-						.setIntent(intent.setAction(Intent.ACTION_VIEW))
-						.build()
-					ShortcutManagerCompat.requestPinShortcut(requireContext(),
-					                                         info,
-					                                         PendingIntent.getBroadcast(
-						                                         requireContext(),
-						                                         0,
-						                                         ShortcutManagerCompat.createShortcutResultIntent(
-							                                         requireContext(),
-							                                         info),
-						                                         PendingIntent.FLAG_IMMUTABLE).intentSender)
+					else config.toast(R.string.fail_to_add_shortcut)
 				}
-				else model.contextUtil.toast(R.string.fail_to_add_shortcut)
+				
+				GenericTonalButton(image = Icons.Rounded.ClearAll, text = stringResource(R.string.service_order)) {
+					onShowOrder()
+				}
+				
+				GenericTonalButton(image = Icons.Rounded.KeyboardVoice, text = stringResource(R.string.feedback)) {
+					context.startActivity(Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+				}
+				
+				GenericTonalButton(image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)) {
+					val itemUrl = item.getString("url")
+					if (!TextUtils.isEmpty(itemUrl)) context.startActivity(Intent(context, BrowserActivity::class.java).setData(itemUrl.toUri()))
+				}
+				
+				GenericTonalButton(image = Icons.Rounded.Book, text = stringResource(R.string.guide)) {
+					if (item.containsKey("doc")) context.startActivity(Intent(context, BrowserActivity::class.java).setData("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.getString("doc"))}".toUri()))
+					else config.toast(R.string.undeveloped_warning)
+				}
 			}
-			collect.setOnClickListener {
-				val collected = isServiceCollected.value == true
-				if (collected) db?.deleteService(itemId)
-				else db?.addService(itemId, item.toJSONString(), collectionAdapter?.itemCount ?: 0)
-				model.contextUtil.toast(if (collected) R.string.cancel_collect_success else R.string.collect_success)
-				shortcutCollection
-				isServiceCollected.value = !collected
-				collect.text = getString(if (isServiceCollected.value == true) R.string.cancel_collect else R.string.collect)
-			}
-			addToDashboard.setOnClickListener {
-				val collected = isShortcutCollected.value == true
-				if (collected) db?.deleteDashboardShortcut(itemId)
-				else db?.addDashboardShortcut(itemId,
-				                              item.toJSONString(),
-				                              collectionAdapter?.itemCount ?: 0)
-				model.contextUtil.toast(if (collected) R.string.cancel_add_shortcut_success else R.string.add_shortcut_success)
-				viewModel?.updateDashboardShortcut?.value = true
-				isShortcutCollected.value = !collected
-				addToDashboard.text = getString(if (isShortcutCollected.value == true) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
-			}
-			feedback.setOnClickListener {
-				startActivity(Intent(Intent.ACTION_VIEW,
-				                     "https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${
-					                     item.getString("name")
-				                     }&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-			}
-			markwon.setMarkdown(description,
-			                    "### ${item.getString("name")}\n${item.getString("description")}")
 		}
-		actionDialog!!.show()
-		return true
 	}
 }
 
-internal class CourseAdapter : RecyclerAdapter<JSONObject>() {
-	private var onClick: ((JSONObject?, View?) -> Unit)? = null
-	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-		object : RecyclerView.ViewHolder(ItemHomeCourseBinding.inflate(LayoutInflater.from(parent.context),
-		                                                               parent,
-		                                                               false).root) {}
-	
-	fun setClick(onClick: (JSONObject?, View?) -> Unit) {
-		this.onClick = onClick
-	}
-	
-	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-		val binding = ItemHomeCourseBinding.bind(holder.itemView)
-		val item = get(position)
-		holder.itemView.setOnClickListener { v -> onClick?.invoke(item, v) }
-		mapOf(binding.courseTitle to "courseName",
-		      binding.location to "teachingPlace",
-		      binding.time to "time",
-		      binding.teacher to "teacherName",
-		      binding.course to "course").forEach { (v, s) ->
-			v.text = item.getString(s)
-			v.setOnLongClickListener {
-				config?.copy(s,
-				             item.getString(s)); config?.toast(R.string.copy_successfully); true
+@Composable private fun ShortcutSection(
+	vm: DashboardViewModel,
+	config: ContextUtil,
+	activity: FragmentActivity,
+	onShowActionDialog: (JSONObject) -> Unit,
+                                       ) {
+	val context = LocalContext.current
+	val scan = stringResource(R.string.scan)
+	val qrcode = stringResource(R.string.qrcode)
+	val courseSchedule = stringResource(R.string.course_schedule)
+	val shortcuts = vm.dashboardShortcuts
+	LaunchedEffect(Unit) { vm.loadDashboardShortcuts() }
+	FlowRow(modifier = Modifier
+		.fillMaxWidth()
+		.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.Center, verticalArrangement = Arrangement.Center) {
+		ButtonGroup(horizontalArrangement = Arrangement.Center, overflowIndicator = { menuState ->
+			FilledTonalIconButton(onClick = {
+				if (menuState.isShowing) menuState.dismiss()
+				else menuState.show()
+			}) {
+				Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(R.string.more))
 			}
+		}) {
+			clickableItem(label = scan, icon = {
+				Icon(Icons.Rounded.QrCodeScanner, contentDescription = stringResource(R.string.scan))
+			}, onClick = { vm.openWechatScan() })
+			clickableItem(label = qrcode, icon = {
+				Icon(Icons.Rounded.QrCode2, contentDescription = stringResource(R.string.qrcode))
+			}, onClick = { vm.openQrCode() })
+			clickableItem(label = courseSchedule, icon = {
+				Icon(Icons.Rounded.CalendarMonth, contentDescription = stringResource(R.string.course_schedule))
+			}, onClick = { context.startActivity(Intent(context, CourseScheduleActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()) })
 		}
-		val status = item.getString("status")
-		val isBefore = status == "before"
-		val tint = when (status) {
-			"in" -> config?.contextUtil?.getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim)
-			"before" -> 0
-			else -> config?.contextUtil?.getColorFromAttr(com.google.android.material.R.attr.colorSurface)
-		} ?: 0
-		holder.itemView.background.setTint(tint)
-		binding.courseTitle.setTextAppearance(if (isBefore) com.google.android.material.R.style.TextAppearance_Material3_TitleMedium else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized)
-		binding.item.alpha = if (isBefore) 0.64f else 1.0f
-		super.onBindViewHolder(holder, position)
+		shortcuts.forEach { entity ->
+			val shortcutJson = entity.shortcutJson ?: return@forEach
+			val shortcut = remember(entity.shortcutId) { JSONObject.parse(shortcutJson) }
+			val name = shortcut.getString("name") ?: return@forEach
+			LongClickButton(onClick = {
+				val act = shortcut.getString("activity")
+				val url = shortcut.getString("url")
+				when {
+					!act.isNullOrEmpty() -> {
+						try {
+							Intent(context, Class.forName(context.packageName + act)).takeIf {
+								it.resolveActivity(context.packageManager) != null
+							}?.let {
+								context.startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+							}
+						} catch (_: Exception) {
+							config.toast(R.string.activity_not_found)
+						}
+					}
+					!url.isNullOrEmpty() -> {
+						context.startActivity(Intent(context, BrowserActivity::class.java).setData(url.toUri()), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+					}
+					else -> config.toast(R.string.undeveloped)
+				}
+			}, icon = Icons.Rounded.Star, label = name, onLongClick = { onShowActionDialog(shortcut) })
+		}
 	}
 }
 
-internal class ExamAdapter : RecyclerAdapter<JSONObject>() {
-	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-		object : RecyclerView.ViewHolder(ItemExamBinding.inflate(LayoutInflater.from(parent.context),
-		                                                         parent,
-		                                                         false).root) {}
-	
-	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-		val binding = ItemExamBinding.bind(holder.itemView)
-		val context = holder.itemView.context
-		val examData = get(position)
-		val text = arrayOf(examData.getString("examSubjectName"),
-		                   examData.getString("classroomNumber"),
-		                   "${examData.getString("examDate")} ${
-			                   context.resources.getStringArray(R.array.weeks)[examData.getInteger("week") - 1]
-		                   }",
-		                   "${examData.getString("duration")}${context.getString(R.string.minute)}",
-		                   examData.getString("durationTime"),
-		                   String.format(context.getString(R.string.section_range),
-		                                 examData.getIntValue("startClassTimes"),
-		                                 examData.getIntValue("endClassTimes")),
-		                   "${context.getString(R.string.exam_mode)}：${examData.getString("examMode")}",
-		                   "${context.getString(R.string.exam_stage)}：${examData.getString("examStage")}")
-		val views = arrayOf<TextView>(binding.examName,
-		                              binding.examLocation,
-		                              binding.examDate,
-		                              binding.examDuration,
-		                              binding.examTime,
-		                              binding.examClassTime,
-		                              binding.examMode,
-		                              binding.examStage)
-		views.forEachIndexed { i, v ->
-			v.text = text[i]
-			v.setOnClickListener {
-				config?.copy("exam",
-				             text[i]); config?.toast(R.string.copy_successfully)
+@Composable private fun ScheduleSection(
+	nextClassMarkdown: String,
+	dateText: String,
+	onNextClassClick: () -> Unit,
+	onTimeCardClick: () -> Unit,
+                                       ) {
+	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_padding))) {
+		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1f), onClick = onNextClassClick) {
+			if (nextClassMarkdown.isNotEmpty()) {
+				Markdown(rememberMarkdownState(nextClassMarkdown), colors = markdownColor(), typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized), modifier = Modifier.padding(12.dp))
 			}
 		}
-		val status = examData.getString("status")
-		val isBefore = status == "before"
-		val tint = when (status) {
-			"in" -> config?.contextUtil?.getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim)
-			"before" -> Color.TRANSPARENT
-			else -> config?.contextUtil?.getColorFromAttr(com.google.android.material.R.attr.colorSurface)
-		} ?: Color.TRANSPARENT
-		binding.root.setCardBackgroundColor(tint)
-		binding.examName.setTextAppearance(if (isBefore) com.google.android.material.R.style.TextAppearance_Material3_TitleMedium else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium_Emphasized)
-		binding.item.alpha = if (isBefore) 0.64f else 1.0f
-		super.onBindViewHolder(holder, position)
+		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1f), onClick = onTimeCardClick) {
+			Column(modifier = Modifier.padding(dimensionResource(R.dimen.content_padding))) {
+				Text(text = dateText, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalFoundationApi::class) @Composable private fun CourseSection(
+	todayCourses: SnapshotStateList<JSONObject>,
+	tomorrowCourses: SnapshotStateList<JSONObject>,
+	showToday: Boolean,
+	nextClassIndex: Int = 0,
+	onToggle: (Boolean) -> Unit,
+	onCourseClick: (JSONObject) -> Unit,
+	onCourseLongClick: (JSONObject, String) -> Unit,
+	activity: FragmentActivity,
+                                                                              ) {
+	val context = LocalContext.current
+	var courses = if (showToday) todayCourses else tomorrowCourses
+	var selectedIndex by remember { mutableIntStateOf(0) }
+	LaunchedEffect(selectedIndex) {
+		onToggle(selectedIndex == 0)
+		courses = if (selectedIndex == 0) todayCourses else tomorrowCourses
+	}
+	Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) {
+			context.startActivity(Intent(context, CourseScheduleActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+		}
+		
+		SingleChoiceSegmentedButtonRow {
+			listOf(R.string.today, R.string.recent).forEachIndexed { index, label ->
+				SegmentedButton(
+					shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+					onClick = { selectedIndex = index },
+					selected = selectedIndex == index,
+					icon = {},
+				               ) {
+					Text(stringResource(label))
+				}
+			}
+		}
+	}
+	
+	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+		if (courses.isEmpty()) Text(text = stringResource(R.string.noClass),
+		                            style = MaterialTheme.typography.titleLargeEmphasized,
+		                            modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
+		else Row(modifier = Modifier
+			.fillMaxWidth()
+			.height(IntrinsicSize.Max)
+			.horizontalScroll(rememberScrollState(nextClassIndex)), verticalAlignment = Alignment.CenterVertically) {
+			courses.forEachIndexed { index, item ->
+				if (index > 0) VerticalDivider()
+				CourseItem(item = item, onClick = { onCourseClick(item) }, onLongClick = { key -> onCourseLongClick(item, key) })
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalFoundationApi::class) @Composable private fun CourseItem(
+	item: JSONObject,
+	onClick: () -> Unit,
+	onLongClick: (String) -> Unit,
+                                                                           ) {
+	val status = item.getString("status") ?: "after"
+	val isBefore = status == "before"
+	val alpha = if (isBefore) 0.64f else 1.0f
+	val backgroundColor = when (status) {
+		"in" -> MaterialTheme.colorScheme.surfaceDim
+		"before" -> Color.Transparent
+		else -> MaterialTheme.colorScheme.surface
+	}
+	val clipboard = LocalClipboard.current
+	val coroutineScope = rememberCoroutineScope()
+	Card(colors = CardDefaults.cardColors(containerColor = backgroundColor), shape = RoundedCornerShape(0.dp), modifier = Modifier
+		.fillMaxHeight()
+		.combinedClickable(onClick = onClick, onLongClick = { onLongClick("courseName") })
+		.alpha(alpha)) {
+		Column(modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
+			Spacer(modifier = Modifier.height(4.dp))
+			Text(text = item.getString("courseName", ""), style = if (isBefore) MaterialTheme.typography.titleMedium
+			else MaterialTheme.typography.titleMediumEmphasized, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier
+				.fillMaxWidth()
+				.align(Alignment.CenterHorizontally))
+			listOf("teachingPlace", "time", "teacherName", "course").zip(listOf(Icons.Rounded.LocationOn, Icons.Rounded.Timer, Icons.Rounded.AccountCircle, Icons.Rounded.CalendarMonth)).forEach { (key, icon) ->
+				val text = item.getString(key, "")
+				GenericButton(icon = icon, text = text) {
+					coroutineScope.launch {
+						clipboard.setClipEntry(ClipData.newPlainText(key, text).toClipEntry())
+					}
+				}
+			}
+		}
+	}
+}
+
+@Composable private fun ExamSection(
+	week18Exams: SnapshotStateList<JSONObject>,
+	week19Exams: SnapshotStateList<JSONObject>,
+	showWeek18: Boolean,
+	todayExamIndex: Int = 0,
+	onToggle: (Boolean) -> Unit,
+	onExamClick: (JSONObject) -> Unit,
+	onExamLongClick: (String) -> Unit,
+	activity: FragmentActivity,
+	coroutineScope: CoroutineScope,
+                                   ) {
+	val context = LocalContext.current
+	val exams = if (showWeek18) week18Exams else week19Exams
+	var selectedIndex by remember { mutableIntStateOf(if (showWeek18) 0 else 1) }
+	LaunchedEffect(selectedIndex) {
+		onToggle(selectedIndex == 0)
+	}
+	
+	Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+		CardTitle(R.drawable.exam, text = stringResource(R.string.exam)) {
+			context.startActivity(Intent(context, ExamActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+		}
+		SingleChoiceSegmentedButtonRow {
+			listOf(R.string.week18, R.string.week19).forEachIndexed { index, label ->
+				SegmentedButton(
+					shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+					onClick = { selectedIndex = index },
+					selected = selectedIndex == index,
+					icon = {},
+				               ) {
+					Text(stringResource(label))
+				}
+			}
+		}
+	}
+	
+	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+		if (exams.isEmpty()) Text(text = stringResource(R.string.noExam), style = MaterialTheme.typography.titleLargeEmphasized, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
+		else {
+			Row(modifier = Modifier
+				.fillMaxWidth()
+				.height(IntrinsicSize.Max)
+				.horizontalScroll(rememberScrollState(todayExamIndex)), verticalAlignment = Alignment.CenterVertically) {
+				exams.forEachIndexed { index, exam ->
+					if (index > 0) VerticalDivider()
+					ExamItem(exam = exam, onClick = { onExamClick(exam) }, onLongClick = { text -> onExamLongClick(text) }, coroutineScope = coroutineScope)
+				}
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalFoundationApi::class) @Composable private fun ExamItem(
+	exam: JSONObject,
+	onClick: () -> Unit,
+	onLongClick: (String) -> Unit,
+	coroutineScope: kotlinx.coroutines.CoroutineScope,
+                                                                         ) {
+	val status = exam.getString("status") ?: "after"
+	val isBefore = status == "before"
+	val alpha = if (isBefore) 0.64f else 1.0f
+	val backgroundColor = when (status) {
+		"in" -> MaterialTheme.colorScheme.surfaceDim
+		"before" -> Color.Transparent
+		else -> MaterialTheme.colorScheme.surface
+	}
+	val weeks = stringArrayResource(R.array.weeks)
+	val clipboard = LocalClipboard.current
+	Card(colors = CardDefaults.cardColors(containerColor = backgroundColor), modifier = Modifier
+		.fillMaxHeight()
+		.combinedClickable(onClick = onClick, onLongClick = { onLongClick(exam.getString("examSubjectName") ?: "") })
+		.alpha(alpha)) {
+		Column(modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
+			Spacer(modifier = Modifier.height(4.dp))
+			Text(text = exam.getString("examSubjectName", ""), style = if (isBefore) MaterialTheme.typography.titleMedium
+			else MaterialTheme.typography.titleMediumEmphasized, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier
+				.fillMaxWidth()
+				.align(Alignment.CenterHorizontally))
+			val examDate = exam.getString("examDate", "")
+			val weekIdx = exam.getInteger("week")?.let { it - 1 }?.coerceIn(0, weeks.size - 1) ?: 0
+			listOf(exam.getString("classroomNumber", ""),
+			       "$examDate ${weeks[weekIdx]}",
+			       "${exam.getString("duration", "")}${stringResource(R.string.minute)}",
+			       exam.getString("durationTime", ""),
+			       stringResource(R.string.section_range, exam.getIntValue("startClassTimes"), exam.getIntValue("endClassTimes"))).zip(listOf(Icons.Rounded.LocationOn,
+			                                                                                                                                  Icons.Rounded.Timer,
+			                                                                                                                                  Icons.Rounded.Schedule,
+			                                                                                                                                  Icons.Rounded.School,
+			                                                                                                                                  Icons.Rounded.CalendarMonth)).forEach { (text, icon) ->
+				GenericButton(icon = icon, text = text) {
+					coroutineScope.launch {
+						clipboard.setClipEntry(ClipData.newPlainText("exam", text).toClipEntry())
+					}
+				}
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3Api::class) @Composable private fun TodoSection(
+	todoList: List<TodoEntity>,
+	onViewAllClick: () -> Unit,
+	todoManager: TodoManager,
+                                                                           ) {
+	var addTrigger by remember { mutableIntStateOf(0) }
+	Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+		CardTitle(R.drawable.todo, text = stringResource(R.string.todo)) {
+			onViewAllClick()
+		}
+		SingleChoiceSegmentedButtonRow {
+			SegmentedButton(onClick = { addTrigger++ }, selected = false, shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2), icon = {}, contentPadding = PaddingValues(0.dp)) {
+				Icon(painter = painterResource(R.drawable.add), contentDescription = stringResource(R.string.add))
+			}
+			SegmentedButton(onClick = onViewAllClick, selected = false, shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2), icon = {}, contentPadding = PaddingValues(0.dp)) {
+				Icon(painter = painterResource(R.drawable.view), contentDescription = stringResource(R.string.view_detail))
+			}
+		}
+	}
+	
+	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+		if (todoList.isEmpty()) Text(text = stringResource(R.string.no_todo),
+		                             style = MaterialTheme.typography.titleLargeEmphasized,
+		                             modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin)))
+		todoManager.TodoListScreen(todoList = todoList, addTrigger = addTrigger)
+	}
+}
+
+@Composable fun GenericButton(
+	icon: ImageVector,
+	text: String = "",
+	enable: Boolean = true,
+	onClick: () -> Unit = {},
+                             ) {
+	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
+		Icon(icon, contentDescription = text, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(ButtonDefaults.IconSize))
+		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+		Text(text)
+	}
+}
+
+@Composable fun GenericButton(
+	image: Int,
+	text: String = "",
+	enable: Boolean = true,
+	onClick: () -> Unit = {},
+                             ) {
+	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
+		Icon(painter = painterResource(image), contentDescription = text, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(ButtonDefaults.IconSize))
+		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+		Text(text)
+	}
+}
+
+@Composable fun RowScope.CardTitle(
+	image: Int,
+	text: String = "",
+	onClick: () -> Unit = {},
+                                  ) {
+	Row(
+		modifier = Modifier
+			.weight(1f)
+			.clickable(onClick = onClick, indication = null, interactionSource = null),
+		verticalAlignment = Alignment.CenterVertically,
+	   ) {
+		Icon(painter = painterResource(image), contentDescription = text, tint = MaterialTheme.colorScheme.primary)
+		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+		Text(text, style = MaterialTheme.typography.titleMediumEmphasized)
+	}
+}
+
+@Composable fun RowScope.CardTitle(
+	image: ImageVector,
+	text: String = "",
+	onClick: () -> Unit = {},
+                                  ) {
+	Row(
+		modifier = Modifier
+			.clickable(onClick = onClick, indication = null, interactionSource = null)
+			.weight(1f),
+		verticalAlignment = Alignment.CenterVertically,
+	   ) {
+		Icon(image, contentDescription = text, tint = MaterialTheme.colorScheme.primary)
+		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+		Text(text, style = MaterialTheme.typography.titleMediumEmphasized)
+	}
+}
+
+@Composable fun LongClickButton(
+	onClick: () -> Unit,
+	onLongClick: () -> Unit,
+	modifier: Modifier = Modifier,
+	icon: ImageVector? = null,
+	label: String? = null,
+	enabled: Boolean = true,
+	colors: ButtonColors = ButtonDefaults.buttonColors(),
+	interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+	content: @Composable RowScope.() -> Unit = {},
+                               ) {
+	val haptic = LocalHapticFeedback.current
+	val isPressed by interactionSource.collectIsPressedAsState()
+	val shapes = ButtonDefaults.shapes()
+	val shape = when {
+		isPressed -> shapes.pressedShape
+		else -> shapes.shape
+	}
+	Surface(
+		modifier = modifier
+			.minimumInteractiveComponentSize()
+			.combinedClickable(interactionSource = interactionSource, enabled = enabled, onClick = onClick, onLongClick = {
+				haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+				onLongClick()
+			}),
+		shape = shape,
+		color = if (enabled) colors.containerColor else colors.disabledContainerColor,
+		contentColor = if (enabled) colors.contentColor else colors.disabledContentColor,
+	       ) {
+		CompositionLocalProvider(LocalContentColor provides if (enabled) colors.contentColor else colors.disabledContentColor) {
+			Row(modifier = Modifier.padding(if (icon != null) ButtonDefaults.ButtonWithIconContentPadding else ButtonDefaults.ContentPadding), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+				icon?.let { Icon(it, contentDescription = label, modifier = Modifier.size(ButtonDefaults.MediumIconSize)) }
+				if (icon != null && label != null) Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+				label?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+				content()
+			}
+		}
 	}
 }

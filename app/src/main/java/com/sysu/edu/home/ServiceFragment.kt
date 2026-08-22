@@ -1,441 +1,535 @@
 package com.sysu.edu.home
 
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import android.text.Editable
 import android.text.TextUtils
-import android.text.TextWatcher
-import android.text.style.ForegroundColorSpan
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewGroup.MarginLayoutParams
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.WindowManager
-import android.widget.TextView
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Shortcut
+import androidx.compose.material.icons.rounded.Book
+import androidx.compose.material.icons.rounded.ClearAll
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.KeyboardVoice
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.Output
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ChipColors
+import androidx.compose.material3.ChipElevation
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
-import com.alibaba.fastjson2.JSONArray
+import androidx.fragment.app.FragmentActivity
 import com.alibaba.fastjson2.JSONObject
-import com.alibaba.fastjson2.JSONReader
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.sysu.edu.BaseFragment
+import com.mikepenz.markdown.compose.Markdown
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.rememberMarkdownState
 import com.sysu.edu.MainActivity
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.ContextUtil
 import com.sysu.edu.browser.BrowserActivity
-import com.sysu.edu.databinding.DialogServiceActionBinding
-import com.sysu.edu.databinding.DialogServiceOrderBinding
-import com.sysu.edu.databinding.FragmentServiceBinding
-import com.sysu.edu.databinding.ItemActionChipBinding
-import com.sysu.edu.databinding.ItemServiceBoxBinding
-import com.sysu.edu.view.AdapterListener
-import com.sysu.edu.view.RecyclerAdapter
-import io.noties.markwon.AbstractMarkwonPlugin
-import io.noties.markwon.Markwon
-import io.noties.markwon.MarkwonConfiguration
-import io.noties.markwon.MarkwonSpansFactory
-import io.noties.markwon.MarkwonVisitor
-import io.noties.markwon.MarkwonVisitor.BlockHandler
-import io.noties.markwon.RenderProps
-import io.noties.markwon.SpanFactory
-import io.noties.markwon.core.CoreProps
-import io.noties.markwon.core.spans.LastLineSpacingSpan
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.schedulers.Schedulers
-import io.reactivex.rxjava3.subjects.PublishSubject
-import org.commonmark.node.Heading
-import org.commonmark.node.Node
-import java.nio.charset.StandardCharsets
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.launch
 
-class ServiceFragment : BaseFragment() {
-	val list: MutableList<JSONObject> = mutableListOf()
-	private val disposables = CompositeDisposable()
-	lateinit var binding: FragmentServiceBinding
-	var actionDialog: BottomSheetDialog? = null
-	lateinit var db: HomeCollectionHelper
-	var actionBinding: DialogServiceActionBinding? = null
-	var orderDialog: BottomSheetDialog? = null
-	var collectionAdapter: CollectionAdapter? = null
-	var collectionBinding: ItemServiceBoxBinding? = null
-	var viewModel: HomeViewModel? = null
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
-		super.onCreateView(inflater, container, savedInstanceState)
-		binding = FragmentServiceBinding.inflate(inflater)
-		requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-		viewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
-		initAction(inflater)
-		initOrder(inflater)
-		initSearch()
-		val reader = JSONReader.of(resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
-		db = HomeCollectionHelper(requireContext())
-		addCollection(inflater)
-		reader.readJSONArray().forEach {
-			binding.serviceContainer.addView(
-				initBoxWithHashMap(inflater, (it as JSONObject).getString("name"),
-				                   it.getJSONArray("items")).root)
-		}
-		reader.close()
-		return binding.root
-	}
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalFoundationApi::class) @Composable internal fun ServiceScreen(
+	homeViewModel: HomeViewModel,
+	serviceViewModel: ServiceViewModel,
+	searchQuery: String = "",
+                                                                                                                                              ) {
+	val context = LocalContext.current
+	val config = remember { ContextUtil(context) }
+	var showActionItem by remember { mutableStateOf<JSONObject?>(null) }
+	var showOrderDialog by rememberSaveable { mutableStateOf(false) }
+	val collection = serviceViewModel.collection
+	val allItems = serviceViewModel.allItems
+	val serviceData = serviceViewModel.serviceData
 	
-	fun initAction(inflater: LayoutInflater) {
-		actionDialog = BottomSheetDialog(requireContext())
-		actionBinding = DialogServiceActionBinding.inflate(inflater).apply {
-			order.setOnClickListener { orderDialog!!.show() }
-			actionDialog?.setContentView(root)
-		}
+	LaunchedEffect(Unit) {
+		serviceViewModel.loadCollection()
+		serviceViewModel.loadServiceData()
 	}
-	
-	fun initOrder(inflater: LayoutInflater) {
-		orderDialog = BottomSheetDialog(requireContext())
-		collectionAdapter = CollectionAdapter()
-		DialogServiceOrderBinding.inflate(inflater).apply {
-			recyclerView.setLayoutManager(LinearLayoutManager(context))
-			recyclerView.setAdapter(collectionAdapter)
-			confirm.setOnClickListener {
-				updateService()
-				updateServiceCollection()
-				orderDialog!!.dismiss()
+	val searchResults = remember(searchQuery, allItems) {
+		if (searchQuery.isBlank()) emptyList()
+		else allItems.filter { item ->
+			item.getString("name")?.contains(searchQuery, ignoreCase = true) == true ||
+			item.getString("description")?.contains(searchQuery, ignoreCase = true) == true
+		}.sortedWith(compareByDescending<JSONObject> { item ->
+			when {
+				item.getString("name")?.startsWith(searchQuery, ignoreCase = true) == true -> 2
+				item.getString("name")?.contains(searchQuery, ignoreCase = true) == true -> 1
+				else -> 0
 			}
-			orderDialog!!.setContentView(root)
-			ItemTouchHelper(object : ItemTouchHelper.Callback() {
-				override fun getMovementFlags(recyclerView: RecyclerView,
-				                              viewHolder: RecyclerView.ViewHolder): Int {
-					return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
-				}
-				
-				override fun onMove(recyclerView: RecyclerView,
-				                    source: RecyclerView.ViewHolder,
-				                    target: RecyclerView.ViewHolder): Boolean {
-					collectionAdapter!!.swap(source.getBindingAdapterPosition(),
-					                         target.getBindingAdapterPosition())
-					return true
-				}
-				
-				override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-				}
-			}).attachToRecyclerView(recyclerView)
-		}
+		}.thenBy { it.getString("name") })
 	}
 	
-	fun addCollection(inflater: LayoutInflater) {
-		val collection = collection
-		collectionBinding = initBoxWithHashMap(inflater, getString(R.string.collect),
-		                                       collection).apply {
-			serviceBoxTitle.setOnClickListener { orderDialog!!.show() }
-			binding.serviceContainer.addView(root, 0)
-			if (collection.isEmpty()) root.visibility = View.GONE
-		}
-	}
+	ServiceActionDialog(
+		item = showActionItem,
+		onDismiss = { showActionItem = null },
+		onShowOrder = { _ -> showActionItem = null; showOrderDialog = true },
+		serviceViewModel = serviceViewModel,
+		homeViewModel = homeViewModel,
+		config = config,
+	                   )
 	
-	fun updateServiceCollection() {
-		val collection = collection
-		collectionBinding!!.apply {
-			if (collection.isEmpty()) root.visibility = View.GONE
-			else {
-				root.visibility = View.VISIBLE
-				serviceBoxItems.removeAllViews()
-				addItems(getLayoutInflater(), collection, this)
+	ServiceOrderDialog(
+		show = showOrderDialog,
+		onDismiss = { showOrderDialog = false },
+		serviceViewModel = serviceViewModel,
+	                  )
+	val nestedScrollConnection = rememberNestedScrollInteropConnection()
+	val verticalMargin = dimensionResource(R.dimen.vertical_margin)
+	
+	LazyColumn(
+		modifier = Modifier
+			.fillMaxSize()
+			.nestedScroll(nestedScrollConnection),
+		verticalArrangement = Arrangement.spacedBy(verticalMargin),
+	          ) {
+		if (searchQuery.isNotBlank() && searchResults.isNotEmpty()) {
+			items(searchResults, key = { it.getIntValue("id") }) { item ->
+				ListItem(
+					overlineContent = {
+						Text(
+							item.getString("name") ?: "",
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis,
+							style = MaterialTheme.typography.titleMedium,
+						    )
+					},
+					supportingContent = {
+						Text(
+							item.getString("description") ?: "",
+							maxLines = 2,
+							overflow = TextOverflow.Ellipsis,
+							style = MaterialTheme.typography.bodySmall,
+						    )
+					},
+					modifier = Modifier.combinedClickable(
+						onClick = { navigateToServiceItem(context, item, config) },
+						onLongClick = { showActionItem = item },
+					                                     ),
+				        ) {}
 			}
 		}
-	}
-	
-	private val collection: JSONArray
-		get() {
-			val cursor = db.writableDatabase.query("service_collection", null, null, null, null,
-			                                       null, "position ASC")
-			val collection = JSONArray()
-			collectionAdapter!!.clear()
-			while (cursor.moveToNext()) JSONObject.parse(
-				cursor.getString(cursor.getColumnIndexOrThrow("serviceJson"))).apply {
-					collection.add(this)
-					collectionAdapter!!.add(this)
-				}
-			cursor.close()
-			return collection
+		else if (searchQuery.isNotBlank()) {
+			item(key = "emptySearch") {
+				Text(
+					text = stringResource(R.string.search),
+					modifier = Modifier.padding(16.dp),
+					style = MaterialTheme.typography.bodyMedium,
+				    )
+			}
 		}
-	
-	fun initBoxWithHashMap(inflater: LayoutInflater,
-	                       boxTitle: String?,
-	                       items: JSONArray): ItemServiceBoxBinding {
-		val binding = ItemServiceBoxBinding.inflate(inflater)
-		binding.serviceBoxTitle.text = boxTitle
-		addItems(inflater, items, binding)
-		return binding
-	}
-	
-	fun addItems(inflater: LayoutInflater, items: JSONArray, binding: ItemServiceBoxBinding) {
-		items.indices.forEach { index: Int ->
-			items.getJSONObject(index).let { item ->
-				list.add(item)
-				ItemActionChipBinding.inflate(inflater, binding.serviceBoxItems, false).root.apply {
-					setOnClickListener(
-						viewModel!!.actionMap[item.getIntValue("id")] ?: View.OnClickListener {
-							getItemIntent(item, null)?.let { it1 ->
-								startActivity(it1,
-								              ActivityOptionsCompat.makeSceneTransitionAnimation(
-									              requireActivity(), it, "miniapp").toBundle())
-							} ?: config.toast(R.string.activity_not_found)
-						})
-					setOnLongClickListener { showActionDialog(item) }
-					text = item.getString("name")
-					binding.serviceBoxItems.addView(this)
+		else {
+			if (collection.isNotEmpty()) {
+				item(key = "collection") {
+					ServiceBox(
+						title = stringResource(R.string.collect),
+						items = collection,
+						onItemClick = { navigateToServiceItem(context, it, config) },
+						onItemLongClick = { showActionItem = it },
+						onTitleClick = { showOrderDialog = true },
+					          )
 				}
+			}
+			
+			items(serviceData, key = { it.first }) { (name, items) ->
+				ServiceBox(
+					title = name,
+					items = items,
+					onItemClick = { navigateToServiceItem(context, it, config) },
+					onItemLongClick = { showActionItem = it },
+				          )
+			}
+			
+			item(key = "bottomSpacer") {
+				Spacer(modifier = Modifier.height(verticalMargin))
 			}
 		}
 	}
+}
+
+private fun navigateToServiceItem(context: Context, item: JSONObject, config: ContextUtil) {
+	getServiceItemIntent(context, item, null)?.let {
+		(context as FragmentActivity).startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle())
+	} ?: config.toast(R.string.activity_not_found)
+}
+
+private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Intent?): Intent? {
+	return if (item.containsKey("activity")) {
+		try {
+			Intent(context, Class.forName(context.packageName + item.getString("activity"))).takeIf {
+				it.resolveActivity(context.packageManager) != null
+			} ?: intent
+		} catch (_: Exception) {
+			intent
+		}
+	}
+	else if (item.containsKey("url")) {
+		Intent(context, BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url")).toUri())
+	}
+	else intent
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class) @Composable private fun ServiceBox(
+	title: String,
+	items: List<JSONObject>,
+	onItemClick: (JSONObject) -> Unit,
+	onItemLongClick: (JSONObject) -> Unit,
+	onTitleClick: (() -> Unit)? = null,
+                                                                                                         ) {
+	Row(
+		modifier = Modifier.fillMaxWidth().padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)).apply {
+			if (onTitleClick != null) combinedClickable(onClick = onTitleClick)
+		},
+		verticalAlignment = Alignment.CenterVertically,
+	   ) {
+		Text(
+			text = title,
+			style = MaterialTheme.typography.titleMedium,
+			color = MaterialTheme.colorScheme.primary,
+		    )
+	}
+	Card(
+		modifier = Modifier.fillMaxWidth(),
+		shape = MaterialTheme.shapes.small,
+		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+	    ) {
+		FlowRow(
+			modifier = Modifier
+				.fillMaxWidth()
+				.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
+			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+		       ) {
+			items.forEach { item ->
+				val hasActivity = item.containsKey("activity")
+				LongClickableElevatedAssistChip(
+					onClick = {
+						onItemClick(item)
+					},
+					onLongClick = { onItemLongClick(item) },
+					label = item.getString("name", ""),
+					colors = if (hasActivity) AssistChipDefaults.elevatedAssistChipColors()
+					else AssistChipDefaults.elevatedAssistChipColors(
+						containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+					                                                ),
+				                               )
+			}
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3Api::class) @Composable private fun ServiceActionDialog(
+	item: JSONObject?,
+	onDismiss: () -> Unit,
+	onShowOrder: (JSONObject?) -> Unit,
+	serviceViewModel: ServiceViewModel,
+	homeViewModel: HomeViewModel,
+	config: ContextUtil,
+                                                                                   ) {
+	if (item == null) return
+	val context = LocalContext.current
+	val coroutineScope = rememberCoroutineScope()
+	val itemId = item.getIntValue("id")
+	var isServiceCollected by remember { mutableStateOf(false) }
+	var isShortcutCollected by remember { mutableStateOf(false) }
+	val name = item.getString("name", "")
+	val description = item.getString("description", "")
+	val url = item.getString("url", "")
+	val markdown = StringBuilder("### $name\n$description")
+	if (url.isNotBlank()) markdown.append("\n`$url`")
+	LaunchedEffect(item) {
+		isServiceCollected = serviceViewModel.isServiceCollected(itemId)
+		isShortcutCollected = serviceViewModel.isDashboardShortcutCollected(itemId)
+	}
 	
-	fun showActionDialog(item: JSONObject): Boolean {
-		val itemId = item.getIntValue("id")
-		val isServiceCollected = MutableLiveData(db.isServiceCollected(itemId))
-		val isShortcutCollected = MutableLiveData(db.isDashboardShortcutCollected(itemId))
-		actionBinding?.run {
-			collect.setText(
-				if (true == isServiceCollected.value) R.string.cancel_collect else R.string.collect)
-			addToDashboard.setText(
-				if (true == isShortcutCollected.value) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
-			addToLauncher.setOnClickListener {
-				if (ShortcutManagerCompat.isRequestPinShortcutSupported(requireContext())) {
-					getItemIntent(item, Intent(requireContext(), MainActivity::class.java))?.let {
-						ShortcutInfoCompat.Builder(requireContext(), "$itemId")
-							.setShortLabel(item.getString("name"))
-							.setLongLabel(item.getString("name"))
-							.setIcon(IconCompat.createWithResource(requireContext(), R.mipmap.icon))
-							.setIntent(it.setAction(Intent.ACTION_VIEW))
-					}?.build()?.let {
-						ShortcutManagerCompat.requestPinShortcut(requireContext(), it,
-						                                         PendingIntent.getBroadcast(
-							                                         requireContext(),  /* request code */
-							                                         0,
-							                                         ShortcutManagerCompat.createShortcutResultIntent(
-								                                         requireContext(),
-								                                         it),  /* flags */
-							                                         PendingIntent.FLAG_IMMUTABLE).intentSender)
+	ModalBottomSheet(onDismissRequest = onDismiss) {
+		Column(modifier = Modifier.fillMaxWidth()) {
+			Card(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)),
+				shape = MaterialTheme.shapes.medium,
+			    ) {
+				Markdown(
+					rememberMarkdownState("$markdown"),
+					colors = markdownColor(),
+					typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
+					modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+				        )
+			}
+			
+			FlowRow(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)),
+				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap)),
+			       ) {
+				GenericTonalButton(image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder, text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)) {
+					isServiceCollected = !isServiceCollected
+					coroutineScope.launch {
+						if (isServiceCollected) {
+							serviceViewModel.addService(itemId, item.toJSONString(), serviceViewModel.collection.size)
+							config.toast(R.string.collect_success)
+						}
+						else {
+							serviceViewModel.deleteService(itemId)
+							config.toast(R.string.cancel_collect_success)
+						}
+						serviceViewModel.loadCollection()
 					}
 				}
-				else config.toast(R.string.fail_to_add_shortcut)
-			}
-			collect.setOnClickListener {
-				val isServiceCollect = true == isServiceCollected.value
-				if (isServiceCollect) {
-					db.deleteService(itemId)
-					config.toast(R.string.cancel_collect_success)
+				
+				GenericTonalButton(image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut, text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)) {
+					isShortcutCollected = !isShortcutCollected
+					coroutineScope.launch {
+						if (isShortcutCollected) {
+							serviceViewModel.addDashboardShortcut(itemId, item.toJSONString(), null)
+							config.toast(R.string.add_shortcut_success)
+						}
+						else {
+							serviceViewModel.deleteDashboardShortcut(itemId)
+							config.toast(R.string.cancel_add_shortcut_success)
+						}
+						homeViewModel.updateDashboardShortcut.value = true
+					}
 				}
-				else {
-					db.addService(itemId, item.toJSONString(), collectionAdapter!!.itemCount)
-					config.toast(R.string.collect_success)
-				}
-				updateServiceCollection()
-				collect.setText(if (isServiceCollect) R.string.collect else R.string.cancel_collect)
-				isServiceCollected.value = !isServiceCollect
-			}
-			addToDashboard.setOnClickListener {
-				val isShortcutCollect = true == isShortcutCollected.value
-				if (isShortcutCollect) {
-					db.deleteDashboardShortcut(itemId)
-					config.toast(R.string.cancel_add_shortcut_success)
-				}
-				else {
-					db.addDashboardShortcut(itemId, item.toJSONString(), null)
-					config.toast(R.string.add_shortcut_success)
-				}
-				viewModel!!.updateDashboardShortcut.value = true
-				addToDashboard.setText(
-					if (isShortcutCollect) R.string.add_to_dashboard else R.string.cancel_add_shortcut)
-				isShortcutCollected.value = !isShortcutCollect
-			}
-			feedback.setOnClickListener {
-				startActivity(Intent(Intent.ACTION_VIEW).setData(
-					"https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->${
-						item.getString("name")
-					}&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-			}
-			openAsUrl.setOnClickListener {
-				val url = item.getString("url")
-				if (!TextUtils.isEmpty(url)) startActivity(
-					Intent(requireContext(), BrowserActivity::class.java).setData(Uri.parse(url)))
-			}
-			guide.setOnClickListener {
-				if (item.containsKey("doc")) startActivity(
-					Intent(requireContext(), BrowserActivity::class.java).setData(
-						("https://sysu-tang.github.io/sysuer-website${
-							CommonUtil.trim(item.getString("doc"))
-						}").toUri()))
-				else config.toast(R.string.undeveloped_warning)
-			}
-			val contextUtil = ContextUtil(requireContext())
-			Markwon.builder(requireContext())
-				.usePlugin(object : AbstractMarkwonPlugin() {
-					override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
-						super.configureSpansFactory(builder)
-						builder.appendFactory(Heading::class.java,
-						                      SpanFactory { _: MarkwonConfiguration?, configuration: RenderProps? ->
-												  if (CoreProps.HEADING_LEVEL.require(
-									                      configuration!!) == 3) return@SpanFactory ForegroundColorSpan(
-								                      contextUtil.getColorFromAttr(
-									                      androidx.appcompat.R.attr.colorPrimary))
-												  null
-											  })
-						builder.appendFactory(
-							Heading::class.java) { _: MarkwonConfiguration?, _: RenderProps? ->
-							LastLineSpacingSpan(24)
+				
+				GenericTonalButton(image = Icons.Rounded.Output, text = stringResource(R.string.add_to_launcher)) {
+					if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
+						getServiceItemIntent(context, item, Intent(context, MainActivity::class.java))?.let { intent ->
+							ShortcutInfoCompat.Builder(context, "$itemId").setShortLabel(name).setLongLabel(name).setIcon(IconCompat.createWithResource(context, R.mipmap.icon)).setIntent(intent.setAction(Intent.ACTION_VIEW)).build()
+						}?.let { info ->
+							ShortcutManagerCompat.requestPinShortcut(
+								context, info,
+								PendingIntent.getBroadcast(
+									context, 0,
+									ShortcutManagerCompat.createShortcutResultIntent(context, info),
+									PendingIntent.FLAG_IMMUTABLE,
+								                          ).intentSender,
+							                                        )
 						}
 					}
-					
-					override fun configureVisitor(builder: MarkwonVisitor.Builder) {
-						super.configureVisitor(builder)
-						builder.blockHandler(object : BlockHandler {
-							override fun blockStart(visitor: MarkwonVisitor, node: Node) {
-							}
-							
-							override fun blockEnd(visitor: MarkwonVisitor, node: Node) {
-								if (visitor.hasNext(node)) visitor.ensureNewLine()
-							}
-						})
-					}
-				})
-				.build()
-				.setMarkdown(description, "### ${item.getString("name")}\n${
-					item.getString("description")
-				}\n\n`${CommonUtil.trim(item.getString("url"))}`")
-		}
-		actionDialog!!.show()
-		return true
-	}
-	
-	fun updateService() {
-		(0 until collectionAdapter!!.itemCount).forEach {
-			db.updateServicePosition(collectionAdapter!!.get(it).getInteger("id"), it)
-		}
-	}
-	
-	override fun onDestroy() {
-		disposables.clear()
-		super.onDestroy()
-	}
-	
-	fun initSearch() {
-		binding.run {
-			ViewCompat.setOnApplyWindowInsetsListener(
-				searchView) { v: View?, insets: WindowInsetsCompat? ->
-				val left = insets!!.getInsets(WindowInsetsCompat.Type.systemBars()).left
-				val right = insets.getInsets(WindowInsetsCompat.Type.systemBars()).right
-				val bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
-				v!!.setPadding(left, 0, right, bottom)
-				WindowInsetsCompat.CONSUMED
-			}
-			searchBar.getViewTreeObserver()
-				.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-					override fun onGlobalLayout() {
-						searchBar.getViewTreeObserver().removeOnGlobalLayoutListener(this)
-						val layoutParams = searchBar.layoutParams as MarginLayoutParams
-						serviceContainer.setPadding(0,
-						                            searchBar.height + layoutParams.topMargin + layoutParams.bottomMargin,
-						                            0, 0)
-					}
-				})
-			sugList.setLayoutManager(LinearLayoutManager(requireContext()))
-			val serviceFragmentCollectionAdapter = CollectionAdapter()
-			serviceFragmentCollectionAdapter.listener = object : AdapterListener {
-				override fun onBind(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                    holder: RecyclerView.ViewHolder,
-				                    position: Int) {
-					val item = serviceFragmentCollectionAdapter.get(position)
-					holder.itemView.setOnClickListener(viewModel!!.actionMap[item.getInteger("id")]
-														   ?: View.OnClickListener { v: View? ->
-															   getItemIntent(item, null)?.let {
-																   startActivity(it,
-								                                                 ActivityOptionsCompat.makeSceneTransitionAnimation(
-									                                                 requireActivity(),
-									                                                 v!!, "miniapp")
-																					 .toBundle())
-															   } ?: config.toast(
-								                                   R.string.activity_not_found)
-														   })
+					else config.toast(R.string.fail_to_add_shortcut)
 				}
 				
-				override fun onCreate(adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
-				                      binding: ViewBinding?) {
+				GenericTonalButton(image = Icons.Rounded.ClearAll, text = stringResource(R.string.service_order)) {
+					onShowOrder(item)
+				}
+				
+				GenericTonalButton(image = Icons.Rounded.KeyboardVoice, text = stringResource(R.string.feedback)) {
+					context.startActivity(
+						Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+					                     )
+				}
+				
+				GenericTonalButton(image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)) {
+					val itemUrl = item.getString("url")
+					if (!TextUtils.isEmpty(itemUrl)) context.startActivity(Intent(context, BrowserActivity::class.java).setData(itemUrl.toUri()))
+				}
+				
+				GenericTonalButton(image = Icons.Rounded.Book, text = stringResource(R.string.guide)) {
+					if (item.containsKey("doc")) context.startActivity(Intent(context, BrowserActivity::class.java).setData("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.getString("doc"))}".toUri()))
+					else config.toast(R.string.undeveloped_warning)
 				}
 			}
-			sugList.setAdapter(serviceFragmentCollectionAdapter)
-			val objectPublishSubject = PublishSubject.create<String>()
-			disposables.add(objectPublishSubject.debounce(300, TimeUnit.MILLISECONDS)
-								.distinctUntilChanged()
-								.observeOn(Schedulers.computation())
-								.map { query ->
-									if (query.trim { it <= ' ' }.isEmpty()) return@map list
-									val q = query.trim { it <= ' ' }
-									list.filter { item ->
-										item.getString("name")
-											?.contains(q) == true || item.getString("description")
-											?.contains(q) == true
-									}.sortedWith { a: JSONObject?, b: JSONObject? ->
-										val aNameMatch = a!!.getString("name").contains(q)
-										val bNameMatch = b!!.getString("name").contains(q)
-										if (aNameMatch && !bNameMatch) -1 else if (!aNameMatch && bNameMatch) 1 else 0
-									}.toMutableList()
+		}
+	}
+}
+
+@OptIn(ExperimentalMaterial3Api::class) @Composable private fun ServiceOrderDialog(
+	show: Boolean,
+	onDismiss: () -> Unit,
+	serviceViewModel: ServiceViewModel,
+                                                                                  ) {
+	if (!show) return
+	val orderCollection = serviceViewModel.orderCollection
+	
+	LaunchedEffect(Unit) {
+		serviceViewModel.loadOrderCollection()
+	}
+	
+	ModalBottomSheet(onDismissRequest = onDismiss) {
+		Column(modifier = Modifier.fillMaxWidth()) {
+			Text(
+				stringResource(R.string.service_order),
+				style = MaterialTheme.typography.titleMedium,
+				modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+			    )
+			LazyColumn(modifier = Modifier.fillMaxWidth()) {
+				itemsIndexed(orderCollection, key = { _, item -> item.getIntValue("id") }) { index, item ->
+					ListItem(
+						overlineContent = {
+							Text(
+								item.getString("name", ""),
+								maxLines = 1,
+								overflow = TextOverflow.Ellipsis,
+								style = MaterialTheme.typography.titleMedium,
+							    )
+						},
+						leadingContent = {
+							Row {
+								IconButton(
+									onClick = {
+										if (index > 0) serviceViewModel.moveOrderCollection(index, index - 1)
+									},
+									enabled = index > 0,
+								          ) {
+									Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = null)
 								}
-								.observeOn(AndroidSchedulers.mainThread())
-								.subscribe { d: MutableList<JSONObject> ->
-					                serviceFragmentCollectionAdapter.set(d)
-				                })
-			searchView.editText.addTextChangedListener(object : TextWatcher {
-				override fun beforeTextChanged(s: CharSequence?,
-				                               start: Int,
-				                               count: Int,
-				                               after: Int) {
+								IconButton(
+									onClick = {
+										if (index < orderCollection.lastIndex) serviceViewModel.moveOrderCollection(index, index + 1)
+									},
+									enabled = index < orderCollection.lastIndex,
+								          ) {
+									Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = null)
+								}
+							}
+						},
+						modifier = Modifier.animateItem(),
+					        ) {}
 				}
-				
-				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-					objectPublishSubject.onNext("$s")
-				}
-				
-				override fun afterTextChanged(s: Editable?) {
-				}
-			})
-			searchView.setupWithSearchBar(searchBar)
+			}
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(end = 24.dp, bottom = 24.dp),
+				horizontalArrangement = Arrangement.End,
+			   ) {
+				TextButton(onClick = {
+					serviceViewModel.saveOrderCollection()
+					onDismiss()
+				}) { Text(stringResource(R.string.confirm)) }
+			}
 		}
 	}
-	
-	fun getItemIntent(item: JSONObject, intent: Intent?): Intent? =
-		if (item.containsKey("activity")) Intent(requireContext(), Class.forName(
-			requireContext().packageName + item.getString("activity"))).takeIf {
-			it.resolveActivity(requireContext().packageManager) != null
-		} ?: intent
-		else if (item.containsKey("url")) Intent(requireContext(),
-		                                         BrowserActivity::class.java).setData(
-			CommonUtil.trim(item.getString("url")).toUri())
-		else intent
-	
-	class CollectionAdapter : RecyclerAdapter<JSONObject>() {
-		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object : RecyclerView.ViewHolder(
-				LayoutInflater.from(parent.context).inflate(R.layout.item_sug, parent, false)) {}
+}
+
+@Composable fun LongClickableElevatedAssistChip(
+	modifier: Modifier = Modifier,
+	label: String? = null,
+	onClick: () -> Unit = {},
+	onLongClick: () -> Unit = {},
+	leadingIcon: (@Composable () -> Unit)? = null,
+	colors: ChipColors = AssistChipDefaults.elevatedAssistChipColors(),
+	elevation: ChipElevation = AssistChipDefaults.elevatedAssistChipElevation(),
+	enabled: Boolean = true,
+	content: @Composable RowScope.() -> Unit = {},
+                                               ) {
+	Surface(
+		shape = AssistChipDefaults.shape,
+		modifier = modifier.height(AssistChipDefaults.Height),
+		color = if (enabled) colors.containerColor else colors.disabledContainerColor,
+		contentColor = if (enabled) colors.labelColor else colors.disabledLabelColor,
+		shadowElevation = if (enabled) elevation.elevation else elevation.disabledElevation,
+		tonalElevation = if (enabled) elevation.elevation else elevation.disabledElevation,
+	       ) {
+		Row(modifier = Modifier
+			.combinedClickable(
+				interactionSource = remember { MutableInteractionSource() },
+				role = Role.Button,
+				enabled = enabled,
+				onClick = onClick,
+				onLongClick = onLongClick,
+			                  )
+			.padding(AssistChipDefaults.ContentPadding), verticalAlignment = Alignment.CenterVertically) {
+			if (leadingIcon != null) {
+				leadingIcon()
+			}
+			if (label != null && leadingIcon != null) {
+				Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+			}
+			label?.let {
+				Text(text = it, style = MaterialTheme.typography.labelLarge)
+			}
+			content()
 		}
-		
-		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-			(holder.itemView as TextView).text = get(position).getString("name")
-			super.onBindViewHolder(holder, position)
-		}
+	}
+}
+
+@Composable fun GenericTonalButton(
+	image: Int,
+	text: String = "",
+	enable: Boolean = true,
+	onClick: () -> Unit = {},
+                                  ) {
+	FilledTonalButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
+		Icon(painter = painterResource(image), contentDescription = text, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(ButtonDefaults.IconSize))
+		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+		Text(text)
+	}
+}
+
+@Composable fun GenericTonalButton(
+	image: ImageVector,
+	text: String = "",
+	enable: Boolean = true,
+	onClick: () -> Unit = {},
+                                  ) {
+	FilledTonalButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
+		Icon(image, contentDescription = text, modifier = Modifier.size(ButtonDefaults.IconSize))
+		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+		Text(text)
 	}
 }

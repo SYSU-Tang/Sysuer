@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/horizontal_margin"
         android:layout_marginVertical="@dimen/vertical_margin"
-        app:constraint_referenced_ids="guide,collect,feedback,delete,order,add_to_dashboard,add_to_launcher,open_as_url"
+        app:constraint_referenced_ids="collect,delete,order,add_to_dashboard,add_to_launcher,open_as_url,guide,feedback"
         app:flow_horizontalBias="0"
         app:flow_horizontalGap="@dimen/horizontal_gap"
         app:flow_horizontalStyle="packed"

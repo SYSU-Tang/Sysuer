@@ -32,5 +32,5 @@ class CalendarManager {
 		date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 	
 	fun toMillis(date: String?): Long =
-		LocalDate.parse(date).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+		toMillis(LocalDate.parse(date))
 }

@@ -24,14 +24,9 @@ object DateTimeManager {
 	val endOfMonth: LocalDate?
 		get() = today.with(TemporalAdjusters.lastDayOfMonth())
 	
-	fun toDate(millis: Long): LocalDate? =
-		Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
-	
+	fun toDate(millis: Long): LocalDate? = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+	fun toDate(date: String?): LocalDate = LocalDate.parse(date, dateFormatter)
 	fun toMillis(date: LocalDate): Long = toMillis(date.atTime(LocalTime.NOON))
-	fun toMillis(date: LocalDateTime): Long =
-		date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-	
-	fun toMillis(date: String?): Long =
-		LocalDate.parse(date).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-	
+	fun toMillis(date: LocalDateTime): Long = date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+	fun toMillis(date: String?): Long = toMillis(LocalDate.parse(date))
 }

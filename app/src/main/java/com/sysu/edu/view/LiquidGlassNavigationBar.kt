@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
@@ -174,12 +175,7 @@ fun LiquidGlassNavBar(
 ) {
     val itemCount = items.size
     val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
-    val width = when (itemCount) {
-        2 -> 200.dp
-        3 -> 300.dp
-        4 -> 400.dp
-        else -> 450.dp
-    }
+	val width = itemCount * 75.dp.coerceIn(75.dp, 450.dp)
     val barHeight = 64.dp
     val cornerRadius = 36.dp
 

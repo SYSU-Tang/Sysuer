@@ -88,6 +88,7 @@ dependencies {
 	implementation(libs.ui)
 	implementation(libs.ui.graphics)
 	implementation(libs.ui.tooling.preview)
+	implementation(libs.foundation)
 	implementation(libs.material3)
 	implementation(libs.preference)
 	implementation(libs.work.runtime)
