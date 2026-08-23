@@ -864,4 +864,17 @@
 
     <string name="no_outline_found">No outline found</string>
     <string name="enter_leave_type_name">Please enter leave type name</string>
+
+    <string name="recent">Recent</string>
+    <string name="more">More</string>
+    <string name="edit_todo">Edit Todo</string>
+    <string name="no_todo">No Todo</string>
+    <string name="course_date">Course Date</string>
+
+    <string name="dynamic_color">Dynamic Color</string>
+    <string name="dynamic_color_summary">Dynamic color based on wallpaper (Android 12+)</string>
+    <string name="floating_liquid_glass_navigation_bar">Floating Liquid Glass Navigation Bar</string>
+    <string name="floating_liquid_glass_navigation_bar_summary">Floating blur navigation bar</string>
+    <string name="material_navigation_bar_summary">Material navigation bar</string>
+    <string name="navigation_bar">Navigation Bar</string>
 </resources>

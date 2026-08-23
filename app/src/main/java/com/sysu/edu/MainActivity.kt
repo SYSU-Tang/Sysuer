@@ -138,7 +138,7 @@ class MainActivity : BaseActivity() {
 		setContent {
 			MainScreen()
 		}
-		val spm = ViewModelProvider(this)[PreferenceViewModel::class.java]
+//		val spm = ViewModelProvider(this)[PreferenceViewModel::class.java]
 		spm.isFirstLaunch = false
 		spm.isAgreeLiveData.observe(this) { aBoolean ->
 			if (aBoolean) {
@@ -255,7 +255,7 @@ class MainActivity : BaseActivity() {
 									},
 									leadingIcon = {
 										IconButton(onClick = {
-											searchQuery = ""
+											textFieldState.setTextAndPlaceCursorAtEnd("")
 											scope.launch { searchBarState.animateToCollapsed() }
 										}) {
 											Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -266,9 +266,7 @@ class MainActivity : BaseActivity() {
 							colors = appBarWithSearchColors.searchBarColors,
 						                                    ) {
 							ServiceSearchResults(results = searchResults, onResultClick = { item ->
-//								val name = item.getString("name", "")
 								textFieldState.setTextAndPlaceCursorAtEnd("")
-								searchQuery = ""
 								scope.launch { searchBarState.animateToCollapsed() }
 								navigateToServiceItem(item)
 							})
@@ -278,7 +276,7 @@ class MainActivity : BaseActivity() {
 			},
 			pageContent = { page ->
 				when (page) {
-					0 -> DashboardScreen(dashboardViewModel, homeViewModel, spm, todoManager)
+					0 -> DashboardScreen(dashboardViewModel, homeViewModel, spm, todoManager, settingManager)
 					1 -> ServiceScreen(homeViewModel, serviceViewModel, searchQuery)
 					2 -> AccountScreen { recreate() }
 				}
@@ -421,33 +419,29 @@ class MainActivity : BaseActivity() {
 	results: List<JSONObject>,
 	onResultClick: (JSONObject) -> Unit,
                                             ) {
-	if (results.isEmpty()) {
-		Text(
-			text = stringResource(R.string.search),
-			modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
-			style = MaterialTheme.typography.bodyMedium,
-		    )
-	}
-	else {
-		LazyColumn(modifier = Modifier.fillMaxSize()) {
-			items(results, key = { it.getIntValue("id") }) { item ->
-				ListItem(
-					overlineContent = {
-						Text(
-							item.getString("name", ""),
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-							style = MaterialTheme.typography.titleMedium,
-						    )
-					},
-					modifier = Modifier.clickable(onClick = { onResultClick(item) }),
-				        ) {
+	if (results.isEmpty()) Text(
+		text = stringResource(R.string.search),
+		modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+		style = MaterialTheme.typography.bodyMedium,
+                           )
+	else LazyColumn(modifier = Modifier.fillMaxSize()) {
+		items(results, key = { it.getIntValue("id") }) { item ->
+			ListItem(
+				overlineContent = {
 					Text(
-						item.getString("description", ""),
+						item.getString("name", ""),
+						maxLines = 1,
 						overflow = TextOverflow.Ellipsis,
-						style = MaterialTheme.typography.bodySmall,
+						style = MaterialTheme.typography.titleMedium,
 					    )
-				}
+				},
+				modifier = Modifier.clickable(onClick = { onResultClick(item) }),
+			        ) {
+				Text(
+					item.getString("description", ""),
+					overflow = TextOverflow.Ellipsis,
+					style = MaterialTheme.typography.bodySmall,
+				    )
 			}
 		}
 	}

@@ -30,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.PrimaryTabRow
@@ -88,33 +87,42 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	})
 	val coroutineScope = rememberCoroutineScope()
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-	val supportsBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 	val settingManager = SettingManager(LocalContext.current)
+	val supportsBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && settingManager.isBlurNavigationBar
 	var isNavBarVisible by remember { mutableStateOf(true) }
-	val navBarScrollConnection = remember {
-		object : NestedScrollConnection {
-			override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-				if (available.y < -1) isNavBarVisible = false
-				else if (available.y > 1) isNavBarVisible = true
-				return Offset.Zero
-			}
-		}
-	}
+//	val navBarScrollConnection = remember {
+//		object : NestedScrollConnection {
+//			override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+//				if (available.y < -1) isNavBarVisible = false
+//				else if (available.y > 1) isNavBarVisible = true
+//				return Offset.Zero
+//			}
+//		}
+//	}
 	LaunchedEffect(pagerState.currentPage) {
 		onPageChange?.invoke(pagerState.currentPage)
 	}
 	
-	SysuerTheme {
+	SysuerTheme (settingManager = settingManager) {
 		val surface = MaterialTheme.colorScheme.surface
 		val backdrop = rememberLayerBackdrop {
 			drawRect(surface)
 			drawContent()
 		}
+		val nestedScrollConnection = remember {
+			object : NestedScrollConnection {
+				override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+					if (available.y < -1) isNavBarVisible = false
+				else if (available.y > 1) isNavBarVisible = true
+					return Offset.Zero
+				}
+			}
+		}
 		Scaffold(
 			modifier = Modifier
 				.fillMaxSize()
 				.nestedScroll(scrollBehavior.nestedScrollConnection)
-				.nestedScroll(navBarScrollConnection),
+				.nestedScroll(nestedScrollConnection),
 			topBar = {
 				val backgroundColor = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceContainer, scrollBehavior.state.overlappedFraction)
 //				val topBackdrop = rememberLayerBackdrop {
@@ -185,7 +193,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 							enter = slideInVertically(initialOffsetY = { it }),
 							exit = slideOutVertically(targetOffsetY = { it })
 						) {
-							NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+							NavigationBar {
 								navs.forEachIndexed { index, navItem ->
 									NavigationBarItem(selected = pagerState.currentPage == index, label = { Text(text = navItem.title ?: "") }, onClick = {
 										coroutineScope.launch {

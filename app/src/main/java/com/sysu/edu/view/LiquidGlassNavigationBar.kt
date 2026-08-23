@@ -310,8 +310,8 @@ fun LiquidGlassNavBar(
                 items.forEachIndexed { index, item ->
                     val selected = 1f - abs(pageOffset - index).coerceIn(0f, 1f)
                     val tint = lerp(
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.618f),
-                        MaterialTheme.colorScheme.onSurface,
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                        MaterialTheme.colorScheme.primary,
                         selected
                     )
                     Column(

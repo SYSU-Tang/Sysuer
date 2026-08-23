@@ -4,6 +4,11 @@ import android.app.PendingIntent
 import android.content.ClipData
 import android.content.Intent
 import android.text.TextUtils
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -127,6 +132,7 @@ import com.sysu.edu.academic.ExamActivity
 import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.ContextUtil
 import com.sysu.edu.api.PreferenceViewModel
+import com.sysu.edu.api.SettingManager
 import com.sysu.edu.api.TodoManager
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.todo.TodoActivity
@@ -139,6 +145,7 @@ import kotlinx.coroutines.launch
 	homeViewModel: HomeViewModel,
 	spm: PreferenceViewModel,
 	todoManager: TodoManager,
+	settingManager: SettingManager,
                                         ) {
 	val context = LocalContext.current
 	val activity = remember { context as FragmentActivity }
@@ -155,8 +162,8 @@ import kotlinx.coroutines.launch
 	val term by dashboardViewModel.term.collectAsStateWithLifecycle()
 	val finalExamWeek by dashboardViewModel.finalExamWeek.collectAsStateWithLifecycle()
 	val navigateToCourseDetail by dashboardViewModel.navigateToCourseDetail.collectAsStateWithLifecycle()
-	var showToday by rememberSaveable { mutableStateOf(dashboardViewModel.isShowToday.value) }
-	var showWeek18 by rememberSaveable { mutableStateOf(dashboardViewModel.isShowWeek18.value) }
+//	val showToday by dashboardViewModel.isShowToday.collectAsStateWithLifecycle()
+	val showWeek18 by dashboardViewModel.isShowWeek18.collectAsStateWithLifecycle()
 	val todayCourses = dashboardViewModel.todayCourses
 	val tomorrowCourses = dashboardViewModel.tomorrowCourses
 	val week18Exams = dashboardViewModel.week18Exams
@@ -217,7 +224,7 @@ import kotlinx.coroutines.launch
 			LaunchedEffect(Unit) {
 				dashboardViewModel.getTodayCourses()
 			}
-			CourseSection(todayCourses = todayCourses, tomorrowCourses = tomorrowCourses, showToday = showToday, nextClassIndex = nextClassIndex, onToggle = { showToday = it; dashboardViewModel.setShowToday(it) }, onCourseClick = { json ->
+			CourseSection(todayCourses = todayCourses, tomorrowCourses = tomorrowCourses, showDate = settingManager.courseDate, nextClassIndex = nextClassIndex, onCourseClick = { json ->
 				context.startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code", json.getString("courseNum")).putExtra("class", json.getString("classesNum")),
 				                      ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
 			}, onCourseLongClick = { json, key ->
@@ -241,7 +248,7 @@ import kotlinx.coroutines.launch
 				}
 			}
 			
-			ExamSection(week18Exams = week18Exams, week19Exams = week19Exams, showWeek18 = showWeek18, todayExamIndex = todayExamIndex, onToggle = { showWeek18 = it; dashboardViewModel.setShowWeek18(it) }, onExamClick = { json ->
+			ExamSection(week18Exams = week18Exams, week19Exams = week19Exams, showWeek18 = showWeek18, todayExamIndex = todayExamIndex, onToggle = { dashboardViewModel.setShowWeek18(it) }, onExamClick = { json ->
 				dashboardViewModel.getSelectedCourses(json.getString("examSubjectName"))
 			}, onExamLongClick = { text ->
 				coroutineScope.launch {
@@ -283,7 +290,7 @@ import kotlinx.coroutines.launch
 				itemsIndexed(shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
 					val shortcut = remember(entity.shortcutId) { JSONObject.parse(entity.shortcutJson ?: "") }
 					val name = shortcut.getString("name") ?: ""
-					ListItem(overlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) }, leadingContent = {
+					ListItem(overlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium) }, leadingContent = {
 						Row {
 							IconButton(onClick = {
 								if (index > 0) dashboardViewModel.moveOrderShortcut(index, index - 1)
@@ -498,16 +505,12 @@ import kotlinx.coroutines.launch
 	onNextClassClick: () -> Unit,
 	onTimeCardClick: () -> Unit,
                                        ) {
-	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_padding))) {
-		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1f), onClick = onNextClassClick) {
-			if (nextClassMarkdown.isNotEmpty()) {
-				Markdown(rememberMarkdownState(nextClassMarkdown), colors = markdownColor(), typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized), modifier = Modifier.padding(12.dp))
-			}
+	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
+		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1.2f), onClick = onNextClassClick) {
+			if (nextClassMarkdown.isNotEmpty()) Markdown(rememberMarkdownState(nextClassMarkdown), colors = markdownColor(text = MaterialTheme.colorScheme.primary),  typography = markdownTypography(h6 = MaterialTheme.typography.titleLargeEmphasized), modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding),dimensionResource(R.dimen.vertical_padding)))
 		}
 		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1f), onClick = onTimeCardClick) {
-			Column(modifier = Modifier.padding(dimensionResource(R.dimen.content_padding))) {
-				Text(text = dateText, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-			}
+			if (nextClassMarkdown.isNotEmpty()) Markdown(rememberMarkdownState(dateText), colors = markdownColor(text = MaterialTheme.colorScheme.primary),  typography = markdownTypography(h6 = MaterialTheme.typography.titleLargeEmphasized), modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding),dimensionResource(R.dimen.vertical_padding)))
 		}
 	}
 }
@@ -515,20 +518,16 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class) @Composable private fun CourseSection(
 	todayCourses: SnapshotStateList<JSONObject>,
 	tomorrowCourses: SnapshotStateList<JSONObject>,
-	showToday: Boolean,
+	showDate: Int,
 	nextClassIndex: Int = 0,
-	onToggle: (Boolean) -> Unit,
 	onCourseClick: (JSONObject) -> Unit,
 	onCourseLongClick: (JSONObject, String) -> Unit,
 	activity: FragmentActivity,
                                                                               ) {
 	val context = LocalContext.current
-	var courses = if (showToday) todayCourses else tomorrowCourses
-	var selectedIndex by remember { mutableIntStateOf(0) }
-	LaunchedEffect(selectedIndex) {
-		onToggle(selectedIndex == 0)
-		courses = if (selectedIndex == 0) todayCourses else tomorrowCourses
-	}
+	var selectedIndex by rememberSaveable { mutableIntStateOf(showDate) }
+	val courses = if (selectedIndex == 0) todayCourses else tomorrowCourses
+
 	Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
 		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) {
 			context.startActivity(Intent(context, CourseScheduleActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
@@ -549,16 +548,18 @@ import kotlinx.coroutines.launch
 	}
 	
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-		if (courses.isEmpty()) Text(text = stringResource(R.string.noClass),
-		                            style = MaterialTheme.typography.titleLargeEmphasized,
-		                            modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
-		else Row(modifier = Modifier
-			.fillMaxWidth()
-			.height(IntrinsicSize.Max)
-			.horizontalScroll(rememberScrollState(nextClassIndex)), verticalAlignment = Alignment.CenterVertically) {
-			courses.forEachIndexed { index, item ->
-				if (index > 0) VerticalDivider()
-				CourseItem(item = item, onClick = { onCourseClick(item) }, onLongClick = { key -> onCourseLongClick(item, key) })
+		Crossfade(targetState = courses, label = "courseTab") { list ->
+			if (list.isEmpty()) Text(text = stringResource(R.string.noClass),
+			                         style = MaterialTheme.typography.bodyLarge,
+			                         modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
+			else Row(modifier = Modifier
+				.fillMaxWidth()
+				.height(IntrinsicSize.Max)
+				.horizontalScroll(rememberScrollState(nextClassIndex)), verticalAlignment = Alignment.CenterVertically) {
+				list.forEachIndexed { index, item ->
+					if (index > 0) VerticalDivider()
+					CourseItem(item = item, onClick = { onCourseClick(item) }, onLongClick = { key -> onCourseLongClick(item, key) })
+				}
 			}
 		}
 	}
@@ -585,8 +586,7 @@ import kotlinx.coroutines.launch
 		.alpha(alpha)) {
 		Column(modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
 			Spacer(modifier = Modifier.height(4.dp))
-			Text(text = item.getString("courseName", ""), style = if (isBefore) MaterialTheme.typography.titleMedium
-			else MaterialTheme.typography.titleMediumEmphasized, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier
+			Text(text = item.getString("courseName", ""), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier
 				.fillMaxWidth()
 				.align(Alignment.CenterHorizontally))
 			listOf("teachingPlace", "time", "teacherName", "course").zip(listOf(Icons.Rounded.LocationOn, Icons.Rounded.Timer, Icons.Rounded.AccountCircle, Icons.Rounded.CalendarMonth)).forEach { (key, icon) ->
@@ -601,7 +601,7 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@Composable private fun ExamSection(
+@OptIn(ExperimentalAnimationApi::class) @Composable private fun ExamSection(
 	week18Exams: SnapshotStateList<JSONObject>,
 	week19Exams: SnapshotStateList<JSONObject>,
 	showWeek18: Boolean,
@@ -611,7 +611,7 @@ import kotlinx.coroutines.launch
 	onExamLongClick: (String) -> Unit,
 	activity: FragmentActivity,
 	coroutineScope: CoroutineScope,
-                                   ) {
+                                                                           ) {
 	val context = LocalContext.current
 	val exams = if (showWeek18) week18Exams else week19Exams
 	var selectedIndex by remember { mutableIntStateOf(if (showWeek18) 0 else 1) }
@@ -638,15 +638,14 @@ import kotlinx.coroutines.launch
 	}
 	
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-		if (exams.isEmpty()) Text(text = stringResource(R.string.noExam), style = MaterialTheme.typography.titleLargeEmphasized, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
-		else {
-			Row(modifier = Modifier
-				.fillMaxWidth()
-				.height(IntrinsicSize.Max)
-				.horizontalScroll(rememberScrollState(todayExamIndex)), verticalAlignment = Alignment.CenterVertically) {
-				exams.forEachIndexed { index, exam ->
-					if (index > 0) VerticalDivider()
-					ExamItem(exam = exam, onClick = { onExamClick(exam) }, onLongClick = { text -> onExamLongClick(text) }, coroutineScope = coroutineScope)
+		AnimatedContent(targetState = exams, transitionSpec = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) togetherWith slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) }, label = "examTab") { list ->
+			if (list.isEmpty()) Text(text = stringResource(R.string.noExam), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
+			else {
+				Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max).horizontalScroll(rememberScrollState(todayExamIndex)), verticalAlignment = Alignment.CenterVertically) {
+					exams.forEachIndexed { index, exam ->
+						if (index > 0) VerticalDivider()
+						ExamItem(exam = exam, onClick = { onExamClick(exam) }, onLongClick = { text -> onExamLongClick(text) }, coroutineScope = coroutineScope)
+					}
 				}
 			}
 		}
@@ -657,7 +656,7 @@ import kotlinx.coroutines.launch
 	exam: JSONObject,
 	onClick: () -> Unit,
 	onLongClick: (String) -> Unit,
-	coroutineScope: kotlinx.coroutines.CoroutineScope,
+	coroutineScope: CoroutineScope,
                                                                          ) {
 	val status = exam.getString("status") ?: "after"
 	val isBefore = status == "before"
@@ -675,8 +674,7 @@ import kotlinx.coroutines.launch
 		.alpha(alpha)) {
 		Column(modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
 			Spacer(modifier = Modifier.height(4.dp))
-			Text(text = exam.getString("examSubjectName", ""), style = if (isBefore) MaterialTheme.typography.titleMedium
-			else MaterialTheme.typography.titleMediumEmphasized, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier
+			Text(text = exam.getString("examSubjectName", ""), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier
 				.fillMaxWidth()
 				.align(Alignment.CenterHorizontally))
 			val examDate = exam.getString("examDate", "")
@@ -722,7 +720,7 @@ import kotlinx.coroutines.launch
 	
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
 		if (todoList.isEmpty()) Text(text = stringResource(R.string.no_todo),
-		                             style = MaterialTheme.typography.titleLargeEmphasized,
+		                             style = MaterialTheme.typography.bodyLarge,
 		                             modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin)))
 		todoManager.TodoListScreen(todoList = todoList, addTrigger = addTrigger)
 	}
@@ -735,7 +733,7 @@ import kotlinx.coroutines.launch
 	onClick: () -> Unit = {},
                              ) {
 	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
-		Icon(icon, contentDescription = text, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(ButtonDefaults.IconSize))
+		Icon(icon, contentDescription = text, modifier = Modifier.size(ButtonDefaults.IconSize))
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(text)
 	}
@@ -748,7 +746,7 @@ import kotlinx.coroutines.launch
 	onClick: () -> Unit = {},
                              ) {
 	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
-		Icon(painter = painterResource(image), contentDescription = text, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(ButtonDefaults.IconSize))
+		Icon(painter = painterResource(image), contentDescription = text, modifier = Modifier.size(ButtonDefaults.IconSize))
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(text)
 	}
@@ -767,7 +765,7 @@ import kotlinx.coroutines.launch
 	   ) {
 		Icon(painter = painterResource(image), contentDescription = text, tint = MaterialTheme.colorScheme.primary)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-		Text(text, style = MaterialTheme.typography.titleMediumEmphasized)
+		Text(text, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
 	}
 }
 
@@ -784,7 +782,7 @@ import kotlinx.coroutines.launch
 	   ) {
 		Icon(image, contentDescription = text, tint = MaterialTheme.colorScheme.primary)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-		Text(text, style = MaterialTheme.typography.titleMediumEmphasized)
+		Text(text, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
 	}
 }
 

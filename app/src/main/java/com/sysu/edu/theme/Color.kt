@@ -2,8 +2,13 @@ package com.sysu.edu.theme
 
 import androidx.compose.ui.graphics.Color
 
-val SysuGreen: Color = Color(0xFF005826)
-val SysuRed: Color = Color(0xFF740003)
+val SysuGreenPrimary: Color = Color(0xFF005826)
+val SysuGreenSecondary: Color = Color(0xFF0b655f)
+val SysuGreenTertiary: Color = Color(0xFF004e8a)
+
+val SysuRedPrimary: Color = Color(0xFFEF5350)
+val SysuRedSecondary: Color = Color(0xFFd0822f)
+val SysuRedTertiary: Color = Color(0xFFe8eb2d)
 
 val Purple80: Color = Color(0xFFD0BCFF)
 val PurpleGrey80: Color = Color(0xFFCCC2DC)

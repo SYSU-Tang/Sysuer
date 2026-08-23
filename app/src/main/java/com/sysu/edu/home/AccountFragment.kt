@@ -63,7 +63,7 @@ import com.sysu.edu.extra.UpdateActivity
 			},*/ trailingContent = {
 			Icon(imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos, contentDescription = stringResource(R.string.forward), modifier = Modifier.size(20.dp))
 		}) {
-			Text(stringResource(key), style = MaterialTheme.typography.bodyLargeEmphasized)
+			Text(stringResource(key), style = MaterialTheme.typography.bodyLarge)
 		}
 	}
 	Column(modifier = Modifier
@@ -72,9 +72,12 @@ import com.sysu.edu.extra.UpdateActivity
 		.verticalScroll(rememberScrollState())
 		.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin)),
 	       verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap))) {
-		Text(text = stringResource(R.string.account), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_gap), dimensionResource(R.dimen.vertical_gap)))
+		Text(text = stringResource(R.string.account),
+		     style = MaterialTheme.typography.titleSmall,
+		     color = MaterialTheme.colorScheme.primary,
+		     modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_gap), dimensionResource(R.dimen.vertical_gap)))
 		JumpPreference(R.string.privacy, R.drawable.account, activity = PrivacyActivity::class.java)
-		Text(text = stringResource(R.string.app), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_gap), dimensionResource(R.dimen.vertical_gap)))
+		Text(text = stringResource(R.string.app), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_gap), dimensionResource(R.dimen.vertical_gap)))
 		JumpPreference(R.string.setting, R.drawable.setting, 0, 4) {
 			settingLauncher.launch(Intent(context, SettingActivity::class.java))
 		}

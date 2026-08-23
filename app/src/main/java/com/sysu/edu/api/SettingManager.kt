@@ -1,15 +1,17 @@
 package com.sysu.edu.api
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceManager
+import kotlin.concurrent.Volatile
 
-class SettingManager(val context: Context) {
+class SettingManager(context: Context) {
+	val context: Context = context.applicationContext
 	val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-	
 	init {
 		if (defaultFontSize == 0.0f) defaultFontSize = context.resources.configuration.fontScale
 	}
@@ -46,9 +48,17 @@ class SettingManager(val context: Context) {
 	* */
 	fun getTheme(): Int = preferences.getString("theme", "2")?.toInt() ?: 2
 	val isDarkTheme: Boolean = getTheme() == 1 || (getTheme() == 2 && AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES)
-	
+	val isDynamicColor: Boolean = preferences.getBoolean("dynamic_color", true)
+	val isBlurNavigationBar: Boolean = preferences.getBoolean("navigation_bar", true)
 	companion object {
 		@JvmStatic var defaultFontSize: Float = 0.0f
+		@SuppressLint("StaticFieldLeak")
+		@Volatile
+		private var INSTANCE: SettingManager? = null
+		fun getInstance(context: Context): SettingManager =
+			INSTANCE ?: synchronized(SettingManager::class.java) {
+				INSTANCE ?: SettingManager(context).also { INSTANCE = it }
+			}
 	}
 	
 	fun setFontSize(fontSize: Float): Context {
@@ -87,5 +97,13 @@ class SettingManager(val context: Context) {
 		set(value) {
 			field = value
 			preferences.edit { putString("qrcode", value) }
+		}
+	var courseDate: Int = 0
+		get() {
+			return preferences.getString("course_date", "0")?.toInt() ?: 0
+		}
+		set(value) {
+			field = value
+			preferences.edit { putString("course_date", "$value") }
 		}
 }

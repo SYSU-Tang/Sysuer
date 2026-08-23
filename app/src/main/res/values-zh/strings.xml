@@ -862,4 +862,18 @@
 
     <string name="no_outline_found">未查询到大纲</string>
     <string name="enter_leave_type_name">请输入请假类型名称</string>
+
+
+    <string name="recent">最近</string>
+    <string name="more">更多</string>
+    <string name="edit_todo">编辑待办</string>
+    <string name="no_todo">没有待办</string>
+    <string name="course_date">课程时间</string>
+
+    <string name="dynamic_color">动态取色</string>
+    <string name="dynamic_color_summary">根据壁纸取色（Android12+）</string>
+    <string name="floating_liquid_glass_navigation_bar">底部浮动导航栏</string>
+    <string name="floating_liquid_glass_navigation_bar_summary">底部浮动模糊材质导航栏</string>
+    <string name="material_navigation_bar_summary">底部质感材质导航栏</string>
+    <string name="navigation_bar">导航栏</string>
 </resources>

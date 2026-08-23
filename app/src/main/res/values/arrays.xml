@@ -286,4 +286,8 @@
         <item>document-idle</item>
         <item>manual</item>
     </string-array>
+    <string-array name="course_date">
+        <item>@string/today</item>
+        <item>@string/recent</item>
+    </string-array>
 </resources>

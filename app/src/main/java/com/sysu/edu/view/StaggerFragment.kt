@@ -19,6 +19,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
 import com.sysu.edu.academic.MarkdownViewActivity
+import com.sysu.edu.api.SettingManager
 import com.sysu.edu.theme.SysuerTheme
 
 open class StaggerFragment : BaseFragment() {
@@ -39,7 +40,7 @@ open class StaggerFragment : BaseFragment() {
 		super.onCreateView(inflater, container, savedInstanceState)
 		return ComposeView(requireContext()).apply {
 			setContent {
-				SysuerTheme {
+				SysuerTheme(settingManager = SettingManager.getInstance(requireContext())) {
 					StaggerScreen()
 				}
 			}

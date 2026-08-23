@@ -80,7 +80,7 @@ class PayActivity : BaseActivity() {
 		val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 		
 		setContent {
-			SysuerTheme {
+			SysuerTheme(settingManager = settingManager) {
 			val toPayList by viewModel.toPayList.observeAsState(JSONArray())
 			val selectivePayList by viewModel.selectivePayList.observeAsState(JSONArray())
 			val feeList by viewModel.feeList.observeAsState(JSONArray())

@@ -5,9 +5,22 @@
             app:defaultValue="2"
             app:entries="@array/theme"
             app:entryValues="@array/values_3"
-            app:icon="@drawable/theme"
+            app:icon="@drawable/light"
             app:key="theme"
             app:title="@string/theme" />
+        <rikka.material.preference.MaterialSwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/palette"
+            app:key="dynamic_color"
+            app:summary="@string/dynamic_color_summary"
+            app:title="@string/dynamic_color" />
+        <rikka.material.preference.MaterialSwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/navigation_bar"
+            app:key="navigation_bar"
+            app:summaryOff="@string/material_navigation_bar_summary"
+            app:summaryOn="@string/floating_liquid_glass_navigation_bar_summary"
+            app:title="@string/navigation_bar" />
         <com.sysu.edu.preference.MenuPreference
             app:defaultValue="2"
             app:entries="@array/theme"
@@ -43,7 +56,6 @@
             app:icon="@drawable/qrcode"
             app:key="qrcode"
             app:title="@string/qrcode" />
-
         <com.sysu.edu.preference.MutiListPreference
             app:defaultValue="@array/values_6"
             app:entries="@array/dashboard"
@@ -53,6 +65,15 @@
             app:positiveButtonText="@string/confirm"
             app:summary="@string/custom"
             app:title="@string/dashboard" />
+        <rikka.preference.SimpleMenuPreference
+            app:defaultValue="0"
+            app:entries="@array/course_date"
+            app:entryValues="@array/values_2"
+            app:icon="@drawable/calendar"
+            app:key="course_date"
+            app:summary="@string/today"
+            app:title="@string/course_date"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
     <!--<PreferenceCategory app:title="@string/login">
         <com.sysu.edu.preference.MenuPreference
@@ -105,9 +126,9 @@
         <Preference
             app:icon="@drawable/developer"
             app:isPreferenceVisible="false"
-            app:persistent="false"
             app:key="developer_mode"
-            app:title="@string/developer_mode" >
+            app:persistent="false"
+            app:title="@string/developer_mode">
             <intent
                 android:targetClass="com.sysu.edu.extra.DeveloperActivity"
                 android:targetPackage="com.sysu.edu" />

@@ -96,7 +96,7 @@ data class SectionData(
 					Icon(painter = painterResource(id = it), contentDescription = null, modifier = Modifier.size(dimensionResource(R.dimen.icon_size)), tint = MaterialTheme.colorScheme.primary)
 					Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 				}
-				section.title?.let { Text(text = it, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f)) }
+				section.title?.let { Text(text = it, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f)) }
 				if (isExpandable) {
 					val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "ExpandIconRotation")
 					Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = if (expanded) "折叠" else "展开", modifier = Modifier.rotate(rotation))
@@ -156,22 +156,22 @@ data class SectionData(
 	if (orientation == RowOrientation.Horizontal) {
 		Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
 			SelectionContainer {
-				Text(text = row.key ?: "", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+				Text(text = row.key ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
 			}
 			if (row.value != null && row.key != null) Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
 			SelectionContainer {
-				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary)
+				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary)
 			}
 		}
 	}
 	else {
 		Column(modifier = modifier) {
 			SelectionContainer {
-				Text(text = row.key ?: "", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+				Text(text = row.key ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
 			}
 			if (row.value != null && row.key != null) Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
 			SelectionContainer {
-				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth())
+				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth())
 			}
 		}
 	}
