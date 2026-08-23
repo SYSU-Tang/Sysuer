@@ -58,17 +58,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.net.toUri
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.DataStoreManager
 import com.sysu.edu.api.DateTimeManager
 import com.sysu.edu.api.FileManager
 import com.sysu.edu.browser.BrowserActivity
-import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.MenuItem
 import com.sysu.edu.view.RowOrientation
@@ -76,10 +73,9 @@ import com.sysu.edu.view.SectionCard
 import com.sysu.edu.view.SectionData
 import com.sysu.edu.view.StaggerScreen
 import com.sysu.edu.view.WarningCard
-import com.sysu.edu.view.toMarkdown
+import com.sysu.edu.view.exportMarkdownMenuItem
 
-@OptIn(ExperimentalMaterial3Api::class)
-class LeaveSlipActivity : BaseActivity() {
+@OptIn(ExperimentalMaterial3Api::class) class LeaveSlipActivity : BaseActivity() {
 	private val viewModel: LeaveSlipViewModel by viewModels()
 	private val fileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
 		if (result?.resultCode == RESULT_OK) {
@@ -113,30 +109,27 @@ class LeaveSlipActivity : BaseActivity() {
 			ActivityPager(title = stringResource(R.string.leave_slip), floatingActionButton = {
 				if (apply) {
 					Column(modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
-						ExtendedFloatingActionButton(expanded = fabExpanded, onClick = { viewModel.reset() }, text = { Text(stringResource(R.string.reset)) }, icon = { Icon(imageVector = Icons.Rounded.Refresh, contentDescription = stringResource(R.string.reset)) })
+						ExtendedFloatingActionButton(expanded = fabExpanded,
+						                             onClick = { viewModel.reset() },
+						                             text = { Text(stringResource(R.string.reset)) },
+						                             icon = { Icon(imageVector = Icons.Rounded.Refresh, contentDescription = stringResource(R.string.reset)) })
 						ExtendedFloatingActionButton(expanded = fabExpanded, onClick = {
 							viewModel.submitLeaveSlip()
 						}, icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.submit)) }, text = { Text(stringResource(R.string.submit)) })
 					}
 				}
 				else {
-					ExtendedFloatingActionButton(expanded = fabExpanded, onClick = {
-						viewModel.resetSubmitSuccess()
-						apply = true
-					},
+					ExtendedFloatingActionButton(expanded = fabExpanded,
+					                             onClick = {
+						                             viewModel.resetSubmitSuccess()
+						                             apply = true
+					                             },
 					                             modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
 					                             icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.ask_for_leave)) },
 					                             text = { Text(stringResource(R.string.ask_for_leave)) })
 				}
-			}, onNavigationClick = { if (apply) apply = false else supportFinishAfterTransition() }, isNestedScrollEnabled = false, actions = {
-				IconButton(onClick = {
-					val markdown = viewModel.sections.toMarkdown()
-					DataStoreManager.saveContent(this@LeaveSlipActivity, getString(R.string.result), markdown) {
-						startActivity(Intent(this@LeaveSlipActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.result)))
-					}
-				}) {
-					Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
-				}
+			}, onNavigationClick = { if (apply) apply = false else supportFinishAfterTransition() }, isNestedScrollEnabled = false, topBarMenus = {
+				listOf(exportMarkdownMenuItem(viewModel.sections, stringResource(R.string.leave_slip), stringResource(R.string.leave_slip)))
 			}) {
 				if (apply) ApplyPage(viewModel, onUpload = {
 					val intent = Intent(Intent.ACTION_GET_CONTENT).apply {

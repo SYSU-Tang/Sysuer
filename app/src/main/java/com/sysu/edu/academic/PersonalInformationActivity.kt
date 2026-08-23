@@ -1,31 +1,25 @@
 package com.sysu.edu.academic
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.toStringOrDefault
-import com.sysu.edu.api.DataStoreManager
-import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.MenuItem
 import com.sysu.edu.view.RowData
 import com.sysu.edu.view.SectionData
 import com.sysu.edu.view.StaggerScreen
-import com.sysu.edu.view.toMarkdown
+import com.sysu.edu.view.exportMarkdownMenuItem
 
 class PersonalInformationActivity : BaseActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,16 +82,9 @@ class PersonalInformationActivity : BaseActivity() {
 					sections
 				}
 			}
-			
-			ActivityPager(title = stringResource(R.string.personal_info), tabs = tabTitles.map { MenuItem(it) }, actions = {
-				IconButton(onClick = {
-					val markdown = allSections.joinToString("\n\n") { it.toMarkdown() }
-					DataStoreManager.saveContent(this@PersonalInformationActivity, getString(R.string.personal_info), markdown) {
-						startActivity(Intent(this@PersonalInformationActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.personal_info)))
-					}
-				}) {
-					Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
-				}
+			val tabs = tabTitles.map { MenuItem(it) }
+			ActivityPager(title = stringResource(R.string.personal_info), tabs = tabs, topBarMenus = {
+				listOf(exportMarkdownMenuItem(allSections, tabs, stringResource(R.string.personal_info)))
 			}, onNavigationClick = { supportFinishAfterTransition() }) { page ->
 				allSections.getOrNull(page)?.let { StaggerScreen(it) }
 			}

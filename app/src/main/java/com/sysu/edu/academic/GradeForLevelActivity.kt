@@ -1,6 +1,5 @@
 package com.sysu.edu.academic
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,32 +8,26 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.ViewModelProvider
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.extractValue
-import com.sysu.edu.api.DataStoreManager
-import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.InputDialogChip
 import com.sysu.edu.view.SectionData
 import com.sysu.edu.view.SingleSelectChipDropdown
 import com.sysu.edu.view.StaggerScreen
-import com.sysu.edu.view.toMarkdown
+import com.sysu.edu.view.exportMarkdownMenuItem
 
 class GradeForLevelActivity : BaseActivity() {
 	@OptIn(ExperimentalLayoutApi::class) override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,21 +36,21 @@ class GradeForLevelActivity : BaseActivity() {
 		val viewModel = ViewModelProvider(this)[GradeForLevelViewModel::class.java]
 		
 		setContent {
-			val gradeList by viewModel.gradeList.observeAsState(emptyList())
-			val trainTypeOptions by viewModel.trainTypeOptions.observeAsState(emptyList())
-			val yearOptions by viewModel.yearOptions.observeAsState(emptyList())
-			val courseTypeOptions by viewModel.courseTypeOptions.observeAsState(emptyList())
+			val gradeList = viewModel.gradeList
+			val trainTypeOptions = viewModel.trainTypeOptions
+			val yearOptions = viewModel.yearOptions
+			val courseTypeOptions = viewModel.courseTypeOptions
 			
 			LaunchedEffect(Unit) {
 				viewModel.fetchOptions()
 				viewModel.fetchGrade()
 			}
-			var trainTypeValue by remember { mutableStateOf<String?>(null) }
-			var yearValue by remember { mutableStateOf<String?>(null) }
-			var courseTypeValue by remember { mutableStateOf<String?>(null) }
-			var courseNameValue by remember { mutableStateOf("") }
-			var courseNumberValue by remember { mutableStateOf("") }
-			var minGradeValue by remember { mutableStateOf("") }
+			var trainTypeValue by rememberSaveable { mutableStateOf<String?>(null) }
+			var yearValue by rememberSaveable { mutableStateOf<String?>(null) }
+			var courseTypeValue by rememberSaveable { mutableStateOf<String?>(null) }
+			var courseNameValue by rememberSaveable { mutableStateOf("") }
+			var courseNumberValue by rememberSaveable { mutableStateOf("") }
+			var minGradeValue by rememberSaveable { mutableStateOf("") }
 			fun onFilterChange() {
 				viewModel.trainType = trainTypeValue
 				viewModel.year = yearValue
@@ -68,7 +61,7 @@ class GradeForLevelActivity : BaseActivity() {
 				viewModel.reFetchGrade()
 			}
 			
-			val sections = remember(gradeList) {
+			val sections = rememberSaveable(gradeList) {
 				mutableStateListOf<SectionData>().also { list ->
 					gradeList.forEach { item ->
 						list.add(SectionData(title = item.getString("courseName"),
@@ -108,15 +101,8 @@ class GradeForLevelActivity : BaseActivity() {
 				}
 			}
 			
-			ActivityPager(title = stringResource(R.string.grade_for_level), onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false, actions = {
-				IconButton(onClick = {
-					val markdown = sections.toMarkdown()
-					DataStoreManager.saveContent(this@GradeForLevelActivity, getString(R.string.grade_for_level), markdown) {
-						startActivity(Intent(this@GradeForLevelActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.grade_for_level)))
-					}
-				}) {
-					Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
-				}
+			ActivityPager(title = stringResource(R.string.grade_for_level), onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false, topBarMenus = {
+				listOf(exportMarkdownMenuItem(sections, stringResource(R.string.grade_for_level), stringResource(R.string.grade_for_level)))
 			}, topBarContent = {
 				FlowRow(modifier = Modifier
 					.fillMaxWidth()

@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sysu.edu.R
@@ -93,13 +94,13 @@ data class SectionData(
 				}
 				.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding))) {
 				section.icon?.let {
-					Icon(painter = painterResource(id = it), contentDescription = null, modifier = Modifier.size(dimensionResource(R.dimen.icon_size)), tint = MaterialTheme.colorScheme.primary)
+					Icon(painter = painterResource(it), contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize), tint = MaterialTheme.colorScheme.primary)
 					Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 				}
 				section.title?.let { Text(text = it, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f)) }
 				if (isExpandable) {
 					val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "ExpandIconRotation")
-					Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = if (expanded) "折叠" else "展开", modifier = Modifier.rotate(rotation))
+					Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand), modifier = Modifier.rotate(rotation), tint = MaterialTheme.colorScheme.primary)
 				}
 			}
 			AnimatedVisibility(visible = expanded, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {

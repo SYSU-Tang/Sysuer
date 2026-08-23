@@ -1,5 +1,6 @@
 package com.sysu.edu.view
 
+import android.content.Intent
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -25,11 +26,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.Output
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.PrimaryTabRow
@@ -37,6 +40,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ripple
@@ -47,6 +51,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -64,7 +69,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sysu.edu.R
+import com.sysu.edu.api.DataStoreManager
 import com.sysu.edu.api.SettingManager
+import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.theme.SysuerTheme
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -79,7 +86,8 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	onPageChange: ((Int) -> Unit)? = null,
 	isNestedScrollEnabled: Boolean = true,
 	floatingActionButton: @Composable () -> Unit = {},
-	actions: @Composable RowScope.() -> Unit = {},
+	actions: @Composable (RowScope.() -> Unit)? = null,
+	topBarMenus: @Composable ((Int) -> List<MenuItem>)? = null,
 	pageContent: @Composable (page: Int) -> Unit = {},
                                                                                                        ) {
 	val pagerState = rememberPagerState(pageCount = {
@@ -88,17 +96,17 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	val coroutineScope = rememberCoroutineScope()
 	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 	val settingManager = SettingManager(LocalContext.current)
-	val supportsBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && settingManager.isBlurNavigationBar
+	val blurEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && settingManager.isBlurNavigationBar
 	var isNavBarVisible by remember { mutableStateOf(true) }
-//	val navBarScrollConnection = remember {
-//		object : NestedScrollConnection {
-//			override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-//				if (available.y < -1) isNavBarVisible = false
-//				else if (available.y > 1) isNavBarVisible = true
-//				return Offset.Zero
-//			}
-//		}
-//	}
+	val floatingNavBarScroll = remember {
+		object : NestedScrollConnection {
+			override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+				if (available.y < -1) isNavBarVisible = false
+				else if (available.y > 1) isNavBarVisible = true
+				return Offset.Zero
+			}
+		}
+	}
 	LaunchedEffect(pagerState.currentPage) {
 		onPageChange?.invoke(pagerState.currentPage)
 	}
@@ -109,20 +117,14 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 			drawRect(surface)
 			drawContent()
 		}
-		val nestedScrollConnection = remember {
-			object : NestedScrollConnection {
-				override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-					if (available.y < -1) isNavBarVisible = false
-				else if (available.y > 1) isNavBarVisible = true
-					return Offset.Zero
-				}
-			}
-		}
+		val behavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
+		
 		Scaffold(
 			modifier = Modifier
 				.fillMaxSize()
 				.nestedScroll(scrollBehavior.nestedScrollConnection)
-				.nestedScroll(nestedScrollConnection),
+				.nestedScroll(floatingNavBarScroll)
+				.nestedScroll(behavior.nestedScrollConnection),
 			topBar = {
 				val backgroundColor = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceContainer, scrollBehavior.state.overlappedFraction)
 //				val topBackdrop = rememberLayerBackdrop {
@@ -140,17 +142,35 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 				Surface(color = backgroundColor) {
 					Column{
 						TopAppBar(
-							title = { Text(text = title) },
+							title = { Text(text = title, color = MaterialTheme.colorScheme.primary) },
 							navigationIcon = {
 								if (onNavigationClick != null)
 								IconButton(onClick = onNavigationClick) {
 									Icon(
 										imageVector = Icons.AutoMirrored.Filled.ArrowBack,
 										contentDescription = stringResource(R.string.back),
+										tint = MaterialTheme.colorScheme.primary,
 									    )
 								}
 							},
-							actions = actions,
+							actions = actions ?:
+								topBarMenus?.run {
+									{
+										invoke(pagerState.currentPage).forEach { menu ->
+											menu.icon?.let {
+												IconButton(onClick = { menu.onClick() }) {
+												 Icon(imageVector = it, contentDescription = menu.title, tint = MaterialTheme.colorScheme.primary)
+												}
+											} ?: run{
+												menu.title?.let {
+											TextButton(onClick = { menu.onClick() }) {
+													Text(text = it, color = MaterialTheme.colorScheme.primary) }
+												}
+											}
+											menu.content()
+										}
+									}
+								} ?: {},
 							colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent, scrolledContainerColor = Color.Transparent),
 							scrollBehavior = scrollBehavior,
 						         )
@@ -186,24 +206,16 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 				}
 			},
 			bottomBar = {
-				if (navs.isNotEmpty()) {
-					if (!supportsBlur) {
-						AnimatedVisibility(
-							visible = isNavBarVisible,
-							enter = slideInVertically(initialOffsetY = { it }),
-							exit = slideOutVertically(targetOffsetY = { it })
-						) {
-							NavigationBar {
-								navs.forEachIndexed { index, navItem ->
-									NavigationBarItem(selected = pagerState.currentPage == index, label = { Text(text = navItem.title ?: "") }, onClick = {
-										coroutineScope.launch {
-											pagerState.animateScrollToPage(index)
-										}
-									}, icon = navItem.icon?.let { { Icon(imageVector = it, contentDescription = "") } } ?: {})
-								}
+				if (navs.isNotEmpty() && !blurEnabled) {
+					FlexibleBottomAppBar(scrollBehavior = behavior) {
+							navs.forEachIndexed { index, navItem ->
+								NavigationBarItem(selected = pagerState.currentPage == index, label = { Text(text = navItem.title ?: "") }, onClick = {
+									coroutineScope.launch {
+										pagerState.animateScrollToPage(index)
+									}
+								}, icon = navItem.icon?.let { { Icon(imageVector = it, contentDescription = "") } } ?: {})
 							}
 						}
-					}
 				}
 			},
 			floatingActionButton = floatingActionButton,
@@ -219,7 +231,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 					               ) { page ->
 						pageContent(page)
 					}
-					if (supportsBlur && navs.isNotEmpty()) {
+					if (blurEnabled && navs.isNotEmpty()) {
 						AnimatedVisibility(
 							visible = isNavBarVisible,
 							enter = slideInVertically(initialOffsetY = { it }),
@@ -257,7 +269,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	}
 }
 
-data class MenuItem(val title: String? = null, val icon: ImageVector? = null, val enabled: Boolean = true, val onClick: () -> Boolean = { false })
+data class MenuItem(val title: String? = null, val icon: ImageVector? = null, /*val painter: Painter? = null,*/ val enabled: Boolean = true,val content: @Composable () -> Unit = {},  val onClick: () -> Boolean = { false })
 
 @Composable fun UnboundedTab(
 	selected: Boolean,
@@ -275,5 +287,42 @@ data class MenuItem(val title: String? = null, val icon: ImageVector? = null, va
 			Text(text = it, color = if (selected) MaterialTheme.colorScheme.primary
 			else MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
 		}
+	}
+}
+
+
+
+@Composable fun exportMarkdownMenuItem(sectionData: List<SnapshotStateList<SectionData>>,tabs: List<MenuItem>, name: String): MenuItem {
+	val context = LocalContext.current
+	return MenuItem(title = stringResource(R.string.export), icon = Icons.Rounded.Output){
+		val markdown = StringBuilder()
+		sectionData.zip(tabs).forEach { (section, tab) ->
+			markdown.append("###### ${tab.title}")
+			.append("\n\n")
+			.append(section.toMarkdown())
+			.append("\n\n---\n\n")
+		}
+		DataStoreManager.saveContent(context, name, "$markdown") {
+			context.startActivity(Intent(context, RichTextActivity::class.java)
+				              .putExtra("type", DataStoreManager.ContentType.MARKDOWN.name)
+				              .putExtra("title", name))
+		}
+		true
+	}
+}
+
+@Composable fun exportMarkdownMenuItem(sectionData: SnapshotStateList<SectionData>, tab: String, name: String): MenuItem {
+	val context = LocalContext.current
+	return MenuItem(title = stringResource(R.string.export), icon = Icons.Rounded.Output){
+		val markdown = StringBuilder().append("###### $tab")
+				.append("\n\n")
+				.append(sectionData.toMarkdown())
+				.append("\n\n---\n\n")
+		DataStoreManager.saveContent(context, name, "$markdown") {
+			context.startActivity(Intent(context, RichTextActivity::class.java)
+				                      .putExtra("type", DataStoreManager.ContentType.MARKDOWN.name)
+				                      .putExtra("title", name))
+		}
+		true
 	}
 }

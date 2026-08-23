@@ -1,28 +1,22 @@
 package com.sysu.edu.academic
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.extractValue
-import com.sysu.edu.api.DataStoreManager
-import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.MenuItem
 import com.sysu.edu.view.SectionData
 import com.sysu.edu.view.StaggerScreen
-import com.sysu.edu.view.toMarkdown
+import com.sysu.edu.view.exportMarkdownMenuItem
 
 class SchoolEnrollmentActivity : BaseActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -299,29 +293,19 @@ class SchoolEnrollmentActivity : BaseActivity() {
 					allSections[it + 1].add(SectionData(title = "${index + 1}", rows = extractValue(this@SchoolEnrollmentActivity, item, tabNames[it], tabKeys[it])))
 				}
 			}
-			ActivityPager(title = stringResource(R.string.school_enroll),
-			              tabs = listOf(
-				              MenuItem(stringResource(R.string.school_enrollment_basic_info)),
-				              MenuItem(stringResource(R.string.school_enrollment_family_info)),
-				              MenuItem(stringResource(R.string.school_enrollment_education_info)),
-				              MenuItem(stringResource(R.string.school_enrollment_exchange_info)),
-				              MenuItem(stringResource(R.string.school_enrollment_change_info)),
-				              MenuItem(stringResource(R.string.school_enrollment_major_info)),
-				              MenuItem(stringResource(R.string.school_enrollment_register_info)),
-				              MenuItem(stringResource(R.string.school_enrollment_punish_info)),
-			                           ),
-			              actions = {
-				              IconButton(onClick = {
-					              val markdown = allSections.joinToString("\n\n") { it.toMarkdown() }
-					              DataStoreManager.saveContent(this@SchoolEnrollmentActivity, getString(R.string.school_enroll), markdown) {
-						              startActivity(Intent(this@SchoolEnrollmentActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.school_enroll)))
-					              }
-				              }) {
-					              Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
-				              }
-			              },
-			              onNavigationClick = { supportFinishAfterTransition() },
-			              isNestedScrollEnabled = false) {
+			val tabs = listOf(
+				MenuItem(stringResource(R.string.school_enrollment_basic_info)),
+				MenuItem(stringResource(R.string.school_enrollment_family_info)),
+				MenuItem(stringResource(R.string.school_enrollment_education_info)),
+				MenuItem(stringResource(R.string.school_enrollment_exchange_info)),
+				MenuItem(stringResource(R.string.school_enrollment_change_info)),
+				MenuItem(stringResource(R.string.school_enrollment_major_info)),
+				MenuItem(stringResource(R.string.school_enrollment_register_info)),
+				MenuItem(stringResource(R.string.school_enrollment_punish_info)),
+			                 )
+			ActivityPager(title = stringResource(R.string.school_enroll), tabs = tabs, topBarMenus = {
+				listOf(exportMarkdownMenuItem(allSections.toList(), tabs, stringResource(R.string.school_enroll)))
+			}, onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false) {
 				StaggerScreen(allSections[it])
 			}
 		}

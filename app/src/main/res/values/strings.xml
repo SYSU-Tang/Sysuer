@@ -859,4 +859,5 @@
     <string name="floating_liquid_glass_navigation_bar_summary">底部浮动模糊材质导航栏</string>
     <string name="material_navigation_bar_summary">底部质感材质导航栏</string>
     <string name="navigation_bar">导航栏</string>
+    <string name="collapse">折叠</string>
 </resources>

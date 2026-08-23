@@ -39,8 +39,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -56,22 +54,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.DataStoreManager
-import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.StaggerScreen
-import com.sysu.edu.view.toMarkdown
+import com.sysu.edu.view.exportMarkdownMenuItem
 import kotlin.math.abs
 
 class TrainingProgramActivity : BaseActivity() {
 	private val viewModel: TrainingProgramViewModel by viewModels()
-	
 	@OptIn(ExperimentalSharedTransitionApi::class) override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
@@ -90,17 +84,9 @@ class TrainingProgramActivity : BaseActivity() {
 				ActivityPager(title = if (viewModel.showResults) stringResource(R.string.result) else stringResource(R.string.training_program_query), onNavigationClick = {
 					if (viewModel.showResults) viewModel.navigateBack()
 					else supportFinishAfterTransition()
-				}, isNestedScrollEnabled = false, actions = {
-					if (viewModel.showResults) {
-						IconButton(onClick = {
-							val markdown = viewModel.resultSections.toMarkdown()
-							DataStoreManager.saveContent(this@TrainingProgramActivity, getString(R.string.result), markdown) {
-								startActivity(Intent(this@TrainingProgramActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.result)))
-							}
-						}) {
-							Icon(painter = painterResource(R.drawable.export), contentDescription = stringResource(R.string.export))
-						}
-					}
+				}, isNestedScrollEnabled = false, topBarMenus = {
+					if (viewModel.showResults) listOf(exportMarkdownMenuItem(viewModel.resultSections, stringResource(R.string.training_program_query), stringResource(R.string.training_program_query)))
+					else emptyList()
 				}) {
 					AnimatedContent(targetState = viewModel.showResults, label = "query_to_result", transitionSpec = {
 						fadeIn() togetherWith fadeOut()

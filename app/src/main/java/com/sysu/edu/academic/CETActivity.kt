@@ -1,28 +1,22 @@
 package com.sysu.edu.academic
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.DataStoreManager
-import com.sysu.edu.browser.RichTextActivity
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.RowData
 import com.sysu.edu.view.SectionData
 import com.sysu.edu.view.StaggerScreen
-import com.sysu.edu.view.toMarkdown
+import com.sysu.edu.view.exportMarkdownMenuItem
 
 class CETActivity : BaseActivity() {
 	private val keys = listOf("考试年份",
@@ -110,17 +104,14 @@ class CETActivity : BaseActivity() {
 				}
 				snapshotList
 			}
-			ActivityPager(title = stringResource(R.string.cet), onNavigationClick = { supportFinishAfterTransition() }, actions = {
-				IconButton(onClick = {
-					val markdown = sections.toMarkdown()
-					DataStoreManager.saveContent(this@CETActivity, getString(R.string.cet), markdown) {
-						startActivity(Intent(this@CETActivity, RichTextActivity::class.java).putExtra("type", DataStoreManager.ContentType.MARKDOWN.name).putExtra("title", getString(R.string.cet))/*,
-					              ActivityOptionsCompat.makeSceneTransitionAnimation(this@CETActivity, window.decorView, "miniapp").toBundle()*/)
-					}
-				}) {
-					Icon(painter = painterResource(id = R.drawable.export), contentDescription = stringResource(R.string.export))
-				}
-			}, isNestedScrollEnabled = false, pageContent = {
+			ActivityPager(title = stringResource(R.string.cet), onNavigationClick = { supportFinishAfterTransition() },
+			              topBarMenus = {
+				              listOf(
+					              exportMarkdownMenuItem(
+						              sections,
+						              stringResource(R.string.cet),stringResource(R.string.cet))
+				                    )
+			              }, isNestedScrollEnabled = false, pageContent = {
 				StaggerScreen(sections = sections, onScrollBottom = { viewModel.fetchNextPage() })
 			})
 		}
