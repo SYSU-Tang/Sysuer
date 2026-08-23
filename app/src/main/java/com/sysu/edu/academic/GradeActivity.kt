@@ -184,8 +184,8 @@ class GradeActivity : BaseActivity() {
 						}
 						val total = pull.getString("stuTotal")
 						header.clear()
-						header.addSection(getString(R.string.total_year), CommonUtil.getString(this, intArrayOf(R.string.total_rank, R.string.total_credit, R.string.total_point)), mutableListOf("$totalRank/$total", totalCredit, totalPoint))
-						header.addSection(terms[term.value ?: 0], CommonUtil.getString(this, intArrayOf(R.string.current_rank, R.string.current_point)), mutableListOf("$rank/$total", point))
+						header.addSection(getString(R.string.total_year), CommonUtil.getString(this, intArrayOf(R.string.total_rank, R.string.total_credit, R.string.total_point)), mutableListOf("$totalRank/$total=${totalRank.toFloat()/total.toFloat()}", totalCredit, totalPoint))
+						header.addSection(terms[term.value ?: 0], CommonUtil.getString(this, intArrayOf(R.string.current_rank, R.string.current_point)), mutableListOf("$rank/$total=${rank.toFloat()/total.toFloat()}", point))
 						header.addSection(getString(R.string.credit),
 						                  CommonUtil.getString(this,
 						                                       intArrayOf(R.string.term_credit, R.string.public_compulsory_credit, R.string.public_select_credit, R.string.major_compulsory_credit, R.string.major_select_credit, R.string.honor_credit)),
