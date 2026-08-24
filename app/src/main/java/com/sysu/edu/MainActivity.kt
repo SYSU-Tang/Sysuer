@@ -72,6 +72,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation3.runtime.NavKey
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager.Companion.getInstance
@@ -134,7 +135,7 @@ class MainActivity : BaseActivity() {
 		setContent {
 			MainScreen()
 		}
-//		val spm = ViewModelProvider(this)[PreferenceViewModel::class.java]
+		
 		spm.isFirstLaunch = false
 		spm.isAgreeLiveData.observe(this) { aBoolean ->
 			if (aBoolean) {
@@ -429,7 +430,7 @@ class MainActivity : BaseActivity() {
 		text = stringResource(R.string.search),
 		modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
 		style = MaterialTheme.typography.bodyMedium,
-                           )
+	                           )
 	else LazyColumn(modifier = Modifier.fillMaxSize()) {
 		items(results, key = { it.getIntValue("id") }) { item ->
 			ListItem(
@@ -452,3 +453,13 @@ class MainActivity : BaseActivity() {
 		}
 	}
 }
+
+@kotlinx.serialization.Serializable data object Dashboard : NavKey
+
+@kotlinx.serialization.Serializable data object Service : NavKey
+
+@kotlinx.serialization.Serializable data object Account : NavKey
+
+@kotlinx.serialization.Serializable data class CourseDetail(val courseId: String) : NavKey
+
+@kotlinx.serialization.Serializable data class WebPage(val url: String, val title: String = "") : NavKey

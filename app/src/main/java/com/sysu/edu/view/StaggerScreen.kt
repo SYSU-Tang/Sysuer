@@ -232,7 +232,7 @@ fun List<SectionData>.toMarkdown(): String {
 			keys = sectionKeys
 			markdown.append("\n").append("序号 | ").append(keys.joinToString(" | ") { it?.trim() ?: "" }).append("\n").append("--- | ".repeat(keys.size + 1)).append("\n")
 		}
-		markdown.append(i + 1).append(" | ").append(section.rows.map { it.value }.joinToString(" | ") { it?.trim() ?: "" }).append("\n")
+		markdown.append(i + 1).append(" | ").append(section.rows.map { it.value }.joinToString(" | ") { it?.trim()?.replace("\n", "<br>")?.replace("\r", "") ?: "" }).append("\n")
 	}
 	return "$markdown"
 }

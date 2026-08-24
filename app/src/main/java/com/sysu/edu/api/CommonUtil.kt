@@ -24,9 +24,9 @@ object CommonUtil {
 		for (i in keys) values.add(data.getString(i))
 		return values
 	}
-	@JvmStatic fun extractValue(context: Context, data: JSONObject, names: IntArray, keys: Array<String?>): SnapshotStateList<RowData> {
+	@JvmStatic fun extractValue(context: Context, data: JSONObject, names: IntArray, keys: Array<String?>, defaultValue: String = ""): SnapshotStateList<RowData> {
 		val values = mutableStateListOf<RowData>()
-		names.zip(keys).forEach { (name, key) -> values.add(RowData(context.getString(name),  data.getString(key)))
+		names.zip(keys).forEach { (name, key) -> values.add(RowData(context.getString(name),  data.getString(key, defaultValue)))
 		}
 		return values
 	}
