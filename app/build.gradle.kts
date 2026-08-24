@@ -56,13 +56,18 @@ android {
 }
 dependencies {
 	implementation(libs.androidx.activity.ktx)
+	implementation(libs.androidx.adaptive.navigation3)
 	implementation(libs.androidx.animation)
 	implementation(libs.androidx.datastore.preferences.rxjava3)
+	implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 	implementation(libs.androidx.material3)
+	implementation(libs.androidx.navigation3.runtime)
+	implementation(libs.androidx.navigation3.ui)
 	implementation(libs.androidx.preference.ktx)
 	implementation(libs.androidx.room3.runtime)
 	implementation(libs.androidx.runtime.livedata)
 	implementation(libs.glide)
+ implementation(libs.kotlinx.serialization.core)
 //    implementation(libs.haze)
 	implementation(libs.material.icons.extended)
 	implementation(libs.multiplatform.markdown.renderer.android)

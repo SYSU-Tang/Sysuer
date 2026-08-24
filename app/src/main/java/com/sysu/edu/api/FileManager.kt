@@ -12,7 +12,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 
 object FileManager {
-	@JvmStatic fun readAssets(context: Context, file: String): String {
+	fun readAssets(context: Context, file: String): String {
 		val jsJSON = StringBuilder()
 		try {
 			val input = InputStreamReader(context.assets.open(file))
@@ -65,6 +65,6 @@ object FileManager {
 		}
 		return FileRequestBody(finalFileName, finalFileSize, requestBody)
 	}
+	data class FileRequestBody(val fileName: String?, val fileSize: Long, val file: RequestBody)
 }
 
-data class FileRequestBody(val fileName: String?, val fileSize: Long, val file: RequestBody)

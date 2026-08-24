@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -21,10 +20,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.ViewModelProvider
 import com.sysu.edu.BaseActivity
 import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.view.ActivityPager
 import com.sysu.edu.view.InputDialogChip
-import com.sysu.edu.view.SectionData
 import com.sysu.edu.view.SingleSelectChipDropdown
 import com.sysu.edu.view.StaggerScreen
 import com.sysu.edu.view.exportMarkdownMenuItem
@@ -36,15 +33,9 @@ class GradeForLevelActivity : BaseActivity() {
 		val viewModel = ViewModelProvider(this)[GradeForLevelViewModel::class.java]
 		
 		setContent {
-			val gradeList = viewModel.gradeList
 			val trainTypeOptions = viewModel.trainTypeOptions
 			val yearOptions = viewModel.yearOptions
 			val courseTypeOptions = viewModel.courseTypeOptions
-			
-			LaunchedEffect(Unit) {
-				viewModel.fetchOptions()
-				viewModel.fetchGrade()
-			}
 			var trainTypeValue by rememberSaveable { mutableStateOf<String?>(null) }
 			var yearValue by rememberSaveable { mutableStateOf<String?>(null) }
 			var courseTypeValue by rememberSaveable { mutableStateOf<String?>(null) }
@@ -60,49 +51,12 @@ class GradeForLevelActivity : BaseActivity() {
 				viewModel.minGrade = minGradeValue.ifEmpty { null }
 				viewModel.reFetchGrade()
 			}
-			
-			val sections = rememberSaveable(gradeList) {
-				mutableStateListOf<SectionData>().also { list ->
-					gradeList.forEach { item ->
-						list.add(SectionData(title = item.getString("courseName"),
-						                     rows = extractValue(this@GradeForLevelActivity,
-						                                         item,
-						                                         intArrayOf(R.string.gpa,
-						                                                    R.string.class_number,
-						                                                    R.string.course_category,
-						                                                    R.string.course_id,
-						                                                    R.string.course_name,
-						                                                    R.string.course_number,
-						                                                    R.string.credit,
-						                                                    R.string.exam_nature,
-						                                                    R.string.level,
-						                                                    R.string.grade,
-						                                                    R.string.department,
-						                                                    R.string.semester,
-						                                                    R.string.total_hours,
-						                                                    R.string.training_category,
-						                                                    R.string.total_achievement),
-						                                         arrayOf("achievementPoint",
-						                                                 "classesNum",
-						                                                 "courseCategoryName",
-						                                                 "courseId",
-						                                                 "courseName",
-						                                                 "courseNum",
-						                                                 "credit",
-						                                                 "examNatureName",
-						                                                 "finalAchievementStr",
-						                                                 "grade",
-						                                                 "openClassUnitName",
-						                                                 "schoolSemester",
-						                                                 "sumHours",
-						                                                 "trainingCategoryName",
-						                                                 "totalAchievement"))))
-					}
-				}
+			LaunchedEffect(Unit) {
+				viewModel.fetchOptions()
+				viewModel.fetchGrade()
 			}
-			
 			ActivityPager(title = stringResource(R.string.grade_for_level), onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false, topBarMenus = {
-				listOf(exportMarkdownMenuItem(sections, stringResource(R.string.grade_for_level), stringResource(R.string.grade_for_level)))
+				listOf(exportMarkdownMenuItem(viewModel.sections, stringResource(R.string.grade_for_level), stringResource(R.string.grade_for_level)))
 			}, topBarContent = {
 				FlowRow(modifier = Modifier
 					.fillMaxWidth()
@@ -128,7 +82,7 @@ class GradeForLevelActivity : BaseActivity() {
 					InputDialogChip(stringResource(R.string.min_grade), minGradeValue, KeyboardType.Number) { minGradeValue = it; onFilterChange() }
 				}
 			}) {
-				StaggerScreen(sections = sections, onScrollBottom = {
+				StaggerScreen(sections = viewModel.sections, onScrollBottom = {
 					if (viewModel.hasMore()) viewModel.fetchGrade()
 				})
 			}

@@ -296,11 +296,12 @@ data class MenuItem(val title: String? = null, val icon: ImageVector? = null, /*
 	val context = LocalContext.current
 	return MenuItem(title = stringResource(R.string.export), icon = Icons.Rounded.Output){
 		val markdown = StringBuilder()
-		sectionData.zip(tabs).forEach { (section, tab) ->
+		sectionData.zip(tabs).forEachIndexed { index, (section, tab) ->
 			markdown.append("###### ${tab.title}")
 			.append("\n\n")
 			.append(section.toMarkdown())
-			.append("\n\n---\n\n")
+			if (index < sectionData.size - 1)
+				markdown.append("\n\n---\n\n")
 		}
 		DataStoreManager.saveContent(context, name, "$markdown") {
 			context.startActivity(Intent(context, RichTextActivity::class.java)
@@ -317,7 +318,6 @@ data class MenuItem(val title: String? = null, val icon: ImageVector? = null, /*
 		val markdown = StringBuilder().append("###### $tab")
 				.append("\n\n")
 				.append(sectionData.toMarkdown())
-				.append("\n\n---\n\n")
 		DataStoreManager.saveContent(context, name, "$markdown") {
 			context.startActivity(Intent(context, RichTextActivity::class.java)
 				                      .putExtra("type", DataStoreManager.ContentType.MARKDOWN.name)

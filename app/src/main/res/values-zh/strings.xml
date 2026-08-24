@@ -873,7 +873,10 @@
     <string name="dynamic_color">动态取色</string>
     <string name="dynamic_color_summary">根据壁纸取色（Android12+）</string>
     <string name="floating_liquid_glass_navigation_bar">底部浮动导航栏</string>
-    <string name="floating_liquid_glass_navigation_bar_summary">底部浮动模糊材质导航栏</string>
+    <string name="floating_liquid_glass_navigation_bar_summary">底部浮动模糊材质导航栏（Android12+）</string>
     <string name="material_navigation_bar_summary">底部质感材质导航栏</string>
-    <string name="navigation_bar">导航栏</string>
+    <string name="navigation_bar">导航栏</string>]
+
+
+    <string name="collapse">折叠</string>
 </resources>

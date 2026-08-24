@@ -61,8 +61,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	val progressCurrent: StateFlow<Int> = _progressCurrent.asStateFlow()
 	private val _nextClassMarkdown = MutableStateFlow("")
 	val nextClassMarkdown: StateFlow<String> = _nextClassMarkdown.asStateFlow()
-//	private val _isShowToday = MutableStateFlow(true)
-//	val isShowToday: StateFlow<Boolean> = _isShowToday.asStateFlow()
 	private val _isShowWeek18 = MutableStateFlow(true)
 	val isShowWeek18: StateFlow<Boolean> = _isShowWeek18.asStateFlow()
 	private var examSubject = ""

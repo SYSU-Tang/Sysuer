@@ -81,8 +81,10 @@ abstract class BaseModel(context: Context) {
 	fun login(request: CommonUtil.Tuple2<Request, Int>?) {
 		val empty = afterLoginRequest.isEmpty()
 		afterLoginRequest.add(request)
-		if (empty) login {
-			afterLoginRequest.forEach { request: CommonUtil.Tuple2<Request, Int>? -> retry(request!!) }
+		if (empty) {
+			login {
+				afterLoginRequest.forEach { request: CommonUtil.Tuple2<Request, Int>? -> retry(request!!) }
+			}
 		}
 	}
 	
@@ -214,5 +216,3 @@ abstract class BaseModel(context: Context) {
 	val token: String
 		get() = http.authorizationJar?.getToken(host) ?: ""
 }
-
-

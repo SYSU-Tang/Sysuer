@@ -151,8 +151,10 @@ import kotlinx.coroutines.launch
 	val activity = remember { context as FragmentActivity }
 	val config = remember { ContextUtil(context) }
 	val coroutineScope = rememberCoroutineScope()
-	LaunchedEffect(Unit) {
-		if (spm.isAgree) dashboardViewModel.getTerm()
+	val isAgree by spm.isAgreeLiveData.observeAsState()
+	LaunchedEffect(isAgree) {
+//		println("isAgree: $isAgree")
+		if (isAgree == true) dashboardViewModel.getTerm()
 	}
 	LaunchedEffect(Unit) {
 		homeViewModel.updateDashboardShortcut.observeForever {
@@ -221,8 +223,8 @@ import kotlinx.coroutines.launch
 		}
 		
 		if (3 in selectedSet) {
-			LaunchedEffect(Unit) {
-				dashboardViewModel.getTodayCourses()
+			LaunchedEffect(isAgree) {
+				if (isAgree == true) dashboardViewModel.getTodayCourses()
 			}
 			CourseSection(todayCourses = todayCourses, tomorrowCourses = tomorrowCourses, showDate = settingManager.courseDate, nextClassIndex = nextClassIndex, onCourseClick = { json ->
 				context.startActivity(Intent(context, CourseDetailActivity::class.java).putExtra("code", json.getString("courseNum")).putExtra("class", json.getString("classesNum")),
@@ -641,7 +643,10 @@ import kotlinx.coroutines.launch
 		AnimatedContent(targetState = exams, transitionSpec = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) togetherWith slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) }, label = "examTab") { list ->
 			if (list.isEmpty()) Text(text = stringResource(R.string.noExam), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
 			else {
-				Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max).horizontalScroll(rememberScrollState(todayExamIndex)), verticalAlignment = Alignment.CenterVertically) {
+				Row(modifier = Modifier
+					.fillMaxWidth()
+					.height(IntrinsicSize.Max)
+					.horizontalScroll(rememberScrollState(todayExamIndex)), verticalAlignment = Alignment.CenterVertically) {
 					exams.forEachIndexed { index, exam ->
 						if (index > 0) VerticalDivider()
 						ExamItem(exam = exam, onClick = { onExamClick(exam) }, onLongClick = { text -> onExamLongClick(text) }, coroutineScope = coroutineScope)

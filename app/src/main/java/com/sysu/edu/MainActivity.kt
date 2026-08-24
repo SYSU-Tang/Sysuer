@@ -77,9 +77,11 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.sysu.edu.api.CommonUtil
 import com.sysu.edu.api.HttpManager
 import com.sysu.edu.api.PreferenceViewModel
 import com.sysu.edu.api.TodoManager
+import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.home.AccountScreen
 import com.sysu.edu.home.DashboardScreen
 import com.sysu.edu.home.DashboardViewModel
@@ -107,14 +109,8 @@ class MainActivity : BaseActivity() {
 	val spm: PreferenceViewModel by viewModels()
 	val serviceViewModel: ServiceViewModel by viewModels()
 	val todoManager: TodoManager by lazy { TodoManager(this, lifecycleScope) }
-	var receiver: BroadcastReceiver? = object : BroadcastReceiver() {
-		override fun onReceive(context: Context?, intent: Intent) {
-			if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) == downloadId) {
-				config.toast(getString(R.string.download_complete))
-				com.sysu.edu.api.DownloadManager.openFile(this@MainActivity, path)
-			}
-		}
-	}
+	var receiver: BroadcastReceiver? = null
+	var receiverRegistered: Boolean = false
 	private lateinit var http: HttpManager
 	var path: String = ""
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,7 +144,16 @@ class MainActivity : BaseActivity() {
 					sendBroadcast(Intent(this, it).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
 						              .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, AppWidgetManager.getInstance(this@MainActivity).getAppWidgetIds(ComponentName(this@MainActivity, it))))
 				}
+				receiver = object : BroadcastReceiver() {
+					override fun onReceive(context: Context?, intent: Intent) {
+						if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) == downloadId) {
+							config.toast(getString(R.string.download_complete))
+							com.sysu.edu.api.DownloadManager.openFile(this@MainActivity, path)
+						}
+					}
+				}
 				ContextCompat.registerReceiver(this, receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED)
+				receiverRegistered = true
 				getInstance(this).enqueue(OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(Data.Builder().putStringArray("components", arrayOf("TodayClassWidget", "RecentClassWidget", "NextClassWidget")).build()).build())
 				if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),
 				                                                                                                                                                                                    PackageManager.PERMISSION_GRANTED)
@@ -295,7 +300,7 @@ class MainActivity : BaseActivity() {
 			}
 		}
 		else if (item.containsKey("url")) {
-			Intent(this, com.sysu.edu.browser.BrowserActivity::class.java).setData(com.sysu.edu.api.CommonUtil.trim(item.getString("url")).toUri())
+			Intent(this, BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url")).toUri())
 		}
 		else null
 		intent?.let { startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle()) } ?: config.toast(R.string.activity_not_found)
@@ -390,9 +395,10 @@ class MainActivity : BaseActivity() {
 	
 	override fun onDestroy() {
 		super.onDestroy()
-		if (receiver != null) {
+		if (receiverRegistered) {
 			unregisterReceiver(receiver)
 			receiver = null
+			receiverRegistered = false
 		}
 	}
 	

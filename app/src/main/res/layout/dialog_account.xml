@@ -28,12 +28,12 @@
         <include
             android:id="@+id/password"
             layout="@layout/dialog_edit_text"
-            app:icon="@{@drawable/password}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/horizontal_margin"
             android:layout_marginVertical="@dimen/vertical_margin"
             app:hint="@{@string/password}"
+            app:icon="@{@drawable/password}"
             app:inputType="@{InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD}"
             app:layout_constraintBottom_toTopOf="@+id/captcha_text"
             app:layout_constraintEnd_toEndOf="parent"

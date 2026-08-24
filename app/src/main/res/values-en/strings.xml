@@ -874,7 +874,8 @@
     <string name="dynamic_color">Dynamic Color</string>
     <string name="dynamic_color_summary">Dynamic color based on wallpaper (Android 12+)</string>
     <string name="floating_liquid_glass_navigation_bar">Floating Liquid Glass Navigation Bar</string>
-    <string name="floating_liquid_glass_navigation_bar_summary">Floating blur navigation bar</string>
+    <string name="floating_liquid_glass_navigation_bar_summary">Floating Blur navigation bar (Android 12+)</string>
     <string name="material_navigation_bar_summary">Material navigation bar</string>
     <string name="navigation_bar">Navigation Bar</string>
+    <string name="collapse">Collapse</string>
 </resources>

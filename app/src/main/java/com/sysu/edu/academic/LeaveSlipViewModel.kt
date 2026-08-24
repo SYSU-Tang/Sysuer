@@ -23,7 +23,7 @@ import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.api.DateTimeManager
 import com.sysu.edu.api.DownloadManager
-import com.sysu.edu.api.FileRequestBody
+import com.sysu.edu.api.FileManager.FileRequestBody
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.model.JwxtModel
 import com.sysu.edu.view.MenuItem

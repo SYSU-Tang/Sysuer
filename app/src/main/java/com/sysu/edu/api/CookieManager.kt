@@ -9,19 +9,13 @@ import java.util.stream.Collectors
 
 class CookieManager(context: Context) {
 	private val cookiePreference: SharedPreferences = context.getSharedPreferences("cookie", Context.MODE_PRIVATE)
-	fun get(host: String?): MutableSet<String?> {
-		return cookiePreference.getStringSet(host, HashSet<String?>())!!
-	}
-	
+	fun get(host: String?): MutableSet<String?> = cookiePreference.getStringSet(host, HashSet<String?>())!!
 	fun toString(host: String?): String {
 		val strings = get(host)
 		return if (strings.isEmpty()) "" else strings.joinToString(separator = ";")
 	}
 	
-	fun toSimpleString(host: String?): String {
-		return get(host).stream().map { c: String? -> c!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] }.collect(Collectors.joining(";"))
-	}
-	
+	fun toSimpleString(host: String?): String = get(host).stream().map { c: String? -> c!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0] }.collect(Collectors.joining(";"))
 	fun set(host: String?, cookieSet: MutableSet<String?>) {
 		cookiePreference.edit { putStringSet(host, cookieSet.stream().filter { c: String? -> !c!!.startsWith("rememberMe=") }.collect(Collectors.toSet())) }
 	}
@@ -30,20 +24,16 @@ class CookieManager(context: Context) {
 		cookiePreference.edit { remove(host) }
 	}
 	
-	//	fun clearAll() {
-//		cookiePreference.edit { clear() }
-//	}
 	fun add(host: String?, cookie: Cookie) {
 		if ("rememberMe" != cookie.name) {
-			get(host)
-				.let {
-					it.forEach { o ->
-						val c = HttpCookie.parse(o)[0]
-						if (c.name == cookie.name) it.remove(o)
-					}
-					it.add("$cookie")
-					set(host, it)
+			get(host).let {
+				it.forEach { o ->
+					val c = HttpCookie.parse(o)[0]
+					if (c.name == cookie.name) it.remove(o)
 				}
+				it.add("$cookie")
+				set(host, it)
+			}
 		}
 	}
 	
@@ -59,5 +49,12 @@ class CookieManager(context: Context) {
 			if (c.name == cookieName) cookieSet.remove(o)
 		}
 		set(host, cookieSet)
+	}
+	
+	companion object {
+		@Volatile private var INSTANCE: CookieManager? = null
+		fun getInstance(context: Context): CookieManager = INSTANCE ?: synchronized(CookieManager::class.java) {
+			INSTANCE ?: CookieManager(context.applicationContext).also { INSTANCE = it }
+		}
 	}
 }
