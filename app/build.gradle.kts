@@ -53,6 +53,11 @@ android {
 	buildToolsVersion = "37.0.0"
 	ndkVersion = "30.0.14904198 rc1"
 	compileSdkMinor = 0
+	packaging {
+		jniLibs {
+			pickFirsts += setOf("**/lib/**")
+		}
+	}
 }
 dependencies {
 	implementation(libs.androidx.activity.ktx)
@@ -135,7 +140,9 @@ dependencies {
 	implementation(libs.miuix.preference)
 	implementation(libs.miuix.icons)
 	implementation(libs.miuix.blur)
-	implementation(libs.miuix.navigation3.ui)
+//	implementation(libs.miuix.navigation3.ui){
+//		exclude(group = "androidx.navigation3")
+//	}
 	implementation(libs.miuix.squircle)
 	implementation(libs.jsoup)
 	implementation(libs.rxjava)
@@ -145,5 +152,7 @@ dependencies {
 	implementation(libs.commonmark.tables)
 	configurations.all {
 		exclude(group = "com.atlassian.commonmark")
+//		exclude(group = "top.yukonga.miuix.kmp", module = "miuix-navigation3-ui-runtime")
+//		exclude(group = "top.yukonga.miuix.kmp", module = "miuix-navigation3-ui-runtime-android")
 	}
 }
