@@ -372,6 +372,7 @@
       {
         "id": 712,
         "name": "已选课程",
+        "route": "CourseSelected",
         "activity": ".academic.CourseSelectedActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE",
         "description": "已选课程查询系统，显示学生已选的课程信息、成绩等"
@@ -601,6 +602,12 @@
         "name": "破壁计划",
         "url": "https://arxiv.jaison.ink/",
         "description": "中大破壁计划，非官方学习资料和真题开源社区"
+      },
+      {
+        "id": 1107,
+        "name": "康乐园生存导航",
+        "url": "https://blog.fffcx.com/project/kangleyuan-2026/#",
+        "description": "参考手册编写：鸭大纪中校友会，网站搭建者：Sulflower，资料来源包括鸭大纪中校友会所编写的《康乐园生存手册（2026版）》、2026 级补充材料及公开官方数据。本站为非官方新生指南；价格、开放时间、课程政策和交通信息以最新官方通知为准。"
       }
     ]
   }

@@ -878,4 +878,12 @@
     <string name="material_navigation_bar_summary">Material navigation bar</string>
     <string name="navigation_bar">Navigation Bar</string>
     <string name="collapse">Collapse</string>
+
+
+    <string name="duration">Duration</string>
+    <string name="exam_classroom">Exam Classroom</string>
+    <string name="no_in_course_selection">Not in course selection stage</string>
+    <string name="senior_filter">Senior Filter</string>
+    <string name="action_success">Action Success</string>
+    <string name="hidden_selected">Hidden Selected</string>
 </resources>

@@ -877,6 +877,12 @@
     <string name="material_navigation_bar_summary">底部质感材质导航栏</string>
     <string name="navigation_bar">导航栏</string>]
 
-
     <string name="collapse">折叠</string>
+
+    <string name="duration">时长</string>
+    <string name="exam_classroom">考场</string>
+    <string name="no_in_course_selection">未在选课阶段</string>
+    <string name="senior_filter">高级筛选</string>
+    <string name="action_success">操作成功</string>
+    <string name="hidden_selected">隐藏已选</string>
 </resources>
