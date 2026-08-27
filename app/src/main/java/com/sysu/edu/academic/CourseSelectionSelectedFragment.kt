@@ -2,7 +2,9 @@ package com.sysu.edu.academic
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import com.sysu.edu.BaseFragment
 import com.sysu.edu.R
@@ -196,20 +199,27 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 			}"
 			val item = get(position)
 			val status = item.getInteger("status")
-			binding.select.setSelected(status == 3 || status == 4)
+			val isSelected = status == 3 || status == 4
 			val canPNP = status == 4 && item.getString("isInTwoTierSet") == "1" && listOf<String?>(*item.getString(
 				"courseCateList")
 				.split(",".toRegex())
 				.dropLastWhile { it.isEmpty() }
 				.toTypedArray()).contains(item.getString("courseCateCode"))
+			binding.select.setSelected(isSelected)
+			val selectBg = if (isSelected) MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorPrimaryContainer) else Color.TRANSPARENT
+			val selectFg = MaterialColors.getColor(binding.select, if (isSelected) com.google.android.material.R.attr.colorOnPrimaryContainer else com.google.android.material.R.attr.colorOnSurface)
+			binding.select.backgroundTintList = ColorStateList.valueOf(selectBg)
+			binding.select.setTextColor(ColorStateList.valueOf(selectFg))
+			binding.select.setIconTint(ColorStateList.valueOf(selectFg))
+			
 			binding.select.text = if (binding.select.isSelected) context.getString(R.string.drop_course)
 			else context.getString(R.string.select_course)
-			binding.filtering.text = "${context.getString(R.string.status)}：${
-				"\n${context.getString(if (status == 4) R.string.status_selected else if (status == 3) R.string.filtering else if (status == 1) R.string.retired else R.string.unselected)}"
-			}"
 			binding.select.setOnClickListener {
 				if (selectAction != null) selectAction?.invoke(position)
 			}
+			binding.filtering.text = "${context.getString(R.string.status)}：${
+				"\n${context.getString(if (status == 4) R.string.status_selected else if (status == 3) R.string.filtering else if (status == 1) R.string.retired else R.string.unselected)}"
+			}"
 			binding.open.setOnClickListener { v: View? ->
 				context.startActivity(Intent(context,
 				                             CourseDetailActivity::class.java).putExtra("code",
@@ -228,10 +238,15 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 			binding.like.visibility = if (canPNP) View.VISIBLE else View.GONE
 			if (canPNP) {
 				val isPNP = item.getString("isTwoTier") == null || "0" == item.getString("isTwoTier")
+				val pnpBg = if (isPNP) Color.TRANSPARENT else MaterialColors.getColor(binding.like, com.google.android.material.R.attr.colorPrimaryContainer)
+				val pnpFg = MaterialColors.getColor(binding.like, if (isPNP) com.google.android.material.R.attr.colorOnSurface else com.google.android.material.R.attr.colorOnPrimaryContainer)
 				binding.like.setText(if (isPNP) R.string.set_pnp else R.string.cancel_pnp)
 				binding.like.setOnClickListener {
 					likeAction?.invoke(if (isPNP) "1" else "0", item.getString("teachingClassId"))
 				}
+				binding.like.backgroundTintList = ColorStateList.valueOf(pnpBg)
+				binding.like.setTextColor(ColorStateList.valueOf(pnpFg))
+				binding.like.setIconTint(ColorStateList.valueOf(pnpFg))
 			}
 			val courseInfoLabels = context.resources.getStringArray(R.array.course_info_labels)
 			val infoList = context.resources.getStringArray(R.array.seat_info_labels)

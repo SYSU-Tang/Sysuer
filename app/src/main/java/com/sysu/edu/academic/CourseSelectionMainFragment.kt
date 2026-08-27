@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
+import com.alibaba.fastjson2.JSONWriter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
@@ -165,18 +166,23 @@ class CourseSelectionMainFragment : BaseFragment() {
 				when (code) {
 					0 -> {
 						val data = response.getJSONObject("data")
-						term = data.getString("semesterYear")
-						findNavController().currentDestination?.label = data.getString("electiveCourseStageName")
-						toolbar.title = data.getString("electiveCourseStageName")
-						toolbar.subtitle = "${data.getString("startTime")}~${data.getString("endTime")}"
-						courseList
+						if (data.containsKey("code") && data.getInteger("code") == 100) toolbar.setTitle(R.string.no_in_course_selection)
+						else if (data.containsKey("code") && data.getInteger("code") == 200) {
+							term = data.getString("semesterYear")
+							findNavController().currentDestination?.label = data.getString("electiveCourseStageName")
+							toolbar.title = data.getString("electiveCourseStageName")
+							val start = data.getString("startTime", "")
+							val end = data.getString("endTime", "")
+							if (!start.isEmpty() && !end.isEmpty()) toolbar.subtitle = "${start}~${end}"
+							courseList
+						}
 					}
 					1 -> response.getJSONObject("data")?.run {
 						total = getInteger("total")
 						getJSONArray("rows").forEach { e: Any? -> adp!!.add(e as JSONObject) }
 					}
 					3 -> {
-						config.toast(response.getString("data",""))
+						config.toast(response.getString("data", ""))
 						regetCourseList()
 					}
 					4 -> {
@@ -300,7 +306,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 		                                       if (binding.head.vacancy.isChecked) "1" else "0",
 		                                       "collectionStatus",
 		                                       if (binding.head.onlyCollection.isChecked) "1" else "0"))
-		data.getJSONObject("param").putAll(JSONObject.from(filterValue))
+		data.getJSONObject("param").putAll(JSONObject.from(filterValue, JSONWriter.Feature.FieldBased))
 		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/list", "$data", 1)
 	}
 	
