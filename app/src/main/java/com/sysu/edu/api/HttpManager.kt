@@ -14,6 +14,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
  * 构造函数
@@ -43,7 +44,7 @@ class HttpManager(val handler: Handler) {
 	 *
 	 * @return OkHttpClient 客户端
 	 */
-	var client: OkHttpClient = OkHttpClient.Builder().build() // 全局 OkHttpClient 实例
+	var client: OkHttpClient = OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).build() // 全局 OkHttpClient 实例
 	
 	/**
 	 * 设置请求参数
@@ -140,9 +141,13 @@ class HttpManager(val handler: Handler) {
 	 * @param what    消息标识
 	 */
 	fun sendRequest(request: Request, what: Int) {
+		requestStatus[what] = Status.LOADING
 		client.newCall(request).enqueue(object : Callback {
-			override fun onFailure(call: Call,
-			                       e: IOException) { //                System.out.println(request.url());
+			override fun onFailure(
+				call: Call,
+				e: IOException,
+			                      ) {
+				requestStatus[what] = Status.ERROR
 				sendFailure()
 			}
 			
@@ -157,6 +162,7 @@ class HttpManager(val handler: Handler) {
 				bundle.putString("data", msg.obj as String?)
 				msg.data = bundle
 				handler.sendMessage(msg)
+				requestStatus[what] = Status.SUCCESS
 			}
 		})
 	}
@@ -185,8 +191,7 @@ class HttpManager(val handler: Handler) {
 		if (authorization != null) request.header("Authorization", authorization!!)
 		if (referrer != null) request.header("Referer", referrer!!)
 		if (ua != null) request.header("User-Agent", ua!!)
-		if (data != null) request.post(data.toRequestBody((type
-			?: "application/json").toMediaType()))
+		if (data != null) request.post(data.toRequestBody((type ?: "application/json").toMediaType()))
 		if (isTokenRequired && authorizationJar != null) request.header("token", authorizationJar!!.getToken(host))
 		header?.forEach { (name: String?, value: String?) -> request.header(name!!, value!!) }
 		return request
@@ -266,5 +271,21 @@ class HttpManager(val handler: Handler) {
 	 */
 	fun deleteRequest(url: String, what: Int) {
 		sendRequest(generateGetRequest(url).delete().build(), what)
+	}
+	
+	private val requestStatus = mutableMapOf<Int, Status>()
+	
+	/**
+	 * 获取请求状态
+	 *
+	 * @param what 消息标识
+	 * @return 请求状态
+	 */
+	fun getStatus(what: Int): Status {
+		return requestStatus[what] ?: Status.UNSTARTED
+	}
+	
+	enum class Status {
+		UNSTARTED, LOADING, UNAUTHORIZED, SUCCESS, ERROR,
 	}
 }
