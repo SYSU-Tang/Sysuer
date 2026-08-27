@@ -306,7 +306,7 @@ class SchoolEnrollmentActivity : BaseActivity() {
 			ActivityPager(title = stringResource(R.string.school_enroll), tabs = tabs, topBarMenus = {
 				listOf(exportMarkdownMenuItem(allSections.toList(), tabs, stringResource(R.string.school_enroll)))
 			}, onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false) {
-				StaggerScreen(allSections[it])
+				StaggerScreen(sections = allSections[it])
 			}
 		}
 	}

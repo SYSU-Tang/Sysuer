@@ -23,6 +23,7 @@
             android:id="@+id/tab"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:tabUnboundedRipple="true"
             android:background="#00000000" />
 
 

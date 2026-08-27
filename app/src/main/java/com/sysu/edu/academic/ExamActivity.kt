@@ -127,7 +127,7 @@ class ExamActivity : BaseActivity() {
 					}
 				}
 			}) {
-				StaggerScreen(examViewModel.sections)
+				StaggerScreen(sections = examViewModel.sections)
 			}
 		}
 	}

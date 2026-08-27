@@ -34,11 +34,11 @@ class NetPayActivity : BaseActivity() {
 					             ),
 					isNestedScrollEnabled = false,
 				             ) {
-					StaggerScreen(when (it) {
-						              0 -> viewModel.orderSections
-						              1 -> viewModel.statusSections
-						              else -> viewModel.orderSections
-					              })
+					StaggerScreen(sections = when (it) {
+						0 -> viewModel.orderSections
+						1 -> viewModel.statusSections
+						else -> viewModel.orderSections
+					})
 				}
 				NetPayDialog(viewModel)
 				NetPaySnackbar(viewModel)

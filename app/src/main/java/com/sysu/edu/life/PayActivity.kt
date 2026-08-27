@@ -175,14 +175,14 @@ class PayActivity : BaseActivity() {
 				                 )
 				ActivityPager(title = stringResource(R.string.pay_fee), tabs = tabs, topBarMenus = { page ->
 					mutableListOf(exportMarkdownMenuItem(allSections, tabs, stringResource(R.string.pay_fee))).also {
-							if (page == 0) {
-								it.add(MenuItem(stringResource(R.string.pay_record), icon = Icons.Rounded.AttachMoney) {
-									selectedPayItems.clear()
-									showPayDialog = true
-									true
-								})
-							}
+						if (page == 0) {
+							it.add(MenuItem(stringResource(R.string.pay_record), icon = Icons.Rounded.AttachMoney) {
+								selectedPayItems.clear()
+								showPayDialog = true
+								true
+							})
 						}
+					}
 				}, onNavigationClick = { supportFinishAfterTransition() }, topBarContent = {
 					when (it) {
 						2 -> {
@@ -237,7 +237,7 @@ class PayActivity : BaseActivity() {
 					}
 				}, onPageChange = { currentPage = it }) { page ->
 					allSections.getOrNull(page)?.let { sections ->
-						StaggerScreen(sections)
+						StaggerScreen(sections = sections)
 					}
 				}
 				

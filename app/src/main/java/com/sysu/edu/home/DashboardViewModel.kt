@@ -85,7 +85,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	suspend fun isDashboardShortcutCollected(id: Int): Boolean = db.collectionDao().isDashboardShortcutCollected(id)
 
-	fun addService(serviceId: Int, serviceJson: String, position: Int?) {
+	fun collectService(serviceId: Int, serviceJson: String, position: Int?) {
 		viewModelScope.launch(Dispatchers.IO) {
 			db.collectionDao().addService(ServiceCollectionEntity(serviceId = serviceId, serviceJson = serviceJson, position = position))
 		}
@@ -132,7 +132,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 	val date: String? = LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
 	val weekDay: String? = getApplication<Application>().resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
-	
 	
 	val dateText: String
 		get() {
@@ -307,12 +306,16 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5)
 	}
 	
-	fun getSelectedCourses(courseName: String?) {
-		examSubject = courseName ?: ""
-		_selectedCourses.clear()
+	fun getSelectedCourses(courseName: String) {
+		examSubject = courseName
+		if (_selectedCourses.isEmpty())
 		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list",
 		                 "{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
 		                 6)
+		else
+			_selectedCourses.firstOrNull { it.getString("courseName") == examSubject }?.let {
+							_navigateToCourseDetail.value = it
+						}
 	}
 	
 	fun getTimePosition(from: String?, to: String?): String {

@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.navigation3.runtime.NavKey
 import com.sysu.edu.R
 import com.sysu.edu.browser.BrowserActivity
 import com.sysu.edu.extra.AboutActivity
@@ -36,12 +37,12 @@ import com.sysu.edu.extra.PrivacyActivity
 import com.sysu.edu.extra.SettingActivity
 import com.sysu.edu.extra.UpdateActivity
 
-@Composable internal fun AccountScreen(recreate: () -> Unit) {
+@Composable internal fun AccountScreen(backStack: MutableList<NavKey>, recreate: () -> Unit) {
 	val context = LocalContext.current
 	val settingLauncher = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.StartActivityForResult(),
-		onResult = { o: ActivityResult? ->
-			if (o?.resultCode == Activity.RESULT_OK) recreate()
+		onResult = { o: ActivityResult ->
+			if (o.resultCode == Activity.RESULT_OK) recreate()
 		},
 	                                                       )
 	
@@ -51,16 +52,18 @@ import com.sysu.edu.extra.UpdateActivity
 		index: Int = 0,
 		count: Int = 1,
 		activity: Class<*>? = null,
+		route: NavKey? = null,
 		onClick: () -> Unit = {
-			activity?.let {
+			route?.let {
+				backStack.add(it)
+			} ?: activity?.let {
 				context.startActivity(Intent(context, activity))
 			}
 		},
 	                              ) {
 		SegmentedListItem(onClick = onClick, shapes = ListItemDefaults.segmentedShapes(index, count), colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer), leadingContent = {
 			Icon(painter = painterResource(icon), contentDescription = stringResource(key))
-		}, /*overlineContent = {
-			},*/ trailingContent = {
+		}, trailingContent = {
 			Icon(imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos, contentDescription = stringResource(R.string.forward), modifier = Modifier.size(20.dp))
 		}) {
 			Text(stringResource(key), style = MaterialTheme.typography.bodyLarge)

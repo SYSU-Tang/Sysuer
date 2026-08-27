@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
@@ -68,16 +70,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
 import com.sysu.edu.R
 import com.sysu.edu.api.DataStoreManager
 import com.sysu.edu.api.SettingManager
 import com.sysu.edu.browser.RichTextActivity
+import com.sysu.edu.nav.RichText
 import com.sysu.edu.theme.SysuerTheme
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable fun ActivityPager(
+	modifier: Modifier = Modifier,
 	title: String = "",
 	tabs: List<MenuItem> = emptyList(),
 	navs: List<MenuItem> = emptyList(),
@@ -85,7 +90,10 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 	onNavigationClick: (() -> Unit)? = null,
 	onPageChange: ((Int) -> Unit)? = null,
 	isNestedScrollEnabled: Boolean = true,
-	floatingActionButton: @Composable () -> Unit = {},
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
+	sharedKey: Any = "toolbar",
+	floatingActionButton: @Composable (Int) -> Unit = {},
 	actions: @Composable (RowScope.() -> Unit)? = null,
 	topBarMenus: @Composable ((Int) -> List<MenuItem>)? = null,
 	pageContent: @Composable (page: Int) -> Unit = {},
@@ -120,7 +128,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 		val behavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 		
 		Scaffold(
-			modifier = Modifier
+			modifier = modifier
 				.fillMaxSize()
 				.nestedScroll(scrollBehavior.nestedScrollConnection)
 				.nestedScroll(floatingNavBarScroll)
@@ -142,6 +150,15 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 				Surface(color = backgroundColor) {
 					Column{
 						TopAppBar(
+							modifier = Modifier.then(if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+								with(sharedTransitionScope) {
+									Modifier.sharedBounds(
+										sharedContentState = rememberSharedContentState(key = sharedKey),
+										animatedVisibilityScope = animatedVisibilityScope
+									                     )
+								}
+							}
+							                         else Modifier),
 							title = { Text(text = title, color = MaterialTheme.colorScheme.primary) },
 							navigationIcon = {
 								if (onNavigationClick != null)
@@ -218,7 +235,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 						}
 				}
 			},
-			floatingActionButton = floatingActionButton,
+			floatingActionButton = { floatingActionButton(pagerState.currentPage) },
 		        ) { innerPadding ->
 			if (tabs.isNotEmpty() || navs.isNotEmpty()) {
 				Box(modifier = Modifier.fillMaxSize()) {
@@ -323,6 +340,16 @@ data class MenuItem(val title: String? = null, val icon: ImageVector? = null, /*
 				                      .putExtra("type", DataStoreManager.ContentType.MARKDOWN.name)
 				                      .putExtra("title", name))
 		}
+		true
+	}
+}
+
+@Composable fun exportMarkdownMenuItem(backStack: MutableList<NavKey>, sectionData: SnapshotStateList<SectionData>, tab: String, name: String): MenuItem {
+	return MenuItem(title = stringResource(R.string.export), icon = Icons.Rounded.Output){
+		val markdown = StringBuilder().append("###### $tab")
+			.append("\n\n")
+			.append(sectionData.toMarkdown())
+		backStack.add(RichText(title = name, content = "$markdown", contentType = DataStoreManager.ContentType.MARKDOWN.name))
 		true
 	}
 }

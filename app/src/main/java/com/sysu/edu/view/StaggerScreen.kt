@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -73,6 +75,7 @@ data class SectionData(
 	val rowOrientation: RowOrientation = RowOrientation.Horizontal,
 	val footerMenus: SnapshotStateList<MenuItem> = mutableStateListOf(),
 	var footer: (@Composable ColumnScope.() -> Unit)? = null,
+	val transitionName: String? = null,
                       )
 
 @Composable fun SectionCard(
@@ -80,6 +83,8 @@ data class SectionData(
 	isExpandable: Boolean = true,
 	defaultExpanded: Boolean = true,
 	isHideNull: Boolean = false,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
                            ) {
 	var expanded by rememberSaveable { mutableStateOf(defaultExpanded) }
 	
@@ -119,7 +124,20 @@ data class SectionData(
 					.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding)),
 				    horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
 					section.footerMenus.forEach { item ->
-						FilledTonalButton(onClick = { item.onClick() }, modifier = Modifier.weight(1f), shapes = ButtonDefaults.shapes(), enabled = item.enabled) {
+						FilledTonalButton(onClick = { item.onClick() }, modifier = Modifier
+							.weight(1f)
+							.then(if (sharedTransitionScope != null && animatedVisibilityScope != null && section.transitionName != null) {
+								with(sharedTransitionScope) {
+									Modifier.sharedBounds(
+										sharedContentState = rememberSharedContentState(key = section.transitionName),
+										animatedVisibilityScope = animatedVisibilityScope,
+										/* enter = fadeIn(tween(300)),
+										 exit = fadeOut(tween(300)),
+										 resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds()*/
+									                     )
+								}
+							}
+							      else Modifier), shapes = ButtonDefaults.shapes(), enabled = item.enabled) {
 							item.icon?.let {
 								Icon(it, contentDescription = item.title, modifier = Modifier.size(dimensionResource(R.dimen.icon_size)))
 								Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
@@ -179,11 +197,14 @@ data class SectionData(
 }
 
 @Composable fun StaggerScreen(
+	modifier: Modifier = Modifier,
 	sections: SnapshotStateList<SectionData> = mutableStateListOf(),
 	isHideNull: Boolean = false,
 	isNestedEnabled: Boolean = true,
 	onScrollBottom: (() -> Unit)? = null,
 	onScrollTopChanged: ((Boolean) -> Unit)? = null,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
                              ) {
 	val state = rememberLazyStaggeredGridState()
 	val isTop = remember { derivedStateOf { state.firstVisibleItemIndex == 0 && state.firstVisibleItemScrollOffset == 0 } }
@@ -199,7 +220,7 @@ data class SectionData(
 	}
 	val nestedScrollConnection = rememberNestedScrollInteropConnection()
 	if (!isNestedEnabled) {
-		FlowRow(modifier = Modifier
+		FlowRow(modifier = modifier
 			.fillMaxWidth()
 			.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)), verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
 			sections.forEach { section ->
@@ -211,14 +232,14 @@ data class SectionData(
 	
 	LazyVerticalStaggeredGrid(state = state,
 	                          columns = StaggeredGridCells.Adaptive(240.dp),
-	                          modifier = Modifier
+	                          modifier = modifier
 		                          .fillMaxSize()
 		                          .nestedScroll(nestedScrollConnection),
 	                          contentPadding = PaddingValues(dimensionResource(R.dimen.horizontal_margin)),
 	                          verticalItemSpacing = dimensionResource(R.dimen.vertical_margin),
 	                          horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
 		itemsIndexed(sections) { _, section ->
-			SectionCard(section, isHideNull = isHideNull)
+			SectionCard(section, isHideNull = isHideNull, sharedTransitionScope = sharedTransitionScope, animatedVisibilityScope = animatedVisibilityScope)
 		}
 	}
 }

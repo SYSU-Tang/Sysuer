@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.alibaba.fastjson2.JSONReader
+import com.alibaba.fastjson2.to
 import com.sysu.edu.R
 import com.sysu.edu.home.data.CollectionDatabase
 import com.sysu.edu.home.data.DashboardShortcutEntity
@@ -19,36 +20,34 @@ import java.nio.charset.StandardCharsets
 
 class ServiceViewModel(application: Application) : AndroidViewModel(application) {
 	private val db by lazy { CollectionDatabase.getDatabase(application) }
-	private val _collection = mutableStateListOf<JSONObject>()
-	val collection: SnapshotStateList<JSONObject> = _collection
-	val allItems: SnapshotStateList<JSONObject> = mutableStateListOf()
-	val serviceData: SnapshotStateList<Pair<String, List<JSONObject>>> = mutableStateListOf()
+	private val _collection = mutableStateListOf<ServiceConfig>()
+	val collection: SnapshotStateList<ServiceConfig> = _collection
+	val allItems: SnapshotStateList<ServiceConfig> = mutableStateListOf()
+	val serviceData: SnapshotStateList<Pair<String, List<ServiceConfig>>> = mutableStateListOf()
 	fun loadServiceData() {
 		if (allItems.isNotEmpty()) return
 		val reader = JSONReader.of(application.resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
-		val tempGroups = mutableListOf<Pair<String, List<JSONObject>>>()
-		val tempItems = mutableListOf<JSONObject>()
 		reader.readJSONArray().forEach {
 			val name = (it as JSONObject).getString("name", "")
 			val items = it.getJSONArray("items") ?: JSONArray()
-			val itemList = items.map { item -> item as JSONObject }
-			tempGroups.add(Pair(name, itemList))
-			tempItems.addAll(itemList)
+			val itemList = items.map { item ->
+				(item as JSONObject).to<ServiceConfig>( JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue)
+			}
+			serviceData.add(Pair(name, itemList))
+			allItems.addAll(itemList)
 		}
 		reader.close()
-		serviceData.addAll(tempGroups)
-		allItems.addAll(tempItems)
 	}
 	
-	private val _orderCollection = mutableStateListOf<JSONObject>()
-	val orderCollection: SnapshotStateList<JSONObject> = _orderCollection
+	private val _orderCollection = mutableStateListOf<ServiceConfig>()
+	val orderCollection: SnapshotStateList<ServiceConfig> = _orderCollection
 	fun loadCollection() {
 		viewModelScope.launch(Dispatchers.IO) {
 			val services = db.collectionDao().getCollectedServices()
 			_collection.clear()
 			services.forEach { entity ->
 				entity.serviceJson?.let { json ->
-					_collection.add(JSONObject.parse(json))
+					_collection.add(JSONObject.parseObject(json, ServiceConfig::class.java, JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue))
 				}
 			}
 		}
@@ -60,7 +59,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 			_orderCollection.clear()
 			services.forEach { entity ->
 				entity.serviceJson?.let { json ->
-					_orderCollection.add(JSONObject.parse(json))
+					_orderCollection.add(JSONObject.parseObject(json, ServiceConfig::class.java, JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue))
 				}
 			}
 		}
@@ -75,7 +74,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 	fun saveOrderCollection() {
 		viewModelScope.launch(Dispatchers.IO) {
 			_orderCollection.forEachIndexed { index, item ->
-				db.collectionDao().updateServicePosition(item.getIntValue("id"), index)
+				db.collectionDao().updateServicePosition(item.id, index)
 			}
 			loadCollection()
 		}
@@ -83,7 +82,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 	
 	suspend fun isServiceCollected(id: Int): Boolean = db.collectionDao().isServiceCollected(id)
 	suspend fun isDashboardShortcutCollected(id: Int): Boolean = db.collectionDao().isDashboardShortcutCollected(id)
-	fun addService(serviceId: Int, serviceJson: String, position: Int?) {
+	fun addService(serviceId: Int, serviceJson: String, position: Int? = collection.size) {
 		viewModelScope.launch(Dispatchers.IO) {
 			db.collectionDao().addService(ServiceCollectionEntity(serviceId = serviceId, serviceJson = serviceJson, position = position))
 		}

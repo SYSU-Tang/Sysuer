@@ -20,77 +20,47 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Dashboard
-import androidx.compose.material.icons.rounded.GridView
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.AppBarWithSearch
-import androidx.compose.material3.ExpandedFullScreenContainedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SearchBarDefaults.appBarWithSearchColors
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberContainedSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.sysu.edu.api.CommonUtil
+import com.sysu.edu.academic.CourseDetailRoute
+import com.sysu.edu.academic.CourseSelectedRoute
 import com.sysu.edu.api.HttpManager
 import com.sysu.edu.api.PreferenceViewModel
-import com.sysu.edu.api.TodoManager
-import com.sysu.edu.browser.BrowserActivity
-import com.sysu.edu.home.AccountScreen
-import com.sysu.edu.home.DashboardScreen
-import com.sysu.edu.home.DashboardViewModel
+import com.sysu.edu.browser.RichTextRoute
 import com.sysu.edu.home.HomeViewModel
-import com.sysu.edu.home.ServiceScreen
-import com.sysu.edu.home.ServiceViewModel
-import com.sysu.edu.view.ActivityPager
-import com.sysu.edu.view.MenuItem
+import com.sysu.edu.home.ServiceConfig
+import com.sysu.edu.nav.CourseDetail
+import com.sysu.edu.nav.CourseSelected
+import com.sysu.edu.nav.Home
+import com.sysu.edu.nav.RichText
+import com.sysu.edu.nav.SysuerNavDisplay
+import com.sysu.edu.theme.SysuerTheme
 import com.sysu.edu.widget.NextClassWidget
 import com.sysu.edu.widget.RecentClassWidget
 import com.sysu.edu.widget.TomorrowClassWidget
@@ -100,16 +70,10 @@ import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.coroutines.launch
 import java.io.File
 
 class MainActivity : BaseActivity() {
 	var downloadId: Long = 0
-	val dashboardViewModel: DashboardViewModel by viewModels()
-	val homeViewModel: HomeViewModel by viewModels()
-	val spm: PreferenceViewModel by viewModels()
-	val serviceViewModel: ServiceViewModel by viewModels()
-	val todoManager: TodoManager by lazy { TodoManager(this, lifecycleScope) }
 	var receiver: BroadcastReceiver? = null
 	var receiverRegistered: Boolean = false
 	private lateinit var http: HttpManager
@@ -123,19 +87,19 @@ class MainActivity : BaseActivity() {
 					0 -> config.contextUtil.disposable.add(Observable.just(msg.obj).map {
 						JSONObject.parseObject(it as String?)
 					}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ response: JSONObject ->
-						                                                                                   this@MainActivity.showUpdateDialog(response)
+						                                                                                   showUpdateDialog(response)
 					                                                                                   }, {}))
 				}
 			}
 		}).apply {
 			setParams(this@MainActivity.config)
 		}
-		val viewModel = ViewModelProvider(this).get<HomeViewModel>(HomeViewModel::class.java)
-		initActionMap(viewModel.actionMap)
+		val homeViewModel: HomeViewModel by viewModels()
+		val spm : PreferenceViewModel by viewModels()
+		initActionMap(homeViewModel.actionMap)
 		setContent {
 			MainScreen()
 		}
-		
 		spm.isFirstLaunch = false
 		spm.isAgreeLiveData.observe(this) { aBoolean ->
 			if (aBoolean) {
@@ -148,7 +112,7 @@ class MainActivity : BaseActivity() {
 				receiver = object : BroadcastReceiver() {
 					override fun onReceive(context: Context?, intent: Intent) {
 						if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) == downloadId) {
-							config.toast(getString(R.string.download_complete))
+							config.toast(R.string.download_complete)
 							com.sysu.edu.api.DownloadManager.openFile(this@MainActivity, path)
 						}
 					}
@@ -179,132 +143,19 @@ class MainActivity : BaseActivity() {
 	}
 	
 	@OptIn(ExperimentalMaterial3Api::class) @Composable private fun MainScreen() {
-		val progressMax by dashboardViewModel.progressMax.collectAsStateWithLifecycle()
-		val progressCurrent by dashboardViewModel.progressCurrent.collectAsStateWithLifecycle()
-		val searchBarState = rememberContainedSearchBarState()
-		val textFieldState = rememberTextFieldState()
-		var searchQuery by rememberSaveable { mutableStateOf("") }
-		LaunchedEffect(Unit) { serviceViewModel.loadServiceData() }
-		LaunchedEffect(textFieldState) {
-			snapshotFlow { textFieldState.text.toString() }.collect { searchQuery = it }
-		}
-		val allItems = serviceViewModel.allItems
-		val searchResults = remember(searchQuery, allItems) {
-			if (searchQuery.isBlank()) emptyList()
-			else allItems.filter { item ->
-				item.getString("name")?.contains(searchQuery, ignoreCase = true) == true || item.getString("description")?.contains(searchQuery, ignoreCase = true) == true
-			}.sortedWith(compareByDescending<JSONObject> { item ->
-				when {
-					item.getString("name")?.startsWith(searchQuery, ignoreCase = true) == true -> 2
-					item.getString("name")?.contains(searchQuery, ignoreCase = true) == true -> 1
-					else -> 0
-				}
-			}.thenBy { it.getString("name") })
-		}
-		val scope = rememberCoroutineScope()
-		
-		ActivityPager(
-			title = getString(R.string.app_name),
-			navs = listOf(
-				MenuItem(getString(R.string.dashboard), Icons.Rounded.Dashboard),
-				MenuItem(getString(R.string.service), Icons.Rounded.GridView),
-				MenuItem(getString(R.string.account), Icons.Rounded.Person),
-			             ),
-			topBarContent = { page ->
-				when (page) {
-					0 -> {
-						if (progressMax > 0) LinearProgressIndicator(
-							progress = { progressCurrent.toFloat() / progressMax },
-							modifier = Modifier.fillMaxWidth(),
-						                                            )
-						else LinearProgressIndicator(
-							progress = { 1f },
-							modifier = Modifier.fillMaxWidth(),
-						                            )
+		val backStack = rememberNavBackStack(Home)
+		SysuerTheme(settingManager) {
+			SharedTransitionLayout {
+				SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
+					entry<Home> {
+						HomeRoute(backStack, sharedTransitionScope = this@SharedTransitionLayout, animatedVisibilityScope = LocalNavAnimatedContentScope.current)
 					}
-					1 -> {
-						val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
-						val appBarWithSearchColors = appBarWithSearchColors(searchBarColors = SearchBarDefaults.containedColors(state = searchBarState))
-						val inputField = @Composable {
-							SearchBarDefaults.InputField(
-								textFieldState = rememberTextFieldState(),
-								searchBarState = searchBarState,
-								colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
-								onSearch = { },
-								placeholder = {
-									Text(modifier = Modifier.clearAndSetSemantics {}, text = stringResource(R.string.search))
-								},
-								leadingIcon = {
-									Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.search))
-								},
-							                            )
-						}
-						AppBarWithSearch(
-							scrollBehavior = scrollBehavior,
-							windowInsets = SearchBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal),
-							state = searchBarState,
-							colors = appBarWithSearchColors(
-								appBarContainerColor = Color.Transparent,
-							                               ),
-							inputField = inputField,
-						                )
-						ExpandedFullScreenContainedSearchBar(
-							state = searchBarState,
-							inputField = @Composable {
-								SearchBarDefaults.InputField(
-									textFieldState = textFieldState,
-									searchBarState = searchBarState,
-									colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
-									onSearch = { },
-									placeholder = {
-										Text(modifier = Modifier.clearAndSetSemantics {}, text = stringResource(R.string.search))
-									},
-									leadingIcon = {
-										IconButton(onClick = {
-											textFieldState.setTextAndPlaceCursorAtEnd("")
-											scope.launch { searchBarState.animateToCollapsed() }
-										}) {
-											Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
-										}
-									},
-								                            )
-							},
-							colors = appBarWithSearchColors.searchBarColors,
-						                                    ) {
-							ServiceSearchResults(results = searchResults, onResultClick = { item ->
-								textFieldState.setTextAndPlaceCursorAtEnd("")
-								scope.launch { searchBarState.animateToCollapsed() }
-								navigateToServiceItem(item)
-							})
-						}
-					}
-				}
-			},
-			pageContent = { page ->
-				when (page) {
-					0 -> DashboardScreen(dashboardViewModel, homeViewModel, spm, todoManager, settingManager)
-					1 -> ServiceScreen(homeViewModel, serviceViewModel, searchQuery)
-					2 -> AccountScreen { recreate() }
-				}
-			},
-		             )
-	}
-	
-	private fun navigateToServiceItem(item: JSONObject) {
-		val intent = if (item.containsKey("activity")) {
-			try {
-				Intent(this, Class.forName(packageName + item.getString("activity"))).takeIf {
-					it.resolveActivity(packageManager) != null
-				}
-			} catch (_: Exception) {
-				null
+					entry<CourseSelected> { CourseSelectedRoute(backStack, sharedTransitionScope = this@SharedTransitionLayout, animatedVisibilityScope = LocalNavAnimatedContentScope.current) }
+					entry<CourseDetail> { CourseDetailRoute(backStack, it, sharedTransitionScope = this@SharedTransitionLayout, animatedVisibilityScope = LocalNavAnimatedContentScope.current) }
+					entry<RichText> { RichTextRoute(backStack, it, sharedTransitionScope = this@SharedTransitionLayout, animatedVisibilityScope = LocalNavAnimatedContentScope.current) }
+				})
 			}
 		}
-		else if (item.containsKey("url")) {
-			Intent(this, BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url")).toUri())
-		}
-		else null
-		intent?.let { startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle()) } ?: config.toast(R.string.activity_not_found)
 	}
 	
 	fun showUpdateDialog(response: JSONObject) {
@@ -322,7 +173,7 @@ class MainActivity : BaseActivity() {
 			}.setCancelable(!response.getBoolean("enforce")).setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
 				val notificationManager = NotificationManagerCompat.from(this)
 				notificationManager.createNotificationChannel(NotificationChannelCompat.Builder("update", NotificationManagerCompat.IMPORTANCE_DEFAULT).setDescription("APP下载通知").setName("下载进度通知").build())
-				com.sysu.edu.api.DownloadManager.downloadFile(this, releaseLink, path, true, object : com.sysu.edu.api.DownloadManager.DownloadListener {
+				com.sysu.edu.api.DownloadManager.downloadFile(this, releaseLink, path, true/*, object : com.sysu.edu.api.DownloadManager.DownloadListener {
 					override fun onDownloadProgress(
 						progress: Long,
 						total: Long,
@@ -339,7 +190,7 @@ class MainActivity : BaseActivity() {
 						message: String?,
 					                            ) {
 					}
-				})
+				}*/)
 			}.create().apply {
 				setCancelable(!response.getBoolean("enforce"))
 				show()
@@ -403,7 +254,7 @@ class MainActivity : BaseActivity() {
 		}
 	}
 	
-	fun initActionMap(actionMap: MutableMap<in Int?, View.OnClickListener?>) {
+	fun initActionMap(actionMap: MutableMap<in Int?, View.OnClickListener>) {
 		actionMap[302] = View.OnClickListener {
 			packageManager.getLaunchIntentForPackage("com.comingx.zanao")?.let {
 				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -422,44 +273,38 @@ class MainActivity : BaseActivity() {
 	}
 }
 
-@Composable private fun ServiceSearchResults(
-	results: List<JSONObject>,
-	onResultClick: (JSONObject) -> Unit,
-                                            ) {
+@Composable fun ServiceSearchResults(
+	results: List<ServiceConfig>,
+	onResultClick: (ServiceConfig) -> Unit,
+                                    ) {
 	if (results.isEmpty()) Text(
 		text = stringResource(R.string.search),
 		modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
 		style = MaterialTheme.typography.bodyMedium,
 	                           )
 	else LazyColumn(modifier = Modifier.fillMaxSize()) {
-		items(results, key = { it.getIntValue("id") }) { item ->
+		items(results, key = { it.id }) { item ->
 			ListItem(
 				overlineContent = {
-					Text(
-						item.getString("name", ""),
-						maxLines = 1,
-						overflow = TextOverflow.Ellipsis,
-						style = MaterialTheme.typography.titleMedium,
-					    )
+					item.name?.let {
+						Text(
+							it,
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis,
+							style = MaterialTheme.typography.titleMedium,
+						    )
+					}
 				},
 				modifier = Modifier.clickable(onClick = { onResultClick(item) }),
 			        ) {
-				Text(
-					item.getString("description", ""),
-					overflow = TextOverflow.Ellipsis,
-					style = MaterialTheme.typography.bodySmall,
-				    )
+				item.description?.let {
+					Text(
+						it,
+						overflow = TextOverflow.Ellipsis,
+						style = MaterialTheme.typography.bodySmall,
+					    )
+				}
 			}
 		}
 	}
 }
-
-@kotlinx.serialization.Serializable data object Dashboard : NavKey
-
-@kotlinx.serialization.Serializable data object Service : NavKey
-
-@kotlinx.serialization.Serializable data object Account : NavKey
-
-@kotlinx.serialization.Serializable data class CourseDetail(val courseId: String) : NavKey
-
-@kotlinx.serialization.Serializable data class WebPage(val url: String, val title: String = "") : NavKey

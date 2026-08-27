@@ -86,7 +86,7 @@ class PersonalInformationActivity : BaseActivity() {
 			ActivityPager(title = stringResource(R.string.personal_info), tabs = tabs, topBarMenus = {
 				listOf(exportMarkdownMenuItem(allSections, tabs, stringResource(R.string.personal_info)))
 			}, onNavigationClick = { supportFinishAfterTransition() }) { page ->
-				allSections.getOrNull(page)?.let { StaggerScreen(it) }
+				allSections.getOrNull(page)?.let { StaggerScreen(sections = it) }
 			}
 		}
 	}

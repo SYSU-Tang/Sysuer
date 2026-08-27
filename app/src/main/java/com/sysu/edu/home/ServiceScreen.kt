@@ -3,7 +3,8 @@ package com.sysu.edu.home
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -70,14 +71,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
-import com.alibaba.fastjson2.JSONObject
+import androidx.navigation3.runtime.NavKey
+import com.alibaba.fastjson2.toJSONString
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
@@ -92,34 +93,21 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalFoundationApi::class) @Composable internal fun ServiceScreen(
 	homeViewModel: HomeViewModel,
 	serviceViewModel: ServiceViewModel,
-	searchQuery: String = "",
+	backStack: MutableList<NavKey>,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
                                                                                                                                               ) {
 	val context = LocalContext.current
 	val config = remember { ContextUtil(context) }
-	var showActionItem by remember { mutableStateOf<JSONObject?>(null) }
+	var showActionItem by remember { mutableStateOf<ServiceConfig?>(null) }
 	var showOrderDialog by rememberSaveable { mutableStateOf(false) }
 	val collection = serviceViewModel.collection
-	val allItems = serviceViewModel.allItems
 	val serviceData = serviceViewModel.serviceData
 	
 	LaunchedEffect(Unit) {
 		serviceViewModel.loadCollection()
 		serviceViewModel.loadServiceData()
 	}
-	val searchResults = remember(searchQuery, allItems) {
-		if (searchQuery.isBlank()) emptyList()
-		else allItems.filter { item ->
-			item.getString("name")?.contains(searchQuery, ignoreCase = true) == true ||
-			item.getString("description")?.contains(searchQuery, ignoreCase = true) == true
-		}.sortedWith(compareByDescending<JSONObject> { item ->
-			when {
-				item.getString("name")?.startsWith(searchQuery, ignoreCase = true) == true -> 2
-				item.getString("name")?.contains(searchQuery, ignoreCase = true) == true -> 1
-				else -> 0
-			}
-		}.thenBy { it.getString("name") })
-	}
-	
 	ServiceActionDialog(
 		item = showActionItem,
 		onDismiss = { showActionItem = null },
@@ -143,98 +131,74 @@ import kotlinx.coroutines.launch
 			.nestedScroll(nestedScrollConnection),
 		verticalArrangement = Arrangement.spacedBy(verticalMargin),
 	          ) {
-		if (searchQuery.isNotBlank() && searchResults.isNotEmpty()) {
-			items(searchResults, key = { it.getIntValue("id") }) { item ->
-				ListItem(
-					overlineContent = {
-						Text(
-							item.getString("name") ?: "",
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-							style = MaterialTheme.typography.titleMedium,
-						    )
-					},
-					supportingContent = {
-						Text(
-							item.getString("description") ?: "",
-							maxLines = 2,
-							overflow = TextOverflow.Ellipsis,
-							style = MaterialTheme.typography.bodySmall,
-						    )
-					},
-					modifier = Modifier.combinedClickable(
-						onClick = { navigateToServiceItem(context, item, config) },
-						onLongClick = { showActionItem = item },
-					                                     ),
-				        ) {}
-			}
-		}
-		else if (searchQuery.isNotBlank()) {
-			item(key = "emptySearch") {
-				Text(
-					text = stringResource(R.string.search),
-					modifier = Modifier.padding(16.dp),
-					style = MaterialTheme.typography.bodyMedium,
-				    )
-			}
-		}
-		else {
-			if (collection.isNotEmpty()) {
-				item(key = "collection") {
-					ServiceBox(
-						title = stringResource(R.string.collect),
-						items = collection,
-						onItemClick = { navigateToServiceItem(context, it, config) },
-						onItemLongClick = { showActionItem = it },
-						onTitleClick = { showOrderDialog = true },
-					          )
-				}
-			}
-			
-			items(serviceData, key = { it.first }) { (name, items) ->
+		if (collection.isNotEmpty()) {
+			item(key = "collection") {
 				ServiceBox(
-					title = name,
-					items = items,
-					onItemClick = { navigateToServiceItem(context, it, config) },
+					title = stringResource(R.string.collect),
+					items = serviceViewModel.collection,
+					onItemClick = { navigateToServiceItem(context, backStack, it, config) },
 					onItemLongClick = { showActionItem = it },
+					onTitleClick = { showOrderDialog = true },
+					sharedTransitionScope = sharedTransitionScope,
+					animatedVisibilityScope = animatedVisibilityScope,
 				          )
 			}
-			
-			item(key = "bottomSpacer") {
-				Spacer(modifier = Modifier.height(verticalMargin))
+		}
+		
+		items(serviceData, key = { it.first }) { (name, items) ->
+			ServiceBox(
+				title = name,
+				items = items,
+				onItemClick = { navigateToServiceItem(context, backStack, it, config) },
+				onItemLongClick = { showActionItem = it },
+				sharedTransitionScope = sharedTransitionScope,
+				animatedVisibilityScope = animatedVisibilityScope,
+			          )
+		}
+		
+		item(key = "bottomSpacer") {
+			Spacer(modifier = Modifier.height(verticalMargin))
+		}
+	}
+}
+
+private fun navigateToServiceItem(context: Context, backStack: MutableList<NavKey>, item: ServiceConfig, config: ContextUtil) {
+	when {
+		!item.route.isNullOrBlank() -> {
+			(Class.forName("${context.packageName}.nav.${item.route}").kotlin.objectInstance as? NavKey)?.let { backStack.add(it) }
+		}
+		else -> getServiceItemIntent(context, item, null)?.let {
+			(context as FragmentActivity).startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle())
+		} ?: config.toast(R.string.activity_not_found)
+	}
+}
+
+private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: Intent?): Intent? {
+	return when {
+		!item.activity.isNullOrBlank() -> {
+			try {
+				Intent(context, Class.forName(context.packageName + item.activity)).takeIf {
+					it.resolveActivity(context.packageManager) != null
+				} ?: intent
+			} catch (_: Exception) {
+				intent
 			}
 		}
-	}
-}
-
-private fun navigateToServiceItem(context: Context, item: JSONObject, config: ContextUtil) {
-	getServiceItemIntent(context, item, null)?.let {
-		(context as FragmentActivity).startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle())
-	} ?: config.toast(R.string.activity_not_found)
-}
-
-private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Intent?): Intent? {
-	return if (item.containsKey("activity")) {
-		try {
-			Intent(context, Class.forName(context.packageName + item.getString("activity"))).takeIf {
-				it.resolveActivity(context.packageManager) != null
-			} ?: intent
-		} catch (_: Exception) {
-			intent
+		!item.url.isNullOrBlank() -> {
+			Intent(context, BrowserActivity::class.java).setData(CommonUtil.trim(item.url).toUri())
 		}
+		else -> intent
 	}
-	else if (item.containsKey("url")) {
-		Intent(context, BrowserActivity::class.java).setData(CommonUtil.trim(item.getString("url")).toUri())
-	}
-	else intent
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class) @Composable private fun ServiceBox(
 	title: String,
-	items: List<JSONObject>,
-	onItemClick: (JSONObject) -> Unit,
-	onItemLongClick: (JSONObject) -> Unit,
+	items: List<ServiceConfig>,
+	onItemClick: (ServiceConfig) -> Unit,
+	onItemLongClick: (ServiceConfig) -> Unit,
 	onTitleClick: (() -> Unit)? = null,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
                                                                                                          ) {
 	Row(
 		modifier = Modifier.fillMaxWidth().padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)).apply {
@@ -261,17 +225,22 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
 		       ) {
 			items.forEach { item ->
-				val hasActivity = item.containsKey("activity")
 				LongClickableElevatedAssistChip(
+					modifier = Modifier.then(if (sharedTransitionScope != null && animatedVisibilityScope != null && item.route != null) {
+						with(sharedTransitionScope) {
+							Modifier.sharedBounds(sharedContentState = rememberSharedContentState(key = item.route), animatedVisibilityScope = animatedVisibilityScope)
+						}
+					}
+					                         else Modifier),
 					onClick = {
 						onItemClick(item)
 					},
 					onLongClick = { onItemLongClick(item) },
-					label = item.getString("name", ""),
-					colors = if (hasActivity) AssistChipDefaults.elevatedAssistChipColors()
-					else AssistChipDefaults.elevatedAssistChipColors(
+					label = item.name,
+					colors = if (item.activity.isNullOrBlank()) AssistChipDefaults.elevatedAssistChipColors(
 						containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-					                                                ),
+					                                                                                       )
+					else AssistChipDefaults.elevatedAssistChipColors(),
 				                               )
 			}
 		}
@@ -279,9 +248,9 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 }
 
 @OptIn(ExperimentalMaterial3Api::class) @Composable private fun ServiceActionDialog(
-	item: JSONObject?,
+	item: ServiceConfig?,
 	onDismiss: () -> Unit,
-	onShowOrder: (JSONObject?) -> Unit,
+	onShowOrder: (ServiceConfig?) -> Unit,
 	serviceViewModel: ServiceViewModel,
 	homeViewModel: HomeViewModel,
 	config: ContextUtil,
@@ -289,14 +258,14 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 	if (item == null) return
 	val context = LocalContext.current
 	val coroutineScope = rememberCoroutineScope()
-	val itemId = item.getIntValue("id")
+	val itemId = item.id
 	var isServiceCollected by remember { mutableStateOf(false) }
 	var isShortcutCollected by remember { mutableStateOf(false) }
-	val name = item.getString("name", "")
-	val description = item.getString("description", "")
-	val url = item.getString("url", "")
+	val name = item.name ?: ""
+	val description = item.description
+	val url = item.url
 	val markdown = StringBuilder("### $name\n$description")
-	if (url.isNotBlank()) markdown.append("\n`$url`")
+	if (!url.isNullOrBlank()) markdown.append("\n`$url`")
 	LaunchedEffect(item) {
 		isServiceCollected = serviceViewModel.isServiceCollected(itemId)
 		isShortcutCollected = serviceViewModel.isDashboardShortcutCollected(itemId)
@@ -308,7 +277,6 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)),
-				shape = MaterialTheme.shapes.medium,
 			    ) {
 				Markdown(
 					rememberMarkdownState("$markdown"),
@@ -329,7 +297,7 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 					isServiceCollected = !isServiceCollected
 					coroutineScope.launch {
 						if (isServiceCollected) {
-							serviceViewModel.addService(itemId, item.toJSONString(), serviceViewModel.collection.size)
+							serviceViewModel.addService(itemId, item.toJSONString())
 							config.toast(R.string.collect_success)
 						}
 						else {
@@ -384,12 +352,12 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 				}
 				
 				GenericTonalButton(image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)) {
-					val itemUrl = item.getString("url")
-					if (!TextUtils.isEmpty(itemUrl)) context.startActivity(Intent(context, BrowserActivity::class.java).setData(itemUrl.toUri()))
+					val itemUrl = item.url
+					if (!itemUrl.isNullOrBlank()) context.startActivity(Intent(context, BrowserActivity::class.java).setData(itemUrl.toUri()))
 				}
 				
 				GenericTonalButton(image = Icons.Rounded.Book, text = stringResource(R.string.guide)) {
-					if (item.containsKey("doc")) context.startActivity(Intent(context, BrowserActivity::class.java).setData("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.getString("doc"))}".toUri()))
+					if (!item.doc.isNullOrBlank()) context.startActivity(Intent(context, BrowserActivity::class.java).setData("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.doc)}".toUri()))
 					else config.toast(R.string.undeveloped_warning)
 				}
 			}
@@ -414,18 +382,20 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 			Text(
 				stringResource(R.string.service_order),
 				style = MaterialTheme.typography.titleMedium,
-				modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+				modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_margin)),
 			    )
 			LazyColumn(modifier = Modifier.fillMaxWidth()) {
-				itemsIndexed(orderCollection, key = { _, item -> item.getIntValue("id") }) { index, item ->
+				itemsIndexed(orderCollection, key = { _, item -> item.id }) { index, item ->
 					ListItem(
 						overlineContent = {
-							Text(
-								item.getString("name", ""),
-								maxLines = 1,
-								overflow = TextOverflow.Ellipsis,
-								style = MaterialTheme.typography.titleMedium,
-							    )
+							item.name?.let {
+								Text(
+									it,
+									maxLines = 1,
+									overflow = TextOverflow.Ellipsis,
+									style = MaterialTheme.typography.titleMedium,
+								    )
+							}
 						},
 						leadingContent = {
 							Row {
@@ -454,7 +424,7 @@ private fun getServiceItemIntent(context: Context, item: JSONObject, intent: Int
 			Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(end = 24.dp, bottom = 24.dp),
+					.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin)),
 				horizontalArrangement = Arrangement.End,
 			   ) {
 				TextButton(onClick = {
