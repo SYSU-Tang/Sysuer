@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.JSONObject
 import com.sysu.edu.R
 import com.sysu.edu.api.CommonUtil.extractValue
 import com.sysu.edu.model.JwxtModel
+import com.sysu.edu.nav.CourseDetail
 import com.sysu.edu.view.RowData
 import com.sysu.edu.view.SectionData
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,18 +18,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
-data class CourseDetailNav(
-	val teachingClassId: String,
-	val courseNum: String,
-	val teachingClassNum: String,
-                          )
-
 class CourseSelectedViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: JwxtModel = JwxtModel(application)
 	private val _sections: SnapshotStateList<SectionData> = mutableStateListOf()
 	val sections: SnapshotStateList<SectionData> = _sections
-	private val _navigationEvents = MutableSharedFlow<CourseDetailNav>()
-	val navigationEvents: SharedFlow<CourseDetailNav> = _navigationEvents.asSharedFlow()
+	private val _navigationEvents = MutableSharedFlow<CourseDetail>()
+	val navigationEvents: SharedFlow<CourseDetail> = _navigationEvents.asSharedFlow()
 	private var page = 0
 	private var total = -1
 	
@@ -61,16 +56,15 @@ class CourseSelectedViewModel(application: Application) : AndroidViewModel(appli
 					                                    R.string.class_name,
 					                                    R.string.course_number),
 					                         arrayOf("courseName", "courseCategoryName", "courseUnitName", "scheduleExamTime", "examFormName", "credit", "teachingClassId", "teachingClassNum", "teachingClassName", "courseNum")))
-					sections.add(SectionData(title = item.getString("courseName"), rows = rows, footerMenus = mutableStateListOf(com.sysu.edu.view.MenuItem(title = application.getString(R.string.course_detail), onClick = {
-						viewModelScope.launch {
-							_navigationEvents.emit(CourseDetailNav(
-								teachingClassId = item.getString("teachingClassId"),
-								courseNum = item.getString("courseNum"),
-								teachingClassNum = item.getString("teachingClassNum"),
-							                                      ))
-						}
-						true
-					}))))
+					_sections.add(SectionData(title = item.getString("courseName"),
+					                          rows = rows,
+					                          transitionName = "course_${item.getString("teachingClassId")}_${item.getString("courseNum")}",
+					                          footerMenus = mutableStateListOf(com.sysu.edu.view.MenuItem(title = application.getString(R.string.course_detail), onClick = {
+						                          viewModelScope.launch {
+							                          _navigationEvents.emit(CourseDetail(item.getString("teachingClassId"), item.getString("courseNum")))
+						                          }
+						                          true
+					                          }))))
 				}
 			}
 		}

@@ -63,10 +63,10 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		}
 	}
 	
-	fun initFromIntent(code: String?, id: String?) {
-		classNum.value = code
-		courseId.value = id
-		if (code != null) fetchCourseOutline()
+	fun initFromIntent(classNum: String?, courseId: String?) {
+		this@CourseDetailViewModel.classNum.value = classNum
+		this@CourseDetailViewModel.courseId.value = courseId
+		if (classNum != null) fetchCourseOutline()
 		else fetchCourseOutline2()
 		model.next()
 	}
@@ -90,7 +90,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		classNum.value = data.getString("courseNumber")
 		outline2Loaded = true
 		
-		outlineInfo?.let { updateDetailSections(it,data) }
+		outlineInfo?.let { updateDetailSections(it, data) }
 		
 		if (!outlineLoaded) fetchCourseOutline()
 	}
@@ -155,33 +155,26 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 	
 	private fun updateDetailSections(info: JSONObject, detail: JSONObject) {
 		_detailSections.clear()
-		val no = app.getString(R.string.none)
-		val introRows = extractValue(
-			app,
-			info,
-			intArrayOf(
-				R.string.course_intro,
-				R.string.course_goal,
-				R.string.course_method,
-				R.string.course_score,
-				R.string.course_reference,
-				R.string.course_resource,
-					  ),
-			arrayOf(
-				"courseContentInChinese",
-				"courseObjectiveAndRequirement",
-				"teachMethod",
-				"evaluationMethod",
-				"referenceBook",
-				"courseResource",
-				   ),no
-					)
-//		introRows.add(RowData(app.getString(R.string.course_intro), trim(info?.getString("courseContentInChinese", no))))
-//		introRows.add(RowData(app.getString(R.string.course_goal), trim(info?.getString("courseObjectiveAndRequirement", no))))
-//		introRows.add(RowData(app.getString(R.string.course_method), trim(info?.getString("teachMethod", no))))
-//		introRows.add(RowData(app.getString(R.string.course_score), trim(info?.getString("evaluationMethod", no))))
-//		introRows.add(RowData(app.getString(R.string.course_reference), trim(info?.getString("referenceBook", no))))
-//		introRows.add(RowData(app.getString(R.string.course_resource), trim(info?.getString("courseResource", no))))
+		val none = app.getString(R.string.none)
+		val introRows = extractValue(app,
+		                             info,
+		                             intArrayOf(
+			                             R.string.course_intro,
+			                             R.string.course_goal,
+			                             R.string.course_method,
+			                             R.string.course_score,
+			                             R.string.course_reference,
+			                             R.string.course_resource,
+		                                       ),
+		                             arrayOf(
+			                             "courseContentInChinese",
+			                             "courseObjectiveAndRequirement",
+			                             "teachMethod",
+			                             "evaluationMethod",
+			                             "referenceBook",
+			                             "courseResource",
+		                                    ),
+		                             none)
 		val infoKeys = arrayOf("courseName",
 		                       "faceProfessionName",
 		                       "courseTypeName",
@@ -207,7 +200,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		val detailRows = mutableStateListOf<RowData>()
 		infoKeys.zip(names).forEachIndexed { index, (key, name) ->
 			val source = if (index == 9 || index == 12) detail else info
-			detailRows.add(RowData(name, source.getString(key,no)))
+			detailRows.add(RowData(name, source.getString(key, none).trim()))
 		}
 		_detailSections.add(SectionData(app.getString(R.string.course_detail), rows = detailRows))
 		_detailSections.add(SectionData(courseName.value, rows = introRows, rowOrientation = RowOrientation.Vertical))
@@ -216,39 +209,23 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 	private fun updateOutlineSections(scheduleList: JSONArray) {
 		_outlineSections.clear()
 		val none = app.getString(R.string.none)
-		scheduleList.forEachIndexed { i,e ->
+		scheduleList.forEachIndexed { i, e ->
 			if (e is JSONObject) {
 				val rows = mutableStateListOf<RowData>()
-				val section = trim(e.getString("sectionDesignation",none))
-				val hours = trim(e.getString("teachingHours",none))
-				val content = trim(e.getString("teachingMainContent",none))
-				val elements = trim(e.getString("courseElements",none))
-				val keyPoints = trim(e.getString("keyPoints",none))
+				val section = trim(e.getString("sectionDesignation", none))
+				val hours = trim(e.getString("teachingHours", none))
+				val content = trim(e.getString("teachingMainContent", none))
+				val elements = trim(e.getString("courseElements", none))
+				val keyPoints = trim(e.getString("keyPoints", none))
 				rows.add(RowData("章节", section))
 				rows.add(RowData("学时", hours))
 				rows.add(RowData("教学内容", content))
 				rows.add(RowData("育人元素", elements))
 				rows.add(RowData("重点、难点", keyPoints))
-				_outlineSections.add(SectionData(title = "第${i+1}章（${hours}${app.getString(R.string.study_hour)}）", rows = rows))
+				_outlineSections.add(SectionData(title = "第${i + 1}章（${hours}${app.getString(R.string.study_hour)}）", rows = rows))
 			}
 		}
 	}
-	
-//	fun getOutlineMarkdown(): String {
-//		val md = StringBuilder()
-//		md.append("|章节|学时|教学内容|育人元素|重点、难点|\n|---|---|---|---|---|\n")
-//		_outlineSections.firstOrNull()?.rows?.forEach { row ->
-//			val parts = row.key?.split("（", limit = 2) ?: return@forEach
-//			val section = parts.getOrNull(0) ?: ""
-//			val hours = parts.getOrNull(1)?.removeSuffix("学时）") ?: ""
-//			val valueParts = row.value?.split("\n") ?: return@forEach
-//			val content = valueParts.getOrNull(0)?.removePrefix("教学内容：")?.replace("\n", "") ?: ""
-//			val elements = valueParts.getOrNull(1)?.removePrefix("育人元素：")?.replace("\n", "") ?: ""
-//			val keyPoints = valueParts.getOrNull(2)?.removePrefix("重点、难点：")?.replace("\n", "") ?: ""
-//			md.append("$section|$hours|$content|$elements|$keyPoints|\n")
-//		}
-//		return "$md"
-//	}
 	
 	override fun onCleared() {
 		model.dispose()
