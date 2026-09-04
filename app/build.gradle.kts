@@ -117,6 +117,7 @@ dependencies {
 	implementation(libs.ext.tables) 
 	implementation(libs.ext.strikethrough) 
 	implementation(libs.google.material)
+	implementation(libs.recyclerview)
 	implementation(libs.recycler) 
 	implementation(libs.recycler.table) 
 	implementation(libs.inline.parser) 

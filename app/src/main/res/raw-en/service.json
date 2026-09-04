@@ -14,6 +14,7 @@
       {
         "id": 102,
         "name": "CET-4/6",
+        "route": "CET",
         "activity": ".academic.CETActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/stuEnglishGradeAchievement?code=jwxsd_sljcjcx&resourceName=%25E5%259B%259B%25E5%2585%25AD%25E7%25BA%25A7%25E6%2588%2590%25E7%25BB%25A9%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "College English Test Band 4 and 6 information inquiry, including registration time, examination arrangement, score inquiry, etc."
@@ -56,6 +57,7 @@
       {
         "id": 108,
         "name": "Dormitory",
+        "route": "Dorm",
         "activity": ".academic.DormActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/ssgl/",
         "description": "Dormitory information inquiry system, check personal dormitory status, allocation situation, fee payment, etc."
@@ -147,8 +149,9 @@
       },
       {
         "id": 303,
+        "route": "AcademyNotification",
         "name": "Academic Affairs Notice",
-        "activity": ".academic.AcademyNotification",
+        "activity": ".academic.AcademyNotificationActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/#/notice/0",
         "description": "Academic affairs notification and announcement system, which publishes important information such as course selection notices, examination arrangements, and teaching adjustments"
       }
@@ -318,6 +321,7 @@
       {
         "id": 704,
         "name": "Examination",
+        "route": "Exam",
         "activity": ".academic.ExamActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/stuExamInfo?code=jwxsd_ksxxck&resourceName=%25E8%2580%2583%25E8%25AF%2595%25E4%25BF%25A1%25E6%2581%25AF%25E6%259F%25A5%25E7%259C%258B",
         "description": "Examination information inquiry system, with functions such as examination time arrangement, examination room distribution, and score inquiry"
@@ -339,6 +343,7 @@
       {
         "id": 707,
         "name": "Grades",
+        "route": "Grade",
         "activity": ".academic.GradeActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/stuAchievementView?code=jwxsd_wdcj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E6%2588%2590%25E7%25BB%25A9",
         "description": "Grade inquiry system, with functions such as semester grade inquiry, GPA calculation, and transcript printing"
@@ -409,6 +414,7 @@
         "id": 717,
         "name": "Leave Slip",
         "activity": ".academic.LeaveSlipActivity",
+        "route": "LeaveSlip",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/studentAskLeaveInfo?code=jwxsd_qjsq&resourceName=%25E8%25AF%25B7%25E5%2581%2587%25E7%2594%25B3%25E8%25AF%25B7",
         "description": "Leave slip inquiry system, with functions such as student names, leave times, and leave reasons"
       }

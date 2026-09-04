@@ -66,225 +66,294 @@ import com.sysu.edu.R
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun CourseSelectionPreviewScreen(
-	viewModel: CourseSelectionPreviewViewModel = viewModel(),
-	onNavigateToFilter: (CourseFilterNameData, CourseFilterValueData) -> Unit = { _, _ -> },
-	onNavigateToDetail: (id: String, code: String, className: String) -> Unit = { _, _, _ -> },
-                                                                                                                  ) {
-	val courses = viewModel.courses
-	val filterName = viewModel.filterName
-	val filterValue = viewModel.filterValue
-	val gridState = rememberLazyStaggeredGridState()
-	val hiddenSelectedStatus by viewModel.hiddenSelectedStatus.collectAsStateWithLifecycle()
-	LaunchedEffect(Unit) {
-		viewModel.loadMore()
-	}
-	
-	LaunchedEffect(gridState) {
-		snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }.distinctUntilChanged().filterNotNull().collect { lastVisibleIndex ->
-			if (lastVisibleIndex >= courses.size - 3 && !viewModel.isLoading.value) {
-				viewModel.loadMore()
-			}
-		}
-	}
-	Column(
-		modifier = Modifier.fillMaxWidth(),
-		horizontalAlignment = Alignment.CenterHorizontally,
-	      ) {
-		SingleChoiceSegmentedButtonRow(modifier = Modifier
-			.fillMaxWidth()
-			.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
-			intArrayOf(1, 4, 2).zip(intArrayOf(R.string.my_major, R.string.public_selection, R.string.transdisciplinary)).forEachIndexed { index, (type, text) ->
-				SegmentedButton(
-					selected = viewModel.type.intValue == type,
-					onClick = { viewModel.setType(type) },
-					icon = {},
-					shape = SegmentedButtonDefaults.itemShape(index, 3),
-				               ) {
-					Text(stringResource(text))
-				}
-			}
-		}
-		val activeFilters = listOf(
-			filterName.courseName,
-			filterName.studyCampusId,
-			filterName.week,
-			filterName.classTimes,
-			filterName.courseUnitNum,
-			filterName.teachingTeacherNum,
-			filterName.teachingLanguageCode,
-			filterName.specialClassCode,
-		                          ).filter { !it.isNullOrEmpty() }
-		FlowRow(
-			modifier = Modifier
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun CourseSelectionPreviewScreen(
+    viewModel: CourseSelectionPreviewViewModel = viewModel(),
+    onNavigateToFilter: (CourseFilterNameData, CourseFilterValueData) -> Unit = { _, _ -> },
+    onNavigateToDetail: (id: String, code: String, className: String) -> Unit = { _, _, _ -> },
+) {
+    val courses = viewModel.courses
+    val filterName = viewModel.filterName
+    val filterValue = viewModel.filterValue
+    val gridState = rememberLazyStaggeredGridState()
+    val hiddenSelectedStatus by viewModel.hiddenSelectedStatus.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.loadMore()
+    }
+
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }.distinctUntilChanged()
+            .filterNotNull().collect { lastVisibleIndex ->
+            if (lastVisibleIndex >= courses.size - 3 && !viewModel.isLoading.value) {
+                viewModel.loadMore()
+            }
+        }
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier
+				.fillMaxWidth()
+				.padding(
+					dimensionResource(R.dimen.horizontal_margin),
+					dimensionResource(R.dimen.vertical_margin)
+				)
+        ) {
+            intArrayOf(1, 4, 2).zip(
+                intArrayOf(
+                    R.string.my_major,
+                    R.string.public_selection,
+                    R.string.transdisciplinary
+                )
+            ).forEachIndexed { index, (type, text) ->
+                SegmentedButton(
+                    selected = viewModel.type.intValue == type,
+                    onClick = { viewModel.setType(type) },
+                    icon = {},
+                    shape = SegmentedButtonDefaults.itemShape(index, 3),
+                ) {
+                    Text(stringResource(text))
+                }
+            }
+        }
+        val activeFilters = listOf(
+            filterName.courseName,
+            filterName.studyCampusId,
+            filterName.week,
+            filterName.classTimes,
+            filterName.courseUnitNum,
+            filterName.teachingTeacherNum,
+            filterName.teachingLanguageCode,
+            filterName.specialClassCode,
+        ).filter { !it.isNullOrEmpty() }
+        FlowRow(
+            modifier = Modifier
 				.fillMaxWidth()
 				.padding(horizontal = dimensionResource(R.dimen.horizontal_margin)),
-			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
-		       ) {
-			ElevatedFilterChip(
-				leadingIcon = if (hiddenSelectedStatus) {
-					{
-						Icon(imageVector = Icons.Filled.Done, contentDescription = stringResource(R.string.hidden_selected), modifier = Modifier.size(FilterChipDefaults.IconSize))
-					}
-				}
-				else {
-					null
-				},
-				selected = hiddenSelectedStatus,
-				onClick = { viewModel.setHiddenSelectedStatus(!hiddenSelectedStatus) },
-				label = { Text(stringResource(R.string.hidden_selected)) },
-			                  )
-			activeFilters.forEach { filter ->
-				ElevatedFilterChip(
-					selected = true,
-					onClick = {},
-					label = { Text("$filter") },
-				                  )
-			}
-			ElevatedAssistChip(
-				onClick = {
-					onNavigateToFilter(filterName, filterValue)
-				},
-				leadingIcon = { Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add_filter)) },
-				label = { Text(stringResource(R.string.add_filter)) },
-			                  )
-		}
-		LazyVerticalStaggeredGrid(
-			columns = StaggeredGridCells.Adaptive(240.dp),
-			state = gridState,
-			contentPadding = PaddingValues(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin)),
-			modifier = Modifier
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+        ) {
+            ElevatedFilterChip(
+                leadingIcon = if (hiddenSelectedStatus) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = stringResource(R.string.hidden_selected),
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                },
+                selected = hiddenSelectedStatus,
+                onClick = { viewModel.setHiddenSelectedStatus(!hiddenSelectedStatus) },
+                label = { Text(stringResource(R.string.hidden_selected)) },
+            )
+            activeFilters.forEach { filter ->
+                ElevatedFilterChip(
+                    selected = true,
+                    onClick = {},
+                    label = { Text("$filter") },
+                )
+            }
+            ElevatedAssistChip(
+                onClick = {
+                    onNavigateToFilter(filterName, filterValue)
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Rounded.Add,
+                        contentDescription = stringResource(R.string.add_filter)
+                    )
+                },
+                label = { Text(stringResource(R.string.add_filter)) },
+            )
+        }
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Adaptive(240.dp),
+            state = gridState,
+            contentPadding = PaddingValues(
+                dimensionResource(R.dimen.horizontal_margin),
+                dimensionResource(R.dimen.vertical_margin)
+            ),
+            modifier = Modifier
 				.fillMaxSize()
 				.nestedScroll(rememberNestedScrollInteropConnection()),
-			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)),
-			verticalItemSpacing = dimensionResource(R.dimen.vertical_margin),
-		                         ) {
-			items(courses, key = { it.getString("teachingClassId") }) { item ->
-				CourseCard(
-					item = item,
-					onClick = {
-						onNavigateToDetail(
-							item.getString("teachingClassId"),
-							item.getString("courseNum"),
-							item.getString("teachingClassNum"),
-						                  )
-					},
-					onCollect = { viewModel.like(item.getString("teachingClassId")) },
-				          )
-			}
-			
-			if (viewModel.isLoading.value) {
-				item(span = StaggeredGridItemSpan.FullLine) {
-					Box(
-						modifier = Modifier
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)),
+            verticalItemSpacing = dimensionResource(R.dimen.vertical_margin),
+        ) {
+            items(courses, key = { it.getString("teachingClassId") }) { item ->
+                CourseCard(
+                    item = item,
+                    onClick = {
+                        onNavigateToDetail(
+                            item.getString("teachingClassId"),
+                            item.getString("courseNum"),
+                            item.getString("teachingClassNum"),
+                        )
+                    },
+                    onCollect = { viewModel.like(item.getString("teachingClassId")) },
+                )
+            }
+
+            if (viewModel.isLoading.value) {
+                item(span = StaggeredGridItemSpan.FullLine) {
+                    Box(
+                        modifier = Modifier
 							.fillMaxWidth()
 							.padding(16.dp),
-						contentAlignment = Alignment.Center,
-					   ) {
-						LinearWavyProgressIndicator()
-					}
-				}
-			}
-		}
-	}
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        LinearWavyProgressIndicator()
+                    }
+                }
+            }
+        }
+    }
 }
 
-@Composable private fun CourseCard(
-	item: JSONObject,
-	onClick: () -> Unit,
-	onCollect: () -> Unit,
-                                  ) {
-	val key = arrayOf("courseCategoryName",
-	                  "courseUnitName",
-	                  "scheduleExamTime",
-	                  "examFormName",
-	                  "credit",
-	                  "teachingClassId",
-	                  "teachingClassNum",
-	                  "teachingClassName",
-	                  "courseNum",
-	                  "baseReceiveNum",
-	                  "addReceiveNum",
-	                  "courseSelectedNum",
-	                  "filterSelectedNum",
-	                  "remainNum",
-	                  "minorReceiveNum")
-	val name = arrayOf("课程类别", "开设学院", "考试时间", "考核方式", "学分", "教学班ID", "教学班号", "教学班名", "课程号", "基本接收人数", "新增接收人数", "已选人数", "筛选中人数", "剩余人数", "辅修接收人数")
-	val none = stringResource(R.string.none)
-	val teachingTimePlace = item.getString("teachingTimePlace", "")
-	val markdown = remember(item) {
-		val md = StringBuilder("|老师|时间|地点|\n|:-----:|:----:|:----:|\n|").append(teachingTimePlace.replace(";", " | ").replace(",", " |\n| ")).append("|\n")
-		key.forEachIndexed { i, v ->
-			val value = item.getString(v, none)
-			md.append("\n${name[i]}：**${value}**\n")
-		}
-		"$md"
-	}
-	val isCollect = item.getString("collectionStatus") == "1"
-	val isSelect = item.getString("selectedStatus") == "1"
-	Card(
-		onClick = onClick,
-		modifier = Modifier.fillMaxWidth(),
-		colors = CardDefaults.cardColors(
-			containerColor = MaterialTheme.colorScheme.surfaceContainer,
-		                                ),
-	    ) {
-		Column(
-			modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
-		      ) {
-			println(item)
-			Row(
-				modifier = Modifier.fillMaxWidth(),
-				verticalAlignment = Alignment.CenterVertically,
-			   ) {
-				if (isCollect) Icon(Icons.Rounded.Bookmark, contentDescription = stringResource(R.string.collect), tint = MaterialTheme.colorScheme.primary)
-				if (isSelect) Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.select), tint = MaterialTheme.colorScheme.primary)
-				if (isCollect || isSelect) Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-				Text(
-					text = item.getString("courseName", ""),
-					style = MaterialTheme.typography.headlineSmall,
-					color = MaterialTheme.colorScheme.primary,
-				    )
-			}
-			Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
-			Markdown(
-				rememberMarkdownState(markdown),
-				modifier = Modifier.fillMaxWidth(),
-				colors = markdownColor(),
-				typography = markdownTypography(),
-				components = markdownComponents(table = { model ->
-					MarkdownTable(
-						content = model.content,
-						node = model.node,
-						style = model.typography.table,
-						headerBlock = { content, header, tableWidth, style ->
-							MarkdownTableHeader(
-								content = content,
-								header = header,
-								tableWidth = tableWidth,
-								style = style,
-								maxLines = Int.MAX_VALUE,
-								overflow = TextOverflow.Clip,
-							                   )
-						},
-						rowBlock = { content, row, tableWidth, style ->
-							MarkdownTableRow(
-								content = content,
-								header = row,
-								tableWidth = tableWidth,
-								style = style,
-								maxLines = Int.MAX_VALUE,
-								overflow = TextOverflow.Clip,
-							                )
-						},
-					             )
-				}),
-			        )
-			Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
-			Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)), verticalAlignment = Alignment.CenterVertically) {
-				FilledTonalButton(modifier = Modifier.weight(1f), shapes = ButtonDefaults.shapes(), onClick = onCollect) { Text(stringResource(if (isCollect) R.string.cancel_collect else R.string.collect)) }
-				FilledTonalButton(modifier = Modifier.weight(1f), shapes = ButtonDefaults.shapes(), onClick = onClick) { Text(stringResource(R.string.open)) }
-			}
-		}
-	}
+@Composable
+private fun CourseCard(
+    item: JSONObject,
+    onClick: () -> Unit,
+    onCollect: () -> Unit,
+) {
+    val key = arrayOf(
+        "courseCategoryName",
+        "courseUnitName",
+        "scheduleExamTime",
+        "examFormName",
+        "credit",
+        "teachingClassId",
+        "teachingClassNum",
+        "teachingClassName",
+        "courseNum",
+        "baseReceiveNum",
+        "addReceiveNum",
+        "courseSelectedNum",
+        "filterSelectedNum",
+        "remainNum",
+        "minorReceiveNum"
+    )
+    val name = arrayOf(
+        "课程类别",
+        "开设学院",
+        "考试时间",
+        "考核方式",
+        "学分",
+        "教学班ID",
+        "教学班号",
+        "教学班名",
+        "课程号",
+        "基本接收人数",
+        "新增接收人数",
+        "已选人数",
+        "筛选中人数",
+        "剩余人数",
+        "辅修接收人数"
+    )
+    val none = stringResource(R.string.none)
+    val teachingTimePlace = item.getString("teachingTimePlace", "")
+    val markdown = remember(item) {
+        val md = StringBuilder("|老师|时间|地点|\n|:-----:|:----:|:----:|\n|").append(
+            teachingTimePlace.replace(
+                ";",
+                " | "
+            ).replace(",", " |\n| ")
+        ).append("|\n")
+        key.forEachIndexed { i, v ->
+            val value = item.getString(v, none)
+            md.append("\n${name[i]}：**${value}**\n")
+        }
+        "$md"
+    }
+    val isCollect = item.getString("collectionStatus") == "1"
+    val isSelect = item.getString("selectedStatus") == "1"
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+        ) {
+            println(item)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (isCollect) Icon(
+                    Icons.Rounded.Bookmark,
+                    contentDescription = stringResource(R.string.collect),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                if (isSelect) Icon(
+                    Icons.Rounded.Check,
+                    contentDescription = stringResource(R.string.select),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                if (isCollect || isSelect) Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                Text(
+                    text = item.getString("courseName", ""),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
+            Markdown(
+                rememberMarkdownState(markdown),
+                modifier = Modifier.fillMaxWidth(),
+                colors = markdownColor(),
+                typography = markdownTypography(),
+                components = markdownComponents(table = { model ->
+                    MarkdownTable(
+                        content = model.content,
+                        node = model.node,
+                        style = model.typography.table,
+                        headerBlock = { content, header, tableWidth, style ->
+                            MarkdownTableHeader(
+                                content = content,
+                                header = header,
+                                tableWidth = tableWidth,
+                                style = style,
+                                maxLines = Int.MAX_VALUE,
+                                overflow = TextOverflow.Clip,
+                            )
+                        },
+                        rowBlock = { content, row, tableWidth, style ->
+                            MarkdownTableRow(
+                                content = content,
+                                header = row,
+                                tableWidth = tableWidth,
+                                style = style,
+                                maxLines = Int.MAX_VALUE,
+                                overflow = TextOverflow.Clip,
+                            )
+                        },
+                    )
+                }),
+            )
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilledTonalButton(
+                    modifier = Modifier.weight(1f),
+                    shapes = ButtonDefaults.shapes(),
+                    onClick = onCollect
+                ) { Text(stringResource(if (isCollect) R.string.cancel_collect else R.string.collect)) }
+                FilledTonalButton(
+                    modifier = Modifier.weight(1f),
+                    shapes = ButtonDefaults.shapes(),
+                    onClick = onClick
+                ) { Text(stringResource(R.string.open)) }
+            }
+        }
+    }
 }

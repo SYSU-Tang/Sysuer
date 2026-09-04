@@ -14,6 +14,7 @@
       {
         "id": 102,
         "name": "四六级",
+        "route": "CET",
         "activity": ".academic.CETActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/stuEnglishGradeAchievement?code=jwxsd_sljcjcx&resourceName=%25E5%259B%259B%25E5%2585%25AD%25E7%25BA%25A7%25E6%2588%2590%25E7%25BB%25A9%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "大学英语四六级考试信息查询，包括考试年份、考试时间、考试学校校区、笔试和口语考试成绩、准考证号、笔试分数分布等"
@@ -56,6 +57,7 @@
       {
         "id": 108,
         "name": "宿舍",
+        "route": "Dorm",
         "activity": ".academic.DormActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/ssgl/",
         "description": "宿舍信息查询，查看个人宿舍状态、分配情况、费用缴纳等"
@@ -146,7 +148,8 @@
       },
       {
         "id": 303,
-        "activity": ".academic.AcademyNotification",
+        "activity": ".academic.AcademyNotificationActivity",
+        "route": "AcademyNotification",
         "name": "教务通知",
         "url": "https://jwxt.sysu.edu.cn/jwxt/#/notice/0",
         "description": "教务通知公告系统，发布选课通知、考试安排、教学调整等重要信息"
@@ -316,6 +319,7 @@
       {
         "id": 704,
         "name": "考试",
+        "route": "Exam",
         "activity": ".academic.ExamActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/stuExamInfo?code=jwxsd_ksxxck&resourceName=%25E8%2580%2583%25E8%25AF%2595%25E4%25BF%25A1%25E6%2581%25AF%25E6%259F%25A5%25E7%259C%258B",
         "description": "考试信息查询系统，考试时间安排、考场分布、成绩查询等功能"
@@ -337,6 +341,7 @@
       {
         "id": 707,
         "name": "成绩",
+        "route": "Grade",
         "activity": ".academic.GradeActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/stuAchievementView?code=jwxsd_wdcj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E6%2588%2590%25E7%25BB%25A9",
         "description": "成绩查询系统，学期成绩、绩点计算、成绩单打印等功能"
@@ -408,6 +413,7 @@
       {
         "id": 717,
         "activity": ".academic.LeaveSlipActivity",
+        "route": "LeaveSlip",
         "name": "假条",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/studentAskLeaveInfo?code=jwxsd_qjsq&resourceName=%25E8%25AF%25B7%25E5%2581%2587%25E7%2594%25B3%25E8%25AF%25B7",
         "description": "假条查询系统，显示学生姓名、请假时间、请假原因等"

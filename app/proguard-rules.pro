@@ -23,3 +23,5 @@
 #-keep interface com.haibin.calendarview.** { *; }
 -keep class com.sysu.edu.view.CustomMonthView
 -keep class com.sysu.edu.view.CustomWeekView
+-keep class com.sysu.edu.view.FeeMonthView
+-keep class com.sysu.edu.view.FeeWeekView
