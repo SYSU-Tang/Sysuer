@@ -43,44 +43,63 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 		super.onDestroyView()
 		model.dispose()
 	}
-	
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+	): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		config = Config(this)
 		model = JwxtModel(requireContext())
 		courseSelectedAdapter = CourseSelectedAdapter().apply {
 			setParams(config)
-			selectAction = { position: Int? ->
-				if (get(position!!).getInteger("selectedStatus") == 3 || get(position).getInteger("selectedStatus") == 4) unselect(
-					convert(position, "courseId"),
-					convert(position, "teachingClassId"),
-					get(position).getString("selectedType"))
-				else select(convert(position, "teachingClassId"),
-				            convert(position, "selectedType"),
-				            get(position).getString("courseCateCode"))
-			}
+
 			likeAction = { type: String?, id: String? -> setPNP(type, id!!) }
 		}
-		layoutManager = StaggeredGridLayoutManager(config.column,
-		                                           StaggeredGridLayoutManager.VERTICAL)
-		val binding = FragmentCourseSelectionSelectedBinding.inflate(inflater, container, false)
-			.apply {
+		layoutManager = StaggeredGridLayoutManager(
+			config.column, StaggeredGridLayoutManager.VERTICAL
+		)
+		val binding =
+			FragmentCourseSelectionSelectedBinding.inflate(inflater, container, false).apply {
 				list.root.layoutManager = layoutManager
-				list.root.adapter = courseSelectedAdapter
+				list.root.adapter = courseSelectedAdapter?.apply {
+					selectAction = { position: Int? ->
+						val status = get(position!!).getInteger("status")
+						val isSelected = status == 3 || status == 4
+						Snackbar.make(
+							root,
+							if (isSelected) R.string.unselect else R.string.select,
+							Snackbar.LENGTH_LONG
+						).setAction(R.string.confirm) {
+							if (isSelected) unselect(
+								convert(position, "courseId"),
+								convert(position, "teachingClassId"),
+								get(position).getString("selectedType")
+							)
+							else select(
+								convert(position, "teachingClassId"),
+								convert(position, "selectedType"),
+								get(position).getString("courseCateCode")
+							)
+						}.show()
+					}
+				}
 				list.root.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
 						if (!v.canScrollVertically(1) && total > (page - 1) * 10 && dy > 0) selectedCourses
-						head.elevation = (if (v.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
+						head.elevation =
+							(if (v.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
 					}
 				})
 				list.root.addItemDecoration(SpacesItemDecoration(config.dpToPx(8)))
 				filter.setOnCheckedStateChangeListener { _: ChipGroup?, checkedId: MutableList<Int>? ->
-					this@CourseSelectionSelectedFragment.success = if (checkedId!!.contains(R.id.success)) 1 else 0
-					this@CourseSelectionSelectedFragment.failure = if (checkedId.contains(R.id.failure)) 1 else 0
-					this@CourseSelectionSelectedFragment.retired = if (checkedId.contains(R.id.retired)) 1 else 0
-					this@CourseSelectionSelectedFragment.waiting = if (checkedId.contains(R.id.to_filter)) 1 else 0
+					this@CourseSelectionSelectedFragment.success =
+						if (checkedId!!.contains(R.id.success)) 1 else 0
+					this@CourseSelectionSelectedFragment.failure =
+						if (checkedId.contains(R.id.failure)) 1 else 0
+					this@CourseSelectionSelectedFragment.retired =
+						if (checkedId.contains(R.id.retired)) 1 else 0
+					this@CourseSelectionSelectedFragment.waiting =
+						if (checkedId.contains(R.id.to_filter)) 1 else 0
 					regetSelectedCourses()
 				}
 				category.setOnCheckedStateChangeListener { _: ChipGroup?, checkedId: MutableList<Int>? ->
@@ -103,13 +122,14 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 				when (code) {
 					0 -> {
 						total = response.getJSONObject("data").getInteger("total")
-						response.getJSONObject("data")
-							.getJSONArray("rows")
+						response.getJSONObject("data").getJSONArray("rows")
 							.forEach { o: Any? -> courseSelectedAdapter!!.add(o as JSONObject) }
 					}
+
 					1 -> {
 						if (response.containsKey("data") && response.getString("data") != null) config.toast(
-							response.getString("data"))
+							response.getString("data")
+						)
 						regetSelectedCourses()
 					}
 				}
@@ -118,65 +138,75 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 		selectedCourses
 		return binding.root
 	}
-	
+
 	fun unselect(classId: String, code: String?, type: String?) {
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/back",
-		                 "{\"courseId\":\"$classId\",\"clazzId\":\"$code\",\"selectedType\":\"$type\"}",
-		                 1)
+		model.addAndNext(
+			"jwxt/choose-course-front-server/classCourseInfo/course/back",
+			"{\"courseId\":\"$classId\",\"clazzId\":\"$code\",\"selectedType\":\"$type\"}",
+			1
+		)
 	}
-	
+
 	fun select(code: String, type: String?, category: String?) {
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose",
-		                 "{\"clazzId\":\"$code\",\"selectedType\":\"$type\",\"selectedCate\":\"$category\",\"check\":true}",
-		                 1)
+		model.addAndNext(
+			"jwxt/choose-course-front-server/classCourseInfo/course/choose",
+			"{\"clazzId\":\"$code\",\"selectedType\":\"$type\",\"selectedCate\":\"$category\",\"check\":true}",
+			1
+		)
 	}
-	
+
 	val selectedCourses: Unit
 		get() {
-			val args = JSONObject.of("successStatus",
-			                         "$success",
-			                         "failureStatus",
-			                         "$failure",
-			                         "retiredClass",
-			                         "$retired",
-			                         "waitingScreen",
-			                         "$waiting")
+			val args = JSONObject.of(
+				"successStatus",
+				"$success",
+				"failureStatus",
+				"$failure",
+				"retiredClass",
+				"$retired",
+				"waitingScreen",
+				"$waiting"
+			)
 			if (!category.isNullOrEmpty()) args["courseCateCode"] = category
-			model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list",
-			                 "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${args.toJSONString()}}",
-			                 0)
+			model.addAndNext(
+				"jwxt/choose-course-front-server/selectedCourse/list",
+				"{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${args.toJSONString()}}",
+				0
+			)
 		}
-	
+
 	fun regetSelectedCourses() {
 		page = 1
 		total = -1
 		courseSelectedAdapter!!.clear()
 		selectedCourses
 	}
-	
+
 	fun setPNP(type: String?, id: String) {
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/setTwoTier?type=$type",
-		                 "{\"clazzId\":\"$id\"}",
-		                 1)
+		model.addAndNext(
+			"jwxt/choose-course-front-server/selectedCourse/setTwoTier?type=$type",
+			"{\"clazzId\":\"$id\"}",
+			1
+		)
 	}
-	
+
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
 		layoutManager!!.setSpanCount(config.column)
 	}
-	
+
 	class CourseSelectedAdapter : RecyclerAdapter<JSONObject>() {
 		var selectAction: ((Int?) -> Unit)? = null
 		var likeAction: ((String?, String?) -> Unit)? = null
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 			val context = parent.context
-			val binding = ItemCourseSelectionBinding.inflate(LayoutInflater.from(context),
-			                                                 parent,
-			                                                 false)
+			val binding = ItemCourseSelectionBinding.inflate(
+				LayoutInflater.from(context), parent, false
+			)
 			(0..3).forEach { _ ->
-				val chip = ItemActionChipBinding.inflate(LayoutInflater.from(context),
-				                                         binding.courseInfo,
-				                                         false).root.apply {
+				val chip = ItemActionChipBinding.inflate(
+					LayoutInflater.from(context), binding.courseInfo, false
+				).root.apply {
 					setOnLongClickListener {
 						config?.copy("", "")
 						false
@@ -185,12 +215,12 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 						Snackbar.make(context, this, text, Snackbar.LENGTH_LONG).show()
 					}
 				}
-				
+
 				binding.courseInfo.addView(chip)
 			}
 			return object : RecyclerView.ViewHolder(binding.root) {}
 		}
-		
+
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 			val binding = ItemCourseSelectionBinding.bind(holder.itemView).apply { }
 			val context = binding.root.context
@@ -200,20 +230,27 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 			val item = get(position)
 			val status = item.getInteger("status")
 			val isSelected = status == 3 || status == 4
-			val canPNP = status == 4 && item.getString("isInTwoTierSet") == "1" && listOf<String?>(*item.getString(
-				"courseCateList")
-				.split(",".toRegex())
-				.dropLastWhile { it.isEmpty() }
-				.toTypedArray()).contains(item.getString("courseCateCode"))
+			val canPNP = status == 4 && item.getString("isInTwoTierSet") == "1" && listOf<String?>(
+				*item.getString(
+					"courseCateList"
+				).split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+			).contains(
+				item.getString("courseCateCode")
+			)
 			binding.select.setSelected(isSelected)
-			val selectBg = if (isSelected) MaterialColors.getColor(binding.select, com.google.android.material.R.attr.colorPrimaryContainer) else Color.TRANSPARENT
-			val selectFg = MaterialColors.getColor(binding.select, if (isSelected) com.google.android.material.R.attr.colorOnPrimaryContainer else com.google.android.material.R.attr.colorOnSurface)
+			val selectBg = if (isSelected) MaterialColors.getColor(
+				binding.select, com.google.android.material.R.attr.colorPrimaryContainer
+			) else Color.TRANSPARENT
+			val selectFg = MaterialColors.getColor(
+				binding.select,
+				if (isSelected) com.google.android.material.R.attr.colorOnPrimaryContainer else com.google.android.material.R.attr.colorOnSurface
+			)
 			binding.select.backgroundTintList = ColorStateList.valueOf(selectBg)
 			binding.select.setTextColor(ColorStateList.valueOf(selectFg))
 			binding.select.setIconTint(ColorStateList.valueOf(selectFg))
-			
-			binding.select.text = if (binding.select.isSelected) context.getString(R.string.drop_course)
-			else context.getString(R.string.select_course)
+			binding.select.text =
+				if (binding.select.isSelected) context.getString(R.string.drop_course)
+				else context.getString(R.string.select_course)
 			binding.select.setOnClickListener {
 				if (selectAction != null) selectAction?.invoke(position)
 			}
@@ -221,25 +258,33 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 				"\n${context.getString(if (status == 4) R.string.status_selected else if (status == 3) R.string.filtering else if (status == 1) R.string.retired else R.string.unselected)}"
 			}"
 			binding.open.setOnClickListener { v: View? ->
-				context.startActivity(Intent(context,
-				                             CourseDetailActivity::class.java).putExtra("code",
-				                                                                        convert(
-					                                                                        position,
-					                                                                        "courseNum"))
-					                      .putExtra("id", convert(position, "courseId"))
-					                      .putExtra("class", convert(position, "clazzNum")),
-				                      ActivityOptionsCompat.makeSceneTransitionAnimation(context as Activity,
-				                                                                         v!!,
-				                                                                         "miniapp")
-					                      .toBundle())
+				context.startActivity(
+					Intent(
+						context, CourseDetailActivity::class.java
+					).putExtra(
+						"code", convert(
+							position, "courseNum"
+						)
+					).putExtra("id", convert(position, "courseId"))
+						.putExtra("class", convert(position, "clazzNum")),
+					ActivityOptionsCompat.makeSceneTransitionAnimation(
+						context as Activity, v!!, "miniapp"
+					).toBundle()
+				)
 			}
-			binding.head.text = convert(position, "teachingTimePlace").replace(";", " | ")
-				.replace(",", "\n")
+			binding.head.text =
+				convert(position, "teachingTimePlace").replace(";", " | ").replace(",", "\n")
 			binding.like.visibility = if (canPNP) View.VISIBLE else View.GONE
 			if (canPNP) {
-				val isPNP = item.getString("isTwoTier") == null || "0" == item.getString("isTwoTier")
-				val pnpBg = if (isPNP) Color.TRANSPARENT else MaterialColors.getColor(binding.like, com.google.android.material.R.attr.colorPrimaryContainer)
-				val pnpFg = MaterialColors.getColor(binding.like, if (isPNP) com.google.android.material.R.attr.colorOnSurface else com.google.android.material.R.attr.colorOnPrimaryContainer)
+				val isPNP =
+					item.getString("isTwoTier") == null || "0" == item.getString("isTwoTier")
+				val pnpBg = if (isPNP) Color.TRANSPARENT else MaterialColors.getColor(
+					binding.like, com.google.android.material.R.attr.colorPrimaryContainer
+				)
+				val pnpFg = MaterialColors.getColor(
+					binding.like,
+					if (isPNP) com.google.android.material.R.attr.colorOnSurface else com.google.android.material.R.attr.colorOnPrimaryContainer
+				)
 				binding.like.setText(if (isPNP) R.string.set_pnp else R.string.cancel_pnp)
 				binding.like.setOnClickListener {
 					likeAction?.invoke(if (isPNP) "1" else "0", item.getString("teachingClassId"))
@@ -249,13 +294,11 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 				binding.like.setIconTint(ColorStateList.valueOf(pnpFg))
 			}
 			val courseInfoLabels = context.resources.getStringArray(R.array.course_info_labels)
-			val infoList = context.resources.getStringArray(R.array.seat_info_labels)
-				.drop(1)
-				.toTypedArray()
-			arrayOf("credit",
-			        "teachingClassNum",
-			        "scheduleExamTime",
-			        "examFormName").forEachIndexed { index, value ->
+			val infoList =
+				context.resources.getStringArray(R.array.seat_info_labels).drop(1).toTypedArray()
+			arrayOf(
+				"credit", "teachingClassNum", "scheduleExamTime", "examFormName"
+			).forEachIndexed { index, value ->
 				(binding.courseInfo.getChildAt(index) as Chip).text = "${courseInfoLabels[index]}：${
 					convert(position, value)
 				}"
@@ -266,7 +309,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 				}"
 			}
 		}
-		
+
 		fun convert(position: Int, key: String?): String {
 			return trim(data[position].getString(key)).replace("\n\n", "\n")
 		}

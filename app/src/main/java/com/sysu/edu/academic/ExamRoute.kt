@@ -75,6 +75,7 @@ fun ExamRoute(
         topBarMenus = {
             listOf(
                 exportMarkdownMenuItem(
+                    backStack,
                     examViewModel.sections,
                     stringResource(R.string.exam),
                     stringResource(R.string.exam)

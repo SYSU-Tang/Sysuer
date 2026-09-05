@@ -65,7 +65,7 @@ data class RowData(
 	val key: String?,
 	var value: String?,
 	var onClick: (() -> Unit)? = null,
-                  )
+)
 
 enum class RowOrientation { Horizontal, Vertical }
 data class SectionData(
@@ -76,39 +76,71 @@ data class SectionData(
 	val footerMenus: SnapshotStateList<MenuItem> = mutableStateListOf(),
 	var footer: (@Composable ColumnScope.() -> Unit)? = null,
 	val transitionName: String? = null,
-                      )
+)
 
-@Composable fun SectionCard(
+@Composable
+fun SectionCard(
 	section: SectionData,
 	isExpandable: Boolean = true,
 	defaultExpanded: Boolean = true,
 	isHideNull: Boolean = false,
 	sharedTransitionScope: SharedTransitionScope? = null,
 	animatedVisibilityScope: AnimatedVisibilityScope? = null,
-                           ) {
+) {
 	var expanded by rememberSaveable { mutableStateOf(defaultExpanded) }
-	
+
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-		Column(modifier = Modifier
-			.fillMaxWidth()
-			.padding(vertical = dimensionResource(R.dimen.vertical_padding))) {
-			Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+		Column(
+			modifier = Modifier
 				.fillMaxWidth()
-				.clickable(enabled = isExpandable) {
-					expanded = !expanded
-				}
-				.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding))) {
+				.padding(vertical = dimensionResource(R.dimen.vertical_padding))
+		) {
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				modifier = Modifier
+					.fillMaxWidth()
+					.clickable(enabled = isExpandable) {
+						expanded = !expanded
+					}
+					.padding(
+						horizontal = dimensionResource(R.dimen.horizontal_padding),
+						vertical = dimensionResource(R.dimen.vertical_padding)
+					)) {
 				section.icon?.let {
-					Icon(painter = painterResource(it), contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize), tint = MaterialTheme.colorScheme.primary)
+					Icon(
+						painter = painterResource(it),
+						contentDescription = null,
+						modifier = Modifier.size(ButtonDefaults.IconSize),
+						tint = MaterialTheme.colorScheme.primary
+					)
 					Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 				}
-				section.title?.let { Text(text = it, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f)) }
+				section.title?.let {
+					Text(
+						text = it,
+						style = MaterialTheme.typography.headlineSmall,
+						color = MaterialTheme.colorScheme.primary,
+						modifier = Modifier.weight(1f)
+					)
+				}
 				if (isExpandable) {
-					val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "ExpandIconRotation")
-					Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand), modifier = Modifier.rotate(rotation), tint = MaterialTheme.colorScheme.primary)
+					val rotation by animateFloatAsState(
+						targetValue = if (expanded) 180f else 0f,
+						label = "ExpandIconRotation"
+					)
+					Icon(
+						imageVector = Icons.Default.KeyboardArrowDown,
+						contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
+						modifier = Modifier.rotate(rotation),
+						tint = MaterialTheme.colorScheme.primary
+					)
 				}
 			}
-			AnimatedVisibility(visible = expanded, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+			AnimatedVisibility(
+				visible = expanded,
+				enter = expandVertically() + fadeIn(),
+				exit = shrinkVertically() + fadeOut()
+			) {
 				Column {
 					section.rows.forEach { row ->
 						if (!isHideNull || !row.value.isNullOrEmpty()) {
@@ -117,29 +149,39 @@ data class SectionData(
 					}
 				}
 			}
-			
+
 			if (section.footerMenus.isNotEmpty()) {
-				Row(modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding)),
-				    horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+							horizontal = dimensionResource(R.dimen.horizontal_padding),
+							vertical = dimensionResource(R.dimen.vertical_padding)
+						),
+					horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
+				) {
 					section.footerMenus.forEach { item ->
-						FilledTonalButton(onClick = { item.onClick() }, modifier = Modifier
-							.weight(1f)
-							.then(if (sharedTransitionScope != null && animatedVisibilityScope != null && section.transitionName != null) {
-								with(sharedTransitionScope) {
-									Modifier.sharedBounds(
-										sharedContentState = rememberSharedContentState(key = section.transitionName),
-										animatedVisibilityScope = animatedVisibilityScope,
-										/* enter = fadeIn(tween(300)),
-										 exit = fadeOut(tween(300)),
-										 resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds()*/
-									                     )
-								}
-							}
-							      else Modifier), shapes = ButtonDefaults.shapes(), enabled = item.enabled) {
+						FilledTonalButton(
+							onClick = { item.onClick() },
+							modifier = Modifier
+								.weight(1f)
+								.then(
+									if (sharedTransitionScope != null && animatedVisibilityScope != null && section.transitionName != null) {
+									with(sharedTransitionScope) {
+										Modifier.sharedBounds(
+											sharedContentState = rememberSharedContentState(key = section.transitionName),
+											animatedVisibilityScope = animatedVisibilityScope,
+										)
+									}
+								} else Modifier),
+							shapes = ButtonDefaults.shapes(),
+							enabled = item.enabled) {
 							item.icon?.let {
-								Icon(it, contentDescription = item.title, modifier = Modifier.size(dimensionResource(R.dimen.icon_size)))
+								Icon(
+									it,
+									contentDescription = item.title,
+									modifier = Modifier.size(dimensionResource(R.dimen.icon_size))
+								)
 								Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 							}
 							item.title?.let {
@@ -150,53 +192,93 @@ data class SectionData(
 				}
 			}
 			section.footer?.let {
-				Column(modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding)), content = it)
+				Column(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+							horizontal = dimensionResource(R.dimen.horizontal_padding),
+							vertical = dimensionResource(R.dimen.vertical_padding)
+						), content = it
+				)
 			}
 		}
 	}
 }
 
-@Composable fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horizontal) {
+@Composable
+fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horizontal) {
 	val context = LocalContext.current
 	val modifier = Modifier
 		.fillMaxWidth()
 		.clickable {
 			if (row.onClick != null) {
 				row.onClick?.invoke()
-			}
-			else {
+			} else {
 				val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 				clip.setPrimaryClip(ClipData.newPlainText(row.key, row.value))
 			}
 		}
-		.padding(horizontal = dimensionResource(R.dimen.horizontal_padding), vertical = dimensionResource(R.dimen.vertical_padding))
+		.padding(
+			horizontal = dimensionResource(R.dimen.horizontal_padding),
+			vertical = dimensionResource(R.dimen.vertical_padding)
+		)
 	if (orientation == RowOrientation.Horizontal) {
-		Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+		Row(
+			modifier = modifier,
+			horizontalArrangement = Arrangement.SpaceBetween,
+			verticalAlignment = Alignment.CenterVertically
+		) {
 			SelectionContainer {
-				Text(text = row.key ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+				Text(
+					text = row.key ?: "",
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier.weight(1f),
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
 			}
-			if (row.value != null && row.key != null) Spacer(modifier = Modifier.width(dimensionResource(R.dimen.horizontal_margin)))
+			if (row.value != null && row.key != null) Spacer(
+				modifier = Modifier.width(
+					dimensionResource(R.dimen.horizontal_margin)
+				)
+			)
 			SelectionContainer {
-				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary)
+				Text(
+					text = row.value ?: "",
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier.weight(1.2f),
+					textAlign = TextAlign.End,
+					color = MaterialTheme.colorScheme.primary
+				)
 			}
 		}
-	}
-	else {
+	} else {
 		Column(modifier = modifier) {
 			SelectionContainer {
-				Text(text = row.key ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+				Text(
+					text = row.key ?: "",
+					style = MaterialTheme.typography.bodyLarge,
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
 			}
-			if (row.value != null && row.key != null) Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
+			if (row.value != null && row.key != null) Spacer(
+				modifier = Modifier.height(
+					dimensionResource(R.dimen.vertical_margin)
+				)
+			)
 			SelectionContainer {
-				Text(text = row.value ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.fillMaxWidth())
+				Text(
+					text = row.value ?: "",
+					style = MaterialTheme.typography.bodyLarge,
+					color = MaterialTheme.colorScheme.primary,
+					modifier = Modifier.fillMaxWidth()
+				)
 			}
 		}
 	}
 }
 
-@Composable fun StaggerScreen(
+@Composable
+fun StaggerScreen(
 	modifier: Modifier = Modifier,
 	sections: SnapshotStateList<SectionData> = mutableStateListOf(),
 	isHideNull: Boolean = false,
@@ -205,10 +287,11 @@ data class SectionData(
 	onScrollTopChanged: ((Boolean) -> Unit)? = null,
 	sharedTransitionScope: SharedTransitionScope? = null,
 	animatedVisibilityScope: AnimatedVisibilityScope? = null,
-                             ) {
+) {
 	val state = rememberLazyStaggeredGridState()
-	val isTop = remember { derivedStateOf { state.firstVisibleItemIndex == 0 && state.firstVisibleItemScrollOffset == 0 } }
-	
+	val isTop =
+		remember { derivedStateOf { state.firstVisibleItemIndex == 0 && state.firstVisibleItemScrollOffset == 0 } }
+
 	LaunchedEffect(isTop.value) {
 		onScrollTopChanged?.invoke(isTop.value)
 	}
@@ -220,26 +303,39 @@ data class SectionData(
 	}
 	val nestedScrollConnection = rememberNestedScrollInteropConnection()
 	if (!isNestedEnabled) {
-		FlowRow(modifier = modifier
-			.fillMaxWidth()
-			.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)), verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
+		FlowRow(
+			modifier = modifier
+				.fillMaxWidth()
+				.padding(
+					dimensionResource(R.dimen.horizontal_padding),
+					dimensionResource(R.dimen.vertical_padding)
+				),
+			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
+		) {
 			sections.forEach { section ->
 				SectionCard(section, isHideNull = isHideNull)
 			}
 		}
 		return
 	}
-	
-	LazyVerticalStaggeredGrid(state = state,
-	                          columns = StaggeredGridCells.Adaptive(240.dp),
-	                          modifier = modifier
-		                          .fillMaxSize()
-		                          .nestedScroll(nestedScrollConnection),
-	                          contentPadding = PaddingValues(dimensionResource(R.dimen.horizontal_margin)),
-	                          verticalItemSpacing = dimensionResource(R.dimen.vertical_margin),
-	                          horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
+
+	LazyVerticalStaggeredGrid(
+		state = state,
+		columns = StaggeredGridCells.Adaptive(240.dp),
+		modifier = modifier
+			.fillMaxSize()
+			.nestedScroll(nestedScrollConnection),
+		contentPadding = PaddingValues(dimensionResource(R.dimen.horizontal_margin)),
+		verticalItemSpacing = dimensionResource(R.dimen.vertical_margin),
+		horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
+	) {
 		itemsIndexed(sections) { _, section ->
-			SectionCard(section, isHideNull = isHideNull, sharedTransitionScope = sharedTransitionScope, animatedVisibilityScope = animatedVisibilityScope)
+			SectionCard(
+				section,
+				isHideNull = isHideNull,
+				sharedTransitionScope = sharedTransitionScope,
+				animatedVisibilityScope = animatedVisibilityScope
+			)
 		}
 	}
 }
@@ -251,9 +347,13 @@ fun List<SectionData>.toMarkdown(): String {
 		val sectionKeys = section.rows.map { it.key }
 		if (keys.isEmpty() || !sectionKeys.containsAll(keys)) {
 			keys = sectionKeys
-			markdown.append("\n").append("序号 | ").append(keys.joinToString(" | ") { it?.trim() ?: "" }).append("\n").append("--- | ".repeat(keys.size + 1)).append("\n")
+			markdown.append("\n").append("序号 | ")
+				.append(keys.joinToString(" | ") { it?.trim() ?: "" }).append("\n")
+				.append("--- | ".repeat(keys.size + 1)).append("\n")
 		}
-		markdown.append(i + 1).append(" | ").append(section.rows.map { it.value }.joinToString(" | ") { it?.trim()?.replace("\n", "<br>")?.replace("\r", "") ?: "" }).append("\n")
+		markdown.append(i + 1).append(" | ").append(section.rows.map { it.value }
+			.joinToString(" | ") { it?.trim()?.replace("\n", "<br>")?.replace("\r", "") ?: "" })
+			.append("\n")
 	}
 	return "$markdown"
 }
@@ -262,7 +362,7 @@ fun List<SectionData>.toHtml(): String {
 	val html = StringBuilder()
 	html.append("<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">")
 	var keys: List<String?> = emptyList()
-	
+
 	forEachIndexed { i, section ->
 		val sectionKeys = section.rows.map { it.key }
 		if (keys.isEmpty() || !sectionKeys.containsAll(keys)) {

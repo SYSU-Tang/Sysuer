@@ -54,13 +54,23 @@ import com.sysu.edu.academic.CourseDetailRoute
 import com.sysu.edu.academic.CourseSelectedRoute
 import com.sysu.edu.academic.DormRoute
 import com.sysu.edu.academic.ExamRoute
+import com.sysu.edu.academic.GradeForLevelRoute
 import com.sysu.edu.academic.GradeRoute
 import com.sysu.edu.academic.LeaveSlipRoute
+import com.sysu.edu.academic.MajorInfoRoute
+import com.sysu.edu.academic.PersonalInformationRoute
+import com.sysu.edu.academic.PersonalTrainingProgramRoute
+import com.sysu.edu.academic.RegistrationRoute
+import com.sysu.edu.academic.SchoolEnrollmentRoute
+import com.sysu.edu.academic.SchoolWorkWarningRoute
+import com.sysu.edu.academic.TrainingProgramRoute
 import com.sysu.edu.api.HttpManager
 import com.sysu.edu.api.PreferenceViewModel
 import com.sysu.edu.browser.RichTextRoute
 import com.sysu.edu.home.HomeViewModel
 import com.sysu.edu.home.ServiceConfig
+import com.sysu.edu.life.NetPayRoute
+import com.sysu.edu.life.PayRoute
 import com.sysu.edu.nav.AcademyNotification
 import com.sysu.edu.nav.CET
 import com.sysu.edu.nav.CourseDetail
@@ -68,7 +78,17 @@ import com.sysu.edu.nav.CourseSelected
 import com.sysu.edu.nav.Dorm
 import com.sysu.edu.nav.Exam
 import com.sysu.edu.nav.Grade
+import com.sysu.edu.nav.GradeForLevel
 import com.sysu.edu.nav.LeaveSlip
+import com.sysu.edu.nav.MajorInfo
+import com.sysu.edu.nav.NetPay
+import com.sysu.edu.nav.Pay
+import com.sysu.edu.nav.PersonalInformation
+import com.sysu.edu.nav.PersonalTrainingProgram
+import com.sysu.edu.nav.Registration
+import com.sysu.edu.nav.SchoolEnrollment
+import com.sysu.edu.nav.SchoolWorkWarning
+import com.sysu.edu.nav.TrainingProgram
 import com.sysu.edu.nav.Home
 import com.sysu.edu.nav.RichText
 import com.sysu.edu.nav.SysuerNavDisplay
@@ -253,8 +273,79 @@ class MainActivity : BaseActivity() {
 							animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<GradeForLevel> {
+						GradeForLevelRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
 					entry<LeaveSlip> {
 						LeaveSlipRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<NetPay> {
+						NetPayRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<Pay> {
+						PayRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<Registration> {
+						RegistrationRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<MajorInfo> {
+						MajorInfoRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<PersonalInformation> {
+						PersonalInformationRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<PersonalTrainingProgram> { key ->
+						PersonalTrainingProgramRoute(
+							backStack,
+							key,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<TrainingProgram> {
+						TrainingProgramRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<SchoolWorkWarning> {
+						SchoolWorkWarningRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<SchoolEnrollment> {
+						SchoolEnrollmentRoute(
 							backStack,
 							sharedTransitionScope = this@SharedTransitionLayout,
 							animatedVisibilityScope = LocalNavAnimatedContentScope.current

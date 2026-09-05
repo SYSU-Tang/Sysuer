@@ -121,6 +121,7 @@ fun CETRoute(
         topBarMenus = {
             listOf(
                 exportMarkdownMenuItem(
+                    backStack,
                     sections,
                     stringResource(R.string.cet), stringResource(R.string.cet)
                 )

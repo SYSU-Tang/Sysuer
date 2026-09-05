@@ -47,7 +47,7 @@ import com.sysu.edu.view.exportMarkdownMenuItem
 	}
 	val activity = LocalActivity.current
 	ActivityPager(title = stringResource(R.string.course_selected), onNavigationClick = { backStack.navigateBack(activity) }, isNestedScrollEnabled = false, topBarMenus = {
-		listOf(exportMarkdownMenuItem(viewModel.sections, stringResource(R.string.course_selected), stringResource(R.string.course_selected)))
+		listOf(exportMarkdownMenuItem(backStack, viewModel.sections, stringResource(R.string.course_selected), stringResource(R.string.course_selected)))
 	}, topBarContent = {
 		OutlinedTextField(value = searchQuery, onValueChange = { searchQuery = it }, trailingIcon = {
 			if (searchQuery.isNotEmpty()) IconButton(onClick = { searchQuery = "" }) {

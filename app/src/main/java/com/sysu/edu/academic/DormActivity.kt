@@ -9,7 +9,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.sysu.edu.BaseActivity
+import com.sysu.edu.browser.RichTextRoute
 import com.sysu.edu.nav.Dorm as DormKey
+import com.sysu.edu.nav.RichText
 import com.sysu.edu.nav.SysuerNavDisplay
 import com.sysu.edu.theme.SysuerTheme
 
@@ -25,6 +27,13 @@ class DormActivity : BaseActivity() {
                     SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
                         entry<DormKey> {
                             DormRoute(
+                                backStack,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                            )
+                        }
+                        entry<RichText> {
+                            RichTextRoute(
                                 backStack,
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current

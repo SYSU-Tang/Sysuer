@@ -35,13 +35,13 @@ fun DormRoute(
     val viewModel: DormViewModel = viewModel()
     val dormInfo by viewModel.dormInfo.observeAsState(null)
     val activity = LocalActivity.current
-
+    val title = stringResource(R.string.personal_info)
     val personalInfo = remember(dormInfo) {
         val snapshotList = mutableStateListOf<SectionData>()
         dormInfo?.let {
             snapshotList.add(
                 SectionData(
-                    title = context.getString(R.string.personal_info),
+                    title = title,
                     rows = extractValue(
                         context,
                         it,
@@ -159,6 +159,7 @@ fun DormRoute(
         topBarMenus = {
             listOf(
                 exportMarkdownMenuItem(
+                    backStack,
                     listOf(personalInfo, roomInfo, feeInfo),
                     tabs,
                     stringResource(R.string.dorm)

@@ -164,7 +164,7 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 								rows = createRows(
 									intArrayOf(R.string.current_rank, R.string.current_point),
 									listOf(
-										"$rank/$total=${rank.toFloat() / total.toFloat()}",
+										"$rank/$total${if (rank.isNotEmpty()) "(=${rank.toFloat() / total.toFloat()})" else ""}",
 										point
 									)
 								)

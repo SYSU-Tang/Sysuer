@@ -866,4 +866,8 @@
     <string name="senior_filter">高级筛选</string>
     <string name="action_success">操作成功</string>
     <string name="hidden_selected">隐藏已选</string>
+    <string name="create_time">创建时间</string>
+    <string name="pay_status">支付状态</string>
+    <string name="invoice_title">发票抬头</string>
+    <string name="unselect">退课</string>
 </resources>

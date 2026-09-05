@@ -44,6 +44,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 	
 	init {
 		model.message.observeForever { (code, response) ->
+			println("code: $code response: $response")
 			if (response.getInteger("code") == 200) {
 				val data = response.getJSONObject("data")
 				if (data != null) when (code) {
@@ -64,6 +65,16 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 	}
 	
 	fun initFromIntent(classNum: String?, courseId: String?) {
+		outlineLoaded = false
+		outline2Loaded = false
+		outlineInfo = null
+		outline2Data = null
+		synchronized(_detailSections) { _detailSections.clear() }
+		synchronized(_outlineSections) { _outlineSections.clear() }
+		outlineId.value = null
+		courseInfoId.value = null
+		courseName.value = null
+		
 		this@CourseDetailViewModel.classNum.value = classNum
 		this@CourseDetailViewModel.courseId.value = courseId
 		if (classNum != null) fetchCourseOutline()

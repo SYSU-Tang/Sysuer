@@ -7,6 +7,7 @@
       {
         "id": 101,
         "name": "Academic Status",
+        "route": "SchoolEnrollment",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/myStuRoll?code=jwxsd_wdxj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E5%25AD%25A6%25E7%25B1%258D",
         "activity": ".academic.SchoolEnrollmentActivity",
         "description": "Student status information inquiry system, check personal student status, admission information, major and class, and other basic information"
@@ -22,6 +23,7 @@
       {
         "id": 103,
         "name": "Registration",
+        "route": "Registration",
         "activity": ".academic.RegistrationActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/myStuRoll?code=jwxsd_xk&resourceName=%25E6%2588%2591%25E7%259A%2584%25E8%25AF%25B7%25E6%25B3%2595%25E6%258B%258D%25E8%25AF%25B7",
         "description": "Registration information management system, inquiry and confirmation of student registration status every semester"
@@ -29,6 +31,7 @@
       {
         "id": 104,
         "name": "Academic Warning",
+        "route": "SchoolWorkWarning",
         "activity": ".academic.SchoolWorkWarningActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/schoolWorkWarning?code=jwxsd_wdxyyj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E5%25AD%25A6%25E4%25B8%259A%25E9%25A2%2584%25E8%25AD%25A6",
         "description": "Academic early warning system, monitoring academic performance, credit completion, and issuing early warning notices in a timely manner"
@@ -65,6 +68,7 @@
       {
         "id": 109,
         "name": "Personal Information",
+        "route": "PersonalInformation",
         "activity": ".academic.PersonalInformationActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/xsxx/#/personalInfo",
         "description": "Personal information inquiry system, check personal basic information, educational work experience, family members, and social relationships, as well as dual major dual degree information, work and study records, etc."
@@ -358,6 +362,7 @@
       {
         "id": 709,
         "name": "Personal Training Plan",
+        "route": "PersonalTrainingProgram",
         "activity": ".academic.PersonalTrainingProgramActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView?code=jwxsd_grpyfack&resourceName=%25E4%25B8%25AA%25E4%25BA%25BA%25E5%259F%25B9%25E5%2585%25BB%25E6%2596%25B9%25E6%25A1%2588%25E6%259F%25A5%25E7%259C%258B",
         "description": "Personal training plan system, providing professional training plans, course planning, and academic guidance"
@@ -365,12 +370,15 @@
       {
         "id": 710,
         "name": "All School Training Plan",
+        "activity": ".academic.TrainingProgramActivity",
+        "route": "TrainingProgram",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/allSchoolTrainingProgramView?code=jwxsd_qxpyfack&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%259F%25B9%25E5%2585%25BB%25E6%2596%25B9%25E6%25A1%2588%25E6%259F%25A5%25E7%259C%258B",
         "description": "Training plan inquiry system, providing details on training objectives, course settings, and graduation requirements for each major"
       },
       {
         "id": 711,
         "name": "Undergraduate Majors Library",
+        "route": "MajorInfo",
         "activity": ".academic.MajorInfoActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/majorInfoView?code=jwxsd_bkzycx&resourceName=%25E6%259C%25AC%25E7%25A7%2591%25E4%25B8%2593%25E4%25B8%259A%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "Major information inquiry system, providing detailed information such as major introductions, faculty, and employment direction"
@@ -392,6 +400,7 @@
       {
         "id": 714,
         "name": "Level Grades",
+        "route": "GradeForLevel",
         "activity": ".academic.GradeForLevelActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/achieveConvertApply?code=jwxsd_cjzhsq&resourceName=%25E6%2588%2590%25E7%25BB%25A9%25E8%25BD%25AC%25E6%258D%25A2%25E7%2594%25B3%25E8%25AF%25B7",
         "description": "Level grade inquiry system, with functions such as level grade inquiry, GPA calculation, and transcript printing"
@@ -521,6 +530,7 @@
       {
         "id": 907,
         "name": "Payment Hall",
+        "route": "Pay",
         "activity": ".life.PayActivity",
         "url": "https://pay.sysu.edu.cn/#/",
         "description": "Campus online payment platform for paying various fees such as tuition, accommodation, and miscellaneous fees"
@@ -535,6 +545,7 @@
       {
         "id": 909,
         "name": "Campus Network",
+        "route": "NetPay",
         "activity": ".life.NetPayActivity",
         "url": "https://netpay.sysu.edu.cn/",
         "description": "Campus network management system"

@@ -3,88 +3,46 @@ package com.sysu.edu.academic
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.lifecycle.ViewModelProvider
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.sysu.edu.BaseActivity
-import com.sysu.edu.R
-import com.sysu.edu.view.ActivityPager
-import com.sysu.edu.view.InputDialogChip
-import com.sysu.edu.view.SingleSelectChipDropdown
-import com.sysu.edu.view.StaggerScreen
-import com.sysu.edu.view.exportMarkdownMenuItem
+import com.sysu.edu.browser.RichTextRoute
+import com.sysu.edu.nav.GradeForLevel as GradeForLevelKey
+import com.sysu.edu.nav.RichText
+import com.sysu.edu.nav.SysuerNavDisplay
+import com.sysu.edu.theme.SysuerTheme
 
 class GradeForLevelActivity : BaseActivity() {
-	@OptIn(ExperimentalLayoutApi::class) override fun onCreate(savedInstanceState: Bundle?) {
+	@OptIn(ExperimentalSharedTransitionApi::class)
+	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
-		val viewModel = ViewModelProvider(this)[GradeForLevelViewModel::class.java]
-		
 		setContent {
-			val trainTypeOptions = viewModel.trainTypeOptions
-			val yearOptions = viewModel.yearOptions
-			val courseTypeOptions = viewModel.courseTypeOptions
-			var trainTypeValue by rememberSaveable { mutableStateOf<String?>(null) }
-			var yearValue by rememberSaveable { mutableStateOf<String?>(null) }
-			var courseTypeValue by rememberSaveable { mutableStateOf<String?>(null) }
-			var courseNameValue by rememberSaveable { mutableStateOf("") }
-			var courseNumberValue by rememberSaveable { mutableStateOf("") }
-			var minGradeValue by rememberSaveable { mutableStateOf("") }
-			fun onFilterChange() {
-				viewModel.trainType = trainTypeValue
-				viewModel.year = yearValue
-				viewModel.courseType = courseTypeValue
-				viewModel.courseName = courseNameValue.ifEmpty { null }
-				viewModel.courseNumber = courseNumberValue.ifEmpty { null }
-				viewModel.minGrade = minGradeValue.ifEmpty { null }
-				viewModel.reFetchGrade()
-			}
-			LaunchedEffect(Unit) {
-				viewModel.fetchOptions()
-				viewModel.fetchGrade()
-			}
-			ActivityPager(title = stringResource(R.string.grade_for_level), onNavigationClick = { supportFinishAfterTransition() }, isNestedScrollEnabled = false, topBarMenus = {
-				listOf(exportMarkdownMenuItem(viewModel.sections, stringResource(R.string.grade_for_level), stringResource(R.string.grade_for_level)))
-			}, topBarContent = {
-				FlowRow(modifier = Modifier
-					.fillMaxWidth()
-					.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
-				        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
-					SingleSelectChipDropdown(category = stringResource(R.string.train_type),
-					                         options = listOf(getString(R.string.reset)) + trainTypeOptions.map { it.getString("dataName") },
-					                         optionValues = listOf(null) + trainTypeOptions.map { it.getString("dataNumber") },
-					                         selectedValue = trainTypeValue,
-					                         onValueChange = { trainTypeValue = it; onFilterChange() })
-					SingleSelectChipDropdown(category = stringResource(R.string.year),
-					                         options = listOf(getString(R.string.reset)) + yearOptions.map { it.getString("acadYearSemester") },
-					                         optionValues = listOf(null) + yearOptions.map { it.getString("acadYearSemester") },
-					                         selectedValue = yearValue,
-					                         onValueChange = { yearValue = it; onFilterChange() })
-					SingleSelectChipDropdown(category = stringResource(R.string.course_type),
-					                         options = listOf(getString(R.string.reset)) + courseTypeOptions.map { it.getString("catName") },
-					                         optionValues = listOf(null) + courseTypeOptions.map { it.getString("catCode") },
-					                         selectedValue = courseTypeValue,
-					                         onValueChange = { courseTypeValue = it; onFilterChange() })
-					InputDialogChip(stringResource(R.string.course_name), courseNameValue) { courseNameValue = it; onFilterChange() }
-					InputDialogChip(stringResource(R.string.course_number), courseNumberValue) { courseNumberValue = it; onFilterChange() }
-					InputDialogChip(stringResource(R.string.min_grade), minGradeValue, KeyboardType.Number) { minGradeValue = it; onFilterChange() }
+			val backStack = rememberNavBackStack(GradeForLevelKey)
+			SysuerTheme(settingManager) {
+				SharedTransitionLayout {
+					SysuerNavDisplay(
+						backStack = backStack,
+						entryProvider = entryProvider {
+							entry<GradeForLevelKey> {
+								GradeForLevelRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								)
+							}
+							entry<RichText> {
+								RichTextRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								)
+							}
+						})
 				}
-			}) {
-				StaggerScreen(sections = viewModel.sections, onScrollBottom = {
-					if (viewModel.hasMore()) viewModel.fetchGrade()
-				})
 			}
 		}
 	}

@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
-fun MutableList<NavKey>.navigateBack(onFinish: (() -> Unit)? = null) {
+private fun MutableList<NavKey>.navigateBack(onFinish: (() -> Unit)? = null) {
 	if (size > 1) removeLastOrNull()
 	else onFinish?.invoke()
 }
@@ -15,53 +15,9 @@ fun MutableList<NavKey>.navigateBack(activity: Activity? = null) {
 	}
 }
 
-fun navKeyOf(name: String): NavKey? = when (name) {
-	"Home" -> Home
-	"CourseSelected" -> CourseSelected
-	"SchoolEnrollment" -> SchoolEnrollment
-	"CET" -> CET
-	"Registration" -> Registration
-	"SchoolWorkWarning" -> SchoolWorkWarning
-	"CourseCompletion" -> CourseCompletion
-	"LeaveReturnRegistration" -> LeaveReturnRegistration
-	"PhysicalFitnessTestResult" -> PhysicalFitnessTestResult
-	"Dorm" -> Dorm
-	"PersonalInformation" -> PersonalInformation
-	"StudentPartTime" -> StudentPartTime
-	"Todo" -> Todo
-	"Agenda" -> Agenda
-	"Homework" -> Homework
-	"News" -> News
-	"AcademyNotification" -> AcademyNotification
-	"Evaluation" -> Evaluation
-	"CourseSelection" -> CourseSelection
-	"CourseSchedule" -> CourseSchedule
-	"Exam" -> Exam
-	"Calendar" -> Calendar
-	"ClassroomQuery" -> ClassroomQuery
-	"Grade" -> Grade
-	"CourseQuery" -> CourseQuery
-	"PersonalTrainingProgram" -> PersonalTrainingProgram
-	"TrainingProgram" -> TrainingProgram
-	"MajorInfo" -> MajorInfo
-	"AssistantInfo" -> AssistantInfo
-	"GradeForLevel" -> GradeForLevel
-	"RoomQuery" -> RoomQuery
-	"AssistantEvaluation" -> AssistantEvaluation
-	"LeaveSlip" -> LeaveSlip
-	"RainClassMain" -> RainClassMain
-	"SchoolBus" -> SchoolBus
-	"EnergyFee" -> EnergyFee
-	"Pay" -> Pay
-	"GymReservation" -> GymReservation
-	"NetPay" -> NetPay
-	"Complaint" -> Complaint
-	else -> null
-}
-
 @Serializable data object Home : NavKey
 @Serializable data object CourseSelected : NavKey
-@Serializable data class CourseDetail(val courseId: String = "", val courseNum: String = "") : NavKey
+@Serializable data class CourseDetail(val courseId: String? = "", val courseNum: String = "") : NavKey
 @Serializable data class WebPage(val url: String, val title: String = "") : NavKey
 @Serializable data class RichText(val title: String = "预览", val content: String? = "", val contentType: String? = "") : NavKey
 @Serializable data object SchoolEnrollment : NavKey
@@ -87,7 +43,7 @@ fun navKeyOf(name: String): NavKey? = when (name) {
 @Serializable data object ClassroomQuery : NavKey
 @Serializable data object Grade : NavKey
 @Serializable data object CourseQuery : NavKey
-@Serializable data object PersonalTrainingProgram : NavKey
+@Serializable data class PersonalTrainingProgram(val programId: String? = null) : NavKey
 @Serializable data object TrainingProgram : NavKey
 @Serializable data object MajorInfo : NavKey
 @Serializable data object AssistantInfo : NavKey

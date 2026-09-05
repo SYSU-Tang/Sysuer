@@ -7,6 +7,7 @@
       {
         "id": 101,
         "name": "学籍",
+        "route": "SchoolEnrollment",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/myStuRoll?code=jwxsd_wdxj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E5%25AD%25A6%25E7%25B1%258D",
         "activity": ".academic.SchoolEnrollmentActivity",
         "description": "学籍信息查询，查看个人学籍、个人基本信息、个人联系方式、家庭成员及社会关系、学历及经历、交流经历、异动情况、双专业双学位辅修情况、注册状态、惩处等基本信息"
@@ -22,6 +23,7 @@
       {
         "id": 103,
         "name": "注册",
+        "route": "Registration",
         "activity": ".academic.RegistrationActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/myStuRoll?code=jwxsd_xk&resourceName=%25E6%2588%2591%25E7%259A%2584%25E8%25AF%25B7%25E6%25B3%2595%25E6%258B%258D%25E8%25AF%25B7",
         "description": "注册信息查询，包括今年学生注册报道信息、缴费信息、往年注册记录等"
@@ -29,6 +31,7 @@
       {
         "id": 104,
         "name": "学业预警",
+        "route": "SchoolWorkWarning",
         "activity": ".academic.SchoolWorkWarningActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/schoolWorkWarning?code=jwxsd_wdxyyj&resourceName=%25E6%2588%2591%25E7%259A%2584%25E5%25AD%25A6%25E4%25B8%259A%25E9%25A2%2584%25E8%25AD%25A6",
         "description": "学业预警查询，查看个人学业预警状态、预警内容、预警时间等信息"
@@ -65,6 +68,7 @@
       {
         "id": 109,
         "name": "个人信息",
+        "route": "PersonalInformation",
         "activity": ".academic.PersonalInformationActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/xsxx/#/personalInfo",
         "description": "个人信息查询系统，查看个人基本信息、教育工作经历、家庭成员以及社会关系、本科辅修双专业双学位信息、奖勤助贷情况、勤工俭学记录等"
@@ -356,6 +360,7 @@
       {
         "id": 709,
         "name": "个人培养方案",
+        "route": "PersonalTrainingProgram",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/personalTrainingProgramView?code=jwxsd_grpyfack&resourceName=%25E4%25B8%25AA%25E4%25BA%25BA%25E5%259F%25B9%25E5%2585%25BB%25E6%2596%25B9%25E6%25A1%2588%25E6%259F%25A5%25E7%259C%258B",
         "activity": ".academic.PersonalTrainingProgramActivity",
         "description": "个人培养计划系统，专业培养方案、课程规划、学业指导等"
@@ -363,6 +368,7 @@
       {
         "id": 710,
         "activity": ".academic.TrainingProgramActivity",
+        "route": "TrainingProgram",
         "name": "全校培养方案",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/allSchoolTrainingProgramView?code=jwxsd_qxpyfack&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%259F%25B9%25E5%2585%25BB%25E6%2596%25B9%25E6%25A1%2588%25E6%259F%25A5%25E7%259C%258B",
         "description": "培养方案查询系统，各专业培养目标、课程设置、毕业要求等"
@@ -370,6 +376,7 @@
       {
         "id": 711,
         "name": "本科专业库",
+        "route": "MajorInfo",
         "activity": ".academic.MajorInfoActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/studentWeb/#/majorInfoView?code=jwxsd_bkzycx&resourceName=%25E6%259C%25AC%25E7%25A7%2591%25E4%25B8%2593%25E4%25B8%259A%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "专业信息查询系统，专业介绍、师资力量、就业方向等详细信息"
@@ -392,6 +399,7 @@
       {
         "id": 714,
         "name": "等级制成绩",
+        "route": "GradeForLevel",
         "activity": ".academic.GradeForLevelActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/achieveConvertApply?code=jwxsd_cjzhsq&resourceName=%25E6%2588%2590%25E7%25BB%25A9%25E8%25BD%25AC%25E6%258D%25A2%25E7%2594%25B3%25E8%25AF%25B7",
         "description": "等级制成绩查询系统，显示学生等级、绩点、等级制成绩等信息"
@@ -522,6 +530,7 @@
       {
         "id": 907,
         "name": "缴费大厅",
+        "route": "Pay",
         "activity": ".life.PayActivity",
         "url": "https://pay.sysu.edu.cn/#/",
         "description": "校园在线缴费平台，学费、住宿费、杂费等各类费用缴纳"
@@ -536,6 +545,7 @@
       {
         "id": 909,
         "activity": ".life.NetPayActivity",
+        "route": "NetPay",
         "name": "校园网",
         "url": "https://netpay.sysu.edu.cn/",
         "description": "校园网管理系统"

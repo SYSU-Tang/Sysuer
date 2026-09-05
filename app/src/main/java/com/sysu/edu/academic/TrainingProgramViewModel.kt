@@ -105,7 +105,9 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 						responseData.getJSONArray("rows").forEach { o: Any? ->
 							val obj = o as JSONObject
 							val keys = intArrayOf(R.string.profession, R.string.grade, R.string.college, R.string.training_category, R.string.study_period, R.string.discipline_category, R.string.degree, R.string.profession_code, R.string.profession_id)
-							resultSections.add(SectionData(title = obj.getString("name"),  rows = extractValue(getApplication(),
+							resultSections.add(SectionData(title = obj.getString("name"),
+								transitionName = "PersonalTrainingProgram_${o.getString("teachPlanNumber")}",
+								rows = extractValue(getApplication(),
 							                                                                                                                        obj, keys, arrayOf("professionName", "grade", "manageUnitName", "trainTypeName", "educationalSystem", "disciplineCateName", "degreeGrantName", "professionCode", "professionId")
 																																	 ), footerMenus = mutableStateListOf(MenuItem(getApplication<Application>().getString(R.string.view_detail)){
 																																		 viewDetailProgramId = o.getString("teachPlanNumber")

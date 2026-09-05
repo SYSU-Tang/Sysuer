@@ -29,9 +29,9 @@ import com.sysu.edu.view.exportMarkdownMenuItem
 	if (navKey == null) return
 	val viewModel: CourseDetailViewModel = viewModel()
 	val context = LocalContext.current
-	val activity = LocalActivity.current
+	println("navKey: $navKey courseId: ${navKey.courseId} courseNum: ${navKey.courseNum}")
 	LaunchedEffect(navKey.courseId, navKey.courseNum) {
-		viewModel.initFromIntent(navKey.courseNum.ifEmpty { null }, navKey.courseId.ifEmpty { null })
+		viewModel.initFromIntent(navKey.courseNum, navKey.courseId)
 	}
 	LaunchedEffect(Unit) {
 		viewModel.toastEvent.collect { message ->
@@ -42,7 +42,7 @@ import com.sysu.edu.view.exportMarkdownMenuItem
 	              animatedVisibilityScope = animatedVisibilityScope,
 	              sharedKey = "course_${navKey.courseId}_${navKey.courseNum}",
 	              title = stringResource(R.string.course_detail),
-	              onNavigationClick = { backStack.navigateBack(activity) },
+	              onNavigationClick = { backStack.navigateBack() },
 	              tabs = listOf(
 		              MenuItem(title = stringResource(R.string.course_detail)),
 		              MenuItem(title = stringResource(R.string.course_draft)),

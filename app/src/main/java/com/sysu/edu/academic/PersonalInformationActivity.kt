@@ -3,91 +3,45 @@ package com.sysu.edu.academic
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModelProvider
-import com.alibaba.fastjson2.JSONObject
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.sysu.edu.BaseActivity
-import com.sysu.edu.R
-import com.sysu.edu.api.CommonUtil.toStringOrDefault
-import com.sysu.edu.view.ActivityPager
-import com.sysu.edu.view.MenuItem
-import com.sysu.edu.view.RowData
-import com.sysu.edu.view.SectionData
-import com.sysu.edu.view.StaggerScreen
-import com.sysu.edu.view.exportMarkdownMenuItem
+import com.sysu.edu.browser.RichTextRoute
+import com.sysu.edu.nav.PersonalInformation as PersonalInformationKey
+import com.sysu.edu.nav.RichText
+import com.sysu.edu.nav.SysuerNavDisplay
+import com.sysu.edu.theme.SysuerTheme
 
 class PersonalInformationActivity : BaseActivity() {
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		enableEdgeToEdge()
-		val viewModel = ViewModelProvider(this)[PersonalInformationViewModel::class.java]
-		
-		setContent {
-			val infoList by viewModel.infoList.observeAsState(emptyList())
-			
-			LaunchedEffect(Unit) {
-				viewModel.fetchPersonalInfo()
-			}
-			val tabTitles = remember(infoList) {
-				infoList.map { it.getString("zdflmc") }
-			}
-			val allSections = remember(infoList) {
-				val dict = HashMap<String?, String?>()
-				dict["bmmc"] = "部门"
-				dict["id"] = "ID"
-				dict["jgmc"] = "籍贯"
-				dict["hjszdText"] = "高中所在地"
-				dict["zjxymc"] = "宗教信仰"
-				dict["sfzszdmc"] = "身份证所在地"
-				dict["jkzkmc"] = "健康状况"
-				dict["csd"] = "出生地"
-				dict["kslbmc"] = "考生类别"
-				dict["hyzk"] = "婚姻状况"
-				dict["cjrbjText"] = "残疾人标记"
-				dict["xxmc"] = "学校"
-				dict["hyzkmc"] = "婚姻状况描述"
-				
-				infoList.map { item ->
-					val sections = mutableStateListOf<SectionData>()
-					item.getJSONArray("fields")?.filterIsInstance<JSONObject>()?.forEach { field ->
-						dict[field.getString("zdmc")] = field.getString("zdzwm")
-					}
-					val data = item.getJSONObject("data")
-					if (data != null && !data.isEmpty()) {
-						val rows = mutableStateListOf<RowData>()
-						data.forEach { (k, v) ->
-							rows.add(RowData(dict.getOrDefault(k, k), toStringOrDefault<Any?>(v)))
-						}
-						sections.add(SectionData(title = item.getString("zdflmc"), rows = rows))
-					}
-					else {
-						var count = 1
-						item.getJSONArray("dataList")?.filterIsInstance<JSONObject>()?.forEach { j ->
-							val rows = mutableStateListOf<RowData>()
-							j.forEach { (k, v) ->
-								val value = when (k) {
-									"gx", "gxrzzmm", "qdxl" -> (v as? JSONObject)?.getString("label")
-									else -> "$v"
-								}
-								rows.add(RowData(dict.getOrDefault(k, k), value))
-							}
-							sections.add(SectionData(title = "${count++}", rows = rows))
-						}
-					}
-					sections
-				}
-			}
-			val tabs = tabTitles.map { MenuItem(it) }
-			ActivityPager(title = stringResource(R.string.personal_info), tabs = tabs, topBarMenus = {
-				listOf(exportMarkdownMenuItem(allSections, tabs, stringResource(R.string.personal_info)))
-			}, onNavigationClick = { supportFinishAfterTransition() }) { page ->
-				allSections.getOrNull(page)?.let { StaggerScreen(sections = it) }
-			}
-		}
-	}
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            val backStack = rememberNavBackStack(PersonalInformationKey)
+            SysuerTheme(settingManager) {
+                SharedTransitionLayout {
+                    SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
+                        entry<PersonalInformationKey> {
+                            PersonalInformationRoute(
+                                backStack,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                            )
+                        }
+                        entry<RichText> {
+                            RichTextRoute(
+                                backStack,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = LocalNavAnimatedContentScope.current
+                            )
+                        }
+                    })
+                }
+            }
+        }
+    }
 }
