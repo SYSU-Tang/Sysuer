@@ -12,16 +12,19 @@ object ScriptManager {
 	 * @param url 当前页面的 URL
 	 * @param allScripts 数据库中所有的脚本实体
 	 */
-	fun getMatchingScripts(url: String,
-	                       allScripts: List<JavaScriptEntity>): List<JavaScriptEntity> {
+	fun getMatchingScripts(
+		url: String, allScripts: List<JavaScriptEntity>
+	): List<JavaScriptEntity> {
 		// SECURITY: scripts that opt into universal URL coverage (`<all_urls>`)
 		// must also have `run == 1` (the explicit "trust this script" flag
 		// stored on the entity). Without that gate, a malicious or careless
 		// script using `<all_urls>` would inject userscript code into every
 		// page the user visits — including banking, email, and the credential
 		// forms that this very app relies on.
-		val supportsAllUrls = url.startsWith("http://") || url.startsWith("https://") ||
-			url.startsWith("file://") || url.startsWith("about:")
+		val supportsAllUrls =
+			url.startsWith("http://") || url.startsWith("https://") || url.startsWith("file://") || url.startsWith(
+				"about:"
+			)
 		return allScripts.filter { script -> // 1. 检查状态是否启用 (state = 1 表示启用)
 			if (script.state != 1) return@filter false // 2. 检查黑名单 (excludes)
 			val allowAllUrls = script.run == 1
@@ -39,7 +42,7 @@ object ScriptManager {
 			isMatched || isIncluded
 		}
 	}
-	
+
 	/**
 	 * 执行匹配的脚本
 	 * @param webView 目标 WebView
@@ -53,7 +56,7 @@ object ScriptManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * 执行匹配的脚本
 	 * @param webView 目标 WebView
@@ -67,39 +70,28 @@ object ScriptManager {
 			}
 		}
 	}
+
 	fun executeScript(entity: JavaScriptEntity, webView: WebView) {
 		val scriptContent = entity.script ?: return
 		val scriptName = entity.title ?: "Untitled"
 		val scriptId = "${scriptName}_${entity.namespace ?: ""}"
 
-		// Sanitize user-controlled values used inside the JS string literal
 		val safeName = scriptName.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
-		val safeNamespace = (entity.namespace ?: "").replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
-		val safeVersion = (entity.version ?: "").replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
+		val safeNamespace = (entity.namespace ?: "").replace("\\", "\\\\").replace("\"", "\\\"")
+			.replace("\n", "\\n")
+		val safeVersion =
+			(entity.version ?: "").replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
 		val safeScriptId = scriptId.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
 
-		// Sandboxed GM polyfill:
-		//  - All GM_* APIs are declared with `const` inside an IIFE so they live in
-		//    the script's lexical scope and are NOT attached to `window`.
-		//  - Only the API object (via the `unsafeWindow`-like `__GM_API__` reference
-		//    passed to the user script) is reachable from the script body itself.
-		//  - Web page JS cannot directly reach `AndroidGM` via the GM_ functions,
-		//    because the polyfill is no longer hoisted onto `window`.
-		//
-		// Note: `AndroidGM` (the JavascriptInterface) is still attached to the
-		// WebView globally, but any non-user-script page code calling it can only
-		// invoke operations that are routed through `gmBridge` which has its own
-		// permission checks (see GMBridge). Critical values like `username` /
-		// `password` are NO LONGER exposed via `GM_getValue` keys.
 		val gmPolyfill = """
                     (function() {
-                        const __SCRIPT_ID__ = "${safeScriptId}";
-                        const __SCRIPT_NAME__ = "${safeName}";
+                        const __SCRIPT_ID__ = "$safeScriptId";
+                        const __SCRIPT_NAME__ = "$safeName";
                         const GM_info = Object.freeze({
                             script: Object.freeze({
                                 name: __SCRIPT_NAME__,
-                                namespace: "${safeNamespace}",
-                                version: "${safeVersion}"
+                                namespace: "$safeNamespace",
+                                version: "$safeVersion"
                             })
                         });
                         const GM_setValue = (key, value) => AndroidGM.setValue(__SCRIPT_ID__, key, JSON.stringify(value));
@@ -173,10 +165,9 @@ object ScriptManager {
                         }
                     })();
                 """.trimIndent()
-		val wrappedScript = gmPolyfill
-		webView.evaluateJavascript(wrappedScript, null)
+		webView.evaluateJavascript(gmPolyfill, null)
 	}
-	
+
 	/**
 	 * 检测脚本更新
 	 * @return 如果有新版本，返回解析后的新实体，否则返回 null
@@ -189,8 +180,7 @@ object ScriptManager {
 		// legitimate upgrade.
 		if (!updateUrl.startsWith("https://")) {
 			Log.w(
-				"GM_Script",
-				"Refusing non-HTTPS userscript update URL: $updateUrl"
+				"GM_Script", "Refusing non-HTTPS userscript update URL: $updateUrl"
 			)
 			return null
 		}
@@ -207,7 +197,7 @@ object ScriptManager {
 		}
 		return null
 	}
-	
+
 	/**
 	 * 版本号对比
 	 * @return 1 if v1 > v2, -1 if v1 < v2, 0 if equal
@@ -219,31 +209,30 @@ object ScriptManager {
 		(0 until length).forEach { i ->
 			val p1 = parts1.getOrNull(i)
 			val p2 = parts2.getOrNull(i)
-			
+
 			if (p1 == p2) return@forEach
 			if (p1 == null) return -1
 			if (p2 == null) return 1
 			val n1 = p1.toIntOrNull()
 			val n2 = p2.toIntOrNull()
-			
+
 			if (n1 != null && n2 != null) {
 				if (n1 != n2) return n1.compareTo(n2)
-			}
-			else {
+			} else {
 				val res = p1.compareTo(p2, ignoreCase = true)
 				if (res != 0) return res
 			}
 		}
 		return 0
 	}
-	
+
 	/**
 	 * URL 匹配算法：支持通配符 *
 	 *
 	 * SECURITY: `<all_urls>` is a Userscript metadata convention meaning "match
 	 * every HTTP/HTTPS URL". In a desktop userscript engine this is a normal
 	 * setting; in our embedded WebView it is potentially dangerous because the
-	 * same engine also runs site JS for arbitrary origins (banking, email, etc).
+	 * same engine also runs site JS for arbitrary origins (banking, email, etc.).
 	 * To reduce the abuse surface we still honour `<all_urls>` but require an
 	 * explicit opt-in flag on the entity (`entity.run == 1`). Userscripts that
 	 * rely on `<all_urls>` should set that flag manually; default-installed
@@ -252,14 +241,12 @@ object ScriptManager {
 	 * The pure pattern matcher is exposed for callers that need to inspect a
 	 * specific pattern independently from the entity flag.
 	 * */
-	fun matchUrl(pattern: String, url: String): Boolean {
-		return try { // 将通配符模式转换为正则表达式
-			val regex = pattern.replace(".", "\\.").replace("*", ".*").replace("?", "\\?")
+	fun matchUrl(pattern: String, url: String): Boolean = try { // 将通配符模式转换为正则表达式
+		val regex = pattern.replace(".", "\\.").replace("*", ".*").replace("?", "\\?")
 
-			Regex("^$regex$").containsMatchIn(url)
-		} catch (_: Exception) {
-			false
-		}
+		Regex("^$regex$").containsMatchIn(url)
+	} catch (_: Exception) {
+		false
 	}
 
 	/**
@@ -267,8 +254,7 @@ object ScriptManager {
 	 * Callers should use this instead of `matchUrl` directly so that
 	 * untrusted user scripts cannot silently gain universal URL coverage.
 	 */
-	fun matchUrlWithAllUrls(pattern: String, url: String, allowAllUrls: Boolean): Boolean {
-		if (pattern == "<all_urls>") return allowAllUrls
-		return matchUrl(pattern, url)
-	}
+	fun matchUrlWithAllUrls(pattern: String, url: String, allowAllUrls: Boolean): Boolean =
+		if (pattern == "<all_urls>") allowAllUrls
+		else matchUrl(pattern, url)
 }
