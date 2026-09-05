@@ -67,7 +67,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 						val isSelected = status == 3 || status == 4
 						Snackbar.make(
 							root,
-							if (isSelected) R.string.unselect else R.string.select,
+							if (isSelected) R.string.drop_course else R.string.select_course,
 							Snackbar.LENGTH_LONG
 						).setAction(R.string.confirm) {
 							if (isSelected) unselect(

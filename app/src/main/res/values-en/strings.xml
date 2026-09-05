@@ -886,4 +886,8 @@
     <string name="senior_filter">Senior Filter</string>
     <string name="action_success">Action Success</string>
     <string name="hidden_selected">Hidden Selected</string>
+
+    <string name="create_time">Create Time</string>
+    <string name="pay_status">Payment Status</string>
+    <string name="invoice_title">Invoice Title</string>
 </resources>

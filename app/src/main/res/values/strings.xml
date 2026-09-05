@@ -869,5 +869,4 @@
     <string name="create_time">创建时间</string>
     <string name="pay_status">支付状态</string>
     <string name="invoice_title">发票抬头</string>
-    <string name="unselect">退课</string>
 </resources>

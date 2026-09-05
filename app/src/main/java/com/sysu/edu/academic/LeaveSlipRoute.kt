@@ -3,7 +3,6 @@ package com.sysu.edu.academic
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -87,7 +86,6 @@ fun LeaveSlipRoute(
 ) {
 	val viewModel: LeaveSlipViewModel = viewModel()
 	val context = LocalContext.current
-	val activity = LocalActivity.current
 	val fileLauncher =
 		rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 			if (result.resultCode == Activity.RESULT_OK) {

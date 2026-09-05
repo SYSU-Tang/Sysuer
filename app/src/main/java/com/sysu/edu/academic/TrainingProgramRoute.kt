@@ -47,7 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -102,13 +102,10 @@ fun TrainingProgramRoute(
 				)
 			)
 			else emptyList()
-		}
-	) {
+		}) {
 		SharedTransitionLayout {
 			AnimatedContent(
-				targetState = viewModel.showResults,
-				label = "query_to_result",
-				transitionSpec = {
+				targetState = viewModel.showResults, label = "query_to_result", transitionSpec = {
 					fadeIn() togetherWith fadeOut()
 				}) { showResults ->
 				if (showResults) {
@@ -129,9 +126,7 @@ fun TrainingProgramRoute(
 					}
 				} else {
 					TrainingProgramForm(
-						viewModel,
-						this@SharedTransitionLayout,
-						this@AnimatedContent
+						viewModel, this@SharedTransitionLayout, this@AnimatedContent
 					)
 				}
 			}
@@ -171,8 +166,7 @@ private fun TrainingProgramForm(
 		HorizontalDivider(modifier = Modifier.padding(vertical = dimensionResource(R.dimen.vertical_margin)))
 
 		Row(
-			modifier = Modifier
-				.fillMaxWidth(),
+			modifier = Modifier.fillMaxWidth(),
 			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
 		) {
 			OutlinedButton(
@@ -187,16 +181,16 @@ private fun TrainingProgramForm(
 				modifier = Modifier
 					.weight(1f)
 					.then(
-						if (sharedTransitionScope != null && animatedVisibilityScope != null)
-							with(sharedTransitionScope) {
-								Modifier.sharedBounds(
-									sharedContentState = rememberSharedContentState(key = "query_button"),
-									animatedVisibilityScope = animatedVisibilityScope
-								)
-							}
-						else Modifier),
-				shapes = ButtonDefaults.shapes()
-			) {
+						if (sharedTransitionScope != null && animatedVisibilityScope != null) with(
+						sharedTransitionScope
+					) {
+						Modifier.sharedBounds(
+							sharedContentState = rememberSharedContentState(key = "query_button"),
+							animatedVisibilityScope = animatedVisibilityScope
+						)
+					}
+					else Modifier),
+				shapes = ButtonDefaults.shapes()) {
 				Text(stringResource(R.string.query))
 			}
 		}
@@ -207,9 +201,7 @@ private fun TrainingProgramForm(
 @Composable
 private fun CollegeDropdown(viewModel: TrainingProgramViewModel) {
 	var expanded by remember { mutableStateOf(false) }
-	val configuration = LocalConfiguration.current
-	val maxMenuHeight = configuration.screenHeightDp.dp * 0.5f
-
+	val maxMenuHeight = LocalWindowInfo.current.containerDpSize.height * 0.5f
 	ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
 		OutlinedTextField(
 			value = viewModel.selectedCollegeName ?: "",
@@ -247,7 +239,7 @@ private fun CollegeDropdown(viewModel: TrainingProgramViewModel) {
 @Composable
 private fun ProfessionDropdown(viewModel: TrainingProgramViewModel) {
 	var expanded by remember { mutableStateOf(false) }
-	val maxMenuHeight = LocalConfiguration.current.screenHeightDp.dp * 0.5f
+	val maxMenuHeight = LocalWindowInfo.current.containerDpSize.height * 0.5f
 
 	ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
 		OutlinedTextField(
@@ -303,8 +295,7 @@ private fun GradePicker(viewModel: TrainingProgramViewModel) {
 	Box(
 		modifier = Modifier
 			.fillMaxWidth()
-			.height(120.dp),
-		contentAlignment = Alignment.Center
+			.height(120.dp), contentAlignment = Alignment.Center
 	) {
 		VerticalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
 			val offset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
@@ -316,8 +307,7 @@ private fun GradePicker(viewModel: TrainingProgramViewModel) {
 					.graphicsLayer {
 						scaleY = scale
 						this.alpha = alpha
-					},
-				contentAlignment = Alignment.Center
+					}, contentAlignment = Alignment.Center
 			) {
 				Text(
 					text = viewModel.gradeNames[page],
@@ -338,8 +328,7 @@ private fun TypeChips(viewModel: TrainingProgramViewModel) {
 			FilterChip(
 				selected = viewModel.typeIds.getOrNull(index) == viewModel.selectedTypeId,
 				onClick = { viewModel.onTypeSelected(index) },
-				label = { Text(name) }
-			)
+				label = { Text(name) })
 		}
 	}
 }
