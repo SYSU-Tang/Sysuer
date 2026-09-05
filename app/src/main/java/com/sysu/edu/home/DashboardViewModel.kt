@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.net.toUri
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
@@ -83,11 +84,16 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	suspend fun isServiceCollected(id: Int): Boolean = db.collectionDao().isServiceCollected(id)
 
-	suspend fun isDashboardShortcutCollected(id: Int): Boolean = db.collectionDao().isDashboardShortcutCollected(id)
+	suspend fun isDashboardShortcutCollected(id: Int): Boolean =
+		db.collectionDao().isDashboardShortcutCollected(id)
 
 	fun collectService(serviceId: Int, serviceJson: String, position: Int?) {
 		viewModelScope.launch(Dispatchers.IO) {
-			db.collectionDao().addService(ServiceCollectionEntity(serviceId = serviceId, serviceJson = serviceJson, position = position))
+			db.collectionDao().addService(
+				ServiceCollectionEntity(
+					serviceId = serviceId, serviceJson = serviceJson, position = position
+				)
+			)
 		}
 	}
 
@@ -97,12 +103,18 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	fun addDashboardShortcut(shortcutId: Int, shortcutJson: String, position: Int?) {
 		viewModelScope.launch(Dispatchers.IO) {
-			db.collectionDao().addDashboardShortcut(DashboardShortcutEntity(shortcutId = shortcutId, shortcutJson = shortcutJson, position = position))
+			db.collectionDao().addDashboardShortcut(
+				DashboardShortcutEntity(
+					shortcutId = shortcutId, shortcutJson = shortcutJson, position = position
+				)
+			)
 		}
 	}
 
 	fun deleteDashboardShortcut(shortcutId: Int) {
-		viewModelScope.launch(Dispatchers.IO) { db.collectionDao().deleteDashboardShortcut(shortcutId) }
+		viewModelScope.launch(Dispatchers.IO) {
+			db.collectionDao().deleteDashboardShortcut(shortcutId)
+		}
 	}
 
 	private val _orderShortcuts = mutableStateListOf<DashboardShortcutEntity>()
@@ -130,13 +142,19 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			loadDashboardShortcuts()
 		}
 	}
-	val date: String? = LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
-	val weekDay: String? = getApplication<Application>().resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
-	
+
+	val date: String? =
+		LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
+	val weekDay: String? =
+		getApplication<Application>().resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
+
 	val dateText: String
 		get() {
 			val md = StringBuilder()
-			if (_week.value.isNotEmpty()) md.append("###### 第${_week.value}周\n")
+			if (_week.value.isNotEmpty()) {
+				if (_week.value.isDigitsOnly()) md.append("###### 第${_week.value}周\n")
+				else md.append("###### ${_week.value}\n")
+			}
 			if (_term.value.isNotEmpty()) md.append("###### 第${_term.value}学期\n")
 			if (date != null) md.append(date).append("\n\n")
 			if (weekDay != null) md.append(weekDay)
@@ -146,15 +164,15 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 //		get() = if (_isShowToday.value) _todayCourses else _tomorrowCourses
 //	val currentExams: SnapshotStateList<JSONObject>
 //		get() = if (_isShowWeek18.value) _week18Exams else _week19Exams
-	
+
 //	fun setShowToday(showToday: Boolean) {
 //		_isShowToday.value = showToday
 //	}
-	
+
 	fun setShowWeek18(showWeek18: Boolean) {
 		_isShowWeek18.value = showWeek18
 	}
-	
+
 	fun openWechatScan() {
 		val context = getApplication<Application>()
 		try {
@@ -167,8 +185,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			if (intent.resolveActivity(context.packageManager) != null) {
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 				context.startActivity(intent)
-			}
-			else {
+			} else {
 				model.contextUtil.toast(R.string.activity_not_found)
 			}
 		} catch (e: Exception) {
@@ -176,10 +193,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			model.contextUtil.toast(R.string.activity_not_found)
 		}
 	}
-	
+
 	fun openQrCode() {
 		val context = getApplication<Application>()
-		PreferenceManager.getDefaultSharedPreferences(context).getString("qrcode", "")?.takeIf { it.isNotEmpty() }?.run {
+		PreferenceManager.getDefaultSharedPreferences(context).getString("qrcode", "")
+			?.takeIf { it.isNotEmpty() }?.run {
 				Intent(Intent.ACTION_VIEW, toUri()).takeIf {
 					it.resolveActivity(context.packageManager) != null
 				}?.let {
@@ -188,7 +206,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				} ?: model.contextUtil.toast(R.string.fix_sysu_code_warning)
 			} ?: model.contextUtil.toast(R.string.set_sysu_code_warning)
 	}
-	
+
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
 		val context = getApplication<Application>()
 		val markdown = if (isAfterEmpty) {
@@ -197,35 +215,56 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				next?.getString("courseName") ?: context.getString(R.string.none)
 			}**\n\n${context.getString(R.string.location)}：**${
 				next?.getString("teachingPlace") ?: context.getString(R.string.none)
-			}**\n\n${context.getString(R.string.time)}：**${next?.getString("time") ?: context.getString(R.string.none)}**"
-		}
-		else {
+			}**\n\n${context.getString(R.string.time)}：**${
+				next?.getString("time") ?: context.getString(
+					R.string.none
+				)
+			}**"
+		} else {
 			val current = _todayCourses.getOrNull(beforeSize)
-			"###### ${current?.getString("courseName") ?: context.getString(R.string.none)}\n\n${context.getString(R.string.location)}：**${
+			"###### ${current?.getString("courseName") ?: context.getString(R.string.none)}\n\n${
+				context.getString(
+					R.string.location
+				)
+			}：**${
 				current?.getString("teachingPlace") ?: context.getString(R.string.none)
-			}**\n\n${context.getString(R.string.time)}：**${current?.getString("time") ?: context.getString(R.string.none)}**\n\n${
+			}**\n\n${context.getString(R.string.time)}：**${
+				current?.getString("time") ?: context.getString(
+					R.string.none
+				)
+			}**\n\n${
 				context.getString(R.string.date)
 			}：**${current?.getString("teachingDate") ?: context.getString(R.string.none)}**"
 		}
 		_nextClassMarkdown.value = markdown
 	}
-	
+
 	private fun scheduleNotification(beforeSize: Int, isAfterEmpty: Boolean) {
-		val course = if (isAfterEmpty) _tomorrowCourses.getOrNull(0) else _todayCourses.getOrNull(beforeSize)
+		val course =
+			if (isAfterEmpty) _tomorrowCourses.getOrNull(0) else _todayCourses.getOrNull(beforeSize)
 		course?.run {
 			val startTimeStr = "${getString("teachingDate")} ${getString("startTime")}"
-			val delta = LocalDateTime.parse(startTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - System.currentTimeMillis()
+			val delta =
+				LocalDateTime.parse(startTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+					.atZone(ZoneId.systemDefault()).toInstant()
+					.toEpochMilli() - System.currentTimeMillis()
 			if (delta > 0) {
 				val delay = if (delta < 15 * 60 * 1000) 0L else delta - 15 * 60 * 1000
-				val workRequest = OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java)
-					.setInputData(workDataOf("courseName" to getString("courseName"), "teachingPlace" to getString("teachingPlace"), "time" to getString("time")))
-					.setInitialDelay(delay, TimeUnit.MILLISECONDS)
-					.build()
-				WorkManager.getInstance(getApplication()).enqueueUniqueWork("next_class_notification_update", ExistingWorkPolicy.KEEP, workRequest)
+				val workRequest =
+					OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java).setInputData(
+							workDataOf(
+								"courseName" to getString("courseName"),
+								"teachingPlace" to getString("teachingPlace"),
+								"time" to getString("time")
+							)
+						).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
+				WorkManager.getInstance(getApplication()).enqueueUniqueWork(
+					"next_class_notification_update", ExistingWorkPolicy.KEEP, workRequest
+				)
 			}
 		}
 	}
-	
+
 	init {
 		model.message.observeForever { (code, response) ->
 			if (response.getInteger("code") == 200) {
@@ -233,19 +272,28 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 					1 -> {
 						_todayCourses.clear()
 						_tomorrowCourses.clear()
-						val (beforeArray, afterArray) = response.getJSONArray("data").map { it as JSONObject }.filter { item ->
-							item["status"] = getTimePosition("${item.getString("teachingDate")} ${item.getString("startTime")}", "${item.getString("teachingDate")} ${item.getString("endTime")}")
-							item["time"] = "${item.getString("startTime")}~${item.getString("endTime")}"
-							item["course"] = "第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
-							val isToday = "TD" == item.getString("useflag")
-							if (isToday) _todayCourses.add(item) else _tomorrowCourses.add(item)
-							isToday
-						}.partition { it.getString("status") == "before" }
+						val (beforeArray, afterArray) = response.getJSONArray("data")
+							.map { it as JSONObject }.filter { item ->
+								item["status"] = getTimePosition(
+									"${item.getString("teachingDate")} ${
+										item.getString("startTime")
+									}",
+									"${item.getString("teachingDate")} ${item.getString("endTime")}"
+								)
+								item["time"] =
+									"${item.getString("startTime")}~${item.getString("endTime")}"
+								item["course"] =
+									"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
+								val isToday = "TD" == item.getString("useflag")
+								if (isToday) _todayCourses.add(item) else _tomorrowCourses.add(item)
+								isToday
+							}.partition { it.getString("status") == "before" }
 						_progressMax.value = _todayCourses.size
 						_progressCurrent.value = beforeArray.size
 						updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
 						scheduleNotification(beforeArray.size, afterArray.isEmpty())
 					}
+
 					2 -> {
 						_week18Exams.clear()
 						_week19Exams.clear()
@@ -255,69 +303,91 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 							timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }.forEach {
 								(timetable[it] as JSONArray?)?.apply {
 									forEach { exam ->
-										(exam as JSONObject)["status"] = getDatePosition(exam.getString("examDate"))
+										(exam as JSONObject)["status"] =
+											getDatePosition(exam.getString("examDate"))
 										exams.add(exam)
 									}
 								}
 							}
-							_todayExamIndex.value = exams.indexOfFirst { it.getString("status") == "in" }.let {
-								if (it < 0) exams.indexOfFirst { e -> e.getString("status") == "after" } else it
-							}
+							_todayExamIndex.value =
+								exams.indexOfFirst { it.getString("status") == "in" }.let {
+									if (it < 0) exams.indexOfFirst { e -> e.getString("status") == "after" } else it
+								}
 						}
 						_isShowWeek18.value = _week.value != "19"
 					}
+
 					3 -> {
 						_term.value = response.getJSONObject("data").getString("acadYearSemester")
 					}
+
 					4 -> {
-						_week.value = response.getJSONArray("data").getJSONObject(0).getString("weekTimes")
+						_week.value =
+							response.getJSONArray("data").getJSONObject(0).getString("weekTimes")
 					}
+
 					5 -> {
-						_finalExamWeek.value = response.getJSONArray("data").filterIsInstance<JSONObject>().firstOrNull { it.getString("examWeekName") == "18-19周期末考" }?.getString("examWeekId") ?: ""
+						_finalExamWeek.value =
+							response.getJSONArray("data").filterIsInstance<JSONObject>()
+								.firstOrNull { it.getString("examWeekName") == "18-19周期末考" }
+								?.getString("examWeekId") ?: ""
 					}
+
 					6 -> {
-						_selectedCourses.addAll(response.getJSONObject("data").getJSONArray("rows").filterIsInstance<JSONObject>())
-						_selectedCourses.firstOrNull { it.getString("courseName") == examSubject }?.let {
-							_navigateToCourseDetail.value = it
-						}
+						_selectedCourses.addAll(
+							response.getJSONObject("data").getJSONArray("rows")
+								.filterIsInstance<JSONObject>()
+						)
+						_selectedCourses.firstOrNull { it.getString("courseName") == examSubject }
+							?.let {
+								_navigateToCourseDetail.value = it
+							}
 					}
 				}
 			}
 		}
 	}
-	
+
 	fun getTerm() {
 		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 3)
 	}
-	
+
 	fun getWeek(term: String?) {
 		model.addAndNext("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 4)
 	}
-	
+
 	fun getTodayCourses() {
-		model.addAndNext("jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=", 1)
+		model.addAndNext(
+			"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=", 1
+		)
 	}
-	
+
 	fun getExams(term: String, weekId: String?) {
-		model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck", "{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}", 2)
+		model.addAndNext(
+			"jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck",
+			"{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}",
+			2
+		)
 	}
-	
+
 	fun getExamWeekName(term: String) {
-		model.addAndNext("jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5)
+		model.addAndNext(
+			"jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5
+		)
 	}
-	
+
 	fun getSelectedCourses(courseName: String) {
 		examSubject = courseName
-		if (_selectedCourses.isEmpty())
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list",
-		                 "{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
-		                 6)
-		else
-			_selectedCourses.firstOrNull { it.getString("courseName") == examSubject }?.let {
-							_navigateToCourseDetail.value = it
-						}
+		if (_selectedCourses.isEmpty()) model.addAndNext(
+			"jwxt/choose-course-front-server/selectedCourse/list",
+			"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
+			6
+		)
+		else _selectedCourses.firstOrNull { it.getString("courseName") == examSubject }?.let {
+			_navigateToCourseDetail.value = it
+		}
 	}
-	
+
 	fun getTimePosition(from: String?, to: String?): String {
 		val now = LocalDateTime.now()
 		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
@@ -329,7 +399,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			else -> "in"
 		}
 	}
-	
+
 	fun getDatePosition(date: String): String {
 		val now = LocalDate.now()
 		val target = DateTimeManager.toDate(date)
@@ -339,7 +409,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			else -> "in"
 		}
 	}
-	
+
 	override fun onCleared() {
 		model.dispose()
 	}
