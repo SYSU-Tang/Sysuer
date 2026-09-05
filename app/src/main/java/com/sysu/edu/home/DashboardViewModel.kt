@@ -160,15 +160,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			if (weekDay != null) md.append(weekDay)
 			return "$md"
 		}
-//	val currentCourses: SnapshotStateList<JSONObject>
-//		get() = if (_isShowToday.value) _todayCourses else _tomorrowCourses
-//	val currentExams: SnapshotStateList<JSONObject>
-//		get() = if (_isShowWeek18.value) _week18Exams else _week19Exams
-
-//	fun setShowToday(showToday: Boolean) {
-//		_isShowToday.value = showToday
-//	}
-
 	fun setShowWeek18(showWeek18: Boolean) {
 		_isShowWeek18.value = showWeek18
 	}

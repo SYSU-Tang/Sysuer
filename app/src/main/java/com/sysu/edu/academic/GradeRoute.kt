@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -155,9 +156,9 @@ fun GradeRoute(
 			}
 		}
 	) {
+
 		LazyColumn(
 			modifier = Modifier.fillMaxSize(),
-			contentPadding = PaddingValues(dimensionResource(R.dimen.horizontal_padding))
 		) {
 			item {
 				StaggerScreen(
@@ -166,12 +167,12 @@ fun GradeRoute(
 				)
 			}
 			item {
-				HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+				HorizontalDivider()
 			}
 			itemsIndexed(viewModel.scores) { index, score ->
 				ScoreItem(
 					score = score,
-					modifier = Modifier.padding(vertical = 8.dp),
+					modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
 					onClick = { viewModel.requestGrade(index) }
 				)
 			}
@@ -222,7 +223,8 @@ fun ScoreItem(
 	) {
 		Row(
 			modifier = Modifier.padding(16.dp),
-			horizontalArrangement = Arrangement.spacedBy(16.dp)
+			horizontalArrangement = Arrangement.spacedBy(16.dp),
+			verticalAlignment = Alignment.CenterVertically
 		) {
 			Text(
 				text = "${score.getString("scoFinalScore")}${
