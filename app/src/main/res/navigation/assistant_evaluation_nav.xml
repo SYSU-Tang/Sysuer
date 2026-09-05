@@ -6,8 +6,8 @@
 
     <fragment
         android:id="@+id/assistant_evaluation_query"
-        android:name="com.sysu.edu.academic.AssistantEvaluationQueryFragment" />
+        android:name="com.miyuyan.sysuer.academic.AssistantEvaluationQueryFragment" />
     <fragment
         android:id="@+id/assistant_evaluation_result"
-        android:name="com.sysu.edu.academic.AssistantEvaluationResultFragment"/>
+        android:name="com.miyuyan.sysuer.academic.AssistantEvaluationResultFragment"/>
 </navigation>

@@ -9,7 +9,7 @@
         app:startDestination="@id/gym_campus_fragment">
         <fragment
             android:id="@+id/gym_campus_fragment"
-            android:name="com.sysu.edu.life.GymListFragment">
+            android:name="com.miyuyan.sysuer.life.GymListFragment">
             <action
                 android:id="@+id/campus_to_field"
                 app:destination="@id/gym_field_fragment" />
@@ -21,7 +21,7 @@
 
         <fragment
             android:id="@+id/gym_field_fragment"
-            android:name="com.sysu.edu.life.GymListFragment">
+            android:name="com.miyuyan.sysuer.life.GymListFragment">
             <argument
                 android:name="code"
                 android:defaultValue="1"
@@ -32,7 +32,7 @@
         </fragment>
         <fragment
             android:id="@+id/gym_detail_fragment"
-            android:name="com.sysu.edu.life.GymDetailFragment">
+            android:name="com.miyuyan.sysuer.life.GymDetailFragment">
             <argument
                 android:name="code"
                 android:defaultValue="2"
@@ -41,11 +41,11 @@
     </navigation>
     <fragment
         android:id="@+id/gym_reservation_fragment"
-        android:name="com.sysu.edu.life.GymReservationFragment" />
+        android:name="com.miyuyan.sysuer.life.GymReservationFragment" />
     <fragment
         android:id="@+id/gym_order_fragment"
-        android:name="com.sysu.edu.life.GymOrderFragment" />
+        android:name="com.miyuyan.sysuer.life.GymOrderFragment" />
     <fragment
         android:id="@+id/gym_account_fragment"
-        android:name="com.sysu.edu.life.GymAccountFragment" />
+        android:name="com.miyuyan.sysuer.life.GymAccountFragment" />
 </navigation>

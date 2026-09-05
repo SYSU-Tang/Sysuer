@@ -9,10 +9,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.sysu.edu" />
-                  <option name="mobileSdkAppId" value="1:169629797326:android:e620f899c0f4b6ff29b99f" />
-                  <option name="projectId" value="edu-27b3e98b" />
-                  <option name="projectNumber" value="169629797326" />
+                  <option name="appId" value="com.miyuyan.sysuer" />
+                  <option name="mobileSdkAppId" value="1:151787204877:android:a7afd5bd68350287904044" />
+                  <option name="projectId" value="sysuer" />
+                  <option name="projectNumber" value="151787204877" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

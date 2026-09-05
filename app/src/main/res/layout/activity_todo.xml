@@ -94,7 +94,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment"
-        android:name="com.sysu.edu.todo.TodoFragment"
+        android:name="com.miyuyan.sysuer.todo.TodoFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

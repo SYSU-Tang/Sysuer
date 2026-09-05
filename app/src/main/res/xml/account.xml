@@ -5,8 +5,8 @@
             app:icon="@drawable/account"
             app:title="@string/privacy">
             <intent
-                android:targetClass="com.sysu.edu.extra.PrivacyActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.extra.PrivacyActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/app">
@@ -20,23 +20,23 @@
             app:title="@string/about">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:targetClass="com.sysu.edu.extra.AboutActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.extra.AboutActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/refresh"
             app:title="@string/update">
             <intent
-                android:targetClass="com.sysu.edu.extra.UpdateActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.extra.UpdateActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/help"
             app:title="@string/help">
             <intent
                 android:data="https://sysu-tang.github.io/sysuer-website/docs/user/introduction"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
 
     </PreferenceCategory>

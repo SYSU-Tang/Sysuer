@@ -15,7 +15,7 @@
             app:persistent="false"
             app:title="@string/office"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.FilterPreference
+        <com.miyuyan.sysuer.preference.FilterPreference
             app:allowDividerAbove="false"
             app:canEdit="true"
             app:icon="@drawable/location"
@@ -43,7 +43,7 @@
             app:persistent="false"
             app:title="@string/occupy_source"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/edit"
             app:key="occupyReason"
             app:persistent="false"
@@ -51,7 +51,7 @@
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/time">
-        <com.sysu.edu.preference.SliderPreference
+        <com.miyuyan.sysuer.preference.SliderPreference
             android:max="16"
             app:icon="@drawable/calendar"
             app:key="classBegin"
@@ -61,7 +61,7 @@
             app:showSeekBarValue="true"
             app:title="@string/class_begin"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.SliderPreference
+        <com.miyuyan.sysuer.preference.SliderPreference
             android:max="16"
             app:icon="@drawable/calendar"
             app:key="classEnd"
@@ -90,7 +90,7 @@
             app:persistent="false"
             app:title="@string/year_term"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.SliderPreference
+        <com.miyuyan.sysuer.preference.SliderPreference
             android:max="25"
             app:icon="@drawable/course"
             app:key="weekBegin"
@@ -100,7 +100,7 @@
             app:showSeekBarValue="true"
             app:title="@string/week_begin"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.SliderPreference
+        <com.miyuyan.sysuer.preference.SliderPreference
             android:max="25"
             app:icon="@drawable/course"
             app:key="weekEnd"
@@ -118,7 +118,7 @@
             app:persistent="false"
             app:title="@string/week_time"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.MutiListPreference
+        <com.miyuyan.sysuer.preference.MutiListPreference
             app:defaultValue="@array/week_values"
             app:entries="@array/weeks"
             app:entryValues="@array/week_values"

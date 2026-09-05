@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.sysu.edu.preference.EditPreference
+    <com.miyuyan.sysuer.preference.EditPreference
         app:icon="@drawable/text"
         app:key="title"
         app:persistent="false"
         app:title="@string/title" />
 
-    <com.sysu.edu.preference.EditPreference
+    <com.miyuyan.sysuer.preference.EditPreference
         app:icon="@drawable/text"
         app:key="description"
         app:persistent="false"
@@ -86,37 +86,37 @@
         app:allowDividerAbove="true"
         app:persistent="false"
         app:title="@string/info">
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/account"
             app:key="author"
             app:persistent="false"
             app:title="@string/author" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/account"
             app:key="namespace"
             app:persistent="false"
             app:title="@string/namespace" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/version"
             app:key="version"
             app:persistent="false"
             app:title="@string/version" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/link"
             app:key="link"
             app:persistent="false"
             app:title="@string/script_link" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/link"
             app:key="update"
             app:persistent="false"
             app:title="@string/update_link" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/home"
             app:key="homepage"
             app:persistent="false"
             app:title="@string/homepage" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/money"
             app:key="support"
             app:persistent="false"

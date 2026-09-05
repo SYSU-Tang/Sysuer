@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/js_list_fragment"
-        android:name="com.sysu.edu.browser.JSListFragment">
+        android:name="com.miyuyan.sysuer.browser.JSListFragment">
         <action
             android:id="@+id/list_to_info"
             app:destination="@id/js_info_fragment" />
@@ -16,12 +16,12 @@
     </fragment>
     <fragment
         android:id="@+id/js_info_fragment"
-        android:name="com.sysu.edu.browser.JSInfoFragment">
+        android:name="com.miyuyan.sysuer.browser.JSInfoFragment">
         <action
             android:id="@+id/info_to_editor"
             app:destination="@id/js_editor_activity" />
     </fragment>
     <activity
         android:id="@+id/js_editor_activity"
-        android:name="com.sysu.edu.browser.JSEditorActivity" />
+        android:name="com.miyuyan.sysuer.browser.JSEditorActivity" />
 </navigation>

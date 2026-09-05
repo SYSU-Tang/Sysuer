@@ -8,7 +8,7 @@
         app:title="@string/year_term"
         app:useSimpleSummaryProvider="true" />
 
-    <com.sysu.edu.preference.FilterPreference
+    <com.miyuyan.sysuer.preference.FilterPreference
         app:allowDividerAbove="false"
         app:canEdit="true"
         app:icon="@drawable/home"
@@ -17,7 +17,7 @@
         app:title="@string/department"
         app:useSimpleSummaryProvider="true" />
 
-    <com.sysu.edu.preference.EditPreference
+    <com.miyuyan.sysuer.preference.EditPreference
         app:icon="@drawable/text"
         app:key="courseName"
         app:persistent="false"
@@ -25,7 +25,7 @@
         app:useSimpleSummaryProvider="true" />
 
 
-    <com.sysu.edu.preference.EditPreference
+    <com.miyuyan.sysuer.preference.EditPreference
         app:icon="@drawable/account"
         app:key="teacher"
         app:persistent="false"

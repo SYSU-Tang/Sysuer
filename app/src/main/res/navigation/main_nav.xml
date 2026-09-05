@@ -5,16 +5,16 @@
     app:startDestination="@id/navigation_dashboard">
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.sysu.edu.home.DashboardFragment"
+        android:name="com.miyuyan.sysuer.home.DashboardFragment"
         android:label="@string/dashboard"
         tools:layout="@layout/fragment_dashboard" />
     <fragment
         android:id="@+id/navigation_service"
-        android:name="com.sysu.edu.home.ServiceFragment"
+        android:name="com.miyuyan.sysuer.home.ServiceFragment"
         android:label="@string/service"
         tools:layout="@layout/fragment_service" />
     <fragment
         android:id="@+id/navigation_account"
-        android:name="com.sysu.edu.home.AccountFragment"
+        android:name="com.miyuyan.sysuer.home.AccountFragment"
         android:label="@string/account" />
 </navigation>

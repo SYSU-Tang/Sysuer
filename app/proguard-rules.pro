@@ -21,7 +21,7 @@
 #-renamesourcefileattribute SourceFile
 #-keep class com.haibin.calendarview.** { *; }
 #-keep interface com.haibin.calendarview.** { *; }
--keep class com.sysu.edu.view.CustomMonthView
--keep class com.sysu.edu.view.CustomWeekView
--keep class com.sysu.edu.view.FeeMonthView
--keep class com.sysu.edu.view.FeeWeekView
+-keep class com.miyuyan.sysuer.view.CustomMonthView
+-keep class com.miyuyan.sysuer.view.CustomWeekView
+-keep class com.miyuyan.sysuer.view.FeeMonthView
+-keep class com.miyuyan.sysuer.view.FeeWeekView

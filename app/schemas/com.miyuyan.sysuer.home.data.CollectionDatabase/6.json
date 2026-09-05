@@ -1,0 +1,113 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "67ea9a48d3254c3be8de09d024e5f14e",
+    "entities": [
+      {
+        "tableName": "service_collection",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `serviceId` INTEGER, `serviceJson` TEXT, `collectTime` TEXT DEFAULT CURRENT_TIMESTAMP, `position` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serviceId",
+            "columnName": "serviceId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "serviceJson",
+            "columnName": "serviceJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "collectTime",
+            "columnName": "collectTime",
+            "affinity": "TEXT",
+            "defaultValue": "CURRENT_TIMESTAMP"
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_service_collection_serviceId",
+            "unique": true,
+            "columnNames": [
+              "serviceId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_service_collection_serviceId` ON `${TABLE_NAME}` (`serviceId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "dashboard_shortcut_collection",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `shortcutId` INTEGER, `shortcutJson` TEXT, `collectTime` TEXT DEFAULT CURRENT_TIMESTAMP, `position` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shortcutId",
+            "columnName": "shortcutId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "shortcutJson",
+            "columnName": "shortcutJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "collectTime",
+            "columnName": "collectTime",
+            "affinity": "TEXT",
+            "defaultValue": "CURRENT_TIMESTAMP"
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dashboard_shortcut_collection_shortcutId",
+            "unique": true,
+            "columnNames": [
+              "shortcutId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_dashboard_shortcut_collection_shortcutId` ON `${TABLE_NAME}` (`shortcutId`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '67ea9a48d3254c3be8de09d024e5f14e')"
+    ]
+  }
+}

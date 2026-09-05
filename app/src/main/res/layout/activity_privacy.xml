@@ -31,7 +31,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment"
-        android:name="com.sysu.edu.extra.PrivacyFragment"
+        android:name="com.miyuyan.sysuer.extra.PrivacyFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />

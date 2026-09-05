@@ -5,10 +5,10 @@
 
     <fragment
         android:id="@+id/homework_home_fragment"
-        android:name="com.sysu.edu.academic.HomeworkMainFragment">
+        android:name="com.miyuyan.sysuer.academic.HomeworkMainFragment">
     </fragment>
     <fragment
         android:id="@+id/homework_setting_fragment"
-        android:name="com.sysu.edu.academic.HomeworkSettingFragment">
+        android:name="com.miyuyan.sysuer.academic.HomeworkSettingFragment">
     </fragment>
 </navigation>

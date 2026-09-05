@@ -68,7 +68,7 @@
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/header"
-                android:name="com.sysu.edu.view.StaggerFragment"
+                android:name="com.miyuyan.sysuer.view.StaggerFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 

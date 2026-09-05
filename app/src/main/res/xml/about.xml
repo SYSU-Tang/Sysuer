@@ -7,8 +7,8 @@
             app:icon="@drawable/submit"
             app:title="@string/current_version" >
             <intent
-                android:targetClass="com.sysu.edu.extra.UpdateActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.extra.UpdateActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             android:summary="https://github.com/SYSU-Tang/Sysuer/releases"
@@ -16,8 +16,8 @@
             app:title="@string/download_link">
             <intent
                 android:data="https://github.com/SYSU-Tang/Sysuer/releases"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             android:summary="https://sysu-tang.github.io/sysuer-website/"
@@ -25,8 +25,8 @@
             app:title="@string/official_website">
             <intent
                 android:data="https://sysu-tang.github.io/sysuer-website/"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/project">
@@ -36,8 +36,8 @@
             app:title="SYSU—Tang">
             <intent
                 android:data="https://github.com/SYSU-Tang"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -45,8 +45,8 @@
             app:title="@string/app_name">
             <intent
                 android:data="https://github.com/SYSU-Tang/Sysuer/"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/group"
@@ -63,8 +63,8 @@
             app:title="@string/submit_issues">
             <intent
                 android:data="https://github.com/SYSU-Tang/Sysuer/issues"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/money"
@@ -74,8 +74,8 @@
             app:title="@string/sponsor">
             <intent
                 android:data="https://sysu-tang.github.io/sysuer-website/docs/sponsor"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/permission">
@@ -88,8 +88,8 @@
             app:title="@string/privacy_policy">
             <intent
                 android:data="https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy/"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:defaultValue="true"
@@ -100,8 +100,8 @@
             app:title="@string/user_agreement">
             <intent
                 android:data="https://sysu-tang.github.io/sysuer-website/docs/userAgreement/"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/open_source">
@@ -111,8 +111,8 @@
             app:title="fastjson2">
             <intent
                 android:data="https://github.com/alibaba/fastjson2"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -120,8 +120,8 @@
             app:title="okhttp">
             <intent
                 android:data="https://github.com/square/okhttp"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -129,8 +129,8 @@
             app:title="androidx">
             <intent
                 android:data="https://github.com/androidx/androidx"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -138,8 +138,8 @@
             app:title="Material3">
             <intent
                 android:data="https://github.com/material-components/material-components-android"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -147,8 +147,8 @@
             app:title="Kotlin">
             <intent
                 android:data="https://github.com/JetBrains/kotlin"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -156,8 +156,8 @@
             app:title="Shizuku">
             <intent
                 android:data="https://github.com/RikkaApps/Shizuku"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -165,8 +165,8 @@
             app:title="Glide">
             <intent
                 android:data="https://github.com/bumptech/glide"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -174,8 +174,8 @@
             app:title="RikkaX">
             <intent
                 android:data="https://github.com/RikkaApps/RikkaX"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -183,8 +183,8 @@
             app:title="Markwon">
             <intent
                 android:data="https://github.com/noties/Markwon"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
         <Preference
             app:icon="@drawable/version"
@@ -192,8 +192,8 @@
             app:title="CalendarView">
             <intent
                 android:data="https://github.com/huanghaibin-dev/CalendarView"
-                android:targetClass="com.sysu.edu.browser.BrowserActivity"
-                android:targetPackage="com.sysu.edu" />
+                android:targetClass="com.miyuyan.sysuer.browser.BrowserActivity"
+                android:targetPackage="com.miyuyan.sysuer" />
         </Preference>
     </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

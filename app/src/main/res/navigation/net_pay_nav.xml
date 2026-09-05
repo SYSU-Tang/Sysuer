@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/net_order_fragment"
-        android:name="com.sysu.edu.life.NetOrderFragment">
+        android:name="com.miyuyan.sysuer.life.NetOrderFragment">
         <argument
             android:name="code"
             android:defaultValue="0"
@@ -13,7 +13,7 @@
     </fragment>
     <fragment
         android:id="@+id/net_status_fragment"
-        android:name="com.sysu.edu.life.NetOrderFragment">
+        android:name="com.miyuyan.sysuer.life.NetOrderFragment">
         <argument
             android:name="code"
             android:defaultValue="1"

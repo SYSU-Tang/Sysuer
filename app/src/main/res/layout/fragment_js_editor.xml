@@ -6,7 +6,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/js_info"
-        android:name="com.sysu.edu.browser.JSInfoFragment"
+        android:name="com.miyuyan.sysuer.browser.JSInfoFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/editor"

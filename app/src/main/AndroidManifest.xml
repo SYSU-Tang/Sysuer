@@ -343,7 +343,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.sysu.edu.fileProvider"
+            android:authorities="com.miyuyan.sysuer.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -352,7 +352,7 @@
         </provider>
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
-            android:authorities="com.sysu.edu.shizuku"
+            android:authorities="com.miyuyan.sysuer.shizuku"
             android:enabled="true"
             android:exported="true"
             android:multiprocess="false"

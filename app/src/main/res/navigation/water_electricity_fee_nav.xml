@@ -4,18 +4,18 @@
     app:startDestination="@id/dashboard_fragment">
     <fragment
         android:id="@+id/dashboard_fragment"
-        android:name="com.sysu.edu.life.EnergyDashboardFragment"
+        android:name="com.miyuyan.sysuer.life.EnergyDashboardFragment"
         android:label="@string/dashboard" />
     <fragment
         android:id="@+id/water_fee_fragment"
-        android:name="com.sysu.edu.life.EnergyWaterFeeFragment"
+        android:name="com.miyuyan.sysuer.life.EnergyWaterFeeFragment"
         android:label="@string/water_fee" />
     <fragment
         android:id="@+id/electricity_fee_fragment"
-        android:name="com.sysu.edu.life.EnergyElectricityFeeFragment"
+        android:name="com.miyuyan.sysuer.life.EnergyElectricityFeeFragment"
         android:label="@string/electricity_fee" />
     <fragment
         android:id="@+id/account_fragment"
-        android:name="com.sysu.edu.life.EnergyAccountFragment"
+        android:name="com.miyuyan.sysuer.life.EnergyAccountFragment"
         android:label="@string/account" />
 </navigation>

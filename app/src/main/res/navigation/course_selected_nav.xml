@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/course_selection_selected_fragment"
-        android:name="com.sysu.edu.academic.CourseSelectionSelectedFragment"
+        android:name="com.miyuyan.sysuer.academic.CourseSelectionSelectedFragment"
         android:label="@string/course_selected">
         <action
             android:id="@+id/selection_to_filter"
@@ -14,17 +14,17 @@
     </fragment>
     <fragment
         android:id="@+id/filter_fragment"
-        android:name="com.sysu.edu.academic.CourseSelectionFilterFragment"
+        android:name="com.miyuyan.sysuer.academic.CourseSelectionFilterFragment"
         android:label="@string/filter">
         <argument
             android:name="course_selection_value_filter"
             android:defaultValue="@null"
-            app:argType="com.sysu.edu.academic.CourseFilterValueData"
+            app:argType="com.miyuyan.sysuer.academic.CourseFilterValueData"
             app:nullable="true" />
         <argument
             android:name="course_selection_name_filter"
             android:defaultValue="@null"
-            app:argType="com.sysu.edu.academic.CourseFilterNameData"
+            app:argType="com.miyuyan.sysuer.academic.CourseFilterNameData"
             app:nullable="true" />
     </fragment>
 

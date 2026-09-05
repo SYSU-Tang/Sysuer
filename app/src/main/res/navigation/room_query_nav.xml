@@ -4,12 +4,12 @@
     app:startDestination="@id/room_query_filter_fragment">
     <fragment
         android:id="@+id/room_query_filter_fragment"
-        android:name="com.sysu.edu.academic.RoomQueryFilterFragment">
+        android:name="com.miyuyan.sysuer.academic.RoomQueryFilterFragment">
         <action
             android:id="@+id/query_to_result"
             app:destination="@id/room_query_result_fragment" />
     </fragment>
     <fragment
         android:id="@+id/room_query_result_fragment"
-        android:name="com.sysu.edu.academic.RoomQueryResultFragment" />
+        android:name="com.miyuyan.sysuer.academic.RoomQueryResultFragment" />
 </navigation>

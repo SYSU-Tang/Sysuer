@@ -8,8 +8,8 @@
         android:shortcutShortLabel="@string/course_schedule">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.sysu.edu.academic.CourseScheduleActivity"
-            android:targetPackage="com.sysu.edu" />
+            android:targetClass="com.miyuyan.sysuer.academic.CourseScheduleActivity"
+            android:targetPackage="com.miyuyan.sysuer" />
         <categories android:name="android.shortcut.conversation" />
         <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
     </shortcut>
@@ -21,8 +21,8 @@
         android:shortcutShortLabel="@string/setting">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.sysu.edu.extra.SettingActivity"
-            android:targetPackage="com.sysu.edu" />
+            android:targetClass="com.miyuyan.sysuer.extra.SettingActivity"
+            android:targetPackage="com.miyuyan.sysuer" />
         <categories android:name="android.shortcut.conversation" />
         <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
     </shortcut>

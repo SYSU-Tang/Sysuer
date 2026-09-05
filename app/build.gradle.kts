@@ -13,7 +13,7 @@ room3 {
 	schemaDirectory("$projectDir/schemas")
 }
 android {
-	namespace = "com.sysu.edu"
+	namespace = "com.miyuyan.sysuer"
 	compileSdk = 37
 	
 	defaultConfig {
@@ -24,7 +24,7 @@ android {
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
-		applicationId = "com.sysu.edu"
+		applicationId = "com.miyuyan.sysuer"
 		minSdk = 26
 		targetSdk = 37
 		versionCode = 1940

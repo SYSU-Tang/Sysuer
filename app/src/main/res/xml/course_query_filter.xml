@@ -13,7 +13,7 @@
             app:persistent="false"
             app:title="@string/end_year"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.SliderPreference
+        <com.miyuyan.sysuer.preference.SliderPreference
             android:max="7"
             app:icon="@drawable/course"
             app:key="week"
@@ -23,7 +23,7 @@
             app:showSeekBarValue="true"
             app:title="@string/week"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.RangeSliderPreference
+        <com.miyuyan.sysuer.preference.RangeSliderPreference
             android:max="26"
             app:key="weekRange"
             app:min="0"
@@ -34,7 +34,7 @@
             app:useSimpleSummaryProvider="true"
             app:valueFrom="0"
             app:valueTo="0" />
-        <com.sysu.edu.preference.RangeSliderPreference
+        <com.miyuyan.sysuer.preference.RangeSliderPreference
             android:max="12"
             app:key="classRange"
             app:min="0"
@@ -60,7 +60,7 @@
             app:persistent="false"
             app:title="@string/office"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.FilterPreference
+        <com.miyuyan.sysuer.preference.FilterPreference
             app:allowDividerAbove="false"
             app:canEdit="true"
             app:icon="@drawable/home"
@@ -71,13 +71,13 @@
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/course">
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/calendar"
             app:key="courseName"
             app:persistent="false"
             app:title="@string/course_name"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/id"
             app:key="courseNumber"
             app:persistent="false"
@@ -99,7 +99,7 @@
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/teaching_class">
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/font"
             app:key="className"
             app:persistent="false"
@@ -111,19 +111,19 @@
             app:persistent="false"
             app:title="@string/class_level"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/id"
             app:key="classId"
             app:persistent="false"
             app:title="@string/class_number"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.EditPreference
+        <com.miyuyan.sysuer.preference.EditPreference
             app:icon="@drawable/account"
             app:key="teacher"
             app:persistent="false"
             app:title="@string/main_teacher"
             app:useSimpleSummaryProvider="true" />
-        <com.sysu.edu.preference.FilterPreference
+        <com.miyuyan.sysuer.preference.FilterPreference
             app:canEdit="true"
             app:icon="@drawable/group"
             app:isFilter="false"

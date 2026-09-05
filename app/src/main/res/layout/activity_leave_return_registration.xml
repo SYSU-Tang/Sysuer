@@ -41,7 +41,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/leave_return_list_fragment"
-        android:name="com.sysu.edu.academic.LeaveReturnListFragment"
+        android:name="com.miyuyan.sysuer.academic.LeaveReturnListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />

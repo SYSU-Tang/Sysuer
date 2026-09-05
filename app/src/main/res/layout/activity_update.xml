@@ -74,7 +74,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.sysu.edu.view.MarkdownView
+            <com.miyuyan.sysuer.view.MarkdownView
                 android:id="@+id/changelog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

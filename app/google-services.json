@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "169629797326",
-    "project_id": "edu-27b3e98b",
-    "storage_bucket": "edu-27b3e98b.firebasestorage.app"
+    "project_number": "151787204877",
+    "project_id": "sysuer",
+    "storage_bucket": "sysuer.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:169629797326:android:e620f899c0f4b6ff29b99f",
+        "mobilesdk_app_id": "1:151787204877:android:a7afd5bd68350287904044",
         "android_client_info": {
-          "package_name": "com.sysu.edu"
+          "package_name": "com.miyuyan.sysuer"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBUIA072ObNDAuGUGeEj6exJWPZqBsb4go"
+          "current_key": "AIzaSyBB7RvuOwzWdWtDIEjHuGZTBFXtb4C8ztY"
         }
       ],
       "services": {

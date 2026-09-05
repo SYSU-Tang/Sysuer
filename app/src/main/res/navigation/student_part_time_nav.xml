@@ -6,17 +6,17 @@
 
     <fragment
         android:id="@+id/recruitment_info"
-        android:name="com.sysu.edu.studentAffair.RecruitmentInfoFragment"
+        android:name="com.miyuyan.sysuer.studentAffair.RecruitmentInfoFragment"
         android:label="@string/recruitment_info" />
 
     <fragment
         android:id="@+id/cv"
-        android:name="com.sysu.edu.studentAffair.CVFragment"
+        android:name="com.miyuyan.sysuer.studentAffair.CVFragment"
         android:label="@string/cv" />
 
     <fragment
         android:id="@+id/application_record"
-        android:name="com.sysu.edu.studentAffair.ApplicationRecordFragment"
+        android:name="com.miyuyan.sysuer.studentAffair.ApplicationRecordFragment"
         android:label="@string/application_record" />
 
 </navigation>
