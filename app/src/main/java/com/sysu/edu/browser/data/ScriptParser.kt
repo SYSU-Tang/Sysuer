@@ -1,5 +1,6 @@
 package com.sysu.edu.browser.data
 
+import android.util.Log
 import com.alibaba.fastjson2.JSONArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -133,6 +134,13 @@ object ScriptParser {
 	 * 从 URL 下载并解析脚本
 	 */
 	suspend fun parseFromUrl(url: String): JavaScriptEntity? = withContext(Dispatchers.IO) {
+		// SECURITY: refuse to import userscripts from non-HTTPS sources. Plain
+		// HTTP exposes users to trivial MITM tampering with arbitrary JS that
+		// will then run with the privileges of a userscript.
+		if (!url.startsWith("https://")) {
+			Log.w("GM_Script", "Refusing non-HTTPS userscript import: $url")
+			return@withContext null
+		}
 		try {
 			val response = client.newCall(Request.Builder().url(url).build()).execute()
 			if (response.isSuccessful) {

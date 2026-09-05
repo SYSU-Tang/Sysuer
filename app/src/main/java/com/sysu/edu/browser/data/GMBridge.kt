@@ -40,17 +40,23 @@ class GMBridge(private val context: Context) {
 	@OptIn(ExperimentalCoroutinesApi::class) @JavascriptInterface fun getValue(scriptName: String,
 	                                                                           key: String,
 	                                                                           defaultValue: String?): String? {
+		// SECURITY: Previously this method auto-injected `username`/`password` from
+		// the active account when requested via `GM_getValue`. Because
+		// `AndroidGM` is a global JavascriptInterface on the WebView, ANY web
+		// page script (not just user-installed userscripts) could call it and
+		// exfiltrate the user's credentials. We therefore refuse to ever
+		// surface those keys from this bridge.
+		if (key.equals("password", ignoreCase = true) ||
+			key.equals("username", ignoreCase = true) ||
+			key.contains("passwd", ignoreCase = true) ||
+			key.contains("credential", ignoreCase = true)) {
+			Log.w("GM_Script", "Refused credential-like GM_getValue key: $key")
+			return defaultValue
+		}
 		return try {
 			val storedValue = dataStore.data()
 				.blockingFirst()[stringPreferencesKey("${scriptName}_$key")]
-			if (storedValue != null) return storedValue
-			if (key in listOf("username", "password")) {
-				val accountManager = com.sysu.edu.api.AccountManager.getInstance(context)
-				val account = accountManager.getActiveAccountSync("sysu.edu.cn")
-				if (key == "username") return JSON.toJSONString(account?.first ?: defaultValue)
-				if (key == "password") return JSON.toJSONString(account?.second ?: defaultValue)
-			}
-			defaultValue
+			storedValue ?: defaultValue
 		} catch (e: Exception) {
 			Log.e("GM_Script", "Error getting value for $key", e)
 			defaultValue
