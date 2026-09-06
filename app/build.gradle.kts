@@ -17,9 +17,9 @@ android {
 	compileSdk = 37
 	
 	defaultConfig {
-		val generation = "1"
-		val major = "5"
-		val minor = "2"
+		val generation = "2"
+		val major = "0"
+		val minor = "0"
 		val beta = true
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
