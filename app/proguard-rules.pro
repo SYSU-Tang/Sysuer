@@ -25,3 +25,4 @@
 -keep class com.miyuyan.sysuer.view.CustomWeekView
 -keep class com.miyuyan.sysuer.view.FeeMonthView
 -keep class com.miyuyan.sysuer.view.FeeWeekView
+-keep class com.miyuyan.sysuer.home.ServiceConfig

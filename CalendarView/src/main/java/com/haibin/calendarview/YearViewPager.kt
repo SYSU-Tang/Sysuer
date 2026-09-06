@@ -18,12 +18,10 @@ package com.haibin.calendarview
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import androidx.core.content.ContextCompat
+import androidx.core.view.forEach
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.haibin.calendarview.YearRecyclerView.OnMonthSelectedListener
@@ -41,43 +39,35 @@ class YearViewPager(context: Context, attrs: AttributeSet? = null) : ViewPager(c
 		mDelegate = delegate
 		mYearCount = mDelegate!!.maxYear - mDelegate!!.minYear + 1
 		setAdapter(object : PagerAdapter() {
-			override fun getCount(): Int {
-				return mYearCount
-			}
-			
-			override fun getItemPosition(`object`: Any): Int {
-				return if (isUpdateYearView) POSITION_NONE else super.getItemPosition(`object`)
-			}
-			
-			override fun isViewFromObject(view: View, o: Any): Boolean {
-				return view === o
-			}
-			
-			override fun instantiateItem(container: ViewGroup, position: Int): Any {
-				val view = YearRecyclerView(context).apply {
+			override fun getCount(): Int = mYearCount
+
+			override fun getItemPosition(any: Any): Int = if (isUpdateYearView) POSITION_NONE else super.getItemPosition(any)
+
+			override fun isViewFromObject(view: View, o: Any): Boolean = view === o
+
+			override fun instantiateItem(container: ViewGroup, position: Int): Any = YearRecyclerView(context).apply {
 					mDelegate = delegate
 					setOnMonthSelectedListener(mListener)
 					init(position + mDelegate!!.minYear)
+				}.also{
+					container.addView(it)
 				}
-				container.addView(view)
-				return view
-			}
-			
-			override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-				container.removeView(`object` as View)
+
+			override fun destroyItem(container: ViewGroup, position: Int, v: Any) {
+				container.removeView(v as View)
 			}
 		})
 		currentItem = mDelegate!!.currentDay.year - mDelegate!!.minYear
 	}
-	
+
 	override fun setCurrentItem(item: Int) {
 		setCurrentItem(item, false)
 	}
-	
+
 	override fun setCurrentItem(item: Int, smoothScroll: Boolean) {
 		super.setCurrentItem(item, false)
 	}
-	
+
 	/**
 	 * 通知刷新
 	 */
@@ -85,7 +75,7 @@ class YearViewPager(context: Context, attrs: AttributeSet? = null) : ViewPager(c
 		mYearCount = mDelegate!!.maxYear - mDelegate!!.minYear + 1
 		adapter?.notifyDataSetChanged()
 	}
-	
+
 	/**
 	 * 滚动到某年
 	 * 
@@ -95,7 +85,7 @@ class YearViewPager(context: Context, attrs: AttributeSet? = null) : ViewPager(c
 	fun scrollToYear(year: Int, smoothScroll: Boolean) {
 		setCurrentItem(year - mDelegate!!.minYear, smoothScroll)
 	}
-	
+
 	/**
 	 * 更新日期范围
 	 */
@@ -104,71 +94,51 @@ class YearViewPager(context: Context, attrs: AttributeSet? = null) : ViewPager(c
 		notifyDataSetChanged()
 		isUpdateYearView = false
 	}
-	
+
 	/**
 	 * 更新界面
 	 */
 	fun update() {
-		(0..<childCount).forEach {
-			(getChildAt(it) as YearRecyclerView).notifyAdapterDataSetChanged()
+		forEach {
+			(it as YearRecyclerView).notifyAdapterDataSetChanged()
 		}
 	}
-	
+
 	/**
 	 * 更新周起始
 	 */
 	fun updateWeekStart() {
-		(0..<childCount).forEach { i ->
-			(getChildAt(i) as YearRecyclerView).apply {
+		forEach {
+			(it as YearRecyclerView).apply {
 				updateWeekStart()
 				notifyAdapterDataSetChanged()
 			}
 		}
 	}
-	
+
 	/**
 	 * 更新字体颜色大小
 	 */
 	fun updateStyle() {
-		(0..<childCount).forEach {
-			(getChildAt(it) as YearRecyclerView).updateStyle()
+		forEach {
+			(it as YearRecyclerView).updateStyle()
 		}
 	}
-	
+
 	fun setOnMonthSelectedListener(listener: OnMonthSelectedListener?) {
 		mListener = listener
 	}
-	
-	override fun onMeasure(widthMeasureSpec: Int,
-	                       heightMeasureSpec: Int) { //heightMeasureSpec = MeasureSpec.makeMeasureSpec(getHeight(getContext(), this), MeasureSpec.EXACTLY);
+
+	override fun onMeasure(
+		widthMeasureSpec: Int, heightMeasureSpec: Int
+	) { //heightMeasureSpec = MeasureSpec.makeMeasureSpec(getHeight(getContext(), this), MeasureSpec.EXACTLY);
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 	}
-	
+
 	@SuppressLint("ClickableViewAccessibility")
-	override fun onTouchEvent(ev: MotionEvent?): Boolean {
-		return mDelegate!!.isYearViewScrollable && super.onTouchEvent(ev)
-	}
-	
-	override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-		return mDelegate!!.isYearViewScrollable && super.onInterceptTouchEvent(ev)
-	}
-	
-	companion object {
-		/**
-		 * 计算相对高度
-		 * 
-		 * @param context context
-		 * @param view    view
-		 * @return 年月视图选择器最适合的高度
-		 */
-		private fun getHeight(context: Context, view: View): Int {
-			val dm = DisplayMetrics()
-			ContextCompat.getSystemService(context, WindowManager::class.java)?.defaultDisplay?.getMetrics(dm)
-			val h = dm.heightPixels
-			val location = IntArray(2)
-			view.getLocationInWindow(location)
-			view.getLocationOnScreen(location)
-			return h - location[1]
-		}
-	}
+	override fun onTouchEvent(ev: MotionEvent?): Boolean =
+		mDelegate?.isYearViewScrollable == true && super.onTouchEvent(ev)
+
+	override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean =
+		mDelegate?.isYearViewScrollable == true && super.onInterceptTouchEvent(ev)
 }

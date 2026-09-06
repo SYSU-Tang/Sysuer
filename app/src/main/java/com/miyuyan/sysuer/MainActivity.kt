@@ -30,13 +30,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.core.app.NotificationChannelCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
@@ -118,11 +117,11 @@ class MainActivity : BaseActivity() {
 					-1 -> config.toast(R.string.no_net_connected)
 					0 -> config.contextUtil.disposable.add(
 						Observable.just(msg.obj).map {
-						JSONObject.parseObject(it as String?)
-					}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-						.subscribe({ response: JSONObject ->
-							showUpdateDialog(response)
-						}, {})
+							JSONObject.parseObject(it as String?)
+						}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+							.subscribe({ response: JSONObject ->
+								showUpdateDialog(response)
+							}, {})
 					)
 				}
 			}
@@ -205,7 +204,7 @@ class MainActivity : BaseActivity() {
 		}
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class)
+	@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 	@Composable
 	private fun MainScreen() {
 		val backStack = rememberNavBackStack(Home)
@@ -386,31 +385,8 @@ class MainActivity : BaseActivity() {
 					startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(releaseLink)))
 				}.setCancelable(!response.getBoolean("enforce"))
 				.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
-					val notificationManager = NotificationManagerCompat.from(this)
-					notificationManager.createNotificationChannel(
-						NotificationChannelCompat.Builder(
-							"update", NotificationManagerCompat.IMPORTANCE_DEFAULT
-						).setDescription("APP下载通知").setName("下载进度通知").build()
-					)
 					com.miyuyan.sysuer.api.DownloadManager.downloadFile(
-						this, releaseLink, path, true/*, object : com.sysu.edu.api.DownloadManager.DownloadListener {
-					override fun onDownloadProgress(
-						progress: Long,
-						total: Long,
-					                               ) {
-					}
-					
-					override fun onDownloadComplete(
-						path: String?,
-					                               ) {
-					}
-					
-					override fun onDownloadError(
-						code: Int,
-						message: String?,
-					                            ) {
-					}
-				}*/
+						this, releaseLink, path
 					)
 				}.create().apply {
 					setCancelable(!response.getBoolean("enforce"))
@@ -452,9 +428,7 @@ class MainActivity : BaseActivity() {
 						}.setCancelable(!response.getBoolean("enforce"))
 						.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
 							com.miyuyan.sysuer.api.DownloadManager.downloadFile(
-								this,
-								previewLink,
-								path
+								this, previewLink, path
 							)
 						}.create().apply {
 							show()

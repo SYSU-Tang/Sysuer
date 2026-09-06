@@ -55,7 +55,7 @@ object FileManager {
 			}
 			
 			override fun contentLength(): Long = finalFileSize
-			@Throws(java.io.IOException::class) override fun writeTo(sink: okio.BufferedSink) {
+			@Throws(IOException::class) override fun writeTo(sink: okio.BufferedSink) {
 				resolver.openInputStream(uri).use { inputStream ->
 					inputStream?.source().use { source ->
 						source?.let { sink.writeAll(it) }

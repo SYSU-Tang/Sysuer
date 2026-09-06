@@ -26,3 +26,4 @@ dependencyResolutionManagement {
 rootProject.name = "中大儿"
 include(":app")
 include(":CalendarView")
+include(":compose-preference")

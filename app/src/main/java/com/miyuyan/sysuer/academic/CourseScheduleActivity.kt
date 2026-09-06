@@ -106,7 +106,7 @@ class CourseScheduleActivity : BaseActivity() {
 		} // 初始化课程时间
 		for (i in 0..6) {
 			val itemBinding = ItemWeekdayBinding.inflate(layoutInflater, binding.week, false)
-			itemBinding.courseWeek.text = getResources().getStringArray(R.array.weeks_simple)[i]
+			itemBinding.courseWeek.text = resources.getStringArray(R.array.weeks_simple)[i]
 			itemBinding.courseDate.text = getOldDate(i - weekday)
 			val column = View(this)
 			if (i == weekday) {
