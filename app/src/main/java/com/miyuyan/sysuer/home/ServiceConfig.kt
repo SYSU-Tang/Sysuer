@@ -8,4 +8,4 @@ data class ServiceConfig(
 	@JvmField val url: String?,
 	@JvmField val doc: String?,
 	@JvmField val description: String?,
-                        )
+)

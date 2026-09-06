@@ -79,6 +79,7 @@ import com.miyuyan.sysuer.nav.Dorm
 import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.nav.Grade
 import com.miyuyan.sysuer.nav.GradeForLevel
+import com.miyuyan.sysuer.nav.Home
 import com.miyuyan.sysuer.nav.LeaveSlip
 import com.miyuyan.sysuer.nav.MajorInfo
 import com.miyuyan.sysuer.nav.NetPay
@@ -86,12 +87,11 @@ import com.miyuyan.sysuer.nav.Pay
 import com.miyuyan.sysuer.nav.PersonalInformation
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram
 import com.miyuyan.sysuer.nav.Registration
+import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
-import com.miyuyan.sysuer.nav.TrainingProgram
-import com.miyuyan.sysuer.nav.Home
-import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.widget.NextClassWidget
 import com.miyuyan.sysuer.widget.RecentClassWidget
@@ -118,11 +118,11 @@ class MainActivity : BaseActivity() {
 					-1 -> config.toast(R.string.no_net_connected)
 					0 -> config.contextUtil.disposable.add(
 						Observable.just(msg.obj).map {
-							JSONObject.parseObject(it as String?)
-						}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-							.subscribe({ response: JSONObject ->
-								showUpdateDialog(response)
-							}, {})
+						JSONObject.parseObject(it as String?)
+					}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+						.subscribe({ response: JSONObject ->
+							showUpdateDialog(response)
+						}, {})
 					)
 				}
 			}
@@ -155,8 +155,7 @@ class MainActivity : BaseActivity() {
 				receiver = object : BroadcastReceiver() {
 					override fun onReceive(context: Context?, intent: Intent) {
 						if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(
-								DownloadManager.EXTRA_DOWNLOAD_ID,
-								-1
+								DownloadManager.EXTRA_DOWNLOAD_ID, -1
 							) == downloadId
 						) {
 							config.toast(R.string.download_complete)
@@ -196,9 +195,7 @@ class MainActivity : BaseActivity() {
 						}.setCancelable(false).create()
 				agreementDialog.show()
 				agreementDialog.findViewById<TextView>(android.R.id.message)?.let {
-					Markwon.builder(this)
-						.usePlugin(StrikethroughPlugin.create())
-						.build()
+					Markwon.builder(this).usePlugin(StrikethroughPlugin.create()).build()
 						.setMarkdown(
 							it,
 							"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)"
@@ -366,8 +363,7 @@ class MainActivity : BaseActivity() {
 	fun showUpdateDialog(response: JSONObject) {
 		if (PackageInfoCompat.getLongVersionCode(
 				this.packageManager.getPackageInfo(
-					this.packageName,
-					0
+					this.packageName, 0
 				)
 			) < response.getInteger("version")
 		) {
@@ -393,8 +389,7 @@ class MainActivity : BaseActivity() {
 					val notificationManager = NotificationManagerCompat.from(this)
 					notificationManager.createNotificationChannel(
 						NotificationChannelCompat.Builder(
-							"update",
-							NotificationManagerCompat.IMPORTANCE_DEFAULT
+							"update", NotificationManagerCompat.IMPORTANCE_DEFAULT
 						).setDescription("APP下载通知").setName("下载进度通知").build()
 					)
 					com.miyuyan.sysuer.api.DownloadManager.downloadFile(
@@ -456,13 +451,16 @@ class MainActivity : BaseActivity() {
 							startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(previewLink)))
 						}.setCancelable(!response.getBoolean("enforce"))
 						.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
-							com.miyuyan.sysuer.api.DownloadManager.downloadFile(this, previewLink, path)
+							com.miyuyan.sysuer.api.DownloadManager.downloadFile(
+								this,
+								previewLink,
+								path
+							)
 						}.create().apply {
 							show()
 							findViewById<TextView>(android.R.id.message)?.let {
 								Markwon.builder(this@MainActivity).build().setMarkdown(
-									it,
-									response.getString("previewDescription", "暂无更新描述")
+									it, response.getString("previewDescription", "暂无更新描述")
 								)
 							}
 						}

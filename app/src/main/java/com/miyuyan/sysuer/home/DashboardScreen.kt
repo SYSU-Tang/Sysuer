@@ -516,7 +516,7 @@ import kotlinx.coroutines.launch
 	onTimeCardClick: () -> Unit,
                                        ) {
 	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
-		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1.2f), onClick = onNextClassClick) {
+		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1.25f), onClick = onNextClassClick) {
 			if (nextClassMarkdown.isNotEmpty()) Markdown(rememberMarkdownState(nextClassMarkdown),
 			                                             colors = markdownColor(text = MaterialTheme.colorScheme.primary),
 			                                             typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),

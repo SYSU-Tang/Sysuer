@@ -11,10 +11,8 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -25,7 +23,6 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarDefaults.appBarWithSearchColors
+import androidx.compose.material3.SearchBarDefaults.inputFieldColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
@@ -45,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -164,12 +161,11 @@ fun AcademyNotificationRoute(
 		animatedVisibilityScope = animatedVisibilityScope,
 		onNavigationClick = { backStack.navigateBack(activity) },
 		topBarContent = {
-			fun setQuery(str: String) {
-				when (it) {
-					0 -> textFieldState1.setTextAndPlaceCursorAtEnd(str)
-					else -> textFieldState2.setTextAndPlaceCursorAtEnd(str)
-				}
+			val setQuery = when (it) {
+				0 -> textFieldState1::setTextAndPlaceCursorAtEnd
+				else -> textFieldState2::setTextAndPlaceCursorAtEnd
 			}
+
 
 			fun getQuery(): TextFieldState = when (it) {
 				0 -> textFieldState1
@@ -177,49 +173,78 @@ fun AcademyNotificationRoute(
 			}
 
 			val searchBarState = rememberSearchBarState()
-
-			AppBarWithSearch(
-				scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior(),
-				windowInsets = SearchBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal),
-				state = searchBarState,
-				colors = appBarWithSearchColors(
-					appBarContainerColor = Color.Transparent,
-				),
-				inputField = @Composable {
-					SearchBarDefaults.InputField(
-						textFieldState = getQuery(),
-						searchBarState = searchBarState,
-						colors = appBarWithSearchColors().searchBarColors.inputFieldColors,
-						onSearch = {},
-						placeholder = {
-							Text(
-								modifier = Modifier.clearAndSetSemantics {},
-								text = stringResource(R.string.search)
-							)
-						},
-						leadingIcon = {
-							IconButton(onClick = {
-
-							}) {
-								Icon(
-									Icons.Rounded.Search,
-									contentDescription = stringResource(R.string.search)
-								)
-							}
-						},
-						trailingIcon = {
-							if (getQuery().text.isNotEmpty()) IconButton(onClick = {
-								setQuery("")
-							}) {
-								Icon(
-									Icons.Rounded.Close,
-									contentDescription = stringResource(R.string.clear)
-								)
-							}
-						},
+			SearchBarDefaults.InputField(
+				textFieldState = getQuery(),
+				searchBarState = searchBarState,
+				onSearch = {},
+				placeholder = {
+					Text(
+						modifier = Modifier.clearAndSetSemantics {},
+						text = stringResource(R.string.search)
 					)
 				},
+				leadingIcon = {
+					IconButton(onClick = {
+
+					}) {
+						Icon(
+							Icons.Rounded.Search,
+							contentDescription = stringResource(R.string.search)
+						)
+					}
+				},
+				trailingIcon = {
+					if (getQuery().text.isNotEmpty()) IconButton(onClick = {
+						setQuery("")
+					}) {
+						Icon(
+							Icons.Rounded.Close,
+							contentDescription = stringResource(R.string.clear)
+						)
+					}
+				},
 			)
+//			AppBarWithSearch(
+//				scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior(),
+//				windowInsets = SearchBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal),
+//				state = searchBarState,
+//				colors = appBarWithSearchColors(
+//					appBarContainerColor = Color.Transparent,
+//				),
+//				inputField = @Composable {
+//					SearchBarDefaults.InputField(
+//						textFieldState = getQuery(),
+//						searchBarState = searchBarState,
+//						onSearch = {},
+//						placeholder = {
+//							Text(
+//								modifier = Modifier.clearAndSetSemantics {},
+//								text = stringResource(R.string.search)
+//							)
+//						},
+//						leadingIcon = {
+//							IconButton(onClick = {
+//
+//							}) {
+//								Icon(
+//									Icons.Rounded.Search,
+//									contentDescription = stringResource(R.string.search)
+//								)
+//							}
+//						},
+//						trailingIcon = {
+//							if (getQuery().text.isNotEmpty()) IconButton(onClick = {
+//								setQuery("")
+//							}) {
+//								Icon(
+//									Icons.Rounded.Close,
+//									contentDescription = stringResource(R.string.clear)
+//								)
+//							}
+//						},
+//					)
+//				},
+//			)
 		},
 		pageContent = { page ->
 			AnimatedContent(targetState = page, label = "page_transition") { targetPage ->
