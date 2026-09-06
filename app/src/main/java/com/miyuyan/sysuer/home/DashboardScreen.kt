@@ -144,7 +144,8 @@ import com.miyuyan.sysuer.todo.TodoEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Composable internal fun DashboardScreen(
+@Composable
+internal fun DashboardScreen(
 	dashboardViewModel: DashboardViewModel,
 	homeViewModel: HomeViewModel,
 	spm: PreferenceViewModel,
@@ -153,16 +154,16 @@ import kotlinx.coroutines.launch
 	sharedTransitionScope: SharedTransitionScope? = null,
 	animatedVisibilityScope: AnimatedVisibilityScope? = null,
 	backStack: MutableList<NavKey>,
-                                        ) {
+) {
 	val context = LocalContext.current
 	val activity = remember { context as FragmentActivity }
 	val config = remember { ContextUtil(context) }
-	val coroutineScope = rememberCoroutineScope()
-	val isAgree by spm.isAgreeLiveData.observeAsState()
+	val coroutineScope = rememberCoroutineScope()    /*val isAgree by spm.isAgreeLiveData.observeAsState()
 	LaunchedEffect(isAgree) {
-		if (isAgree == true) dashboardViewModel.getTerm()
-	}
+		if (isAgree == true)
+	}*/
 	LaunchedEffect(Unit) {
+		dashboardViewModel.getTerm()
 		homeViewModel.updateDashboardShortcut.observeForever {
 			if (it == true) dashboardViewModel.loadDashboardShortcuts()
 		}
@@ -184,23 +185,27 @@ import kotlinx.coroutines.launch
 	var showActionItem by remember { mutableStateOf<ServiceConfig?>(null) }
 	var showOrderDialog by rememberSaveable { mutableStateOf(false) }
 	val navigateToCourseDetail by dashboardViewModel.navigateToCourseDetail.collectAsStateWithLifecycle()
-	
+
 	LaunchedEffect(navigateToCourseDetail) {
 		navigateToCourseDetail?.let { json ->
-			backStack.add(CourseDetail(json.getString("teachingClassId", ""), json.getString("courseNum", "")))
+			backStack.add(
+				CourseDetail(
+					json.getString("teachingClassId", ""), json.getString("courseNum", "")
+				)
+			)
 			dashboardViewModel.onNavigatedToCourseDetail()
 		}
 	}
 	LaunchedEffect(term) {
 		if (term.isNotEmpty()) dashboardViewModel.getWeek(term)
 	}
-	
+
 	DashboardOrderDialog(
 		show = showOrderDialog,
 		onDismiss = { showOrderDialog = false },
 		dashboardViewModel = dashboardViewModel,
-	                    )
-	
+	)
+
 	DashboardActionDialog(
 		item = showActionItem,
 		onDismiss = { showActionItem = null },
@@ -208,104 +213,166 @@ import kotlinx.coroutines.launch
 		dashboardViewModel = dashboardViewModel,
 		homeViewModel = homeViewModel,
 		config = config,
-	                     )
-	
-	FlowRow(modifier = Modifier
-		.fillMaxSize()
-		.nestedScroll(rememberNestedScrollInteropConnection())
-		.verticalScroll(rememberScrollState())
-		.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)),
-	        maxItemsInEachRow = 2,
-	        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))) {
-		if (0 in selectedSet) ShortcutSection(dashboardViewModel, config, activity) { showActionItem = it }
-		
+	)
+
+	FlowRow(
+		modifier = Modifier
+			.fillMaxSize()
+			.nestedScroll(rememberNestedScrollInteropConnection())
+			.verticalScroll(rememberScrollState())
+			.padding(
+				dimensionResource(R.dimen.horizontal_padding),
+				dimensionResource(R.dimen.vertical_padding)
+			),
+		maxItemsInEachRow = 2,
+		verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
+	) {
+		if (0 in selectedSet) ShortcutSection(
+			dashboardViewModel, config, activity
+		) { showActionItem = it }
+
 		if (1 in selectedSet || 2 in selectedSet) {
 			val dateText = remember(term, week) { dashboardViewModel.dateText }
-			ScheduleSection(nextClassMarkdown = nextClassMarkdown, dateText = dateText, onNextClassClick = {
-				context.startActivity(Intent(context, CourseScheduleActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
-			}, onTimeCardClick = {
-				context.startActivity(Intent(context, AgendaActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
-			})
+			ScheduleSection(
+				nextClassMarkdown = nextClassMarkdown,
+				dateText = dateText,
+				onNextClassClick = {
+					context.startActivity(
+						Intent(context, CourseScheduleActivity::class.java),
+						ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+					)
+				},
+				onTimeCardClick = {
+					context.startActivity(
+						Intent(context, AgendaActivity::class.java),
+						ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+					)
+				})
 		}
-		
-		if (3 in selectedSet) {
-			LaunchedEffect(isAgree) {
+
+		if (3 in selectedSet) {            /*LaunchedEffect(isAgree) {
 				if (isAgree == true) dashboardViewModel.getTodayCourses()
+			}*/
+			LaunchedEffect(Unit) {
+				dashboardViewModel.getTodayCourses()
 			}
-			CourseSection(todayCourses = todayCourses, tomorrowCourses = tomorrowCourses, showDate = settingManager.courseDate, nextClassIndex = nextClassIndex, onCourseClick = {
-				backStack.add(it)
-			}, onCourseLongClick = { text ->
-				coroutineScope.launch {
-					clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
-				}
-				config.toast(R.string.copy_successfully)
-			}, activity = activity, sharedTransitionScope = sharedTransitionScope, animatedVisibilityScope = animatedVisibilityScope)
+			CourseSection(
+				todayCourses = todayCourses,
+				tomorrowCourses = tomorrowCourses,
+				showDate = settingManager.courseDate,
+				nextClassIndex = nextClassIndex,
+				onCourseClick = {
+					backStack.add(it)
+				},
+				onCourseLongClick = { text ->
+					coroutineScope.launch {
+						clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
+					}
+					config.toast(R.string.copy_successfully)
+				},
+				activity = activity,
+				sharedTransitionScope = sharedTransitionScope,
+				animatedVisibilityScope = animatedVisibilityScope
+			)
 		}
-		
+
 		if (4 in selectedSet) {
 			LaunchedEffect(term) {
 				if (term.isNotEmpty()) {
 					dashboardViewModel.getExamWeekName(term)
 				}
 			}
-			
+
 			LaunchedEffect(finalExamWeek) {
 				if (term.isNotEmpty() && finalExamWeek.isNotEmpty()) {
 					dashboardViewModel.getExams(term, finalExamWeek)
 				}
 			}
-			
-			ExamSection(week18Exams = week18Exams, week19Exams = week19Exams, showWeek18 = showWeek18, todayExamIndex = todayExamIndex, onToggle = { dashboardViewModel.setShowWeek18(it) }, onExamClick = { json ->
-				dashboardViewModel.getSelectedCourses(json.getString("examSubjectName"))
-			}, onExamLongClick = { text ->
-				coroutineScope.launch {
-					clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
-				}
-				config.toast(R.string.copy_successfully)
-			}, activity = activity, coroutineScope = coroutineScope)
+
+			ExamSection(
+				week18Exams = week18Exams,
+				week19Exams = week19Exams,
+				showWeek18 = showWeek18,
+				todayExamIndex = todayExamIndex,
+				onToggle = { dashboardViewModel.setShowWeek18(it) },
+				onExamClick = { json ->
+					dashboardViewModel.getSelectedCourses(json.getString("examSubjectName"))
+				},
+				onExamLongClick = { text ->
+					coroutineScope.launch {
+						clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
+					}
+					config.toast(R.string.copy_successfully)
+				},
+				activity = activity,
+				coroutineScope = coroutineScope
+			)
 		}
-		
+
 		if (5 in selectedSet) {
 			LaunchedEffect(Unit) { todoManager.init() }
 			val todoList by todoManager.todoModel.todoList.observeAsState(emptyList())
 			var todoRefreshKey by rememberSaveable { mutableIntStateOf(0) }
 			LaunchedEffect(todoRefreshKey) {
-				val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+				val today = java.time.LocalDate.now()
+					.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
 				todoManager.refresh("(due_date = ? OR ddl = ?)", arrayOf(today, today))
 			}
 			todoManager.refreshListener = { todoRefreshKey++ }
 			TodoSection(todoList = todoList, onViewAllClick = {
-				context.startActivity(Intent(context, TodoActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+				context.startActivity(
+					Intent(context, TodoActivity::class.java),
+					ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+				)
 			}, todoManager = todoManager)
 		}
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable private fun DashboardOrderDialog(
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DashboardOrderDialog(
 	show: Boolean,
 	onDismiss: () -> Unit,
 	dashboardViewModel: DashboardViewModel,
-                                                                                    ) {
+) {
 	if (!show) return
 	val shortcuts = dashboardViewModel.orderShortcuts
 	val confirmText = stringResource(R.string.confirm)
 	val orderText = stringResource(R.string.service_order)
 	ModalBottomSheet(onDismissRequest = onDismiss) {
 		Column(modifier = Modifier.fillMaxWidth()) {
-			Text(orderText, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp))
+			Text(
+				orderText,
+				style = MaterialTheme.typography.titleMedium,
+				modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+			)
 			LazyColumn(modifier = Modifier.fillMaxWidth()) {
-				itemsIndexed(shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
-					val shortcut = remember(entity.shortcutId) { JSONObject.parse(entity.shortcutJson ?: "") }
+				itemsIndexed(
+					shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
+					val shortcut =
+						remember(entity.shortcutId) { JSONObject.parse(entity.shortcutJson ?: "") }
 					val name = shortcut.getString("name") ?: ""
-					ListItem(overlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium) }, leadingContent = {
+					ListItem(overlineContent = {
+						Text(
+							name,
+							maxLines = 1,
+							overflow = TextOverflow.Ellipsis,
+							style = MaterialTheme.typography.bodyMedium
+						)
+					}, leadingContent = {
 						Row {
 							IconButton(onClick = {
-								if (index > 0) dashboardViewModel.moveOrderShortcut(index, index - 1)
+								if (index > 0) dashboardViewModel.moveOrderShortcut(
+									index, index - 1
+								)
 							}, enabled = index > 0) {
 								Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = null)
 							}
 							IconButton(onClick = {
-								if (index < shortcuts.lastIndex) dashboardViewModel.moveOrderShortcut(index, index + 1)
+								if (index < shortcuts.lastIndex) dashboardViewModel.moveOrderShortcut(
+									index, index + 1
+								)
 							}, enabled = index < shortcuts.lastIndex) {
 								Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = null)
 							}
@@ -313,9 +380,12 @@ import kotlinx.coroutines.launch
 					}, modifier = Modifier.animateItem()) {}
 				}
 			}
-			Row(modifier = Modifier
-				.fillMaxWidth()
-				.padding(end = 24.dp, bottom = 24.dp), horizontalArrangement = Arrangement.End) {
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(end = 24.dp, bottom = 24.dp),
+				horizontalArrangement = Arrangement.End
+			) {
 				TextButton(onClick = {
 					dashboardViewModel.saveOrderShortcuts()
 					onDismiss()
@@ -325,14 +395,16 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class) @Composable private fun DashboardActionDialog(
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+private fun DashboardActionDialog(
 	item: ServiceConfig?,
 	onDismiss: () -> Unit,
 	onShowOrder: () -> Unit,
 	dashboardViewModel: DashboardViewModel,
 	homeViewModel: HomeViewModel,
 	config: ContextUtil,
-                                                                                                                       ) {
+) {
 	if (item == null) return
 	val context = LocalContext.current
 	val coroutineScope = rememberCoroutineScope()
@@ -344,58 +416,80 @@ import kotlinx.coroutines.launch
 	val url = item.url ?: ""
 	val markdown = StringBuilder("### $name\n$description")
 	if (url.isNotBlank()) markdown.append("\n`$url`")
-	
+
 	LaunchedEffect(item) {
 		isServiceCollected = dashboardViewModel.isServiceCollected(itemId)
 		isShortcutCollected = dashboardViewModel.isDashboardShortcutCollected(itemId)
 	}
-	
+
 	ModalBottomSheet(onDismissRequest = onDismiss) {
 		Column(modifier = Modifier.fillMaxWidth()) {
 			Card(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)),
+					.padding(
+						horizontal = dimensionResource(R.dimen.horizontal_margin),
+						vertical = dimensionResource(R.dimen.vertical_margin)
+					),
 				shape = MaterialTheme.shapes.medium,
-			    ) {
+			) {
 				Markdown(
 					rememberMarkdownState("$markdown"),
 					colors = markdownColor(),
 					typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
 					modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
-				        )
+				)
 			}
-			
+
 			FlowRow(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = dimensionResource(R.dimen.horizontal_margin), vertical = dimensionResource(R.dimen.vertical_margin)),
+					.padding(
+						horizontal = dimensionResource(R.dimen.horizontal_margin),
+						vertical = dimensionResource(R.dimen.vertical_margin)
+					),
 				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
 				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap)),
-			       ) {
-				GenericTonalButton(image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder, text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)) {
+			) {
+				GenericTonalButton(
+					image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+					text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)
+				) {
 					isServiceCollected = !isServiceCollected
 					coroutineScope.launch {
 						if (isServiceCollected) {
-							dashboardViewModel.collectService(itemId, item.toJSONString(JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls), null)
+							dashboardViewModel.collectService(
+								itemId, item.toJSONString(
+									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
+								), null
+							)
 							config.toast(R.string.collect_success)
-						}
-						else {
+						} else {
 							dashboardViewModel.deleteService(itemId)
 							config.toast(R.string.cancel_collect_success)
 						}
 					}
 				}
-				
-				GenericTonalButton(image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut, text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)) {
+
+				GenericTonalButton(
+					image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut,
+					text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
+				) {
 					isShortcutCollected = !isShortcutCollected
 					coroutineScope.launch {
 						if (isShortcutCollected) {
-							println(item.toJSONString(JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls))
-							dashboardViewModel.addDashboardShortcut(itemId, item.toJSONString(JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls), null)
+							println(
+								item.toJSONString(
+									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
+								)
+							)
+							dashboardViewModel.addDashboardShortcut(
+								itemId, item.toJSONString(
+									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
+								), null
+							)
 							config.toast(R.string.add_shortcut_success)
-						}
-						else {
+						} else {
 							dashboardViewModel.deleteDashboardShortcut(itemId)
 							config.toast(R.string.cancel_add_shortcut_success)
 						}
@@ -403,43 +497,86 @@ import kotlinx.coroutines.launch
 						homeViewModel.updateDashboardShortcut.value = true
 					}
 				}
-				
-				GenericTonalButton(image = Icons.Rounded.Output, text = stringResource(R.string.add_to_launcher)) {
+
+				GenericTonalButton(
+					image = Icons.Rounded.Output, text = stringResource(R.string.add_to_launcher)
+				) {
 					if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
 						val intent = when {
 							!item.activity.isNullOrBlank() -> {
 								try {
-									Intent(context, Class.forName(context.packageName + item.activity))
+									Intent(
+										context, Class.forName(context.packageName + item.activity)
+									)
 								} catch (_: Exception) {
 									Intent(context, MainActivity::class.java)
 								}
 							}
-							!item.url.isNullOrBlank() -> Intent(context, BrowserActivity::class.java).setData(item.url.toUri())
+
+							!item.url.isNullOrBlank() -> Intent(
+								context, BrowserActivity::class.java
+							).setData(item.url.toUri())
+
 							else -> Intent(context, MainActivity::class.java)
 						}
-						val info = ShortcutInfoCompat.Builder(context, "$itemId").setShortLabel(name).setLongLabel(name).setIcon(IconCompat.createWithResource(context, R.mipmap.icon)).setIntent(intent.setAction(Intent.ACTION_VIEW)).build()
-						ShortcutManagerCompat.requestPinShortcut(context, info, PendingIntent.getBroadcast(context, 0, ShortcutManagerCompat.createShortcutResultIntent(context, info), PendingIntent.FLAG_IMMUTABLE).intentSender)
-					}
-					else config.toast(R.string.fail_to_add_shortcut)
+						val info =
+							ShortcutInfoCompat.Builder(context, "$itemId").setShortLabel(name)
+								.setLongLabel(name)
+								.setIcon(IconCompat.createWithResource(context, R.mipmap.icon))
+								.setIntent(intent.setAction(Intent.ACTION_VIEW)).build()
+						ShortcutManagerCompat.requestPinShortcut(
+							context, info, PendingIntent.getBroadcast(
+								context,
+								0,
+								ShortcutManagerCompat.createShortcutResultIntent(context, info),
+								PendingIntent.FLAG_IMMUTABLE
+							).intentSender
+						)
+					} else config.toast(R.string.fail_to_add_shortcut)
 				}
-				
-				GenericTonalButton(image = Icons.Rounded.ClearAll, text = stringResource(R.string.service_order)) {
+
+				GenericTonalButton(
+					image = Icons.Rounded.ClearAll, text = stringResource(R.string.service_order)
+				) {
 					onShowOrder()
 				}
-				
-				GenericTonalButton(image = Icons.Rounded.KeyboardVoice, text = stringResource(R.string.feedback)) {
-					context.startActivity(Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+
+				GenericTonalButton(
+					image = Icons.Rounded.KeyboardVoice, text = stringResource(R.string.feedback)
+				) {
+					context.startActivity(
+						Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri())
+							.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+					)
 				}
-				
-				GenericTonalButton(image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)) {
+
+				GenericTonalButton(
+					image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
+				) {
 					item.url?.takeIf { it.isNotBlank() }?.let {
-						context.startActivity(Intent(context, BrowserActivity::class.java).setData(it.toUri()))
+						context.startActivity(
+							Intent(context, BrowserActivity::class.java).setData(
+								it.toUri()
+							)
+						)
 					}
 				}
-				
-				GenericTonalButton(image = Icons.Rounded.Book, text = stringResource(R.string.guide)) {
+
+				GenericTonalButton(
+					image = Icons.Rounded.Book, text = stringResource(R.string.guide)
+				) {
 					item.doc?.takeIf { it.isNotBlank() }?.let {
-						context.startActivity(Intent(context, BrowserActivity::class.java).setData("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(it)}".toUri()))
+						context.startActivity(
+							Intent(
+								context, BrowserActivity::class.java
+							).setData(
+								"https://sysu-tang.github.io/sysuer-website${
+									CommonUtil.trim(
+										it
+									)
+								}".toUri()
+							)
+						)
 					} ?: config.toast(R.string.undeveloped_warning)
 				}
 			}
@@ -447,21 +584,26 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@Composable private fun ShortcutSection(
+@Composable
+private fun ShortcutSection(
 	vm: DashboardViewModel,
 	config: ContextUtil,
 	activity: FragmentActivity,
 	onShowActionDialog: (ServiceConfig) -> Unit,
-                                       ) {
+) {
 	val context = LocalContext.current
 	val scan = stringResource(R.string.scan)
 	val qrcode = stringResource(R.string.qrcode)
 	val courseSchedule = stringResource(R.string.course_schedule)
 	val shortcuts = vm.dashboardShortcuts
 	LaunchedEffect(Unit) { vm.loadDashboardShortcuts() }
-	FlowRow(modifier = Modifier
-		.fillMaxWidth()
-		.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.Center, verticalArrangement = Arrangement.Center) {
+	FlowRow(
+		modifier = Modifier
+			.fillMaxWidth()
+			.horizontalScroll(rememberScrollState()),
+		horizontalArrangement = Arrangement.Center,
+		verticalArrangement = Arrangement.Center
+	) {
 		ButtonGroup(horizontalArrangement = Arrangement.Center, overflowIndicator = { menuState ->
 			FilledTonalIconButton(onClick = {
 				if (menuState.isShowing) menuState.dismiss()
@@ -471,20 +613,36 @@ import kotlinx.coroutines.launch
 			}
 		}) {
 			clickableItem(label = scan, icon = {
-				Icon(Icons.Rounded.QrCodeScanner, contentDescription = stringResource(R.string.scan))
+				Icon(
+					Icons.Rounded.QrCodeScanner, contentDescription = stringResource(R.string.scan)
+				)
 			}, onClick = { vm.openWechatScan() })
 			clickableItem(label = qrcode, icon = {
 				Icon(Icons.Rounded.QrCode2, contentDescription = stringResource(R.string.qrcode))
 			}, onClick = { vm.openQrCode() })
 			clickableItem(label = courseSchedule, icon = {
-				Icon(Icons.Rounded.CalendarMonth, contentDescription = stringResource(R.string.course_schedule))
-			}, onClick = { context.startActivity(Intent(context, CourseScheduleActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()) })
+				Icon(
+					Icons.Rounded.CalendarMonth,
+					contentDescription = stringResource(R.string.course_schedule)
+				)
+			}, onClick = {
+				context.startActivity(
+					Intent(
+						context, CourseScheduleActivity::class.java
+					), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+				)
+			})
 		}
 		shortcuts.forEach { entity ->
 			val shortcutJson = entity.shortcutJson ?: return@forEach
-			val shortcut = remember(entity.shortcutId) { JSONObject.parseObject(shortcutJson, ServiceConfig::class.java) }
+			val shortcut = remember(entity.shortcutId) {
+				JSONObject.parseObject(
+					shortcutJson, ServiceConfig::class.java
+				)
+			}
 			val name = shortcut.name ?: return@forEach
-			LongClickButton(onClick = {
+			LongClickButton(
+				onClick = {
 				val act = shortcut.activity
 				val url = shortcut.url
 				when {
@@ -493,45 +651,83 @@ import kotlinx.coroutines.launch
 							Intent(context, Class.forName(context.packageName + act)).takeIf {
 								it.resolveActivity(context.packageManager) != null
 							}?.let {
-								context.startActivity(it, ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+								context.startActivity(
+									it,
+									ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
+										.toBundle()
+								)
 							}
 						} catch (_: Exception) {
 							config.toast(R.string.activity_not_found)
 						}
 					}
+
 					!url.isNullOrEmpty() -> {
-						context.startActivity(Intent(context, BrowserActivity::class.java).setData(url.toUri()), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+						context.startActivity(
+							Intent(context, BrowserActivity::class.java).setData(
+								url.toUri()
+							),
+							ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+						)
 					}
+
 					else -> config.toast(R.string.undeveloped)
 				}
-			}, icon = Icons.Rounded.Star, label = name, onLongClick = { onShowActionDialog(shortcut) })
+			},
+				icon = Icons.Rounded.Star,
+				label = name,
+				onLongClick = { onShowActionDialog(shortcut) })
 		}
 	}
 }
 
-@Composable private fun ScheduleSection(
+@Composable
+private fun ScheduleSection(
 	nextClassMarkdown: String,
 	dateText: String,
 	onNextClassClick: () -> Unit,
 	onTimeCardClick: () -> Unit,
-                                       ) {
-	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
-		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1.25f), onClick = onNextClassClick) {
-			if (nextClassMarkdown.isNotEmpty()) Markdown(rememberMarkdownState(nextClassMarkdown),
-			                                             colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-			                                             typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-			                                             modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
+) {
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
+	) {
+		OutlinedCard(
+			border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+			modifier = Modifier.weight(1.25f),
+			onClick = onNextClassClick
+		) {
+			if (nextClassMarkdown.isNotEmpty()) Markdown(
+				rememberMarkdownState(nextClassMarkdown),
+				colors = markdownColor(text = MaterialTheme.colorScheme.primary),
+				typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
+				modifier = Modifier.padding(
+					dimensionResource(R.dimen.horizontal_padding),
+					dimensionResource(R.dimen.vertical_padding)
+				)
+			)
 		}
-		OutlinedCard(border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline), modifier = Modifier.weight(1f), onClick = onTimeCardClick) {
-			if (nextClassMarkdown.isNotEmpty()) Markdown(rememberMarkdownState(dateText),
-			                                             colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-			                                             typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-			                                             modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
+		OutlinedCard(
+			border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+			modifier = Modifier.weight(1f),
+			onClick = onTimeCardClick
+		) {
+			if (nextClassMarkdown.isNotEmpty()) Markdown(
+				rememberMarkdownState(dateText),
+				colors = markdownColor(text = MaterialTheme.colorScheme.primary),
+				typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
+				modifier = Modifier.padding(
+					dimensionResource(R.dimen.horizontal_padding),
+					dimensionResource(R.dimen.vertical_padding)
+				)
+			)
 		}
 	}
 }
 
-@OptIn(ExperimentalFoundationApi::class) @Composable private fun CourseSection(
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CourseSection(
 	todayCourses: SnapshotStateList<JSONObject>,
 	tomorrowCourses: SnapshotStateList<JSONObject>,
 	showDate: Int,
@@ -541,16 +737,23 @@ import kotlinx.coroutines.launch
 	sharedTransitionScope: SharedTransitionScope?,
 	animatedVisibilityScope: AnimatedVisibilityScope?,
 	activity: FragmentActivity,
-                                                                              ) {
+) {
 	val context = LocalContext.current
 	var selectedIndex by rememberSaveable { mutableIntStateOf(showDate) }
 	val courses = if (selectedIndex == 0) todayCourses else tomorrowCourses
-	
-	Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		verticalAlignment = Alignment.CenterVertically,
+		horizontalArrangement = Arrangement.SpaceBetween
+	) {
 		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) {
-			context.startActivity(Intent(context, CourseScheduleActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+			context.startActivity(
+				Intent(context, CourseScheduleActivity::class.java),
+				ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+			)
 		}
-		
+
 		SingleChoiceSegmentedButtonRow {
 			listOf(R.string.today, R.string.recent).forEachIndexed { index, label ->
 				SegmentedButton(
@@ -558,33 +761,54 @@ import kotlinx.coroutines.launch
 					onClick = { selectedIndex = index },
 					selected = selectedIndex == index,
 					icon = {},
-				               ) {
+				) {
 					Text(stringResource(label))
 				}
 			}
 		}
 	}
-	
+
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
 		Crossfade(targetState = courses, label = "courseTab") { list ->
-			if (list.isEmpty()) Text(text = stringResource(R.string.noClass), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
-			else Row(modifier = Modifier
-				.fillMaxWidth()
-				.height(IntrinsicSize.Max)
-				.horizontalScroll(rememberScrollState(nextClassIndex)), verticalAlignment = Alignment.CenterVertically) {
+			if (list.isEmpty()) Text(
+				text = stringResource(R.string.noClass),
+				style = MaterialTheme.typography.bodyLarge,
+				modifier = Modifier.padding(
+					dimensionResource(R.dimen.horizontal_padding),
+					dimensionResource(R.dimen.vertical_padding)
+				)
+			)
+			else Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(IntrinsicSize.Max)
+					.horizontalScroll(rememberScrollState(nextClassIndex)),
+				verticalAlignment = Alignment.CenterVertically
+			) {
 				list.forEachIndexed { index, item ->
 					if (index > 0) VerticalDivider()
-					CourseItem(modifier = Modifier.then(if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+					CourseItem(
+						modifier = Modifier.then(
+						if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
-								sharedContentState = rememberSharedContentState(key = "course_${item.getString("classesNum")}_${item.getString("courseNum")}"),
+								sharedContentState = rememberSharedContentState(
+									key = "course_${
+										item.getString(
+											"classesNum"
+										)
+									}_${item.getString("courseNum")}"
+								),
 								animatedVisibilityScope = animatedVisibilityScope,
-							                     )
+							)
 						}
-					}
-					                                    else Modifier), item = item, onClick = {
+					} else Modifier), item = item, onClick = {
 						println(item)
-						onCourseClick(CourseDetail(item.getString("classesNum"), item.getString("courseNum")))
+						onCourseClick(
+							CourseDetail(
+								item.getString("classesNum"), item.getString("courseNum")
+							)
+						)
 					}, onLongClick = { key -> onCourseLongClick(item.getString(key)) })
 				}
 			}
@@ -592,12 +816,14 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@OptIn(ExperimentalFoundationApi::class) @Composable private fun CourseItem(
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CourseItem(
 	modifier: Modifier = Modifier,
 	item: JSONObject,
 	onClick: () -> Unit,
 	onLongClick: (String) -> Unit,
-                                                                           ) {
+) {
 	val status = item.getString("status") ?: "after"
 	val isBefore = status == "before"
 	val alpha = if (isBefore) 0.64f else 1.0f
@@ -608,21 +834,41 @@ import kotlinx.coroutines.launch
 	}
 	val clipboard = LocalClipboard.current
 	val coroutineScope = rememberCoroutineScope()
-	Card(colors = CardDefaults.cardColors(containerColor = backgroundColor), shape = RoundedCornerShape(0.dp), modifier = Modifier
-		.fillMaxHeight()
-		.combinedClickable(onClick = onClick, onLongClick = { onLongClick("courseName") })
-		.alpha(alpha)) {
-		Column(modifier = modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
+	Card(
+		colors = CardDefaults.cardColors(containerColor = backgroundColor),
+		shape = RoundedCornerShape(0.dp),
+		modifier = Modifier
+			.fillMaxHeight()
+			.combinedClickable(onClick = onClick, onLongClick = { onLongClick("courseName") })
+			.alpha(alpha)
+	) {
+		Column(
+			modifier = modifier.padding(
+				dimensionResource(R.dimen.horizontal_margin),
+				dimensionResource(R.dimen.vertical_margin)
+			)
+		) {
 			Spacer(modifier = Modifier.height(4.dp))
-			Text(text = item.getString("courseName", ""),
-			     style = MaterialTheme.typography.titleMedium,
-			     maxLines = 1,
-			     overflow = TextOverflow.Ellipsis,
-			     textAlign = TextAlign.Center,
-			     modifier = Modifier
-				     .fillMaxWidth()
-				     .align(Alignment.CenterHorizontally))
-			listOf("teachingPlace", "time", "teacherName", "course").zip(listOf(Icons.Rounded.LocationOn, Icons.Rounded.Timer, Icons.Rounded.AccountCircle, Icons.Rounded.CalendarMonth)).forEach { (key, icon) ->
+			Text(
+				text = item.getString("courseName", ""),
+				style = MaterialTheme.typography.titleMedium,
+				maxLines = 1,
+				overflow = TextOverflow.Ellipsis,
+				textAlign = TextAlign.Center,
+				modifier = Modifier
+					.fillMaxWidth()
+					.align(Alignment.CenterHorizontally)
+			)
+			listOf(
+				"teachingPlace", "time", "teacherName", "course"
+			).zip(
+				listOf(
+					Icons.Rounded.LocationOn,
+					Icons.Rounded.Timer,
+					Icons.Rounded.AccountCircle,
+					Icons.Rounded.CalendarMonth
+				)
+			).forEach { (key, icon) ->
 				val text = item.getString(key, "")
 				GenericButton(icon = icon, text = text) {
 					coroutineScope.launch {
@@ -634,7 +880,9 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@OptIn(ExperimentalAnimationApi::class) @Composable private fun ExamSection(
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun ExamSection(
 	week18Exams: SnapshotStateList<JSONObject>,
 	week19Exams: SnapshotStateList<JSONObject>,
 	showWeek18: Boolean,
@@ -644,17 +892,24 @@ import kotlinx.coroutines.launch
 	onExamLongClick: (String) -> Unit,
 	activity: FragmentActivity,
 	coroutineScope: CoroutineScope,
-                                                                           ) {
+) {
 	val context = LocalContext.current
 	val exams = if (showWeek18) week18Exams else week19Exams
 	var selectedIndex by remember { mutableIntStateOf(if (showWeek18) 0 else 1) }
 	LaunchedEffect(selectedIndex) {
 		onToggle(selectedIndex == 0)
 	}
-	
-	Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		verticalAlignment = Alignment.CenterVertically,
+		horizontalArrangement = Arrangement.SpaceBetween
+	) {
 		CardTitle(R.drawable.exam, text = stringResource(R.string.exam)) {
-			context.startActivity(Intent(context, ExamActivity::class.java), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle())
+			context.startActivity(
+				Intent(context, ExamActivity::class.java),
+				ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+			)
 		}
 		SingleChoiceSegmentedButtonRow {
 			listOf(R.string.week18, R.string.week19).forEachIndexed { index, label ->
@@ -663,26 +918,45 @@ import kotlinx.coroutines.launch
 					onClick = { selectedIndex = index },
 					selected = selectedIndex == index,
 					icon = {},
-				               ) {
+				) {
 					Text(stringResource(label))
 				}
 			}
 		}
 	}
-	
+
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-		AnimatedContent(targetState = exams,
-		                transitionSpec = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) togetherWith slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) },
-		                label = "examTab") { list ->
-			if (list.isEmpty()) Text(text = stringResource(R.string.noExam), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_padding), dimensionResource(R.dimen.vertical_padding)))
+		AnimatedContent(
+			targetState = exams, transitionSpec = {
+				slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) togetherWith slideOutOfContainer(
+					AnimatedContentTransitionScope.SlideDirection.Right
+				)
+			}, label = "examTab"
+		) { list ->
+			if (list.isEmpty()) Text(
+				text = stringResource(R.string.noExam),
+				style = MaterialTheme.typography.bodyLarge,
+				modifier = Modifier.padding(
+					dimensionResource(R.dimen.horizontal_padding),
+					dimensionResource(R.dimen.vertical_padding)
+				)
+			)
 			else {
-				Row(modifier = Modifier
-					.fillMaxWidth()
-					.height(IntrinsicSize.Max)
-					.horizontalScroll(rememberScrollState(todayExamIndex)), verticalAlignment = Alignment.CenterVertically) {
+				Row(
+					modifier = Modifier
+						.fillMaxWidth()
+						.height(IntrinsicSize.Max)
+						.horizontalScroll(rememberScrollState(todayExamIndex)),
+					verticalAlignment = Alignment.CenterVertically
+				) {
 					exams.forEachIndexed { index, exam ->
 						if (index > 0) VerticalDivider()
-						ExamItem(exam = exam, onClick = { onExamClick(exam) }, onLongClick = { text -> onExamLongClick(text) }, coroutineScope = coroutineScope)
+						ExamItem(
+							exam = exam,
+							onClick = { onExamClick(exam) },
+							onLongClick = { text -> onExamLongClick(text) },
+							coroutineScope = coroutineScope
+						)
 					}
 				}
 			}
@@ -690,12 +964,14 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@OptIn(ExperimentalFoundationApi::class) @Composable private fun ExamItem(
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ExamItem(
 	exam: JSONObject,
 	onClick: () -> Unit,
 	onLongClick: (String) -> Unit,
 	coroutineScope: CoroutineScope,
-                                                                         ) {
+) {
 	val status = exam.getString("status") ?: "after"
 	val isBefore = status == "before"
 	val alpha = if (isBefore) 0.64f else 1.0f
@@ -706,31 +982,53 @@ import kotlinx.coroutines.launch
 	}
 	val weeks = stringArrayResource(R.array.weeks)
 	val clipboard = LocalClipboard.current
-	Card(colors = CardDefaults.cardColors(containerColor = backgroundColor), modifier = Modifier
-		.fillMaxHeight()
-		.combinedClickable(onClick = onClick, onLongClick = { onLongClick(exam.getString("examSubjectName") ?: "") })
-		.alpha(alpha)) {
-		Column(modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin))) {
+	Card(
+		colors = CardDefaults.cardColors(containerColor = backgroundColor),
+		modifier = Modifier
+			.fillMaxHeight()
+			.combinedClickable(
+				onClick = onClick,
+				onLongClick = { onLongClick(exam.getString("examSubjectName") ?: "") })
+			.alpha(alpha)
+	) {
+		Column(
+			modifier = Modifier.padding(
+				dimensionResource(R.dimen.horizontal_margin),
+				dimensionResource(R.dimen.vertical_margin)
+			)
+		) {
 			Spacer(modifier = Modifier.height(4.dp))
-			Text(text = exam.getString("examSubjectName", ""),
-			     style = MaterialTheme.typography.titleMedium,
-			     maxLines = 1,
-			     overflow = TextOverflow.Ellipsis,
-			     textAlign = TextAlign.Center,
-			     modifier = Modifier
-				     .fillMaxWidth()
-				     .align(Alignment.CenterHorizontally))
+			Text(
+				text = exam.getString("examSubjectName", ""),
+				style = MaterialTheme.typography.titleMedium,
+				maxLines = 1,
+				overflow = TextOverflow.Ellipsis,
+				textAlign = TextAlign.Center,
+				modifier = Modifier
+					.fillMaxWidth()
+					.align(Alignment.CenterHorizontally)
+			)
 			val examDate = exam.getString("examDate", "")
 			val weekIdx = exam.getInteger("week")?.let { it - 1 }?.coerceIn(0, weeks.size - 1) ?: 0
-			listOf(exam.getString("classroomNumber", ""),
-			       "$examDate ${weeks[weekIdx]}",
-			       "${exam.getString("duration", "")}${stringResource(R.string.minute)}",
-			       exam.getString("durationTime", ""),
-			       stringResource(R.string.section_range, exam.getIntValue("startClassTimes"), exam.getIntValue("endClassTimes"))).zip(listOf(Icons.Rounded.LocationOn,
-			                                                                                                                                  Icons.Rounded.Timer,
-			                                                                                                                                  Icons.Rounded.Schedule,
-			                                                                                                                                  Icons.Rounded.School,
-			                                                                                                                                  Icons.Rounded.CalendarMonth)).forEach { (text, icon) ->
+			listOf(
+				exam.getString("classroomNumber", ""),
+				"$examDate ${weeks[weekIdx]}",
+				"${exam.getString("duration", "")}${stringResource(R.string.minute)}",
+				exam.getString("durationTime", ""),
+				stringResource(
+					R.string.section_range,
+					exam.getIntValue("startClassTimes"),
+					exam.getIntValue("endClassTimes")
+				)
+			).zip(
+				listOf(
+					Icons.Rounded.LocationOn,
+					Icons.Rounded.Timer,
+					Icons.Rounded.Schedule,
+					Icons.Rounded.School,
+					Icons.Rounded.CalendarMonth
+				)
+			).forEach { (text, icon) ->
 				GenericButton(icon = icon, text = text) {
 					coroutineScope.launch {
 						clipboard.setClipEntry(ClipData.newPlainText("exam", text).toClipEntry())
@@ -741,38 +1039,70 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable private fun TodoSection(
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TodoSection(
 	todoList: List<TodoEntity>,
 	onViewAllClick: () -> Unit,
 	todoManager: TodoManager,
-                                                                           ) {
+) {
 	var addTrigger by remember { mutableIntStateOf(0) }
-	Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+	Row(
+		modifier = Modifier.fillMaxWidth(),
+		verticalAlignment = Alignment.CenterVertically,
+		horizontalArrangement = Arrangement.SpaceBetween
+	) {
 		CardTitle(R.drawable.todo, text = stringResource(R.string.todo)) {
 			onViewAllClick()
 		}
 		SingleChoiceSegmentedButtonRow {
-			SegmentedButton(onClick = { addTrigger++ }, selected = false, shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2), icon = {}, contentPadding = PaddingValues(0.dp)) {
-				Icon(painter = painterResource(R.drawable.add), contentDescription = stringResource(R.string.add))
+			SegmentedButton(
+				onClick = { addTrigger++ },
+				selected = false,
+				shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+				icon = {},
+				contentPadding = PaddingValues(0.dp)
+			) {
+				Icon(
+					painter = painterResource(R.drawable.add),
+					contentDescription = stringResource(R.string.add)
+				)
 			}
-			SegmentedButton(onClick = onViewAllClick, selected = false, shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2), icon = {}, contentPadding = PaddingValues(0.dp)) {
-				Icon(painter = painterResource(R.drawable.view), contentDescription = stringResource(R.string.view_detail))
+			SegmentedButton(
+				onClick = onViewAllClick,
+				selected = false,
+				shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+				icon = {},
+				contentPadding = PaddingValues(0.dp)
+			) {
+				Icon(
+					painter = painterResource(R.drawable.view),
+					contentDescription = stringResource(R.string.view_detail)
+				)
 			}
 		}
 	}
-	
+
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-		if (todoList.isEmpty()) Text(text = stringResource(R.string.no_todo), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(dimensionResource(R.dimen.horizontal_margin), dimensionResource(R.dimen.vertical_margin)))
+		if (todoList.isEmpty()) Text(
+			text = stringResource(R.string.no_todo),
+			style = MaterialTheme.typography.bodyLarge,
+			modifier = Modifier.padding(
+				dimensionResource(R.dimen.horizontal_margin),
+				dimensionResource(R.dimen.vertical_margin)
+			)
+		)
 		todoManager.TodoListScreen(todoList = todoList, addTrigger = addTrigger)
 	}
 }
 
-@Composable fun GenericButton(
+@Composable
+fun GenericButton(
 	icon: ImageVector,
 	text: String = "",
 	enable: Boolean = true,
 	onClick: () -> Unit = {},
-                             ) {
+) {
 	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
 		Icon(icon, contentDescription = text, modifier = Modifier.size(ButtonDefaults.IconSize))
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
@@ -780,54 +1110,76 @@ import kotlinx.coroutines.launch
 	}
 }
 
-@Composable fun GenericButton(
+@Composable
+fun GenericButton(
 	image: Int,
 	text: String = "",
 	enable: Boolean = true,
 	onClick: () -> Unit = {},
-                             ) {
+) {
 	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
-		Icon(painter = painterResource(image), contentDescription = text, modifier = Modifier.size(ButtonDefaults.IconSize))
+		Icon(
+			painter = painterResource(image),
+			contentDescription = text,
+			modifier = Modifier.size(ButtonDefaults.IconSize)
+		)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(text)
 	}
 }
 
-@Composable fun RowScope.CardTitle(
+@Composable
+fun RowScope.CardTitle(
 	image: Int,
 	text: String = "",
 	onClick: () -> Unit = {},
-                                  ) {
+) {
 	Row(
 		modifier = Modifier
 			.weight(1f)
 			.clickable(onClick = onClick, indication = null, interactionSource = null),
 		verticalAlignment = Alignment.CenterVertically,
-	   ) {
-		Icon(painter = painterResource(image), contentDescription = text, tint = MaterialTheme.colorScheme.primary)
+	) {
+		Icon(
+			painter = painterResource(image),
+			contentDescription = text,
+			tint = MaterialTheme.colorScheme.primary
+		)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-		Text(text, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+		Text(
+			text,
+			style = MaterialTheme.typography.titleLarge,
+			color = MaterialTheme.colorScheme.primary
+		)
 	}
 }
 
-@Composable fun RowScope.CardTitle(
+@Composable
+fun RowScope.CardTitle(
 	image: ImageVector,
 	text: String = "",
 	onClick: () -> Unit = {},
-                                  ) {
+) {
 	Row(
 		modifier = Modifier
-			.clickable(onClick = onClick, indication = null, interactionSource = null)
+			.clickable(
+				onClick = onClick, indication = null, interactionSource = null
+			)
 			.weight(1f),
 		verticalAlignment = Alignment.CenterVertically,
-	   ) {
+	) {
 		Icon(image, contentDescription = text, tint = MaterialTheme.colorScheme.primary)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-		Text(text, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+		Text(
+			text,
+			style = MaterialTheme.typography.titleLarge,
+			color = MaterialTheme.colorScheme.primary
+		)
 	}
 }
 
-@Composable fun LongClickButton(
+@Composable
+fun LongClickButton(
 	onClick: () -> Unit,
 	onLongClick: () -> Unit,
 	modifier: Modifier = Modifier,
@@ -837,7 +1189,7 @@ import kotlinx.coroutines.launch
 	colors: ButtonColors = ButtonDefaults.buttonColors(),
 	interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 	content: @Composable RowScope.() -> Unit = {},
-                               ) {
+) {
 	val haptic = LocalHapticFeedback.current
 	val isPressed by interactionSource.collectIsPressedAsState()
 	val shapes = ButtonDefaults.shapes()
@@ -848,17 +1200,31 @@ import kotlinx.coroutines.launch
 	Surface(
 		modifier = modifier
 			.minimumInteractiveComponentSize()
-			.combinedClickable(interactionSource = interactionSource, enabled = enabled, onClick = onClick, onLongClick = {
-				haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-				onLongClick()
-			}),
+			.combinedClickable(
+				interactionSource = interactionSource,
+				enabled = enabled,
+				onClick = onClick,
+				onLongClick = {
+					haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+					onLongClick()
+				}),
 		shape = shape,
 		color = if (enabled) colors.containerColor else colors.disabledContainerColor,
 		contentColor = if (enabled) colors.contentColor else colors.disabledContentColor,
-	       ) {
+	) {
 		CompositionLocalProvider(LocalContentColor provides if (enabled) colors.contentColor else colors.disabledContentColor) {
-			Row(modifier = Modifier.padding(if (icon != null) ButtonDefaults.ButtonWithIconContentPadding else ButtonDefaults.ContentPadding), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-				icon?.let { Icon(it, contentDescription = label, modifier = Modifier.size(ButtonDefaults.MediumIconSize)) }
+			Row(
+				modifier = Modifier.padding(if (icon != null) ButtonDefaults.ButtonWithIconContentPadding else ButtonDefaults.ContentPadding),
+				horizontalArrangement = Arrangement.Center,
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				icon?.let {
+					Icon(
+						it,
+						contentDescription = label,
+						modifier = Modifier.size(ButtonDefaults.MediumIconSize)
+					)
+				}
 				if (icon != null && label != null) Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 				label?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
 				content()

@@ -9,25 +9,28 @@ import androidx.preference.PreferenceManager
 
 class PreferenceViewModel(application: Application) : AndroidViewModel(application) {
 	val isAgreeLiveData: MutableLiveData<Boolean> = MutableLiveData()
-	val dashboardLiveData: MutableLiveData<MutableSet<String?>?> = MutableLiveData<MutableSet<String?>?>()
-	val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
+	val dashboardLiveData: MutableLiveData<MutableSet<String?>?> =
+		MutableLiveData<MutableSet<String?>?>()
+	val sharedPreferences: SharedPreferences =
+		PreferenceManager.getDefaultSharedPreferences(application)
+
 	fun getString(key: String?, defValue: String?): String? =
 		sharedPreferences.getString(key, defValue)
-	
+
 	fun getBoolean(key: String?, defValue: Boolean): Boolean =
 		sharedPreferences.getBoolean(key, defValue)
-	
+
 	val theme: String?
 		get() = getString(THEME, "2")
-	
+
 	init {
 		isAgreeLiveData.value = isAgree
 		dashboardLiveData.value = dashboard
 	}
-	
+
 	private fun getSet(key: String?, defValue: Set<String?>?): MutableSet<String?>? =
 		sharedPreferences.getStringSet(key, defValue)
-	
+
 	val dashboard: MutableSet<String?>?
 		get() = getSet("dashboard", (0..5).map { "$it" }.toSet())
 	val home: String?
@@ -39,6 +42,7 @@ class PreferenceViewModel(application: Application) : AndroidViewModel(applicati
 	var isAgree: Boolean
 		get() = getBoolean(IS_AGREE, false)
 		set(isAgree) {
+			isAgreeLiveData.value = isAgree
 			sharedPreferences.edit { putBoolean(IS_AGREE, isAgree) }
 		}
 	var isFirstLaunch: Boolean
@@ -48,11 +52,7 @@ class PreferenceViewModel(application: Application) : AndroidViewModel(applicati
 		}
 	val update: Boolean
 		get() = getBoolean(UPDATE, true)
-	
-	fun setIsAgreeLiveData(isAgree: Boolean) {
-		isAgreeLiveData.value = isAgree
-	}
-	
+
 	companion object {
 		private const val THEME = "theme"
 		private const val HOME = "home"

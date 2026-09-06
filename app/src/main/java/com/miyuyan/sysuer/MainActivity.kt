@@ -26,12 +26,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -39,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
@@ -47,6 +54,7 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.mikepenz.markdown.m3.Markdown
 import com.miyuyan.sysuer.academic.AcademyNotificationRoute
 import com.miyuyan.sysuer.academic.CETRoute
 import com.miyuyan.sysuer.academic.CourseDetailRoute
@@ -97,7 +105,6 @@ import com.miyuyan.sysuer.widget.RecentClassWidget
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import io.noties.markwon.Markwon
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -117,11 +124,11 @@ class MainActivity : BaseActivity() {
 					-1 -> config.toast(R.string.no_net_connected)
 					0 -> config.contextUtil.disposable.add(
 						Observable.just(msg.obj).map {
-							JSONObject.parseObject(it as String?)
-						}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-							.subscribe({ response: JSONObject ->
-								showUpdateDialog(response)
-							}, {})
+						JSONObject.parseObject(it as String?)
+					}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+						.subscribe({ response: JSONObject ->
+							showUpdateDialog(response)
+						}, {})
 					)
 				}
 			}
@@ -131,76 +138,113 @@ class MainActivity : BaseActivity() {
 		val homeViewModel: HomeViewModel by viewModels()
 		val spm: PreferenceViewModel by viewModels()
 		initActionMap(homeViewModel.actionMap)
-		setContent {
-			MainScreen()
-		}
 		spm.isFirstLaunch = false
-		spm.isAgreeLiveData.observe(this) { aBoolean ->
-			if (aBoolean) {
-				if (spm.update) checkUpdate()
-				listOf(
-					NextClassWidget::class.java,  /*TodayClassWidget.class, */
-					TomorrowClassWidget::class.java, RecentClassWidget::class.java
-				).forEach {
-					sendBroadcast(
-						Intent(this, it).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-							.putExtra(
+		setContent {
+			val mainViewModel: MainViewModel = viewModel()
+			val isAgree by spm.isAgreeLiveData.observeAsState()
+			LaunchedEffect(isAgree) {
+				if (isAgree == true) {
+					if (spm.update) mainViewModel.getLatestVersion()
+						.onSuccess { showUpdateDialog(it) }.onFailure { }
+					listOf(
+						NextClassWidget::class.java,  /*TodayClassWidget.class, */
+						TomorrowClassWidget::class.java, RecentClassWidget::class.java
+					).forEach {
+						sendBroadcast(
+							Intent(
+								this@MainActivity, it
+							).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE).putExtra(
 								AppWidgetManager.EXTRA_APPWIDGET_IDS,
 								AppWidgetManager.getInstance(this@MainActivity)
 									.getAppWidgetIds(ComponentName(this@MainActivity, it))
 							)
-					)
-				}
-				receiver = object : BroadcastReceiver() {
-					override fun onReceive(context: Context?, intent: Intent) {
-						if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(
-								DownloadManager.EXTRA_DOWNLOAD_ID, -1
-							) == downloadId
-						) {
-							config.toast(R.string.download_complete)
-							com.miyuyan.sysuer.api.DownloadManager.openFile(this@MainActivity, path)
+						)
+					}
+					receiver = object : BroadcastReceiver() {
+						override fun onReceive(context: Context?, intent: Intent) {
+							if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(
+									DownloadManager.EXTRA_DOWNLOAD_ID, -1
+								) == downloadId
+							) {
+								config.toast(R.string.download_complete)
+								com.miyuyan.sysuer.api.DownloadManager.openFile(
+									this@MainActivity, path
+								)
+							}
 						}
 					}
-				}
-				ContextCompat.registerReceiver(
-					this,
-					receiver,
-					IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-					ContextCompat.RECEIVER_EXPORTED
-				)
-				receiverRegistered = true
-				getInstance(this).enqueue(
-					OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
-						Data.Builder().putStringArray(
-							"components",
-							arrayOf("TodayClassWidget", "RecentClassWidget", "NextClassWidget")
+					ContextCompat.registerReceiver(
+						this@MainActivity,
+						receiver,
+						IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+						ContextCompat.RECEIVER_EXPORTED
+					)
+					receiverRegistered = true
+					getInstance(this@MainActivity).enqueue(
+						OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
+							Data.Builder().putStringArray(
+								"components",
+								arrayOf("TodayClassWidget", "RecentClassWidget", "NextClassWidget")
+							).build()
 						).build()
-					).build()
-				)
-				if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
-					arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-					PackageManager.PERMISSION_GRANTED
-				)
-			} else {
-				val agreementDialog =
-					MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
-						.setMessage("")
-						.setPositiveButton(R.string.agree) { _: DialogInterface?, _: Int ->
-							spm.isAgree = true
-							spm.setIsAgreeLiveData(true)
-						}.setNegativeButton(R.string.disagree) { _: DialogInterface?, _: Int ->
-							spm.isAgree = false
-							supportFinishAfterTransition()
-						}.setCancelable(false).create()
-				agreementDialog.show()
-				agreementDialog.findViewById<TextView>(android.R.id.message)?.let {
-					Markwon.builder(this).usePlugin(StrikethroughPlugin.create()).build()
-						.setMarkdown(
-							it,
-							"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)"
-						)
+					)
+					if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
+						arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+						PackageManager.PERMISSION_GRANTED
+					)
 				}
 			}
+			if (isAgree == true) {
+				MainScreen()
+			} else {
+				AlertDialog(
+					title = { Text(stringResource(R.string.user_agreement_and_privacy_policy)) },
+					text = {
+						Markdown(
+							"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)",
+							modifier = Modifier
+						)
+					},
+					onDismissRequest = {},
+					dismissButton = {
+						TextButton(
+							onClick = { supportFinishAfterTransition() },
+							shape = ButtonDefaults.shape
+						) {
+							Text(stringResource(R.string.exit))
+						}
+					},
+					confirmButton = {
+						TextButton(
+							onClick = { spm.isAgree = true }, shapes = ButtonDefaults.shapes()
+						) {
+							Text(stringResource(R.string.confirm))
+						}
+					})
+			}
+//		spm.isAgreeLiveData.observe(this) { aBoolean ->
+//			if (aBoolean) {
+//			} else {
+//				val agreementDialog =
+//					MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
+//						.setMessage("")
+//						.setPositiveButton(R.string.agree) { _: DialogInterface?, _: Int ->
+//							spm.isAgree = true
+//							spm.setIsAgreeLiveData(true)
+//						}.setNegativeButton(R.string.disagree) { _: DialogInterface?, _: Int ->
+//							spm.isAgree = false
+//							supportFinishAfterTransition()
+//						}.setCancelable(false).create()
+//				agreementDialog.show()
+//				agreementDialog.findViewById<TextView>(android.R.id.message)?.let {
+//					Markwon.builder(this).usePlugin(StrikethroughPlugin.create()).build()
+//						.setMarkdown(
+//							it,
+//							"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)"
+//						)
+//				}
+//			}
+//		}
 		}
 	}
 
@@ -364,7 +408,7 @@ class MainActivity : BaseActivity() {
 				this.packageManager.getPackageInfo(
 					this.packageName, 0
 				)
-			) < response.getInteger("version")
+			) < response.getInteger("version") || true
 		) {
 			path = "${
 				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
