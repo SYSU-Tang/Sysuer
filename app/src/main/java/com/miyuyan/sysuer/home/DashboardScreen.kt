@@ -250,11 +250,11 @@ internal fun DashboardScreen(
 				})
 		}
 
-		if (3 in selectedSet) {            /*LaunchedEffect(isAgree) {
-				if (isAgree == true) dashboardViewModel.getTodayCourses()
-			}*/
-			LaunchedEffect(Unit) {
-				dashboardViewModel.getTodayCourses()
+		if (3 in selectedSet) {
+			LaunchedEffect(term) {
+				if (term.isNotEmpty()) {
+					dashboardViewModel.getTodayCourses(term)
+				}
 			}
 			CourseSection(
 				todayCourses = todayCourses,

@@ -160,6 +160,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			if (weekDay != null) md.append(weekDay)
 			return "$md"
 		}
+
 	fun setShowWeek18(showWeek18: Boolean) {
 		_isShowWeek18.value = showWeek18
 	}
@@ -243,12 +244,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				val delay = if (delta < 15 * 60 * 1000) 0L else delta - 15 * 60 * 1000
 				val workRequest =
 					OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java).setInputData(
-							workDataOf(
-								"courseName" to getString("courseName"),
-								"teachingPlace" to getString("teachingPlace"),
-								"time" to getString("time")
-							)
-						).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
+						workDataOf(
+							"courseName" to getString("courseName"),
+							"teachingPlace" to getString("teachingPlace"),
+							"time" to getString("time")
+						)
+					).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
 				WorkManager.getInstance(getApplication()).enqueueUniqueWork(
 					"next_class_notification_update", ExistingWorkPolicy.KEEP, workRequest
 				)
@@ -279,6 +280,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 								if (isToday) _todayCourses.add(item) else _tomorrowCourses.add(item)
 								isToday
 							}.partition { it.getString("status") == "before" }
+						println(beforeArray)
+						println(afterArray)
+						println(_todayCourses)
+						println(_tomorrowCourses)
 						_progressMax.value = _todayCourses.size
 						_progressCurrent.value = beforeArray.size
 						updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
@@ -347,9 +352,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		model.addAndNext("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 4)
 	}
 
-	fun getTodayCourses() {
+	fun getTodayCourses(term: String = "") {
 		model.addAndNext(
-			"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=", 1
+			"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term", 1
 		)
 	}
 

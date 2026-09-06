@@ -14,8 +14,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.Message
 import android.view.View
 import android.widget.TextView
 import androidx.activity.compose.setContent
@@ -71,7 +69,6 @@ import com.miyuyan.sysuer.academic.RegistrationRoute
 import com.miyuyan.sysuer.academic.SchoolEnrollmentRoute
 import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
 import com.miyuyan.sysuer.academic.TrainingProgramRoute
-import com.miyuyan.sysuer.api.HttpManager
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.browser.RichTextRoute
 import com.miyuyan.sysuer.home.HomeViewModel
@@ -105,36 +102,34 @@ import com.miyuyan.sysuer.widget.RecentClassWidget
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import io.noties.markwon.Markwon
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 
 class MainActivity : BaseActivity() {
 	var downloadId: Long = 0
 	var receiver: BroadcastReceiver? = null
 	var receiverRegistered: Boolean = false
-	private lateinit var http: HttpManager
+
+	//	private lateinit var http: HttpManager
 	var path: String = ""
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		http = HttpManager(object : Handler(mainLooper) {
-			override fun handleMessage(msg: Message) {
-				when (msg.what) {
-					-1 -> config.toast(R.string.no_net_connected)
-					0 -> config.contextUtil.disposable.add(
-						Observable.just(msg.obj).map {
-						JSONObject.parseObject(it as String?)
-					}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-						.subscribe({ response: JSONObject ->
-							showUpdateDialog(response)
-						}, {})
-					)
-				}
-			}
-		}).apply {
-			setParams(this@MainActivity.config)
-		}
+//		http = HttpManager(object : Handler(mainLooper) {
+//			override fun handleMessage(msg: Message) {
+//				when (msg.what) {
+//					-1 -> config.toast(R.string.no_net_connected)
+//					0 -> config.contextUtil.disposable.add(
+//						Observable.just(msg.obj).map {
+//						JSONObject.parseObject(it as String?)
+//					}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+//						.subscribe({ response: JSONObject ->
+//							showUpdateDialog(response)
+//						}, {})
+//					)
+//				}
+//			}
+//		}).apply {
+//			setParams(this@MainActivity.config)
+//		}
 		val homeViewModel: HomeViewModel by viewModels()
 		val spm: PreferenceViewModel by viewModels()
 		initActionMap(homeViewModel.actionMap)
@@ -209,7 +204,7 @@ class MainActivity : BaseActivity() {
 					dismissButton = {
 						TextButton(
 							onClick = { supportFinishAfterTransition() },
-							shape = ButtonDefaults.shape
+							shapes = ButtonDefaults.shapes()
 						) {
 							Text(stringResource(R.string.exit))
 						}
@@ -408,7 +403,7 @@ class MainActivity : BaseActivity() {
 				this.packageManager.getPackageInfo(
 					this.packageName, 0
 				)
-			) < response.getInteger("version") || true
+			) < response.getInteger("version")
 		) {
 			path = "${
 				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -500,9 +495,9 @@ class MainActivity : BaseActivity() {
 		}
 	}
 
-	fun checkUpdate() {
-		http.getRequest("https://sysu-tang.github.io/latest.json", 0)
-	}
+//	fun checkUpdate() {
+//		http.getRequest("https://sysu-tang.github.io/latest.json", 0)
+//	}
 
 	override fun onDestroy() {
 		super.onDestroy()
