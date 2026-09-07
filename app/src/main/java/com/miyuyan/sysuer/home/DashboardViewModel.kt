@@ -280,10 +280,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 								if (isToday) _todayCourses.add(item) else _tomorrowCourses.add(item)
 								isToday
 							}.partition { it.getString("status") == "before" }
-						println(beforeArray)
-						println(afterArray)
-						println(_todayCourses)
-						println(_tomorrowCourses)
 						_progressMax.value = _todayCourses.size
 						_progressCurrent.value = beforeArray.size
 						updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())

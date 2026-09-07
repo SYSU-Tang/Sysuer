@@ -551,7 +551,7 @@
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
     <string name="manage">Manage</string>
-    <string name="higher_version_detected">Higher Version Detected</string>
+    <string name="release_version_detected">Higher Version Detected</string>
     <string name="download_in_app">Downlaod in APP</string>
     <string name="download_in_system">Download in System</string>
     <string name="download_in_browser">Download in Browser</string>

@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -15,15 +14,18 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
-import android.widget.TextView
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +38,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -51,8 +57,8 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownTypography
 import com.miyuyan.sysuer.academic.AcademyNotificationRoute
 import com.miyuyan.sysuer.academic.CETRoute
 import com.miyuyan.sysuer.academic.CourseDetailRoute
@@ -101,121 +107,105 @@ import com.miyuyan.sysuer.widget.NextClassWidget
 import com.miyuyan.sysuer.widget.RecentClassWidget
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
-import io.noties.markwon.Markwon
 import java.io.File
 
 class MainActivity : BaseActivity() {
 	var downloadId: Long = 0
 	var receiver: BroadcastReceiver? = null
 	var receiverRegistered: Boolean = false
-
-	//	private lateinit var http: HttpManager
 	var path: String = ""
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-//		http = HttpManager(object : Handler(mainLooper) {
-//			override fun handleMessage(msg: Message) {
-//				when (msg.what) {
-//					-1 -> config.toast(R.string.no_net_connected)
-//					0 -> config.contextUtil.disposable.add(
-//						Observable.just(msg.obj).map {
-//						JSONObject.parseObject(it as String?)
-//					}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-//						.subscribe({ response: JSONObject ->
-//							showUpdateDialog(response)
-//						}, {})
-//					)
-//				}
-//			}
-//		}).apply {
-//			setParams(this@MainActivity.config)
-//		}
 		val homeViewModel: HomeViewModel by viewModels()
 		val spm: PreferenceViewModel by viewModels()
 		initActionMap(homeViewModel.actionMap)
 		spm.isFirstLaunch = false
 		setContent {
-			val mainViewModel: MainViewModel = viewModel()
-			val isAgree by spm.isAgreeLiveData.observeAsState()
-			LaunchedEffect(isAgree) {
-				if (isAgree == true) {
-					if (spm.update) mainViewModel.getLatestVersion()
-						.onSuccess { showUpdateDialog(it) }.onFailure { }
-					listOf(
-						NextClassWidget::class.java,  /*TodayClassWidget.class, */
-						TomorrowClassWidget::class.java, RecentClassWidget::class.java
-					).forEach {
-						sendBroadcast(
-							Intent(
-								this@MainActivity, it
-							).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE).putExtra(
-								AppWidgetManager.EXTRA_APPWIDGET_IDS,
-								AppWidgetManager.getInstance(this@MainActivity)
-									.getAppWidgetIds(ComponentName(this@MainActivity, it))
-							)
-						)
-					}
-					receiver = object : BroadcastReceiver() {
-						override fun onReceive(context: Context?, intent: Intent) {
-							if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(
-									DownloadManager.EXTRA_DOWNLOAD_ID, -1
-								) == downloadId
-							) {
-								config.toast(R.string.download_complete)
-								com.miyuyan.sysuer.api.DownloadManager.openFile(
-									this@MainActivity, path
+			SysuerTheme(settingManager) {
+				val mainViewModel: MainViewModel = viewModel()
+				val isAgree by spm.isAgreeLiveData.observeAsState()
+				val updateData by mainViewModel.update.collectAsStateWithLifecycle()
+				updateData?.let { UpdateDialog(it) }
+				LaunchedEffect(isAgree) {
+					if (isAgree == true) {
+						if (spm.update) mainViewModel.getLatestVersion()
+						listOf(
+							NextClassWidget::class.java,  /*TodayClassWidget.class, */
+							TomorrowClassWidget::class.java, RecentClassWidget::class.java
+						).forEach {
+							sendBroadcast(
+								Intent(
+									this@MainActivity, it
+								).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE).putExtra(
+									AppWidgetManager.EXTRA_APPWIDGET_IDS,
+									AppWidgetManager.getInstance(this@MainActivity)
+										.getAppWidgetIds(ComponentName(this@MainActivity, it))
 								)
+							)
+						}
+						receiver = object : BroadcastReceiver() {
+							override fun onReceive(context: Context?, intent: Intent) {
+								if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(
+										DownloadManager.EXTRA_DOWNLOAD_ID, -1
+									) == downloadId
+								) {
+									config.toast(R.string.download_complete)
+									com.miyuyan.sysuer.api.DownloadManager.openFile(
+										this@MainActivity, path
+									)
+								}
 							}
 						}
-					}
-					ContextCompat.registerReceiver(
-						this@MainActivity,
-						receiver,
-						IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-						ContextCompat.RECEIVER_EXPORTED
-					)
-					receiverRegistered = true
-					getInstance(this@MainActivity).enqueue(
-						OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
-							Data.Builder().putStringArray(
-								"components",
-								arrayOf("TodayClassWidget", "RecentClassWidget", "NextClassWidget")
-							).build()
-						).build()
-					)
-					if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
-						arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-						PackageManager.PERMISSION_GRANTED
-					)
-				}
-			}
-			if (isAgree == true) {
-				MainScreen()
-			} else {
-				AlertDialog(
-					title = { Text(stringResource(R.string.user_agreement_and_privacy_policy)) },
-					text = {
-						Markdown(
-							"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)",
-							modifier = Modifier
+						ContextCompat.registerReceiver(
+							this@MainActivity,
+							receiver,
+							IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+							ContextCompat.RECEIVER_EXPORTED
 						)
-					},
-					onDismissRequest = {},
-					dismissButton = {
-						TextButton(
-							onClick = { supportFinishAfterTransition() },
-							shapes = ButtonDefaults.shapes()
-						) {
-							Text(stringResource(R.string.exit))
-						}
-					},
-					confirmButton = {
-						TextButton(
-							onClick = { spm.isAgree = true }, shapes = ButtonDefaults.shapes()
-						) {
-							Text(stringResource(R.string.confirm))
-						}
-					})
+						receiverRegistered = true
+						getInstance(this@MainActivity).enqueue(
+							OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
+								Data.Builder().putStringArray(
+									"components", arrayOf(
+										"TodayClassWidget", "RecentClassWidget", "NextClassWidget"
+									)
+								).build()
+							).build()
+						)
+						if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
+							arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+							PackageManager.PERMISSION_GRANTED
+						)
+					}
+				}
+				if (isAgree == true) {
+					MainScreen()
+				} else {
+					AlertDialog(
+						title = { Text(stringResource(R.string.user_agreement_and_privacy_policy)) },
+						text = {
+							Markdown(
+								"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)",
+								modifier = Modifier
+							)
+						},
+						onDismissRequest = {},
+						dismissButton = {
+							TextButton(
+								onClick = { supportFinishAfterTransition() },
+								shapes = ButtonDefaults.shapes()
+							) {
+								Text(stringResource(R.string.exit))
+							}
+						},
+						confirmButton = {
+							TextButton(
+								onClick = { spm.isAgree = true }, shapes = ButtonDefaults.shapes()
+							) {
+								Text(stringResource(R.string.confirm))
+							}
+						})
+				}
 			}
 //		spm.isAgreeLiveData.observe(this) { aBoolean ->
 //			if (aBoolean) {
@@ -398,43 +388,32 @@ class MainActivity : BaseActivity() {
 		}
 	}
 
-	fun showUpdateDialog(response: JSONObject) {
+	@Composable
+	fun UpdateDialog(response: JSONObject) {
+		var showUpdateDialog by remember { mutableStateOf(false) }
+		var dismissed by remember { mutableStateOf(false) }
+		var title = R.string.release_version_detected
+		var content = ""
+		var link = ""
+		var enforce = false
+		if (dismissed) return
 		if (PackageInfoCompat.getLongVersionCode(
-				this.packageManager.getPackageInfo(
-					this.packageName, 0
+				packageManager.getPackageInfo(
+					packageName, 0
 				)
 			) < response.getInteger("version")
 		) {
 			path = "${
 				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 			}/${getString(R.string.app_name)}${response.getString("versionName")}.apk"
-			val releaseLink = response.getString(
+			link = response.getString(
 				"link",
 				"https://github.com/SYSU-Tang/Sysuer/releases/latest/download/app-release.apk"
 			)
-			MaterialAlertDialogBuilder(this).setMessage("")
-				.setTitle(R.string.higher_version_detected)
-				.setPositiveButton(R.string.download_in_system) { _: DialogInterface?, _: Int ->
-					downloadId = (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(
-						DownloadManager.Request(Uri.parse(releaseLink))
-							.setDestinationUri(Uri.fromFile(File(path)))
-							.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-					)
-				}.setNegativeButton(R.string.download_in_browser) { _: DialogInterface?, _: Int ->
-					startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(releaseLink)))
-				}.setCancelable(!response.getBoolean("enforce"))
-				.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
-					com.miyuyan.sysuer.api.DownloadManager.downloadFile(
-						this, releaseLink, path
-					)
-				}.create().apply {
-					setCancelable(!response.getBoolean("enforce"))
-					show()
-					findViewById<TextView>(android.R.id.message)?.let {
-						Markwon.builder(this@MainActivity).build()
-							.setMarkdown(it, response.getString("description"))
-					}
-				}
+			content = response.getString("description", "暂无更新描述")
+			title = R.string.release_version_detected
+			enforce = response.getBooleanValue("enforce", false)
+			showUpdateDialog = true
 		} else if (settingManager.developerMode && settingManager.betaCheck) {
 			if (response.containsKey("minorVersion") && response.containsKey("majorVersion") && response.containsKey(
 					"generationVersion"
@@ -448,38 +427,76 @@ class MainActivity : BaseActivity() {
 					val versionName = "${generationVersion}.${majorVersion}.${minorVersion}-beta"
 					path = "${
 						Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-					}/${getString(R.string.app_name)}-$versionName}apk"
-					val previewLink = response.getString(
+					}/${getString(R.string.app_name)}$versionName.apk"
+					link = response.getString(
 						"previewLink",
 						"https://github.com/SYSU-Tang/Sysuer/releases/download/$versionName/app-release.apk"
 					)
-					MaterialAlertDialogBuilder(this).setMessage("")
-						.setTitle(R.string.beta_version_detected)
-						.setPositiveButton(R.string.download_in_system) { _: DialogInterface?, _: Int ->
-							downloadId = getSystemService(DownloadManager::class.java).enqueue(
-								DownloadManager.Request(Uri.parse(previewLink))
-									.setDestinationUri(Uri.fromFile(File(path)))
-									.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-							)
-						}
-						.setNegativeButton(R.string.download_in_browser) { _: DialogInterface?, _: Int ->
-							startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(previewLink)))
-						}.setCancelable(!response.getBoolean("enforce"))
-						.setNeutralButton(R.string.download_in_app) { _: DialogInterface?, _: Int ->
-							com.miyuyan.sysuer.api.DownloadManager.downloadFile(
-								this, previewLink, path
-							)
-						}.create().apply {
-							show()
-							findViewById<TextView>(android.R.id.message)?.let {
-								Markwon.builder(this@MainActivity).build().setMarkdown(
-									it, response.getString("previewDescription", "暂无更新描述")
-								)
-							}
-						}
+					title = R.string.beta_version_detected
+					content = response.getString("previewDescription", "暂无更新描述")
+					showUpdateDialog = true
 				}
 			}
 		}
+		fun close() {
+			if (!enforce) {
+				dismissed = true
+				showUpdateDialog = false
+			}
+		}
+
+		if (showUpdateDialog) AlertDialog(title = { Text(stringResource(title)) }, text = {
+			Markdown(
+				content,
+				modifier = Modifier.verticalScroll(rememberScrollState()),
+				typography = markdownTypography(
+					h3 = MaterialTheme.typography.titleLarge
+				)
+			)
+		}, onDismissRequest = { close() }, dismissButton = {
+			if (!enforce) TextButton(
+				onClick = { close() }, shapes = ButtonDefaults.shapes()
+			) {
+				Text(stringResource(R.string.cancel))
+			}
+		}, confirmButton = {
+			FlowRow(horizontalArrangement = Arrangement.End) {
+				TextButton(
+					onClick = {
+						startActivity(
+							Intent(
+								Intent.ACTION_VIEW, link.toUri()
+							)
+						)
+						close()
+					}, shapes = ButtonDefaults.shapes()
+				) {
+					Text(stringResource(R.string.download_in_browser))
+				}
+				TextButton(
+					onClick = {
+						downloadId = getSystemService(DownloadManager::class.java).enqueue(
+							DownloadManager.Request(link.toUri())
+								.setDestinationUri(Uri.fromFile(File(path)))
+								.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+						)
+						close()
+					}, shapes = ButtonDefaults.shapes()
+				) {
+					Text(stringResource(R.string.download_in_system))
+				}
+				TextButton(
+					onClick = {
+						com.miyuyan.sysuer.api.DownloadManager.downloadFile(
+							this@MainActivity, link, path
+						)
+						close()
+					}, shapes = ButtonDefaults.shapes()
+				) {
+					Text(stringResource(R.string.download_in_app))
+				}
+			}
+		})
 	}
 
 	override fun onRequestPermissionsResult(
@@ -494,10 +511,6 @@ class MainActivity : BaseActivity() {
 			)
 		}
 	}
-
-//	fun checkUpdate() {
-//		http.getRequest("https://sysu-tang.github.io/latest.json", 0)
-//	}
 
 	override fun onDestroy() {
 		super.onDestroy()

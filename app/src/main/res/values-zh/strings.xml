@@ -549,7 +549,7 @@
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>
     <string name="manage">管理</string>
-    <string name="higher_version_detected">发现新版本</string>
+    <string name="release_version_detected">发现新版本</string>
     <string name="download_in_app">APP内下载</string>
     <string name="download_in_system">系统下载</string>
     <string name="download_in_browser">浏览器下载</string>

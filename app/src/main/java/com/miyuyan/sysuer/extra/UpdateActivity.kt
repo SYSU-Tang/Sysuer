@@ -70,7 +70,7 @@ class UpdateActivity : BaseActivity() {
 													data.getString("description", "")
 												}"
 											)
-											binding.updateButton.setText(R.string.higher_version_detected)
+											binding.updateButton.setText(R.string.release_version_detected)
 										} else if (settingManager.developerMode && settingManager.betaCheck && containsKey(
 												"minorVersion"
 											) && containsKey("majorVersion") && containsKey(
