@@ -175,7 +175,7 @@ internal fun ServiceScreen(
 	}
 }
 
-private fun navigateToServiceItem(
+fun navigateToServiceItem(
 	context: Context,
 	backStack: MutableList<NavKey>,
 	item: ServiceConfig,

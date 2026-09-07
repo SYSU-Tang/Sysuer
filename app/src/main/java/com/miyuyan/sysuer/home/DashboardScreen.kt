@@ -158,10 +158,7 @@ internal fun DashboardScreen(
 	val context = LocalContext.current
 	val activity = remember { context as FragmentActivity }
 	val config = remember { ContextUtil(context) }
-	val coroutineScope = rememberCoroutineScope()    /*val isAgree by spm.isAgreeLiveData.observeAsState()
-	LaunchedEffect(isAgree) {
-		if (isAgree == true)
-	}*/
+	val coroutineScope = rememberCoroutineScope()
 	LaunchedEffect(Unit) {
 		dashboardViewModel.getTerm()
 		homeViewModel.updateDashboardShortcut.observeForever {
@@ -228,7 +225,7 @@ internal fun DashboardScreen(
 		verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 	) {
 		if (0 in selectedSet) ShortcutSection(
-			dashboardViewModel, config, activity
+			backStack, dashboardViewModel, homeViewModel, config, activity
 		) { showActionItem = it }
 
 		if (1 in selectedSet || 2 in selectedSet) {
@@ -586,7 +583,9 @@ private fun DashboardActionDialog(
 
 @Composable
 private fun ShortcutSection(
+	backStack: MutableList<NavKey>,
 	vm: DashboardViewModel,
+	hm: HomeViewModel,
 	config: ContextUtil,
 	activity: FragmentActivity,
 	onShowActionDialog: (ServiceConfig) -> Unit,
@@ -643,6 +642,9 @@ private fun ShortcutSection(
 			val name = shortcut.name ?: return@forEach
 			LongClickButton(
 				onClick = {
+				navigateToServiceItem(
+					context, backStack, shortcut, hm.actionMap
+				)
 				val act = shortcut.activity
 				val url = shortcut.url
 				when {
