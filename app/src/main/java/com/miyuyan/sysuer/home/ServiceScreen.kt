@@ -92,9 +92,7 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.full.primaryConstructor
 
 @OptIn(
-	ExperimentalMaterial3Api::class,
-	ExperimentalLayoutApi::class,
-	ExperimentalFoundationApi::class
+	ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalFoundationApi::class
 )
 @Composable
 internal fun ServiceScreen(
@@ -143,7 +141,11 @@ internal fun ServiceScreen(
 				ServiceBox(
 					title = stringResource(R.string.collect),
 					items = serviceViewModel.collection,
-					onItemClick = { navigateToServiceItem(context, backStack, it, config) },
+					onItemClick = {
+						navigateToServiceItem(
+							context, backStack, it, homeViewModel.actionMap
+						)
+					},
 					onItemLongClick = { showActionItem = it },
 					onTitleClick = { showOrderDialog = true },
 					sharedTransitionScope = sharedTransitionScope,
@@ -156,7 +158,11 @@ internal fun ServiceScreen(
 			ServiceBox(
 				title = name,
 				items = items,
-				onItemClick = { navigateToServiceItem(context, backStack, it, config) },
+				onItemClick = {
+					navigateToServiceItem(
+						context, backStack, it, homeViewModel.actionMap
+					)
+				},
 				onItemLongClick = { showActionItem = it },
 				sharedTransitionScope = sharedTransitionScope,
 				animatedVisibilityScope = animatedVisibilityScope,
@@ -173,7 +179,7 @@ private fun navigateToServiceItem(
 	context: Context,
 	backStack: MutableList<NavKey>,
 	item: ServiceConfig,
-	config: ContextUtil
+	actionMap: MutableMap<in Int, (Context) -> Unit>
 ) {
 	when {
 		!item.route.isNullOrBlank() -> {
@@ -183,12 +189,13 @@ private fun navigateToServiceItem(
 					?: kClass.primaryConstructor?.callBy(emptyMap()) as? NavKey
 			}.getOrNull()?.let { backStack.add(it) }
 		}
+
+		actionMap.containsKey(item.id) -> actionMap[item.id]?.invoke(context)
 		else -> getServiceItemIntent(context, item, null)?.let {
 			(context as FragmentActivity).startActivity(
-				it,
-				ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle()
+				it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle()
 			)
-		} ?: config.toast(R.string.activity_not_found)
+		} ?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
 	}
 }
 
@@ -369,14 +376,11 @@ private fun ServiceActionDialog(
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Output,
-					text = stringResource(R.string.add_to_launcher)
+					image = Icons.Rounded.Output, text = stringResource(R.string.add_to_launcher)
 				) {
 					if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
 						getServiceItemIntent(
-							context,
-							item,
-							Intent(context, MainActivity::class.java)
+							context, item, Intent(context, MainActivity::class.java)
 						)?.let { intent ->
 							ShortcutInfoCompat.Builder(context, "$itemId").setShortLabel(name)
 								.setLongLabel(name)
@@ -396,15 +400,13 @@ private fun ServiceActionDialog(
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.ClearAll,
-					text = stringResource(R.string.service_order)
+					image = Icons.Rounded.ClearAll, text = stringResource(R.string.service_order)
 				) {
 					onShowOrder(item)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.KeyboardVoice,
-					text = stringResource(R.string.feedback)
+					image = Icons.Rounded.KeyboardVoice, text = stringResource(R.string.feedback)
 				) {
 					context.startActivity(
 						Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri())
@@ -413,26 +415,22 @@ private fun ServiceActionDialog(
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Link,
-					text = stringResource(R.string.open_as_url)
+					image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
 				) {
 					val itemUrl = item.url
 					if (!itemUrl.isNullOrBlank()) context.startActivity(
 						Intent(
-							context,
-							BrowserActivity::class.java
+							context, BrowserActivity::class.java
 						).setData(itemUrl.toUri())
 					)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Book,
-					text = stringResource(R.string.guide)
+					image = Icons.Rounded.Book, text = stringResource(R.string.guide)
 				) {
 					if (!item.doc.isNullOrBlank()) context.startActivity(
 						Intent(
-							context,
-							BrowserActivity::class.java
+							context, BrowserActivity::class.java
 						).setData("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.doc)}".toUri())
 					)
 					else config.toast(R.string.undeveloped_warning)
@@ -484,8 +482,7 @@ private fun ServiceOrderDialog(
 								IconButton(
 									onClick = {
 										if (index > 0) serviceViewModel.moveOrderCollection(
-											index,
-											index - 1
+											index, index - 1
 										)
 									},
 									enabled = index > 0,
@@ -495,8 +492,7 @@ private fun ServiceOrderDialog(
 								IconButton(
 									onClick = {
 										if (index < orderCollection.lastIndex) serviceViewModel.moveOrderCollection(
-											index,
-											index + 1
+											index, index + 1
 										)
 									},
 									enabled = index < orderCollection.lastIndex,

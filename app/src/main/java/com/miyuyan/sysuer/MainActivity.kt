@@ -116,9 +116,7 @@ class MainActivity : BaseActivity() {
 	var path: String = ""
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		val homeViewModel: HomeViewModel by viewModels()
 		val spm: PreferenceViewModel by viewModels()
-		initActionMap(homeViewModel.actionMap)
 		spm.isFirstLaunch = false
 		setContent {
 			SysuerTheme(settingManager) {
@@ -521,7 +519,7 @@ class MainActivity : BaseActivity() {
 		}
 	}
 
-	fun initActionMap(actionMap: MutableMap<in Int?, View.OnClickListener>) {
+	/*fun initActionMap(actionMap: MutableMap<in Int?, View.OnClickListener>) {
 		actionMap[302] = View.OnClickListener {
 			packageManager.getLaunchIntentForPackage("com.comingx.zanao")?.let {
 				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -537,7 +535,7 @@ class MainActivity : BaseActivity() {
 				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 			} ?: config.toast(R.string.no_app)
 		}
-	}
+	}*/
 }
 
 @Composable
