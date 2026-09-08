@@ -143,6 +143,8 @@ import com.miyuyan.sysuer.todo.TodoActivity
 import com.miyuyan.sysuer.todo.TodoEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 internal fun DashboardScreen(
@@ -311,8 +313,8 @@ internal fun DashboardScreen(
 			val todoList by todoManager.todoModel.todoList.observeAsState(emptyList())
 			var todoRefreshKey by rememberSaveable { mutableIntStateOf(0) }
 			LaunchedEffect(todoRefreshKey) {
-				val today = java.time.LocalDate.now()
-					.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+				val today = LocalDate.now()
+					.format(DateTimeFormatter.ISO_LOCAL_DATE)
 				todoManager.refresh("(due_date = ? OR ddl = ?)", arrayOf(today, today))
 			}
 			todoManager.refreshListener = { todoRefreshKey++ }

@@ -581,6 +581,12 @@
         "name": "Xue Gong Sir",
         "url": "https://xgxw.sysu.edu.cn/aicounsellor/agents/outlink/sunyatsenuniversity",
         "description": "Xue Gong Sir AI counselor, providing intelligent services such as student affairs consultation, policy interpretation, and problem-solving"
+      },
+      {
+        "id": 1004,
+        "name": "Yi Xiao Diao",
+        "url": "https://freshman.sysu.edu.cn/aiCounselor/#/aiCounselor",
+        "description": "AI counselor Yi Xiao Diao"
       }
     ]
   },
@@ -624,6 +630,33 @@
         "name": "Kangleyuan Survival Navigation",
         "url": "https://blog.fffcx.com/project/kangleyuan-2026/#",
         "description": "Kangleyuan Survival Navigation, non-official guide for new students"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Other",
+    "description": "Other features",
+    "items": [
+      {
+        "id": 1301,
+        "name": "About",
+        "route": "About",
+        "activity": ".extra.AboutActivity",
+        "description": "About this app"
+      },
+      {
+        "id": 1302,
+        "name": "Update",
+        "route": "Update",
+        "activity": ".extra.UpdateActivity",
+        "description": "Check and download application updates"
+      },
+      {
+        "id": 1303,
+        "name": "Settings",
+        "activity": ".extra.SettingActivity",
+        "description": "Set application settings preferences, including theme, language, and font options"
       }
     ]
   }

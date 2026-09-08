@@ -13,7 +13,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.view.View
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.SharedTransitionLayout
@@ -77,10 +76,12 @@ import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
 import com.miyuyan.sysuer.academic.TrainingProgramRoute
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.browser.RichTextRoute
-import com.miyuyan.sysuer.home.HomeViewModel
+import com.miyuyan.sysuer.extra.AboutRoute
+import com.miyuyan.sysuer.extra.UpdateRoute
 import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.life.NetPayRoute
 import com.miyuyan.sysuer.life.PayRoute
+import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.AcademyNotification
 import com.miyuyan.sysuer.nav.CET
 import com.miyuyan.sysuer.nav.CourseDetail
@@ -102,6 +103,7 @@ import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.nav.TrainingProgram
+import com.miyuyan.sysuer.nav.Update
 import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.widget.NextClassWidget
 import com.miyuyan.sysuer.widget.RecentClassWidget
@@ -381,6 +383,20 @@ class MainActivity : BaseActivity() {
 							animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<About> {
+						AboutRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<Update> {
+						UpdateRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
 				})
 			}
 		}
@@ -540,8 +556,8 @@ class MainActivity : BaseActivity() {
 
 @Composable
 fun ServiceSearchResults(
-	results: List<ServiceConfig>,
-	onResultClick: (ServiceConfig) -> Unit,
+	results: List<ServiceConfig>, onResultClick: (ServiceConfig) -> Unit
+
 ) {
 	if (results.isEmpty()) Text(
 		text = stringResource(R.string.search),

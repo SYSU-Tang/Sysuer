@@ -138,6 +138,7 @@ dependencies {
 	implementation(libs.editor)
 	implementation(libs.language.textmate)
 	implementation(project(":CalendarView"))
+	implementation(project(":compose-preference"))
 	implementation(libs.okhttp.java.net.cookiejar)
 	implementation(libs.miuix.blur.android)
 	implementation(libs.miuix.ui)
@@ -160,4 +161,5 @@ dependencies {
 //		exclude(group = "top.yukonga.miuix.kmp", module = "miuix-navigation3-ui-runtime")
 //		exclude(group = "top.yukonga.miuix.kmp", module = "miuix-navigation3-ui-runtime-android")
 	}
+
 }

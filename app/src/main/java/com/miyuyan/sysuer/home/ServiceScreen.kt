@@ -181,22 +181,25 @@ fun navigateToServiceItem(
 	item: ServiceConfig,
 	actionMap: MutableMap<in Int, (Context) -> Unit>
 ) {
-	when {
-		!item.route.isNullOrBlank() -> {
-			runCatching<NavKey?> {
-				val kClass = Class.forName("${context.packageName}.nav.${item.route}").kotlin
-				kClass.objectInstance as? NavKey
-					?: kClass.primaryConstructor?.callBy(emptyMap()) as? NavKey
-			}.getOrNull()?.let { backStack.add(it) }
+	if (!item.route.isNullOrBlank()) {
+		runCatching<NavKey?> {
+			val kClass = Class.forName("${context.packageName}.nav.${item.route}").kotlin
+			kClass.objectInstance as? NavKey
+				?: kClass.primaryConstructor?.callBy(emptyMap()) as? NavKey
+		}.getOrNull()?.let {
+			backStack.add(it)
+			return
 		}
-
-		actionMap.containsKey(item.id) -> actionMap[item.id]?.invoke(context)
-		else -> getServiceItemIntent(context, item, null)?.let {
-			(context as FragmentActivity).startActivity(
-				it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle()
-			)
-		} ?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
 	}
+	getServiceItemIntent(context, item, null)?.let {
+		(context as FragmentActivity).startActivity(
+			it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle()
+		)
+		return
+	}
+
+	if (actionMap.containsKey(item.id)) actionMap[item.id]?.invoke(context)
+		?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
 }
 
 private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: Intent?): Intent? {

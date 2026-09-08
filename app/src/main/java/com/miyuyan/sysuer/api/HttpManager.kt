@@ -176,7 +176,7 @@ class HttpManager(val handler: Handler = Handler(Looper.getMainLooper())) {
 
 			@Throws(IOException::class)
 			override fun onResponse(call: Call, response: Response) {
-				handler?.sendMessage(Message().apply {
+				handler.sendMessage(Message().apply {
 					this.what = what
 					val content = response.body.string()
 					obj = content
@@ -198,7 +198,7 @@ class HttpManager(val handler: Handler = Handler(Looper.getMainLooper())) {
 	 * 发送失败消息
 	 */
 	fun sendFailure() {
-		handler?.sendEmptyMessage(-1)
+		handler.sendEmptyMessage(-1)
 	}
 
 	/**

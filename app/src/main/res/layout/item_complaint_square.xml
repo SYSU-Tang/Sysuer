@@ -42,7 +42,7 @@
             android:text="@string/expand"
             app:icon="@drawable/down" />-->
 
-        <com.google.android.material.textview.MaterialTextView
+        <com.miyuyan.sysuer.view.MarkdownView
             android:id="@+id/response"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

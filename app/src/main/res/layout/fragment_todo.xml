@@ -27,7 +27,7 @@
         app:min_year="2008"
         app:min_year_day="1"
         app:min_year_month="1"
-        app:month_view="com.sysu.edu.view.CustomMonthView"
+        app:month_view="com.miyuyan.sysuer.view.CustomMonthView"
         app:month_view_show_mode="mode_only_current"
         app:scheme_lunar_text_color="#CFCFCF"
         app:scheme_text="假"

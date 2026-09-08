@@ -581,6 +581,12 @@
         "name": "学工君",
         "url": "https://xgxw.sysu.edu.cn/aicounsellor/agents/outlink/sunyatsenuniversity",
         "description": "学工君AI辅导员，学生事务咨询、政策解读、问题解决等智能服务"
+      },
+      {
+        "id": 1004,
+        "name": "逸小导",
+        "url": "https://freshman.sysu.edu.cn/aiCounselor/#/aiCounselor",
+        "description": "AI辅导员逸小导"
       }
     ]
   },
@@ -624,6 +630,33 @@
         "name": "康乐园生存导航",
         "url": "https://blog.fffcx.com/project/kangleyuan-2026/#",
         "description": "参考手册编写：鸭大纪中校友会，网站搭建者：Sulflower，资料来源包括鸭大纪中校友会所编写的《康乐园生存手册（2026版）》、2026 级补充材料及公开官方数据。本站为非官方新生指南；价格、开放时间、课程政策和交通信息以最新官方通知为准。"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "其他",
+    "description": "其他功能",
+    "items": [
+      {
+        "id": 1301,
+        "name": "关于",
+        "route": "About",
+        "activity": ".extra.AboutActivity",
+        "description": "关于本应用"
+      },
+      {
+        "id": 1302,
+        "name": "更新",
+        "route": "Update",
+        "activity": ".extra.UpdateActivity",
+        "description": "检查并下载应用更新"
+      },
+      {
+        "id": 1303,
+        "name": "设置",
+        "activity": ".extra.SettingActivity",
+        "description": "设置应用设置偏好，包括主题、语言、字体等选项"
       }
     ]
   }

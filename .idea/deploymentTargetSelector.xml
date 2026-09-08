@@ -4,10 +4,29 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-09-06T14:22:27.382480300Z">
+        <DropdownSelection timestamp="2026-09-07T12:52:47.438612Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="Default" identifier="serial=172.26.28.24:5555;connection=6541e6fa" />
+              <DeviceId pluginId="Default" identifier="serial=172.26.13.100:5555;connection=ca7a3d9c" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection>
+          <targets>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="Default" identifier="serial=172.26.13.100:5555;connection=025b43c2" />
+              </handle>
+            </Target>
+          </targets>
+        </DialogSelection>
+      </SelectionState>
+      <SelectionState runConfigName="未命名">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-09-07T05:25:51.921421100Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="Default" identifier="serial=172.26.13.100:5555;connection=73d1064d" />
             </handle>
           </Target>
         </DropdownSelection>

@@ -61,7 +61,13 @@ import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable fun HomeRoute(backStack: MutableList<NavKey>, sharedTransitionScope: SharedTransitionScope? = null, animatedVisibilityScope: AnimatedVisibilityScope? = null) {
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeRoute(
+	backStack: MutableList<NavKey>,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null
+) {
 	val activity = LocalActivity.current
 	val context = LocalContext.current
 	val dashboardViewModel: DashboardViewModel = viewModel()
@@ -83,7 +89,10 @@ import kotlinx.coroutines.launch
 	val searchResults = remember(searchQuery, allItems) {
 		if (searchQuery.isBlank()) allItems
 		else allItems.filter { item ->
-			item.name?.contains(searchQuery, true) == true || item.description?.contains(searchQuery, ignoreCase = true) == true
+			item.name?.contains(
+				searchQuery,
+				true
+			) == true || item.description?.contains(searchQuery, ignoreCase = true) == true
 		}.sortedWith(compareByDescending<ServiceConfig> { item ->
 			when {
 				item.name?.startsWith(searchQuery, true) == true -> 2
@@ -102,12 +111,16 @@ import kotlinx.coroutines.launch
 			} catch (_: Exception) {
 				null
 			}
-		}
-		else if (!item.url.isNullOrBlank()) {
+		} else if (!item.url.isNullOrBlank()) {
 			Intent(context, BrowserActivity::class.java).setData(item.url.toUri())
-		}
-		else null
-		intent?.let { context.startActivity(it, activity?.let { it1 -> ActivityOptionsCompat.makeSceneTransitionAnimation(it1) }?.toBundle()) } ?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
+		} else null
+		intent?.let {
+			context.startActivity(
+				it,
+				activity?.let { it1 -> ActivityOptionsCompat.makeSceneTransitionAnimation(it1) }
+					?.toBundle()
+			)
+		} ?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
 	}
 	ActivityPager(
 		title = stringResource(R.string.app_name),
@@ -115,22 +128,25 @@ import kotlinx.coroutines.launch
 			MenuItem(stringResource(R.string.dashboard), Icons.Rounded.Dashboard),
 			MenuItem(stringResource(R.string.service), Icons.Rounded.GridView),
 			MenuItem(stringResource(R.string.account), Icons.Rounded.Person),
-		             ),
+		),
 		topBarContent = { page ->
 			when (page) {
 				0 -> {
 					if (progressMax > 0) LinearProgressIndicator(
 						progress = { progressCurrent.toFloat() / progressMax },
 						modifier = Modifier.fillMaxWidth(),
-					                                            )
+					)
 					else LinearProgressIndicator(
 						progress = { 1f },
 						modifier = Modifier.fillMaxWidth(),
-					                            )
+					)
 				}
+
 				1 -> {
 					val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
-					val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(searchBarColors = SearchBarDefaults.containedColors(state = searchBarState))
+					val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
+						searchBarColors = SearchBarDefaults.containedColors(state = searchBarState)
+					)
 					val inputField = @Composable {
 						SearchBarDefaults.InputField(
 							textFieldState = rememberTextFieldState(),
@@ -138,12 +154,18 @@ import kotlinx.coroutines.launch
 							colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
 							onSearch = { },
 							placeholder = {
-								Text(modifier = Modifier.clearAndSetSemantics {}, text = stringResource(R.string.search))
+								Text(
+									modifier = Modifier.clearAndSetSemantics {},
+									text = stringResource(R.string.search)
+								)
 							},
 							leadingIcon = {
-								Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.search))
+								Icon(
+									Icons.Rounded.Search,
+									contentDescription = stringResource(R.string.search)
+								)
 							},
-						                            )
+						)
 					}
 					AppBarWithSearch(
 						scrollBehavior = scrollBehavior,
@@ -151,9 +173,9 @@ import kotlinx.coroutines.launch
 						state = searchBarState,
 						colors = SearchBarDefaults.appBarWithSearchColors(
 							appBarContainerColor = Color.Transparent,
-						                                                 ),
+						),
 						inputField = inputField,
-					                )
+					)
 					ExpandedFullScreenContainedSearchBar(
 						state = searchBarState,
 						inputField = @Composable {
@@ -163,18 +185,24 @@ import kotlinx.coroutines.launch
 								colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
 								onSearch = { },
 								placeholder = {
-									Text(modifier = Modifier.clearAndSetSemantics {}, text = stringResource(R.string.search))
+									Text(
+										modifier = Modifier.clearAndSetSemantics {},
+										text = stringResource(R.string.search)
+									)
 								},
 								leadingIcon = {
 									IconButton(onClick = {
 										scope.launch { searchBarState.animateToCollapsed() }
 									}) {
-										Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
+										Icon(
+											Icons.AutoMirrored.Rounded.ArrowBack,
+											contentDescription = stringResource(R.string.back)
+										)
 									}
 								},
-							                            )
+							)
 						},
-					                                    ) {
+					) {
 						ServiceSearchResults(results = searchResults, onResultClick = { item ->
 							scope.launch { searchBarState.animateToCollapsed() }
 							navigateToServiceItem(item)
@@ -185,10 +213,31 @@ import kotlinx.coroutines.launch
 		},
 		pageContent = { page ->
 			when (page) {
-				0 -> DashboardScreen(dashboardViewModel, homeViewModel, spm, todoManager, settingManager, sharedTransitionScope, animatedVisibilityScope, backStack)
-				1 -> ServiceScreen(homeViewModel, serviceViewModel, backStack, sharedTransitionScope, animatedVisibilityScope)
-				2 -> AccountScreen (backStack){ activity?.let { recreate(it) } }
+				0 -> DashboardScreen(
+					dashboardViewModel,
+					homeViewModel,
+					spm,
+					todoManager,
+					settingManager,
+					sharedTransitionScope,
+					animatedVisibilityScope,
+					backStack
+				)
+
+				1 -> ServiceScreen(
+					homeViewModel,
+					serviceViewModel,
+					backStack,
+					sharedTransitionScope,
+					animatedVisibilityScope
+				)
+
+				2 -> AccountScreen(
+					backStack,
+					sharedTransitionScope,
+					animatedVisibilityScope
+				) { activity?.let { recreate(it) } }
 			}
 		},
-	             )
+	)
 }

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -35,6 +34,7 @@ import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.PrimaryTabRow
@@ -89,6 +89,7 @@ import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 fun ActivityPager(
 	modifier: Modifier = Modifier,
 	title: String = "",
+	expandable: Boolean = false,
 	tabs: List<MenuItem> = emptyList(),
 	navs: List<MenuItem> = emptyList(),
 	snackbar: SnackbarHostState = remember { SnackbarHostState() },
@@ -108,7 +109,8 @@ fun ActivityPager(
 		if (tabs.isNotEmpty()) tabs.size else if (navs.isNotEmpty()) navs.size else 1
 	})
 	val coroutineScope = rememberCoroutineScope()
-	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+	val scrollBehavior = if (expandable) TopAppBarDefaults.enterAlwaysScrollBehavior()
+	else TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 	val settingManager = SettingManager(LocalContext.current)
 	val blurEnabled =
 		Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && settingManager.isBlurNavigationBar
@@ -147,73 +149,74 @@ fun ActivityPager(
 					MaterialTheme.colorScheme.surfaceContainer,
 					scrollBehavior.state.overlappedFraction
 				)
-//				val topBackdrop = rememberLayerBackdrop {
-//					drawRect(backgroundColor)
-//					drawContent()
-//				}
-				val modifier = Modifier.fillMaxWidth()
-//					.textureBlur(
-//						backdrop = backdrop,
-//						shape = RoundedCornerShape(4.dp),
-//						blurRadius = 36f,
-//						highlight = if (settingManager.isDarkTheme) Highlight.GlassStrokeMiddleDark else Highlight.GlassStrokeMiddleLight,
-//					            )
 				Surface(color = backgroundColor) {
 					Column {
-						TopAppBar(
-							modifier = Modifier.then(
+						val modifier =
+							Modifier.then(
 								if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-								with(sharedTransitionScope) {
-									Modifier.sharedBounds(
-										sharedContentState = rememberSharedContentState(key = sharedKey),
-										animatedVisibilityScope = animatedVisibilityScope
-									)
-								}
-							} else Modifier),
-							title = {
-								Text(
-									text = title,
-									color = MaterialTheme.colorScheme.primary
+									with(sharedTransitionScope) {
+										Modifier.sharedBounds(
+											sharedContentState = rememberSharedContentState(key = sharedKey),
+											animatedVisibilityScope = animatedVisibilityScope
+										)
+									}
+								} else Modifier)
+						val title = @Composable {
+							Text(
+								text = title, color = MaterialTheme.colorScheme.primary
+							)
+						}
+						val navigationIcon = @Composable {
+							if (onNavigationClick != null) IconButton(onClick = onNavigationClick) {
+								Icon(
+									imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+									contentDescription = stringResource(R.string.back),
+									tint = MaterialTheme.colorScheme.primary,
 								)
-							},
-							navigationIcon = {
-								if (onNavigationClick != null) IconButton(onClick = onNavigationClick) {
-									Icon(
-										imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-										contentDescription = stringResource(R.string.back),
-										tint = MaterialTheme.colorScheme.primary,
-									)
-								}
-							},
-							actions = actions ?: topBarMenus?.run {
-								{
-									invoke(pagerState.currentPage).forEach { menu ->
-										menu.icon?.let {
-											IconButton(onClick = { menu.onClick() }) {
-												Icon(
-													imageVector = it,
-													contentDescription = menu.title,
-													tint = MaterialTheme.colorScheme.primary
+							}
+						}
+						val actionsContent = actions ?: topBarMenus?.run {
+							{
+								invoke(pagerState.currentPage).forEach { menu ->
+									menu.icon?.let {
+										IconButton(onClick = { menu.onClick() }) {
+											Icon(
+												imageVector = it,
+												contentDescription = menu.title,
+												tint = MaterialTheme.colorScheme.primary
+											)
+										}
+									} ?: run {
+										menu.title?.let {
+											TextButton(onClick = { menu.onClick() }) {
+												Text(
+													text = it,
+													color = MaterialTheme.colorScheme.primary
 												)
 											}
-										} ?: run {
-											menu.title?.let {
-												TextButton(onClick = { menu.onClick() }) {
-													Text(
-														text = it,
-														color = MaterialTheme.colorScheme.primary
-													)
-												}
-											}
 										}
-										menu.content()
 									}
+									menu.content()
 								}
-							} ?: {},
-							colors = TopAppBarDefaults.topAppBarColors(
-								containerColor = Color.Transparent,
-								scrolledContainerColor = Color.Transparent
-							),
+							}
+						} ?: {}
+						val colors = TopAppBarDefaults.topAppBarColors(
+							containerColor = Color.Transparent,
+							scrolledContainerColor = Color.Transparent
+						)
+						if (expandable) MediumTopAppBar(
+							modifier = modifier,
+							title = title,
+							navigationIcon = navigationIcon,
+							actions = actionsContent,
+							colors = colors,
+							scrollBehavior = scrollBehavior,
+						) else TopAppBar(
+							modifier = modifier,
+							title = title,
+							navigationIcon = navigationIcon,
+							actions = actionsContent,
+							colors = colors,
 							scrollBehavior = scrollBehavior,
 						)
 						if (tabs.isNotEmpty()) {
@@ -293,8 +296,7 @@ fun ActivityPager(
 								icon = navItem.icon?.let {
 									{
 										Icon(
-											imageVector = it,
-											contentDescription = ""
+											imageVector = it, contentDescription = ""
 										)
 									}
 								} ?: {})
@@ -406,9 +408,7 @@ fun UnboundedTab(
 
 @Composable
 fun exportMarkdownMenuItem(
-	sectionData: List<SnapshotStateList<SectionData>>,
-	tabs: List<MenuItem>,
-	name: String
+	sectionData: List<SnapshotStateList<SectionData>>, tabs: List<MenuItem>, name: String
 ): MenuItem {
 	val context = LocalContext.current
 	return MenuItem(title = stringResource(R.string.export), icon = Icons.Rounded.Output) {
@@ -420,9 +420,8 @@ fun exportMarkdownMenuItem(
 		DataStoreManager.saveContent(context, name, "$markdown") {
 			context.startActivity(
 				Intent(context, RichTextActivity::class.java).putExtra(
-						"type",
-						DataStoreManager.ContentType.MARKDOWN.name
-					).putExtra("title", name)
+					"type", DataStoreManager.ContentType.MARKDOWN.name
+				).putExtra("title", name)
 			)
 		}
 		true
@@ -431,9 +430,7 @@ fun exportMarkdownMenuItem(
 
 @Composable
 fun exportMarkdownMenuItem(
-	sectionData: SnapshotStateList<SectionData>,
-	tab: String,
-	name: String
+	sectionData: SnapshotStateList<SectionData>, tab: String, name: String
 ): MenuItem {
 	val context = LocalContext.current
 	return MenuItem(title = stringResource(R.string.export), icon = Icons.Rounded.Output) {
@@ -442,9 +439,8 @@ fun exportMarkdownMenuItem(
 		DataStoreManager.saveContent(context, name, "$markdown") {
 			context.startActivity(
 				Intent(context, RichTextActivity::class.java).putExtra(
-						"type",
-						DataStoreManager.ContentType.MARKDOWN.name
-					).putExtra("title", name)
+					"type", DataStoreManager.ContentType.MARKDOWN.name
+				).putExtra("title", name)
 			)
 		}
 		true
