@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -236,12 +235,14 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			if (isAfterEmpty) _tomorrowCourses.getOrNull(0) else _todayCourses.getOrNull(beforeSize)
 		course?.run {
 			val startTimeStr = "${getString("teachingDate")} ${getString("startTime")}"
-			val delta =
-				LocalDateTime.parse(startTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-					.atZone(ZoneId.systemDefault()).toInstant()
-					.toEpochMilli() - System.currentTimeMillis()
+			val delta = DateTimeManager.toMillis(
+				LocalDateTime.parse(
+					startTimeStr,
+					DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+				)
+			) - System.currentTimeMillis()
 			if (delta > 0) {
-				val delay = if (delta < 15 * 60 * 1000) 0L else delta - 15 * 60 * 1000
+				val delay = (delta - 15 * 60 * 1000).coerceAtLeast(0L)
 				val workRequest =
 					OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java).setInputData(
 						workDataOf(

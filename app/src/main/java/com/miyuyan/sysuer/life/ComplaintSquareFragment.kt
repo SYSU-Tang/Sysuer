@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.alibaba.fastjson2.JSONObject
@@ -25,7 +24,7 @@ class ComplaintSquareFragment : BaseFragment() {
 	): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		val adapter = SquareAdapter()
-		val layoutManager =
+		layoutManager =
 			StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL)
 		val binding = RecyclerViewScrollBinding.inflate(inflater, container, false).apply {
 			root.adapter = adapter
@@ -33,13 +32,13 @@ class ComplaintSquareFragment : BaseFragment() {
 		}
 		model = XinfangModel(requireContext())
 		model.message.observe(
-			requireActivity(),
-			Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-				val response = message.second
-				if (message.first == 0) if (response.getBoolean("ok")) response.getJSONArray("data")
-					.forEach { adapter.add(it as JSONObject) }
-				else config.toast(response.getString("msg"))
-			})
+			requireActivity()
+		) { message: CommonUtil.Tuple2<Int, JSONObject> ->
+			val response = message.second
+			if (message.first == 0) if (response.getBoolean("ok")) response.getJSONArray("data")
+				.forEach { adapter.add(it as JSONObject) }
+			else config.toast(response.getString("msg"))
+		}
 		square
 		return binding.root
 	}
@@ -51,16 +50,21 @@ class ComplaintSquareFragment : BaseFragment() {
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
-		layoutManager.spanCount = config.column
+		layoutManager.setSpanCount(
+			when {
+				newConfig.screenWidthDp < 540 -> 1
+				newConfig.screenWidthDp < 900 -> 2
+				else -> 3
+			}
+		)
 	}
 
 	internal class SquareAdapter : RecyclerAdapter<JSONObject>() {
-		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object : RecyclerView.ViewHolder(
+		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+			object : RecyclerView.ViewHolder(
 				LayoutInflater.from(parent.context)
 					.inflate(R.layout.item_complaint_square, parent, false)
 			) {}
-		}
 
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 			val item = get(position)
