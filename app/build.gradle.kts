@@ -20,14 +20,14 @@ android {
 		val generation = "2"
 		val major = "0"
 		val minor = "0"
-		val beta = true
+		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
 		applicationId = "com.miyuyan.sysuer"
 		minSdk = 26
 		targetSdk = 37
-		versionCode = 1940
+		versionCode = 1941
 		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled = true
