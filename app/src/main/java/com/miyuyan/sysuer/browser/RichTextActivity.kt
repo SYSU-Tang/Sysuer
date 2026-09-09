@@ -14,16 +14,27 @@ import com.miyuyan.sysuer.theme.SysuerTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class RichTextActivity : BaseActivity() {
-	@OptIn(ExperimentalCoroutinesApi::class) override fun onCreate(savedInstanceState: Bundle?) {
+	@OptIn(ExperimentalCoroutinesApi::class)
+	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
 		setContent {
-			val backStack = rememberNavBackStack(RichText(intent.getStringExtra("title") ?: "", intent.getStringExtra("type")))
+			val backStack = rememberNavBackStack(
+				RichText(
+					intent.getStringExtra("title") ?: "",
+					contentType = intent.getStringExtra("type")
+				)
+			)
 			SysuerTheme {
 				SharedTransitionLayout {
 					SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
 						entry<RichText> {
-							RichTextRoute(backStack, it, sharedTransitionScope = this@SharedTransitionLayout, animatedVisibilityScope = LocalNavAnimatedContentScope.current)
+							RichTextRoute(
+								backStack,
+								it,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
 						}
 					})
 				}

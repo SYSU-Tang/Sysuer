@@ -24,7 +24,10 @@ object DataStoreManager {
 	
 	@OptIn(ExperimentalCoroutinesApi::class) @Synchronized fun saveContent(context: Context, title: String, content: String, callback: () -> Unit = {}): Disposable = getInstance(context).updateDataAsync { prefs ->
 		Single.just(prefs.toMutablePreferences().apply { this[stringPreferencesKey(title)] = content })
-	}.subscribe { callback() }
+	}.subscribe ({ callback()}, {
+		// 处理错误
+		println("Error saving content: ${it.message}")
+	} )
 	
 	@OptIn(ExperimentalCoroutinesApi::class) @Synchronized fun loadContent(context: Context, title: String, callback: (String) -> Unit = {}): Disposable = getInstance(context).data().subscribe {
 		callback(it[stringPreferencesKey(title)] ?: "")

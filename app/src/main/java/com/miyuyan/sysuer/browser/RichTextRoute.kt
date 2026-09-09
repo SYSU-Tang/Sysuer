@@ -56,7 +56,7 @@ fun RichTextRoute(
 	val coroutine = rememberCoroutineScope()
 	val title = navKey?.title ?: ""
 	val contentType = navKey?.contentType ?: DataStoreManager.ContentType.MARKDOWN.name
-	if (content.isEmpty()) DataStoreManager.loadContent(LocalContext.current, title) {
+	if (content.isEmpty() && title.isNotEmpty()) DataStoreManager.loadContent(LocalContext.current, title) {
 		content = it
 	}
 	ActivityPager(
