@@ -96,7 +96,6 @@ fun JumpPreference(
 		modifier = modifier.then(
 			if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 			with(sharedTransitionScope) {
-				println("JumpPreference: ${route.toString()}")
 				Modifier.sharedBounds(
 					sharedContentState = rememberSharedContentState(
 						key = route.toString()

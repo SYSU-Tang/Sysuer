@@ -16,6 +16,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.util.component1
@@ -40,7 +41,6 @@ import java.util.Base64
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import kotlin.concurrent.Volatile
-import kotlin.math.roundToInt
 
 class ContextUtil(val context: Context) {
 	fun getAvailableActivity(): FragmentActivity? = if (context is FragmentActivity && !context.isFinishing && !context.isDestroyed) context
@@ -72,7 +72,7 @@ class ContextUtil(val context: Context) {
 	 * @param dps dp 值
 	 * @return 对应的 px 值
 	 */
-	fun dpToPx(dps: Int): Int = (context.resources.displayMetrics.density * dps).roundToInt()
+	fun dpToPx(dps: Int): Int = dps.dp.value.toInt()
 	val userName: String
 		/**
 		 * 获取用户名

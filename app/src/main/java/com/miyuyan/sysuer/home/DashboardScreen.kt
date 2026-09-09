@@ -33,6 +33,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -120,6 +122,9 @@ import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
 import com.alibaba.fastjson2.JSONWriter
 import com.alibaba.fastjson2.toJSONString
@@ -141,6 +146,7 @@ import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.nav.CourseDetail
 import com.miyuyan.sysuer.todo.TodoActivity
 import com.miyuyan.sysuer.todo.TodoEntity
+import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -172,7 +178,7 @@ internal fun DashboardScreen(
 	val finalExamWeek by dashboardViewModel.finalExamWeek.collectAsStateWithLifecycle()
 	val showWeek18 by dashboardViewModel.isShowWeek18.collectAsStateWithLifecycle()
 	val todayCourses = dashboardViewModel.todayCourses
-	val tomorrowCourses = dashboardViewModel.tomorrowCourses
+	val recentCourses = dashboardViewModel.tomorrowCourses
 	val week18Exams = dashboardViewModel.week18Exams
 	val week19Exams = dashboardViewModel.week19Exams
 	val todayExamIndex by dashboardViewModel.todayExamIndex.collectAsStateWithLifecycle()
@@ -248,16 +254,29 @@ internal fun DashboardScreen(
 					)
 				})
 		}
-
+		LaunchedEffect(term) {
+			if (term.isNotEmpty()) {
+				getInstance(context).enqueue(
+					OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
+						Data.Builder().putStringArray(
+							"components", arrayOf(
+								"TodayClassWidget", "RecentClassWidget", "NextClassWidget"
+							)
+						).build()
+					).build()
+				)
+			}
+		}
 		if (3 in selectedSet) {
 			LaunchedEffect(term) {
 				if (term.isNotEmpty()) {
 					dashboardViewModel.getTodayCourses(term)
 				}
 			}
+
 			CourseSection(
 				todayCourses = todayCourses,
-				tomorrowCourses = tomorrowCourses,
+				recentCourses = recentCourses,
 				showDate = settingManager.courseDate,
 				nextClassIndex = nextClassIndex,
 				onCourseClick = {
@@ -313,8 +332,7 @@ internal fun DashboardScreen(
 			val todoList by todoManager.todoModel.todoList.observeAsState(emptyList())
 			var todoRefreshKey by rememberSaveable { mutableIntStateOf(0) }
 			LaunchedEffect(todoRefreshKey) {
-				val today = LocalDate.now()
-					.format(DateTimeFormatter.ISO_LOCAL_DATE)
+				val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
 				todoManager.refresh("(due_date = ? OR ddl = ?)", arrayOf(today, today))
 			}
 			todoManager.refreshListener = { todoRefreshKey++ }
@@ -733,7 +751,7 @@ private fun ScheduleSection(
 @Composable
 private fun CourseSection(
 	todayCourses: SnapshotStateList<JSONObject>,
-	tomorrowCourses: SnapshotStateList<JSONObject>,
+	recentCourses: SnapshotStateList<JSONObject>,
 	showDate: Int,
 	nextClassIndex: Int = 0,
 	onCourseClick: (CourseDetail) -> Unit,
@@ -744,7 +762,7 @@ private fun CourseSection(
 ) {
 	val context = LocalContext.current
 	var selectedIndex by rememberSaveable { mutableIntStateOf(showDate) }
-	val courses = if (selectedIndex == 0) todayCourses else tomorrowCourses
+	val courses = if (selectedIndex == 0) todayCourses else recentCourses
 
 	Row(
 		modifier = Modifier.fillMaxWidth(),
@@ -771,7 +789,10 @@ private fun CourseSection(
 			}
 		}
 	}
-
+	val bringIntoViewRequester = remember { BringIntoViewRequester() }
+	LaunchedEffect(nextClassIndex) {
+		bringIntoViewRequester.bringIntoView()
+	}
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
 		Crossfade(targetState = courses, label = "courseTab") { list ->
 			if (list.isEmpty()) Text(
@@ -792,7 +813,9 @@ private fun CourseSection(
 				list.forEachIndexed { index, item ->
 					if (index > 0) VerticalDivider()
 					CourseItem(
-						modifier = Modifier.then(
+						modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
+						bringIntoViewRequester
+					) else Modifier).then(
 						if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
@@ -807,7 +830,6 @@ private fun CourseSection(
 							)
 						}
 					} else Modifier), item = item, onClick = {
-						println(item)
 						onCourseClick(
 							CourseDetail(
 								item.getString("classesNum"), item.getString("courseNum")

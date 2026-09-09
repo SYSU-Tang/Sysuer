@@ -105,8 +105,6 @@ import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.nav.Update
 import com.miyuyan.sysuer.theme.SysuerTheme
-import com.miyuyan.sysuer.widget.NextClassWidget
-import com.miyuyan.sysuer.widget.RecentClassWidget
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import java.io.File
@@ -129,9 +127,8 @@ class MainActivity : BaseActivity() {
 				LaunchedEffect(isAgree) {
 					if (isAgree == true) {
 						if (spm.update) mainViewModel.getLatestVersion()
-						listOf(
-							NextClassWidget::class.java,  /*TodayClassWidget.class, */
-							TomorrowClassWidget::class.java, RecentClassWidget::class.java
+						listOf(							/*NextClassWidget::class.java,*/  /*TodayClassWidget.class, */
+							TomorrowClassWidget::class.java/*, RecentClassWidget::class.java*/
 						).forEach {
 							sendBroadcast(
 								Intent(
@@ -163,15 +160,6 @@ class MainActivity : BaseActivity() {
 							ContextCompat.RECEIVER_EXPORTED
 						)
 						receiverRegistered = true
-						getInstance(this@MainActivity).enqueue(
-							OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
-								Data.Builder().putStringArray(
-									"components", arrayOf(
-										"TodayClassWidget", "RecentClassWidget", "NextClassWidget"
-									)
-								).build()
-							).build()
-						)
 						if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
 							arrayOf(Manifest.permission.POST_NOTIFICATIONS),
 							PackageManager.PERMISSION_GRANTED
@@ -207,29 +195,6 @@ class MainActivity : BaseActivity() {
 						})
 				}
 			}
-//		spm.isAgreeLiveData.observe(this) { aBoolean ->
-//			if (aBoolean) {
-//			} else {
-//				val agreementDialog =
-//					MaterialAlertDialogBuilder(this).setTitle(R.string.user_agreement_and_privacy_policy)
-//						.setMessage("")
-//						.setPositiveButton(R.string.agree) { _: DialogInterface?, _: Int ->
-//							spm.isAgree = true
-//							spm.setIsAgreeLiveData(true)
-//						}.setNegativeButton(R.string.disagree) { _: DialogInterface?, _: Int ->
-//							spm.isAgree = false
-//							supportFinishAfterTransition()
-//						}.setCancelable(false).create()
-//				agreementDialog.show()
-//				agreementDialog.findViewById<TextView>(android.R.id.message)?.let {
-//					Markwon.builder(this).usePlugin(StrikethroughPlugin.create()).build()
-//						.setMarkdown(
-//							it,
-//							"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)"
-//						)
-//				}
-//			}
-//		}
 		}
 	}
 
@@ -534,24 +499,6 @@ class MainActivity : BaseActivity() {
 			receiverRegistered = false
 		}
 	}
-
-	/*fun initActionMap(actionMap: MutableMap<in Int?, View.OnClickListener>) {
-		actionMap[302] = View.OnClickListener {
-			packageManager.getLaunchIntentForPackage("com.comingx.zanao")?.let {
-				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-			} ?: config.toast(R.string.no_app)
-		}
-		actionMap[601] = View.OnClickListener {
-			settingManager.qrCode.takeIf { it.isNotEmpty() }?.let {
-				startActivity(Intent(Intent.ACTION_VIEW, it.toUri()))
-			} ?: config.toast(R.string.no_app)
-		}
-		actionMap[602] = View.OnClickListener {
-			packageManager.getLaunchIntentForPackage("com.tencent.wework")?.let {
-				startActivity(it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-			} ?: config.toast(R.string.no_app)
-		}
-	}*/
 }
 
 @Composable
