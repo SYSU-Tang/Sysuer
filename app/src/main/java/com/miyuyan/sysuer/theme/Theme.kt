@@ -11,8 +11,45 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.miyuyan.sysuer.api.SettingManager
 
-private val DarkColorScheme = darkColorScheme(primary = SysuRedPrimary, secondary = SysuRedSecondary, tertiary = SysuRedTertiary)
-private val LightColorScheme = lightColorScheme(primary = SysuGreenPrimary, secondary = SysuGreenSecondary, tertiary = SysuGreenTertiary)
+//private val DarkColorScheme = darkColorScheme(primary = SysuRedPrimary, secondary = SysuRedSecondary, tertiary = SysuRedTertiary)
+//private val LightColorScheme = lightColorScheme(primary = SysuGreenPrimary, secondary = SysuGreenSecondary, tertiary = SysuGreenTertiary)
+
+private val LightColorScheme = lightColorScheme(
+	primary = LightPrimary,
+	onPrimary = LightOnPrimary,
+	primaryContainer = LightPrimaryContainer,
+	onPrimaryContainer = LightOnPrimaryContainer,
+	secondary = LightSecondary,
+	onSecondary = LightOnSecondary,
+	secondaryContainer = LightSecondaryContainer,
+	onSecondaryContainer = LightOnSecondaryContainer,
+	background = LightBackground,
+	onBackground = LightOnBackground,
+	surface = LightSurface,
+	onSurface = LightOnSurface,
+	surfaceVariant = LightSurfaceVariant,
+	onSurfaceVariant = LightOnSurfaceVariant,
+	outline = LightOutline
+)
+
+private val DarkColorScheme = darkColorScheme(
+	primary = DarkPrimary,
+	onPrimary = DarkOnPrimary,
+	primaryContainer = DarkPrimaryContainer,
+	onPrimaryContainer = DarkOnPrimaryContainer,
+	secondary = DarkSecondary,
+	onSecondary = DarkOnSecondary,
+	secondaryContainer = DarkSecondaryContainer,
+	onSecondaryContainer = DarkOnSecondaryContainer,
+	background = DarkBackground,
+	onBackground = DarkOnBackground,
+	surface = DarkSurface,
+	onSurface = DarkOnSurface,
+	surfaceVariant = DarkSurfaceVariant,
+	onSurfaceVariant = DarkOnSurfaceVariant,
+	outline = DarkOutline
+)
+
 @Composable fun SysuerTheme(
 	settingManager: SettingManager? = null,
 	darkTheme: Boolean = settingManager?.isDarkTheme ?: isSystemInDarkTheme(),

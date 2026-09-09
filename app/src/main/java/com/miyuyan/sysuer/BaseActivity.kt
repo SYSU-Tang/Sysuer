@@ -13,15 +13,23 @@ open class BaseActivity : AppCompatActivity() {
 		settingManager = SettingManager(context).apply {
 			setLanguage()
 			setTheme()
+
 			super.attachBaseContext(setFontSize(fontSize))
 		}
 	}
-	
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		config = Config(this)
+		if (!settingManager.isDynamicColor) setTheme(
+			when (settingManager.getTheme()) {
+				0 -> R.style.Theme_SYSUER_Light
+				1 -> R.style.Theme_SYSUER_Night
+				else -> R.style.Theme_SYSUER_DayNight
+			}
+		)
 	}
-	
+
 	override fun onDestroy() {
 		super.onDestroy()
 		config.contextUtil.disposable.dispose()

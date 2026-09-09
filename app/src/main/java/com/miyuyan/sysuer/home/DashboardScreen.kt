@@ -10,7 +10,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -715,7 +714,6 @@ private fun ScheduleSection(
 		horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
 	) {
 		OutlinedCard(
-			border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
 			modifier = Modifier.weight(1.25f),
 			onClick = onNextClassClick
 		) {
@@ -730,7 +728,6 @@ private fun ScheduleSection(
 			)
 		}
 		OutlinedCard(
-			border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
 			modifier = Modifier.weight(1f),
 			onClick = onTimeCardClick
 		) {

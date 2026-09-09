@@ -19,7 +19,7 @@ fun MutableList<NavKey>.navigateBack(activity: Activity? = null) {
 @Serializable data object CourseSelected : NavKey
 @Serializable data class CourseDetail(val courseId: String? = "", val courseNum: String = "") : NavKey
 @Serializable data class WebPage(val url: String, val title: String = "") : NavKey
-@Serializable data class RichText(val title: String = "预览", val content: String? = "", val contentType: String? = "") : NavKey
+@Serializable data class RichText(val title: String = "预览", val content: String = "", val contentType: String? = "") : NavKey
 @Serializable data object SchoolEnrollment : NavKey
 @Serializable data object CET : NavKey
 @Serializable data object Registration : NavKey

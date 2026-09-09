@@ -1,10 +1,30 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <style name="Theme.SYSUER.DynamicDayNight" parent="@style/Theme.SYSUER.DynamicLight" />
+
     <style name="Theme.SYSUER.DayNight" parent="@style/Theme.SYSUER.Light" />
 
-    <style name="Theme.SYSUER.Light" parent="Theme.SYSUER.Base" />
+    <style name="Theme.SYSUER.DynamicLight" parent="Theme.SYSUER.DynamicBase" />
 
-    <style name="Theme.SYSUER.Base" parent="Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
+    <style name="Theme.SYSUER.Light" parent="Theme.SYSUER.Base">
+        <item name="colorPrimary">@color/md_theme_light_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_light_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
+        <item name="backgroundColor">@color/md_theme_light_background</item>
+        <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
+        <item name="colorSurface">@color/md_theme_light_surface</item>
+        <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_light_outline</item>
+    </style>
+
+    <style name="Theme.SYSUER.DynamicBase" parent="Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
         <item name="editTextPreferenceStyle">@style/Preference.Rikka.EditTextPreference.Material3
         </item>
@@ -30,6 +50,29 @@
         <item name="colorPrimaryContainer">@color/md_theme_default_light_primaryContainer</item>
     </style>
 
+    <style name="Theme.SYSUER.Base" parent="Theme.Material3Expressive.Light.NoActionBar">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
+        <item name="editTextPreferenceStyle">@style/Preference.Rikka.EditTextPreference.Material3
+        </item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Rikka.SeekbarPreference.Material3
+        </item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+        <item name="simpleMenuPreferenceStyle">
+            @style/Preference.Rikka.SimpleMenuPreference.Material3
+        </item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch
+        </item>
+        <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="android:windowAnimationStyle">@style/fade</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorOnContainerChecked">@color/md_theme_default_light_secondaryContainer</item>
+        <item name="colorOnContainerUnchecked">@color/md_theme_default_light_secondaryContainer
+        </item>
+    </style>
+
     <style name="fade">
         <item name="android:activityOpenEnterAnimation">
             @android:anim/fade_in
@@ -53,7 +96,7 @@
     </style>
 
     <style name="SYSUER.CollapsingAppBarLayout" parent="Widget.Material3.AppBarLayout">
-        <item name="android:fitsSystemWindows">false</item>
+        <item name="android:fitsSystemWindows">true</item>
         <item name="android:outlineSpotShadowColor" tools:targetApi="28">@color/black</item>
         <item name="android:outlineAmbientShadowColor" tools:targetApi="28">@color/black</item>
     </style>

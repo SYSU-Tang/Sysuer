@@ -279,7 +279,8 @@ fun AboutRoute(
 								icon = {
 									Icon(
 										painterResource(R.drawable.version),
-										contentDescription = null
+										contentDescription = null,
+										tint = MaterialTheme.colorScheme.primary
 									)
 								})
 						}

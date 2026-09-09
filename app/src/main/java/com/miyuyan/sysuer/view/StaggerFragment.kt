@@ -15,15 +15,19 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.ActivityOptionsCompat.makeSceneTransitionAnimation
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.academic.MarkdownViewActivity
+import com.miyuyan.sysuer.api.DataStoreManager
 import com.miyuyan.sysuer.api.SettingManager
+import com.miyuyan.sysuer.browser.RichTextActivity
 import com.miyuyan.sysuer.theme.SysuerTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 open class StaggerFragment : BaseFragment() {
-	
+
 	val sections: SnapshotStateList<SectionData> = mutableStateListOf()
 	val hideNull: MutableLiveData<Boolean?> = MutableLiveData<Boolean?>(false)
 	val staggeredListener: MutableLiveData<AdapterListener?> = MutableLiveData<AdapterListener?>()
@@ -36,7 +40,7 @@ open class StaggerFragment : BaseFragment() {
 		inflater: LayoutInflater,
 		container: ViewGroup?,
 		savedInstanceState: Bundle?,
-	                         ): View? {
+	): View? {
 		super.onCreateView(inflater, container, savedInstanceState)
 		return ComposeView(requireContext()).apply {
 			setContent {
@@ -46,43 +50,42 @@ open class StaggerFragment : BaseFragment() {
 			}
 		}
 	}
-	
+
 	@Composable
 	fun StaggerScreen() {
 		val isHideNull by hideNull.observeAsState(false)
 		val isNestedEnabled by nestedScrollingEnabled.observeAsState(true)
 		val scrollBottomTask by scrollBottom.observeAsState()
-		
+
 		StaggerScreen(
 			sections = sections,
 			isHideNull = isHideNull ?: false,
 			isNestedEnabled = isNestedEnabled ?: true,
 			onScrollBottom = { scrollBottomTask?.run() },
-			onScrollTopChanged = { isScrolledToTop.value = it }
-		             )
+			onScrollTopChanged = { isScrolledToTop.value = it })
 	}
-	
+
 	// Methods to maintain API compatibility
 	fun setOrientation(o: Int) {
-	// Managed by LazyVerticalStaggeredGrid configuration
+		// Managed by LazyVerticalStaggeredGrid configuration
 	}
-	
+
 	fun setScrollBottom(runnable: Runnable?) {
 		scrollBottom.value = runnable
 	}
-	
+
 	fun setNested(nested: Boolean) {
 		nestedScrollingEnabled.value = nested
 	}
-	
+
 	fun setHideNull(hide: Boolean) {
 		hideNull.value = hide
 	}
-	
+
 	fun setListener(v: AdapterListener?) {
 		staggeredListener.value = v
 	}
-	
+
 	open fun addSection(
 		title: String?,
 		icon: Int?,
@@ -97,33 +100,46 @@ open class StaggerFragment : BaseFragment() {
 		keys.zip(values) { k, v -> rows.add(RowData(k, v)) }
 		sections.add(SectionData(title, icon, rows, rowOrientation, footerMenus, footer))
 	}
-	
-	fun addSection(title: String?, keys: MutableList<String?>, values: MutableList<String?>, rowOrientation: RowOrientation = RowOrientation.Horizontal) {
+
+	fun addSection(
+		title: String?,
+		keys: MutableList<String?>,
+		values: MutableList<String?>,
+		rowOrientation: RowOrientation = RowOrientation.Horizontal
+	) {
 		addSection(title, null, keys, values, rowOrientation)
 	}
-	
+
 	fun addRow(pos: Int = sections.size - 1, key: String?, value: String?) {
 		if (pos in sections.indices) {
 			sections[pos].rows.add(RowData(key, value))
 		}
 	}
-	
+
 	fun clear() {
 		sections.clear()
 	}
-	
+
 	fun addExportMenu(toolbar: MaterialToolbar) {
 		toolbar.menu.add(R.string.export).setIcon(R.drawable.export).setOnMenuItemClickListener {
 			export(toolbar, "${toolbar.title}")
 			false
 		}.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
 	}
-	
+
 	fun export(toolbar: View, title: String) {
-		startActivity(Intent(requireContext(), MarkdownViewActivity::class.java).putExtra("content", sections.toMarkdown()).putExtra("title", title), makeSceneTransitionAnimation(requireActivity(), toolbar, "miniapp").toBundle())
+		val bundle = makeSceneTransitionAnimation(requireActivity(), toolbar, "miniapp").toBundle()
+		DataStoreManager.saveContent(requireContext(), title, sections.toMarkdown()) {
+			lifecycleScope.launch(Dispatchers.Main) {
+				requireContext().startActivity(
+					Intent(requireContext(), RichTextActivity::class.java).putExtra(
+						"type", DataStoreManager.ContentType.MARKDOWN.name
+					).putExtra("title", title), bundle
+				)
+			}
+		}
 	}
-	
-	// Compatibility classes for old View-based logic
+
 	inner class SectionAdapter {
 		val titles: List<String?> get() = sections.map { it.title }
 		val keys: List<MutableList<String?>>
@@ -139,39 +155,38 @@ open class StaggerFragment : BaseFragment() {
 				field = value
 				this@StaggerFragment.setHideNull(value)
 			}
-		
+
 		fun add(
 			title: String?,
 			keys: MutableList<String?>?,
 			values: MutableList<String?>?,
 			icon: Int?,
-		       ) {
-			this@StaggerFragment.addSection(title,
-			                                icon,
-			                                keys ?: mutableListOf(),
-			                                values ?: mutableListOf())
+		) {
+			this@StaggerFragment.addSection(
+				title, icon, keys ?: mutableListOf(), values ?: mutableListOf()
+			)
 		}
-		
+
 		fun clear(): Unit = this@StaggerFragment.clear()
-		fun getTwoColumnsAdapter(pos: Int): TwoColumnsAdapter = TwoColumnsAdapter(pos)
-		/*fun addRow(pos: Int = itemCount - 1, key: String?, value: String?) {
+		fun getTwoColumnsAdapter(pos: Int): TwoColumnsAdapter = TwoColumnsAdapter(pos)        /*fun addRow(pos: Int = itemCount - 1, key: String?, value: String?) {
 			this@StaggerFragment.addRow(pos, key, value)
 		}
 		
 		fun addFooter(pos: Int = itemCount - 1, content: com.sysu.edu.view.MenuItem) {
 			if (pos in sections.indices) sections[pos].footerMenus.add(content)
 		}*/
-		
-		fun setSectionFooter(pos: Int = itemCount - 1, content: (@Composable ColumnScope.() -> Unit)? = null) {
+
+		fun setSectionFooter(
+			pos: Int = itemCount - 1, content: (@Composable ColumnScope.() -> Unit)? = null
+		) {
 			if (pos in sections.indices) sections[pos].footer = content
-		}
-		/*fun setListener(listener: AdapterListener?) {
+		}        /*fun setListener(listener: AdapterListener?) {
 			staggeredListener.value = listener
 		}*/
-		
+
 		val itemCount: Int get() = sections.size
 	}
-	
+
 	inner class TwoColumnsAdapter(val sectionIndex: Int) {
 		fun setKeyAndValue(keys: MutableList<String?>, values: MutableList<String?>) {
 			if (sectionIndex in sections.indices) {
@@ -180,7 +195,7 @@ open class StaggerFragment : BaseFragment() {
 				keys.zip(values) { k, v -> rows.add(RowData(k, v)) }
 			}
 		}
-		
+
 		fun setValue(values: MutableList<String?>) {
 			if (sectionIndex in sections.indices) {
 				val rows = sections[sectionIndex].rows
@@ -189,7 +204,7 @@ open class StaggerFragment : BaseFragment() {
 				}
 			}
 		}
-		
+
 		fun setKey(keys: MutableList<String?>) {
 			if (sectionIndex in sections.indices) {
 				val rows = sections[sectionIndex].rows
@@ -198,7 +213,7 @@ open class StaggerFragment : BaseFragment() {
 				keys.zip(currentValues) { k, v -> rows.add(RowData(k, v)) }
 			}
 		}
-		
+
 		fun setKeyAndValue(map: Map<String, Any?>) {
 			val keys = map["keys"] as? MutableList<String?>
 			val values = map["values"] as? MutableList<String?>
@@ -206,23 +221,23 @@ open class StaggerFragment : BaseFragment() {
 				setKeyAndValue(keys, values)
 			}
 		}
-		
+
 		fun add(row: Int = -1, key: String?, value: String?) {
 			this@StaggerFragment.addRow(sectionIndex, key, value)
 		}
-		
+
 		fun setRowClickListener(index: Int, onClick: () -> Unit) {
 			if (sectionIndex in sections.indices && index in sections[sectionIndex].rows.indices) {
 				sections[sectionIndex].rows[index].onClick = onClick
 			}
 		}
-		
+
 		fun setListener(listener: AdapterListener?) {
 		}
-		
+
 		val itemCount: Int get() = sections.getOrNull(sectionIndex)?.rows?.size ?: 0
 	}
-	
+
 	companion object {
 		fun newInstance(position: Int): StaggerFragment {
 			val s = StaggerFragment()

@@ -1,6 +1,7 @@
 package com.miyuyan.preference
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -17,7 +18,11 @@ fun IconTextPreference(
 		title = title,
 		modifier = modifier,
 		icon = {
-			Icon(painterResource(icon), contentDescription = title)
+			Icon(
+				painterResource(icon),
+				contentDescription = title,
+				tint = MaterialTheme.colorScheme.primary
+			)
 		},
 		summary = summary,
 	)

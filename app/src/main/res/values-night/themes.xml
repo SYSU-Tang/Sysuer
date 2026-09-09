@@ -1,4 +1,50 @@
 <resources>
+
+    <style name="Theme.SYSUER.DynamicDayNight" parent="@style/Theme.SYSUER.DynamicNight" />
+
     <style name="Theme.SYSUER.DayNight" parent="@style/Theme.SYSUER.Night" />
-    <style name="Theme.SYSUER.Night" parent="Theme.SYSUER.Base" />
+
+    <style name="Theme.SYSUER.DynamicNight" parent="Theme.SYSUER.DynamicBase" />
+
+    <style name="Theme.SYSUER.Night" parent="Theme.SYSUER.Base">
+        <item name="colorPrimary">@color/md_theme_dark_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_dark_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_dark_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_dark_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_dark_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_dark_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_dark_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_dark_onSecondaryContainer</item>
+        <item name="backgroundColor">@color/md_theme_dark_background</item>
+        <item name="colorOnBackground">@color/md_theme_dark_onBackground</item>
+        <item name="colorSurface">@color/md_theme_dark_surface</item>
+        <item name="colorOnSurface">@color/md_theme_dark_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_dark_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_dark_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_dark_outline</item>
+    </style>
+
+    <style name="Theme.SYSUER.Base" parent="Theme.Material3Expressive.Dark.NoActionBar">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
+        <item name="editTextPreferenceStyle">@style/Preference.Rikka.EditTextPreference.Material3
+        </item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Rikka.SeekbarPreference.Material3
+        </item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+        <item name="simpleMenuPreferenceStyle">
+            @style/Preference.Rikka.SimpleMenuPreference.Material3
+        </item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch
+        </item>
+        <item name="switchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="android:windowAnimationStyle">@style/fade</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorOnContainerChecked">@color/md_theme_default_light_secondaryContainer</item>
+        <item name="colorOnContainerUnchecked">@color/md_theme_default_light_secondaryContainer
+        </item>
+    </style>
+
 </resources>

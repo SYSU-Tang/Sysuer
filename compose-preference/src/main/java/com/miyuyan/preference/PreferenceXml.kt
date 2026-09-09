@@ -3,6 +3,7 @@ package com.miyuyan.preference
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -82,8 +83,6 @@ fun PreferenceScreen(
 	val context = LocalContext.current
 	val sp = sharedPreferences ?: PreferenceManager.getDefaultSharedPreferences(context)
 
-	// 每次 SharedPreferences 变化时,version++ 触发 Compose recompose,
-	// 让下面 remember(key, version) 的值重新读取
 	var version by remember { mutableIntStateOf(0) }
 	DisposableEffect(sp) {
 		val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> version++ }
@@ -91,12 +90,10 @@ fun PreferenceScreen(
 		onDispose { sp.unregisterOnSharedPreferenceChangeListener(listener) }
 	}
 
-	// 一次性 inflate XML 得到 AndroidX Preference 对象树
 	val rootScreen = remember(xmlResId) {
 		PreferenceManager(context).inflateFromResource(context, xmlResId, null)
 	}
 
-	// 复用 lambda 版本的 PreferenceScreen 布局
 	PreferenceScreen(modifier = modifier, title = title) {
 		rootScreen.children.forEach { child ->
 			when (child) {
@@ -105,7 +102,6 @@ fun PreferenceScreen(
 				}
 
 				is AndroidXPreferenceScreen -> {
-					// 嵌套 PreferenceScreen 直接展开它的子项
 					child.children.forEach { sub ->
 						if (sub is AndroidXPreferenceCategory) {
 							XmlCategory(sub, sp, customHandler, version)
@@ -207,7 +203,7 @@ private fun XmlPreference(
 				summary = summary,
 				enabled = pref.isEnabled,
 				icon = if (icon != null) {
-					{ Icon(icon.toBitmap().asImageBitmap(), contentDescription = null) }
+					{ Icon(icon.toBitmap().asImageBitmap(), contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
 				} else null,
 			)
 		}

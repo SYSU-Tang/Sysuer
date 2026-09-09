@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -103,11 +104,11 @@ fun ActivityPager(
 	floatingActionButton: @Composable (Int) -> Unit = {},
 	actions: @Composable (RowScope.() -> Unit)? = null,
 	topBarMenus: @Composable ((Int) -> List<MenuItem>)? = null,
-	pageContent: @Composable (page: Int) -> Unit = {},
-) {
-	val pagerState = rememberPagerState(pageCount = {
+	pagerState: PagerState = rememberPagerState(pageCount = {
 		if (tabs.isNotEmpty()) tabs.size else if (navs.isNotEmpty()) navs.size else 1
-	})
+	}),
+	pageContent: @Composable (page: Int) -> Unit = {}
+) {
 	val coroutineScope = rememberCoroutineScope()
 	val scrollBehavior = if (expandable) TopAppBarDefaults.enterAlwaysScrollBehavior()
 	else TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -152,15 +153,14 @@ fun ActivityPager(
 				Surface(color = backgroundColor) {
 					Column {
 						val modifier =
-							Modifier.then(
-								if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-									with(sharedTransitionScope) {
-										Modifier.sharedBounds(
-											sharedContentState = rememberSharedContentState(key = sharedKey),
-											animatedVisibilityScope = animatedVisibilityScope
-										)
-									}
-								} else Modifier)
+							if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+								with(sharedTransitionScope) {
+									Modifier.sharedBounds(
+										sharedContentState = rememberSharedContentState(key = sharedKey),
+										animatedVisibilityScope = animatedVisibilityScope
+									)
+								}
+							} else Modifier
 						val title = @Composable {
 							Text(
 								text = title, color = MaterialTheme.colorScheme.primary
@@ -238,7 +238,6 @@ fun ActivityPager(
 							if (tabs.size > 4) PrimaryScrollableTabRow(
 								edgePadding = 0.dp,
 								selectedTabIndex = pagerState.currentPage,
-								modifier = modifier,
 								containerColor = Color.Transparent,
 								divider = {},
 								tabs = tabContent,
@@ -255,7 +254,6 @@ fun ActivityPager(
 								})
 							else PrimaryTabRow(
 								selectedTabIndex = pagerState.currentPage,
-								modifier = modifier,
 								containerColor = Color.Transparent,
 								divider = {},
 								tabs = tabContent,
