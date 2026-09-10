@@ -934,7 +934,7 @@ class TodoManager(
 			selectedTags.filter { it !in items }.forEach { name ->
 				ElevatedFilterChip(
 					modifier = Modifier.combinedClickable(
-						onClick = { onToggle(name) },
+					onClick = { onToggle(name) },
 					onLongClick = { onDelete?.invoke(name) },
 					interactionSource = remember { MutableInteractionSource() },
 					indication = null

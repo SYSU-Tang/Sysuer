@@ -12,13 +12,13 @@ import java.util.regex.Pattern
  * @param originHost     原始 URL
  * @param substituteHost 替代 URL
  */
-class AuthorizationManager(// 原始 URL
-	private val originHost: String, // 替代 URL
-	private var substituteHost: String) {
+class AuthorizationManager(
+	private val originHost: String, private var substituteHost: String
+) {
 	var isAuthorized: Boolean = true // 是否认证
 	var isAccessible: Boolean = true // 是否可访问
-	var originTargetUrl: String? = null
-	var substituteTargetUrl: String? = null
+	var originTargetUrl: String? = null // 原始 URL 目标 URL
+	var substituteTargetUrl: String? = null // 替代 URL 目标 URL
 	val host: String
 		/**
 		 * 获取根 URL
@@ -33,7 +33,7 @@ class AuthorizationManager(// 原始 URL
 		 * @return 目标 URL，根据是否可访问返回原始 URL 或替代 URL
 		 */
 		get() = (if (isAccessible) originTargetUrl else substituteTargetUrl)!!
-	
+
 	/**
 	 * 判断内容是否可访问
 	 * 
@@ -45,9 +45,6 @@ class AuthorizationManager(// 原始 URL
 		if (isInaccessible) isAccessible = false
 		return !isInaccessible
 	}
-	/*public boolean isAuthorized() {
-		return isAuthorized;
-	}*/
 	/**
 	 * 判断内容是否认证
 	 * 
@@ -59,7 +56,12 @@ class AuthorizationManager(// 原始 URL
 		if (isContentUnauthorized) isAuthorized = false
 		return !isContentUnauthorized
 	}
-	
+
+	/**
+	 * 设置目标 URL
+	 * @param origin 原始 URL
+	 * @param substitute 替代 URL
+	 * */
 	fun setTargetUrl(origin: String, substitute: String) {
 		originTargetUrl = origin
 		substituteTargetUrl = substitute

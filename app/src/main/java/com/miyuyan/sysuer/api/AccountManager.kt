@@ -22,7 +22,7 @@ import kotlin.concurrent.Volatile
 class AccountManager private constructor(context: Context) {
 	private val dataStore = RxPreferenceDataStoreBuilder(context, "accounts").build()
 	private val aead: Aead
-	
+
 	init {
 		try {
 			AeadConfig.register()
@@ -30,92 +30,132 @@ class AccountManager private constructor(context: Context) {
 				.withSharedPref(context, "master_keyset", "secure_keys")
 				.withKeyTemplate(KeyTemplates.get("AES256_GCM"))
 				.withMasterKeyUri("android-keystore://master_key")
-				.build()
-				.keysetHandle
-				.getPrimitive(RegistryConfiguration.get(), Aead::class.java)
+				.build().keysetHandle.getPrimitive(RegistryConfiguration.get(), Aead::class.java)
 		} catch (e: Exception) {
 			throw RuntimeException("Tink 初始化失败", e)
 		}
 	}
-	
+
+	/**
+	 * 同步获取 domain 域名下的活跃账号
+	 * @param domain 域名
+	 * @return 活跃账号，<用户名, 密码>
+	 * */
 	fun getActiveAccountSync(domain: String?): Pair<String?, String?>? {
-		val username = dataStore.data().blockingFirst()[stringPreferencesKey("active:$domain")] ?: return null
+		val username =
+			dataStore.data().blockingFirst()[stringPreferencesKey("active:$domain")] ?: return null
 		val password = getPasswordSync(domain, username)
 		return Pair<String?, String?>(username, password)
 	}
-	
+
+	/**
+	 * 同步获取 domain 域名下的账号 username 的密码
+	 * @param domain 域名
+	 * @param username 用户名
+	 * @return 密码
+	 * */
 	fun getPasswordSync(domain: String?, username: String?): String? {
-		val encoded = dataStore.data().blockingFirst()[stringPreferencesKey("$domain:$username")] ?: return null
+		val encoded = dataStore.data().blockingFirst()[stringPreferencesKey("$domain:$username")]
+			?: return null
 		return try {
 			String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null))
 		} catch (_: Exception) {
 			null
 		}
 	}
-	
-	fun getActiveAccountAsync(domain: String): Single<Pair<String?, String?>> {
-		return dataStore.data().firstOrError()
-			.map<Pair<String?, String?>> { prefs: Preferences ->
-				val username = prefs[stringPreferencesKey("active:$domain")] ?: return@map Pair<String?, String?>("", "")
-				val encoded = prefs[stringPreferencesKey("$domain:$username")] ?: return@map Pair<String?, String?>("", "")
-				val password = String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null))
-				Pair<String?, String?>(username, password)
-			}
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-	}
-	
-	fun setAccountAsync(domain: String, username: String, password: String): Completable {
-		return setAccountAsync(domain, username, password, false)
-	}
-	
-	fun setAccountAsync(domain: String, username: String, password: String, active: Boolean): Completable {
-		return dataStore.updateDataAsync { prefs: Preferences? ->
-			Single.just(prefs!!.toMutablePreferences()
-							.also {
-								it[stringPreferencesKey("$domain:$username")] = Base64.encodeToString(aead.encrypt(password.toByteArray(), null), Base64.DEFAULT)
-							}
-							.also {
-								if (active || !it.contains(stringPreferencesKey("active:$domain")))
-									it[stringPreferencesKey("active:$domain")] = username
-							})
-		}.ignoreElement()
-			.subscribeOn(Schedulers.io())
-	}
-	
-	fun setActiveAccountAsync(domain: String?, username: String?): Completable {
-		return dataStore.updateDataAsync { prefs: Preferences? ->
-			Single.just(prefs!!.toMutablePreferences()
-							.also { it[stringPreferencesKey("active:$domain")] = username as String })
-		}.ignoreElement()
-			.subscribeOn(Schedulers.io())
-	}
-	
-	fun removeAccountAsync(domain: String, username: String): Completable {
-		return dataStore.updateDataAsync { prefs: Preferences? ->
-			Single.just(prefs!!.toMutablePreferences()
-							.also { it.remove(stringPreferencesKey("$domain:$username")) })
-		}.ignoreElement()
-			.subscribeOn(Schedulers.io())
-	}
-	
-	fun removeActiveAccountAsync(domain: String): Completable {
-		return dataStore.updateDataAsync { prefs: Preferences? ->
-			Single.just(prefs!!.toMutablePreferences()
-							.also { it.remove(stringPreferencesKey("active:$domain")) })
-		}.ignoreElement()
-			.subscribeOn(Schedulers.io())
-	}
-	
+
+	/**
+	 * 异步获取 domain 域名下的活跃账号
+	 * @param domain 域名
+	 * @return 活跃账号，<用户名, 密码>
+	 * */
+	fun getActiveAccountAsync(domain: String): Single<Pair<String?, String?>> =
+		dataStore.data().firstOrError().map<Pair<String?, String?>> { prefs: Preferences ->
+			val username = prefs[stringPreferencesKey("active:$domain")]
+				?: return@map Pair<String?, String?>("", "")
+			val encoded = prefs[stringPreferencesKey("$domain:$username")]
+				?: return@map Pair<String?, String?>("", "")
+			val password = String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null))
+			Pair<String?, String?>(username, password)
+		}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+
+	/**
+	 * 异步设置账号，不设置为活跃账号
+	 * @param domain 域名
+	 * @param username 用户名
+	 * @param password 密码
+	 * */
+	fun setAccountAsync(domain: String, username: String, password: String): Completable =
+		setAccountAsync(domain, username, password, false)
+
+	/**
+	 * 异步设置账号
+	 * @param domain 域名
+	 * @param username 用户名
+	 * @param password 密码
+	 * @param active 是否设置为活跃账号
+	 * */
+	fun setAccountAsync(
+		domain: String, username: String, password: String, active: Boolean
+	): Completable = dataStore.updateDataAsync { prefs: Preferences ->
+		Single.just(prefs.toMutablePreferences().also {
+			it[stringPreferencesKey("$domain:$username")] = Base64.encodeToString(
+				aead.encrypt(password.toByteArray(), null), Base64.DEFAULT
+			)
+		}.also {
+			if (active || !it.contains(stringPreferencesKey("active:$domain"))) it[stringPreferencesKey(
+				"active:$domain"
+			)] = username
+		})
+	}.ignoreElement().subscribeOn(Schedulers.io())
+
+	/**
+	 * 异步设置活跃账号
+	 * @param domain 域名
+	 * @param username 用户名
+	 * */
+	fun setActiveAccountAsync(domain: String?, username: String?): Completable =
+		dataStore.updateDataAsync { prefs: Preferences? ->
+			Single.just(
+				prefs!!.toMutablePreferences()
+					.also { it[stringPreferencesKey("active:$domain")] = username as String })
+		}.ignoreElement().subscribeOn(Schedulers.io())
+
+	/**
+	 * 异步删除账号
+	 * @param domain 域名
+	 * @param username 用户名
+	 * */
+	fun removeAccountAsync(domain: String, username: String): Completable =
+		dataStore.updateDataAsync { prefs: Preferences ->
+			Single.just(
+				prefs.toMutablePreferences()
+					.also { it.remove(stringPreferencesKey("$domain:$username")) })
+		}.ignoreElement().subscribeOn(Schedulers.io())
+
+	/**
+	 * 异步删除活跃账号
+	 * @param domain 域名
+	 * */
+	fun removeActiveAccountAsync(domain: String): Completable =
+		dataStore.updateDataAsync { prefs: Preferences ->
+			Single.just(
+				prefs.toMutablePreferences()
+					.also { it.remove(stringPreferencesKey("active:$domain")) })
+		}.ignoreElement().subscribeOn(Schedulers.io())
+
+
 	companion object {
 		@Volatile
 		private var INSTANCE: AccountManager? = null
-		fun getInstance(context: Context): AccountManager {
-			if (INSTANCE == null) synchronized(AccountManager::class.java) {
-				if (INSTANCE == null)
-					INSTANCE = AccountManager(context.applicationContext)
+
+		/**
+		 * 获取 AccountManager 实例
+		 * @param context 上下文对象
+		 * */
+		fun getInstance(context: Context): AccountManager =
+			INSTANCE ?: synchronized(AccountManager::class.java) {
+				INSTANCE ?: AccountManager(context.applicationContext).also { INSTANCE = it }
 			}
-			return INSTANCE!!
-		}
 	}
 }

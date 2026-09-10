@@ -45,10 +45,6 @@
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".browser.MarkdownActivity"
-            android:exported="true"
-            android:label="@string/title_activity_markdown" />
-        <activity
             android:name=".browser.RichTextActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
