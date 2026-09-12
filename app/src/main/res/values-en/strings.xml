@@ -900,4 +900,6 @@
     <string name="all_course_finished">Today\'s classes are over 🎉</string>
     <string name="no_next_class">No next class, awesome!</string>
     <string name="immediate_class_warning">Class is about to start</string>
+
+    <string name="second">s</string>
 </resources>

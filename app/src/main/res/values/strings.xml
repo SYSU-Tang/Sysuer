@@ -878,4 +878,5 @@
     <string name="no_next_class">没有下一节课，太爽了!</string>
     <string name="immediate_class_warning" >马上就要上课了</string>
     <string name="second">秒</string>
+    <string name="first_week_warning">这是第一周</string>
 </resources>

@@ -17,5 +17,5 @@
         android:id="@+id/course_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+        android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 </LinearLayout>

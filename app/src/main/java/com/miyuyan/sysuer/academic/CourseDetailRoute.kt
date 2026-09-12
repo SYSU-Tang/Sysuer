@@ -1,6 +1,7 @@
 package com.miyuyan.sysuer.academic
 
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ fun CourseDetailRoute(
 	if (navKey == null) return
 	val viewModel: CourseDetailViewModel = viewModel()
 	val context = LocalContext.current
+	val activity = LocalActivity.current
 	println("navKey: $navKey courseId: ${navKey.courseId} courseNum: ${navKey.courseNum}")
 	LaunchedEffect(navKey.courseId, navKey.courseNum) {
 		viewModel.initFromIntent(navKey.courseNum, navKey.courseId)
@@ -43,7 +45,7 @@ fun CourseDetailRoute(
 		animatedVisibilityScope = animatedVisibilityScope,
 		sharedKey = "course_${navKey.courseId}_${navKey.courseNum}",
 		title = stringResource(R.string.course_detail),
-		onNavigationClick = { backStack.navigateBack() },
+		onNavigationClick = { backStack.navigateBack(activity) },
 		tabs = listOf(
 			MenuItem(title = stringResource(R.string.course_detail)),
 			MenuItem(title = stringResource(R.string.course_draft)),
@@ -58,8 +60,7 @@ fun CourseDetailRoute(
 							viewModel.downloadOutline(it)
 						} ?: viewModel.getOutlineId()
 						true
-					}),
-				exportMarkdownMenuItem(
+					}), exportMarkdownMenuItem(
 					backStack,
 					viewModel.outlineSections,
 					stringResource(R.string.course_outline),
