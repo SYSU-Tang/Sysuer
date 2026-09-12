@@ -294,7 +294,7 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 			}
 			else if (examList.value.isEmpty()) {
 				Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-					Text(text = stringResource(R.string.noExam),
+					Text(text = stringResource(R.string.no_exam),
 					     style = MaterialTheme.typography.bodyLarge)
 				}
 			}

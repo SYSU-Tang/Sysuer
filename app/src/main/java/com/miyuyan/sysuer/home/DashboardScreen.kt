@@ -793,7 +793,7 @@ private fun CourseSection(
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
 		Crossfade(targetState = courses, label = "courseTab") { list ->
 			if (list.isEmpty()) Text(
-				text = stringResource(R.string.noClass),
+				text = stringResource(R.string.no_class_today),
 				style = MaterialTheme.typography.bodyLarge,
 				modifier = Modifier.padding(
 					dimensionResource(R.dimen.horizontal_padding),
@@ -957,7 +957,7 @@ private fun ExamSection(
 			}, label = "examTab"
 		) { list ->
 			if (list.isEmpty()) Text(
-				text = stringResource(R.string.noExam),
+				text = stringResource(R.string.no_exam),
 				style = MaterialTheme.typography.bodyLarge,
 				modifier = Modifier.padding(
 					dimensionResource(R.dimen.horizontal_padding),

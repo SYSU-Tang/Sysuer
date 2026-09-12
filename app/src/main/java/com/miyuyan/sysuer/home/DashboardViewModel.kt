@@ -8,15 +8,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
-import com.miyuyan.sysuer.ClassNotificationWorker
+import com.miyuyan.sysuer.ClassIsland
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.home.data.CollectionDatabase
@@ -32,7 +29,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 	private val model = JwxtModel(application)
@@ -186,76 +182,51 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun openQrCode() {
-		val context = getApplication<Application>()
-		PreferenceManager.getDefaultSharedPreferences(context).getString("qrcode", "")
+		PreferenceManager.getDefaultSharedPreferences(application).getString("qrcode", "")
 			?.takeIf { it.isNotEmpty() }?.run {
 				Intent(Intent.ACTION_VIEW, toUri()).takeIf {
-					it.resolveActivity(context.packageManager) != null
+					it.resolveActivity(application.packageManager) != null
 				}?.let {
 					it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-					context.startActivity(it)
+					application.startActivity(it)
 				} ?: model.contextUtil.toast(R.string.fix_sysu_code_warning)
 			} ?: model.contextUtil.toast(R.string.set_sysu_code_warning)
 	}
 
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
-		val context = getApplication<Application>()
 		val markdown = if (isAfterEmpty) {
 			val next = _tomorrowCourses.getOrNull(0)
-			"###### ${context.getString(R.string.noClass)}\n\n${context.getString(R.string.next_class)}：**${
-				next?.getString("courseName") ?: context.getString(R.string.none)
-			}**\n\n${context.getString(R.string.location)}：**${
-				next?.getString("teachingPlace") ?: context.getString(R.string.none)
-			}**\n\n${context.getString(R.string.time)}：**${
-				next?.getString("time") ?: context.getString(
+			"###### ${application.getString(R.string.no_class_today)}\n\n${application.getString(R.string.next_class)}：**${
+				next?.getString("courseName") ?: application.getString(R.string.none)
+			}**\n\n${application.getString(R.string.location)}：**${
+				next?.getString("teachingPlace") ?: application.getString(R.string.none)
+			}**\n\n${application.getString(R.string.time)}：**${
+				next?.getString("time") ?: application.getString(
 					R.string.none
 				)
 			}**"
 		} else {
 			val current = _todayCourses.getOrNull(beforeSize)
-			"###### ${current?.getString("courseName") ?: context.getString(R.string.none)}\n\n${
-				context.getString(
+			"###### ${current?.getString("courseName") ?: application.getString(R.string.none)}\n\n${
+				application.getString(
 					R.string.location
 				)
 			}：**${
-				current?.getString("teachingPlace") ?: context.getString(R.string.none)
-			}**\n\n${context.getString(R.string.time)}：**${
-				current?.getString("time") ?: context.getString(
+				current?.getString("teachingPlace") ?: application.getString(R.string.none)
+			}**\n\n${application.getString(R.string.time)}：**${
+				current?.getString("time") ?: application.getString(
 					R.string.none
 				)
 			}**\n\n${
-				context.getString(R.string.date)
-			}：**${current?.getString("teachingDate") ?: context.getString(R.string.none)}**"
+				application.getString(R.string.date)
+			}：**${current?.getString("teachingDate") ?: application.getString(R.string.none)}**"
 		}
 		_nextClassMarkdown.value = markdown
 	}
 
-	private fun scheduleNotification(beforeSize: Int, isAfterEmpty: Boolean) {
-		val course =
-			if (isAfterEmpty) _tomorrowCourses.getOrNull(0) else _todayCourses.getOrNull(beforeSize)
-		course?.run {
-			val startTimeStr = "${getString("teachingDate")} ${getString("startTime")}"
-			val delta = DateTimeManager.toMillis(
-				LocalDateTime.parse(
-					startTimeStr,
-					DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-				)
-			) - System.currentTimeMillis()
-			if (delta > 0) {
-				val delay = (delta - 15 * 60 * 1000).coerceAtLeast(0L)
-				val workRequest =
-					OneTimeWorkRequest.Builder(ClassNotificationWorker::class.java).setInputData(
-						workDataOf(
-							"courseName" to getString("courseName"),
-							"teachingPlace" to getString("teachingPlace"),
-							"time" to getString("time")
-						)
-					).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
-				WorkManager.getInstance(getApplication()).enqueueUniqueWork(
-					"next_class_notification_update", ExistingWorkPolicy.KEEP, workRequest
-				)
-			}
-		}
+	private fun scheduleIslandTick() {
+		ClassIsland.updateCourseData(_todayCourses, _tomorrowCourses)
+		ClassIsland.triggerAndScheduleTick(application)
 	}
 
 	init {
@@ -284,7 +255,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 						_progressMax.value = _todayCourses.size
 						_progressCurrent.value = beforeArray.size
 						updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
-						scheduleNotification(beforeArray.size, afterArray.isEmpty())
+						scheduleIslandTick()
 					}
 
 					2 -> {

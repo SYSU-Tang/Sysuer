@@ -4,4 +4,20 @@
     <color name="widget_background">#231815</color>
     <color name="widget_on_background">#8C8C8C</color>
     <color name="widget_title_on_background">#ffffff</color>
+    <!-- Dark Theme -->
+    <color name="md_theme_primary">#80D59A</color>
+    <color name="md_theme_onPrimary">#00391C</color>
+    <color name="md_theme_primaryContainer">#00522B</color>
+    <color name="md_theme_onPrimaryContainer">#9CF2B5</color>
+    <color name="md_theme_secondary">#FFB3AB</color>
+    <color name="md_theme_onSecondary">#600009</color>
+    <color name="md_theme_secondaryContainer">#7F0013</color>
+    <color name="md_theme_onSecondaryContainer">#FFDAD6</color>
+    <color name="md_theme_background">#101412</color>
+    <color name="md_theme_onBackground">#E1E3DE</color>
+    <color name="md_theme_surface">#101412</color>
+    <color name="md_theme_onSurface">#E1E3DE</color>
+    <color name="md_theme_surfaceVariant">#414942</color>
+    <color name="md_theme_onSurfaceVariant">#C1C9C0</color>
+    <color name="md_theme_outline">#8B938C</color>
 </resources>

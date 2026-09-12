@@ -191,7 +191,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:text="@string/noClass"
+                android:text="@string/no_class_today"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
         </com.google.android.material.card.MaterialCardView>
 
@@ -238,7 +238,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:text="@string/noExam"
+                android:text="@string/no_exam"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
 
             <androidx.recyclerview.widget.RecyclerView

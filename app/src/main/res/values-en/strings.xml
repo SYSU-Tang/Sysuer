@@ -24,8 +24,8 @@
     <string name="password">Password</string>
     <string name="captcha">Captcha</string>
     <string name="today">Today</string>
-    <string name="noClass">😁NO Courses Today😁</string>
-    <string name="noExam">😁NO Exams Today😁</string>
+    <string name="no_class_today">NO Courses Today🎉</string>
+    <string name="no_exam">NO Exams Today🎉</string>
     <string name="classTime">Section</string>
     <string name="name">Label</string>
     <string name="college">School</string>
@@ -890,4 +890,14 @@
     <string name="create_time">Create Time</string>
     <string name="pay_status">Payment Status</string>
     <string name="invoice_title">Invoice Title</string>
+
+    <string name="next_class_time">%2$d minutes until %1$s starts</string>
+    <string name="remaining_class_time">%2$d minutes until %1$s ends</string>
+<!--    <string name="remaining_class_time">%2$d minutes until %1$s ends</string>-->
+    <string name="hour">H</string>
+    <string name="no_class">No class</string>
+    <string name="immediate_class">Class soon</string>
+    <string name="all_course_finished">Today\'s classes are over 🎉</string>
+    <string name="no_next_class">No next class, awesome!</string>
+    <string name="immediate_class_warning">Class is about to start</string>
 </resources>

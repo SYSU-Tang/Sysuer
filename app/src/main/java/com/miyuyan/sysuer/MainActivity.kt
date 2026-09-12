@@ -52,9 +52,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
-import androidx.work.Data
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
@@ -106,7 +103,6 @@ import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.nav.Update
 import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
-import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import java.io.File
 
 class MainActivity : BaseActivity() {
@@ -127,7 +123,7 @@ class MainActivity : BaseActivity() {
 				LaunchedEffect(isAgree) {
 					if (isAgree == true) {
 						if (spm.update) mainViewModel.getLatestVersion()
-						listOf(							/*NextClassWidget::class.java,*/  /*TodayClassWidget.class, */
+						listOf(                            /*NextClassWidget::class.java,*/  /*TodayClassWidget.class, */
 							TomorrowClassWidget::class.java/*, RecentClassWidget::class.java*/
 						).forEach {
 							sendBroadcast(

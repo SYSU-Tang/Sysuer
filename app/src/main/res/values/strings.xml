@@ -24,8 +24,8 @@
     <string name="password">密码</string>
     <string name="captcha">验证码</string>
     <string name="today">今天</string>
-    <string name="noClass">😁今天没课😁</string>
-    <string name="noExam">😁没有考试😁</string>
+    <string name="no_class_today">今天没课🎉</string>
+    <string name="no_exam">没有考试🎉</string>
     <string name="classTime">节次</string>
     <string name="name">名称</string>
     <string name="college">学院</string>
@@ -869,4 +869,12 @@
     <string name="create_time">创建时间</string>
     <string name="pay_status">支付状态</string>
     <string name="invoice_title">发票抬头</string>
+    <string name="next_class_time">距《%1$s》上课还有 %2$d 分钟</string>
+    <string name="remaining_class_time">距《%1$s》下课还有 %2$d 分钟</string>
+    <string name="hour">时</string>
+    <string name="no_class">没课程中</string>
+    <string name="immediate_class">快上课</string>
+    <string name="all_course_finished">今日课程已结束🎉</string>
+    <string name="no_next_class">没有下一节课，太爽了!</string>
+    <string name="immediate_class_warning" >马上就要上课了</string>
 </resources>
