@@ -31,7 +31,7 @@ object ClassIsland {
 	private const val LONG_BREAK_THRESHOLD_MIN = 20L
 
 	enum class CourseState {
-		NO_CLASS_TODAY, CLASS_FINISHED, BEFORE_CLASS, IN_CLASS, /*SHORT_BREAK, LONG_BREAK,*/ BREAK
+		NO_CLASS_TODAY,/* CLASS_FINISHED,*/ BEFORE_CLASS, IN_CLASS, /*SHORT_BREAK, LONG_BREAK,*/ BREAK
 	}
 
 	data class IslandCourse(
@@ -57,6 +57,7 @@ object ClassIsland {
 		val totalMinutes: Long = 0L,
 		val elapsedMinutes: Long = 0L,
 		val remainingMinutes: Long = 0L,
+		val remainingSeconds: Long = 0L,
 		val progress: Int = if (totalMinutes > 0) {
 			((elapsedMinutes * 100) / totalMinutes).toInt().coerceIn(0, 100)
 		} else 0
@@ -82,12 +83,11 @@ object ClassIsland {
 		todayCourses: List<JSONObject>, recentCourses: List<JSONObject>
 	): StateResult {
 		val now = LocalDateTime.now()
-		val today = todayCourses.map { it.toIslandCourse() }.sortedBy { it.startDateTime }
-
-		if (today.isEmpty()) {
+		if (todayCourses.isEmpty()) {
 			val tomorrowFirst = recentCourses.firstOrNull()?.toIslandCourse()
 			return StateResult(CourseState.NO_CLASS_TODAY, next = tomorrowFirst)
 		}
+		val today = todayCourses.map { it.toIslandCourse() }.sortedBy { it.startDateTime }
 
 		val inClass = today.firstOrNull {
 			now.isAfter(it.startDateTime) && now.isBefore(it.endDateTime)
@@ -100,12 +100,14 @@ object ClassIsland {
 				((elapsedMillis * 100) / totalMillis).toInt().coerceIn(0, 100)
 			} else 0
 			val remaining = Duration.between(now, inClass.endDateTime).toMinutes()
+			val remainingSecs = Duration.between(now, inClass.endDateTime).seconds
 			return StateResult(
 				CourseState.IN_CLASS,
 				current = inClass,
 				totalMinutes = totalMillis,
 				elapsedMinutes = elapsedMillis,
 				remainingMinutes = remaining,
+				remainingSeconds = remainingSecs,
 				progress = progress,
 			)
 		}
@@ -114,32 +116,17 @@ object ClassIsland {
 
 		if (nextCourse != null) {
 			val remainingToNext = Duration.between(now, nextCourse.startDateTime).toMinutes()
-//			val prevCourse = today.lastOrNull { it.endDateTime.isBefore(now) }
-//			if (prevCourse != null) {
-//				val totalBreak = Duration.between(
-//					prevCourse.endDateTime, nextCourse.startDateTime
-//				).toMinutes()
-//				if (remainingToNext > 15) {
-//					val isLong = totalBreak > LONG_BREAK_THRESHOLD_MIN
-//					return StateResult(
-//						state =
-//
-//							if (isLong) CourseState.LONG_BREAK else CourseState.SHORT_BREAK,
-//						prev = prevCourse,
-//						next = nextCourse,
-//						totalMinutes = remainingToNext,
-//					)
-//				}
-//			}
+			val remainingSecs = Duration.between(now, nextCourse.startDateTime).seconds
 			return StateResult(
-				if (remainingToNext > 15) CourseState.BEFORE_CLASS else CourseState.BREAK,
-				current = nextCourse,
-				remainingMinutes = remainingToNext
+				if (remainingToNext <= 15) CourseState.BEFORE_CLASS else CourseState.BREAK,
+				next = nextCourse,
+				remainingMinutes = remainingToNext,
+				remainingSeconds = remainingSecs
 			)
 		}
 
 		val tomorrowFirst = recentCourses.firstOrNull()?.toIslandCourse()
-		return StateResult(CourseState.CLASS_FINISHED, next = tomorrowFirst)
+		return StateResult(CourseState.NO_CLASS_TODAY, next = tomorrowFirst)
 	}
 
 	@JvmStatic
@@ -151,6 +138,7 @@ object ClassIsland {
 		val noClassTodayString = context.getString(R.string.no_class_today)
 		val minuteString = context.getString(R.string.minute)
 		val hourString = context.getString(R.string.hour)
+		val secondString = context.getString(R.string.second)
 
 		val contentIntent = PendingIntent.getActivity(
 			context,
@@ -171,41 +159,25 @@ object ClassIsland {
 
 		when (result.state) {
 			CourseState.NO_CLASS_TODAY -> {
-				builder.setContentTitle(noClassTodayString)/*.setContentText("好好享受一天吧")*/
-					.setStyle(
-						NotificationCompat.BigTextStyle().bigText(
-							buildString {
-								result.next?.let {
-									append("$nextClassString：《${it.courseName}》\n")
-									append("$timeString：${it.startTime}~${it.endTime}\n")
-									append("$locationString：${it.teachingPlace}\n")
-								}
-							})
-					).setProgress(0, 0, false)
-			}
-
-			CourseState.CLASS_FINISHED -> {
-				builder.setContentTitle(context.getString(R.string.all_course_finished))
-					.setContentText(result.next?.let { "$nextClassString：《${it.courseName}》" }
-						?: context.getString(R.string.no_next_class)).setStyle(
-						NotificationCompat.BigTextStyle().bigText(
-							buildString {
-								append(context.getString(R.string.all_course_finished))
-								append("\n")
-								result.next?.let {
-									append("$nextClassString：《${it.courseName}》\n")
-									append("$timeString：${it.startTime}~${it.endTime}\n")
-									append("$locationString：${it.teachingPlace}\n")
-								} ?: append(context.getString(R.string.no_next_class))
-							})
-					).setProgress(0, 0, false)
+				builder.setContentTitle(noClassTodayString).setStyle(
+					NotificationCompat.BigTextStyle().bigText(
+						buildString {
+							result.next?.let {
+								append("$nextClassString：《${it.courseName}》\n")
+								append("$timeString：${it.startTime}~${it.endTime}\n")
+								append("$locationString：${it.teachingPlace}\n")
+							}
+						})
+				).setProgress(0, 0, false)
 			}
 
 			CourseState.BEFORE_CLASS -> {
 				val course = result.current ?: return
 				val mins = result.remainingMinutes
+				val secs = result.remainingSeconds
 				val minsText = when {
-					mins <= 0L -> context.getString(R.string.immediate_class_warning)
+					secs in 1..60L -> "${secs}$secondString"
+					secs <= 0L -> context.getString(R.string.immediate_class_warning)
 					mins <= 15L -> "${mins}$minuteString"
 					else -> "${mins / 60}$hourString${mins % 60}$minuteString"
 				}
@@ -219,34 +191,61 @@ object ClassIsland {
 						NotificationCompat.BigTextStyle().bigText(
 							buildString {
 								append(
-									context.getString(
-										R.string.next_class_time, course.courseName, mins
-									)
+									if (mins == 0L && secs >= 0L) {
+										context.getString(
+											R.string.next_class_time,
+											course.courseName,
+											secs,
+											secondString
+										)
+									} else {
+										context.getString(
+											R.string.next_class_time,
+											course.courseName,
+											mins,
+											minuteString
+										)
+									}
 								)
 								append("$timeString：${course.startTime}~${course.endTime}\n")
 								append("$locationString：${course.teachingPlace}\n")
 							})
-					).setProgress(0, 0, false)
+					)
 			}
 
 			CourseState.IN_CLASS -> {
 				val course = result.current ?: return
-				val remaining = result.remainingMinutes
-				val progress = result.progress.coerceIn(0, 100)
-				builder.setContentTitle("📚 ${course.courseName}")
-					.setShortCriticalText("${remaining}$minuteString").setContentText(
-						context.getString(
-							R.string.remaining_class_time, course.courseName, remaining
-						)
+				val remainingMins = result.remainingMinutes.toInt()
+				val remainingSecs = result.remainingSeconds.toInt()
+				val elapsed = result.elapsedMinutes.toInt()
+				val remainingDisplay =
+					if (remainingMins == 0 && remainingSecs > 0) "${remainingSecs}秒" else "${remainingMins}$minuteString"
+				builder.setContentTitle(course.courseName).setShortCriticalText(remainingDisplay)
+					.setContentText(
+						if (remainingMins == 0 && remainingSecs > 0) {
+							context.getString(
+								R.string.remaining_class_time,
+								course.courseName,
+								remainingSecs,
+								secondString
+							)
+						} else {
+							context.getString(
+								R.string.remaining_class_time,
+								course.courseName,
+								remainingMins,
+								minuteString
+							)
+						}
 					).setStyle(
 						NotificationCompat.ProgressStyle().setStyledByProgress(true)
-							.setProgress(progress).addProgressSegment(
-								NotificationCompat.ProgressStyle.Segment(progress).setColor(
+							.setProgress(elapsed).addProgressSegment(
+								NotificationCompat.ProgressStyle.Segment(elapsed).setColor(
 									context.getColor(R.color.md_theme_primary)
 								)
 							).addProgressSegment(
 								NotificationCompat.ProgressStyle.Segment(
-									(100 - progress).coerceAtLeast(
+									remainingSecs.coerceAtLeast(
 										1
 									)
 								).setColor(
@@ -257,11 +256,14 @@ object ClassIsland {
 			}
 
 			CourseState.BREAK -> {
-				val next = result.next!!
+				val next = result.next ?: return
 				builder.setContentTitle(context.getString(R.string.no_class))
-					.setShortCriticalText(next.courseName.take(6)).setContentText(
+					.setShortCriticalText(next.courseName).setContentText(
 						context.getString(
-							R.string.next_class_time, next.courseName, result.remainingMinutes
+							R.string.next_class_time,
+							next.courseName,
+							result.remainingMinutes,
+							minuteString
 						)
 					).setStyle(
 						NotificationCompat.BigTextStyle().bigText(
@@ -270,13 +272,14 @@ object ClassIsland {
 									context.getString(
 										R.string.next_class_time,
 										next.courseName,
-										result.remainingMinutes
+										result.remainingMinutes,
+										minuteString
 									)
 								)
 								append("$timeString：${next.startTime}~${next.endTime}\n")
 								append("$locationString：${next.teachingPlace}\n")
 							})
-					).setProgress(0, 0, false)
+					)//.setProgress(0, 0, false)
 			}
 		}
 

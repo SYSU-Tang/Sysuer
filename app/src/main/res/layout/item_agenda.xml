@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="0dp"
     android:layout_height="0dp"
-    android:layout_gravity="fill">
+    android:layout_gravity="fill"
+    app:cardCornerRadius="8dp"
+    app:contentPadding="4dp">
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+        android:includeFontPadding="false"
+        app:lineHeight="14dp"
+        android:textAppearance="@style/TextAppearance.Material3.LabelSmall" />
 </com.google.android.material.card.MaterialCardView>

@@ -7,21 +7,19 @@
     android:layout_gravity="center"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingLeft="2dp"
-    android:paddingRight="2dp"
-    android:paddingBottom="8dp">
+    android:paddingHorizontal="4dp"
+    android:paddingVertical="2dp">
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/course_order"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorAccent"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium.Emphasized"
+        android:textColor="?attr/colorAccent" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/course_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium.Emphasized" />
+        android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
 </LinearLayout>

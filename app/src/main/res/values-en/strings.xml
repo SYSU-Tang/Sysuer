@@ -891,8 +891,8 @@
     <string name="pay_status">Payment Status</string>
     <string name="invoice_title">Invoice Title</string>
 
-    <string name="next_class_time">%2$d minutes until %1$s starts</string>
-    <string name="remaining_class_time">%2$d minutes until %1$s ends</string>
+    <string name="next_class_time">%2$d %3$s until %1$s starts</string>
+    <string name="remaining_class_time">%2$d %3$s until %1$s ends</string>
 <!--    <string name="remaining_class_time">%2$d minutes until %1$s ends</string>-->
     <string name="hour">H</string>
     <string name="no_class">No class</string>

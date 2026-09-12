@@ -9,14 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.appbar.MaterialToolbar
+        <!--<com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:navigationIcon="?homeAsUpIndicator"
             android:transitionName="miniapp"
-            app:title="@string/course_schedule" />
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:navigationIcon="?homeAsUpIndicator" />-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,18 +34,27 @@
                 style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="2dp"
-                android:text="@string/term"
-                app:icon="@drawable/calendar" />
+                android:layout_marginHorizontal="2dp"
+                android:text="@string/term" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/today"
+                style="@style/Widget.Material3Expressive.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:minWidth="0dp"
+                android:text="@string/today" />
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/weekTime"
                 style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="2dp"
-                android:text="@string/week1"
-                app:icon="@drawable/time" />
+                android:layout_marginHorizontal="2dp"
+                android:text="@string/week1" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/next"
@@ -74,9 +82,10 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/colorSurfaceContainerHighest"
+        android:background="?attr/colorSurfaceContainer"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <GridLayout
@@ -87,4 +96,26 @@
             android:orientation="vertical"
             android:rowCount="11" />
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:transitionName="miniapp"
+        app:backgroundTint="#0000"
+        app:fabAlignmentMode="end"
+        app:fabAnimationMode="slide"
+        app:hideOnScroll="true"
+        app:layout_behavior="com.google.android.material.bottomappbar.BottomAppBar$Behavior"
+        app:navigationIcon="@drawable/ic_nav_back_rounded"
+        app:navigationIconTint="@null" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/export"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/export"
+        app:layout_anchor="@id/toolbar"
+        app:srcCompat="@drawable/export" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
