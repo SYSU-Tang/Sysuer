@@ -19,8 +19,8 @@ android {
 	defaultConfig {
 		val generation = "2"
 		val major = "0"
-		val minor = "0"
-		val beta = false
+		val minor = "1"
+		val beta = true
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
