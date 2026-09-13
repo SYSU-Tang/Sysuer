@@ -24,6 +24,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.miyuyan.sysuer.Application
@@ -69,9 +70,9 @@ class ContextUtil(val context: Context) {
 	}
 
 	fun getColorFromAttr(attr: Int): Int {
-		val typedValue = TypedValue()
-		context.theme.resolveAttribute(attr, typedValue, true)
-		return typedValue.data
+//		val typedValue = TypedValue()
+//		context.theme.resolveAttribute(attr, typedValue, true)
+		return MaterialColors.getColor(context, attr, context.getColor(R.color.md_theme_primary))
 	}
 
 	/**

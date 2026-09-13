@@ -119,8 +119,9 @@ class CourseScheduleActivity : BaseActivity() {
 					root.setLayoutParams(
 						GridLayout.LayoutParams(
 							GridLayout.spec(i, 1.0f), GridLayout.spec(0)
-						)
-					)
+						).apply {
+							if (i == 4 || i == 8) topMargin = 16
+						})
 				}
 			if (i == 10) {
 				durationBinding.root.measure(View.MEASURED_SIZE_MASK, View.MEASURED_SIZE_MASK)
@@ -173,6 +174,25 @@ class CourseScheduleActivity : BaseActivity() {
 		val detailDialog = BottomSheetDialog(this)
 		detailBinding = ItemDetailBinding.inflate(layoutInflater)
 		detailDialog.setContentView(detailBinding.root)
+		val palettes = arrayOf(
+			androidx.appcompat.R.attr.colorPrimary to com.google.android.material.R.attr.colorOnPrimary,
+			com.google.android.material.R.attr.colorSecondary to com.google.android.material.R.attr.colorOnSecondary,
+			com.google.android.material.R.attr.colorTertiary to com.google.android.material.R.attr.colorOnTertiary,
+			com.google.android.material.R.attr.colorPrimaryContainer to com.google.android.material.R.attr.colorOnPrimaryContainer,
+			com.google.android.material.R.attr.colorSecondaryContainer to com.google.android.material.R.attr.colorOnSecondaryContainer,
+			com.google.android.material.R.attr.colorTertiaryContainer to com.google.android.material.R.attr.colorOnTertiaryContainer,
+			com.google.android.material.R.attr.colorPrimaryFixed to com.google.android.material.R.attr.colorOnPrimaryFixed,
+			com.google.android.material.R.attr.colorSecondaryFixed to com.google.android.material.R.attr.colorOnSecondaryFixed,
+			com.google.android.material.R.attr.colorTertiaryFixed to com.google.android.material.R.attr.colorOnTertiaryFixed,
+			com.google.android.material.R.attr.colorPrimaryFixedDim to com.google.android.material.R.attr.colorOnPrimaryFixed,
+			com.google.android.material.R.attr.colorSecondaryFixedDim to com.google.android.material.R.attr.colorOnSecondaryFixed,
+			com.google.android.material.R.attr.colorTertiaryFixedDim to com.google.android.material.R.attr.colorOnTertiaryFixed,
+			com.google.android.material.R.attr.colorSurfaceContainerLow to com.google.android.material.R.attr.colorOnSurface,
+			com.google.android.material.R.attr.colorSurfaceContainer to com.google.android.material.R.attr.colorOnSurface,
+			com.google.android.material.R.attr.colorSurfaceContainerHigh to com.google.android.material.R.attr.colorOnSurface,
+			com.google.android.material.R.attr.colorSurfaceContainerHighest to com.google.android.material.R.attr.colorOnSurface,
+		)
+		val assignedColors = mutableMapOf<String, Int>()
 		model.message.observe(this) { (code, response) ->
 			println("$code $response")
 			if (response.getInteger("code") == 200) {
@@ -184,8 +204,8 @@ class CourseScheduleActivity : BaseActivity() {
 							val data = e as JSONObject
 							val week = data.getString("week")
 							if (week != null) {
-								val startClassTimes = data.getString("startClassTimes")
-								val endClassTimes = data.getString("endClassTimes")
+								val startClassTimes = data.getInteger("startClassTimes")
+								val endClassTimes = data.getInteger("endClassTimes")
 								val info = data.getJSONArray("teachingInfoList")
 								info.forEach { detail: Any? ->
 									val course = (detail as JSONObject).getString("courseName", "")
@@ -202,29 +222,34 @@ class CourseScheduleActivity : BaseActivity() {
 									if (isStop != null && "0" != isStop) {
 										item.setEnabled(false)
 										item.setCardBackgroundColor(
-											model.contextUtil.getColorFromAttr(
+											MaterialColors.getColor(
+												item,
 												com.google.android.material.R.attr.colorErrorContainer
 											)
 										)
 									} else {
-										val palettes = intArrayOf(
-											com.google.android.material.R.attr.colorPrimaryContainer,
-											com.google.android.material.R.attr.colorSecondaryContainer,
-											com.google.android.material.R.attr.colorTertiaryContainer,
-											com.google.android.material.R.attr.colorSurface,
-//											com.google.android.material.R.color.m3_ref_palette_cyan20,
-										)
-										val colorAttr = palettes[abs(course.hashCode()) % palettes.size]
+										val colorIndex = assignedColors.getOrPut(course) {
+											var idx = abs(course.hashCode()) % palettes.size
+											val used = assignedColors.values.toSet()
+											while (idx in used && assignedColors.size < palettes.size) {
+												idx = (idx + 1) % palettes.size
+											}
+											idx
+										}
+										val (bgAttr, fgAttr) = palettes[colorIndex]
 										item.setCardBackgroundColor(
-											MaterialColors.getColor(item, colorAttr)
+											MaterialColors.getColor(item, bgAttr)
+										)
+										itemAgendaBinding.content.setTextColor(
+											MaterialColors.getColor(item, fgAttr)
 										)
 									}
 									views.add(item)
 									item.setOnClickListener {
 										val location = "$campus-$teachingBuildingName-$classroomNum"
 										setDialogDetail(
-											course, location, teacher, String.format(
-												getString(R.string.from_to),
+											course, location, teacher,
+												getString(R.string.from_to,
 												startClassTimes,
 												endClassTimes
 											), detail.getString("assistantInfo")
@@ -240,10 +265,12 @@ class CourseScheduleActivity : BaseActivity() {
 										height = 0
 										setGravity(Gravity.FILL)
 										rowSpec = GridLayout.spec(
-											startClassTimes.toInt() - 1,
-											endClassTimes.toInt() - startClassTimes.toInt() + 1,
+											startClassTimes - 1,
+											endClassTimes - startClassTimes + 1,
 											1.0f
 										)
+										if (startClassTimes == 5 || startClassTimes == 9) topMargin = 16
+
 									})
 									binding.day.addView(item)
 								}
