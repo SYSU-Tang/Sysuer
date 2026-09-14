@@ -35,125 +35,134 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.StaggerScreen
+import com.miyuyan.sysuer.view.StatePage
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ExamRoute(
-    backStack: MutableList<NavKey>,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+	backStack: MutableList<NavKey>,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
-    val examViewModel: ExamViewModel = viewModel()
-    val terms by examViewModel.termList.collectAsStateWithLifecycle()
-    val term by examViewModel.term.collectAsStateWithLifecycle()
-    val examWeeks by examViewModel.examWeekList.collectAsStateWithLifecycle()
-    val examWeek by examViewModel.examWeek.collectAsStateWithLifecycle()
-    var termExpanded by remember { mutableStateOf(false) }
-    var examExpanded by remember { mutableStateOf(false) }
-    val activity = LocalActivity.current
+	val examViewModel: ExamViewModel = viewModel()
+	val terms by examViewModel.termList.collectAsStateWithLifecycle()
+	val term by examViewModel.term.collectAsStateWithLifecycle()
+	val examWeeks by examViewModel.examWeekList.collectAsStateWithLifecycle()
+	val examWeekId by examViewModel.examWeekId.collectAsStateWithLifecycle()
+	val examWeek by examViewModel.examWeek.collectAsStateWithLifecycle()
+	var termExpanded by remember { mutableStateOf(false) }
+	var examExpanded by remember { mutableStateOf(false) }
+	val uiState by examViewModel.uiState.collectAsStateWithLifecycle()
+	val activity = LocalActivity.current
 
-    LaunchedEffect(Unit) {
-        examViewModel.getTerms()
-    }
-    LaunchedEffect(terms) {
-        examViewModel.getTerm()
-    }
-    LaunchedEffect(term) {
-        examViewModel.getExamWeek(term)
-    }
-    LaunchedEffect(examWeek, term) {
-        if (examWeek != null && term != null) examViewModel.getResult()
-    }
-    ActivityPager(
-        title = stringResource(R.string.exam),
-        onNavigationClick = { backStack.navigateBack(activity) },
-        isNestedScrollEnabled = false,
-        sharedTransitionScope = sharedTransitionScope,
-        animatedVisibilityScope = animatedVisibilityScope,
-        sharedKey = "Exam",
-        topBarMenus = {
-            listOf(
-                exportMarkdownMenuItem(
-                    backStack,
-                    examViewModel.sections,
-                    stringResource(R.string.exam),
-                    stringResource(R.string.exam)
-                ),
-            )
-        },
-        topBarContent = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        dimensionResource(R.dimen.horizontal_padding),
-                        dimensionResource(R.dimen.vertical_padding)
-                    ),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
-            ) {
-                ExposedDropdownMenuBox(expanded = termExpanded, onExpandedChange = { termExpanded = it }) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        value = term ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        singleLine = true,
-                        label = { Text(stringResource(R.string.term)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = termExpanded) },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                    )
-                    ExposedDropdownMenu(expanded = termExpanded, onDismissRequest = { termExpanded = false }) {
-                        terms?.forEach { option ->
-                            val termOption = (option as JSONObject).getString("acadYearSemester")
-                            val isSelected = termOption == term
-                            DropdownMenuItem(
-                                text = { Text(termOption) },
-                                onClick = {
-                                    examViewModel.term.value = termOption
-                                    termExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                modifier = Modifier.background(if (isSelected) Color.LightGray else Color.Transparent),
-                            )
-                        }
-                    }
-                }
-                ExposedDropdownMenuBox(expanded = examExpanded, onExpandedChange = { examExpanded = it }) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                        value = examWeek ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        singleLine = true,
-                        label = { Text(stringResource(R.string.exam_week)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = examExpanded) },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                    )
-                    ExposedDropdownMenu(expanded = examExpanded, onDismissRequest = { examExpanded = false }) {
-                        examWeeks?.forEach { option ->
-                            val examWeekName = (option as JSONObject).getString("examWeekName")
-                            val examWeekId = option.getString("examWeekId")
-                            val isSelected = examWeekName == examWeek
-                            DropdownMenuItem(
-                                text = { Text(examWeekName) },
-                                onClick = {
-                                    examViewModel.examWeek.value = examWeekName
-                                    examViewModel.examWeekId.value = examWeekId
-                                    examExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                modifier = Modifier.background(if (isSelected) Color.LightGray else Color.Transparent),
-                            )
-                        }
-                    }
-                }
-            }
-        }) {
-        StaggerScreen(sections = examViewModel.sections)
-    }
+	LaunchedEffect(Unit) {
+		examViewModel.getTerms()
+	}
+	LaunchedEffect(terms) {
+		examViewModel.getTerm()
+	}
+	LaunchedEffect(term) {
+		examViewModel.getExamWeek(term)
+	}
+	LaunchedEffect(examWeekId, term) {
+		if (examWeekId != null && term != null) examViewModel.getResult()
+	}
+	ActivityPager(
+		title = stringResource(R.string.exam),
+		onNavigationClick = { backStack.navigateBack(activity) },
+		isNestedScrollEnabled = false,
+		sharedTransitionScope = sharedTransitionScope,
+		animatedVisibilityScope = animatedVisibilityScope,
+		sharedKey = "Exam",
+		topBarMenus = {
+			listOf(
+				exportMarkdownMenuItem(
+					backStack,
+					examViewModel.sections,
+					stringResource(R.string.exam),
+					stringResource(R.string.exam)
+				),
+			)
+		},
+		topBarContent = {
+			Column(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(
+						dimensionResource(R.dimen.horizontal_padding),
+						dimensionResource(R.dimen.vertical_padding)
+					),
+				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+			) {
+				ExposedDropdownMenuBox(
+					expanded = termExpanded, onExpandedChange = { termExpanded = it }) {
+					OutlinedTextField(
+						modifier = Modifier
+							.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+							.fillMaxWidth(),
+						value = term ?: "",
+						onValueChange = {},
+						readOnly = true,
+						singleLine = true,
+						label = { Text(stringResource(R.string.term)) },
+						trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = termExpanded) },
+						colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+					)
+					ExposedDropdownMenu(
+						expanded = termExpanded, onDismissRequest = { termExpanded = false }) {
+						terms?.forEach { option ->
+							val termOption = (option as JSONObject).getString("acadYearSemester")
+							val isSelected = termOption == term
+							DropdownMenuItem(
+								text = { Text(termOption) },
+								onClick = {
+									examViewModel.term.value = termOption
+									termExpanded = false
+								},
+								contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+								modifier = Modifier.background(if (isSelected) Color.LightGray else Color.Transparent),
+							)
+						}
+					}
+				}
+				ExposedDropdownMenuBox(
+					expanded = examExpanded, onExpandedChange = { examExpanded = it }) {
+					OutlinedTextField(
+						modifier = Modifier
+							.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+							.fillMaxWidth(),
+						value = examWeek ?: "",
+						onValueChange = {},
+						readOnly = true,
+						singleLine = true,
+						label = { Text(stringResource(R.string.exam_week)) },
+						trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = examExpanded) },
+						colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+					)
+					ExposedDropdownMenu(
+						expanded = examExpanded, onDismissRequest = { examExpanded = false }) {
+						examWeeks?.forEach { option ->
+							val examWeekName = (option as JSONObject).getString("examWeekName")
+							val examWeekId = option.getString("examWeekId")
+							val isSelected = examWeekName == examWeek
+							DropdownMenuItem(
+								text = { Text(examWeekName) },
+								onClick = {
+									examViewModel.examWeek.value = examWeekName
+									examViewModel.examWeekId.value = examWeekId
+									examExpanded = false
+								},
+								contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+								modifier = Modifier.background(if (isSelected) Color.LightGray else Color.Transparent),
+							)
+						}
+					}
+				}
+			}
+		}) {
+		StatePage(uiState) {
+			StaggerScreen(sections = examViewModel.sections)
+		}
+	}
 }

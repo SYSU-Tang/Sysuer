@@ -36,7 +36,8 @@ class PortalModel(context: Context) : BaseModel(context) {
 						if (meta.getInteger("statusCode") != 200) http.handler.post {
 							contextUtil.toast(meta.getString("message",""))
 						}
-						message.postValue(CommonUtil.Tuple2(request.second, contentJSON))
+						message.postValue(result)
+						messageChannel.trySend(result)
 						afterLoginRequest.remove(request)
 					}
 				} ?: run {

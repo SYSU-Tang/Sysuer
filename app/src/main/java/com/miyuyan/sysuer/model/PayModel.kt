@@ -39,6 +39,7 @@ open class PayModel(context: Context) : BaseModel(context) {
 				}
 				result = CommonUtil.Tuple2(request.second, response)
 				message.postValue(result)
+				messageChannel.trySend(result)
 				afterLoginRequest.remove(request)
 			}
 		} /*?: run {

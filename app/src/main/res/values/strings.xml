@@ -682,7 +682,7 @@
     <string name="set_sysu_code_warning">请在设置里配置逸仙码</string>
     <string name="fix_sysu_code_warning">请配置正确的逸仙码链接</string>
     <string name="registration">登记</string>
-    <string name="loading">加载中</string>
+    <string name="loading">加载中…</string>
     <string name="route">路线</string>
     <string name="start">起点</string>
     <string name="end">终点</string>
@@ -876,7 +876,11 @@
     <string name="immediate_class">快上课</string>
     <string name="all_course_finished">今日课程已结束🎉</string>
     <string name="no_next_class">没有下一节课，太爽了!</string>
-    <string name="immediate_class_warning" >马上就要上课了</string>
+    <string name="immediate_class_warning">马上就要上课了</string>
     <string name="second">秒</string>
     <string name="first_week_warning">这是第一周</string>
+    <string name="no_data">暂无数据</string>
+    <string name="retry">重试</string>
+    <string name="load_failed">加载失败</string>
+    <string name="year_month">%d年%d月</string>
 </resources>

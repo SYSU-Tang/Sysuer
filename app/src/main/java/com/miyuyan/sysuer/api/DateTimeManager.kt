@@ -81,7 +81,7 @@ object DateTimeManager {
 	 * @param millis 时间戳（毫秒）
 	 * @return 日期（毫秒）
 	 */
-	fun toDate(millis: Long): LocalDate? =
+	fun toDate(millis: Long): LocalDate =
 		Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
 
 	/**

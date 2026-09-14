@@ -10,8 +10,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.browser.RichTextRoute
-import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.nav.PersonalTrainingProgram
 import com.miyuyan.sysuer.nav.RichText
+import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.theme.SysuerTheme
 
@@ -30,6 +31,14 @@ class TrainingProgramActivity : BaseActivity() {
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+						entry<PersonalTrainingProgram> {
+							PersonalTrainingProgramRoute(
+								backStack,
+								it,
+								this@SharedTransitionLayout,
+								LocalNavAnimatedContentScope.current
 							)
 						}
 						entry<RichText> {

@@ -659,7 +659,7 @@
     <string name="registration">登记</string>
     <string name="route">路线</string>
     <string name="start">起点</string>
-    <string name="loading">加载中</string>
+    <string name="loading">加载中…</string>
     <string name="end">终点</string>
     <string name="passenger">乘客</string>
     <string name="vehicles">车辆</string>
@@ -900,4 +900,7 @@
     <string name="immediate_class_warning">马上就要上课了</string>
 
     <string name="second">秒</string>
+
+    <string name="first_week_warning">这是第一周</string>
+    <string name="no_data">暂无数据</string>
 </resources>

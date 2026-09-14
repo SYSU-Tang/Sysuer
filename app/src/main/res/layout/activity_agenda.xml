@@ -1,92 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.google.android.material.appbar.AppBarLayout
-        style="@style/SYSUER.AppBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:transitionName="miniapp"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:navigationIcon="?homeAsUpIndicator"
-            app:title="@string/agenda" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-
-    <com.haibin.calendarview.CalendarLayout
-        android:id="@+id/calendarLayout"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?colorSurfaceBright"
-        android:orientation="vertical"
-        app:calendar_content_view_id="@id/list"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+        android:fitsSystemWindows="true">
 
-        <com.haibin.calendarview.CalendarView
-            android:id="@+id/calendarView"
+        <com.google.android.material.appbar.AppBarLayout
+            style="@style/SYSUER.AppBarLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?colorSurfaceBright"
-            app:calendar_padding_left="4dp"
-            app:calendar_padding_right="4dp"
-            app:current_day_lunar_text_color="#ff0000"
-            app:current_day_text_color="#ff0000"
-            app:current_month_lunar_text_color="#CFCFCF"
-            app:current_month_text_color="#333333"
-            app:lunar_text_size="10sp"
-            app:max_year="2050"
-            app:max_year_day="31"
-            app:max_year_month="12"
-            app:min_year="2008"
-            app:min_year_day="1"
-            app:min_year_month="1"
-            app:month_view="com.miyuyan.sysuer.view.CustomMonthView"
-            app:month_view_show_mode="mode_only_current"
-            app:other_month_text_color="?colorOnSurface"
-            app:scheme_lunar_text_color="#CFCFCF"
-            app:scheme_text="假"
-            app:scheme_text_color="#333"
-            app:scheme_theme_color="#128c4b"
-            app:selected_lunar_text_color="?colorPrimaryInverse"
-            app:selected_text_color="?colorPrimaryInverse"
-            app:selected_theme_color="?colorPrimary"
-            app:week_background="?colorSurface"
-            app:week_bar_height="46dp"
-            app:week_line_background="#00000000"
-            app:week_line_margin="16dp"
-            app:week_start_with="mon"
-            app:week_text_color="?colorOnSurface"
-            app:week_text_size="12sp"
-            app:week_view="com.miyuyan.sysuer.view.CustomWeekView"
-            app:year_view_background="#f6f6f6"
-            app:year_view_day_text_color="#333333"
-            app:year_view_day_text_size="8sp"
-            app:year_view_month_text_color="#ff0000"
-            app:year_view_month_text_size="20sp"
-            app:year_view_scheme_color="#f17706"
-            app:year_view_week_height="0dp"
-            app:year_view_week_text_color="#666666"
-            app:year_view_week_text_size="7sp" />
+            android:layout_height="wrap_content">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list"
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:transitionName="miniapp"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:navigationIcon="?homeAsUpIndicator"
+                app:title="@string/agenda" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+
+        <com.haibin.calendarview.CalendarLayout
+            android:id="@+id/calendarLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?colorSurface"
-            android:elevation="2dp"
-            app:fastScrollEnabled="true"
-            app:fastScrollHorizontalThumbDrawable="@drawable/thumb"
-            app:fastScrollHorizontalTrackDrawable="@drawable/track"
-            app:fastScrollVerticalThumbDrawable="@drawable/thumb"
-            app:fastScrollVerticalTrackDrawable="@drawable/track" />
-    </com.haibin.calendarview.CalendarLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            android:background="?colorSurfaceBright"
+            android:orientation="vertical"
+            app:calendar_content_view_id="@id/list"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+            <com.haibin.calendarview.CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?colorSurfaceBright"
+                app:calendar_padding_left="4dp"
+                app:calendar_padding_right="4dp"
+                app:current_day_lunar_text_color="#ff0000"
+                app:current_day_text_color="#ff0000"
+                app:current_month_lunar_text_color="#CFCFCF"
+                app:current_month_text_color="#333333"
+                app:lunar_text_size="10sp"
+                app:max_year="2050"
+                app:max_year_day="31"
+                app:max_year_month="12"
+                app:min_year="2008"
+                app:min_year_day="1"
+                app:min_year_month="1"
+                app:month_view="com.miyuyan.sysuer.view.CustomMonthView"
+                app:month_view_show_mode="mode_only_current"
+                app:other_month_text_color="?colorOnSurface"
+                app:scheme_lunar_text_color="#CFCFCF"
+                app:scheme_text="假"
+                app:scheme_text_color="#333"
+                app:scheme_theme_color="#128c4b"
+                app:selected_lunar_text_color="?colorPrimaryInverse"
+                app:selected_text_color="?colorPrimaryInverse"
+                app:selected_theme_color="?colorPrimary"
+                app:week_background="?colorSurface"
+                app:week_bar_height="46dp"
+                app:week_line_background="#00000000"
+                app:week_line_margin="16dp"
+                app:week_start_with="mon"
+                app:week_text_color="?colorOnSurface"
+                app:week_text_size="12sp"
+                app:week_view="com.miyuyan.sysuer.view.CustomWeekView"
+                app:year_view_background="#f6f6f6"
+                app:year_view_day_text_color="#333333"
+                app:year_view_day_text_size="8sp"
+                app:year_view_month_text_color="#ff0000"
+                app:year_view_month_text_size="20sp"
+                app:year_view_scheme_color="#f17706"
+                app:year_view_week_height="0dp"
+                app:year_view_week_text_color="#666666"
+                app:year_view_week_text_size="7sp" />
+
+
+            <include
+                android:id="@+id/content"
+                layout="@layout/recycler_view_state" />
+            <!-- <androidx.core.widget.NestedScrollView
+                 android:id="@+id/warning"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent">
+
+                 <include
+                     layout="@layout/item_none_warning"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     app:warning="@{@string/no_data}" />
+
+             </androidx.core.widget.NestedScrollView>-->
+
+             <androidx.recyclerview.widget.RecyclerView
+                 android:id="@+id/list"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:background="?colorSurface"
+                 android:elevation="2dp"
+                 app:fastScrollEnabled="true"
+                 app:fastScrollHorizontalThumbDrawable="@drawable/thumb"
+                 app:fastScrollHorizontalTrackDrawable="@drawable/track"
+                 app:fastScrollVerticalThumbDrawable="@drawable/thumb"
+                 app:fastScrollVerticalTrackDrawable="@drawable/track" />
+        </com.haibin.calendarview.CalendarLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

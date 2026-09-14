@@ -35,6 +35,7 @@ class XinfangModel(context: Context) : BaseModel(context) {
 					else data as JSONObject
 					result = CommonUtil.Tuple2(request.second, data)
 					message.postValue(result)
+					messageChannel.trySend(result)
 				} ?: run {
 				if (!authorizationManager.isAuthorized(content)) login(request)
 				else if (!authorizationManager.isAccessible(content)) retry(request)

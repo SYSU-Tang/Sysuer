@@ -42,6 +42,7 @@ class GymModel(context: Context) : BaseModel(context) {
 					else data as JSONObject
 					result = CommonUtil.Tuple2(request.second, data)
 					message.postValue(result)
+					messageChannel.trySend(result)
 				} ?: run {
 				if (!authorizationManager.isAuthorized(content)) login(request)
 				else if (Pattern.compile("人机识别检测").matcher(content).find()) login(request)

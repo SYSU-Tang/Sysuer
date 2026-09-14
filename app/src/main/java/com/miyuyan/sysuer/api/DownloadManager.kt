@@ -75,7 +75,7 @@ object DownloadManager {
 			context,
 			Request.Builder()
 				.header("Cookie", CookieManager(context).toSimpleString(url.toHttpUrl().host))
-				.header("Accept-Encoding", "identity").url(url).build(),
+				.url(url).build(),
 			path,
 			notify,
 			listener
@@ -122,9 +122,8 @@ object DownloadManager {
 				try {
 					NotificationManagerCompat.from(context).createNotificationChannel(
 						NotificationChannelCompat.Builder(
-							"update",
-							NotificationManagerCompat.IMPORTANCE_DEFAULT
-						).setDescription("APP下载通知").setName("下载进度通知").build()
+							"update", NotificationManagerCompat.IMPORTANCE_DEFAULT
+						).setDescription("中大儿下载通知").setName("文件下载进度和下载路径通知").build()
 					)
 					response.body.byteStream().use { stream ->
 						FileOutputStream(savePath).use { fos ->
@@ -176,23 +175,18 @@ object DownloadManager {
 	 * @param path    文件路径
 	 * @return 打开文件的 Intent
 	 */
-	fun getOpenFileIntent(context: Context, path: String?): Intent? {
-		return path?.let { path ->
-			Intent.createChooser(
-				Intent(Intent.ACTION_VIEW).addCategory("android.intent.category.DEFAULT")
-					.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-					.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setDataAndType(
-						FileProvider.getUriForFile(
-							context,
-							"com.sysu.edu.fileProvider",
-							File(path)
-						),
-						MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-							path.substring(path.lastIndexOf(".") + 1).lowercase(Locale.getDefault())
-						)
-					), context.getString(R.string.share)
-			)
-		}
+	fun getOpenFileIntent(context: Context, path: String?): Intent? = path?.let { path ->
+		Intent.createChooser(
+			Intent(Intent.ACTION_VIEW).addCategory("android.intent.category.DEFAULT")
+				.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+				.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setDataAndType(
+					FileProvider.getUriForFile(
+						context, "com.sysu.edu.fileProvider", File(path)
+					), MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+						path.substring(path.lastIndexOf(".") + 1).lowercase(Locale.getDefault())
+					)
+				), context.getString(R.string.share)
+		)
 	}
 
 	/**
@@ -225,9 +219,7 @@ object DownloadManager {
 	fun notifyDownloadProgress(context: Context, progress: Long, total: Long) {
 		val indeterminate = total == -1L
 		val progressString = if (indeterminate) String.format(
-			Locale.getDefault(),
-			"%.2fMB",
-			progress / 1024.0f / 1024.0f
+			Locale.getDefault(), "%.2fMB", progress / 1024.0f / 1024.0f
 		) else String.format(
 			Locale.getDefault(),
 			"%.2fMB/%.2fMB",
@@ -243,8 +235,7 @@ object DownloadManager {
 				indeterminate
 			).setPriority(NotificationCompat.PRIORITY_DEFAULT)
 		if (ActivityCompat.checkSelfPermission(
-				context,
-				Manifest.permission.POST_NOTIFICATIONS
+				context, Manifest.permission.POST_NOTIFICATIONS
 			) == PackageManager.PERMISSION_GRANTED
 		) NotificationManagerCompat.from(context).notify(1002, builder.build())
 	}
@@ -258,8 +249,7 @@ object DownloadManager {
 				PendingIntentCompat.getActivity(context, 0, it1, PendingIntent.FLAG_ONE_SHOT, false)
 			}).setProgress(1, 1, false).setPriority(NotificationCompat.PRIORITY_DEFAULT)
 		if (ActivityCompat.checkSelfPermission(
-				context,
-				Manifest.permission.POST_NOTIFICATIONS
+				context, Manifest.permission.POST_NOTIFICATIONS
 			) == PackageManager.PERMISSION_GRANTED
 		) NotificationManagerCompat.from(context).notify(1002, builder.build())
 		path?.let { it1 ->
@@ -274,8 +264,7 @@ object DownloadManager {
 			.setSmallIcon(R.drawable.down).setProgress(1, 0, false)
 			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 		if (ActivityCompat.checkSelfPermission(
-				context,
-				Manifest.permission.POST_NOTIFICATIONS
+				context, Manifest.permission.POST_NOTIFICATIONS
 			) == PackageManager.PERMISSION_GRANTED
 		) NotificationManagerCompat.from(context).notify(1002, builder.build())
 	}

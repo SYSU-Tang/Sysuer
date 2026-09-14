@@ -40,6 +40,7 @@ open class NetPayModel(context: Context) : BaseModel(context) {
 			else -> JSONObject.of("data", content)
 		})
 		message.postValue(result)
+		messageChannel.trySend(result)
 		afterLoginRequest.remove(request)
 		return result
 	}

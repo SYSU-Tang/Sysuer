@@ -45,7 +45,8 @@ class PjxtModel(context: Context) : BaseModel(context) {
 								contextUtil.toast(CommonUtil.toStringOrDefault(data.getString("msg")))
 							}
 						}
-						message.postValue(CommonUtil.Tuple2(request.second, data))
+						message.postValue(result)
+						messageChannel.trySend(result)
 						afterLoginRequest.remove(request)
 					} ?: run {
 					if (!authorizationManager.isAuthorized(content)) login(request)

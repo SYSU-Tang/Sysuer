@@ -224,7 +224,7 @@ fun UpdateRoute(
 						var isDownloaded by remember { mutableStateOf(false) }
 						FilledTonalButton(
 							modifier = Modifier.fillMaxWidth(), onClick = {
-								if (isDownloaded) {
+								if (isDownloaded && File(path).exists()) {
 									SysuerDownloadManager.openFile(context, path)
 								} else {
 									SysuerDownloadManager.downloadFile(

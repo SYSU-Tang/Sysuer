@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import com.alibaba.fastjson2.JSONObject
+import com.miyuyan.sysuer.view.UiState
 import okhttp3.Cache
 import okhttp3.Call
 import okhttp3.Callback

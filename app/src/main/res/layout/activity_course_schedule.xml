@@ -47,14 +47,13 @@
                 android:minWidth="0dp"
                 android:text="@string/today" />
 
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/weekTime"
                 style="@style/Widget.Material3Expressive.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="2dp"
-                android:text="@string/week1" />
+                android:text="@string/week_range" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/next"

@@ -248,10 +248,8 @@ class CourseScheduleActivity : BaseActivity() {
 									item.setOnClickListener {
 										val location = "$campus-$teachingBuildingName-$classroomNum"
 										setDialogDetail(
-											course, location, teacher,
-												getString(R.string.from_to,
-												startClassTimes,
-												endClassTimes
+											course, location, teacher, getString(
+												R.string.from_to, startClassTimes, endClassTimes
 											), detail.getString("assistantInfo")
 										)
 										id.value = detail.getString("classesId")
@@ -269,7 +267,8 @@ class CourseScheduleActivity : BaseActivity() {
 											endClassTimes - startClassTimes + 1,
 											1.0f
 										)
-										if (startClassTimes == 5 || startClassTimes == 9) topMargin = 16
+										if (startClassTimes == 5 || startClassTimes == 9) topMargin =
+											16
 
 									})
 									binding.day.addView(item)
@@ -330,10 +329,10 @@ class CourseScheduleActivity : BaseActivity() {
 						if (nowWeekly != null) currentWeek = nowWeekly.toInt()
 						response.getJSONObject("data").getJSONArray("weeklyList")
 							.forEach { e: Any? -> weeks.add((e as JSONObject).getInteger("weekly")) }
-						weeks.forEach { e: Int ->
+						weeks.forEachIndexed { index, e: Int ->
 							weekPop.menu.add(getString(R.string.week_d, e))
 								.setOnMenuItemClickListener {
-									changeWeek(e)
+									changeWeek(index)
 									true
 								}
 						}

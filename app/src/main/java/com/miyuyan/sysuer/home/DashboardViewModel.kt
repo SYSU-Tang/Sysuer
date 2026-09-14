@@ -24,6 +24,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,7 +44,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	private val _todayExamIndex = MutableStateFlow(-1)
 	val todayExamIndex: StateFlow<Int> = _todayExamIndex.asStateFlow()
 	private val _selectedCourses = mutableStateListOf<JSONObject>()
-	val selectedCourses: SnapshotStateList<JSONObject> = _selectedCourses
+//	val selectedCourses: SnapshotStateList<JSONObject> = _selectedCourses
 	private val _todayCourses = mutableStateListOf<JSONObject>()
 	val todayCourses: SnapshotStateList<JSONObject> = _todayCourses
 	private val _tomorrowCourses = mutableStateListOf<JSONObject>()
@@ -230,85 +232,90 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					1 -> {
-						_todayCourses.clear()
-						_tomorrowCourses.clear()
-						val (beforeArray, afterArray) = response.getJSONArray("data")
-							.map { it as JSONObject }.filter { item ->
-								item["status"] = getTimePosition(
-									"${item.getString("teachingDate")} ${
-										item.getString("startTime")
-									}",
-									"${item.getString("teachingDate")} ${item.getString("endTime")}"
-								)
-								item["time"] =
-									"${item.getString("startTime")}~${item.getString("endTime")}"
-								item["course"] =
-									"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
-								val isToday = "TD" == item.getString("useflag")
-								if (isToday) _todayCourses.add(item) else _tomorrowCourses.add(item)
-								isToday
-							}.partition { it.getString("status") == "before" }
-						_progressMax.value = _todayCourses.size
-						_progressCurrent.value = beforeArray.size
-						updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
-						scheduleIslandTick()
-					}
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().filter { it.second.getInteger("code") == 200 }
+				.collect { (code, response) ->
+					when (code) {
+						1 -> {
+							_todayCourses.clear()
+							_tomorrowCourses.clear()
+							val (beforeArray, afterArray) = response.getJSONArray("data")
+								.map { it as JSONObject }.filter { item ->
+									item["status"] = getTimePosition(
+										"${item.getString("teachingDate")} ${
+											item.getString("startTime")
+										}",
+										"${item.getString("teachingDate")} ${item.getString("endTime")}"
+									)
+									item["time"] =
+										"${item.getString("startTime")}~${item.getString("endTime")}"
+									item["course"] =
+										"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
+									val isToday = "TD" == item.getString("useflag")
+									if (isToday) _todayCourses.add(item) else _tomorrowCourses.add(
+										item
+									)
+									isToday
+								}.partition { it.getString("status") == "before" }
+							_progressMax.value = _todayCourses.size
+							_progressCurrent.value = beforeArray.size
+							updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
+							scheduleIslandTick()
+						}
 
-					2 -> {
-						_week18Exams.clear()
-						_week19Exams.clear()
-						response.getJSONArray("data")?.forEachIndexed { i, v ->
-							val exams = if (i == 0) _week18Exams else _week19Exams
-							val timetable = (v as JSONObject).getJSONObject("timetable")
-							timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }.forEach {
-								(timetable[it] as JSONArray?)?.apply {
-									forEach { exam ->
-										(exam as JSONObject)["status"] =
-											getDatePosition(exam.getString("examDate"))
-										exams.add(exam)
+						2 -> {
+							_week18Exams.clear()
+							_week19Exams.clear()
+							response.getJSONArray("data")?.forEachIndexed { i, v ->
+								val exams = if (i == 0) _week18Exams else _week19Exams
+								val timetable = (v as JSONObject).getJSONObject("timetable")
+								timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }
+									.forEach {
+										(timetable[it] as JSONArray?)?.apply {
+											forEach { exam ->
+												(exam as JSONObject)["status"] =
+													getDatePosition(exam.getString("examDate"))
+												exams.add(exam)
+											}
+										}
 									}
-								}
+								_todayExamIndex.value =
+									exams.indexOfFirst { it.getString("status") == "in" }.let {
+										if (it < 0) exams.indexOfFirst { e -> e.getString("status") == "after" } else it
+									}
 							}
-							_todayExamIndex.value =
-								exams.indexOfFirst { it.getString("status") == "in" }.let {
-									if (it < 0) exams.indexOfFirst { e -> e.getString("status") == "after" } else it
+							_isShowWeek18.value = _week.value != "19"
+						}
+
+						3 -> {
+							_term.value =
+								response.getJSONObject("data").getString("acadYearSemester")
+						}
+
+						4 -> {
+							_week.value = response.getJSONArray("data").getJSONObject(0)
+								.getString("weekTimes")
+						}
+
+						5 -> {
+							_finalExamWeek.value =
+								response.getJSONArray("data").filterIsInstance<JSONObject>()
+									.firstOrNull { it.getString("examWeekName") == "18-19周期末考" }
+									?.getString("examWeekId") ?: ""
+						}
+
+						6 -> {
+							_selectedCourses.addAll(
+								response.getJSONObject("data").getJSONArray("rows")
+									.filterIsInstance<JSONObject>()
+							)
+							_selectedCourses.firstOrNull { it.getString("courseName") == examSubject }
+								?.let {
+									_navigateToCourseDetail.value = it
 								}
 						}
-						_isShowWeek18.value = _week.value != "19"
-					}
-
-					3 -> {
-						_term.value = response.getJSONObject("data").getString("acadYearSemester")
-					}
-
-					4 -> {
-						_week.value =
-							response.getJSONArray("data").getJSONObject(0).getString("weekTimes")
-					}
-
-					5 -> {
-						_finalExamWeek.value =
-							response.getJSONArray("data").filterIsInstance<JSONObject>()
-								.firstOrNull { it.getString("examWeekName") == "18-19周期末考" }
-								?.getString("examWeekId") ?: ""
-					}
-
-					6 -> {
-						_selectedCourses.addAll(
-							response.getJSONObject("data").getJSONArray("rows")
-								.filterIsInstance<JSONObject>()
-						)
-						_selectedCourses.firstOrNull { it.getString("courseName") == examSubject }
-							?.let {
-								_navigateToCourseDetail.value = it
-							}
 					}
 				}
-			}
 		}
 	}
 
@@ -343,8 +350,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	fun getSelectedCourses(courseName: String) {
 		examSubject = courseName
 		if (_selectedCourses.isEmpty()) model.addAndNext(
-			"jwxt/choose-course-front-server/selectedCourse/list",
-			"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
+			"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
+			"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"${_term.value}\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
 			6
 		)
 		else _selectedCourses.firstOrNull { it.getString("courseName") == examSubject }?.let {

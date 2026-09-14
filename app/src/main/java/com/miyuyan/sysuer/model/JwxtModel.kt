@@ -13,17 +13,17 @@ import okhttp3.Request
 import okhttp3.Response
 
 open class JwxtModel(context: Context) : BaseModel(context) {
-	override val authorizationManager: AuthorizationManager = AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn").also {
-		it.setTargetUrl(TargetUrl.JWXT, TargetUrl.JWXT_WEBVPN)
-	}
+	override val authorizationManager: AuthorizationManager =
+		AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn").also {
+			it.setTargetUrl(TargetUrl.JWXT, TargetUrl.JWXT_WEBVPN)
+		}
 	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
 		cookieManager = CookieManager(context)
 		setReferrer("https://jwxt.sysu.edu.cn/")
 	}
-	
+
 	override fun handleResponse(
-		request: CommonUtil.Tuple2<Request, Int>,
-		response: Response
+		request: CommonUtil.Tuple2<Request, Int>, response: Response
 	): CommonUtil.Tuple2<Int, JSONObject>? {
 		val content = response.body.string()
 		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
@@ -37,6 +37,7 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 				}
 				result = CommonUtil.Tuple2(request.second, contentJSON)
 				message.postValue(result)
+				messageChannel.trySend(result)
 				afterLoginRequest.remove(request)
 			}
 		} ?: run {
