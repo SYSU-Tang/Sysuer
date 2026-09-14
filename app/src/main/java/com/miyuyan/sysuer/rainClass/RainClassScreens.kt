@@ -61,7 +61,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,31 +89,34 @@ import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTerm
 import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTimestamp
 import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTimestampMillis
 import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.getTermColor
+import kotlinx.coroutines.flow.receiveAsFlow
 
-@Preview(showBackground = true) @Composable fun CourseScreenPreview() {
+@Preview(showBackground = true)
+@Composable
+fun CourseScreenPreview() {
 	MaterialTheme {
 		CourseScreen()
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 	var searchQuery by remember { mutableStateOf("") }
 	var active by remember { mutableStateOf(false) }
 	val context = LocalContext.current
 	val courseList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
-	val model = remember { RainClassModel(context) }
-	val message by model.message.observeAsState()
-	
+	val model: RainClassModel = remember { RainClassModel(context) }
+	val message = model.messageChannel.receiveAsFlow()
+
 	LaunchedEffect(message) {
-		message?.let { (what, response) ->
+		message.collect { (what, response) ->
 			if (what == RainClassModel.GET_COURSE_LIST) {
 				isLoading.value = false
 				if (response.containsKey("errcode") && response.getInteger("errcode") == 401002) {
 					onRequestScrollToAccount()
-				}
-				else if (response.containsKey("errcode") && response.getInteger("errcode") == 0) {
+				} else if (response.containsKey("errcode") && response.getInteger("errcode") == 0) {
 					val data = response.getJSONObject("data")
 					if (data != null) {
 						val list = data.getJSONArray("list")
@@ -126,108 +128,127 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 			}
 		}
 	}
-	
+
 	fun getCourseList() {
 		isLoading.value = true
 		model.getCourseList()
 	}
-	
+
 	LaunchedEffect(Unit) {
 		getCourseList()
 	}
 	val horizontalPadding by animateDpAsState(if (active) 0.dp else 8.dp, label = "padding")
-	
+
 	Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-		SearchBar(query = searchQuery,
-		          onQueryChange = { searchQuery = it },
-		          onSearch = { active = false },
-		          active = active,
-		          onActiveChange = { active = it },
-		          modifier = Modifier
-			          .fillMaxWidth()
-			          .widthIn(max = 720.dp)
-			          .padding(horizontalPadding)
-			          .semantics { traversalIndex = 0f },
-		          windowInsets = WindowInsets(0.dp),
-		          placeholder = { Text("搜索课程") },
-		          leadingIcon = {
-			          if (active) {
-				          IconButton(onClick = { active = false }) {
-					          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-				          }
-			          }
-			          else {
-				          Icon(Icons.Default.Search, contentDescription = null)
-			          }
-		          },
-		          trailingIcon = {
-			          var showMenu by remember { mutableStateOf(false) }
-			          Box {
-				          IconButton(onClick = { showMenu = true }) {
-					          Icon(Icons.Default.FilterList, contentDescription = "筛选")
-				          }
-				          DropdownMenu(expanded = showMenu,
-				                       onDismissRequest = { showMenu = false }) {
-					          DropdownMenuItem(text = { Text("按时间排序") },
-					                           onClick = { showMenu = false })
-					          DropdownMenuItem(text = { Text("按名称排序") },
-					                           onClick = { showMenu = false })
-				          }
-			          }
-		          }) { }
-		
+		SearchBar(
+				query = searchQuery,
+				onQueryChange = { searchQuery = it },
+				onSearch = { active = false },
+				active = active,
+				onActiveChange = { active = it },
+				modifier = Modifier
+					.fillMaxWidth()
+					.widthIn(max = 720.dp)
+					.padding(horizontalPadding)
+					.semantics { traversalIndex = 0f },
+				windowInsets = WindowInsets(0.dp),
+				placeholder = { Text("搜索课程") },
+				leadingIcon = {
+					if (active) {
+						IconButton(onClick = { active = false }) {
+							Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+						}
+					} else {
+						Icon(Icons.Default.Search, contentDescription = null)
+					}
+				},
+				trailingIcon = {
+					var showMenu by remember { mutableStateOf(false) }
+					Box {
+						IconButton(onClick = { showMenu = true }) {
+							Icon(Icons.Default.FilterList, contentDescription = "筛选")
+						}
+						DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+							DropdownMenuItem(
+									text = { Text("按时间排序") },
+									onClick = { showMenu = false })
+							DropdownMenuItem(
+									text = { Text("按名称排序") },
+									onClick = { showMenu = false })
+						}
+					}
+				}) { }
+
 		if (isLoading.value) {
 			Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 				CircularProgressIndicator()
 			}
-		}
-		else {
-			LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 340.dp),
-			                 modifier = Modifier.fillMaxSize(),
-			                 contentPadding = PaddingValues(16.dp),
-			                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-			                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
+		} else {
+			LazyVerticalGrid(
+					columns = GridCells.Adaptive(minSize = 340.dp),
+					modifier = Modifier.fillMaxSize(),
+					contentPadding = PaddingValues(16.dp),
+					horizontalArrangement = Arrangement.spacedBy(16.dp),
+					verticalArrangement = Arrangement.spacedBy(16.dp)
+			) {
 				items(courseList.value.size) { index ->
 					val courseItem = courseList.value[index]
 					val course = courseItem.getJSONObject("course")
 					val teacher = courseItem.getJSONObject("teacher")
 					val termColor = getTermColor(courseItem.getInteger("term"))
-					Card(modifier = Modifier.fillMaxWidth(),
-					     colors = CardDefaults.cardColors(containerColor = termColor,
-					                                      contentColor = Color.White)) {
-						ListItem(colors = ListItemDefaults.colors(containerColor = Color.Transparent,
-						                                          headlineColor = Color.White,
-						                                          supportingColor = Color.White.copy(
-							                                          alpha = 0.7f),
-						                                          overlineColor = Color.White.copy(
-							                                          alpha = 0.9f)),
-						         overlineContent = {
-							         Text(text = formatTerm(courseItem.getInteger("term")),
-							              style = MaterialTheme.typography.labelSmall)
-						         },
-						         headlineContent = {
-							         Text(course?.getString("name") ?: "未知课程")
-						         },
-						         supportingContent = {
-							         SelectionContainer {
-								         Text("${teacher?.getString("name") ?: "未知教师"} | 课堂号: ${
-									         courseItem.getInteger("classroom_id")
-								         }")
-							         }
-						         },
-						         leadingContent = {
-							         AsyncImage(model = teacher?.getString("avatar"),
-							                    contentDescription = "教师头像",
-							                    modifier = Modifier
-								                    .size(40.dp)
-								                    .clip(CircleShape),
-							                    contentScale = ContentScale.Crop)
-						         },
-						         trailingContent = {
-							         AsyncImage(model = course?.getString("university_mini_logo"),
-							                    contentDescription = "学校Logo",
-							                    modifier = Modifier.size(24.dp))
-						         })
+					Card(
+							modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
+							containerColor = termColor, contentColor = Color.White
+					)
+					) {
+						ListItem(
+								modifier = Modifier,
+								leadingContent = {
+									AsyncImage(
+											model = teacher?.getString("avatar"),
+											contentDescription = "教师头像",
+											modifier = Modifier
+												.size(40.dp)
+												.clip(CircleShape),
+											contentScale = ContentScale.Crop
+									)
+								},
+								trailingContent = {
+									AsyncImage(
+											model = course?.getString("university_mini_logo"),
+											contentDescription = "学校Logo",
+											modifier = Modifier.size(24.dp)
+									)
+								},
+								overlineContent = {
+									Text(
+											text = formatTerm(courseItem.getInteger("term")),
+											style = MaterialTheme.typography.labelSmall
+									)
+								},
+								supportingContent = {
+									SelectionContainer {
+										Text(
+												"${teacher?.getString("name") ?: "未知教师"} | 课堂号: ${
+													courseItem.getInteger("classroom_id")
+												}"
+										)
+									}
+								},
+								colors = ListItemDefaults.colors(
+										containerColor = Color.Transparent,
+										headlineColor = Color.White,
+										supportingColor = Color.White.copy(
+												alpha = 0.7f
+										),
+										overlineColor = Color.White.copy(
+												alpha = 0.9f
+										)
+								),
+								content = {
+									Text(course?.getString("name") ?: "未知课程")
+								},
+						)
 					}
 				}
 			}
@@ -235,35 +256,34 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 	}
 }
 
-@Composable fun ExamScreen(onRequestScrollToAccount: () -> Unit = {}) {
+@Composable
+fun ExamScreen(onRequestScrollToAccount: () -> Unit = {}) {
 	val context = LocalContext.current
 	val examList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
 	val model = remember { RainClassModel(context) }
-	val message by model.message.observeAsState()
+	val message = model.messageChannel.receiveAsFlow()
 	var selectedExamJson by rememberSaveable { mutableStateOf<String?>(null) }
 	val selectedExam = remember(selectedExamJson) {
 		selectedExamJson?.let { JSONObject.parseObject(it) }
 	}
 	var examStarted by rememberSaveable { mutableStateOf(false) }
-	
+
 	BackHandler(enabled = selectedExam != null) {
 		if (examStarted) {
 			examStarted = false
-		}
-		else {
+		} else {
 			selectedExamJson = null
 		}
 	}
-	
+
 	LaunchedEffect(message) {
-		message?.let { (what, response) ->
+		message.collect { (what, response) ->
 			if (what == RainClassModel.GET_EXAMS_LIST) {
 				isLoading.value = false
 				if (response.containsKey("errcode") && response.getInteger("errcode") == 401002) {
 					onRequestScrollToAccount()
-				}
-				else if (response.containsKey("code") && response.getInteger("code") == 0) {
+				} else if (response.containsKey("code") && response.getInteger("code") == 0) {
 					val data = response.getJSONObject("data")
 					if (data != null) {
 						val upcoming = data.getJSONArray("upcomingExam")
@@ -275,35 +295,37 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 			}
 		}
 	}
-	
+
 	fun getExams() {
 		isLoading.value = true
 		model.getExams()
 	}
-	
+
 	LaunchedEffect(Unit) {
 		getExams()
 	}
-	
+
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(modifier = Modifier.fillMaxSize()) {
 			if (isLoading.value) {
 				Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 					CircularProgressIndicator()
 				}
-			}
-			else if (examList.value.isEmpty()) {
+			} else if (examList.value.isEmpty()) {
 				Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-					Text(text = stringResource(R.string.no_exam),
-					     style = MaterialTheme.typography.bodyLarge)
+					Text(
+							text = stringResource(R.string.no_exam),
+							style = MaterialTheme.typography.bodyLarge
+					)
 				}
-			}
-			else {
-				LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 340.dp),
-				                 modifier = Modifier.fillMaxSize(),
-				                 contentPadding = PaddingValues(16.dp),
-				                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-				                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
+			} else {
+				LazyVerticalGrid(
+						columns = GridCells.Adaptive(minSize = 340.dp),
+						modifier = Modifier.fillMaxSize(),
+						contentPadding = PaddingValues(16.dp),
+						horizontalArrangement = Arrangement.spacedBy(16.dp),
+						verticalArrangement = Arrangement.spacedBy(16.dp)
+				) {
 					items(examList.value.size) { index ->
 						val exam = examList.value[index]
 						ExamItem(exam) {
@@ -313,82 +335,101 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 				}
 			}
 		}
-		
-		AnimatedVisibility(visible = selectedExam != null,
-		                   enter = slideInVertically(initialOffsetY = { it }),
-		                   exit = slideOutVertically(targetOffsetY = { it })) {
+
+		AnimatedVisibility(
+				visible = selectedExam != null,
+				enter = slideInVertically(initialOffsetY = { it }),
+				exit = slideOutVertically(targetOffsetY = { it })
+		) {
 			selectedExam?.let { exam ->
 				if (examStarted) {
 					ExamPaperScreen(examSummary = exam, onBack = { examStarted = false })
-				}
-				else {
-					ExamDetailScreen(examSummary = exam,
-					                 onBack = { selectedExamJson = null },
-					                 onStartExam = { examStarted = true })
+				} else {
+					ExamDetailScreen(
+							examSummary = exam,
+							onBack = { selectedExamJson = null },
+							onStartExam = { examStarted = true })
 				}
 			}
 		}
 	}
 }
 
-@Composable fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
+@Composable
+fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
 	val context = LocalContext.current
 	ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
 		Column(modifier = Modifier.padding(16.dp)) {
 			Row(verticalAlignment = Alignment.CenterVertically) {
-				AsyncImage(model = exam.getString("user_avatar"),
-				           contentDescription = "教师头像",
-				           modifier = Modifier
-					           .size(32.dp)
-					           .clip(CircleShape))
+				AsyncImage(
+						model = exam.getString("user_avatar"),
+						contentDescription = "教师头像",
+						modifier = Modifier
+							.size(32.dp)
+							.clip(CircleShape)
+				)
 				Spacer(modifier = Modifier.size(8.dp))
-				Text(text = exam.getString("classroom_name") ?: "",
-				     style = MaterialTheme.typography.labelMedium,
-				     color = MaterialTheme.colorScheme.onSurfaceVariant)
+				Text(
+						text = exam.getString("classroom_name") ?: "",
+						style = MaterialTheme.typography.labelMedium,
+						color = MaterialTheme.colorScheme.onSurfaceVariant
+				)
 				Spacer(modifier = Modifier.weight(1f))
 				IconButton(onClick = {
 					val examId = exam.getIntValue("id")
 					openExamInBrowser(context, examId)
 				}) {
-					Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "打开网页版", modifier = Modifier.size(20.dp))
+					Icon(
+							Icons.AutoMirrored.Filled.OpenInNew,
+							contentDescription = "打开网页版",
+							modifier = Modifier.size(20.dp)
+					)
 				}
 			}
 			Spacer(modifier = Modifier.height(8.dp))
-			Text(text = exam.getString("title") ?: "未知考试",
-			     style = MaterialTheme.typography.titleMedium,
-			     fontWeight = FontWeight.Bold)
+			Text(
+					text = exam.getString("title") ?: "未知考试",
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.Bold
+			)
 			Spacer(modifier = Modifier.height(8.dp))
 			Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
 				Column {
 					Text(text = "开始时间", style = MaterialTheme.typography.labelSmall)
-					Text(text = formatTimestamp(exam.getLong("start_time")),
-					     style = MaterialTheme.typography.bodySmall)
+					Text(
+							text = formatTimestamp(exam.getLong("start_time")),
+							style = MaterialTheme.typography.bodySmall
+					)
 				}
 				Column {
 					Text(text = "结束时间", style = MaterialTheme.typography.labelSmall)
-					Text(text = formatTimestamp(exam.getLong("end_time")),
-					     style = MaterialTheme.typography.bodySmall)
+					Text(
+							text = formatTimestamp(exam.getLong("end_time")),
+							style = MaterialTheme.typography.bodySmall
+					)
 				}
 			}
 		}
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable fun ExamDetailScreen(examSummary: JSONObject,
-                                                                         onBack: () -> Unit,
-                                                                         onStartExam: () -> Unit) {
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExamDetailScreen(
+	examSummary: JSONObject, onBack: () -> Unit, onStartExam: () -> Unit
+) {
 	val context = LocalContext.current
 	val examInfo = remember { mutableStateOf<JSONObject?>(null) }
 	val isLoading = remember { mutableStateOf(true) }
 	val model = remember { RainClassModel(context) }
-	val message by model.message.observeAsState()
-	
+	val message = model.messageChannel.receiveAsFlow()
+
 	LaunchedEffect(Unit) {
 		model.getExamInfo(examSummary.getIntValue("id"), examSummary.getIntValue("classroom_id"))
 	}
-	
+
 	LaunchedEffect(message) {
-		message?.let { (what, response) ->
+		message.collect { (what, response) ->
 			if (what == RainClassModel.GET_EXAM_INFO) {
 				isLoading.value = false
 				if (response.containsKey("success") && response.getBoolean("success")) {
@@ -397,136 +438,191 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 			}
 		}
 	}
-	
-	Scaffold(modifier = Modifier
-		.fillMaxSize()
-		.background(MaterialTheme.colorScheme.surface),
-	         topBar = {
-		         TopAppBar(title = { Text(examSummary.getString("title") ?: "考试详情") },
-		                   navigationIcon = {
-			                   IconButton(onClick = onBack) {
-				                   Icon(Icons.AutoMirrored.Filled.ArrowBack,
-				                        contentDescription = "返回")
-			                   }
-		                   },
-		                   actions = {
-			                   IconButton(onClick = {
-				                   openExamInBrowser(context, examSummary.getIntValue("id"))
-			                   }) {
-				                   Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "打开网页版")
-			                   }
-		                   },
-		                   windowInsets = WindowInsets(0),
-		                   colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent))
-	         },
-	         bottomBar = {
-		         Box(modifier = Modifier
-			         .fillMaxWidth()
-			         .padding(16.dp)) {
-			         Button(onClick = onStartExam,
-			                modifier = Modifier.fillMaxWidth(),
-			                enabled = !isLoading.value) {
-				         Text("开始答题", style = MaterialTheme.typography.titleMedium)
-			         }
-		         }
-	         }) { innerPadding ->
-		Box(modifier = Modifier
-			.fillMaxSize()
-			.padding(top = innerPadding.calculateTopPadding())) {
+
+	Scaffold(
+			modifier = Modifier
+				.fillMaxSize()
+				.background(MaterialTheme.colorScheme.surface),
+			topBar = {
+				TopAppBar(
+						title = { Text(examSummary.getString("title") ?: "考试详情") },
+						navigationIcon = {
+							IconButton(onClick = onBack) {
+								Icon(
+										Icons.AutoMirrored.Filled.ArrowBack,
+										contentDescription = "返回"
+								)
+							}
+						},
+						actions = {
+							IconButton(onClick = {
+								openExamInBrowser(context, examSummary.getIntValue("id"))
+							}) {
+								Icon(
+										Icons.AutoMirrored.Filled.OpenInNew,
+										contentDescription = "打开网页版"
+								)
+							}
+						},
+						windowInsets = WindowInsets(0),
+						colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+				)
+			},
+			bottomBar = {
+				Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(16.dp)
+				) {
+					Button(
+							onClick = onStartExam,
+							modifier = Modifier.fillMaxWidth(),
+							enabled = !isLoading.value
+					) {
+						Text("开始答题", style = MaterialTheme.typography.titleMedium)
+					}
+				}
+			}) { innerPadding ->
+		Box(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(top = innerPadding.calculateTopPadding())
+		) {
 			if (isLoading.value) {
 				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-			}
-			else {
+			} else {
 				examInfo.value?.let { info ->
-					Column(modifier = Modifier
-						.fillMaxSize()
-						.verticalScroll(rememberScrollState())
-						.padding(horizontal = 16.dp)
-						.padding(bottom = innerPadding.calculateBottomPadding() + 16.dp),
-					       verticalArrangement = Arrangement.spacedBy(16.dp)) {
-						
+					Column(
+							modifier = Modifier
+								.fillMaxSize()
+								.verticalScroll(rememberScrollState())
+								.padding(horizontal = 16.dp)
+								.padding(bottom = innerPadding.calculateBottomPadding() + 16.dp),
+							verticalArrangement = Arrangement.spacedBy(16.dp)
+					) {
+
 						Text(text = "考试详情", style = MaterialTheme.typography.titleMedium)
 						ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-							Column(modifier = Modifier.padding(16.dp),
-							       verticalArrangement = Arrangement.spacedBy(12.dp)) {
-								DetailRow("当前状态",
-								          when (info.getJSONObject("result")
-									          ?.getInteger("status")) {
-									          0 -> "未开始"
-									          1 -> "进行中"
-									          2 -> "已提交"
-									          else -> "未知"
-								          })
+							Column(
+									modifier = Modifier.padding(16.dp),
+									verticalArrangement = Arrangement.spacedBy(12.dp)
+							) {
+								DetailRow(
+										"当前状态",
+										when (info.getJSONObject("result")?.getInteger("status")) {
+											0 -> "未开始"
+											1 -> "进行中"
+											2 -> "已提交"
+											else -> "未知"
+										}
+								)
 								DetailRow("总分", "${info.getString("total_score")} 分")
 								DetailRow("题目数量", "${info.getString("problem_count")} 题")
 								val limit = info.getInteger("limit")
 								if (limit != null && limit > 0) {
 									DetailRow("限时", "$limit 分钟")
 								}
-								DetailRow("计分方式", when (info.getInteger("way_of_score")) {
+								DetailRow(
+										"计分方式", when (info.getInteger("way_of_score")) {
 									1 -> "最高分"
 									2 -> "最后一次"
 									else -> "普通"
-								})
+								}
+								)
 								DetailRow("允许重试", "${info.getInteger("max_retry")} 次")
-								DetailRow("手动阅卷",
-								          if (info.getInteger("is_manual_review") == 1) "是" else "否")
-								DetailRow("强制确认",
-								          if (info.getBoolean("force_confirm") == true) "是" else "否")
-								HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp),
-								                  color = MaterialTheme.colorScheme.outlineVariant.copy(
-									                  alpha = 0.5f))
-								DetailRow("开始时间",
-								          formatTimestampMillis(info.getLong("start_time")))
-								DetailRow("截止时间",
-								          formatTimestampMillis(info.getLong("deadline")))
+								DetailRow(
+										"手动阅卷",
+										if (info.getInteger("is_manual_review") == 1) "是" else "否"
+								)
+								DetailRow(
+										"强制确认",
+										if (info.getBoolean("force_confirm") == true) "是" else "否"
+								)
+								HorizontalDivider(
+										modifier = Modifier.padding(vertical = 4.dp),
+										color = MaterialTheme.colorScheme.outlineVariant.copy(
+												alpha = 0.5f
+										)
+								)
+								DetailRow(
+										"开始时间",
+										formatTimestampMillis(info.getLong("start_time"))
+								)
+								DetailRow(
+										"截止时间", formatTimestampMillis(info.getLong("deadline"))
+								)
 								if (info.getBoolean("limit_early_submission") == true) {
-									DetailRow("限制早交",
-									          "开启 (${info.getInteger("limit_early_submission_time")} 分钟)")
+									DetailRow(
+											"限制早交",
+											"开启 (${info.getInteger("limit_early_submission_time")} 分钟)"
+									)
 								}
 							}
 						}
-						
+
 						Text(text = "监考规则与限制", style = MaterialTheme.typography.titleMedium)
 						ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-							Column(modifier = Modifier.padding(16.dp),
-							       verticalArrangement = Arrangement.spacedBy(12.dp)) {
-								DetailRow("在线监考",
-								          if (info.getInteger("online_proctor") == 1) "开启" else "关闭")
-								DetailRow("随机人脸",
-								          if (info.getInteger("web_random_take_face_photo") == 1) "开启" else "关闭")
-								DetailRow("人脸识别",
-								          if (info.getJSONObject("face_auth_status")
-										          ?.getInteger("online_proctor") == 1) "开启"
-								          else "关闭")
-								DetailRow("切屏监测",
-								          if (info.getInteger("page_switch_detection") == 1) "开启" else "关闭")
-								DetailRow("截屏保护",
-								          if (info.getInteger("app_capture_screen") == 1 || info.getInteger(
-										          "open_screen_cuts") == 1) "开启"
-								          else "关闭")
-								DetailRow("离线考试",
-								          if (info.getBoolean("is_offline") == true) "是" else "否")
-								DetailRow("加密传输",
-								          if (info.getString("encrypt") == "True") "是" else "否")
+							Column(
+									modifier = Modifier.padding(16.dp),
+									verticalArrangement = Arrangement.spacedBy(12.dp)
+							) {
+								DetailRow(
+										"在线监考",
+										if (info.getInteger("online_proctor") == 1) "开启" else "关闭"
+								)
+								DetailRow(
+										"随机人脸",
+										if (info.getInteger("web_random_take_face_photo") == 1) "开启" else "关闭"
+								)
+								DetailRow(
+										"人脸识别",
+										if (info.getJSONObject("face_auth_status")
+												?.getInteger("online_proctor") == 1
+										) "开启"
+										else "关闭"
+								)
+								DetailRow(
+										"切屏监测",
+										if (info.getInteger("page_switch_detection") == 1) "开启" else "关闭"
+								)
+								DetailRow(
+										"截屏保护",
+										if (info.getInteger("app_capture_screen") == 1 || info.getInteger(
+													"open_screen_cuts"
+											) == 1
+										) "开启"
+										else "关闭"
+								)
+								DetailRow(
+										"离线考试",
+										if (info.getBoolean("is_offline") == true) "是" else "否"
+								)
+								DetailRow(
+										"加密传输",
+										if (info.getString("encrypt") == "True") "是" else "否"
+								)
 								val restriction = info.getString("access_restriction_info")
 								if (!restriction.isNullOrBlank()) {
 									DetailRow("进入限制", restriction)
 								}
 							}
 						}
-						
+
 						Text(text = "考生身份", style = MaterialTheme.typography.titleMedium)
 						ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-							Row(modifier = Modifier.padding(16.dp),
-							    verticalAlignment = Alignment.CenterVertically) {
+							Row(
+									modifier = Modifier.padding(16.dp),
+									verticalAlignment = Alignment.CenterVertically
+							) {
 								val user = info.getJSONObject("user")
-								AsyncImage(model = user?.getString("avatar"),
-								           contentDescription = "考生头像",
-								           modifier = Modifier
-									           .size(48.dp)
-									           .clip(CircleShape),
-								           contentScale = ContentScale.Crop)
+								AsyncImage(
+										model = user?.getString("avatar"),
+										contentDescription = "考生头像",
+										modifier = Modifier
+											.size(48.dp)
+											.clip(CircleShape),
+										contentScale = ContentScale.Crop
+								)
 								Spacer(modifier = Modifier.width(16.dp))
 								Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
 									DetailRow("姓名", user?.getString("user_name") ?: "未知")
@@ -537,11 +633,13 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 						val description = info.getString("description")
 						if (!description.isNullOrBlank()) {
 							Text(text = "考试说明", style = MaterialTheme.typography.titleMedium)
-							Text(text = description,
-							     style = MaterialTheme.typography.bodyMedium,
-							     color = MaterialTheme.colorScheme.onSurfaceVariant)
+							Text(
+									text = description,
+									style = MaterialTheme.typography.bodyMedium,
+									color = MaterialTheme.colorScheme.onSurfaceVariant
+							)
 						}
-						
+
 						Spacer(modifier = Modifier.height(32.dp))
 					}
 				}
@@ -557,15 +655,15 @@ fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
 	val problemList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
 	val model = remember { RainClassModel(context) }
-	val message by model.message.observeAsState()
+	val message = model.messageChannel.receiveAsFlow()
 	val answers = remember { mutableStateMapOf<Int, String>() }
-	
+
 	LaunchedEffect(Unit) {
 		model.getProblem(examSummary.getIntValue("id"))
 	}
-	
+
 	LaunchedEffect(message) {
-		message?.let { (what, response) ->
+		message.collect { (what, response) ->
 			if (what == RainClassModel.GET_PROBLEM_INFO) {
 				isLoading.value = false
 				if (response.containsKey("errcode") && response.getInteger("errcode") == 0) {
@@ -580,45 +678,59 @@ fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
 			}
 		}
 	}
-	
-	Scaffold(modifier = Modifier
-		.fillMaxSize()
-		.background(MaterialTheme.colorScheme.surface),
-	         topBar = {
-		         TopAppBar(title = { Text(examSummary.getString("title") ?: "正在考试") },
-		                   navigationIcon = {
-			                   IconButton(onClick = onBack) {
-				                   Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-			                   }
-		                   },
-		                   windowInsets = WindowInsets(0),
-		                   colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent))
-	         },
-	         bottomBar = {
-		         Box(modifier = Modifier
-			         .fillMaxWidth()
-			         .padding(16.dp)) {
-			         Button(onClick = { /* TODO: Submit exam */ },
-			                modifier = Modifier.fillMaxWidth(),
-			                enabled = !isLoading.value) {
-				         Text("提交试卷", style = MaterialTheme.typography.titleMedium)
-			         }
-		         }
-	         }) { innerPadding ->
-		Box(modifier = Modifier
-			.fillMaxSize()
-			.padding(innerPadding)) {
+
+	Scaffold(
+			modifier = Modifier
+				.fillMaxSize()
+				.background(MaterialTheme.colorScheme.surface),
+			topBar = {
+				TopAppBar(
+						title = { Text(examSummary.getString("title") ?: "正在考试") },
+						navigationIcon = {
+							IconButton(onClick = onBack) {
+								Icon(
+										Icons.AutoMirrored.Filled.ArrowBack,
+										contentDescription = "返回"
+								)
+							}
+						},
+						windowInsets = WindowInsets(0),
+						colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+				)
+			},
+			bottomBar = {
+				Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(16.dp)
+				) {
+					Button(
+							onClick = { /* TODO: Submit exam */ },
+							modifier = Modifier.fillMaxWidth(),
+							enabled = !isLoading.value
+					) {
+						Text("提交试卷", style = MaterialTheme.typography.titleMedium)
+					}
+				}
+			}) { innerPadding ->
+		Box(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(innerPadding)
+		) {
 			if (isLoading.value) {
 				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-			}
-			else {
-				LazyColumn(modifier = Modifier.fillMaxSize(),
-				           contentPadding = PaddingValues(16.dp),
-				           verticalArrangement = Arrangement.spacedBy(24.dp)) {
+			} else {
+				LazyColumn(
+						modifier = Modifier.fillMaxSize(),
+						contentPadding = PaddingValues(16.dp),
+						verticalArrangement = Arrangement.spacedBy(24.dp)
+				) {
 					items(problemList.value) { problem ->
-						ProblemItem(problem = problem,
-						            answer = answers[problem.getIntValue("index")] ?: "",
-						            onAnswerChange = { answers[problem.getIntValue("index")] = it })
+						ProblemItem(
+								problem = problem,
+								answer = answers[problem.getIntValue("index")] ?: "",
+								onAnswerChange = { answers[problem.getIntValue("index")] = it })
 					}
 				}
 			}
@@ -630,19 +742,25 @@ fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
 fun ProblemItem(problem: JSONObject, answer: String, onAnswerChange: (String) -> Unit) {
 	Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			Text(text = "第 ${problem.getIntValue("index") + 1} 题",
-			     style = MaterialTheme.typography.titleMedium,
-			     fontWeight = FontWeight.Bold)
+			Text(
+					text = "第 ${problem.getIntValue("index") + 1} 题",
+					style = MaterialTheme.typography.titleMedium,
+					fontWeight = FontWeight.Bold
+			)
 			Spacer(modifier = Modifier.width(8.dp))
-			Text(text = "(${problem.getString("TypeText")})",
-			     style = MaterialTheme.typography.labelMedium,
-			     color = MaterialTheme.colorScheme.onSurfaceVariant)
+			Text(
+					text = "(${problem.getString("TypeText")})",
+					style = MaterialTheme.typography.labelMedium,
+					color = MaterialTheme.colorScheme.onSurfaceVariant
+			)
 			Spacer(modifier = Modifier.weight(1f))
-			Text(text = "${problem.getString("Score")} 分",
-			     style = MaterialTheme.typography.labelMedium,
-			     color = MaterialTheme.colorScheme.primary)
+			Text(
+					text = "${problem.getString("Score")} 分",
+					style = MaterialTheme.typography.labelMedium,
+					color = MaterialTheme.colorScheme.primary
+			)
 		}
-		
+
 		AndroidView(factory = { context ->
 			TextView(context).apply {
 				text = Html.fromHtml(problem.getString("Body"), Html.FROM_HTML_MODE_COMPACT)
@@ -650,74 +768,79 @@ fun ProblemItem(problem: JSONObject, answer: String, onAnswerChange: (String) ->
 				setTextColor(android.graphics.Color.BLACK)
 			}
 		}, modifier = Modifier.fillMaxWidth())
-		
+
 		if (problem.getString("Type") == "ShortAnswer") {
-			OutlinedTextField(value = answer,
-			                  onValueChange = onAnswerChange,
-			                  modifier = Modifier.fillMaxWidth(),
-			                  placeholder = { Text("请输入你的回答") },
-			                  minLines = 3)
-		}
-		else {
-			Text(text = "暂不支持该题型答题",
-			     style = MaterialTheme.typography.bodySmall,
-			     color = MaterialTheme.colorScheme.error)
+			OutlinedTextField(
+					value = answer,
+					onValueChange = onAnswerChange,
+					modifier = Modifier.fillMaxWidth(),
+					placeholder = { Text("请输入你的回答") },
+					minLines = 3
+			)
+		} else {
+			Text(
+					text = "暂不支持该题型答题",
+					style = MaterialTheme.typography.bodySmall,
+					color = MaterialTheme.colorScheme.error
+			)
 		}
 	}
 }
 
 
-@Composable fun DetailRow(label: String, value: String) {
+@Composable
+fun DetailRow(label: String, value: String) {
 	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
 		Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant)
 		Text(text = value, fontWeight = FontWeight.Medium)
 	}
 }
 
-@Composable fun AccountScreen() {
+@Composable
+fun AccountScreen() {
 	val context = LocalContext.current
 	val userInfo = remember { mutableStateOf<JSONObject?>(null) }
 	val isLoginRequired = remember { mutableStateOf(false) }
 	val isLoading = remember { mutableStateOf(true) }
 	val scrollState = rememberScrollState()
 	val model = remember { RainClassModel(context) }
-	val message by model.message.observeAsState()
-	
+	val message = model.messageChannel.receiveAsFlow()
+
 	LaunchedEffect(message) {
-		message?.let { (what, response) ->
+		message.collect { (what, response) ->
 			if (what == RainClassModel.GET_USER_INFO) {
 				isLoading.value = false
 				if (response.containsKey("op") && response.getString("op") == "web_redirect") {
 					isLoginRequired.value = true
-				}
-				else {
+				} else {
 					userInfo.value = response.getJSONObject("data")?.getJSONObject("user_profile")
 					isLoginRequired.value = false
 				}
 			}
 		}
 	}
-	
+
 	fun getUserInfo() {
 		isLoading.value = true
 		model.getUserInfo()
 	}
-	
+
 	LaunchedEffect(Unit) {
 		getUserInfo()
 	}
-	
-	Column(modifier = Modifier
-		.fillMaxSize()
-		.verticalScroll(scrollState)
-		.padding(16.dp),
-	       horizontalAlignment = Alignment.CenterHorizontally) {
+
+	Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.verticalScroll(scrollState)
+				.padding(16.dp),
+			horizontalAlignment = Alignment.CenterHorizontally
+	) {
 		if (isLoading.value) {
 			Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 				CircularProgressIndicator()
 			}
-		}
-		else if (isLoginRequired.value) {
+		} else if (isLoginRequired.value) {
 			Text(text = "请扫码登录雨课堂", style = MaterialTheme.typography.titleMedium)
 			Spacer(modifier = Modifier.height(16.dp))
 			Card(elevation = CardDefaults.cardElevation()) {
@@ -729,42 +852,60 @@ fun ProblemItem(problem: JSONObject, answer: String, onAnswerChange: (String) ->
 					}
 				}, modifier = Modifier.fillMaxSize())
 			}
-		}
-		else if (userInfo.value != null) {
+		} else if (userInfo.value != null) {
 			val info = userInfo.value!!
-			AsyncImage(model = info.getString("avatar"),
-			           contentDescription = "用户头像",
-			           modifier = Modifier
-				           .size(80.dp)
-				           .clip(CircleShape),
-			           contentScale = ContentScale.Crop)
+			AsyncImage(
+					model = info.getString("avatar"),
+					contentDescription = "用户头像",
+					modifier = Modifier
+						.size(80.dp)
+						.clip(CircleShape),
+					contentScale = ContentScale.Crop
+			)
 			Spacer(modifier = Modifier.height(16.dp))
-			ElevatedCard(modifier = Modifier
-				.fillMaxWidth()
-				.widthIn(max = 600.dp),
-			             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
-				Column(modifier = Modifier.padding(16.dp),
-				       verticalArrangement = Arrangement.spacedBy(12.dp)) {
-					Text(text = stringResource(R.string.account_info),
-					     style = MaterialTheme.typography.titleMedium)
+			ElevatedCard(
+					modifier = Modifier
+						.fillMaxWidth()
+						.widthIn(max = 600.dp),
+					elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+			) {
+				Column(
+						modifier = Modifier.padding(16.dp),
+						verticalArrangement = Arrangement.spacedBy(12.dp)
+				) {
+					Text(
+							text = stringResource(R.string.account_info),
+							style = MaterialTheme.typography.titleMedium
+					)
 					HorizontalDivider()
-					AccountInfoRow(label = stringResource(R.string.name),
-					               value = info.getString("name") ?: "未知")
-					AccountInfoRow(label = stringResource(R.string.student_id),
-					               value = info.getString("school_number") ?: "未知")
-					AccountInfoRow(label = stringResource(R.string.university),
-					               value = info.getString("school") ?: "未知")
-					AccountInfoRow(label = stringResource(R.string.phone),
-					               value = info.getString("phone_number") ?: "未知")
-					AccountInfoRow(label = stringResource(R.string.email),
-					               value = info.getString("email") ?: "无")
+					AccountInfoRow(
+							label = stringResource(R.string.name),
+							value = info.getString("name") ?: "未知"
+					)
+					AccountInfoRow(
+							label = stringResource(R.string.student_id),
+							value = info.getString("school_number") ?: "未知"
+					)
+					AccountInfoRow(
+							label = stringResource(R.string.university),
+							value = info.getString("school") ?: "未知"
+					)
+					AccountInfoRow(
+							label = stringResource(R.string.phone),
+							value = info.getString("phone_number") ?: "未知"
+					)
+					AccountInfoRow(
+							label = stringResource(R.string.email),
+							value = info.getString("email") ?: "无"
+					)
 				}
 			}
 		}
 	}
 }
 
-@Composable fun AccountInfoRow(label: String, value: String) {
+@Composable
+fun AccountInfoRow(label: String, value: String) {
 	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
 		Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant)
 		SelectionContainer {
@@ -777,7 +918,9 @@ fun syncCookiesToWeb(context: Context) {
 	val myCm = com.miyuyan.sysuer.api.CookieManager(context)
 	val webCm = android.webkit.CookieManager.getInstance()
 	webCm.setAcceptCookie(true)
-	listOf("www.yuketang.cn", "yuketang.cn", "xuetangx.com", "examination.xuetangx.com").forEach { host ->
+	listOf(
+			"www.yuketang.cn", "yuketang.cn", "xuetangx.com", "examination.xuetangx.com"
+	).forEach { host ->
 		myCm.get(host).forEach { cookie ->
 			webCm.setCookie(host, cookie)
 		}

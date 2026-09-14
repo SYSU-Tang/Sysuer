@@ -10,6 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.alibaba.fastjson2.JSONObject
@@ -27,6 +30,8 @@ import com.miyuyan.sysuer.databinding.ItemActionChipBinding
 import com.miyuyan.sysuer.databinding.ItemCourseSelectionBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.RecyclerAdapter
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class CourseSelectionSelectedFragment : BaseFragment() {
 	var courseSelectedAdapter: CourseSelectedAdapter? = null
@@ -117,20 +122,24 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 				}
 				regetSelectedCourses()
 			}
-		model.message.observe(requireActivity()) { (code, response) ->
-			if (response.getIntValue("code") == 200) {
-				when (code) {
-					0 -> {
-						total = response.getJSONObject("data").getInteger("total")
-						response.getJSONObject("data").getJSONArray("rows")
-							.forEach { o: Any? -> courseSelectedAdapter!!.add(o as JSONObject) }
-					}
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (response.getIntValue("code") == 200) {
+						when (code) {
+							0 -> {
+								total = response.getJSONObject("data").getInteger("total")
+								response.getJSONObject("data").getJSONArray("rows")
+									.forEach { o: Any? -> courseSelectedAdapter!!.add(o as JSONObject) }
+							}
 
-					1 -> {
-						if (response.containsKey("data") && response.getString("data") != null) config.toast(
-							response.getString("data")
-						)
-						regetSelectedCourses()
+							1 -> {
+								if (response.containsKey("data") && response.getString("data") != null) config.toast(
+									response.getString("data")
+								)
+								regetSelectedCourses()
+							}
+						}
 					}
 				}
 			}

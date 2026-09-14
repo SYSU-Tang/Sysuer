@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.model.PayModel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -39,7 +40,8 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	val pendingPay: SnapshotStateSet<String> = mutableStateSetOf()
 
 	init {
-		model.message.observeForever { (code, response) ->
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				when (code) {
 					0 -> _toPayList.value = response.getJSONArray("data")
@@ -112,6 +114,7 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 					}
 				}
 			}
+		}
 		}
 	}
 

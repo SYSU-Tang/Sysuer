@@ -4,8 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class RegistrationViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: JwxtModel = JwxtModel(application)
@@ -25,16 +28,18 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
 	private var currentYear = "2025"
 
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200 && response.get("data") != null) {
-				when (code) {
-					0 -> _registerInfo.value = response.getJSONObject("data")
-					1 -> _payList.value = response.getJSONArray("data").filterIsInstance<JSONObject>()
-					2 -> {
-						val data = response.getJSONObject("data")
-						historyTotal = data.getInteger("total")
-						val newRows = data.getJSONArray("rows").filterIsInstance<JSONObject>()
-						_historyList.value = _historyList.value?.plus(newRows)
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200 && response.get("data") != null) {
+					when (code) {
+						0 -> _registerInfo.value = response.getJSONObject("data")
+						1 -> _payList.value = response.getJSONArray("data").filterIsInstance<JSONObject>()
+						2 -> {
+							val data = response.getJSONObject("data")
+							historyTotal = data.getInteger("total")
+							val newRows = data.getJSONArray("rows").filterIsInstance<JSONObject>()
+							_historyList.value = _historyList.value?.plus(newRows)
+						}
 					}
 				}
 			}

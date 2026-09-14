@@ -17,9 +17,12 @@ import android.widget.LinearLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.get
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigator
@@ -50,6 +53,8 @@ import com.miyuyan.sysuer.databinding.ItemCourseSelectionBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.PreferenceAdapter
 import com.miyuyan.sysuer.view.RecyclerAdapter
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
@@ -161,40 +166,44 @@ class CourseSelectionMainFragment : BaseFragment() {
 			if (term == null) info
 			else regetCourseList()
 		}
-		model.message.observe(viewLifecycleOwner) { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					0 -> {
-						val data = response.getJSONObject("data")
-						if (data.containsKey("code") && data.getInteger("code") == 100) toolbar.setTitle(R.string.no_in_course_selection)
-						else if (data.containsKey("code") && data.getInteger("code") == 200) {
-							term = data.getString("semesterYear")
-							findNavController().currentDestination?.label = data.getString("electiveCourseStageName")
-							toolbar.title = data.getString("electiveCourseStageName")
-							val start = data.getString("startTime", "")
-							val end = data.getString("endTime", "")
-							if (!start.isEmpty() && !end.isEmpty()) toolbar.subtitle = "${start}~${end}"
-							courseList
-						}
-					}
-					1 -> response.getJSONObject("data")?.run {
-						total = getInteger("total")
-						getJSONArray("rows").forEach { e: Any? -> adp!!.add(e as JSONObject) }
-					}
-					3 -> {
-						config.toast(response.getString("data", ""))
-						regetCourseList()
-					}
-					4 -> {
-						peAdapter.clear()
-						if (response.getJSONArray("data").isEmpty()) binding.head.peSort.isVisible = false
-						else {
-							response.getJSONArray("data").sortedBy { (it as JSONObject).getInteger("volunteerNum") }.forEach { e: Any? ->
-								peAdapter.add(JSONObject.of("title", "${(e as JSONObject).getString("courseNum")}-${
-									e.getString("courseName")
-								}", "content", e.getString("teachingTimePlace"), "icon", R.drawable.menu, "studentFilterID", e.getString("studentFilterID")))
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (response.getInteger("code") == 200) {
+						when (code) {
+							0 -> {
+								val data = response.getJSONObject("data")
+								if (data.containsKey("code") && data.getInteger("code") == 100) toolbar.setTitle(R.string.no_in_course_selection)
+								else if (data.containsKey("code") && data.getInteger("code") == 200) {
+									term = data.getString("semesterYear")
+									findNavController().currentDestination?.label = data.getString("electiveCourseStageName")
+									toolbar.title = data.getString("electiveCourseStageName")
+									val start = data.getString("startTime", "")
+									val end = data.getString("endTime", "")
+									if (!start.isEmpty() && !end.isEmpty()) toolbar.subtitle = "${start}~${end}"
+									courseList
+								}
 							}
-							binding.head.peSort.isVisible = true
+							1 -> response.getJSONObject("data")?.run {
+								total = getInteger("total")
+								getJSONArray("rows").forEach { e: Any? -> adp!!.add(e as JSONObject) }
+							}
+							3 -> {
+								config.toast(response.getString("data", ""))
+								regetCourseList()
+							}
+							4 -> {
+								peAdapter.clear()
+								if (response.getJSONArray("data").isEmpty()) binding.head.peSort.isVisible = false
+								else {
+									response.getJSONArray("data").sortedBy { (it as JSONObject).getInteger("volunteerNum") }.forEach { e: Any? ->
+										peAdapter.add(JSONObject.of("title", "${(e as JSONObject).getString("courseNum")}-${
+											e.getString("courseName")
+										}", "content", e.getString("teachingTimePlace"), "icon", R.drawable.menu, "studentFilterID", e.getString("studentFilterID")))
+									}
+									binding.head.peSort.isVisible = true
+								}
+							}
 						}
 					}
 				}

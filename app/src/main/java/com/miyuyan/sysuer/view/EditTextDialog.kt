@@ -15,7 +15,7 @@ class EditTextDialog(context: android.content.Context) {
 	private val dialog: AlertDialog
 	private val binding: DialogEditTextBinding = DialogEditTextBinding.inflate(LayoutInflater.from(context))
 	var mValue: String? = null
-	var listener: ValueChangeListener? = null
+	var listener: OnValueChangeListener? = null
 	
 	init {
 		dialog = MaterialAlertDialogBuilder(context).setView(binding.root)
@@ -64,14 +64,14 @@ class EditTextDialog(context: android.content.Context) {
 		binding.editLayout.setHint(hint)
 	}
 	
-	fun setValueChangeListener(listener: ValueChangeListener?) {
+	fun setValueChangeListener(listener: OnValueChangeListener?) {
 		this.listener = listener
 	}
 	
 	fun getText(): String = getEditText().text.toString()
 	fun getDialog(): AlertDialog = dialog
 	fun getEditText(): TextInputEditText = binding.edit
-	interface ValueChangeListener {
+	interface OnValueChangeListener {
 		fun onValueChange(value: String?)
 	}
 }

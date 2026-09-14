@@ -145,6 +145,7 @@
     <string name="academic_affair_notice">教务通知</string>
     <string name="day">日</string>
     <string name="from_to">第%s节到第%s节</string>
+    <string name="from_to_number">第%d节到第%d节</string>
     <string name="done">已完成</string>
     <string name="school_affair_notice">院系通知</string>
     <string name="add_todo">添加待办</string>

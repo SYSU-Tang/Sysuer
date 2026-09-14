@@ -10,14 +10,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.XgxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class LeaveReturnListFragment : StaggerFragment() {
 	lateinit var model: XgxtModel
@@ -33,35 +37,38 @@ class LeaveReturnListFragment : StaggerFragment() {
 		model = XgxtModel(requireContext())
 		val viewModel = ViewModelProvider(requireActivity())[LeaveReturnRegistrationViewModel::class.java]
 		viewModel.year.observe(getViewLifecycleOwner(), Observer { year: String? -> this.getList(year) })
-		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (response.getInteger("code") == 200) {
-				clear()
-				response.getJSONArray("data").forEachIndexed { index, e ->
-					val item = e as JSONObject
-					addSection(item.getString("gzmc"), if (item.getInteger("gzztm") == 1) R.drawable.uncheck else R.drawable.check, resources.getStringArray(R.array.registration_keys).toMutableList(), extractValue(item, arrayOf("blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt")))
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (_, response) ->
+					if (response.getInteger("code") == 200) {
+						clear()
+						response.getJSONArray("data").forEachIndexed { index, e ->
+							val item = e as JSONObject
+							addSection(item.getString("gzmc"), if (item.getInteger("gzztm") == 1) R.drawable.uncheck else R.drawable.check, resources.getStringArray(R.array.registration_keys).toMutableList(), extractValue(item, arrayOf("blxn", "lxdjsj", "gzsm", "jjrmc", "jjrrq", "gzzt", "zt")))
 
-					val isRegistering = item.getInteger("gzztm") == 1
-					val status = item.getString("zt")
+							val isRegistering = item.getInteger("gzztm") == 1
+							val status = item.getString("zt")
 
-					sectionAdapter.setSectionFooter(index) {
-						Button(
-							onClick = {
-								if (isRegistering) requireActivity().supportFragmentManager.beginTransaction()
-									.replace(R.id.leave_return_list_fragment, LeaveReturnRegistrationFragment::class.java, Bundle().apply {
-										putString("Id", item.getString("cjlfxgzId"))
-									})
-									.addToBackStack(null)
-									.commit()
-							},
-							modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-						) {
-							Text(getString(if (isRegistering) if ("registering" == status) R.string.start_registration else R.string.modify_registration else R.string.view_detail))
+							sectionAdapter.setSectionFooter(index) {
+								Button(
+									onClick = {
+										if (isRegistering) requireActivity().supportFragmentManager.beginTransaction()
+											.replace(R.id.leave_return_list_fragment, LeaveReturnRegistrationFragment::class.java, Bundle().apply {
+												putString("Id", item.getString("cjlfxgzId"))
+											})
+											.addToBackStack(null)
+											.commit()
+										},
+									modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+								) {
+									Text(getString(if (isRegistering) if ("registering" == status) R.string.start_registration else R.string.modify_registration else R.string.view_detail))
+								}
+							}
 						}
 					}
 				}
 			}
-		})
+		}
 		return view
 	}
 	

@@ -29,6 +29,7 @@ import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
@@ -46,8 +47,6 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	private val _submitSuccess = MutableLiveData<Boolean>()
 	val submitSuccess: LiveData<Boolean> = _submitSuccess
 	val leaveData: JSONObject = JSONObject.of("whetherStuApply", "1")
-	
-	/*{"semester":"2025-2","askLeaveDaysCount":0.5,"askLeaveTypeCode":"1","askLeaveTypeName":"短假","askLeaveBeginDate":"2026-08-16 08:00:00","askLeaveEndDate":"2026-08-16 12:00:00","askLeaveReasonCode":"1","askLeaveReasonExplanation":".","fileName":"中山大学logo.png","filePath":"reports-register/2026-08/16/2088838751325556736.png","whetherStuApply":"1"}*/
 	var leaveDays: String by mutableStateOf("")
 	var leaveType: String by mutableStateOf("")
 	var leaveTypeName: String by mutableStateOf("")
@@ -58,101 +57,142 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	var endPeriod: Int by mutableIntStateOf(0)
 	var startMillis: Long by mutableLongStateOf(System.currentTimeMillis())
 	var endMillis: Long by mutableLongStateOf(System.currentTimeMillis())
-	
+
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200) when (code) {
-				0 -> {
-					response.getJSONObject("data")?.let {
-						if (total == -1) total = it.getInteger("total")
-						it.getJSONArray("rows").forEach { item: Any? ->
-							val title = "${(item as JSONObject).getString("askLeaveReasonName")} · ${item.getString("askLeaveTypeName")}"
-							val context = getApplication<Application>()
-						sections.add(SectionData(title,
-							                         footerMenus = mutableStateListOf(
-													 MenuItem(context.getString(R.string.print_leave_slip), Icons.Rounded.Print){
-														 printLeaveSlip(item.getString("askLeaveId"))
-														 true
-													 }
-																					  ),
-							                         rows = extractValue(context,item,
-							                                             intArrayOf(R.string.leave_reason,
-													                                                     R.string.leave_type,
-													                                                     R.string.leave_start_time,
-													                                                     R.string.leave_end_time,
-													                                                     R.string.leave_start_date,
-													                                                     R.string.leave_end_date,
-													                                                     R.string.leave_day,
-													                                                     R.string.actual_leave_days,
-													                                                     R.string.semester_cumulative_leave,
-													                                                     R.string.approval_status,
-													                                                     R.string.approval_stage,
-													                                                     R.string.cancel_leave,
-													                                                     R.string.is_canceled,
-													                                                     R.string.reason_explanation,
-													                                                     R.string.application_date,
-													                                                     R.string.approval_date,
-													                                                     R.string.term,
-													                                                     R.string.campus,
-													                                                     R.string.grade_major,
-													                                                     R.string.attachment),
-							                                             arrayOf("askLeaveReasonName",
-							                                                     "askLeaveTypeName",
-							                                                     "askLeaveBeginTime",
-							                                                     "askLeaveEndTime",
-							                                                     "askLeaveBeginDate",
-							                                                     "askLeaveEndDate",
-							                                                     "askLeaveDaysCount",
-							                                                     "trueLeaveDaysCount",
-							                                                     "semesterAskLeaveDays",
-							                                                     "approveStatusName",
-							                                                     "approveStageName",
-							                                                     "reportLeaveName",
-							                                                     "canceledName",
-							                                                     "askLeaveReasonExplanation",
-							                                                     "askLeaveApplyDate",
-							                                                     "approveDate",
-							                                                     "semester",
-							                                                     "campusName",
-							                                                     "gradeMajorName",
-							                                                     "fileName")).apply {
-								                         last().onClick = {
-									                         getApplication<Application>().startActivity(Intent(getApplication(), BrowserActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-										                                                                     .setData("https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${item.getString("filePath")}&fileName=${
-											                                                                     item.getString("fileName")
-										                                                                     }".toUri()))
-								                         }
-							                         }))
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200) when (code) {
+					0 -> {
+						response.getJSONObject("data")?.let {
+							if (total == -1) total = it.getInteger("total")
+							it.getJSONArray("rows").forEach { item: Any? ->
+								val title =
+									"${(item as JSONObject).getString("askLeaveReasonName")} · ${
+										item.getString("askLeaveTypeName")
+									}"
+								sections.add(
+										SectionData(
+												title, footerMenus = mutableStateListOf(
+												MenuItem(
+														application.getString(R.string.print_leave_slip),
+														Icons.Rounded.Print
+												) {
+													printLeaveSlip(item.getString("askLeaveId"))
+													true
+												}), rows = extractValue(
+												application, item, intArrayOf(
+												R.string.leave_reason,
+												R.string.leave_type,
+												R.string.leave_start_time,
+												R.string.leave_end_time,
+												R.string.leave_start_date,
+												R.string.leave_end_date,
+												R.string.leave_day,
+												R.string.actual_leave_days,
+												R.string.semester_cumulative_leave,
+												R.string.approval_status,
+												R.string.approval_stage,
+												R.string.cancel_leave,
+												R.string.is_canceled,
+												R.string.reason_explanation,
+												R.string.application_date,
+												R.string.approval_date,
+												R.string.term,
+												R.string.campus,
+												R.string.grade_major,
+												R.string.attachment
+										), arrayOf(
+												"askLeaveReasonName",
+												"askLeaveTypeName",
+												"askLeaveBeginTime",
+												"askLeaveEndTime",
+												"askLeaveBeginDate",
+												"askLeaveEndDate",
+												"askLeaveDaysCount",
+												"trueLeaveDaysCount",
+												"semesterAskLeaveDays",
+												"approveStatusName",
+												"approveStageName",
+												"reportLeaveName",
+												"canceledName",
+												"askLeaveReasonExplanation",
+												"askLeaveApplyDate",
+												"approveDate",
+												"semester",
+												"campusName",
+												"gradeMajorName",
+												"fileName"
+										)
+										).apply {
+											last().onClick = {
+												application.startActivity(
+														Intent(
+																getApplication(),
+																BrowserActivity::class.java
+														).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+															.setData(
+																	"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
+																		item.getString(
+																				"filePath"
+																		)
+																	}&fileName=${
+																		item.getString("fileName")
+																	}".toUri()
+															)
+												)
+											}
+										})
+								)
+							}
 						}
 					}
-				}
-				1 -> {
-					leaveReasons.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
-				}
-				2 -> {
-					val data = response.getJSONObject("data")
-					attachment.value = data
-					attachmentRows.clear()
-					attachmentRows.add(RowData(data.getString("filePath"), data.getString("fileName")) {
-						application.startActivity(Intent(application,
-						                                                   BrowserActivity::class.java).setData("https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${data.getString("filePath")}&fileName=${
-							data.getString("fileName")
-						}".toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-					})
-				}
-				3 -> {
-					model.contextUtil.toast(response.getString("message",""))
-					reset()
-					_submitSuccess.postValue(true)
-					refreshLeaveSlips()
-				}
-				4 -> {
-					leaveData["semester"] = response.getJSONObject("data").getString("acadYearSemester")
+
+					1 -> {
+						leaveReasons.addAll(
+								response.getJSONArray("data").filterIsInstance<JSONObject>()
+						)
+					}
+
+					2 -> {
+						val data = response.getJSONObject("data")
+						attachment.value = data
+						attachmentRows.clear()
+						attachmentRows.add(
+								RowData(
+										data.getString("filePath"),
+										data.getString("fileName")
+								) {
+									application.startActivity(
+											Intent(application, BrowserActivity::class.java)
+												.setData(
+														"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
+															data.getString(
+																	"filePath"
+															)
+														}&fileName=${
+															data.getString("fileName")
+														}".toUri()
+												).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+									)
+								})
+					}
+
+					3 -> {
+						model.contextUtil.toast(response.getString("message", ""))
+						reset()
+						_submitSuccess.postValue(true)
+						refreshLeaveSlips()
+					}
+
+					4 -> {
+						leaveData["semester"] =
+							response.getJSONObject("data").getString("acadYearSemester")
+					}
 				}
 			}
 		}
 	}
-	
+
 	fun reset() {
 		leaveDays = ""
 		leaveType = ""
@@ -168,27 +208,31 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 		attachmentRows.clear()
 		resetVersion++
 	}
-	
+
 	fun fetchLeaveSlips() {
-		model.addAndNext("jwxt/reports-register/askLeaveAgg/selfAskLeaveInfoList", "{\"param\":{},\"pageNo\":${++page},\"pageSize\":10,\"total\":true}", 0)
+		model.addAndNext(
+				"jwxt/reports-register/askLeaveAgg/selfAskLeaveInfoList",
+				"{\"param\":{},\"pageNo\":${++page},\"pageSize\":10,\"total\":true}",
+				0
+		)
 	}
-	
+
 	fun refreshLeaveSlips() {
 		page = 0
 		total = -1
 		sections.clear()
 		fetchLeaveSlips()
 	}
-	
+
 	fun fetchLeaveTypes() {
 		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=436", 1)
 	}
-	
+
 	/*{"semester":"2025-2","askLeaveDaysCount":0.5,"askLeaveTypeCode":"1","askLeaveTypeName":"短假","askLeaveBeginDate":"2026-08-16 08:00:00","askLeaveEndDate":"2026-08-16 12:00:00","askLeaveReasonCode":"1","askLeaveReasonExplanation":".","fileName":"中山大学logo.png","filePath":"reports-register/2026-08/16/2088838751325556736.png","whetherStuApply":"1"}*/
 	fun resetSubmitSuccess() {
 		_submitSuccess.postValue(false)
 	}
-	
+
 	fun submitLeaveSlip() {
 		val days = leaveDays.toDoubleOrNull()
 		if (days == null || days <= 0) {
@@ -219,44 +263,65 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 			leaveData["filePath"] = it.getString("filePath")
 		}
 //		println(leaveData.toJSONString())
-		model.addAndNext("jwxt/reports-register/askLeaveAgg/applyLeave", leaveData.toJSONString(), 3)
+		model.addAndNext(
+				"jwxt/reports-register/askLeaveAgg/applyLeave",
+				leaveData.toJSONString(),
+				3
+		)
 	}
-	
+
 	fun fetchTerms() {
 		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 4)
 	}
-	
+
 	fun uploadAttachment(fileRequestBody: FileRequestBody) {
-		model.request(model.http.generateRequest("https://${model.host}/jwxt//reports-register/askLeaveAgg/importFile?", null, null)
-			              .post(MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("file", fileRequestBody.fileName, fileRequestBody.file).build())
-			              .build(), 2)
+		model.request(
+				model.http.generateRequest(
+						"https://${model.host}/jwxt//reports-register/askLeaveAgg/importFile?",
+						null,
+						null
+				).post(
+							MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart(
+									"file",
+									fileRequestBody.fileName,
+									fileRequestBody.file
+							).build()
+					).build(), 2
+		)
 	}
-	
+
 	fun deleteAttachment() {
 		attachment.value = null
 		attachmentRows.clear()
 	}
-	fun printLeaveSlip(askLeaveId : String) {
-		val path = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-		                             }/${getApplication<Application>().getString(R.string.leave_slip_filename, askLeaveId)}"
-		DownloadManager.downloadFile(application,"https://${model.host}/jwxt/reports-register/askLeaveAgg/selfAskLeavePaper?askLeaveId=$askLeaveId",
-		                             path,
-		                             true,
-		                             object : DownloadManager.DownloadListener {
-			override fun onDownloadProgress(progress: Long, total: Long) {
-			}
-			
-			override fun onDownloadComplete(path: String?) {
-				viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_complete)}：$path")
-				}
-			}
-			
-			override fun onDownloadError(code: Int, message: String?) {
-				viewModelScope.launch { model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_error)}：$message")
-				}
-			}})
+
+	fun printLeaveSlip(askLeaveId: String) {
+		val path = "${
+			Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+		}/${getApplication<Application>().getString(R.string.leave_slip_filename, askLeaveId)}"
+		DownloadManager.downloadFile(
+				application,
+				"https://${model.host}/jwxt/reports-register/askLeaveAgg/selfAskLeavePaper?askLeaveId=$askLeaveId",
+				path,
+				true,
+				object : DownloadManager.DownloadListener {
+					override fun onDownloadProgress(progress: Long, total: Long) {
+					}
+
+					override fun onDownloadComplete(path: String?) {
+						viewModelScope.launch {
+							model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_complete)}：$path")
+						}
+					}
+
+					override fun onDownloadError(code: Int, message: String?) {
+						viewModelScope.launch {
+							model.contextUtil.toast("${model.contextUtil.context.getString(R.string.download_error)}：$message")
+						}
+					}
+				})
 	}
-	
+
 	override fun onCleared() {
 		model.dispose()
 	}

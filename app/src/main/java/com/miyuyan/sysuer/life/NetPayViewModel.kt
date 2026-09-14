@@ -22,6 +22,7 @@ import com.miyuyan.sysuer.model.NetPayModel
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -84,7 +85,8 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 	)
 
 	init {
-		model.message.observeForever { (code, data) ->
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, data) ->
 			when (code) {
 				0, 1, 6 -> {
 					parse(data.getString("data")).selectFirst("tbody")?.select("tr")
@@ -190,6 +192,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 					reloadOrders()
 				}
 			}
+		}
 		}
 		loadOrders()
 		loadStatus()

@@ -7,8 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class PersonalTrainingProgramViewModel(application: Application) : AndroidViewModel(application) {
 	private val model = JwxtModel(application)
@@ -21,21 +24,23 @@ class PersonalTrainingProgramViewModel(application: Application) : AndroidViewMo
 	var programId: String? by mutableStateOf(null)
 	
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					0 -> {
-						val data = response.getJSONArray("data").getJSONObject(0)
-						programId = data.getString("TEACHPLANNUMBER") ?: ""
-					}
-					1 -> _courseTable.value = response.getJSONObject("data")
-					2 -> {
-						_basicInfo.value = response.getJSONObject("data")
-						fetchCredit()
-					}
-					3 -> {
-						_creditList.value = response.getJSONArray("data").filterIsInstance<JSONObject>()
-						fetchCourseTable()
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200) {
+					when (code) {
+						0 -> {
+							val data = response.getJSONArray("data").getJSONObject(0)
+							programId = data.getString("TEACHPLANNUMBER") ?: ""
+						}
+						1 -> _courseTable.value = response.getJSONObject("data")
+						2 -> {
+							_basicInfo.value = response.getJSONObject("data")
+							fetchCredit()
+						}
+						3 -> {
+							_creditList.value = response.getJSONArray("data").filterIsInstance<JSONObject>()
+							fetchCourseTable()
+						}
 					}
 				}
 			}

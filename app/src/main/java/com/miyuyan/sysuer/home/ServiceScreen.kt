@@ -377,7 +377,7 @@ private fun ServiceActionDialog(
 							serviceViewModel.deleteDashboardShortcut(itemId)
 							config.toast(R.string.cancel_add_shortcut_success)
 						}
-						homeViewModel.updateDashboardShortcut.value = true
+						homeViewModel.triggerUpdateDashboardShortcut()
 					}
 				}
 

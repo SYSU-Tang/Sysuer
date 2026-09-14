@@ -56,15 +56,16 @@ fun StatePage(
 			Content -> content()
 			Unstarted -> {}
 			LoadMore -> {
-				Column(
-					modifier = Modifier.fillMaxSize(),
-					horizontalAlignment = Alignment.CenterHorizontally,
-					verticalArrangement = Arrangement.Center
-				) {
+			Column(
+				modifier = Modifier.fillMaxSize(),
+				horizontalAlignment = Alignment.CenterHorizontally,
+			) {
+				Box(modifier = Modifier.weight(1f)) {
 					content()
-					LoadingIndicator()
 				}
+				LoadingIndicator()
 			}
+		}
 		}
 	}
 }

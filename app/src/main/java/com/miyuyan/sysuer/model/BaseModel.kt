@@ -3,7 +3,6 @@ package com.miyuyan.sysuer.model
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.MutableLiveData
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.AuthorizationManager
@@ -30,8 +29,6 @@ abstract class BaseModel(context: Context) {
 	}
 	val state = mutableMapOf<Int, MutableStateFlow<UiState>>()
 	private val queue = ArrayDeque<CommonUtil.Tuple2<Request, Int>>()
-	val message: MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>> =
-		MutableLiveData<CommonUtil.Tuple2<Int, JSONObject>>()
 
 	val messageChannel = Channel<CommonUtil.Tuple2<Int, JSONObject>>(
 		capacity = Channel.UNLIMITED
@@ -198,7 +195,6 @@ abstract class BaseModel(context: Context) {
 					contextUtil.toast(contentJSON.getString("message", ""))
 				}
 				result = CommonUtil.Tuple2(request.second, contentJSON)
-				message.postValue(result)
 				messageChannel.trySend(result)
 				afterLoginRequest.remove(request)
 			}

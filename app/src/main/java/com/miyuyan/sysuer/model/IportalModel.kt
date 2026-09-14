@@ -36,7 +36,7 @@ class IportalModel(context: Context) : BaseModel(context) {
 					result = CommonUtil.Tuple2(request.second, contentJSON)
 					when (contentJSON.getInteger("code")) {
 						10000 -> {
-							message.postValue(result)
+//							message.postValue(result)
 							messageChannel.trySend(result)
 						}
 						10003,496, 497 -> {

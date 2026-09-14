@@ -8,12 +8,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class GradeViewModel(application: Application) : AndroidViewModel(application) {
 	val model = JwxtModel(application)
@@ -73,7 +76,8 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	init {
-		model.message.observeForever { (code, response) ->
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				when (code) {
 					1 -> {
@@ -212,6 +216,7 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 					)
 				)
 			}
+		}
 		}
 	}
 

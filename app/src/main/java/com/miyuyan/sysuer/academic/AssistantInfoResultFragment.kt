@@ -4,12 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.alibaba.fastjson2.JSONObject
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class AssistantInfoResultFragment : StaggerFragment() {
 	var page: Int = 1
@@ -28,17 +31,20 @@ class AssistantInfoResultFragment : StaggerFragment() {
 		setScrollBottom {
 			if (page * 10 < total) result
 		}
-		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (response.getInteger("code") == 200) {
-				if (message.first == 0) {
-					total = response.getJSONObject("data").getInteger("total")
-					response.getJSONObject("data").getJSONArray("rows").forEach { o: Any? ->
-							addSection((o as JSONObject).getString("courseName"), mutableListOf("序号", "学年学期", "校区", "开设单位", "课程名称", "课程编号", "课程学时", "班级编号", "实选人数", "任课教师", "上课时间地点", "修读对象", "上课学生名单", "助教信息", "助教职责"), extractValue(o, arrayOf("rowNum", "semester", "studyCampus", "openUnitName", "courseName", "courseNum", "courseHour", "classNumber", "apersonNum", "teacherName", "teachingTimePlace", "studyObj", "stuList", "assistantInfo", "jobDuty")))
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (response.getInteger("code") == 200) {
+						if (code == 0) {
+							total = response.getJSONObject("data").getInteger("total")
+							response.getJSONObject("data").getJSONArray("rows").forEach { o: Any? ->
+									addSection((o as JSONObject).getString("courseName"), mutableListOf("序号", "学年学期", "校区", "开设单位", "课程名称", "课程编号", "课程学时", "班级编号", "实选人数", "任课教师", "上课时间地点", "修读对象", "上课学生名单", "助教信息", "助教职责"), extractValue(o, arrayOf("rowNum", "semester", "studyCampus", "openUnitName", "courseName", "courseNum", "courseHour", "classNumber", "apersonNum", "teacherName", "teachingTimePlace", "studyObj", "stuList", "assistantInfo", "jobDuty")))
+								}
 						}
+					}
 				}
 			}
-		})
+		}
 		result
 		return view
 	}

@@ -21,6 +21,7 @@ import com.miyuyan.sysuer.view.SectionData
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CourseDetailViewModel(application: Application) : AndroidViewModel(application) {
@@ -43,7 +44,8 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 	private var outline2Data: JSONObject? = null
 	
 	init {
-		model.message.observeForever { (code, response) ->
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
 			println("code: $code response: $response")
 			if (response.getInteger("code") == 200) {
 				val data = response.getJSONObject("data")
@@ -62,8 +64,9 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 				}
 			}
 		}
+		}
 	}
-	
+
 	fun initFromIntent(classNum: String?, courseId: String?) {
 		outlineLoaded = false
 		outline2Loaded = false

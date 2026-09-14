@@ -47,8 +47,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 //	val selectedCourses: SnapshotStateList<JSONObject> = _selectedCourses
 	private val _todayCourses = mutableStateListOf<JSONObject>()
 	val todayCourses: SnapshotStateList<JSONObject> = _todayCourses
-	private val _tomorrowCourses = mutableStateListOf<JSONObject>()
-	val tomorrowCourses: SnapshotStateList<JSONObject> = _tomorrowCourses
+	private val _recentCourses = mutableStateListOf<JSONObject>()
+	val tomorrowCourses: SnapshotStateList<JSONObject> = _recentCourses
 	private val _week18Exams = mutableStateListOf<JSONObject>()
 	val week18Exams: SnapshotStateList<JSONObject> = _week18Exams
 	private val _week19Exams = mutableStateListOf<JSONObject>()
@@ -197,7 +197,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
 		val markdown = if (isAfterEmpty) {
-			val next = _tomorrowCourses.getOrNull(0)
+			val next = _recentCourses.getOrNull(0)
 			"###### ${application.getString(R.string.no_class_today)}\n\n${application.getString(R.string.next_class)}：**${
 				next?.getString("courseName") ?: application.getString(R.string.none)
 			}**\n\n${application.getString(R.string.location)}：**${
@@ -227,7 +227,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	private fun scheduleIslandTick() {
-		ClassIsland.updateCourseData(_todayCourses, _tomorrowCourses)
+		ClassIsland.updateCourseData(_todayCourses, _recentCourses)
 		ClassIsland.triggerAndScheduleTick(application)
 	}
 
@@ -238,7 +238,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 					when (code) {
 						1 -> {
 							_todayCourses.clear()
-							_tomorrowCourses.clear()
+							_recentCourses.clear()
 							val (beforeArray, afterArray) = response.getJSONArray("data")
 								.map { it as JSONObject }.filter { item ->
 									item["status"] = getTimePosition(
@@ -252,7 +252,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 									item["course"] =
 										"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
 									val isToday = "TD" == item.getString("useflag")
-									if (isToday) _todayCourses.add(item) else _tomorrowCourses.add(
+									if (isToday) _todayCourses.add(item) else _recentCourses.add(
 										item
 									)
 									isToday

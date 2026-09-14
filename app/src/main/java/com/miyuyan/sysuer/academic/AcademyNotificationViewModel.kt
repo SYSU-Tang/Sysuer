@@ -4,8 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class AcademyNotificationViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: JwxtModel = JwxtModel(application)
@@ -20,22 +23,24 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 	val noticeContent: LiveData<String?> = _noticeContent
 
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					0 -> {
-						val list = response.getJSONObject("data").getJSONArray("list")
-						_academicNotices.postValue(list.filterIsInstance<JSONObject>())
-					}
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200) {
+					when (code) {
+						0 -> {
+							val list = response.getJSONObject("data").getJSONArray("list")
+							_academicNotices.postValue(list.filterIsInstance<JSONObject>())
+						}
 
-					1 -> {
-						val list = response.getJSONObject("data").getJSONArray("list")
-						_schoolNotices.postValue(list.filterIsInstance<JSONObject>())
-					}
+						1 -> {
+							val list = response.getJSONObject("data").getJSONArray("list")
+							_schoolNotices.postValue(list.filterIsInstance<JSONObject>())
+						}
 
-					2 -> {
-						val data = response.getString("data")
-						_noticeContent.postValue(data)
+						2 -> {
+							val data = response.getString("data")
+							_noticeContent.postValue(data)
+						}
 					}
 				}
 			}

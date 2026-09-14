@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil
@@ -11,6 +14,8 @@ import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.databinding.FragmentCourseQueryResultBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class RoomQueryResultFragment : StaggerFragment() {
 	lateinit var model: JwxtModel
@@ -31,7 +36,9 @@ class RoomQueryResultFragment : StaggerFragment() {
 				}
 			}
 		model = JwxtModel(requireContext())
-		model.message.observe(requireActivity()) { (_, response) ->
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (_, response) ->
 			if (response.getInteger("code") == 200) response.getJSONObject("data").getJSONArray("data").forEach { item: Any? ->
 				val values: ArrayList<String?> = extractValue(item as JSONObject, arrayOf("yearTerm", "date", "week", "dayWeek", "campus", "teachingBuild", "teachingBuildNum", "classroomNum", "floor", "classroomID", "seatCount"))
 				arrayOf("oneSection",
@@ -74,6 +81,8 @@ class RoomQueryResultFragment : StaggerFragment() {
 				                                           R.string.tenth_section,
 				                                           R.string.eleventh_section)/* getString(R.string.twelfth_section), getString(R.string.thirteenth_section), getString(R.string.fourteenth_section), getString(R.string.fifteenth_section), getString(R.string.sixteenth_section)*/),
 				           values)
+					}
+				}
 			}
 		}
 		rooms

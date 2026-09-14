@@ -84,7 +84,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/colorSurfaceContainer"
+        android:background="?colorSurfaceContainer"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <GridLayout

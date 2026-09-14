@@ -1,5 +1,9 @@
 package com.miyuyan.sysuer.life
 
+import kotlinx.coroutines.flow.receiveAsFlow
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -89,7 +93,9 @@ class GymReservationFragment : BaseFragment() {
 				}
 			}
 		}
-		model.message.observe(requireActivity()) { (code, response) ->
+		viewLifecycleOwner.lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
 			if (code == 0) response.getJSONArray("data").forEach { item: Any? ->
 				val preferenceAdapter = PreferenceAdapter()
 				val titleAdapter = TitleAdapter((item as JSONObject).getString("Description")).apply {
@@ -145,6 +151,8 @@ class GymReservationFragment : BaseFragment() {
 				                      R.drawable.money)
 			}
 		}
+		}
+	}
 		viewModel.reservationFromTo.observe(viewLifecycleOwner) { (from,to) ->
 			if (from != null && to != null) {
 				binding.from.text = calendarManager.toDateString(from)

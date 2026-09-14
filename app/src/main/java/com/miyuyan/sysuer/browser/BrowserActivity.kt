@@ -248,11 +248,11 @@ class BrowserActivity : BaseActivity() {
 			setColumn(1)
 			set<Int?>(mutableListOf(R.string.link, R.string.location),
 			          mutableListOf(R.drawable.link, R.drawable.save),
-			          mutableListOf(GridMenuDialog.onGridMenuClickListener {
+			          mutableListOf(GridMenuDialog.OnGridMenuClickListener {
 				          startActivity(Intent(Intent.ACTION_VIEW,
 				                               getMenu(0)?.text.toString()
 					                               .toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-			          }, GridMenuDialog.onGridMenuClickListener { dialog.dismiss() }))
+			          }, GridMenuDialog.OnGridMenuClickListener { dialog.dismiss() }))
 			setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
 			setGravity(Gravity.START or Gravity.CENTER_VERTICAL)
 			getMenu(0)?.setMaxLines(Int.MAX_VALUE)
@@ -438,15 +438,15 @@ class BrowserActivity : BaseActivity() {
 		                                   R.drawable.zoom_in,
 		                                   R.drawable.zoom_out,
 		                                   R.drawable.search),
-		                     mutableListOf(GridMenuDialog.onGridMenuClickListener { goBack() },
-		                                   GridMenuDialog.onGridMenuClickListener { goForward() },
-		                                   GridMenuDialog.onGridMenuClickListener { refresh() },
-		                                   GridMenuDialog.onGridMenuClickListener { supportFinishAfterTransition() },
-		                                   GridMenuDialog.onGridMenuClickListener { pageUp() },
-		                                   GridMenuDialog.onGridMenuClickListener { pageDown() },
-		                                   GridMenuDialog.onGridMenuClickListener { web.zoomIn() },
-		                                   GridMenuDialog.onGridMenuClickListener { web.zoomOut() },
-		                                   GridMenuDialog.onGridMenuClickListener {
+		                     mutableListOf(GridMenuDialog.OnGridMenuClickListener { goBack() },
+		                                   GridMenuDialog.OnGridMenuClickListener { goForward() },
+		                                   GridMenuDialog.OnGridMenuClickListener { refresh() },
+		                                   GridMenuDialog.OnGridMenuClickListener { supportFinishAfterTransition() },
+		                                   GridMenuDialog.OnGridMenuClickListener { pageUp() },
+		                                   GridMenuDialog.OnGridMenuClickListener { pageDown() },
+		                                   GridMenuDialog.OnGridMenuClickListener { web.zoomIn() },
+		                                   GridMenuDialog.OnGridMenuClickListener { web.zoomOut() },
+		                                   GridMenuDialog.OnGridMenuClickListener {
 			                                   binding.searchContainer.visibility = View.VISIBLE
 			                                   web.findAllAsync(binding.keyword.text.toString())
 			                                   menuDialog.dismiss()
@@ -505,9 +505,9 @@ class BrowserActivity : BaseActivity() {
 			val themeIcon = mutableListOf<Int?>(R.drawable.setting,
 			                                    R.drawable.dark,
 			                                    R.drawable.light)
-			val themeAction = mutableListOf(GridMenuDialog.onGridMenuClickListener { preference.theme = 0 },
-			                                GridMenuDialog.onGridMenuClickListener { preference.theme = 1 },
-			                                GridMenuDialog.onGridMenuClickListener { preference.theme = 2 })
+			val themeAction = mutableListOf(GridMenuDialog.OnGridMenuClickListener { preference.theme = 0 },
+			                                GridMenuDialog.OnGridMenuClickListener { preference.theme = 1 },
+			                                GridMenuDialog.OnGridMenuClickListener { preference.theme = 2 })
 			set(themeTitle, themeIcon, themeAction)
 			setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START)
 			setGravity(Gravity.CENTER_VERTICAL or Gravity.START)
@@ -522,11 +522,11 @@ class BrowserActivity : BaseActivity() {
 			setGravity(Gravity.CENTER_VERTICAL or Gravity.START)
 			set(mutableListOf(R.string.cookie, R.string.third_party_cookie),
 			    mutableListOf(R.drawable.cookie, R.drawable.cookie),
-			    mutableListOf(GridMenuDialog.onGridMenuClickListener {
+			    mutableListOf(GridMenuDialog.OnGridMenuClickListener {
 				    val accept = !preference.isCookieAccept
 				    preference.isCookieAccept = accept
 				    cookieManager.setAcceptCookie(accept)
-			    }, GridMenuDialog.onGridMenuClickListener {
+			    }, GridMenuDialog.OnGridMenuClickListener {
 				    val accept = !preference.isThirdPartyCookieAccept
 				    preference.isThirdPartyCookieAccept = accept
 				    cookieManager.setAcceptThirdPartyCookies(web, accept)
@@ -553,33 +553,33 @@ class BrowserActivity : BaseActivity() {
 			                                  R.drawable.light,
 			                                  R.drawable.privacy,
 			                                  R.drawable.cookie)
-			val webAction = mutableListOf(GridMenuDialog.onGridMenuClickListener { uaDialog.show() },
-			                              GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
+			val webAction = mutableListOf(GridMenuDialog.OnGridMenuClickListener { uaDialog.show() },
+			                              GridMenuDialog.OnGridMenuClickListener { v: MaterialButton? ->
 				                              val pc = !preference.isPC
 				                              preference.isPC = pc
 				                              v?.setText(if (pc) R.string.pc_mode else R.string.mobile_mode)
 				                              v?.setIconResource(if (pc) R.drawable.laptop else R.drawable.phone)
 				                              web.reload()
 			                              },
-			                              GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
+			                              GridMenuDialog.OnGridMenuClickListener { v: MaterialButton? ->
 				                              val imageBlocked = !preference.isImageBlocked
 				                              preference.isImageBlocked = imageBlocked
 				                              v?.setText(if (imageBlocked) R.string.image_blocked else R.string.image)
 				                              v?.setIconResource(if (imageBlocked) R.drawable.image_block else R.drawable.image)
 				                              webSettings.blockNetworkImage = imageBlocked
 			                              },
-			                              GridMenuDialog.onGridMenuClickListener {
+			                              GridMenuDialog.OnGridMenuClickListener {
 				                              val jsEnabled = !preference.isJSEnabled
 				                              preference.isJSEnabled = jsEnabled
 				                              webSettings.javaScriptEnabled = jsEnabled
 			                              },
-			                              GridMenuDialog.onGridMenuClickListener { v: MaterialButton? ->
+			                              GridMenuDialog.OnGridMenuClickListener { v: MaterialButton? ->
 				                              val saveMobileDataMode = !preference.isSaveMobileDataMode
 				                              preference.isSaveMobileDataMode = saveMobileDataMode
 				                              v?.setIconResource(if (saveMobileDataMode) R.drawable.no_wifi else R.drawable.wifi)
 				                              webSettings.cacheMode = if (saveMobileDataMode) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_NO_CACHE
 			                              },
-			                              GridMenuDialog.onGridMenuClickListener {
+			                              GridMenuDialog.OnGridMenuClickListener {
 				                              themeDialog.show()
 				                              //                    String css = """
 				                              //                            body { background-color: #121212 !important; color: #e0e0e0 !important; }\
@@ -591,12 +591,12 @@ class BrowserActivity : BaseActivity() {
 				                              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) webSettings.setAlgorithmicDarkeningAllowed(
 					                              true)
 			                              },
-			                              GridMenuDialog.onGridMenuClickListener {
+			                              GridMenuDialog.OnGridMenuClickListener {
 				                              val privacyMode = !preference.isPrivacyMode
 				                              setPrivacyMode(privacyMode)
 				                              preference.isPrivacyMode = privacyMode
 			                              },
-			                              GridMenuDialog.onGridMenuClickListener { cookieModeDialog.show() })
+			                              GridMenuDialog.OnGridMenuClickListener { cookieModeDialog.show() })
 			set(webTitle, webIcon, webAction)
 			setTogglable(intArrayOf(3, 4, 6), true)
 			setColumn(4)
@@ -623,14 +623,14 @@ class BrowserActivity : BaseActivity() {
 			                        R.drawable.export,
 			                        R.drawable.cookie,
 			                        R.drawable.version),
-			          mutableListOf<GridMenuDialog.onGridMenuClickListener?>(GridMenuDialog.onGridMenuClickListener {
+			          mutableListOf<GridMenuDialog.OnGridMenuClickListener?>(GridMenuDialog.OnGridMenuClickListener {
 				          config.copy("url:", web.url)
-			          }, GridMenuDialog.onGridMenuClickListener {
+			          }, GridMenuDialog.OnGridMenuClickListener {
 				          startActivity(Intent(Intent.ACTION_SEND).setType("text/plain")
 					                        .putExtra(Intent.EXTRA_TEXT, trim(web.url)))
-			          }, GridMenuDialog.onGridMenuClickListener {
+			          }, GridMenuDialog.OnGridMenuClickListener {
 				          startActivity(Intent(Intent.ACTION_VIEW).setData(trim(web.url).toUri()))
-			          }, GridMenuDialog.onGridMenuClickListener {
+			          }, GridMenuDialog.OnGridMenuClickListener {
 				          val targetUrl = trim(web.url)
 				          cookieDialog.value = cookieManager.getCookie(targetUrl)
 				          cookieDialog.getDialog()
@@ -658,7 +658,7 @@ class BrowserActivity : BaseActivity() {
 						          config.copy("Cookie:", cookieDialog.getText())
 					          }
 				          cookieDialog.show()
-			          }, GridMenuDialog.onGridMenuClickListener {
+			          }, GridMenuDialog.OnGridMenuClickListener {
 				          web.loadUrl("view-source:${web.url}")
 			          }))
 			setColumn(4)

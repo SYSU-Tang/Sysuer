@@ -26,7 +26,7 @@ class JsonModel(context: Context) : BaseModel(context) {
 					data?.takeIf { it.containsKey("code") && it.getInteger("code") != 200 }?.let {
 						login(request)
 					}
-					message.postValue(result)
+//					message.postValue(result)
 					messageChannel.trySend(result)
 					afterLoginRequest.remove(request)
 				} ?: run {

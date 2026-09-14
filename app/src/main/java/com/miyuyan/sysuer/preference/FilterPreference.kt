@@ -35,7 +35,7 @@ class FilterPreference(context: Context,
 				isFilter = getBoolean(R.styleable.filterPreferenceStyle_isFilter, true)
 				canEdit = getBoolean(R.styleable.filterPreferenceStyle_canEdit, false)
 			}
-		} catch (_: Exception) { //            throw new RuntimeException(e);
+		} catch (_: Exception) {
 		}
 	}
 	

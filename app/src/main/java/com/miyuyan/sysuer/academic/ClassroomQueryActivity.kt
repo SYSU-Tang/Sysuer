@@ -8,8 +8,10 @@ import android.widget.CompoundButton
 import android.widget.LinearLayout
 import androidx.core.view.children
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.alibaba.fastjson2.JSONArray
@@ -24,7 +26,6 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.slider.RangeSlider
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.databinding.ActivityClassroomQueryBinding
 import com.miyuyan.sysuer.databinding.ItemClassroomResultBinding
 import com.miyuyan.sysuer.databinding.ItemFilterChipBinding
@@ -35,6 +36,8 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class ClassroomQueryActivity : BaseActivity() {
 	val office: MutableMap<Int?, String?> = mutableMapOf()
@@ -117,55 +120,58 @@ class ClassroomQueryActivity : BaseActivity() {
 			binding.dateText.text = date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
 		})
 		campus
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			println(response)
-			if (response.getInteger("code") == 200) {
-				if (message.first == 3) {
-					val data = response.getJSONObject("data")
-					total = data.getInteger("total")
-					data.getJSONArray("rows")
-						.forEach { a: Any? -> roomAdapter.add(a as JSONObject) }
-					BottomSheetBehavior.from<LinearLayout?>(binding.resultSheet)
-						.setState(BottomSheetBehavior.STATE_EXPANDED)
-					roomAdapter.setHost(model.host)
-					roomAdapter.setCookie(model.cookieManager!!.toSimpleString(model.host))
-				} else {
-					binding.timeSlider.valueFrom = 1f
-					response.getJSONArray("data").forEach { campusInfo: Any? ->
-						when (message.first) {
-							1 -> {
-								val id = (campusInfo as JSONObject).getString("id")
-								val chip = ItemFilterChipBinding.inflate(layoutInflater, binding.campusGroup, false)
-									.getRoot()
-								binding.campusGroup.addView(chip)
-								chip.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-									if (isChecked) {
-										if (classroom.containsKey(id)) classroom[id]?.forEach { e: Chip? ->
-											e!!.visibility = View.VISIBLE
+		lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					println(response)
+					if (response.getInteger("code") == 200) {
+						if (code == 3) {
+							val data = response.getJSONObject("data")
+							total = data.getInteger("total")
+							data.getJSONArray("rows")
+								.forEach { a: Any? -> roomAdapter.add(a as JSONObject) }
+							BottomSheetBehavior.from<LinearLayout?>(binding.resultSheet)
+								.setState(BottomSheetBehavior.STATE_EXPANDED)
+							roomAdapter.setHost(model.host)
+							roomAdapter.setCookie(model.cookieManager!!.toSimpleString(model.host))
+						} else {
+							binding.timeSlider.valueFrom = 1f
+							response.getJSONArray("data").forEach { campusInfo: Any? ->
+								when (code) {
+									1 -> {
+										val id = (campusInfo as JSONObject).getString("id")
+										val chip = ItemFilterChipBinding.inflate(layoutInflater, binding.campusGroup, false)
+											.getRoot()
+										binding.campusGroup.addView(chip)
+										chip.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+											if (isChecked) {
+												if (classroom.containsKey(id)) classroom[id]?.forEach { e: Chip? ->
+													e!!.visibility = View.VISIBLE
+												}
+												else getOffice(id)
+											} else classroom[id]?.forEach { e: Chip? ->
+												e!!.visibility = View.GONE
+											}
 										}
-										else getOffice(id)
-									} else classroom[id]?.forEach { e: Chip? ->
-										e!!.visibility = View.GONE
+										chip.text = campusInfo.getString("campusName")
+									}
+									2 -> {
+										classroom.computeIfAbsent(campusLiveData.getValue()) { _: String? -> ArrayList() }
+										val chip = ItemFilterChipBinding.inflate(layoutInflater, binding.officeGroup, false)
+											.getRoot()
+										binding.officeGroup.addView(chip)
+										office[chip.id] = (campusInfo as JSONObject).getString("id")
+										chip.text = campusInfo.getString("dataName")
+										classroom[campusLiveData.getValue()]?.add(chip)
 									}
 								}
-								chip.text = campusInfo.getString("campusName")
-							}
-							2 -> {
-								classroom.computeIfAbsent(campusLiveData.getValue()) { _: String? -> ArrayList() }
-								val chip = ItemFilterChipBinding.inflate(layoutInflater, binding.officeGroup, false)
-									.getRoot()
-								binding.officeGroup.addView(chip)
-								office[chip.id] = (campusInfo as JSONObject).getString("id")
-								chip.text = campusInfo.getString("dataName")
-								classroom[campusLiveData.getValue()]?.add(chip)
 							}
 						}
+						model.nextAll()
 					}
 				}
-				model.nextAll()
 			}
-		})
+		}
 		model.next()
 	}
 	

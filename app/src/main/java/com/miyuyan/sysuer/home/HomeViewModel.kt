@@ -3,14 +3,21 @@ package com.miyuyan.sysuer.home
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.SettingManager
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 class HomeViewModel : ViewModel() {
-	val updateDashboardShortcut: MutableLiveData<Boolean?> = MutableLiveData<Boolean?>()
+	private val _updateDashboardShortcut = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+	val updateDashboardShortcut: SharedFlow<Unit> = _updateDashboardShortcut
+
+	fun triggerUpdateDashboardShortcut() {
+		_updateDashboardShortcut.tryEmit(Unit)
+	}
+
 	val actionMap = mutableMapOf<Int, (Context) -> Unit>(302 to { context ->
 		context.packageManager.getLaunchIntentForPackage("com.comingx.zanao")?.let { intent ->
 			context.startActivity(intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

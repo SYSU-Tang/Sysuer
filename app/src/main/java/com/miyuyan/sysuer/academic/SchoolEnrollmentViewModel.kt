@@ -4,8 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class SchoolEnrollmentViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: JwxtModel = JwxtModel(application)
@@ -27,76 +30,83 @@ class SchoolEnrollmentViewModel(application: Application) : AndroidViewModel(app
 	val punishList: LiveData<List<JSONObject>> = _punishList
 	private val pages = IntArray(8)
 	private val totals = IntArray(8)
-	
+
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				val data = response.getJSONObject("data") ?: return@observeForever
-				when (code) {
-					0 -> {
-						_basicInfo.value = data
-						fetchFamily()
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200) {
+					val data = response.getJSONObject("data") ?: return@collect
+					when (code) {
+						0 -> {
+							_basicInfo.value = data
+							fetchFamily()
+						}
+
+						1 -> appendRows(data, _familyList, 1)
+						2 -> appendRows(data, _experienceList, 2)
+						3 -> appendRows(data, _exchangeList, 3)
+						4 -> appendRows(data, _changeList, 4)
+						5 -> appendRows(data, _minorList, 5)
+						6 -> appendRows(data, _registerList, 6)
+						7 -> appendRows(data, _punishList, 7)
 					}
-					1 -> appendRows(data, _familyList, 1)
-					2 -> appendRows(data, _experienceList, 2)
-					3 -> appendRows(data, _exchangeList, 3)
-					4 -> appendRows(data, _changeList, 4)
-					5 -> appendRows(data, _minorList, 5)
-					6 -> appendRows(data, _registerList, 6)
-					7 -> appendRows(data, _punishList, 7)
 				}
 			}
 		}
 	}
-	
+
 	private fun appendRows(
 		data: JSONObject,
 		liveData: MutableLiveData<List<JSONObject>>,
 		tab: Int,
-	                      ) {
+	) {
 		totals[tab] = data.getInteger("total")
 		val newRows = data.getJSONArray("rows").filterIsInstance<JSONObject>()
 		liveData.value = liveData.value?.plus(newRows)
 		if ((liveData.value?.size ?: 0) < totals[tab]) fetchTab(tab)
 		else if (tab < 7) fetchTab(tab + 1)
 	}
-	
+
 	fun fetchBasicInfo() {
 		model.addAndNext("jwxt/student-status/countrystu/studentRollView", 0)
 	}
-	
+
 	fun fetchFamily() {
 		fetchPaginated("jwxt/student-status/stuFamily/showStudentFamily", 1)
 	}
-	
+
 	fun fetchExperience() {
 		fetchPaginated("jwxt/student-status/stuExperience/showStudentExperience", 2)
 	}
-	
+
 	fun fetchExchange() {
 		fetchPaginated("jwxt/student-status/abroadInformation/myStulistInformation", 3)
 	}
-	
+
 	fun fetchChange() {
 		fetchPaginated("jwxt/student-status-move/moveStuAgg/showStuChangeRoll", 4)
 	}
-	
+
 	fun fetchMinor() {
 		fetchPaginated("jwxt/minor-status/minDouDegMajRoll/queryMinDouDegMajRoll", 5)
 	}
-	
+
 	fun fetchRegister() {
 		fetchPaginated("jwxt/reports-register/stuRegistration/getSelfRegisterList", 6)
 	}
-	
+
 	fun fetchPunish() {
 		fetchPaginated("jwxt/student-status/stuRewPunish/showMyStudentRewPunish", 7)
 	}
-	
+
 	private fun fetchPaginated(url: String, code: Int) {
-		model.addAndNext(url, "{\"pageNo\":${++pages[code]},\"pageSize\":10,\"total\":true,\"param\":{}}", code)
+		model.addAndNext(
+				url,
+				"{\"pageNo\":${++pages[code]},\"pageSize\":10,\"total\":true,\"param\":{}}",
+				code
+		)
 	}
-	
+
 	private fun fetchTab(tab: Int) {
 		when (tab) {
 			1 -> fetchFamily()
@@ -108,7 +118,7 @@ class SchoolEnrollmentViewModel(application: Application) : AndroidViewModel(app
 			7 -> fetchPunish()
 		}
 	}
-	
+
 	override fun onCleared() {
 		model.dispose()
 	}

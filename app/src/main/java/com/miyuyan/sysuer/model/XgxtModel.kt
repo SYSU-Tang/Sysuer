@@ -38,7 +38,7 @@ class XgxtModel(context: Context) : BaseModel(context) {
 						if (data.containsKey("code") && data.getInteger("code") != 200) http.handler.post {
 							contextUtil.toast(data.getString("msg", ""))
 						}
-						message.postValue(result)
+//						message.postValue(result)
 						messageChannel.trySend(result)
 						afterLoginRequest.remove(request)
 					}

@@ -5,16 +5,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.CommonUtil
+
 import com.miyuyan.sysuer.databinding.ItemComplaintSquareBinding
 import com.miyuyan.sysuer.databinding.RecyclerViewScrollBinding
 import com.miyuyan.sysuer.model.XinfangModel
 import com.miyuyan.sysuer.view.RecyclerAdapter
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class ComplaintSquareFragment : BaseFragment() {
 	lateinit var model: XinfangModel
@@ -31,13 +36,14 @@ class ComplaintSquareFragment : BaseFragment() {
 			root.layoutManager = layoutManager
 		}
 		model = XinfangModel(requireContext())
-		model.message.observe(
-			requireActivity()
-		) { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (message.first == 0) if (response.getBoolean("ok")) response.getJSONArray("data")
-				.forEach { adapter.add(it as JSONObject) }
-			else config.toast(response.getString("msg"))
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (code == 0) if (response.getBoolean("ok")) response.getJSONArray("data")
+						.forEach { adapter.add(it as JSONObject) }
+					else config.toast(response.getString("msg"))
+				}
+			}
 		}
 		square
 		return binding.root

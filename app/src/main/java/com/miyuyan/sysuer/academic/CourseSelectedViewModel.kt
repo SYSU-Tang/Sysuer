@@ -15,6 +15,7 @@ import com.miyuyan.sysuer.view.SectionData
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
@@ -28,7 +29,8 @@ class CourseSelectedViewModel(application: Application) : AndroidViewModel(appli
 	private var total = -1
 	
 	init {
-		model.message.observeForever { (_, response) ->
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (_, response) ->
 			if (response.getInteger("code") == 200) {
 				val data = response.getJSONObject("data")
 				if (total == -1) total = data.getInteger("total")
@@ -67,6 +69,7 @@ class CourseSelectedViewModel(application: Application) : AndroidViewModel(appli
 					                          }))))
 				}
 			}
+		}
 		}
 	}
 	

@@ -5,12 +5,15 @@ import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.alibaba.fastjson2.JSONWriter
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.model.JwxtModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class CourseSelectionPreviewViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: JwxtModel = JwxtModel(application)
@@ -32,7 +35,8 @@ class CourseSelectionPreviewViewModel(application: Application) : AndroidViewMod
 		private set
 	
 	init {
-		model.message.observeForever { (code, response) ->
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				when (code) {
 					0 -> {
@@ -49,6 +53,7 @@ class CourseSelectionPreviewViewModel(application: Application) : AndroidViewMod
 					}
 				}
 			}
+		}
 		}
 	}
 	

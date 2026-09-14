@@ -45,7 +45,7 @@ class PjxtModel(context: Context) : BaseModel(context) {
 								contextUtil.toast(CommonUtil.toStringOrDefault(data.getString("msg")))
 							}
 						}
-						message.postValue(result)
+//						message.postValue(result)
 						messageChannel.trySend(result)
 						afterLoginRequest.remove(request)
 					} ?: run {

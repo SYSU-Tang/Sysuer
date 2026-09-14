@@ -52,7 +52,7 @@ internal abstract class BaseRecyclerAdapter<T>(val mContext: Context) :
 		this.onItemClickListener = onItemClickListener
 	}
 	
-	@Suppress("unused") fun addAll(items: MutableList<out T?>?) {
+	fun addAll(items: MutableList<out T?>?) {
 		if (!items.isNullOrEmpty()) {
 			this.items.addAll(items)
 			notifyItemRangeInserted(items.size, items.size)

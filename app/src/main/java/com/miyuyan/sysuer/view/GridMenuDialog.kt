@@ -43,14 +43,14 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 	
 	fun <T> set(menuTitle: MutableList<T>,
 	            menuIcon: MutableList<Int?>,
-	            menuAction: MutableList<out onGridMenuClickListener?>) {
+	            menuAction: MutableList<out OnGridMenuClickListener?>) {
 		referenceIds.clear()
 		menuTitle.forEachIndexed { i, v ->
 			add<T>(v, menuIcon[i], menuAction.getOrNull(i))
 		}
 	}
 	
-	fun <T> add(title: T?, menuIcon: Int?, menuAction: onGridMenuClickListener?) {
+	fun <T> add(title: T?, menuIcon: Int?, menuAction: OnGridMenuClickListener?) {
 		val menu = ItemButtonGridBinding.inflate(activity.layoutInflater, menuBinding.grid, false).root
 		if (title is Int) menu.setText(title)
 		else if (title is String) menu.text = title
@@ -164,12 +164,12 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 	class GridMenuItem {
 		var title: CharSequence? = null
 		var icon: Int? = null
-		var action: onGridMenuClickListener? = null
+		var action: OnGridMenuClickListener? = null
 		
 		companion object {
 			fun of(title: CharSequence?,
 			       icon: Int?,
-			       action: onGridMenuClickListener?): GridMenuItem {
+			       action: OnGridMenuClickListener?): GridMenuItem {
 				val item = GridMenuItem()
 				item.title = title
 				item.icon = icon
@@ -179,7 +179,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 		}
 	}
 	
-	fun interface onGridMenuClickListener {
+	fun interface OnGridMenuClickListener {
 		fun onClick(menu: MaterialButton?)
 	}
 }

@@ -3,8 +3,11 @@ package com.miyuyan.sysuer.academic
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.XgxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class DormViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: XgxtModel = XgxtModel(application)
@@ -13,9 +16,11 @@ class DormViewModel(application: Application) : AndroidViewModel(application) {
 	val dormInfo: MutableLiveData<JSONObject> = _dormInfo
 	
 	init {
-		model.message.observeForever { (code, data) ->
-			if (data.containsKey("code") && data.getInteger("code") == 200) {
-				_dormInfo.value = data.getJSONObject("data")
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, data) ->
+				if (data.containsKey("code") && data.getInteger("code") == 200) {
+					_dormInfo.value = data.getJSONObject("data")
+				}
 			}
 		}
 	}

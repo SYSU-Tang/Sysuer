@@ -168,8 +168,8 @@ internal fun DashboardScreen(
 	val coroutineScope = rememberCoroutineScope()
 	LaunchedEffect(Unit) {
 		dashboardViewModel.getTerm()
-		homeViewModel.updateDashboardShortcut.observeForever {
-			if (it == true) dashboardViewModel.loadDashboardShortcuts()
+		homeViewModel.updateDashboardShortcut.collect {
+			dashboardViewModel.loadDashboardShortcuts()
 		}
 	}
 	val term by dashboardViewModel.term.collectAsStateWithLifecycle()
@@ -510,7 +510,7 @@ private fun DashboardActionDialog(
 							config.toast(R.string.cancel_add_shortcut_success)
 						}
 						dashboardViewModel.loadDashboardShortcuts()
-						homeViewModel.updateDashboardShortcut.value = true
+						homeViewModel.triggerUpdateDashboardShortcut()
 					}
 				}
 

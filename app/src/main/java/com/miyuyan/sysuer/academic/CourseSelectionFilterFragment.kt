@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.alibaba.fastjson2.JSONObject
@@ -16,6 +19,8 @@ import com.google.android.material.transition.MaterialContainerTransform
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.databinding.FragmentCourseFilterBinding
 import com.miyuyan.sysuer.model.JwxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class CourseSelectionFilterFragment : BaseFragment() {
 	var filterValue: CourseFilterValueData? = null
@@ -37,27 +42,31 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		model = JwxtModel(requireContext())		//vm = ViewModelProvider(requireActivity())[CourseSelectionViewModel::class.java]
 		binding = FragmentCourseFilterBinding.inflate(inflater, container, false)
 		binding.container.setColumnCount(config.column)
-		model.message.observe(viewLifecycleOwner) { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				val data = response.getJSONArray("data")
-				if (data != null) {
-					val items = mutableListOf<String?>()
-					val itemCodes = mutableListOf<String?>()
-					items.add("")
-					itemCodes.add("")
-					data.forEach { a: Any? ->
-						items.add((a as JSONObject).getString(arrayOf("campusName", "dataName", "minorName", "dataName", "dataName")[code]))
-						itemCodes.add(a.getString(arrayOf("id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber")[code]))
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (response.getInteger("code") == 200) {
+						val data = response.getJSONArray("data")
+						if (data != null) {
+							val items = mutableListOf<String?>()
+							val itemCodes = mutableListOf<String?>()
+							items.add("")
+							itemCodes.add("")
+							data.forEach { a: Any? ->
+								items.add((a as JSONObject).getString(arrayOf("campusName", "dataName", "minorName", "dataName", "dataName")[code]))
+								itemCodes.add(a.getString(arrayOf("id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber")[code]))
+							}
+							val textView = arrayOf(binding.campus, binding.days, binding.sections, binding.languages, binding.special)[code]
+							textView.setSimpleItems(items.toTypedArray())
+							textView.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
+								filterValue?.set(arrayOf("campus", "day", "section", "language", "special")[code], itemCodes[i])
+								filterName?.set(arrayOf("campus", "day", "section", "language", "special")[code], items[i])
+							}
+						}
 					}
-					val textView = arrayOf(binding.campus, binding.days, binding.sections, binding.languages, binding.special)[code]
-					textView.setSimpleItems(items.toTypedArray())
-					textView.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-						filterValue?.set(arrayOf("campus", "day", "section", "language", "special")[code], itemCodes[i])
-						filterName?.set(arrayOf("campus", "day", "section", "language", "special")[code], items[i])
-					}
+					model.nextAll()
 				}
 			}
-			model.nextAll()
 		}
 		(0..<5).forEach { getData(it) }
 		model.next()

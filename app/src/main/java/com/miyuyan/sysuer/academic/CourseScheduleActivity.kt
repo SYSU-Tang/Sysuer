@@ -9,7 +9,10 @@ import android.view.View
 import android.widget.GridLayout
 import android.widget.PopupMenu
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.color.MaterialColors
@@ -24,6 +27,8 @@ import com.miyuyan.sysuer.databinding.ItemDetailBinding
 import com.miyuyan.sysuer.databinding.ItemDurationBinding
 import com.miyuyan.sysuer.databinding.ItemWeekdayBinding
 import com.miyuyan.sysuer.model.JwxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -73,18 +78,18 @@ class CourseScheduleActivity : BaseActivity() {
 			next.setOnClickListener { changeWeek(currentWeekIndex + 1) }
 		}
 		val weekPop = PopupMenu(
-			this,
-			binding.weekTime,
-			0,
-			0,
-			com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow
+				this,
+				binding.weekTime,
+				0,
+				0,
+				com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow
 		)
 		val termPop = PopupMenu(
-			this,
-			binding.term,
-			0,
-			0,
-			com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow
+				this,
+				binding.term,
+				0,
+				0,
+				com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow
 		)
 		binding.term.setOnClickListener {
 			termPop.show()
@@ -117,15 +122,16 @@ class CourseScheduleActivity : BaseActivity() {
 					courseDuration.text = period.replace("~", "\n")
 					courseOrder.text = "${i + 1}"
 					root.setLayoutParams(
-						GridLayout.LayoutParams(
-							GridLayout.spec(i, 1.0f), GridLayout.spec(0)
-						).apply {
-							if (i == 4 || i == 8) topMargin = 16
-						})
+							GridLayout.LayoutParams(
+									GridLayout.spec(i, 1.0f), GridLayout.spec(0)
+							).apply {
+								if (i == 4 || i == 8) topMargin = 16
+							})
 				}
 			if (i == 10) {
 				durationBinding.root.measure(View.MEASURED_SIZE_MASK, View.MEASURED_SIZE_MASK)
-				binding.month.layoutParams.width = durationBinding.root.measuredWidth
+				binding.month.layoutParams.width =
+					durationBinding.root.measuredWidth
 			}
 			val (startStr, endStr) = period.split("~")
 			val start = LocalTime.parse(startStr)
@@ -136,7 +142,7 @@ class CourseScheduleActivity : BaseActivity() {
 				durationBinding.courseOrder.setTextColor(color)
 				binding.day.addView(View(this).apply {
 					layoutParams = GridLayout.LayoutParams(
-						GridLayout.spec(i, 1.0f), GridLayout.spec(0, 8, 1.0f)
+							GridLayout.spec(i, 1.0f), GridLayout.spec(0, 8, 1.0f)
 					).apply {
 						width = 0
 						height = 0
@@ -161,13 +167,13 @@ class CourseScheduleActivity : BaseActivity() {
 				column.setBackgroundColor(color)
 			}
 			column.setLayoutParams(
-				GridLayout.LayoutParams(
-					GridLayout.spec(0, 11, 1.0f), GridLayout.spec(i + 1, 1.0f)
-				).apply {
-					width = 0
-					height = 0
-					setGravity(Gravity.FILL)
-				})
+					GridLayout.LayoutParams(
+							GridLayout.spec(0, 11, 1.0f), GridLayout.spec(i + 1, 1.0f)
+					).apply {
+						width = 0
+						height = 0
+						setGravity(Gravity.FILL)
+					})
 			binding.day.addView(column)
 			binding.week.addView(itemBinding.root)
 		} // 初始化周历
@@ -175,191 +181,204 @@ class CourseScheduleActivity : BaseActivity() {
 		detailBinding = ItemDetailBinding.inflate(layoutInflater)
 		detailDialog.setContentView(detailBinding.root)
 		val palettes = arrayOf(
-			androidx.appcompat.R.attr.colorPrimary to com.google.android.material.R.attr.colorOnPrimary,
-			com.google.android.material.R.attr.colorSecondary to com.google.android.material.R.attr.colorOnSecondary,
-			com.google.android.material.R.attr.colorTertiary to com.google.android.material.R.attr.colorOnTertiary,
-			com.google.android.material.R.attr.colorPrimaryContainer to com.google.android.material.R.attr.colorOnPrimaryContainer,
-			com.google.android.material.R.attr.colorSecondaryContainer to com.google.android.material.R.attr.colorOnSecondaryContainer,
-			com.google.android.material.R.attr.colorTertiaryContainer to com.google.android.material.R.attr.colorOnTertiaryContainer,
-			com.google.android.material.R.attr.colorPrimaryFixed to com.google.android.material.R.attr.colorOnPrimaryFixed,
-			com.google.android.material.R.attr.colorSecondaryFixed to com.google.android.material.R.attr.colorOnSecondaryFixed,
-			com.google.android.material.R.attr.colorTertiaryFixed to com.google.android.material.R.attr.colorOnTertiaryFixed,
-			com.google.android.material.R.attr.colorPrimaryFixedDim to com.google.android.material.R.attr.colorOnPrimaryFixed,
-			com.google.android.material.R.attr.colorSecondaryFixedDim to com.google.android.material.R.attr.colorOnSecondaryFixed,
-			com.google.android.material.R.attr.colorTertiaryFixedDim to com.google.android.material.R.attr.colorOnTertiaryFixed,
-			com.google.android.material.R.attr.colorSurfaceContainerLow to com.google.android.material.R.attr.colorOnSurface,
-			com.google.android.material.R.attr.colorSurfaceContainer to com.google.android.material.R.attr.colorOnSurface,
-			com.google.android.material.R.attr.colorSurfaceContainerHigh to com.google.android.material.R.attr.colorOnSurface,
-			com.google.android.material.R.attr.colorSurfaceContainerHighest to com.google.android.material.R.attr.colorOnSurface,
+				androidx.appcompat.R.attr.colorPrimary to com.google.android.material.R.attr.colorOnPrimary,
+				com.google.android.material.R.attr.colorSecondary to com.google.android.material.R.attr.colorOnSecondary,
+				com.google.android.material.R.attr.colorTertiary to com.google.android.material.R.attr.colorOnTertiary,
+				com.google.android.material.R.attr.colorPrimaryContainer to com.google.android.material.R.attr.colorOnPrimaryContainer,
+				com.google.android.material.R.attr.colorSecondaryContainer to com.google.android.material.R.attr.colorOnSecondaryContainer,
+				com.google.android.material.R.attr.colorTertiaryContainer to com.google.android.material.R.attr.colorOnTertiaryContainer,
+				com.google.android.material.R.attr.colorPrimaryFixed to com.google.android.material.R.attr.colorOnPrimaryFixed,
+				com.google.android.material.R.attr.colorSecondaryFixed to com.google.android.material.R.attr.colorOnSecondaryFixed,
+				com.google.android.material.R.attr.colorTertiaryFixed to com.google.android.material.R.attr.colorOnTertiaryFixed,
+				com.google.android.material.R.attr.colorPrimaryFixedDim to com.google.android.material.R.attr.colorOnPrimaryFixed,
+				com.google.android.material.R.attr.colorSecondaryFixedDim to com.google.android.material.R.attr.colorOnSecondaryFixed,
+				com.google.android.material.R.attr.colorTertiaryFixedDim to com.google.android.material.R.attr.colorOnTertiaryFixed,
+				com.google.android.material.R.attr.colorSurfaceContainerLow to com.google.android.material.R.attr.colorOnSurface,
+				com.google.android.material.R.attr.colorSurfaceContainer to com.google.android.material.R.attr.colorOnSurface,
+				com.google.android.material.R.attr.colorSurfaceContainerHigh to com.google.android.material.R.attr.colorOnSurface,
+				com.google.android.material.R.attr.colorSurfaceContainerHighest to com.google.android.material.R.attr.colorOnSurface,
 		)
 		val assignedColors = mutableMapOf<String, Int>()
-		model.message.observe(this) { (code, response) ->
-			println("$code $response")
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					1 -> {
-						views.forEach { e: View? -> binding.day.removeView(e) }
-						views.clear()
-						response.getJSONArray("data").forEach { e: Any? ->
-							val data = e as JSONObject
-							val week = data.getString("week")
-							if (week != null) {
-								val startClassTimes = data.getInteger("startClassTimes")
-								val endClassTimes = data.getInteger("endClassTimes")
-								val info = data.getJSONArray("teachingInfoList")
-								info.forEach { detail: Any? ->
-									val course = (detail as JSONObject).getString("courseName", "")
-									val teacher = detail.getString("teacherName", "")
-									val campus = detail.getString("teachingCampusName", "")
-									val isStop = detail.getString("whetherStopClass", "")
-									val teachingBuildingName =
-										detail.getString("teachingBuildingName", "")
-									val classroomNum = detail.getString("classroomNum", "")
-									val itemAgendaBinding = ItemAgendaBinding.inflate(
-										layoutInflater, binding.day, false
-									)
-									val item = itemAgendaBinding.root
-									if (isStop != null && "0" != isStop) {
-										item.setEnabled(false)
-										item.setCardBackgroundColor(
-											MaterialColors.getColor(
-												item,
-												com.google.android.material.R.attr.colorErrorContainer
+		lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (response.getInteger("code") == 200) {
+						when (code) {
+							1 -> {
+								views.forEach { e: View? -> binding.day.removeView(e) }
+								views.clear()
+								response.getJSONArray("data").forEach { e: Any? ->
+									val data = e as JSONObject
+									val week = data.getString("week")
+									if (week != null) {
+										val startClassTimes = data.getInteger("startClassTimes")
+										val endClassTimes = data.getInteger("endClassTimes")
+										val info = data.getJSONArray("teachingInfoList")
+										info.forEach { detail: Any? ->
+											val course =
+												(detail as JSONObject).getString("courseName", "")
+											val teacher = detail.getString("teacherName", "")
+											val campus = detail.getString("teachingCampusName", "")
+											val isStop = detail.getString("whetherStopClass", "")
+											val teachingBuildingName =
+												detail.getString("teachingBuildingName", "")
+											val classroomNum = detail.getString("classroomNum", "")
+											val itemAgendaBinding = ItemAgendaBinding.inflate(
+													layoutInflater, binding.day, false
 											)
-										)
-									} else {
-										val colorIndex = assignedColors.getOrPut(course) {
-											var idx = abs(course.hashCode()) % palettes.size
-											val used = assignedColors.values.toSet()
-											while (idx in used && assignedColors.size < palettes.size) {
-												idx = (idx + 1) % palettes.size
+											val item = itemAgendaBinding.root
+											if (isStop != null && "0" != isStop) {
+												item.setEnabled(false)
+												item.setCardBackgroundColor(
+														MaterialColors.getColor(
+																item,
+																com.google.android.material.R.attr.colorErrorContainer
+														)
+												)
+											} else {
+												val colorIndex = assignedColors.getOrPut(course) {
+													var idx = abs(course.hashCode()) % palettes.size
+													val used = assignedColors.values.toSet()
+													while (idx in used && assignedColors.size < palettes.size) {
+														idx = (idx + 1) % palettes.size
+													}
+													idx
+												}
+												val (bgAttr, fgAttr) = palettes[colorIndex]
+												item.setCardBackgroundColor(
+														MaterialColors.getColor(item, bgAttr)
+												)
+												itemAgendaBinding.content.setTextColor(
+														MaterialColors.getColor(item, fgAttr)
+												)
 											}
-											idx
+											views.add(item)
+											item.setOnClickListener {
+												val location =
+													"$campus-$teachingBuildingName-$classroomNum"
+												setDialogDetail(
+														course, location, teacher, getString(
+														R.string.from_to_number,
+														startClassTimes,
+														endClassTimes
+												), detail.getString("assistantInfo")
+												)
+												id.value = detail.getString("classesId")
+												detailDialog.show()
+											}
+											itemAgendaBinding.content.text =
+												"$course/$teachingBuildingName-$classroomNum"
+											item.setLayoutParams(GridLayout.LayoutParams().apply {
+												columnSpec = GridLayout.spec(week.toInt(), 1.0f)
+												width = 0
+												height = 0
+												setGravity(Gravity.FILL)
+												rowSpec = GridLayout.spec(
+														startClassTimes - 1,
+														endClassTimes - startClassTimes + 1,
+														1.0f
+												)
+												if (startClassTimes == 5 || startClassTimes == 9) topMargin =
+													16
+
+											})
+											binding.day.addView(item)
 										}
-										val (bgAttr, fgAttr) = palettes[colorIndex]
-										item.setCardBackgroundColor(
-											MaterialColors.getColor(item, bgAttr)
-										)
-										itemAgendaBinding.content.setTextColor(
-											MaterialColors.getColor(item, fgAttr)
-										)
 									}
-									views.add(item)
-									item.setOnClickListener {
-										val location = "$campus-$teachingBuildingName-$classroomNum"
-										setDialogDetail(
-											course, location, teacher, getString(
-												R.string.from_to, startClassTimes, endClassTimes
-											), detail.getString("assistantInfo")
-										)
-										id.value = detail.getString("classesId")
-										detailDialog.show()
-									}
-									itemAgendaBinding.content.text =
-										"$course/$teachingBuildingName-$classroomNum"
-									item.setLayoutParams(GridLayout.LayoutParams().apply {
-										columnSpec = GridLayout.spec(week.toInt(), 1.0f)
-										width = 0
-										height = 0
-										setGravity(Gravity.FILL)
-										rowSpec = GridLayout.spec(
-											startClassTimes - 1,
-											endClassTimes - startClassTimes + 1,
-											1.0f
-										)
-										if (startClassTimes == 5 || startClassTimes == 9) topMargin =
-											16
-
-									})
-									binding.day.addView(item)
 								}
 							}
-						}
-					}
 
-					2 -> {
-						currentTerm = response.getJSONObject("data").getString("acadYearSemester")
-						binding.term.text = currentTerm
-						availableTerms
-						getAvailableWeeks(currentTerm)
-						getTable(currentTerm, currentWeek)
-						realTime.first = currentTerm
-					}
+							2 -> {
+								currentTerm =
+									response.getJSONObject("data").getString("acadYearSemester")
+								binding.term.text = currentTerm
+								availableTerms
+								getAvailableWeeks(currentTerm)
+								getTable(currentTerm, currentWeek)
+								realTime.first = currentTerm
+							}
 
-					3 -> {
-						val data = response.getJSONObject("data")
-						if (data != null) {
-							val date = LocalDate.parse(
-								data.getString("startTime"),
-								DateTimeFormatter.ofPattern("yyyy-MM-dd")
-							)
-							if (date != null) {
-								binding.month.text =
-									resources.getStringArray(R.array.months)[date.monthValue - 1]
-								for (i in 0..6) (binding.week.getChildAt(i + 1)
-									.findViewById<View?>(R.id.course_date) as MaterialTextView).text =
-									String.format(
-										Locale.getDefault(),
-										"%2d%s",
-										date.plusDays(i.toLong()).dayOfMonth,
-										getString(R.string.day)
+							3 -> {
+								val data = response.getJSONObject("data")
+								if (data != null) {
+									val date = LocalDate.parse(
+											data.getString("startTime"),
+											DateTimeFormatter.ofPattern("yyyy-MM-dd")
 									)
+									if (date != null) {
+										binding.month.text =
+											resources.getStringArray(R.array.months)[date.monthValue - 1]
+										for (i in 0..6) (binding.week.getChildAt(i + 1)
+											.findViewById<View?>(R.id.course_date) as MaterialTextView).text =
+											String.format(
+													Locale.getDefault(),
+													"%2d%s",
+													date.plusDays(i.toLong()).dayOfMonth,
+													getString(R.string.day)
+											)
+									}
+								}
+							}
+
+							4 -> {
+								terms.clear()
+								termPop.menu.clear()
+								response.getJSONArray("data")
+									.forEach { e: Any? -> terms.add((e as JSONObject).getString("acadYearSemester")) }
+								terms.forEach { e: String ->
+									termPop.menu.add(getString(R.string.term_x, e))
+										.setOnMenuItemClickListener {
+											changeTerm(e)
+											true
+										}
+								}
+							}
+
+							5 -> {
+								weeks.clear()
+								weekPop.menu.clear()
+								val nowWeekly =
+									response.getJSONObject("data").getString("nowWeekly")
+								if (nowWeekly != null) currentWeek = nowWeekly.toInt()
+								response.getJSONObject("data").getJSONArray("weeklyList")
+									.forEach { e: Any? -> weeks.add((e as JSONObject).getInteger("weekly")) }
+								weeks.forEachIndexed { index, e: Int ->
+									weekPop.menu.add(getString(R.string.week_d, e))
+										.setOnMenuItemClickListener {
+											changeWeek(index)
+											true
+										}
+								}
+								currentWeekIndex = weeks.indexOf(currentWeek)
+								binding.weekTime.text =
+									String.format(getString(R.string.week_d), currentWeek)
+								getTable(currentTerm, currentWeek)
+								realTime.second = currentWeekIndex
+							}
+
+							6 -> response.getJSONObject("data").getJSONArray("rows").also {
+								selectedCourses[currentTerm] = it.filterIsInstance<JSONObject>()
+							}.takeIf { it.isNotEmpty() }?.first {
+								(it as JSONObject).getString("courseName") == targetSubject
+							}?.also {
+								startActivity(
+										Intent(
+												this@CourseScheduleActivity,
+												CourseDetailActivity::class.java
+										).putExtra(
+												"id",
+												(it as JSONObject).getString("teachingClassId")
+										).putExtra("code", it.getString("courseNum"))
+											.putExtra("class", it.getString("teachingClassNum")),
+										ActivityOptionsCompat.makeSceneTransitionAnimation(
+												this@CourseScheduleActivity, binding.week, "miniapp"
+										).toBundle()
+								)
 							}
 						}
-					}
-
-					4 -> {
-						terms.clear()
-						termPop.menu.clear()
-						response.getJSONArray("data")
-							.forEach { e: Any? -> terms.add((e as JSONObject).getString("acadYearSemester")) }
-						terms.forEach { e: String ->
-							termPop.menu.add(getString(R.string.term_x, e))
-								.setOnMenuItemClickListener {
-									changeTerm(e)
-									true
-								}
-						}
-					}
-
-					5 -> {
-						weeks.clear()
-						weekPop.menu.clear()
-						val nowWeekly = response.getJSONObject("data").getString("nowWeekly")
-						if (nowWeekly != null) currentWeek = nowWeekly.toInt()
-						response.getJSONObject("data").getJSONArray("weeklyList")
-							.forEach { e: Any? -> weeks.add((e as JSONObject).getInteger("weekly")) }
-						weeks.forEachIndexed { index, e: Int ->
-							weekPop.menu.add(getString(R.string.week_d, e))
-								.setOnMenuItemClickListener {
-									changeWeek(index)
-									true
-								}
-						}
-						currentWeekIndex = weeks.indexOf(currentWeek)
-						binding.weekTime.text =
-							String.format(getString(R.string.week_d), currentWeek)
-						getTable(currentTerm, currentWeek)
-						realTime.second = currentWeekIndex
-					}
-
-					6 -> response.getJSONObject("data").getJSONArray("rows").also {
-						selectedCourses[currentTerm] = it.filterIsInstance<JSONObject>()
-					}.takeIf { it.isNotEmpty() }?.first {
-						(it as JSONObject).getString("courseName") == targetSubject
-					}?.also {
-						startActivity(
-							Intent(this, CourseDetailActivity::class.java).putExtra(
-								"id", (it as JSONObject).getString("teachingClassId")
-							).putExtra("code", it.getString("courseNum"))
-								.putExtra("class", it.getString("teachingClassNum")),
-							ActivityOptionsCompat.makeSceneTransitionAnimation(
-								this, binding.week, "miniapp"
-							).toBundle()
-						)
+						model.nextAll()
 					}
 				}
-				model.nextAll()
 			}
 		}
 		term
@@ -369,9 +388,9 @@ class CourseScheduleActivity : BaseActivity() {
 	fun getSelectedCourses(courseName: String?) {
 		targetSubject = courseName
 		model.addAndNext(
-			"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
-			"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"$currentTerm\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
-			6
+				"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
+				"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"$currentTerm\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
+				6
 		)
 	}
 
@@ -402,12 +421,12 @@ class CourseScheduleActivity : BaseActivity() {
 
 	fun getRange(academicYear: String, week: Int) {
 		model.add(
-			String.format(
-				Locale.getDefault(),
-				"jwxt/base-info/school-calender?academicYear=%s&weekly=%d",
-				academicYear,
-				week
-			), 3
+				String.format(
+						Locale.getDefault(),
+						"jwxt/base-info/school-calender?academicYear=%s&weekly=%d",
+						academicYear,
+						week
+				), 3
 		)
 	}
 
@@ -432,13 +451,13 @@ class CourseScheduleActivity : BaseActivity() {
 				it.getString("courseName") == course
 			}.also {
 				startActivity(
-					Intent(this, CourseDetailActivity::class.java).putExtra(
-						"id", it.getString("teachingClassId")
-					).putExtra("code", it.getString("courseNum"))
-						.putExtra("class", it.getString("teachingClassNum")),
-					ActivityOptionsCompat.makeSceneTransitionAnimation(
-						this, binding.week, "miniapp"
-					).toBundle()
+						Intent(this, CourseDetailActivity::class.java).putExtra(
+								"id", it.getString("teachingClassId")
+						).putExtra("code", it.getString("courseNum"))
+							.putExtra("class", it.getString("teachingClassNum")),
+						ActivityOptionsCompat.makeSceneTransitionAnimation(
+								this, binding.week, "miniapp"
+						).toBundle()
 				)
 			}
 		}
@@ -459,16 +478,16 @@ class CourseScheduleActivity : BaseActivity() {
 
 	fun getTable(academicYear: String, week: Int) {
 		if (academicYear.isNotEmpty() && week > 0) model.add(
-			"jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=$academicYear&weekly=$week",
-			1
+				"jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=$academicYear&weekly=$week",
+				1
 		)
 	}
 
 	fun printTable() {
 		val request = model.http.generateRequest(
-			"https://${model.host}/jwxt/timetable-search/stuTimeTabPrint/output",
-			"acadYear=$currentTerm&submitFlag=1&containKey=1%2C2%2C3%2C4%2C5",
-			"application/x-www-form-urlencoded"
+				"https://${model.host}/jwxt/timetable-search/stuTimeTabPrint/output",
+				"acadYear=$currentTerm&submitFlag=1&containKey=1%2C2%2C3%2C4%2C5",
+				"application/x-www-form-urlencoded"
 		).header("Cookie", model.cookie).header("Referer", "https://jwxt.sysu.edu.cn/")
 			.header("Accept-Encoding", "identity").build()
 		DownloadManager.downloadFile(this, request, "")

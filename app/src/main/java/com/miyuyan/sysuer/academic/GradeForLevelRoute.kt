@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.miyuyan.sysuer.R
@@ -27,6 +28,7 @@ import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.InputDialogChip
 import com.miyuyan.sysuer.view.SingleSelectChipDropdown
 import com.miyuyan.sysuer.view.StaggerScreen
+import com.miyuyan.sysuer.view.StatePage
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
@@ -45,7 +47,7 @@ fun GradeForLevelRoute(
 	var courseNameValue by rememberSaveable { mutableStateOf("") }
 	var courseNumberValue by rememberSaveable { mutableStateOf("") }
 	var minGradeValue by rememberSaveable { mutableStateOf("") }
-
+	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 	fun onFilterChange() {
 		viewModel.trainType = trainTypeValue
 		viewModel.year = yearValue
@@ -62,57 +64,75 @@ fun GradeForLevelRoute(
 	}
 
 	ActivityPager(
-		title = stringResource(R.string.grade_for_level),
-		onNavigationClick = { backStack.navigateBack(activity) },
-		isNestedScrollEnabled = false,
-		sharedTransitionScope = sharedTransitionScope,
-		animatedVisibilityScope = animatedVisibilityScope,
-		sharedKey = "GradeForLevel",
-		topBarMenus = {
-			listOf(exportMarkdownMenuItem(backStack, viewModel.sections, stringResource(R.string.grade_for_level), stringResource(R.string.grade_for_level)))
-		},
-		topBarContent = {
-			FlowRow(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-						horizontal = dimensionResource(R.dimen.horizontal_padding),
-						vertical = dimensionResource(R.dimen.vertical_padding)
-					),
-				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
-			) {
-				SingleSelectChipDropdown(
-					category = stringResource(R.string.train_type),
-					options = listOf(stringResource(R.string.reset)) + viewModel.trainTypeOptions.map { it.getString("dataName") },
-					optionValues = listOf(null) + viewModel.trainTypeOptions.map { it.getString("dataNumber") },
-					selectedValue = trainTypeValue,
-					onValueChange = { trainTypeValue = it; onFilterChange() }
+			title = stringResource(R.string.grade_for_level),
+			onNavigationClick = { backStack.navigateBack(activity) },
+			isNestedScrollEnabled = false,
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope,
+			sharedKey = "GradeForLevel",
+			topBarMenus = {
+				listOf(
+						exportMarkdownMenuItem(
+								backStack,
+								viewModel.sections,
+								stringResource(R.string.grade_for_level),
+								stringResource(R.string.grade_for_level)
+						)
 				)
-				SingleSelectChipDropdown(
-					category = stringResource(R.string.year),
-					options = listOf(stringResource(R.string.reset)) + viewModel.yearOptions.map { it.getString("acadYearSemester") },
-					optionValues = listOf(null) + viewModel.yearOptions.map { it.getString("acadYearSemester") },
-					selectedValue = yearValue,
-					onValueChange = { yearValue = it; onFilterChange() }
-				)
-				SingleSelectChipDropdown(
-					category = stringResource(R.string.course_type),
-					options = listOf(stringResource(R.string.reset)) + viewModel.courseTypeOptions.map { it.getString("catName") },
-					optionValues = listOf(null) + viewModel.courseTypeOptions.map { it.getString("catCode") },
-					selectedValue = courseTypeValue,
-					onValueChange = { courseTypeValue = it; onFilterChange() }
-				)
-				InputDialogChip(stringResource(R.string.course_name), courseNameValue) { courseNameValue = it; onFilterChange() }
-				InputDialogChip(stringResource(R.string.course_number), courseNumberValue) { courseNumberValue = it; onFilterChange() }
-				InputDialogChip(stringResource(R.string.min_grade), minGradeValue, KeyboardType.Number) { minGradeValue = it; onFilterChange() }
-			}
+			},
+			topBarContent = {
+				FlowRow(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(
+									horizontal = dimensionResource(R.dimen.horizontal_padding),
+									vertical = dimensionResource(R.dimen.vertical_padding)
+							),
+						horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
+				) {
+					SingleSelectChipDropdown(
+							category = stringResource(R.string.train_type),
+							options = listOf(stringResource(R.string.reset)) + viewModel.trainTypeOptions.map {
+								it.getString("dataName")
+							},
+							optionValues = listOf(null) + viewModel.trainTypeOptions.map {
+								it.getString("dataNumber")
+							},
+							selectedValue = trainTypeValue,
+							onValueChange = { trainTypeValue = it; onFilterChange() })
+					SingleSelectChipDropdown(
+							category = stringResource(R.string.year),
+							options = listOf(stringResource(R.string.reset)) + viewModel.yearOptions.map {
+								it.getString("acadYearSemester")
+							},
+							optionValues = listOf(null) + viewModel.yearOptions.map { it.getString("acadYearSemester") },
+							selectedValue = yearValue,
+							onValueChange = { yearValue = it; onFilterChange() })
+					SingleSelectChipDropdown(
+							category = stringResource(R.string.course_type),
+							options = listOf(stringResource(R.string.reset)) + viewModel.courseTypeOptions.map {
+								it.getString("catName")
+							},
+							optionValues = listOf(null) + viewModel.courseTypeOptions.map {
+								it.getString("catCode")
+							},
+							selectedValue = courseTypeValue,
+							onValueChange = { courseTypeValue = it; onFilterChange() })
+					InputDialogChip(
+							stringResource(R.string.course_name), courseNameValue
+					) { courseNameValue = it; onFilterChange() }
+					InputDialogChip(
+							stringResource(R.string.course_number), courseNumberValue
+					) { courseNumberValue = it; onFilterChange() }
+					InputDialogChip(
+							stringResource(R.string.min_grade), minGradeValue, KeyboardType.Number
+					) { minGradeValue = it; onFilterChange() }
+				}
+			}) {
+		StatePage(uiState) {
+			StaggerScreen(
+					sections = viewModel.sections, onScrollBottom = viewModel::fetchMoreGrade
+			)
 		}
-	) {
-		StaggerScreen(
-			sections = viewModel.sections,
-			onScrollBottom = {
-				if (viewModel.hasMore()) viewModel.fetchGrade()
-			}
-		)
 	}
 }

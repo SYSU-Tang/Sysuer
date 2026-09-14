@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -14,13 +16,14 @@ import androidx.viewbinding.ViewBinding
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.CommonUtil.toStringOrDefault
 import com.miyuyan.sysuer.databinding.ItemEvaluationBinding
 import com.miyuyan.sysuer.databinding.RecyclerViewScrollBinding
 import com.miyuyan.sysuer.model.PjxtModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.Map
 
@@ -77,14 +80,17 @@ class EvaluationCourseFragment : BaseFragment() {
 			}
 		}
 		binding.root.adapter = adp
-		model.message.observe(requireActivity(), Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (response.get("code") == "200") if (message.first == 1) {
-				val result = response.getJSONObject("result")
-				result.getJSONArray("list").forEach { e: Any? -> adp.add(e as JSONObject) }
-				if (result.getInteger("total") / 20.0 > page) getEvaluation(type, rwid, pjrdm!!)
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (response.get("code") == "200") if (code == 1) {
+						val result = response.getJSONObject("result")
+						result.getJSONArray("list").forEach { e: Any? -> adp.add(e as JSONObject) }
+						if (result.getInteger("total") / 20.0 > page) getEvaluation(type, rwid, pjrdm!!)
+					}
+				}
 			}
-		})
+		}
 		if (type != null && rwid != null && pjrdm != null) getEvaluation(type, rwid, pjrdm)
 		return binding.root
 	}

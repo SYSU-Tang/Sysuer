@@ -99,7 +99,7 @@ class RainClassModel(context: Context) : BaseModel(context) {
 				response.header("Content-Type")?.takeIf { it.contains("application/json") }?.let {
 					val contentJSON = JSONObject.parseObject(content)
 					val result = CommonUtil.Tuple2(request.second, contentJSON)
-					message.postValue(result)
+					messageChannel.trySend(result)
 				}
 			}
 			401 -> {}

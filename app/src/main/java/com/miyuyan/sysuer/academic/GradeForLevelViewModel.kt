@@ -5,11 +5,15 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.SectionData
+import com.miyuyan.sysuer.view.UiState
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class GradeForLevelViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: JwxtModel = JwxtModel(application)
@@ -29,76 +33,111 @@ class GradeForLevelViewModel(application: Application) : AndroidViewModel(applic
 	var minGrade: String? = null
 	private var page = 1
 	private var total = -1
-	
+
+	var uiState = model.getUiState(3)
+
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					0 -> _trainTypeOptions.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
-					1 -> _yearOptions.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
-					2 -> _courseTypeOptions.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
-					3 -> {
-						if (total == -1) total = response.getJSONObject("data").getInteger("total")
-						response.getJSONObject("data").getJSONArray("rows").forEach { item ->
-							sections.add(SectionData(title = (item as JSONObject).getString("courseName"),
-							                     rows = extractValue(application,
-							                                         item,
-							                                         intArrayOf(R.string.gpa,
-							                                                    R.string.class_number,
-							                                                    R.string.course_category,
-							                                                    R.string.course_id,
-							                                                    R.string.course_name,
-							                                                    R.string.course_number,
-							                                                    R.string.credit,
-							                                                    R.string.exam_nature,
-							                                                    R.string.level,
-							                                                    R.string.grade,
-							                                                    R.string.department,
-							                                                    R.string.semester,
-							                                                    R.string.total_hours,
-							                                                    R.string.training_category,
-							                                                    R.string.total_achievement),
-							                                         arrayOf("achievementPoint",
-							                                                 "classesNum",
-							                                                 "courseCategoryName",
-							                                                 "courseId",
-							                                                 "courseName",
-							                                                 "courseNum",
-							                                                 "credit",
-							                                                 "examNatureName",
-							                                                 "finalAchievementStr",
-							                                                 "grade",
-							                                                 "openClassUnitName",
-							                                                 "schoolSemester",
-							                                                 "sumHours",
-							                                                 "trainingCategoryName",
-							                                                 "totalAchievement"))))
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200) {
+					when (code) {
+						0 -> _trainTypeOptions.addAll(
+								response.getJSONArray("data").filterIsInstance<JSONObject>()
+						)
+
+						1 -> _yearOptions.addAll(
+								response.getJSONArray("data").filterIsInstance<JSONObject>()
+						)
+
+						2 -> _courseTypeOptions.addAll(
+								response.getJSONArray("data").filterIsInstance<JSONObject>()
+						)
+
+						3 -> {
+							if (total == -1) total =
+								response.getJSONObject("data").getInteger("total")
+							if (total == 0) uiState.value = UiState.Empty else uiState.value =
+								UiState.Content
+							response.getJSONObject("data").getJSONArray("rows").forEach { item ->
+								sections.add(
+										SectionData(
+												title = (item as JSONObject).getString("courseName"),
+												rows = extractValue(
+														application, item, intArrayOf(
+														R.string.gpa,
+														R.string.class_number,
+														R.string.course_category,
+														R.string.course_id,
+														R.string.course_name,
+														R.string.course_number,
+														R.string.credit,
+														R.string.exam_nature,
+														R.string.level,
+														R.string.grade,
+														R.string.department,
+														R.string.semester,
+														R.string.total_hours,
+														R.string.training_category,
+														R.string.total_achievement
+												), arrayOf(
+														"achievementPoint",
+														"classesNum",
+														"courseCategoryName",
+														"courseId",
+														"courseName",
+														"courseNum",
+														"credit",
+														"examNatureName",
+														"finalAchievementStr",
+														"grade",
+														"openClassUnitName",
+														"schoolSemester",
+														"sumHours",
+														"trainingCategoryName",
+														"totalAchievement"
+												)
+												)
+										)
+								)
+							}
 						}
 					}
+					model.nextAll()
 				}
-				model.nextAll()
 			}
 		}
 	}
-	
+
 	fun fetchOptions() {
 		model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 0)
 		model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
 		model.add("jwxt/base-info/base-category/SfqyBox", 2)
 		model.nextAll()
 	}
-	
+
 	fun fetchGrade() {
-		model.addAndNext("jwxt/achievement-manage/achievement/selfPageList", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":$args}", 3)
+		uiState.value =
+			if (page == 1) UiState.Loading else UiState.LoadMore
+		model.addAndNext(
+				"jwxt/achievement-manage/achievement/selfPageList",
+				"{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":$args}",
+				3
+		)
 	}
-	
+
 	fun reFetchGrade() {
 		sections.clear()
 		page = 1
 		total = -1
 		fetchGrade()
 	}
-	
+
+	fun fetchMoreGrade() {
+		if (hasMore()) {
+			fetchGrade()
+		}
+	}
+
 	fun hasMore(): Boolean = (page - 1) * 10 < total
 	private val args: JSONObject
 		get() {
@@ -108,10 +147,11 @@ class GradeForLevelViewModel(application: Application) : AndroidViewModel(applic
 			if (!courseType.isNullOrEmpty()) args["courseTypeCode"] = courseType
 			if (!courseName.isNullOrEmpty()) args["courseName"] = courseName
 			if (!courseNumber.isNullOrEmpty()) args["courseNum"] = courseNumber
-			if (!minGrade.isNullOrEmpty() && minGrade?.isDigitsOnly() == true) args["finalAchievement"] = minGrade?.toInt()
+			if (!minGrade.isNullOrEmpty() && minGrade?.isDigitsOnly() == true) args["finalAchievement"] =
+				minGrade?.toInt()
 			return args
 		}
-	
+
 	override fun onCleared() {
 		model.dispose()
 	}

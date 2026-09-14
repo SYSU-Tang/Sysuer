@@ -38,7 +38,7 @@ open class PayModel(context: Context) : BaseModel(context) {
 					contextUtil.toast(response.getString("message",""))
 				}
 				result = CommonUtil.Tuple2(request.second, response)
-				message.postValue(result)
+//				message.postValue(result)
 				messageChannel.trySend(result)
 				afterLoginRequest.remove(request)
 			}

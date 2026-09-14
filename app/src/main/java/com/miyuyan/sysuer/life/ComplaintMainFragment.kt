@@ -7,6 +7,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -22,6 +25,8 @@ import com.miyuyan.sysuer.databinding.ItemFileBinding
 import com.miyuyan.sysuer.model.XinfangModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
 class ComplaintMainFragment : com.miyuyan.sysuer.BaseFragment() {
@@ -83,19 +88,23 @@ class ComplaintMainFragment : com.miyuyan.sysuer.BaseFragment() {
 			}
 		}
 		loadCaptcha(binding.captchaImage)
-		model.message.observe(viewLifecycleOwner) { (code, response) ->
-			when (code) {
-				0 -> {
-					if (response.getBoolean("ok")) {
-						response.getJSONArray("data").forEach { fileAdapter.add(it as JSONObject) }
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					when (code) {
+						0 -> {
+							if (response.getBoolean("ok")) {
+								response.getJSONArray("data").forEach { fileAdapter.add(it as JSONObject) }
+							}
+						}
+						2 -> {
+							if (response.getBoolean("ok")) model.contextUtil.toast(
+								R.string.submit_successful)
+							else model.contextUtil.toast(
+								response.getString("msg") ?: getString(R.string.submit_fail))
+						}            /*{"msg":"File upload processed successfully","data":[{"ext":"txt","path":"\/uploadfile\/api\/7cbc45dc8c6d42318e23ba4e6a466a39.txt","ownerName":"file","size":0,"mime":"text\/plain","name":"hook.txt"}],"ok":true,"params":{},"timestamp":"Thu Jul 16 21:43:17 CST 2026"}*/
 					}
 				}
-				2 -> {
-					if (response.getBoolean("ok")) model.contextUtil.toast(
-						R.string.submit_successful)
-					else model.contextUtil.toast(
-						response.getString("msg") ?: getString(R.string.submit_fail))
-				}            /*{"msg":"File upload processed successfully","data":[{"ext":"txt","path":"\/uploadfile\/api\/7cbc45dc8c6d42318e23ba4e6a466a39.txt","ownerName":"file","size":0,"mime":"text\/plain","name":"hook.txt"}],"ok":true,"params":{},"timestamp":"Thu Jul 16 21:43:17 CST 2026"}*/
 			}
 		}
 		

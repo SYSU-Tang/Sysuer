@@ -1,13 +1,16 @@
 package com.miyuyan.sysuer.academic
 
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.receiveAsFlow
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.BaseActivity
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.databinding.ActivityLeaveReturnRegistrationBinding
 import com.miyuyan.sysuer.model.XgxtModel
 
@@ -26,10 +29,12 @@ class LeaveReturnRegistrationActivity : BaseActivity() {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 		}
 		setContentView(binding.root)
-		model.message.observe(this, Observer { message: CommonUtil.Tuple2<Int, JSONObject> ->
-			val response = message.second
-			if (response.getInteger("code") == 200) {
-				if (message.first == 0) {
+		lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect {
+				(first, response) ->
+						if (response.getInteger("code") == 200) {
+				if (first == 0) {
 					response.getJSONArray("data")?.let {
 						val years = ArrayList<String?>()
 						it.forEach { o: Any? -> years.add((o as JSONObject).getString("label", "")) }
@@ -44,7 +49,9 @@ class LeaveReturnRegistrationActivity : BaseActivity() {
 					}
 				}
 			}
-		})
+		}
+		}
+	}
 		years
 	}
 	

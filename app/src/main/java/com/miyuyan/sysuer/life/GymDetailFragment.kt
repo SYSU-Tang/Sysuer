@@ -5,8 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +24,8 @@ import com.miyuyan.sysuer.databinding.ItemDateBinding
 import com.miyuyan.sysuer.databinding.ItemFieldDetailBinding
 import com.miyuyan.sysuer.model.GymModel
 import com.miyuyan.sysuer.view.RecyclerAdapter
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -46,19 +51,20 @@ class GymDetailFragment : BaseFragment() {
 	val model: GymModel by lazy {
 		GymModel(requireContext())
 	}
-	
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+	): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		id = requireArguments().getString("id")
-		val gridLayoutManager = GridLayoutManager(requireContext(),
-		                                          4,
-		                                          GridLayoutManager.HORIZONTAL,
-		                                          false)
+		val gridLayoutManager = GridLayoutManager(
+				requireContext(), 4, GridLayoutManager.HORIZONTAL, false
+		)
 		val fieldAdapter = FieldAdapter().apply {
 			action = {
-				viewModel.selected.value = selected
+				selected?.let {
+					viewModel.selected.value = it
+				}
 			}
 		}
 		dateAdapter = DateAdapter().apply {
@@ -67,9 +73,9 @@ class GymDetailFragment : BaseFragment() {
 		}
 		val binding = FragmentGymDetailBinding.inflate(inflater, container, false).apply {
 			date.recyclerView.adapter = dateAdapter
-			date.recyclerView.layoutManager = LinearLayoutManager(requireContext(),
-			                                                      LinearLayoutManager.HORIZONTAL,
-			                                                      false)
+			date.recyclerView.layoutManager = LinearLayoutManager(
+					requireContext(), LinearLayoutManager.HORIZONTAL, false
+			)
 			date.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 				override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 					super.onScrolled(recyclerView, dx, dy)
@@ -92,173 +98,200 @@ class GymDetailFragment : BaseFragment() {
 		viewModel.position.observe(viewLifecycleOwner) { p: Int? ->
 			if (p != null) info
 		}
-		model.message.observe(viewLifecycleOwner) { (code, response) ->
-			when (code) {
-				0 -> {
-					reset(fieldAdapter)
-					hash = md5("$response")
-					var availableCapacity = 0
-					var rows = -1
-					val name = MutableLiveData(false)
-					response.getJSONArray("data").forEach { item: Any? ->
-						val timeslots = (item as JSONObject).getJSONArray("Timeslots")
-						if (timeslots != null) {
-							if (rows == -1) {
-								fieldAdapter.add(JSONObject.of("Name",
-								                               getString(R.string.time),
-								                               "Type",
-								                               2))
-								timeslots.forEach { o: Any? ->
-									fieldAdapter.add(JSONObject.of("Name", "${
-										(o as JSONObject).getString("Start")
-									}\n${
-										o.getString("End")
-									}", "Type", 2))
-								}
-								name.value = true
-								rows = timeslots.size + 1
-								gridLayoutManager.spanCount = rows
-							} // 第一列
-							val fieldName = Pattern.compile("(.+)-")
-								.matcher(item.getString("VenueName"))
-								.replaceAll("") // 第一行
-							fieldAdapter.add(JSONObject().fluentPut("VenueName", fieldName)
-								                 .fluentPut("Type", 0))
-							timeslots.forEach { data: Any? ->
-								val venueBooking = item.clone()
-								venueBooking.remove("Timeslots")
-								venueBooking["TimeSlots"] = JSONArray.of((data as JSONObject).clone()
-									                                         .fluentPut("Date", "${
-										                                         data.getString("Date")
-									                                         }T00:00:00.000Z")
-									                                         .apply {
-										                                         remove("AvailableCapacity")
-									                                         })
-								fieldAdapter.add(data.clone()
-									                 .fluentPut("VenueBooking", venueBooking)
-									                 .fluentPut("Type", 1)
-									                 .fluentPut("Venue", fieldName)
-									                 .fluentPut("Duration",
-									                            "${data.getString("Start")}~${
-										                            data.getString("End")
-									                            }"))
-								data.getInteger("AvailableCapacity")?.let {
-									availableCapacity += it
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					when (code) {
+						0 -> {
+							reset(fieldAdapter)
+							hash = md5("$response")
+							var availableCapacity = 0
+							var rows = -1
+							val name = MutableLiveData(false)
+							response.getJSONArray("data").forEach { item: Any? ->
+								val timeslots = (item as JSONObject).getJSONArray("Timeslots")
+								if (timeslots != null) {
+									if (rows == -1) {
+										fieldAdapter.add(
+												JSONObject.of(
+														"Name", getString(R.string.time), "Type", 2
+												)
+										)
+										timeslots.forEach { o: Any? ->
+											fieldAdapter.add(
+													JSONObject.of(
+															"Name", "${
+														(o as JSONObject).getString("Start")
+													}\n${
+														o.getString("End")
+													}", "Type", 2
+													)
+											)
+										}
+										name.value = true
+										rows = timeslots.size + 1
+										gridLayoutManager.spanCount = rows
+									} // 第一列
+									val fieldName = Pattern.compile("(.+)-")
+										.matcher(item.getString("VenueName")).replaceAll("") // 第一行
+									fieldAdapter.add(
+											JSONObject().fluentPut("VenueName", fieldName)
+												.fluentPut("Type", 0)
+									)
+									timeslots.forEach { data: Any? ->
+										val venueBooking = item.clone()
+										venueBooking.remove("Timeslots")
+										venueBooking["TimeSlots"] = JSONArray.of(
+												(data as JSONObject).clone().fluentPut(
+														"Date", "${
+													data.getString("Date")
+												}T00:00:00.000Z"
+												).apply {
+													remove("AvailableCapacity")
+												})
+										fieldAdapter.add(
+												data.clone().fluentPut("VenueBooking", venueBooking)
+													.fluentPut("Type", 1)
+													.fluentPut("Venue", fieldName).fluentPut(
+															"Duration",
+															"${data.getString("Start")}~${
+																data.getString("End")
+															}"
+													)
+										)
+										data.getInteger("AvailableCapacity")?.let {
+											availableCapacity += it
+										}
+									}
+									if (fieldAdapter.itemCount % rows != 0) (0..<(rows - fieldAdapter.itemCount % rows)).forEach { _ ->
+										fieldAdapter.add(JSONObject.of("Type", 3))
+									}
 								}
 							}
-							if (fieldAdapter.itemCount % rows != 0) (0..<(rows - fieldAdapter.itemCount % rows)).forEach { _ ->
-								fieldAdapter.add(JSONObject.of("Type", 3))
+							if (viewModel.position.value != null) dateAdapter!!.setAvailableCapacity(
+									viewModel.position.value!!, availableCapacity
+							)
+							getFee(id!!)
+						}
+
+						1 -> {
+							fee.clear()
+							response.getJSONArray("data")?.run {
+								forEach { fee[(it as JSONObject).getString("UserRole")] = it }
+							}
+							me
+						}
+
+						2 -> {
+							response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
+								userId = it.getJSONObject(0).getString("UserId")
+							}
+							getType(id)
+						}
+
+						3 -> {
+							response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
+								type = it.getJSONObject(0).getString("TypeIdentity")
 							}
 						}
-					}
-					if (viewModel.position.value != null) dateAdapter!!.setAvailableCapacity(
-						viewModel.position.value!!,
-						availableCapacity)
-					getFee(id!!)
-				}
-				1 -> {
-					fee.clear()
-					response.getJSONArray("data")?.run {
-						forEach { fee[(it as JSONObject).getString("UserRole")] = it }
-					}
-					me
-				}
-				2 -> {
-					response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
-						userId = it.getJSONObject(0).getString("UserId")
-					}
-					getType(id)
-				}
-				3 -> {
-					response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
-						type = it.getJSONObject(0).getString("TypeIdentity")
-					}
-				}
-				4 -> {
-					println("Reserve: $response")//response.getJSONObject("data").run {
-					if (response.getInteger("Code") == 200) config.toast(response.getString("data")
-						                                                     ?: getString(R.string.reserve_success))
-					else config.toast(response.getString("Result")) // 订单编号
-					//}
-				}
-			}
-		}
-		viewModel.selected.observe(viewLifecycleOwner) { selected: MutableSet<Int>? ->
-			fieldAdapter.selected = selected
-			val studentFee = fee["学生"]
-			if (studentFee != null) {
-				fieldAdapter.selected?.isEmpty().let {
-					binding.submit.setEnabled(it == false)
-					if (it == true) binding.info.text = getString(R.string.unselected)
-					else {
-						val info = StringBuilder()
-						val items = JSONArray()
-						fieldAdapter.selected?.forEach { e: Int ->
-							info.append(fieldAdapter.get(e).getString("Venue"))
-								.append(" ")
-								.append(fieldAdapter.get(e).getString("Duration"))
-								.append("+")
-							items.add(fieldAdapter.get(e).getJSONObject("VenueBooking"))
+
+						4 -> {
+							println("Reserve: $response")//response.getJSONObject("data").run {
+							if (response.getInteger("Code") == 200) config.toast(
+									response.getString("data")
+										?: getString(R.string.reserve_success)
+							)
+							else config.toast(response.getString("Result")) // 订单编号
+							//}
 						}
-						val venueName = fieldAdapter.get(fieldAdapter.selected!!.toList()[0])
-							.getJSONObject("VenueBooking")
-							.getString("VenueName")
-						val creditFee = studentFee.getInteger("CreditFee") * fieldAdapter.selected?.size!!
-						binding.submit.setOnClickListener { reserve(items, venueName, creditFee) }
-						binding.info.text = String.format(Locale.getDefault(),
-						                                  "%s=%d元",
-						                                  info.deleteCharAt(info.length - 1),
-						                                  creditFee)
+					}
+				}
+				viewModel.selected.collect { selected: MutableSet<Int>? ->
+					fieldAdapter.selected = selected
+					val studentFee = fee["学生"]
+					if (studentFee != null) {
+						fieldAdapter.selected?.isEmpty().let {
+							binding.submit.setEnabled(it == false)
+							if (it == true) binding.info.text = getString(R.string.unselected)
+							else {
+								val info = StringBuilder()
+								val items = JSONArray()
+								fieldAdapter.selected?.forEach { e: Int ->
+									info.append(fieldAdapter.get(e).getString("Venue")).append(" ")
+										.append(fieldAdapter.get(e).getString("Duration"))
+										.append("+")
+									items.add(fieldAdapter.get(e).getJSONObject("VenueBooking"))
+								}
+								val venueName =
+									fieldAdapter.get(fieldAdapter.selected!!.toList()[0])
+										.getJSONObject("VenueBooking").getString("VenueName")
+								val creditFee =
+									studentFee.getInteger("CreditFee") * fieldAdapter.selected?.size!!
+								binding.submit.setOnClickListener {
+									reserve(
+											items,
+											venueName,
+											creditFee
+									)
+								}
+								binding.info.text = String.format(
+										Locale.getDefault(),
+										"%s=%d元",
+										info.deleteCharAt(info.length - 1),
+										creditFee
+								)
+							}
+						}
 					}
 				}
 			}
 		}
 		return binding.root
 	}
-	
+
 	fun reset(field: FieldAdapter) {
 		field.clear()
 		field.clearSelected()
-		viewModel.selected.value = HashSet()
+		viewModel.selected.value = mutableSetOf()
 	}
-	
+
 	val info: Unit
 		get() {
 			viewModel.position.value?.let {
-				getInfo(id!!,
-				        dateAdapter!!.getFormattedDate(it),
-				        dateAdapter!!.getFormattedDate(it))
+				getInfo(
+						id!!, dateAdapter!!.getFormattedDate(it), dateAdapter!!.getFormattedDate(it)
+				)
 			}
 		}
-	
+
 	fun getInfo(id: String, from: String?, to: String?) {
 		model.addAndNext("api/venue/available-slots/range?venueTypeId=$id&start=$from&end=$to", 0)
 	}
-	
+
 	fun getFee(id: String) {
 		model.addAndNext("api/venuetype/$id/feetemplates", 1)
 	}
-	
+
 	val me: Unit
 		get() {
 			model.addAndNext("api/swimmer/me", 2)
 		}
-	
+
 	fun getType(id: String?) {
 		model.addAndNext("api/venue/type/$id", 3)
 	}
-	
+
 	fun reserve(payload: String?) {
 		model.addAndNext("api/BookingRequestVenue", payload, 4)
 	}
-	
+
 	/**
 	 * 生成 UUID
 	 *
 	 * @return 生成的 UUID
 	 */
 	fun generateUUID(): String = UUID.randomUUID().toString()
-	
+
 	/**
 	 * 生成 Token
 	 *
@@ -266,12 +299,10 @@ class GymDetailFragment : BaseFragment() {
 	 * @return 生成的 Token
 	 */
 	fun genToken(uuid: String?, hash: String?): String {
-		val timestamp = LocalDateTime.now()
-			.atZone(ZoneId.systemDefault())
-			.toEpochSecond()
+		val timestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond()
 		return md5("SYSU888BOOKING-$uuid$timestamp") + "." + timestamp + "." + hash
 	}
-	
+
 	/**
 	 * 计算 MD5 哈希值
 	 *
@@ -281,8 +312,7 @@ class GymDetailFragment : BaseFragment() {
 	fun md5(input: String): String {
 		try {
 			val hexString = StringBuilder()
-			MessageDigest.getInstance("MD5")
-				.digest(input.toByteArray(StandardCharsets.UTF_8))
+			MessageDigest.getInstance("MD5").digest(input.toByteArray(StandardCharsets.UTF_8))
 				.forEach {
 					hexString.append(Integer.toHexString(0xff and it.toInt()).padStart(2, '0'))
 				}
@@ -291,7 +321,7 @@ class GymDetailFragment : BaseFragment() {
 			throw RuntimeException("MD5 algorithm not available", e)
 		}
 	}
-	
+
 	//    void updateReservationDialog(DialogGymReservationBinding binding, JSONObject item, JSONObject studentFee) {
 	//        binding.field.value.setText(item.getString("Venue"));
 	//        binding.date.value.setText(item.getString("Date"));
@@ -304,48 +334,54 @@ class GymDetailFragment : BaseFragment() {
 	//    }
 	private fun reserve(items: JSONArray?, venueName: String?, creditFee: Int?) {
 		val uuid = generateUUID()
-		val time = LocalDateTime.now()
-			.atZone(ZoneId.systemDefault())
-			.withZoneSameInstant(ZoneOffset.UTC)
-			.toString()
-		val payload = JSONObject.of("Identity",
-		                            uuid,
-		                            "BookingId",
-		                            genToken(uuid, hash),
-		                            "VenueTypeId",
-		                            type,
-		                            "VenueBookings",
-		                            items,
-		                            "Participants",
-		                            JSONArray.of(),
-		                            "Status",
-		                            "Accepted",
-		                            "Description",
-		                            venueName,
-		                            "CreatedAt",
-		                            time,
-		                            "UpdatedAt",
-		                            time,
-		                            "ActionedBy",
-		                            userId,  /*NetID*/
-		                            "IsCash",
-		                            false,
-		                            "Charge",
-		                            creditFee)
+		val time =
+			LocalDateTime.now().atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC)
+				.toString()
+		val payload = JSONObject.of(
+				"Identity",
+				uuid,
+				"BookingId",
+				genToken(uuid, hash),
+				"VenueTypeId",
+				type,
+				"VenueBookings",
+				items,
+				"Participants",
+				JSONArray.of(),
+				"Status",
+				"Accepted",
+				"Description",
+				venueName,
+				"CreatedAt",
+				time,
+				"UpdatedAt",
+				time,
+				"ActionedBy",
+				userId,  /*NetID*/
+				"IsCash",
+				false,
+				"Charge",
+				creditFee
+		)
 		println("reserve: ${payload.toJSONString()}")
 		reserve(payload.toJSONString())
 	}
-	
+
 	class DateAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
 		val availableCapacity: MutableMap<Int?, Int?> = mutableMapOf()
 		var action: ((Int) -> Unit)? = null
 		var page: Int = 7
 		var selected: Int = -1
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object : RecyclerView.ViewHolder(ItemDateBinding.inflate(LayoutInflater.from(
-				parent.context), parent, false).root) {}
+			return object : RecyclerView.ViewHolder(
+					ItemDateBinding.inflate(
+							LayoutInflater.from(
+									parent.context
+							), parent, false
+					).root
+			) {}
 		}
-		
+
 		fun select(position: Int) {
 			val tmp = selected
 			selected = position
@@ -353,7 +389,7 @@ class GymDetailFragment : BaseFragment() {
 			notifyItemChanged(position)
 			notifyItemChanged(tmp)
 		}
-		
+
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 			val binding = ItemDateBinding.bind(holder.itemView).apply {
 				date.text = getDate(position)
@@ -361,35 +397,33 @@ class GymDetailFragment : BaseFragment() {
 				root.setOnClickListener { select(position) }
 				root.isChecked = position == selected
 			}
-			binding.availableCapacity.text = availableCapacity.getOrDefault(position, -1)
-				?.let { if (it >= 0) "$it" else "" }
+			binding.availableCapacity.text =
+				availableCapacity.getOrDefault(position, -1)?.let { if (it >= 0) "$it" else "" }
 		}
-		
+
 		fun setAvailableCapacity(position: Int, i: Int) {
 			availableCapacity[position] = i
 			notifyItemChanged(position)
 		}
-		
+
 		override fun getItemCount(): Int = page
 		fun offset(offset: Int) {
 			page += offset
 			notifyItemRangeInserted(page - 1, offset)
 		}
-		
+
 		private fun getDate(distanceDay: Int, pattern: String?): String? {
-			return LocalDate.now()
-				.plusDays(distanceDay.toLong())
+			return LocalDate.now().plusDays(distanceDay.toLong())
 				.format(DateTimeFormatter.ofPattern(pattern))
 		}
-		
+
 		fun getDate(distanceDay: Int): String? = getDate(distanceDay, "M月dd日")
 		fun getFormattedDate(distanceDay: Int): String? = getDate(distanceDay, "M-dd")
 		fun getWeek(context: Context, distanceDay: Int): String? =
 			context.resources.getStringArray(R.array.weeks)[LocalDate.now()
-				.plusDays(distanceDay.toLong())
-				.getDayOfWeek().value - 1]
+				.plusDays(distanceDay.toLong()).getDayOfWeek().value - 1]
 	}
-	
+
 	class FieldAdapter : RecyclerAdapter<JSONObject>() {
 		var action: ((Int) -> Unit)? = null
 		var selected: MutableSet<Int>? = null
@@ -400,18 +434,23 @@ class GymDetailFragment : BaseFragment() {
 					}
 				}
 			}
-		
+
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object : RecyclerView.ViewHolder(ItemFieldDetailBinding.inflate(LayoutInflater.from(
-				parent.context), parent, false).root) {}
+			return object : RecyclerView.ViewHolder(
+					ItemFieldDetailBinding.inflate(
+							LayoutInflater.from(
+									parent.context
+							), parent, false
+					).root
+			) {}
 		}
-		
+
 		fun clearSelected() {
 			val s = selected
 			selected?.clear()
 			s?.forEach { notifyItemChanged(it) }
 		}
-		
+
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 			val pos = holder.getBindingAdapterPosition()
 			val item = get(pos)
@@ -434,13 +473,13 @@ class GymDetailFragment : BaseFragment() {
 							fieldDetail.text = "${context.getString(R.string.reservable)}/${
 								item.getString("AvailableCapacity", "")
 							}"
-						}
-						else {
+						} else {
 							fieldDetail.setText(R.string.reserved)
 							fieldDetail.setAlpha(0.5f)
 						}
 						root.isChecked = selected!!.contains(pos)
 					}
+
 					else -> fieldDetail.text = ""
 				}
 			}

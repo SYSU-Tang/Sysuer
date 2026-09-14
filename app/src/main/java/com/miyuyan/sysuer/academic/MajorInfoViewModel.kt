@@ -6,11 +6,14 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.SectionData
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class MajorInfoViewModel(application: Application) : AndroidViewModel(application) {
 	private val model: JwxtModel = JwxtModel(application)
@@ -22,22 +25,24 @@ class MajorInfoViewModel(application: Application) : AndroidViewModel(applicatio
 	private val totals = mutableMapOf<Int, Int>()
 	
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200 && response.get("data") != null) {
-				when (code) {
-					0 -> _categories.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
-					else -> {
-						val tabIndex = code - 1
-						val data = response.getJSONObject("data")
-						totals[tabIndex] = data.getInteger("total")
-						println("code $code")
-						data.getJSONArray("rows").forEach { item ->
-							_majorList.getOrPut(tabIndex) { mutableStateListOf() }
-								.add(SectionData(title = (item as JSONObject).getString("name"),
-								                 rows = extractValue(application,
-								                                     item,
-								                                     intArrayOf(R.string.major_code, R.string.major_name, R.string.schooling_length, R.string.study_period, R.string.discipline_category, R.string.degree_granting_category),
-								                                     arrayOf("code", "name", "educationalSystem", "maxStudyYear", "disciplineCateName", "degreeGrantName"))))
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200 && response.get("data") != null) {
+					when (code) {
+						0 -> _categories.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())
+						else -> {
+							val tabIndex = code - 1
+							val data = response.getJSONObject("data")
+							totals[tabIndex] = data.getInteger("total")
+							println("code $code")
+							data.getJSONArray("rows").forEach { item ->
+								_majorList.getOrPut(tabIndex) { mutableStateListOf() }
+									.add(SectionData(title = (item as JSONObject).getString("name"),
+									                 rows = extractValue(application,
+									                                     item,
+									                                     intArrayOf(R.string.major_code, R.string.major_name, R.string.schooling_length, R.string.study_period, R.string.discipline_category, R.string.degree_granting_category),
+									                                     arrayOf("code", "name", "educationalSystem", "maxStudyYear", "disciplineCateName", "degreeGrantName"))))
+							}
 						}
 					}
 				}

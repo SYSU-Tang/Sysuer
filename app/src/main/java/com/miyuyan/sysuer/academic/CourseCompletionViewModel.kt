@@ -4,8 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class CourseCompletionViewModel(application: Application) : AndroidViewModel(application) {
 	private val model = JwxtModel(application)
@@ -17,17 +20,19 @@ class CourseCompletionViewModel(application: Application) : AndroidViewModel(app
 	private var total = -1
 	
 	init {
-		model.message.observeForever { (code, response) ->
-			if (response.getInteger("code") == 200 && response.get("data") != null) {
-				when (code) {
-					0 -> {
-						_creditHours.value = response.getJSONArray("data").filterIsInstance<JSONObject>()
-					}
-					1 -> {
-						val data = response.getJSONObject("data")
-						if (total == -1) total = data.getInteger("total")
-						val newRows = data.getJSONArray("rows").filterIsInstance<JSONObject>()
-						_courseList.value = _courseList.value!! + newRows
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				if (response.getInteger("code") == 200 && response.get("data") != null) {
+					when (code) {
+						0 -> {
+							_creditHours.value = response.getJSONArray("data").filterIsInstance<JSONObject>()
+						}
+						1 -> {
+							val data = response.getJSONObject("data")
+							if (total == -1) total = data.getInteger("total")
+							val newRows = data.getJSONArray("rows").filterIsInstance<JSONObject>()
+							_courseList.value = _courseList.value!! + newRows
+						}
 					}
 				}
 			}

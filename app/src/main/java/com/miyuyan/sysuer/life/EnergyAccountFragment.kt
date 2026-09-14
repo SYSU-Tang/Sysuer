@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.collection.ArraySet
 import androidx.collection.arraySetOf
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alibaba.fastjson2.JSONObject
@@ -22,6 +25,8 @@ import com.miyuyan.sysuer.model.ZhnyModel
 import com.miyuyan.sysuer.todo.TitleAdapter
 import com.miyuyan.sysuer.view.ButtonAdapter
 import com.miyuyan.sysuer.view.PreferenceAdapter
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -48,43 +53,47 @@ class EnergyAccountFragment : BaseFragment() {
 				recharge(it, roomCode, rechargeBinding.remark.text.toString())
 			}
 		}
-		model.message.observe(viewLifecycleOwner) { (code, response) ->
-			println("code = $code , response = $response")
-			if (response.getInteger("code") == 200) {
-				when (code) {
-					0 -> {
-						val userInfo = response.getJSONObject("data")
-						adapter.addAdapter(TitleAdapter(getString(R.string.account)))
-						val preferenceAdapter = PreferenceAdapter()
-						preferenceAdapter.set(mutableListOf(R.string.name, R.string.student_id), extractValue(userInfo, arrayOf("name", "username")), mutableListOf(R.drawable.account, R.drawable.id), requireContext())
-						adapter.addAdapter(preferenceAdapter)
-						getRoom(userInfo.getString("username"))
-					}
-					1 -> {
-						response.getJSONArray("data").forEach { e: Any? ->
-							val roomInfo = e as JSONObject
-							adapter.addAdapter(TitleAdapter(getString(R.string.dorm)))
-							val preferenceAdapter = PreferenceAdapter()
-							preferenceAdapter.set(mutableListOf(R.string.location, R.string.room_name), extractValue(roomInfo, arrayOf("areaInfo", "roomName")), mutableListOf(R.drawable.location, R.drawable.home), requireContext())
-							adapter.addAdapter(preferenceAdapter)
-							rooms.add(CommonUtil.Tuple2(roomInfo.getString("roomName"), roomInfo.getString("roomCode")))
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					println("code = $code , response = $response")
+					if (response.getInteger("code") == 200) {
+						when (code) {
+							0 -> {
+								val userInfo = response.getJSONObject("data")
+								adapter.addAdapter(TitleAdapter(getString(R.string.account)))
+								val preferenceAdapter = PreferenceAdapter()
+								preferenceAdapter.set(mutableListOf(R.string.name, R.string.student_id), extractValue(userInfo, arrayOf("name", "username")), mutableListOf(R.drawable.account, R.drawable.id), requireContext())
+								adapter.addAdapter(preferenceAdapter)
+								getRoom(userInfo.getString("username"))
+							}
+							1 -> {
+								response.getJSONArray("data").forEach { e: Any? ->
+									val roomInfo = e as JSONObject
+									adapter.addAdapter(TitleAdapter(getString(R.string.dorm)))
+									val preferenceAdapter = PreferenceAdapter()
+									preferenceAdapter.set(mutableListOf(R.string.location, R.string.room_name), extractValue(roomInfo, arrayOf("areaInfo", "roomName")), mutableListOf(R.drawable.location, R.drawable.home), requireContext())
+									adapter.addAdapter(preferenceAdapter)
+									rooms.add(CommonUtil.Tuple2(roomInfo.getString("roomName"), roomInfo.getString("roomCode")))
+								}
+								if (!rooms.isEmpty()) {
+									roomCode = rooms.valueAt(0)!!.getSecond()
+									getBalance(roomCode)
+								}
+							}
+							2 -> {
+								adapter.addAdapter(TitleAdapter(getString(R.string.balance)))
+								val preferenceAdapter = PreferenceAdapter()
+								preferenceAdapter.add(getString(R.string.balance), response.getJSONObject("data").getString("balance"), R.drawable.money)
+								adapter.addAdapter(preferenceAdapter)
+								val buttonAdapter = ButtonAdapter()
+								buttonAdapter.add(getString(R.string.pay_fee))
+								buttonAdapter.setListener { button: Button?, _: Int -> button!!.setOnClickListener { rechargeDialog.show() } }
+								adapter.addAdapter(buttonAdapter)
+							}
+							3 -> gotoWechat(response.getJSONObject("data").getJSONObject("data"))
 						}
-						if (!rooms.isEmpty()) {
-							roomCode = rooms.valueAt(0)!!.getSecond()
-							getBalance(roomCode)
-						}
 					}
-					2 -> {
-						adapter.addAdapter(TitleAdapter(getString(R.string.balance)))
-						val preferenceAdapter = PreferenceAdapter()
-						preferenceAdapter.add(getString(R.string.balance), response.getJSONObject("data").getString("balance"), R.drawable.money)
-						adapter.addAdapter(preferenceAdapter)
-						val buttonAdapter = ButtonAdapter()
-						buttonAdapter.add(getString(R.string.pay_fee))
-						buttonAdapter.setListener { button: Button?, _: Int -> button!!.setOnClickListener { rechargeDialog.show() } }
-						adapter.addAdapter(buttonAdapter)
-					}
-					3 -> gotoWechat(response.getJSONObject("data").getJSONObject("data"))
 				}
 			}
 		}

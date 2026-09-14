@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.alibaba.fastjson2.JSONObject
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -19,16 +21,20 @@ import com.miyuyan.sysuer.databinding.ItemSchoolBusNoticeBinding
 import com.miyuyan.sysuer.model.PortalModel
 import com.miyuyan.sysuer.view.Pager2Adapter
 import com.miyuyan.sysuer.view.StaggerFragment
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.util.stream.IntStream
 
 class SchoolBusActivity : BaseActivity() {
-	val day: MutableLiveData<Boolean?> = MutableLiveData<Boolean?>(true)
+
+	val day = MutableStateFlow(true)
 	lateinit var model: PortalModel
 	override fun onDestroy() {
 		super.onDestroy()
 		model.dispose()
 	}
-	
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val pager2Adapter = Pager2Adapter(this)
@@ -39,7 +45,8 @@ class SchoolBusActivity : BaseActivity() {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			toolbar.setTitle(R.string.school_bus)
 			pager.adapter = pager2Adapter
-			toolbar.menu.add(R.string.export).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setIcon(R.drawable.export).setOnMenuItemClickListener {
+			toolbar.menu.add(R.string.export).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+				.setIcon(R.drawable.export).setOnMenuItemClickListener {
 					if (pager2Adapter.itemCount > 0) {
 						val currentItem = pager.currentItem
 						val fragment = (pager2Adapter.get(currentItem) as StaggerFragment)
@@ -47,63 +54,103 @@ class SchoolBusActivity : BaseActivity() {
 					}
 					true
 				}
-			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.text = routes[position] }.attach()
+			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab, position: Int ->
+				tab.text = routes[position]
+			}.attach()
 		}
 		setContentView(binding.root)
-		val notice = MaterialAlertDialogBuilder(this).setTitle(R.string.notice).setPositiveButton(R.string.confirm, null).create()
-		val header = ItemSchoolBusNoticeBinding.inflate(layoutInflater, binding.appBarLayout, false).apply {
+		val notice = MaterialAlertDialogBuilder(this).setTitle(R.string.notice)
+			.setPositiveButton(R.string.confirm, null).create()
+		val header =
+			ItemSchoolBusNoticeBinding.inflate(layoutInflater, binding.appBarLayout, false).apply {
 				date.addOnButtonCheckedListener { _: MaterialButtonToggleGroup?, i: Int, b: Boolean ->
 					if (i == R.id.workday) day.value = b
 				}
 				this@apply.notice.setOnClickListener { notice.show() }
-				option.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long -> binding.pager.currentItem = position }
-			}
-		day.observe(this) { b: Boolean? ->
-			val key = if (b == true) "workDay" else "holiday"
-			data?.run {
-				if (getJSONArray(key).isEmpty()) IntStream.range(0, pager2Adapter.itemCount).forEach { j -> (pager2Adapter.get(j) as StaggerFragment).clear() }
-				else {
-					var i = 0
-					getJSONArray(key).forEach { item: Any? ->
-						val fragment: StaggerFragment
-						notice.setMessage((item as JSONObject).getString("note"))
-						if (pager2Adapter.itemCount > i) {
-							fragment = pager2Adapter.get(i) as StaggerFragment
-							fragment.clear()
-						}
-						else {
-							routes.add(item.getString("drivingDirectionName"))
-							fragment = StaggerFragment()
-							pager2Adapter.add(fragment)
-						}
-						i++
-						fragment.addSection(getString(R.string.route_detail),
-						                    R.drawable.bus,
-						                    CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.route, R.string.start, R.string.end)),
-						                    extractValue(item, arrayOf("drivingDirectionName", "startStation", "endStation")))
-						item.getJSONArray("schoolBusShuttleMomentList").forEach {
-							fragment.addSection((it as JSONObject).getString("time"),
-							                    R.drawable.bus,
-							                    CommonUtil.getString(this@SchoolBusActivity, intArrayOf(R.string.passenger, R.string.vehicles, R.string.time, R.string.route)),
-							                    extractValue(it, arrayOf("passenger", "vehiclesType", "time", "drivingRoute")))
-						}
-					}
-					header.option.setSimpleItems(routes.toTypedArray<String?>())
+				option.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
+					binding.pager.currentItem = position
 				}
 			}
-		}
+
 		binding.appBarLayout.addView(header.root)
-		model.message.observe(this) { (code, response) ->
-			if (response.getJSONObject("meta").getInteger("statusCode") == 200) {
-				if (code == 0) {
-					data = response.getJSONObject("data")
-					day.value = true
+		lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					if (response.getJSONObject("meta").getInteger("statusCode") == 200) {
+						if (code == 0) {
+							data = response.getJSONObject("data")
+							day.value = true
+						}
+					}
+				}
+				day.collect { b: Boolean ->
+					val key = if (b) "workDay" else "holiday"
+					data?.run {
+						if (getJSONArray(key).isEmpty()) IntStream.range(0, pager2Adapter.itemCount)
+							.forEach { j -> (pager2Adapter.get(j) as StaggerFragment).clear() }
+						else {
+							var i = 0
+							getJSONArray(key).forEach { item: Any? ->
+								val fragment: StaggerFragment
+								notice.setMessage((item as JSONObject).getString("note"))
+								if (pager2Adapter.itemCount > i) {
+									fragment = pager2Adapter.get(i) as StaggerFragment
+									fragment.clear()
+								} else {
+									routes.add(item.getString("drivingDirectionName"))
+									fragment = StaggerFragment()
+									pager2Adapter.add(fragment)
+								}
+								i++
+								fragment.addSection(
+										getString(R.string.route_detail),
+										R.drawable.bus,
+										CommonUtil.getString(
+												this@SchoolBusActivity,
+												intArrayOf(
+														R.string.route,
+														R.string.start,
+														R.string.end
+												)
+										),
+										extractValue(
+												item, arrayOf(
+												"drivingDirectionName", "startStation", "endStation"
+										)
+										)
+								)
+								item.getJSONArray("schoolBusShuttleMomentList").forEach {
+									fragment.addSection(
+											(it as JSONObject).getString("time"),
+											R.drawable.bus,
+											CommonUtil.getString(
+													this@SchoolBusActivity, intArrayOf(
+													R.string.passenger,
+													R.string.vehicles,
+													R.string.time,
+													R.string.route
+											)
+											),
+											extractValue(
+													it, arrayOf(
+													"passenger",
+													"vehiclesType",
+													"time",
+													"drivingRoute"
+											)
+											)
+									)
+								}
+							}
+							header.option.setSimpleItems(routes.toTypedArray<String?>())
+						}
+					}
 				}
 			}
 		}
 		getData()
 	}
-	
+
 	fun getData() {
 		model.addAndNext("newClient/api/extraCard/schoolBusShuttleInfo/selectSchoolBusMap", 0)
 	}

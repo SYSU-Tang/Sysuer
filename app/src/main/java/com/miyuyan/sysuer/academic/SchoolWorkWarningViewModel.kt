@@ -7,11 +7,14 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.SectionData
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class SchoolWorkWarningViewModel(application: Application) : AndroidViewModel(application) {
 	private val model = JwxtModel(application)
@@ -23,16 +26,18 @@ class SchoolWorkWarningViewModel(application: Application) : AndroidViewModel(ap
 	val hasMore: Boolean get() = total > page * 10
 	
 	init {
-		model.message.observeForever { (_, response) ->
-			if (response.getInteger("code") == 200) response.getJSONObject("data")?.let {
-				if (total == -1) total = it.getInteger("total")
-				var order = sections.size
-				it.getJSONArray("rows").forEach { a: Any? ->
-					sections.add(SectionData("${++order}",
-					                         R.drawable.warning,
-					                         extractValue(a as JSONObject,
-					                                      arrayOf("预警结果", "预警操作学期", "预警学期", "生成预警档案时间", "档案ID", "警告程度"),
-					                                      arrayOf("alarmResultName", "alarmOperationTerm", "alarmTerm", "createTime", "archivceID", "alarmResult"))))
+		viewModelScope.launch {
+			model.messageChannel.receiveAsFlow().collect { (_, response) ->
+				if (response.getInteger("code") == 200) response.getJSONObject("data")?.let {
+					if (total == -1) total = it.getInteger("total")
+					var order = sections.size
+					it.getJSONArray("rows").forEach { a: Any? ->
+						sections.add(SectionData("${++order}",
+						                         R.drawable.warning,
+						                         extractValue(a as JSONObject,
+						                                      arrayOf("预警结果", "预警操作学期", "预警学期", "生成预警档案时间", "档案ID", "警告程度"),
+						                                      arrayOf("alarmResultName", "alarmOperationTerm", "alarmTerm", "createTime", "archivceID", "alarmResult"))))
+					}
 				}
 			}
 		}
