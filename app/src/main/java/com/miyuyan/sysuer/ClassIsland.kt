@@ -80,10 +80,11 @@ object ClassIsland {
 		val totalMinutes: Long = 0L,
 		val elapsedMinutes: Long = 0L,
 		val remainingMinutes: Long = 0L,
-		val remainingSeconds: Long = 0L,/*
-		val progress: Int = if (totalMinutes > 0) {
-			((elapsedMinutes * 100) / totalMinutes).toInt().coerceIn(0, 100)
-		} else 0*/
+		val remainingSeconds: Long = 0L,
+			/*
+					val progress: Int = if (totalMinutes > 0) {
+						((elapsedMinutes * 100) / totalMinutes).toInt().coerceIn(0, 100)
+					} else 0*/
 	)
 
 	@Volatile
@@ -294,7 +295,7 @@ object ClassIsland {
 
 			CourseState.BREAK -> {
 				val next = result.next ?: return
-				builder.setContentTitle(next.courseName)
+				builder.setContentTitle("${nextClassString}：${next.courseName}")
 					.setShortCriticalText(context.getString(no_class)).setContentText(
 							context.getString(
 									next_class_time,
@@ -313,6 +314,7 @@ object ClassIsland {
 														minuteString
 												)
 										)
+										append("\n")
 										append("$timeString：${next.startTime}~${next.endTime}\n")
 										append("$locationString：${next.teachingPlace}\n")
 									})

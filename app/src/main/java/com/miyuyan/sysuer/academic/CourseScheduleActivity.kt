@@ -128,10 +128,9 @@ class CourseScheduleActivity : BaseActivity() {
 								if (i == 4 || i == 8) topMargin = 16
 							})
 				}
-			if (i == 10) {
+			if (i == 0) {
 				durationBinding.root.measure(View.MEASURED_SIZE_MASK, View.MEASURED_SIZE_MASK)
-				binding.month.layoutParams.width =
-					durationBinding.root.measuredWidth
+				binding.month.layoutParams.width = durationBinding.root.measuredWidth
 			}
 			val (startStr, endStr) = period.split("~")
 			val start = LocalTime.parse(startStr)
@@ -146,6 +145,7 @@ class CourseScheduleActivity : BaseActivity() {
 					).apply {
 						width = 0
 						height = 0
+						if (i == 4 || i == 8) topMargin = 16
 						setGravity(Gravity.FILL)
 					}
 					setBackgroundColor(color)
@@ -153,9 +153,9 @@ class CourseScheduleActivity : BaseActivity() {
 			}
 			binding.day.addView(durationBinding.root)
 		} // 初始化课程时间
-		for (i in 0..6) {
+		resources.getStringArray(R.array.weeks_simple).forEachIndexed { i, week ->
 			val itemBinding = ItemWeekdayBinding.inflate(layoutInflater, binding.week, false)
-			itemBinding.courseWeek.text = resources.getStringArray(R.array.weeks_simple)[i]
+			itemBinding.courseWeek.text = week
 			itemBinding.courseDate.text = getOldDate(i - weekday)
 			val column = View(this)
 			if (i == weekday) {

@@ -477,7 +477,7 @@ class GymDetailFragment : BaseFragment() {
 							fieldDetail.setText(R.string.reserved)
 							fieldDetail.setAlpha(0.5f)
 						}
-						root.isChecked = selected!!.contains(pos)
+						root.isChecked = selected?.contains(pos) ?: false
 					}
 
 					else -> fieldDetail.text = ""
