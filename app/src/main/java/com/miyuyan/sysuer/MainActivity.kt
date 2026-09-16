@@ -71,6 +71,7 @@ import com.miyuyan.sysuer.academic.RegistrationRoute
 import com.miyuyan.sysuer.academic.SchoolEnrollmentRoute
 import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
 import com.miyuyan.sysuer.academic.TrainingProgramRoute
+import com.miyuyan.sysuer.rainClass.RainClassRoute
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.browser.RichTextRoute
 import com.miyuyan.sysuer.extra.AboutRoute
@@ -95,6 +96,7 @@ import com.miyuyan.sysuer.nav.Pay
 import com.miyuyan.sysuer.nav.PersonalInformation
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram
 import com.miyuyan.sysuer.nav.Registration
+import com.miyuyan.sysuer.nav.RainClass
 import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
@@ -339,6 +341,13 @@ class MainActivity : BaseActivity() {
 					}
 					entry<AcademyNotification> {
 						AcademyNotificationRoute(
+							backStack,
+							sharedTransitionScope = this@SharedTransitionLayout,
+							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<RainClass> {
+						RainClassRoute(
 							backStack,
 							sharedTransitionScope = this@SharedTransitionLayout,
 							animatedVisibilityScope = LocalNavAnimatedContentScope.current

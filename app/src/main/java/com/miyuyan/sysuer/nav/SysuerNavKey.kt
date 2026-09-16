@@ -51,7 +51,7 @@ fun MutableList<NavKey>.navigateBack(activity: Activity? = null) {
 @Serializable data object RoomQuery : NavKey
 @Serializable data object AssistantEvaluation : NavKey
 @Serializable data object LeaveSlip : NavKey
-@Serializable data object RainClassMain : NavKey
+@Serializable data object RainClass : NavKey
 @Serializable data object SchoolBus : NavKey
 @Serializable data object EnergyFee : NavKey
 @Serializable data object Pay : NavKey

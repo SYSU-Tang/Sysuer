@@ -147,9 +147,9 @@ import com.miyuyan.sysuer.todo.TodoActivity
 import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Composable
 internal fun DashboardScreen(
@@ -193,9 +193,9 @@ internal fun DashboardScreen(
 	LaunchedEffect(navigateToCourseDetail) {
 		navigateToCourseDetail?.let { json ->
 			backStack.add(
-				CourseDetail(
-					json.getString("teachingClassId", ""), json.getString("courseNum", "")
-				)
+					CourseDetail(
+							json.getString("teachingClassId", ""), json.getString("courseNum", "")
+					)
 			)
 			dashboardViewModel.onNavigatedToCourseDetail()
 		}
@@ -205,64 +205,66 @@ internal fun DashboardScreen(
 	}
 
 	DashboardOrderDialog(
-		show = showOrderDialog,
-		onDismiss = { showOrderDialog = false },
-		dashboardViewModel = dashboardViewModel,
+			show = showOrderDialog,
+			onDismiss = { showOrderDialog = false },
+			dashboardViewModel = dashboardViewModel,
 	)
 
 	DashboardActionDialog(
-		item = showActionItem,
-		onDismiss = { showActionItem = null },
-		onShowOrder = { showActionItem = null; showOrderDialog = true },
-		dashboardViewModel = dashboardViewModel,
-		homeViewModel = homeViewModel,
-		config = config,
+			item = showActionItem,
+			onDismiss = { showActionItem = null },
+			onShowOrder = { showActionItem = null; showOrderDialog = true },
+			dashboardViewModel = dashboardViewModel,
+			homeViewModel = homeViewModel,
+			config = config,
 	)
 
 	FlowRow(
-		modifier = Modifier
-			.fillMaxSize()
-			.nestedScroll(rememberNestedScrollInteropConnection())
-			.verticalScroll(rememberScrollState())
-			.padding(
-				dimensionResource(R.dimen.horizontal_padding),
-				dimensionResource(R.dimen.vertical_padding)
-			),
-		maxItemsInEachRow = 2,
-		verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
+			modifier = Modifier
+				.fillMaxSize()
+				.nestedScroll(rememberNestedScrollInteropConnection())
+				.verticalScroll(rememberScrollState())
+				.padding(
+						dimensionResource(R.dimen.horizontal_padding),
+						dimensionResource(R.dimen.vertical_padding)
+				),
+			maxItemsInEachRow = 2,
+			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 	) {
 		if (0 in selectedSet) ShortcutSection(
-			backStack, dashboardViewModel, homeViewModel, config, activity
+				backStack, dashboardViewModel, homeViewModel, config, activity
 		) { showActionItem = it }
 
 		if (1 in selectedSet || 2 in selectedSet) {
 			val dateText = remember(term, week) { dashboardViewModel.dateText }
 			ScheduleSection(
-				nextClassMarkdown = nextClassMarkdown,
-				dateText = dateText,
-				onNextClassClick = {
-					context.startActivity(
-						Intent(context, CourseScheduleActivity::class.java),
-						ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
-					)
-				},
-				onTimeCardClick = {
-					context.startActivity(
-						Intent(context, AgendaActivity::class.java),
-						ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
-					)
-				})
+					nextClassMarkdown = nextClassMarkdown,
+					dateText = dateText,
+					onNextClassClick = {
+						context.startActivity(
+								Intent(context, CourseScheduleActivity::class.java),
+								ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
+									.toBundle()
+						)
+					},
+					onTimeCardClick = {
+						context.startActivity(
+								Intent(context, AgendaActivity::class.java),
+								ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
+									.toBundle()
+						)
+					})
 		}
 		LaunchedEffect(term) {
 			if (term.isNotEmpty()) {
 				getInstance(context).enqueue(
-					OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
-						Data.Builder().putStringArray(
-							"components", arrayOf(
-								"TodayClassWidget", "RecentClassWidget", "NextClassWidget"
-							)
+						OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setInputData(
+								Data.Builder().putStringArray(
+										"components", arrayOf(
+										"TodayClassWidget", "RecentClassWidget", "NextClassWidget"
+								)
+								).build()
 						).build()
-					).build()
 				)
 			}
 		}
@@ -274,22 +276,24 @@ internal fun DashboardScreen(
 			}
 
 			CourseSection(
-				todayCourses = todayCourses,
-				recentCourses = recentCourses,
-				showDate = settingManager.courseDate,
-				nextClassIndex = nextClassIndex,
-				onCourseClick = {
-					backStack.add(it)
-				},
-				onCourseLongClick = { text ->
-					coroutineScope.launch {
-						clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
-					}
-					config.toast(R.string.copy_successfully)
-				},
-				activity = activity,
-				sharedTransitionScope = sharedTransitionScope,
-				animatedVisibilityScope = animatedVisibilityScope
+					todayCourses = todayCourses,
+					recentCourses = recentCourses,
+					showDate = settingManager.courseDate,
+					nextClassIndex = nextClassIndex,
+					onCourseClick = {
+						backStack.add(it)
+					},
+					onCourseLongClick = { text ->
+						coroutineScope.launch {
+							clipboard.setClipEntry(
+									ClipData.newPlainText("text", text).toClipEntry()
+							)
+						}
+						config.toast(R.string.copy_successfully)
+					},
+					activity = activity,
+					sharedTransitionScope = sharedTransitionScope,
+					animatedVisibilityScope = animatedVisibilityScope
 			)
 		}
 
@@ -307,38 +311,42 @@ internal fun DashboardScreen(
 			}
 
 			ExamSection(
-				week18Exams = week18Exams,
-				week19Exams = week19Exams,
-				showWeek18 = showWeek18,
-				todayExamIndex = todayExamIndex,
-				onToggle = { dashboardViewModel.setShowWeek18(it) },
-				onExamClick = { json ->
-					dashboardViewModel.getSelectedCourses(json.getString("examSubjectName"))
-				},
-				onExamLongClick = { text ->
-					coroutineScope.launch {
-						clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
-					}
-					config.toast(R.string.copy_successfully)
-				},
-				activity = activity,
-				coroutineScope = coroutineScope
+					week18Exams = week18Exams,
+					week19Exams = week19Exams,
+					showWeek18 = showWeek18,
+					todayExamIndex = todayExamIndex,
+					onToggle = { dashboardViewModel.setShowWeek18(it) },
+					onExamClick = { json ->
+						dashboardViewModel.getSelectedCourses(json.getString("examSubjectName"))
+					},
+					onExamLongClick = { text ->
+						coroutineScope.launch {
+							clipboard.setClipEntry(
+									ClipData.newPlainText("text", text).toClipEntry()
+							)
+						}
+						config.toast(R.string.copy_successfully)
+					},
+					activity = activity,
+					coroutineScope = coroutineScope
 			)
 		}
 
 		if (5 in selectedSet) {
 			LaunchedEffect(Unit) { todoManager.init() }
 			val todoList by todoManager.todoModel.todoList.observeAsState(emptyList())
-			var todoRefreshKey by rememberSaveable { mutableIntStateOf(0) }
-			LaunchedEffect(todoRefreshKey) {
-				val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-				todoManager.refresh("(due_date = ? OR ddl = ?)", arrayOf(today, today))
+			val todoRefreshKey = remember { Channel<Unit>(Channel.BUFFERED) }
+			LaunchedEffect(Unit) {
+				todoManager.refresh("status = ?", arrayOf("0"))
+				todoRefreshKey.receiveAsFlow().collect {
+					todoManager.refresh("status = ?", arrayOf("0"))
+				}
 			}
-			todoManager.refreshListener = { todoRefreshKey++ }
+			todoManager.refreshListener = { todoRefreshKey.trySend(Unit) }
 			TodoSection(todoList = todoList, onViewAllClick = {
 				context.startActivity(
-					Intent(context, TodoActivity::class.java),
-					ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+						Intent(context, TodoActivity::class.java),
+						ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
 				)
 			}, todoManager = todoManager)
 		}
@@ -359,35 +367,35 @@ private fun DashboardOrderDialog(
 	ModalBottomSheet(onDismissRequest = onDismiss) {
 		Column(modifier = Modifier.fillMaxWidth()) {
 			Text(
-				orderText,
-				style = MaterialTheme.typography.titleMedium,
-				modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+					orderText,
+					style = MaterialTheme.typography.titleMedium,
+					modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
 			)
 			LazyColumn(modifier = Modifier.fillMaxWidth()) {
 				itemsIndexed(
-					shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
+						shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
 					val shortcut =
 						remember(entity.shortcutId) { JSONObject.parse(entity.shortcutJson ?: "") }
 					val name = shortcut.getString("name") ?: ""
 					ListItem(overlineContent = {
 						Text(
-							name,
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-							style = MaterialTheme.typography.bodyMedium
+								name,
+								maxLines = 1,
+								overflow = TextOverflow.Ellipsis,
+								style = MaterialTheme.typography.bodyMedium
 						)
 					}, leadingContent = {
 						Row {
 							IconButton(onClick = {
 								if (index > 0) dashboardViewModel.moveOrderShortcut(
-									index, index - 1
+										index, index - 1
 								)
 							}, enabled = index > 0) {
 								Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = null)
 							}
 							IconButton(onClick = {
 								if (index < shortcuts.lastIndex) dashboardViewModel.moveOrderShortcut(
-									index, index + 1
+										index, index + 1
 								)
 							}, enabled = index < shortcuts.lastIndex) {
 								Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = null)
@@ -397,10 +405,10 @@ private fun DashboardOrderDialog(
 				}
 			}
 			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(end = 24.dp, bottom = 24.dp),
-				horizontalArrangement = Arrangement.End
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(end = 24.dp, bottom = 24.dp),
+					horizontalArrangement = Arrangement.End
 			) {
 				TextButton(onClick = {
 					dashboardViewModel.saveOrderShortcuts()
@@ -441,43 +449,43 @@ private fun DashboardActionDialog(
 	ModalBottomSheet(onDismissRequest = onDismiss) {
 		Column(modifier = Modifier.fillMaxWidth()) {
 			Card(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-						horizontal = dimensionResource(R.dimen.horizontal_margin),
-						vertical = dimensionResource(R.dimen.vertical_margin)
-					),
-				shape = MaterialTheme.shapes.medium,
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+								horizontal = dimensionResource(R.dimen.horizontal_margin),
+								vertical = dimensionResource(R.dimen.vertical_margin)
+						),
+					shape = MaterialTheme.shapes.medium,
 			) {
 				Markdown(
-					rememberMarkdownState("$markdown"),
-					colors = markdownColor(),
-					typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
-					modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+						rememberMarkdownState("$markdown"),
+						colors = markdownColor(),
+						typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
+						modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
 				)
 			}
 
 			FlowRow(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-						horizontal = dimensionResource(R.dimen.horizontal_margin),
-						vertical = dimensionResource(R.dimen.vertical_margin)
-					),
-				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
-				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap)),
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+								horizontal = dimensionResource(R.dimen.horizontal_margin),
+								vertical = dimensionResource(R.dimen.vertical_margin)
+						),
+					horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap)),
 			) {
 				GenericTonalButton(
-					image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-					text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)
+						image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+						text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)
 				) {
 					isServiceCollected = !isServiceCollected
 					coroutineScope.launch {
 						if (isServiceCollected) {
 							dashboardViewModel.collectService(
-								itemId, item.toJSONString(
+									itemId, item.toJSONString(
 									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
-								), null
+							), null
 							)
 							config.toast(R.string.collect_success)
 						} else {
@@ -488,21 +496,22 @@ private fun DashboardActionDialog(
 				}
 
 				GenericTonalButton(
-					image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut,
-					text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
+						image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut,
+						text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
 				) {
 					isShortcutCollected = !isShortcutCollected
 					coroutineScope.launch {
 						if (isShortcutCollected) {
 							println(
-								item.toJSONString(
-									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
-								)
+									item.toJSONString(
+											JSONWriter.Feature.FieldBased,
+											JSONWriter.Feature.WriteNulls
+									)
 							)
 							dashboardViewModel.addDashboardShortcut(
-								itemId, item.toJSONString(
+									itemId, item.toJSONString(
 									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
-								), null
+							), null
 							)
 							config.toast(R.string.add_shortcut_success)
 						} else {
@@ -515,14 +524,16 @@ private fun DashboardActionDialog(
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Output, text = stringResource(R.string.add_to_launcher)
+						image = Icons.Rounded.Output,
+						text = stringResource(R.string.add_to_launcher)
 				) {
 					if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
 						val intent = when {
 							!item.activity.isNullOrBlank() -> {
 								try {
 									Intent(
-										context, Class.forName(context.packageName + item.activity)
+											context,
+											Class.forName(context.packageName + item.activity)
 									)
 								} catch (_: Exception) {
 									Intent(context, MainActivity::class.java)
@@ -530,7 +541,7 @@ private fun DashboardActionDialog(
 							}
 
 							!item.url.isNullOrBlank() -> Intent(
-								context, BrowserActivity::class.java
+									context, BrowserActivity::class.java
 							).setData(item.url.toUri())
 
 							else -> Intent(context, MainActivity::class.java)
@@ -541,57 +552,60 @@ private fun DashboardActionDialog(
 								.setIcon(IconCompat.createWithResource(context, R.mipmap.icon))
 								.setIntent(intent.setAction(Intent.ACTION_VIEW)).build()
 						ShortcutManagerCompat.requestPinShortcut(
-							context, info, PendingIntent.getBroadcast(
+								context, info, PendingIntent.getBroadcast(
 								context,
 								0,
 								ShortcutManagerCompat.createShortcutResultIntent(context, info),
 								PendingIntent.FLAG_IMMUTABLE
-							).intentSender
+						).intentSender
 						)
 					} else config.toast(R.string.fail_to_add_shortcut)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.ClearAll, text = stringResource(R.string.service_order)
+						image = Icons.Rounded.ClearAll,
+						text = stringResource(R.string.service_order)
 				) {
 					onShowOrder()
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.KeyboardVoice, text = stringResource(R.string.feedback)
+						image = Icons.Rounded.KeyboardVoice,
+						text = stringResource(R.string.feedback)
 				) {
 					context.startActivity(
-						Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri())
-							.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+							Intent(Intent.ACTION_VIEW)
+								.setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri())
+								.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 					)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
+						image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
 				) {
 					item.url?.takeIf { it.isNotBlank() }?.let {
 						context.startActivity(
-							Intent(context, BrowserActivity::class.java).setData(
-								it.toUri()
-							)
+								Intent(context, BrowserActivity::class.java).setData(
+										it.toUri()
+								)
 						)
 					}
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Book, text = stringResource(R.string.guide)
+						image = Icons.Rounded.Book, text = stringResource(R.string.guide)
 				) {
 					item.doc?.takeIf { it.isNotBlank() }?.let {
 						context.startActivity(
-							Intent(
-								context, BrowserActivity::class.java
-							).setData(
-								"https://sysu-tang.github.io/sysuer-website${
-									CommonUtil.trim(
-										it
-									)
-								}".toUri()
-							)
+								Intent(
+										context, BrowserActivity::class.java
+								).setData(
+										"https://sysu-tang.github.io/sysuer-website${
+											CommonUtil.trim(
+													it
+											)
+										}".toUri()
+								)
 						)
 					} ?: config.toast(R.string.undeveloped_warning)
 				}
@@ -616,11 +630,11 @@ private fun ShortcutSection(
 	val shortcuts = vm.dashboardShortcuts
 	LaunchedEffect(Unit) { vm.loadDashboardShortcuts() }
 	FlowRow(
-		modifier = Modifier
-			.fillMaxWidth()
-			.horizontalScroll(rememberScrollState()),
-		horizontalArrangement = Arrangement.Center,
-		verticalArrangement = Arrangement.Center
+			modifier = Modifier
+				.fillMaxWidth()
+				.horizontalScroll(rememberScrollState()),
+			horizontalArrangement = Arrangement.Center,
+			verticalArrangement = Arrangement.Center
 	) {
 		ButtonGroup(horizontalArrangement = Arrangement.Center, overflowIndicator = { menuState ->
 			FilledTonalIconButton(onClick = {
@@ -632,7 +646,8 @@ private fun ShortcutSection(
 		}) {
 			clickableItem(label = scan, icon = {
 				Icon(
-					Icons.Rounded.QrCodeScanner, contentDescription = stringResource(R.string.scan)
+						Icons.Rounded.QrCodeScanner,
+						contentDescription = stringResource(R.string.scan)
 				)
 			}, onClick = { vm.openWechatScan() })
 			clickableItem(label = qrcode, icon = {
@@ -640,14 +655,14 @@ private fun ShortcutSection(
 			}, onClick = { vm.openQrCode() })
 			clickableItem(label = courseSchedule, icon = {
 				Icon(
-					Icons.Rounded.CalendarMonth,
-					contentDescription = stringResource(R.string.course_schedule)
+						Icons.Rounded.CalendarMonth,
+						contentDescription = stringResource(R.string.course_schedule)
 				)
 			}, onClick = {
 				context.startActivity(
-					Intent(
-						context, CourseScheduleActivity::class.java
-					), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+						Intent(
+								context, CourseScheduleActivity::class.java
+						), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
 				)
 			})
 		}
@@ -655,14 +670,14 @@ private fun ShortcutSection(
 			val shortcutJson = entity.shortcutJson ?: return@forEach
 			val shortcut = remember(entity.shortcutId) {
 				JSONObject.parseObject(
-					shortcutJson, ServiceConfig::class.java
+						shortcutJson, ServiceConfig::class.java
 				)
 			}
 			val name = shortcut.name ?: return@forEach
 			LongClickButton(
-				onClick = {
+					onClick = {
 				navigateToServiceItem(
-					context, backStack, shortcut, hm.actionMap
+						context, backStack, shortcut, hm.actionMap
 				)
 				val act = shortcut.activity
 				val url = shortcut.url
@@ -673,9 +688,9 @@ private fun ShortcutSection(
 								it.resolveActivity(context.packageManager) != null
 							}?.let {
 								context.startActivity(
-									it,
-									ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
-										.toBundle()
+										it,
+										ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
+											.toBundle()
 								)
 							}
 						} catch (_: Exception) {
@@ -685,19 +700,20 @@ private fun ShortcutSection(
 
 					!url.isNullOrEmpty() -> {
 						context.startActivity(
-							Intent(context, BrowserActivity::class.java).setData(
-								url.toUri()
-							),
-							ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+								Intent(context, BrowserActivity::class.java).setData(
+										url.toUri()
+								),
+								ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
+									.toBundle()
 						)
 					}
 
 					else -> config.toast(R.string.undeveloped)
 				}
 			},
-				icon = Icons.Rounded.Star,
-				label = name,
-				onLongClick = { onShowActionDialog(shortcut) })
+					icon = Icons.Rounded.Star,
+					label = name,
+					onLongClick = { onShowActionDialog(shortcut) })
 		}
 	}
 }
@@ -710,35 +726,33 @@ private fun ScheduleSection(
 	onTimeCardClick: () -> Unit,
 ) {
 	Row(
-		modifier = Modifier.fillMaxWidth(),
-		horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
+			modifier = Modifier.fillMaxWidth(),
+			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
 	) {
 		OutlinedCard(
-			modifier = Modifier.weight(1.25f),
-			onClick = onNextClassClick
+				modifier = Modifier.weight(1.25f), onClick = onNextClassClick
 		) {
 			if (nextClassMarkdown.isNotEmpty()) Markdown(
-				rememberMarkdownState(nextClassMarkdown),
-				colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-				typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-				modifier = Modifier.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-				)
+					rememberMarkdownState(nextClassMarkdown),
+					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
+					typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
+					modifier = Modifier.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_padding)
+					)
 			)
 		}
 		OutlinedCard(
-			modifier = Modifier.weight(1f),
-			onClick = onTimeCardClick
+				modifier = Modifier.weight(1f), onClick = onTimeCardClick
 		) {
 			if (nextClassMarkdown.isNotEmpty()) Markdown(
-				rememberMarkdownState(dateText),
-				colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-				typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-				modifier = Modifier.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-				)
+					rememberMarkdownState(dateText),
+					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
+					typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
+					modifier = Modifier.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_padding)
+					)
 			)
 		}
 	}
@@ -762,24 +776,24 @@ private fun CourseSection(
 	val courses = if (selectedIndex == 0) todayCourses else recentCourses
 
 	Row(
-		modifier = Modifier.fillMaxWidth(),
-		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.SpaceBetween
+			modifier = Modifier.fillMaxWidth(),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
 	) {
 		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) {
 			context.startActivity(
-				Intent(context, CourseScheduleActivity::class.java),
-				ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+					Intent(context, CourseScheduleActivity::class.java),
+					ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
 			)
 		}
 
 		SingleChoiceSegmentedButtonRow {
 			listOf(R.string.today, R.string.recent).forEachIndexed { index, label ->
 				SegmentedButton(
-					shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
-					onClick = { selectedIndex = index },
-					selected = selectedIndex == index,
-					icon = {},
+						shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+						onClick = { selectedIndex = index },
+						selected = selectedIndex == index,
+						icon = {},
 				) {
 					Text(stringResource(label))
 				}
@@ -793,44 +807,44 @@ private fun CourseSection(
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
 		Crossfade(targetState = courses, label = "courseTab") { list ->
 			if (list.isEmpty()) Text(
-				text = stringResource(R.string.no_class_today),
-				style = MaterialTheme.typography.bodyLarge,
-				modifier = Modifier.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-				)
+					text = stringResource(R.string.no_class_today),
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_padding)
+					)
 			)
 			else Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.height(IntrinsicSize.Max)
-					.horizontalScroll(rememberScrollState(nextClassIndex)),
-				verticalAlignment = Alignment.CenterVertically
+					modifier = Modifier
+						.fillMaxWidth()
+						.height(IntrinsicSize.Max)
+						.horizontalScroll(rememberScrollState(nextClassIndex)),
+					verticalAlignment = Alignment.CenterVertically
 			) {
 				list.forEachIndexed { index, item ->
 					if (index > 0) VerticalDivider()
 					CourseItem(
-						modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
-						bringIntoViewRequester
+							modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
+							bringIntoViewRequester
 					) else Modifier).then(
-						if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+									if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
-								sharedContentState = rememberSharedContentState(
-									key = "course_${
-										item.getString(
-											"classesNum"
-										)
-									}_${item.getString("courseNum")}"
-								),
-								animatedVisibilityScope = animatedVisibilityScope,
+									sharedContentState = rememberSharedContentState(
+											key = "course_${
+												item.getString(
+														"classesNum"
+												)
+											}_${item.getString("courseNum")}"
+									),
+									animatedVisibilityScope = animatedVisibilityScope,
 							)
 						}
 					} else Modifier), item = item, onClick = {
 						onCourseClick(
-							CourseDetail(
-								item.getString("classesNum"), item.getString("courseNum")
-							)
+								CourseDetail(
+										item.getString("classesNum"), item.getString("courseNum")
+								)
 						)
 					}, onLongClick = { key -> onCourseLongClick(item.getString(key)) })
 				}
@@ -858,39 +872,39 @@ private fun CourseItem(
 	val clipboard = LocalClipboard.current
 	val coroutineScope = rememberCoroutineScope()
 	Card(
-		colors = CardDefaults.cardColors(containerColor = backgroundColor),
-		shape = RoundedCornerShape(0.dp),
-		modifier = Modifier
-			.fillMaxHeight()
-			.combinedClickable(onClick = onClick, onLongClick = { onLongClick("courseName") })
-			.alpha(alpha)
+			colors = CardDefaults.cardColors(containerColor = backgroundColor),
+			shape = RoundedCornerShape(0.dp),
+			modifier = Modifier
+				.fillMaxHeight()
+				.combinedClickable(onClick = onClick, onLongClick = { onLongClick("courseName") })
+				.alpha(alpha)
 	) {
 		Column(
-			modifier = modifier.padding(
-				dimensionResource(R.dimen.horizontal_margin),
-				dimensionResource(R.dimen.vertical_margin)
-			)
+				modifier = modifier.padding(
+						dimensionResource(R.dimen.horizontal_margin),
+						dimensionResource(R.dimen.vertical_margin)
+				)
 		) {
 			Spacer(modifier = Modifier.height(4.dp))
 			Text(
-				text = item.getString("courseName", ""),
-				style = MaterialTheme.typography.titleMedium,
-				maxLines = 1,
-				overflow = TextOverflow.Ellipsis,
-				textAlign = TextAlign.Center,
-				modifier = Modifier
-					.fillMaxWidth()
-					.align(Alignment.CenterHorizontally)
+					text = item.getString("courseName", ""),
+					style = MaterialTheme.typography.titleMedium,
+					maxLines = 1,
+					overflow = TextOverflow.Ellipsis,
+					textAlign = TextAlign.Center,
+					modifier = Modifier
+						.fillMaxWidth()
+						.align(Alignment.CenterHorizontally)
 			)
 			listOf(
-				"teachingPlace", "time", "teacherName", "course"
+					"teachingPlace", "time", "teacherName", "course"
 			).zip(
-				listOf(
-					Icons.Rounded.LocationOn,
-					Icons.Rounded.Timer,
-					Icons.Rounded.AccountCircle,
-					Icons.Rounded.CalendarMonth
-				)
+					listOf(
+							Icons.Rounded.LocationOn,
+							Icons.Rounded.Timer,
+							Icons.Rounded.AccountCircle,
+							Icons.Rounded.CalendarMonth
+					)
 			).forEach { (key, icon) ->
 				val text = item.getString(key, "")
 				GenericButton(icon = icon, text = text) {
@@ -924,23 +938,23 @@ private fun ExamSection(
 	}
 
 	Row(
-		modifier = Modifier.fillMaxWidth(),
-		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.SpaceBetween
+			modifier = Modifier.fillMaxWidth(),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
 	) {
 		CardTitle(R.drawable.exam, text = stringResource(R.string.exam)) {
 			context.startActivity(
-				Intent(context, ExamActivity::class.java),
-				ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
+					Intent(context, ExamActivity::class.java),
+					ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
 			)
 		}
 		SingleChoiceSegmentedButtonRow {
 			listOf(R.string.week18, R.string.week19).forEachIndexed { index, label ->
 				SegmentedButton(
-					shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
-					onClick = { selectedIndex = index },
-					selected = selectedIndex == index,
-					icon = {},
+						shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+						onClick = { selectedIndex = index },
+						selected = selectedIndex == index,
+						icon = {},
 				) {
 					Text(stringResource(label))
 				}
@@ -950,35 +964,35 @@ private fun ExamSection(
 
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
 		AnimatedContent(
-			targetState = exams, transitionSpec = {
-				slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) togetherWith slideOutOfContainer(
+				targetState = exams, transitionSpec = {
+			slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) togetherWith slideOutOfContainer(
 					AnimatedContentTransitionScope.SlideDirection.Right
-				)
-			}, label = "examTab"
+			)
+		}, label = "examTab"
 		) { list ->
 			if (list.isEmpty()) Text(
-				text = stringResource(R.string.no_exam),
-				style = MaterialTheme.typography.bodyLarge,
-				modifier = Modifier.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-				)
+					text = stringResource(R.string.no_exam),
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_padding)
+					)
 			)
 			else {
 				Row(
-					modifier = Modifier
-						.fillMaxWidth()
-						.height(IntrinsicSize.Max)
-						.horizontalScroll(rememberScrollState(todayExamIndex)),
-					verticalAlignment = Alignment.CenterVertically
+						modifier = Modifier
+							.fillMaxWidth()
+							.height(IntrinsicSize.Max)
+							.horizontalScroll(rememberScrollState(todayExamIndex)),
+						verticalAlignment = Alignment.CenterVertically
 				) {
 					exams.forEachIndexed { index, exam ->
 						if (index > 0) VerticalDivider()
 						ExamItem(
-							exam = exam,
-							onClick = { onExamClick(exam) },
-							onLongClick = { text -> onExamLongClick(text) },
-							coroutineScope = coroutineScope
+								exam = exam,
+								onClick = { onExamClick(exam) },
+								onLongClick = { text -> onExamLongClick(text) },
+								coroutineScope = coroutineScope
 						)
 					}
 				}
@@ -1006,51 +1020,51 @@ private fun ExamItem(
 	val weeks = stringArrayResource(R.array.weeks)
 	val clipboard = LocalClipboard.current
 	Card(
-		colors = CardDefaults.cardColors(containerColor = backgroundColor),
-		modifier = Modifier
-			.fillMaxHeight()
-			.combinedClickable(
-				onClick = onClick,
-				onLongClick = { onLongClick(exam.getString("examSubjectName") ?: "") })
-			.alpha(alpha)
+			colors = CardDefaults.cardColors(containerColor = backgroundColor),
+			modifier = Modifier
+				.fillMaxHeight()
+				.combinedClickable(
+						onClick = onClick,
+						onLongClick = { onLongClick(exam.getString("examSubjectName") ?: "") })
+				.alpha(alpha)
 	) {
 		Column(
-			modifier = Modifier.padding(
-				dimensionResource(R.dimen.horizontal_margin),
-				dimensionResource(R.dimen.vertical_margin)
-			)
+				modifier = Modifier.padding(
+						dimensionResource(R.dimen.horizontal_margin),
+						dimensionResource(R.dimen.vertical_margin)
+				)
 		) {
 			Spacer(modifier = Modifier.height(4.dp))
 			Text(
-				text = exam.getString("examSubjectName", ""),
-				style = MaterialTheme.typography.titleMedium,
-				maxLines = 1,
-				overflow = TextOverflow.Ellipsis,
-				textAlign = TextAlign.Center,
-				modifier = Modifier
-					.fillMaxWidth()
-					.align(Alignment.CenterHorizontally)
+					text = exam.getString("examSubjectName", ""),
+					style = MaterialTheme.typography.titleMedium,
+					maxLines = 1,
+					overflow = TextOverflow.Ellipsis,
+					textAlign = TextAlign.Center,
+					modifier = Modifier
+						.fillMaxWidth()
+						.align(Alignment.CenterHorizontally)
 			)
 			val examDate = exam.getString("examDate", "")
 			val weekIdx = exam.getInteger("week")?.let { it - 1 }?.coerceIn(0, weeks.size - 1) ?: 0
 			listOf(
-				exam.getString("classroomNumber", ""),
-				"$examDate ${weeks[weekIdx]}",
-				"${exam.getString("duration", "")}${stringResource(R.string.minute)}",
-				exam.getString("durationTime", ""),
-				stringResource(
-					R.string.section_range,
-					exam.getIntValue("startClassTimes"),
-					exam.getIntValue("endClassTimes")
-				)
+					exam.getString("classroomNumber", ""),
+					"$examDate ${weeks[weekIdx]}",
+					"${exam.getString("duration", "")}${stringResource(R.string.minute)}",
+					exam.getString("durationTime", ""),
+					stringResource(
+							R.string.section_range,
+							exam.getIntValue("startClassTimes"),
+							exam.getIntValue("endClassTimes")
+					)
 			).zip(
-				listOf(
-					Icons.Rounded.LocationOn,
-					Icons.Rounded.Timer,
-					Icons.Rounded.Schedule,
-					Icons.Rounded.School,
-					Icons.Rounded.CalendarMonth
-				)
+					listOf(
+							Icons.Rounded.LocationOn,
+							Icons.Rounded.Timer,
+							Icons.Rounded.Schedule,
+							Icons.Rounded.School,
+							Icons.Rounded.CalendarMonth
+					)
 			).forEach { (text, icon) ->
 				GenericButton(icon = icon, text = text) {
 					coroutineScope.launch {
@@ -1071,36 +1085,36 @@ private fun TodoSection(
 ) {
 	var addTrigger by remember { mutableIntStateOf(0) }
 	Row(
-		modifier = Modifier.fillMaxWidth(),
-		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.SpaceBetween
+			modifier = Modifier.fillMaxWidth(),
+			verticalAlignment = Alignment.CenterVertically,
+			horizontalArrangement = Arrangement.SpaceBetween
 	) {
 		CardTitle(R.drawable.todo, text = stringResource(R.string.todo)) {
 			onViewAllClick()
 		}
 		SingleChoiceSegmentedButtonRow {
 			SegmentedButton(
-				onClick = { addTrigger++ },
-				selected = false,
-				shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-				icon = {},
-				contentPadding = PaddingValues(0.dp)
+					onClick = { addTrigger++ },
+					selected = false,
+					shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+					icon = {},
+					contentPadding = PaddingValues(0.dp)
 			) {
 				Icon(
-					painter = painterResource(R.drawable.add),
-					contentDescription = stringResource(R.string.add)
+						painter = painterResource(R.drawable.add),
+						contentDescription = stringResource(R.string.add)
 				)
 			}
 			SegmentedButton(
-				onClick = onViewAllClick,
-				selected = false,
-				shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-				icon = {},
-				contentPadding = PaddingValues(0.dp)
+					onClick = onViewAllClick,
+					selected = false,
+					shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+					icon = {},
+					contentPadding = PaddingValues(0.dp)
 			) {
 				Icon(
-					painter = painterResource(R.drawable.view),
-					contentDescription = stringResource(R.string.view_detail)
+						painter = painterResource(R.drawable.view),
+						contentDescription = stringResource(R.string.view_detail)
 				)
 			}
 		}
@@ -1108,13 +1122,13 @@ private fun TodoSection(
 
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
 		if (todoList.isEmpty()) Text(
-			text = stringResource(R.string.no_todo),
-			style = MaterialTheme.typography.bodyLarge,
-			modifier = Modifier.padding(
-				dimensionResource(R.dimen.horizontal_margin),
-				dimensionResource(R.dimen.vertical_margin)
-			)
-		)
+				text = stringResource(R.string.no_todo),
+				style = MaterialTheme.typography.bodyLarge,
+				modifier = Modifier.padding(
+						dimensionResource(R.dimen.horizontal_margin),
+						dimensionResource(R.dimen.vertical_margin)
+				)
+		)else
 		todoManager.TodoListScreen(todoList = todoList, addTrigger = addTrigger)
 	}
 }
@@ -1142,9 +1156,9 @@ fun GenericButton(
 ) {
 	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
 		Icon(
-			painter = painterResource(image),
-			contentDescription = text,
-			modifier = Modifier.size(ButtonDefaults.IconSize)
+				painter = painterResource(image),
+				contentDescription = text,
+				modifier = Modifier.size(ButtonDefaults.IconSize)
 		)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(text)
@@ -1158,21 +1172,21 @@ fun RowScope.CardTitle(
 	onClick: () -> Unit = {},
 ) {
 	Row(
-		modifier = Modifier
-			.weight(1f)
-			.clickable(onClick = onClick, indication = null, interactionSource = null),
-		verticalAlignment = Alignment.CenterVertically,
+			modifier = Modifier
+				.weight(1f)
+				.clickable(onClick = onClick, indication = null, interactionSource = null),
+			verticalAlignment = Alignment.CenterVertically,
 	) {
 		Icon(
-			painter = painterResource(image),
-			contentDescription = text,
-			tint = MaterialTheme.colorScheme.primary
+				painter = painterResource(image),
+				contentDescription = text,
+				tint = MaterialTheme.colorScheme.primary
 		)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(
-			text,
-			style = MaterialTheme.typography.titleLarge,
-			color = MaterialTheme.colorScheme.primary
+				text,
+				style = MaterialTheme.typography.titleLarge,
+				color = MaterialTheme.colorScheme.primary
 		)
 	}
 }
@@ -1184,19 +1198,19 @@ fun RowScope.CardTitle(
 	onClick: () -> Unit = {},
 ) {
 	Row(
-		modifier = Modifier
-			.clickable(
-				onClick = onClick, indication = null, interactionSource = null
-			)
-			.weight(1f),
-		verticalAlignment = Alignment.CenterVertically,
+			modifier = Modifier
+				.clickable(
+						onClick = onClick, indication = null, interactionSource = null
+				)
+				.weight(1f),
+			verticalAlignment = Alignment.CenterVertically,
 	) {
 		Icon(image, contentDescription = text, tint = MaterialTheme.colorScheme.primary)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(
-			text,
-			style = MaterialTheme.typography.titleLarge,
-			color = MaterialTheme.colorScheme.primary
+				text,
+				style = MaterialTheme.typography.titleLarge,
+				color = MaterialTheme.colorScheme.primary
 		)
 	}
 }
@@ -1221,31 +1235,31 @@ fun LongClickButton(
 		else -> shapes.shape
 	}
 	Surface(
-		modifier = modifier
-			.minimumInteractiveComponentSize()
-			.combinedClickable(
-				interactionSource = interactionSource,
-				enabled = enabled,
-				onClick = onClick,
-				onLongClick = {
-					haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-					onLongClick()
-				}),
-		shape = shape,
-		color = if (enabled) colors.containerColor else colors.disabledContainerColor,
-		contentColor = if (enabled) colors.contentColor else colors.disabledContentColor,
+			modifier = modifier
+				.minimumInteractiveComponentSize()
+				.combinedClickable(
+						interactionSource = interactionSource,
+						enabled = enabled,
+						onClick = onClick,
+						onLongClick = {
+							haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+							onLongClick()
+						}),
+			shape = shape,
+			color = if (enabled) colors.containerColor else colors.disabledContainerColor,
+			contentColor = if (enabled) colors.contentColor else colors.disabledContentColor,
 	) {
 		CompositionLocalProvider(LocalContentColor provides if (enabled) colors.contentColor else colors.disabledContentColor) {
 			Row(
-				modifier = Modifier.padding(if (icon != null) ButtonDefaults.ButtonWithIconContentPadding else ButtonDefaults.ContentPadding),
-				horizontalArrangement = Arrangement.Center,
-				verticalAlignment = Alignment.CenterVertically
+					modifier = Modifier.padding(if (icon != null) ButtonDefaults.ButtonWithIconContentPadding else ButtonDefaults.ContentPadding),
+					horizontalArrangement = Arrangement.Center,
+					verticalAlignment = Alignment.CenterVertically
 			) {
 				icon?.let {
 					Icon(
-						it,
-						contentDescription = label,
-						modifier = Modifier.size(ButtonDefaults.MediumIconSize)
+							it,
+							contentDescription = label,
+							modifier = Modifier.size(ButtonDefaults.MediumIconSize)
 					)
 				}
 				if (icon != null && label != null) Spacer(Modifier.size(ButtonDefaults.IconSpacing))

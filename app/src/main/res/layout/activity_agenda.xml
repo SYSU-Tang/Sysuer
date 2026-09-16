@@ -30,7 +30,7 @@
             android:layout_height="match_parent"
             android:background="?colorSurfaceBright"
             android:orientation="vertical"
-            app:calendar_content_view_id="@id/list"
+            app:calendar_content_view_id="@id/content"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <com.haibin.calendarview.CalendarView

@@ -2,6 +2,7 @@ package com.miyuyan.sysuer
 
 import android.content.Context
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.miyuyan.sysuer.api.Config
 import com.miyuyan.sysuer.api.SettingManager
@@ -20,6 +21,7 @@ open class BaseActivity : AppCompatActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		enableEdgeToEdge()
 		config = Config(this)
 		if (!settingManager.isDynamicColor) setTheme(
 			when (settingManager.getTheme()) {

@@ -1,9 +1,9 @@
 package com.miyuyan.sysuer.view
 
-import androidx.lifecycle.LiveData
+import kotlinx.coroutines.flow.StateFlow
 
 interface RecyclerStateViewModel {
-	val uiState: LiveData<UiState>
+	val uiState: StateFlow<UiState>
 	fun retry()
 }
 

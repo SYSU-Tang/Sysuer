@@ -16,9 +16,9 @@ class TodoRepository(private val todoDao: TodoDao) {
 	}
 	
 	suspend fun getTodo(where: String,
-	                    args: Array<String>): List<TodoEntity> {		// 构造原始查询。注意：$where 直接嵌入 SQL，args 通过 bindText 安全绑定
+	                    args: Array<String>): List<TodoEntity> {
 		val query = RoomRawQuery(sql = "SELECT * FROM todos WHERE $where", onBindStatement = { stmt ->
-			args.forEachIndexed { index, arg ->                    // Room 的参数索引从 1 开始
+			args.forEachIndexed { index, arg ->
 				stmt.bindText(index + 1, arg)
 			}
 		})

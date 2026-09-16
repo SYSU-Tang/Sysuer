@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.PortalModel
-import com.miyuyan.sysuer.view.UiState
 import com.miyuyan.sysuer.view.RecyclerStateViewModel
+import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -16,7 +16,7 @@ import java.time.LocalDate
 class AgendaViewModel(application: Application) : AndroidViewModel(application),
 	RecyclerStateViewModel {
 	private val portalModel = PortalModel(application)
-	override val uiState = MutableLiveData<UiState>()
+	override val uiState = portalModel.getUiState(0)
 	val scheduleList = MutableLiveData<JSONArray?>()
 
 	init {
@@ -28,8 +28,7 @@ class AgendaViewModel(application: Application) : AndroidViewModel(application),
 					) response.getJSONArray("data").takeIf { it.isNotEmpty() }?.let {
 						val list = it.getJSONObject(0).getJSONArray("newUserScheduleDetailList")
 						scheduleList.value = list
-						uiState.value =
-							if (list.isNotEmpty()) UiState.Content else UiState.Empty
+						uiState.value = if (list.isNotEmpty()) UiState.Content else UiState.Empty
 					} ?: run {
 						scheduleList.value = null
 						uiState.value = UiState.Empty
@@ -42,15 +41,25 @@ class AgendaViewModel(application: Application) : AndroidViewModel(application),
 	fun loadSchedule(day: LocalDate) {
 		uiState.value = UiState.Loading
 		val args = JSONObject.of(
-			"startTime", day, "endTime", day, "types", null, "isMine", "1", "teamWorkDeptId", null
+				"startTime",
+				day,
+				"endTime",
+				day,
+				"types",
+				null,
+				"isMine",
+				"1",
+				"teamWorkDeptId",
+				null
 		)
 		portalModel.addAndNext(
-			"newClient/api/schedule/newSchedule/getScheduleByTimeZone", "$args", 0
+				"newClient/api/schedule/newSchedule/getScheduleByTimeZone", "$args", 0
 		)
 	}
 
 	override fun retry() {
-		portalModel.next()
+		println("retry")
+		portalModel.nextAll()
 	}
 
 	override fun onCleared() {

@@ -125,6 +125,7 @@ abstract class BaseModel(context: Context) {
 	protected open fun handleFailure(request: CommonUtil.Tuple2<Request, Int>, e: IOException) {
 		e.printStackTrace()
 		http.handler.post { contextUtil.toast(R.string.no_net_connected) }
+		getUiState(request.second).value = UiState.Error
 	}
 
 	/**

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -50,22 +51,22 @@ fun StatePage(
 			Loading -> LoadingView(modifier = modifier)
 			Empty -> EmptyView(modifier = modifier, text = emptyWarning)
 			Error -> ErrorView(
-				modifier = modifier, onRetry = onRetry
+					modifier = modifier, onRetry = onRetry
 			)
 
 			Content -> content()
 			Unstarted -> {}
 			LoadMore -> {
-			Column(
-				modifier = Modifier.fillMaxSize(),
-				horizontalAlignment = Alignment.CenterHorizontally,
-			) {
-				Box(modifier = Modifier.weight(1f)) {
-					content()
+				Column(
+						modifier = Modifier.fillMaxSize(),
+						horizontalAlignment = Alignment.CenterHorizontally,
+				) {
+					Box(modifier = Modifier.weight(1f)) {
+						content()
+					}
+					LoadingIndicator()
 				}
-				LoadingIndicator()
 			}
-		}
 		}
 	}
 }
@@ -74,16 +75,15 @@ fun StatePage(
 @Composable
 private fun LoadingView(modifier: Modifier = Modifier) {
 	Column(
-		modifier = modifier
-			.fillMaxSize(),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center
+			modifier = modifier.fillMaxSize(),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center
 	) {
 		LoadingIndicator()
 		Text(
-			text = stringResource(R.string.loading),
-			modifier = Modifier.padding(vertical = dimensionResource(R.dimen.vertical_margin)),
-			style = MaterialTheme.typography.displaySmall
+				text = stringResource(R.string.loading),
+				modifier = Modifier.padding(vertical = dimensionResource(R.dimen.vertical_margin)),
+				style = MaterialTheme.typography.displaySmall
 		)
 	}
 }
@@ -93,18 +93,17 @@ private fun EmptyView(
 	modifier: Modifier = Modifier, text: String = stringResource(R.string.no_data)
 ) {
 	Column(
-		modifier = modifier
-			.fillMaxSize(),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center
+			modifier = modifier.fillMaxSize(),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center
 	) {
 		Image(
-			painter = painterResource(R.drawable.duck),
-			contentDescription = null,
-			modifier = Modifier.size(100.dp)
+				painter = painterResource(R.drawable.duck),
+				contentDescription = null,
+				modifier = Modifier.size(100.dp)
 		)
 		Text(
-			text = text, style = MaterialTheme.typography.displaySmall
+				text = text, style = MaterialTheme.typography.displaySmall
 		)
 	}
 }
@@ -114,26 +113,26 @@ private fun ErrorView(
 	modifier: Modifier = Modifier, onRetry: () -> Unit
 ) {
 	Column(
-		modifier = modifier
-			.fillMaxSize(),
-		horizontalAlignment = Alignment.CenterHorizontally,
-		verticalArrangement = Arrangement.Center
+			modifier = modifier.fillMaxSize(),
+			horizontalAlignment = Alignment.CenterHorizontally,
+			verticalArrangement = Arrangement.Center
 	) {
 		Image(
-			painter = painterResource(R.drawable.info),
-			contentDescription = null,
-			modifier = Modifier.size(80.dp),
-			colorFilter = ColorFilter.tint(
-				MaterialTheme.colorScheme.error
-			)
+				painter = painterResource(R.drawable.info),
+				contentDescription = null,
+				modifier = Modifier
+					.size(80.dp)
+					.padding(10.dp),
+				colorFilter = ColorFilter.tint(
+						MaterialTheme.colorScheme.error
+				)
 		)
 		Text(
-			text = stringResource(R.string.load_failed),
-			style = MaterialTheme.typography.displaySmall
+				text = stringResource(R.string.load_failed),
+				style = MaterialTheme.typography.displaySmall
 		)
 		OutlinedButton(
-			onClick = onRetry,
-			modifier = Modifier.padding(vertical = dimensionResource(R.dimen.vertical_margin))
+				onClick = onRetry, shapes = ButtonDefaults.shapes()
 		) {
 			Text(stringResource(R.string.retry))
 		}

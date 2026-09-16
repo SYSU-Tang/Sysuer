@@ -145,7 +145,6 @@
     <string name="academic_affair_notice">教务通知</string>
     <string name="day">日</string>
     <string name="from_to">第%s节到第%s节</string>
-    <string name="from_to_number">第%d节到第%d节</string>
     <string name="done">已完成</string>
     <string name="school_affair_notice">院系通知</string>
     <string name="add_todo">添加待办</string>
@@ -751,6 +750,7 @@
     <string name="teaching_class_id">班级ID</string>
     <string name="open_unit">开设学院</string>
     <string name="search_course">搜索课程</string>
+    <string name="rain_class">雨课堂</string>
     <string name="personal_training_program">个人培养方案</string>
     <string name="training_program_query">培养方案查询</string>
     <string name="training_adjust">培养方案调整</string>
@@ -884,4 +884,6 @@
     <string name="retry">重试</string>
     <string name="load_failed">加载失败</string>
     <string name="year_month">%d年%d月</string>
+    <string name="from_to_number">第%d节到第%d节</string>
+    <string name="user_avatar">用户头像</string>
 </resources>

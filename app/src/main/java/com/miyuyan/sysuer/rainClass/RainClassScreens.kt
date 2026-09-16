@@ -7,7 +7,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -24,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -36,14 +34,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -54,13 +48,13 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,8 +67,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -89,6 +81,9 @@ import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTerm
 import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTimestamp
 import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTimestampMillis
 import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.getTermColor
+import com.miyuyan.sysuer.view.RowData
+import com.miyuyan.sysuer.view.SectionCard
+import com.miyuyan.sysuer.view.SectionData
 import kotlinx.coroutines.flow.receiveAsFlow
 
 @Preview(showBackground = true)
@@ -101,9 +96,9 @@ fun CourseScreenPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
-	var searchQuery by remember { mutableStateOf("") }
-	var active by remember { mutableStateOf(false) }
+fun CourseScreen(
+	searchQuery: String = "", onRequestScrollToAccount: () -> Unit = {}
+) {
 	val context = LocalContext.current
 	val courseList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
@@ -137,119 +132,87 @@ fun CourseScreen(onRequestScrollToAccount: () -> Unit = {}) {
 	LaunchedEffect(Unit) {
 		getCourseList()
 	}
-	val horizontalPadding by animateDpAsState(if (active) 0.dp else 8.dp, label = "padding")
 
-	Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-		SearchBar(
-				query = searchQuery,
-				onQueryChange = { searchQuery = it },
-				onSearch = { active = false },
-				active = active,
-				onActiveChange = { active = it },
-				modifier = Modifier
-					.fillMaxWidth()
-					.widthIn(max = 720.dp)
-					.padding(horizontalPadding)
-					.semantics { traversalIndex = 0f },
-				windowInsets = WindowInsets(0.dp),
-				placeholder = { Text("搜索课程") },
-				leadingIcon = {
-					if (active) {
-						IconButton(onClick = { active = false }) {
-							Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-						}
-					} else {
-						Icon(Icons.Default.Search, contentDescription = null)
-					}
-				},
-				trailingIcon = {
-					var showMenu by remember { mutableStateOf(false) }
-					Box {
-						IconButton(onClick = { showMenu = true }) {
-							Icon(Icons.Default.FilterList, contentDescription = "筛选")
-						}
-						DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-							DropdownMenuItem(
-									text = { Text("按时间排序") },
-									onClick = { showMenu = false })
-							DropdownMenuItem(
-									text = { Text("按名称排序") },
-									onClick = { showMenu = false })
-						}
-					}
-				}) { }
+	val filteredList = remember(searchQuery, courseList.value) {
+		if (searchQuery.isBlank()) courseList.value
+		else courseList.value.filter { item ->
+			val course = item.getJSONObject("course")
+			val teacher = item.getJSONObject("teacher")
+			course?.getString("name")?.contains(searchQuery, ignoreCase = true) == true || teacher
+				?.getString("name")?.contains(searchQuery, ignoreCase = true) == true
+		}
+	}
 
-		if (isLoading.value) {
-			Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-				CircularProgressIndicator()
-			}
-		} else {
-			LazyVerticalGrid(
-					columns = GridCells.Adaptive(minSize = 340.dp),
-					modifier = Modifier.fillMaxSize(),
-					contentPadding = PaddingValues(16.dp),
-					horizontalArrangement = Arrangement.spacedBy(16.dp),
-					verticalArrangement = Arrangement.spacedBy(16.dp)
-			) {
-				items(courseList.value.size) { index ->
-					val courseItem = courseList.value[index]
-					val course = courseItem.getJSONObject("course")
-					val teacher = courseItem.getJSONObject("teacher")
-					val termColor = getTermColor(courseItem.getInteger("term"))
-					Card(
-							modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-							containerColor = termColor, contentColor = Color.White
-					)
-					) {
-						ListItem(
-								modifier = Modifier,
-								leadingContent = {
-									AsyncImage(
-											model = teacher?.getString("avatar"),
-											contentDescription = "教师头像",
-											modifier = Modifier
-												.size(40.dp)
-												.clip(CircleShape),
-											contentScale = ContentScale.Crop
-									)
-								},
-								trailingContent = {
-									AsyncImage(
-											model = course?.getString("university_mini_logo"),
-											contentDescription = "学校Logo",
-											modifier = Modifier.size(24.dp)
-									)
-								},
-								overlineContent = {
+	if (isLoading.value) {
+		Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+			CircularProgressIndicator()
+		}
+	} else {
+		LazyVerticalGrid(
+				columns = GridCells.Adaptive(minSize = 340.dp),
+				modifier = Modifier.fillMaxSize(),
+				contentPadding = PaddingValues(16.dp),
+				horizontalArrangement = Arrangement.spacedBy(16.dp),
+				verticalArrangement = Arrangement.spacedBy(16.dp)
+		) {
+			items(filteredList.size) { index ->
+				val courseItem = filteredList[index]
+				val course = courseItem.getJSONObject("course")
+				val teacher = courseItem.getJSONObject("teacher")
+				val termColor = getTermColor(courseItem.getInteger("term"))
+				Card(
+						modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
+						containerColor = termColor, contentColor = Color.White
+				)
+				) {
+					ListItem(
+							modifier = Modifier,
+							leadingContent = {
+								AsyncImage(
+										model = teacher?.getString("avatar"),
+										contentDescription = "教师头像",
+										modifier = Modifier
+											.size(40.dp)
+											.clip(CircleShape),
+										contentScale = ContentScale.Crop
+								)
+							},
+							trailingContent = {
+								AsyncImage(
+										model = course?.getString("university_mini_logo"),
+										contentDescription = "学校Logo",
+										modifier = Modifier.size(24.dp)
+								)
+							},
+							overlineContent = {
+								Text(
+										text = formatTerm(courseItem.getInteger("term")),
+										style = MaterialTheme.typography.labelSmall
+								)
+							},
+							supportingContent = {
+								SelectionContainer {
 									Text(
-											text = formatTerm(courseItem.getInteger("term")),
-											style = MaterialTheme.typography.labelSmall
+											"${teacher?.getString("name") ?: "未知教师"} | 课堂号: ${
+												courseItem.getInteger("classroom_id")
+											}"
 									)
-								},
-								supportingContent = {
-									SelectionContainer {
-										Text(
-												"${teacher?.getString("name") ?: "未知教师"} | 课堂号: ${
-													courseItem.getInteger("classroom_id")
-												}"
-										)
-									}
-								},
-								colors = ListItemDefaults.colors(
-										containerColor = Color.Transparent,
-										headlineColor = Color.White,
-										supportingColor = Color.White.copy(
-												alpha = 0.7f
-										),
-										overlineColor = Color.White.copy(
-												alpha = 0.9f
-										)
-								),
-								content = {
-									Text(course?.getString("name") ?: "未知课程")
-								},
-						)
-					}
+								}
+							},
+							colors = ListItemDefaults.colors(
+									containerColor = Color.Transparent,
+									headlineColor = Color.White,
+									supportingColor = Color.White.copy(
+											alpha = 0.7f
+									),
+									overlineColor = Color.White.copy(
+											alpha = 0.9f
+									)
+							),
+							content = {
+								Text(course?.getString("name") ?: "未知课程")
+							},
+					)
 				}
 			}
 		}
@@ -854,52 +817,43 @@ fun AccountScreen() {
 			}
 		} else if (userInfo.value != null) {
 			val info = userInfo.value!!
+			val noneString = stringResource(R.string.none)
+			val rows = remember {
+				mutableStateListOf<RowData>()
+			}
+			rows.addAll(
+					listOf(
+							RowData(
+									stringResource(R.string.name),
+									info.getString("name", noneString)
+							), RowData(
+							stringResource(R.string.student_id),
+							info.getString("school_number", noneString)
+					), RowData(
+							stringResource(R.string.university),
+							info.getString("school", noneString)
+					), RowData(
+							stringResource(R.string.phone),
+							info.getString("phone_number", noneString)
+					), RowData(
+							stringResource(R.string.email), info.getString("email", noneString)
+					)
+					)
+			)
 			AsyncImage(
 					model = info.getString("avatar"),
-					contentDescription = "用户头像",
+					contentDescription = stringResource(R.string.user_avatar),
 					modifier = Modifier
 						.size(80.dp)
 						.clip(CircleShape),
 					contentScale = ContentScale.Crop
 			)
 			Spacer(modifier = Modifier.height(16.dp))
-			ElevatedCard(
-					modifier = Modifier
-						.fillMaxWidth()
-						.widthIn(max = 600.dp),
-					elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-			) {
-				Column(
-						modifier = Modifier.padding(16.dp),
-						verticalArrangement = Arrangement.spacedBy(12.dp)
-				) {
-					Text(
-							text = stringResource(R.string.account_info),
-							style = MaterialTheme.typography.titleMedium
-					)
-					HorizontalDivider()
-					AccountInfoRow(
-							label = stringResource(R.string.name),
-							value = info.getString("name") ?: "未知"
-					)
-					AccountInfoRow(
-							label = stringResource(R.string.student_id),
-							value = info.getString("school_number") ?: "未知"
-					)
-					AccountInfoRow(
-							label = stringResource(R.string.university),
-							value = info.getString("school") ?: "未知"
-					)
-					AccountInfoRow(
-							label = stringResource(R.string.phone),
-							value = info.getString("phone_number") ?: "未知"
-					)
-					AccountInfoRow(
-							label = stringResource(R.string.email),
-							value = info.getString("email") ?: "无"
-					)
-				}
-			}
+			SectionCard(
+					section = SectionData(
+							title = stringResource(R.string.account_info), rows = rows
+					), isExpandable = false, defaultExpanded = true
+			)
 		}
 	}
 }
@@ -930,10 +884,6 @@ fun syncCookiesToWeb(context: Context) {
 
 fun openExamInBrowser(context: Context, examId: Int) {
 	syncCookiesToWeb(context)
-	val url = "https://examination.xuetangx.com/exam/$examId?isFrom=2"
-	val intent = Intent(context, BrowserActivity::class.java).apply {
-		data = url.toUri()
-	}
+	val intent = Intent(context, BrowserActivity::class.java).setData("https://examination.xuetangx.com/exam/$examId?isFrom=2".toUri())
 	context.startActivity(intent)
 }
-

@@ -777,6 +777,7 @@
     <string name="teaching_class_id">Teaching Class ID</string>
     <string name="open_unit">Open Unit</string>
     <string name="search_course">Search Course</string>
+    <string name="rain_class">Rain Classroom</string>
     <string name="personal_training_program">Personal Training Program</string>
     <string name="training_program_query">Training Program Query</string>
     <string name="training_adjust">Training Adjust</string>
@@ -904,4 +905,9 @@
 
     <string name="first_week_warning">Already the first week</string>
     <string name="no_data">No data available</string>
+
+    <string name="retry">Retry</string>
+    <string name="load_failed">Load failed</string>
+    <string name="year_month">%d/%d</string>
+    <string name="from_to_number">From %d to %d</string>
 </resources>

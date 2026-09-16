@@ -138,218 +138,225 @@ fun ActivityPager(
 		val behavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
 		Scaffold(
-			modifier = modifier
-				.fillMaxSize()
-				.nestedScroll(scrollBehavior.nestedScrollConnection)
-				.nestedScroll(floatingNavBarScroll)
-				.nestedScroll(behavior.nestedScrollConnection),
-			snackbarHost = { SnackbarHost(snackbar) },
-			topBar = {
-				val backgroundColor = lerp(
-					MaterialTheme.colorScheme.surface,
-					MaterialTheme.colorScheme.surfaceContainer,
-					scrollBehavior.state.overlappedFraction
-				)
-				Surface(color = backgroundColor) {
-					Column {
-						val modifier =
-							if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-								with(sharedTransitionScope) {
-									Modifier.sharedBounds(
-										sharedContentState = rememberSharedContentState(key = sharedKey),
-										animatedVisibilityScope = animatedVisibilityScope
-									)
-								}
-							} else Modifier
-						val title = @Composable {
-							Text(
-								text = title, color = MaterialTheme.colorScheme.primary
-							)
-						}
-						val navigationIcon = @Composable {
-							if (onNavigationClick != null) IconButton(onClick = onNavigationClick) {
-								Icon(
-									imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-									contentDescription = stringResource(R.string.back),
-									tint = MaterialTheme.colorScheme.primary,
+				modifier = modifier
+					.fillMaxSize()
+					.nestedScroll(scrollBehavior.nestedScrollConnection)
+					.nestedScroll(floatingNavBarScroll)
+					.nestedScroll(behavior.nestedScrollConnection),
+				snackbarHost = { SnackbarHost(snackbar) },
+				topBar = {
+					val backgroundColor = lerp(
+							MaterialTheme.colorScheme.surface,
+							MaterialTheme.colorScheme.surfaceContainer,
+							scrollBehavior.state.overlappedFraction
+					)
+					Surface(color = backgroundColor) {
+						Column {
+							val modifier =
+								if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+									with(sharedTransitionScope) {
+										Modifier.sharedBounds(
+												sharedContentState = rememberSharedContentState(key = sharedKey),
+												animatedVisibilityScope = animatedVisibilityScope
+										)
+									}
+								} else Modifier
+							val title = @Composable {
+								Text(
+										text = title, color = MaterialTheme.colorScheme.primary
 								)
 							}
-						}
-						val actionsContent = actions ?: topBarMenus?.run {
-							{
-								invoke(pagerState.currentPage).forEach { menu ->
-									menu.icon?.let {
-										IconButton(onClick = { menu.onClick() }) {
-											Icon(
-												imageVector = it,
-												contentDescription = menu.title,
-												tint = MaterialTheme.colorScheme.primary
-											)
-										}
-									} ?: run {
-										menu.title?.let {
-											TextButton(onClick = { menu.onClick() }) {
-												Text(
-													text = it,
-													color = MaterialTheme.colorScheme.primary
-												)
-											}
-										}
-									}
-									menu.content()
+							val navigationIcon = @Composable {
+								if (onNavigationClick != null) IconButton(onClick = onNavigationClick) {
+									Icon(
+											imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+											contentDescription = stringResource(R.string.back),
+											tint = MaterialTheme.colorScheme.primary,
+									)
 								}
 							}
-						} ?: {}
-						val colors = TopAppBarDefaults.topAppBarColors(
-							containerColor = Color.Transparent,
-							scrolledContainerColor = Color.Transparent
-						)
-						if (expandable) MediumTopAppBar(
-							modifier = modifier,
-							title = title,
-							navigationIcon = navigationIcon,
-							actions = actionsContent,
-							colors = colors,
-							scrollBehavior = scrollBehavior,
-						) else TopAppBar(
-							modifier = modifier,
-							title = title,
-							navigationIcon = navigationIcon,
-							actions = actionsContent,
-							colors = colors,
-							scrollBehavior = scrollBehavior,
-						)
-						if (tabs.isNotEmpty()) {
-							val tabContent = @Composable {
-								tabs.forEachIndexed { index, tabItem ->
-									val selected = pagerState.currentPage == index
-									UnboundedTab(
-										selected = selected,
-										icon = tabItem.icon,
-										text = tabItem.title,
+							val actionsContent = actions ?: topBarMenus?.run {
+								{
+									invoke(pagerState.currentPage).forEach { menu ->
+										menu.icon?.let {
+											IconButton(onClick = { menu.onClick() }) {
+												Icon(
+														imageVector = it,
+														contentDescription = menu.title,
+														tint = MaterialTheme.colorScheme.primary
+												)
+											}
+										} ?: run {
+											menu.title?.let {
+												TextButton(onClick = { menu.onClick() }) {
+													Text(
+															text = it,
+															color = MaterialTheme.colorScheme.primary
+													)
+												}
+											}
+										}
+										menu.content()
+									}
+								}
+							} ?: {}
+							val colors = TopAppBarDefaults.topAppBarColors(
+									containerColor = Color.Transparent,
+									scrolledContainerColor = Color.Transparent
+							)
+							if (expandable) MediumTopAppBar(
+									modifier = modifier,
+									title = title,
+									navigationIcon = navigationIcon,
+									actions = actionsContent,
+									colors = colors,
+									scrollBehavior = scrollBehavior,
+							) else TopAppBar(
+									modifier = modifier,
+									title = title,
+									navigationIcon = navigationIcon,
+									actions = actionsContent,
+									colors = colors,
+									scrollBehavior = scrollBehavior,
+							)
+							if (tabs.isNotEmpty()) {
+								val tabContent = @Composable {
+									tabs.forEachIndexed { index, tabItem ->
+										val selected = pagerState.currentPage == index
+										UnboundedTab(
+												selected = selected,
+												icon = tabItem.icon,
+												text = tabItem.title,
+												onClick = {
+													coroutineScope.launch {
+														pagerState.animateScrollToPage(index)
+													}
+												})
+									}
+								}
+
+								if (tabs.size > 4) PrimaryScrollableTabRow(
+										edgePadding = 0.dp,
+										selectedTabIndex = pagerState.currentPage,
+										containerColor = Color.Transparent,
+										divider = {},
+										tabs = tabContent,
+										indicator = {
+											TabRowDefaults.PrimaryIndicator(
+													modifier = Modifier.tabIndicatorOffset(
+															selectedTabIndex = pagerState.currentPage,
+															matchContentSize = true
+													),
+													width = Dp.Unspecified,
+													color = MaterialTheme.colorScheme.primary,
+													shape = RoundedCornerShape(
+															topStart = 2.dp,
+															topEnd = 2.dp
+													)
+											)
+										})
+								else PrimaryTabRow(
+										selectedTabIndex = pagerState.currentPage,
+										containerColor = Color.Transparent,
+										divider = {},
+										tabs = tabContent,
+										indicator = {
+											TabRowDefaults.PrimaryIndicator(
+													modifier = Modifier.tabIndicatorOffset(
+															selectedTabIndex = pagerState.currentPage,
+															matchContentSize = true
+													),
+													width = Dp.Unspecified,
+													color = MaterialTheme.colorScheme.primary,
+													shape = RoundedCornerShape(
+															topStart = 2.dp,
+															topEnd = 2.dp
+													)
+											)
+										})
+							}
+							AnimatedContent(
+									targetState = pagerState.currentPage,
+									transitionSpec = { expandVertically() togetherWith shrinkVertically() },
+									label = "topBarExpand"
+							) { page ->
+								topBarContent(page)
+							}
+						}
+					}
+				},
+				bottomBar = {
+					if (navs.isNotEmpty() && !blurEnabled) {
+						FlexibleBottomAppBar(scrollBehavior = behavior) {
+							navs.forEachIndexed { index, navItem ->
+								NavigationBarItem(
+										selected = pagerState.currentPage == index,
+										label = { Text(text = navItem.title ?: "") },
 										onClick = {
 											coroutineScope.launch {
 												pagerState.animateScrollToPage(index)
 											}
-										})
-								}
+										},
+										icon = navItem.icon?.let {
+											{
+												Icon(
+														imageVector = it,
+														contentDescription = navItem.title
+												)
+											}
+										} ?: {})
 							}
-
-							if (tabs.size > 4) PrimaryScrollableTabRow(
-								edgePadding = 0.dp,
-								selectedTabIndex = pagerState.currentPage,
-								containerColor = Color.Transparent,
-								divider = {},
-								tabs = tabContent,
-								indicator = {
-									TabRowDefaults.PrimaryIndicator(
-										modifier = Modifier.tabIndicatorOffset(
-											selectedTabIndex = pagerState.currentPage,
-											matchContentSize = true
-										),
-										width = Dp.Unspecified,
-										color = MaterialTheme.colorScheme.primary,
-										shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp)
-									)
-								})
-							else PrimaryTabRow(
-								selectedTabIndex = pagerState.currentPage,
-								containerColor = Color.Transparent,
-								divider = {},
-								tabs = tabContent,
-								indicator = {
-									TabRowDefaults.PrimaryIndicator(
-										modifier = Modifier.tabIndicatorOffset(
-											selectedTabIndex = pagerState.currentPage,
-											matchContentSize = true
-										),
-										width = Dp.Unspecified,
-										color = MaterialTheme.colorScheme.primary,
-										shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp)
-									)
-								})
-						}
-						AnimatedContent(
-							targetState = pagerState.currentPage,
-							transitionSpec = { expandVertically() togetherWith shrinkVertically() },
-							label = "topBarExpand"
-						) { page ->
-							topBarContent(page)
 						}
 					}
-				}
-			},
-			bottomBar = {
-				if (navs.isNotEmpty() && !blurEnabled) {
-					FlexibleBottomAppBar(scrollBehavior = behavior) {
-						navs.forEachIndexed { index, navItem ->
-							NavigationBarItem(
-								selected = pagerState.currentPage == index,
-								label = { Text(text = navItem.title ?: "") },
-								onClick = {
-									coroutineScope.launch {
-										pagerState.animateScrollToPage(index)
-									}
-								},
-								icon = navItem.icon?.let {
-									{
-										Icon(
-											imageVector = it, contentDescription = ""
-										)
-									}
-								} ?: {})
-						}
-					}
-				}
-			},
-			floatingActionButton = { floatingActionButton(pagerState.currentPage) },
+				},
+				floatingActionButton = { floatingActionButton(pagerState.currentPage) },
 		) { innerPadding ->
 			if (tabs.isNotEmpty() || navs.isNotEmpty()) {
 				Box(modifier = Modifier.fillMaxSize()) {
 					HorizontalPager(
-						state = pagerState,
-						modifier = Modifier
-							.fillMaxSize()
-							.padding(innerPadding)
-							.layerBackdrop(backdrop),
+							state = pagerState,
+							modifier = Modifier
+								.fillMaxSize()
+								.padding(innerPadding)
+								.layerBackdrop(backdrop),
 					) { page ->
 						pageContent(page)
 					}
 					if (blurEnabled && navs.isNotEmpty()) {
 						AnimatedVisibility(
-							visible = isNavBarVisible,
-							enter = slideInVertically(initialOffsetY = { it }),
-							exit = slideOutVertically(targetOffsetY = { it }),
-							modifier = Modifier.align(Alignment.BottomCenter)
+								visible = isNavBarVisible,
+								enter = slideInVertically(initialOffsetY = { it }),
+								exit = slideOutVertically(targetOffsetY = { it }),
+								modifier = Modifier.align(Alignment.BottomCenter)
 						) {
 							LiquidGlassNavBar(
-								pagerState = pagerState,
-								items = navs,
-								backdrop = backdrop,
-								onItemClick = { index ->
-									coroutineScope.launch {
-										pagerState.animateScrollToPage(index)
-									}
-								},
-								isDark = settingManager.isDarkTheme
+									pagerState = pagerState,
+									items = navs,
+									backdrop = backdrop,
+									onItemClick = { index ->
+										coroutineScope.launch {
+											pagerState.animateScrollToPage(index)
+										}
+									},
+									isDark = settingManager.isDarkTheme
 							)
 						}
 					}
 				}
 			} else {
 				if (isNestedScrollEnabled) Box(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(innerPadding)
-						.verticalScroll(rememberScrollState())
-						.nestedScroll(rememberNestedScrollInteropConnection()),
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(innerPadding)
+							.verticalScroll(rememberScrollState())
+							.nestedScroll(rememberNestedScrollInteropConnection()),
 				) {
 					pageContent(0)
 				}
 				else Box(
-					modifier = Modifier
-						.fillMaxSize()
-						.padding(innerPadding),
+						modifier = Modifier
+							.fillMaxSize()
+							.padding(innerPadding),
 				) {
 					pageContent(0)
 				}
@@ -374,30 +381,30 @@ fun UnboundedTab(
 	onClick: () -> Unit,
 ) {
 	Box(
-		modifier = Modifier
-			.height(48.dp)
-			.selectable(
-				selected = selected,
-				onClick = onClick,
-				role = Role.Tab,
-				interactionSource = remember { MutableInteractionSource() },
-				indication = ripple(bounded = false)
-			)
-			.padding(
-				dimensionResource(R.dimen.horizontal_padding),
-				dimensionResource(R.dimen.vertical_padding)
-			)        /*.clickable(interactionSource = interactionSource, indication = ripple(bounded = false), onClick = onClick)*/,
-		contentAlignment = Alignment.Center
+			modifier = Modifier
+				.height(48.dp)
+				.selectable(
+						selected = selected,
+						onClick = onClick,
+						role = Role.Tab,
+						interactionSource = remember { MutableInteractionSource() },
+						indication = ripple(bounded = false)
+				)
+				.padding(
+						dimensionResource(R.dimen.horizontal_padding),
+						dimensionResource(R.dimen.vertical_padding)
+				)        /*.clickable(interactionSource = interactionSource, indication = ripple(bounded = false), onClick = onClick)*/,
+			contentAlignment = Alignment.Center
 	) {
 		icon?.let { Icon(imageVector = it, contentDescription = text) }
 		text?.let {
 			Text(
-				text = it,
-				color = if (selected) MaterialTheme.colorScheme.primary
-				else MaterialTheme.colorScheme.onSurfaceVariant,
-				style = MaterialTheme.typography.bodyMedium,
-				maxLines = 1,
-				overflow = TextOverflow.Ellipsis
+					text = it,
+					color = if (selected) MaterialTheme.colorScheme.primary
+					else MaterialTheme.colorScheme.onSurfaceVariant,
+					style = MaterialTheme.typography.bodyMedium,
+					maxLines = 1,
+					overflow = TextOverflow.Ellipsis
 			)
 		}
 	}
@@ -417,9 +424,9 @@ fun exportMarkdownMenuItem(
 		}
 		DataStoreManager.saveContent(context, name, "$markdown") {
 			context.startActivity(
-				Intent(context, RichTextActivity::class.java).putExtra(
-					"type", DataStoreManager.ContentType.MARKDOWN.name
-				).putExtra("title", name)
+					Intent(context, RichTextActivity::class.java).putExtra(
+							"type", DataStoreManager.ContentType.MARKDOWN.name
+					).putExtra("title", name)
 			)
 		}
 		true
@@ -436,9 +443,9 @@ fun exportMarkdownMenuItem(
 			StringBuilder().append("###### $tab").append("\n\n").append(sectionData.toMarkdown())
 		DataStoreManager.saveContent(context, name, "$markdown") {
 			context.startActivity(
-				Intent(context, RichTextActivity::class.java).putExtra(
-					"type", DataStoreManager.ContentType.MARKDOWN.name
-				).putExtra("title", name)
+					Intent(context, RichTextActivity::class.java).putExtra(
+							"type", DataStoreManager.ContentType.MARKDOWN.name
+					).putExtra("title", name)
 			)
 		}
 		true
@@ -455,11 +462,11 @@ fun exportMarkdownMenuItem(
 	val markdown =
 		StringBuilder().append("###### $tab").append("\n\n").append(sectionData.toMarkdown())
 	backStack.add(
-		RichText(
-			title = name,
-			content = "$markdown",
-			contentType = DataStoreManager.ContentType.MARKDOWN.name
-		)
+			RichText(
+					title = name,
+					content = "$markdown",
+					contentType = DataStoreManager.ContentType.MARKDOWN.name
+			)
 	)
 	true
 }
@@ -477,11 +484,11 @@ fun exportMarkdownMenuItem(
 		if (index < sectionData.size - 1) markdown.append("\n\n---\n\n")
 	}
 	backStack.add(
-		RichText(
-			title = name,
-			content = "$markdown",
-			contentType = DataStoreManager.ContentType.MARKDOWN.name
-		)
+			RichText(
+					title = name,
+					content = "$markdown",
+					contentType = DataStoreManager.ContentType.MARKDOWN.name
+			)
 	)
 	true
 }

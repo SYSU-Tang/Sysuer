@@ -29,7 +29,6 @@ import com.miyuyan.sysuer.R.drawable.book
 import com.miyuyan.sysuer.R.drawable.warning
 import com.miyuyan.sysuer.R.string.hour
 import com.miyuyan.sysuer.R.string.immediate_class
-import com.miyuyan.sysuer.R.string.immediate_class_warning
 import com.miyuyan.sysuer.R.string.location
 import com.miyuyan.sysuer.R.string.minute
 import com.miyuyan.sysuer.R.string.next_class
@@ -80,11 +79,7 @@ object ClassIsland {
 		val totalMinutes: Long = 0L,
 		val elapsedMinutes: Long = 0L,
 		val remainingMinutes: Long = 0L,
-		val remainingSeconds: Long = 0L,
-			/*
-					val progress: Int = if (totalMinutes > 0) {
-						((elapsedMinutes * 100) / totalMinutes).toInt().coerceIn(0, 100)
-					} else 0*/
+		val remainingSeconds: Long = 0L
 	)
 
 	@Volatile
@@ -93,6 +88,10 @@ object ClassIsland {
 	@Volatile
 	private var cachedRecentCourses: List<JSONObject> = emptyList()
 
+	/**
+	 * 将JSONObject转换为IslandCourse
+	 * @return IslandCourse
+	 * */
 	private fun JSONObject.toIslandCourse(): IslandCourse = IslandCourse(
 			courseName = getString("courseName", ""),
 			teachingPlace = getString("teachingPlace", ""),
@@ -103,6 +102,11 @@ object ClassIsland {
 			endClassTimes = getString("endClassTimes", "")
 	)
 
+	/**
+	 * 根据今日课表和近日课表计算课程状态
+	 * @param todayCourses 今日课程
+	 * @param recentCourses 近日课程
+	 * */
 	fun calculateState(
 		todayCourses: List<JSONObject>, recentCourses: List<JSONObject>
 	): StateResult {
@@ -141,7 +145,7 @@ object ClassIsland {
 			val remainingToNext = Duration.between(now, nextCourse.startDateTime).toMinutes()
 			val remainingSecs = Duration.between(now, nextCourse.startDateTime).seconds
 			return StateResult(
-					if (remainingToNext <= 15) CourseState.BEFORE_CLASS else CourseState.BREAK,
+					if (remainingToNext <= 30) CourseState.BEFORE_CLASS else CourseState.BREAK,
 					next = nextCourse,
 					remainingMinutes = remainingToNext,
 					remainingSeconds = remainingSecs
@@ -152,12 +156,22 @@ object ClassIsland {
 		return StateResult(CourseState.NO_CLASS_TODAY, next = recent)
 	}
 
+	/**
+	 * 取消通知
+	 * @param context 上下文
+	 * */
 	@JvmStatic
 	fun cancelNotification(context: Context) {
 		from(context).cancel(NOTIFICATION_ID)
 		WorkManager.getInstance(context).cancelUniqueWork(TICK_WORK_NAME)
 	}
 
+	/**
+	 * 更新课程数据
+	 *
+	 * @param todayCourses 今日课程
+	 * @param recentCourses 近日课程
+	 * */
 	@JvmStatic
 	fun updateCourseData(
 		todayCourses: List<JSONObject>, recentCourses: List<JSONObject>
@@ -166,6 +180,11 @@ object ClassIsland {
 		cachedRecentCourses = recentCourses
 	}
 
+	/**
+	 * 触发并计划通知
+	 *
+	 * @param context 上下文
+	 * */
 	@JvmStatic
 	fun triggerAndScheduleTick(context: Context) {
 		createNotificationChannel(context)
@@ -195,13 +214,15 @@ object ClassIsland {
 		when (result.state) {
 			CourseState.NO_CLASS_TODAY -> {
 				val next = result.next ?: return
-				builder.setContentTitle(noClassTodayString).setStyle(
+				val content = buildString {
+					append("$nextClassString：《${next.courseName}》\n")
+					append("$timeString：${next.startTime}~${next.endTime}\n")
+					append("$locationString：${next.teachingPlace}\n")
+				}
+				builder.setContentTitle(noClassTodayString).setContentText(content).setStyle(
 						NotificationCompat.BigTextStyle().bigText(
-								buildString {
-									append("$nextClassString：《${next.courseName}》\n")
-									append("$timeString：${next.startTime}~${next.endTime}\n")
-									append("$locationString：${next.teachingPlace}\n")
-								})
+								content
+						)
 				)
 			}
 
@@ -210,42 +231,37 @@ object ClassIsland {
 				val mins = result.remainingMinutes
 				val secs = result.remainingSeconds
 				val minsText = when {
-					secs in 1..60L -> "${secs}$secondString"
-					secs <= 0L -> context.getString(immediate_class_warning)
-					mins <= 15L -> "${mins}$minuteString"
+					secs in 1..60L -> "$secs$secondString"
+					mins <= 30L -> "$mins$minuteString"
 					else -> "${mins / 60}$hourString${mins % 60}$minuteString"
 				}
-				val isDownCount = mins == 0L && secs >= 0L
+				val isDownCount = mins <= 1L && secs >= 0L
 				if (isDownCount) unit = TimeUnit.SECONDS
+				val content = buildString {
+					append(
+							if (isDownCount) {
+								context.getString(
+										next_class_time, course.courseName, secs, secondString
+								)
+							} else {
+								context.getString(
+										next_class_time, course.courseName, mins, minuteString
+								)
+							}
+					)
+					append("$timeString：${course.startTime}~${course.endTime}\n")
+					append("$locationString：${course.teachingPlace}\n")
+				}
 				builder.setLargeIcon(
 						Icon.createWithResource(context, warning).setTint(
 								context.getColor(md_theme_secondary)
 						)
 				).setContentTitle("${course.courseName} · $minsText")
 					.setShortCriticalText(context.getString(immediate_class))
-					.setContentText("${course.courseName} · $minsText").setStyle(
+					.setContentText(content).setStyle(
 							NotificationCompat.BigTextStyle().bigText(
-									buildString {
-										append(
-												if (isDownCount) {
-													context.getString(
-															next_class_time,
-															course.courseName,
-															secs,
-															secondString
-													)
-												} else {
-													context.getString(
-															next_class_time,
-															course.courseName,
-															mins,
-															minuteString
-													)
-												}
-										)
-										append("$timeString：${course.startTime}~${course.endTime}\n")
-										append("$locationString：${course.teachingPlace}\n")
-									})
+									content
+							)
 					)
 			}
 
@@ -254,7 +270,7 @@ object ClassIsland {
 				val remainingMins = result.remainingMinutes.toInt()
 				val remainingSecs = result.remainingSeconds.toInt()
 				val elapsed = result.elapsedMinutes.toInt()
-				val isDownCount = remainingMins == 0 && remainingSecs >= 0
+				val isDownCount = remainingMins == 1 && remainingSecs >= 0
 				if (isDownCount) unit = TimeUnit.SECONDS
 				val remainingDisplay =
 					if (isDownCount) "${remainingSecs}$secondString" else "${remainingMins}$minuteString"
@@ -283,9 +299,7 @@ object ClassIsland {
 										)
 								).addProgressSegment(
 										ProgressStyle.Segment(
-												remainingMins.coerceAtLeast(
-														1
-												)
+												remainingMins
 										).setColor(
 												context.getColor(md_theme_secondary)
 										)
@@ -295,29 +309,26 @@ object ClassIsland {
 
 			CourseState.BREAK -> {
 				val next = result.next ?: return
-				builder.setContentTitle("${nextClassString}：${next.courseName}")
-					.setShortCriticalText(context.getString(no_class)).setContentText(
+				val content = buildString {
+					append(
 							context.getString(
 									next_class_time,
 									next.courseName,
 									result.remainingMinutes,
 									minuteString
 							)
+					)
+					append("\n")
+					append("$timeString：${next.startTime}~${next.endTime}\n")
+					append("$locationString：${next.teachingPlace}\n")
+				}
+				builder.setContentTitle("${nextClassString}：${next.courseName}")
+					.setShortCriticalText(context.getString(no_class)).setContentText(
+							content
 					).setStyle(
 							NotificationCompat.BigTextStyle().bigText(
-									buildString {
-										append(
-												context.getString(
-														next_class_time,
-														next.courseName,
-														result.remainingMinutes,
-														minuteString
-												)
-										)
-										append("\n")
-										append("$timeString：${next.startTime}~${next.endTime}\n")
-										append("$locationString：${next.teachingPlace}\n")
-									})
+									content
+							)
 					)
 			}
 		}
@@ -341,6 +352,12 @@ object ClassIsland {
 		}
 	}
 
+	/**
+	 * 创建通知渠道
+	 *
+	 * @param context 上下文
+	 *
+	 * */
 	private fun createNotificationChannel(context: Context) {
 		from(context).createNotificationChannel(
 				NotificationChannelCompat
