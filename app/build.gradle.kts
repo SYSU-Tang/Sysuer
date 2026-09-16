@@ -89,7 +89,6 @@ dependencies {
 	implementation(libs.lifecycle.viewmodel.ktx)
 	implementation(libs.navigation.fragment)
 	implementation(libs.navigation.ui)
-	implementation(libs.legacy.support.v4)
 	implementation(libs.activity)
 	implementation(libs.annotation)
 	implementation(libs.lifecycle.runtime.ktx)
@@ -150,7 +149,6 @@ dependencies {
 //	}
 	implementation(libs.miuix.squircle)
 	implementation(libs.jsoup)
-	implementation(libs.rxjava)
 	ksp(libs.androidx.room3.compiler)
 	implementation(libs.richtext.commonmark)
 	implementation(libs.commonmark.core)
