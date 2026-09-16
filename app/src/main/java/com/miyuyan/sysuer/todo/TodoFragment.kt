@@ -15,7 +15,7 @@ import com.haibin.calendarview.CalendarView
 import com.haibin.calendarview.CalendarView.OnCalendarSelectListener
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.CalendarManager
+import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.api.CommonUtil.isEmpty
 import com.miyuyan.sysuer.databinding.FragmentTodoBinding
 
@@ -29,10 +29,23 @@ class TodoFragment : BaseFragment() {
 	var todo: Boolean = true
 	var done: Boolean = true
 	lateinit var todoManager: TodoManager
-	val calendarManager: CalendarManager = CalendarManager()
+	override fun onSaveInstanceState(outState: Bundle) {
+		super.onSaveInstanceState(outState)
+		outState.putBoolean("due", due)
+		outState.putBoolean("ddl", ddl)
+		outState.putBoolean("todo", todo)
+		outState.putBoolean("done", done)
+	}
+
 	override fun onCreateView(inflater: LayoutInflater,
 	                          container: ViewGroup?,
 	                          savedInstanceState: Bundle?): View {
+		savedInstanceState?.let {
+			due = it.getBoolean("due", true)
+			ddl = it.getBoolean("ddl", false)
+			todo = it.getBoolean("todo", true)
+			done = it.getBoolean("done", true)
+		}
 		val concatAdapter = ConcatAdapter(ConcatAdapter.Config.Builder()
 			                                  .setIsolateViewTypes(true)
 			                                  .build())
@@ -56,7 +69,7 @@ class TodoFragment : BaseFragment() {
 		}.also {
 			calendarView = it.calendarView
 		}
-		todoManager = TodoManager(requireActivity(), concatAdapter)
+		todoManager = TodoManager(requireContext(), concatAdapter)
 		todoManager.setOnRefreshListener { refresh() }
 		requireActivity().findViewById<FloatingActionButton>(R.id.add).setOnClickListener {
 			todoManager.showTodoAddDialog()
@@ -81,7 +94,7 @@ class TodoFragment : BaseFragment() {
 	}
 	
 	val date: String
-		get() = calendarManager.toDateString(calendarView.selectedCalendar.timeInMillis) ?: ""
+		get() = DateTimeManager.toDateString(calendarView.selectedCalendar.timeInMillis) ?: ""
 	
 	fun refresh() {
 		val a = mutableListOf<String>()

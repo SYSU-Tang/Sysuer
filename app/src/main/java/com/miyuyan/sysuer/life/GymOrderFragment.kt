@@ -20,14 +20,13 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.CalendarManager
+import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.databinding.FragmentGymOrderBinding
 import com.miyuyan.sysuer.model.GymModel
 import com.miyuyan.sysuer.todo.TitleAdapter
 import com.miyuyan.sysuer.view.PreferenceAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class GymOrderFragment : BaseFragment() {
@@ -37,7 +36,6 @@ class GymOrderFragment : BaseFragment() {
 	val model: GymModel by lazy {
 		GymModel(requireContext())
 	}
-	val calendarManager: CalendarManager = CalendarManager()
 	private var total = -1
 	private var page = 0
 	private val concatAdapter: ConcatAdapter = ConcatAdapter(
@@ -54,7 +52,7 @@ class GymOrderFragment : BaseFragment() {
 			recyclerView.adapter = concatAdapter
 			recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 				override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-					if (dy > 0 && total > 0 && page * 10 < total) order
+					if (dy > 0 && total > 0 && page * 10 < total) loadOrder()
 				}
 			})
 			from.setOnClickListener {
@@ -75,8 +73,8 @@ class GymOrderFragment : BaseFragment() {
 							regetOrder()
 						})
 			}
-			from.text = calendarManager.toDateString(viewModel.from)
-			to.text = calendarManager.toDateString(viewModel.to)
+			from.text = DateTimeManager.toDateString(viewModel.from)
+			to.text = DateTimeManager.toDateString(viewModel.to)
 			to.setOnClickListener {
 				val datePicker = picker.setSelection(viewModel.to).setCalendarConstraints(
 							CalendarConstraints.Builder().setValidator(
@@ -98,7 +96,7 @@ class GymOrderFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (code == 0) {
 						response.getJSONArray("Transactions").forEach { item: Any? ->
 							concatAdapter.addAdapter(TitleAdapter((item as JSONObject).getString("Description")).apply {
@@ -130,13 +128,17 @@ class GymOrderFragment : BaseFragment() {
 				}
 			}
 		}
-		order
+	loadOrder()
 		return binding.root
+	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
 	}
 
 	private fun regetOrder() {
 		reset()
-		order
+		loadOrder()
 	}
 
 	fun reset() {
@@ -147,12 +149,11 @@ class GymOrderFragment : BaseFragment() {
 		}
 	}
 
-	val order: Unit
-		get() {
-			model.addAndNext(
-					"api/transaction/Me?StartDate=${calendarManager.toDateString(viewModel.from)}&EndDate=${
-						calendarManager.toDateString(viewModel.to)
-					}&Page=${++page}&PageSize=10", 0
-			)
-		}
+	private fun loadOrder() {
+		model.addAndNext(
+				"api/transaction/Me?StartDate=${DateTimeManager.toDateString(viewModel.from)}&EndDate=${
+					DateTimeManager.toDateString(viewModel.to)
+				}&Page=${++page}&PageSize=10", 0
+		)
+	}
 }

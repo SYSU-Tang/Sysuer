@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.XgxtModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class DormViewModel(application: Application) : AndroidViewModel(application) {
@@ -17,7 +16,7 @@ class DormViewModel(application: Application) : AndroidViewModel(application) {
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, data) ->
+			model.messageChannel.collect { (code, data) ->
 				if (data.containsKey("code") && data.getInteger("code") == 200) {
 					_dormInfo.value = data.getJSONObject("data")
 				}

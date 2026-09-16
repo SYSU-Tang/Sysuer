@@ -114,7 +114,7 @@ class ComplaintModel(val model: XinfangModel? = null) {
 	@Throws(IOException::class) fun submitForm(formFields: MutableMap<String?, String?>,
 	                                           hiddenFields: JSONObject = JSONObject.of("yybz", "0", "visitConfig", "1"),
 	                                           attachments: JSONArray) {
-		if (!isValidateNotEmpty(formFields)) {
+if (isValidateNotEmpty(formFields)) {
 			val jsonBody = JSONObject.of("c", JSONObject(formFields), "h", hiddenFields, "f", attachments).toJSONString()
 			//println("Request Body: $jsonBody")
 			model?.addAndNext("jsp_api/fywt", jsonBody, 2)

@@ -17,7 +17,6 @@ import com.miyuyan.sysuer.databinding.RecyclerViewScrollBinding
 import com.miyuyan.sysuer.model.GymModel
 import com.miyuyan.sysuer.todo.TitleAdapter
 import com.miyuyan.sysuer.view.PreferenceAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class GymAccountFragment : BaseFragment() {
@@ -39,7 +38,7 @@ class GymAccountFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					when (code) {
 						0 -> {
 							val preferenceAdapter = PreferenceAdapter()
@@ -84,7 +83,7 @@ class GymAccountFragment : BaseFragment() {
 							}
 							concatAdapter.addAdapter(TitleAdapter(getString(R.string.other)))
 							concatAdapter.addAdapter(idAdapter)
-							swimmer
+							loadSwimmer()
 						}
 
 						1 -> response.getJSONArray("data").forEach { i: Any? ->
@@ -115,16 +114,18 @@ class GymAccountFragment : BaseFragment() {
 				}
 			}
 		}
-		account
+		loadAccount()
 		return binding.root
 	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
 
-	val account: Unit
-		get() {
+	private fun loadAccount() {
 			model.addAndNext("api/Credit/Me", 0)
 		}
-	val swimmer: Unit
-		get() {
+	private fun loadSwimmer() {
 			model.addAndNext("api/swimmer/me", 1)
 		}
 }

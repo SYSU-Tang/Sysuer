@@ -27,7 +27,6 @@ import com.miyuyan.sysuer.databinding.ItemDetailBinding
 import com.miyuyan.sysuer.databinding.ItemDurationBinding
 import com.miyuyan.sysuer.databinding.ItemWeekdayBinding
 import com.miyuyan.sysuer.model.JwxtModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
@@ -201,7 +200,7 @@ class CourseScheduleActivity : BaseActivity() {
 		val assignedColors = mutableMapOf<String, Int>()
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						when (code) {
 							1 -> {
@@ -292,7 +291,7 @@ class CourseScheduleActivity : BaseActivity() {
 								currentTerm =
 									response.getJSONObject("data").getString("acadYearSemester")
 								binding.term.text = currentTerm
-								availableTerms
+								availableTerms()
 								getAvailableWeeks(currentTerm)
 								getTable(currentTerm, currentWeek)
 								realTime.first = currentTerm
@@ -381,7 +380,7 @@ class CourseScheduleActivity : BaseActivity() {
 				}
 			}
 		}
-		term
+		term()
 		model.next()
 	}
 
@@ -398,10 +397,9 @@ class CourseScheduleActivity : BaseActivity() {
 		model.add("jwxt/base-info/school-calender/weekly?academicYear=$academicYear", 5)
 	}
 
-	val availableTerms: Unit
-		get() {
-			model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4)
-		}
+	private fun availableTerms() {
+		model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4)
+	}
 
 	fun getOldDate(distanceDay: Int): String {
 		return LocalDate.now()
@@ -493,8 +491,7 @@ class CourseScheduleActivity : BaseActivity() {
 		DownloadManager.downloadFile(this, request, "")
 	}
 
-	val term: Unit
-		get() {
-			model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
-		}
+	private fun term() {
+		model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
+	}
 }

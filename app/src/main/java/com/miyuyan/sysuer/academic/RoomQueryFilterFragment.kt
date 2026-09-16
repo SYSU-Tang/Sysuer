@@ -25,7 +25,6 @@ import com.miyuyan.sysuer.databinding.FragmentQueryBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.preference.FilterPreference
 import com.miyuyan.sysuer.preference.PreferenceParamsBuilder
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import rikka.material.preference.MaterialSwitchPreference
 import rikka.preference.SimpleMenuPreference
@@ -65,7 +64,7 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 		val dateSelection = findPreference<PreferenceCategory>("dateSelection")!!
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (what, response) ->
+				model.messageChannel.collect { (what, response) ->
 					if (response.getInteger("code") == 200) {
 						val option = mutableListOf<String>()
 						val number = mutableListOf<String>()

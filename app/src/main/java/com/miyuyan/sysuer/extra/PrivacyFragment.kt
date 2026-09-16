@@ -10,11 +10,11 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.model.PayModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class PrivacyFragment : PreferenceFragmentCompat() {
 	val model: PayModel by lazy { PayModel(requireContext()) }
+
 	override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 		setPreferencesFromResource(R.xml.privacy, rootKey)
 		model.contextUtil.disposable.add(
@@ -24,13 +24,18 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 								netId
 						)
 						findPreference<Preference>("password")?.setOnPreferenceClickListener {
-							model.contextUtil.toast(password)
+							model.contextUtil.copy("password", password)
+							model.contextUtil.toast(R.string.copy_successfully)
 							false
 						}
 					})
+	}
+
+	override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						if (response.get("data") != null) {
 							if (code == 0) {
@@ -82,13 +87,12 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 				}
 			}
 		}
-		info
+		info()
 	}
 
-	val info: Unit
-		get() {
-			model.addAndNext("client/api/client/person/get", "{}", 0)
-		}
+	private fun info() {
+		model.addAndNext("client/api/client/person/get", "{}", 0)
+	}
 
 	override fun onDestroyView() {
 		super.onDestroyView()

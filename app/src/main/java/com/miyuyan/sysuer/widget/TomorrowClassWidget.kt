@@ -71,15 +71,14 @@ class TomorrowClassWidget : AppWidgetProvider() {
 						}
 					}
 				}
-				else contextUtil.login(TargetUrl.PORTAL) { tomorrowSchedule }
+				else contextUtil.login(TargetUrl.PORTAL) { tomorrowSchedule() }
 			}
 		})
-		this.tomorrowSchedule
+		this.tomorrowSchedule()
 	}
 	
-	val tomorrowSchedule: Unit
-		get() {
-			val tomorrow = LocalDate.now().plusDays(1)
-			http.postRequest("https://mportal.sysu.edu.cn/newClient/api/schedule/newSchedule/getNextDaySchedule", "{\"types\":[],\"startTime\":\"$tomorrow\",\"endTime\":\"${tomorrow.plusDays(1)}\"}", 0)
-		}
+	private fun tomorrowSchedule() {
+		val tomorrow = LocalDate.now().plusDays(1)
+		http.postRequest("https://mportal.sysu.edu.cn/newClient/api/schedule/newSchedule/getNextDaySchedule", "{\"types\":[],\"startTime\":\"$tomorrow\",\"endTime\":\"${tomorrow.plusDays(1)}\"}", 0)
+	}
 }

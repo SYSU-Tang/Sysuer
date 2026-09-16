@@ -24,7 +24,6 @@ import com.miyuyan.sysuer.databinding.RecyclerViewScrollBinding
 import com.miyuyan.sysuer.model.GymModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class GymListFragment : BaseFragment() {
@@ -84,7 +83,7 @@ class GymListFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
 						when (code) {
 							1 -> it.forEach { e -> fieldAdapter.add(e as JSONObject) }
@@ -101,29 +100,30 @@ class GymListFragment : BaseFragment() {
 				}
 			}
 		}
-		info
+	loadInfo()
 		return binding.root
 	}
 
-	private val info: Unit
-		get() {
-			if (requireArguments().getInt("code") == 0) campus
-			else venue
-		}
+	private fun loadInfo() {
+		if (requireArguments().getInt("code") == 0) loadCampus()
+		else loadVenue()
+	}
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
 		layoutManager?.setSpanCount(config.column)
 	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
 
-	val campus: Unit
-		get() {
-			model.addAndNext("api/Campus/active", 1)
-		}
-	val venue: Unit
-		get() {
-			model.addAndNext("api/venuetype/all", 2)
-		}
+	private fun loadCampus() {
+		model.addAndNext("api/Campus/active", 1)
+	}
+	private fun loadVenue() {
+		model.addAndNext("api/venuetype/all", 2)
+	}
 
 	private class FieldAdapter : RecyclerAdapter<JSONObject>() {
 		var action: ((String?) -> Unit)? = null

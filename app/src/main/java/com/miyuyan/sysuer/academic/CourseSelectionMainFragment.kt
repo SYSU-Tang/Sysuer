@@ -53,7 +53,6 @@ import com.miyuyan.sysuer.databinding.ItemCourseSelectionBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.PreferenceAdapter
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -153,7 +152,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 			head.filter.setOnCheckedStateChangeListener { _: ChipGroup?, _: MutableList<Int?>? -> regetCourseList() }
 			course.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 				override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
-					if (!v.canScrollVertically(1) && total!! > page * 10 && dy > 0) courseList
+					if (!v.canScrollVertically(1) && total!! > page * 10 && dy > 0) courseList()
 					head.root.elevation = (if (v.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
 				}
 			})
@@ -163,12 +162,12 @@ class CourseSelectionMainFragment : BaseFragment() {
 		}
 		
 		typeCate.observe(viewLifecycleOwner) {
-			if (term == null) info
+			if (term == null) info()
 			else regetCourseList()
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						when (code) {
 							0 -> {
@@ -181,7 +180,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 									val start = data.getString("startTime", "")
 									val end = data.getString("endTime", "")
 									if (!start.isEmpty() && !end.isEmpty()) toolbar.subtitle = "${start}~${end}"
-									courseList
+									courseList()
 								}
 							}
 							1 -> response.getJSONObject("data")?.run {
@@ -214,7 +213,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 	
 	private fun regetCourseList() {
 		clear()
-		courseList
+		courseList()
 	}
 	
 	private fun selectCategory() {
@@ -284,10 +283,9 @@ class CourseSelectionMainFragment : BaseFragment() {
 		total = -1
 	}
 	
-	val courseList: Unit
-		get() {
-			if (term != null) getCourseList(getType(), getCategory(), term)
-		}
+	private fun courseList() {
+		if (term != null) getCourseList(getType(), getCategory(), term)
+	}
 	
 	fun getPE() {
 		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/sportsSelectedlist", 4)
@@ -323,10 +321,9 @@ class CourseSelectionMainFragment : BaseFragment() {
 		model.addAndNext("jwxt/choose-course-front-server/stuCollectedCourse/create", "{\"classesID\":\"$code\",\"selectedType\":\"1\"}", 3)
 	}
 	
-	val info: Unit
-		get() {
-			model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0)
-		}
+	private fun info() {
+		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0)
+	}
 	
 	fun select(code: String) {
 		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose", String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, getType(), getCategory()), 3)

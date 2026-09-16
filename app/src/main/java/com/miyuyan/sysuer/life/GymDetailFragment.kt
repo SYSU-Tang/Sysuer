@@ -24,7 +24,6 @@ import com.miyuyan.sysuer.databinding.ItemDateBinding
 import com.miyuyan.sysuer.databinding.ItemFieldDetailBinding
 import com.miyuyan.sysuer.model.GymModel
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -96,11 +95,11 @@ class GymDetailFragment : BaseFragment() {
 		dialog.setContentView(dialogBinding.root)
 		if (viewModel.position.value == null) viewModel.position.value = 0
 		viewModel.position.observe(viewLifecycleOwner) { p: Int? ->
-			if (p != null) info
+		if (p != null) loadInfo()
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					when (code) {
 						0 -> {
 							reset(fieldAdapter)
@@ -179,7 +178,7 @@ class GymDetailFragment : BaseFragment() {
 							response.getJSONArray("data")?.run {
 								forEach { fee[(it as JSONObject).getString("UserRole")] = it }
 							}
-							me
+						loadMe()
 						}
 
 						2 -> {
@@ -248,6 +247,10 @@ class GymDetailFragment : BaseFragment() {
 		}
 		return binding.root
 	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
 
 	fun reset(field: FieldAdapter) {
 		field.clear()
@@ -255,14 +258,13 @@ class GymDetailFragment : BaseFragment() {
 		viewModel.selected.value = mutableSetOf()
 	}
 
-	val info: Unit
-		get() {
-			viewModel.position.value?.let {
-				getInfo(
-						id!!, dateAdapter!!.getFormattedDate(it), dateAdapter!!.getFormattedDate(it)
-				)
-			}
+	private fun loadInfo() {
+		viewModel.position.value?.let {
+			getInfo(
+					id!!, dateAdapter!!.getFormattedDate(it), dateAdapter!!.getFormattedDate(it)
+			)
 		}
+	}
 
 	fun getInfo(id: String, from: String?, to: String?) {
 		model.addAndNext("api/venue/available-slots/range?venueTypeId=$id&start=$from&end=$to", 0)
@@ -272,10 +274,9 @@ class GymDetailFragment : BaseFragment() {
 		model.addAndNext("api/venuetype/$id/feetemplates", 1)
 	}
 
-	val me: Unit
-		get() {
-			model.addAndNext("api/swimmer/me", 2)
-		}
+	private fun loadMe() {
+		model.addAndNext("api/swimmer/me", 2)
+	}
 
 	fun getType(id: String?) {
 		model.addAndNext("api/venue/type/$id", 3)

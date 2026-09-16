@@ -1,7 +1,6 @@
 package com.miyuyan.sysuer.life
 
 import android.os.Bundle
-import android.util.ArraySet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alibaba.fastjson2.JSONObject
 import com.haibin.calendarview.Calendar
-import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
@@ -26,15 +24,14 @@ import com.miyuyan.sysuer.view.ButtonAdapter
 import com.miyuyan.sysuer.view.PreferenceAdapter
 import com.miyuyan.sysuer.view.PreferenceDialog
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
-class EnergyElectricityFeeFragment : BaseFragment() {
-	val model: ZhnyModel by lazy {
+class EnergyElectricityFeeFragment : EnergyBaseFragment() {
+	override val model: ZhnyModel by lazy {
 		ZhnyModel(requireContext())
 	}
 
@@ -45,13 +42,8 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 	): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		val adapter = ConcatAdapter()
-		fun reset() {
-			adapter.adapters.forEach { adapter.removeAdapter(it) }
-		}
 
 		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-		val rooms: ArraySet<CommonUtil.Tuple2<String?, String?>?> =
-			ArraySet<CommonUtil.Tuple2<String?, String?>?>()
 		val roomCode = MutableStateFlow<String?>(null)
 		val paymentStatus = resources.getStringArray(R.array.payment_status)
 		val binding = FragmentWaterFeeBinding.inflate(inflater, container, false).apply {
@@ -87,7 +79,7 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 		val detailDialog = PreferenceDialog(requireContext())
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						when (code) {
 							0 -> getRoom(response.getJSONObject("data").getString("username"))
@@ -122,7 +114,7 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 								}
 
 							3 -> {
-								reset()
+							resetAdapter(adapter)
 								response.getJSONObject("data").getJSONArray("list")
 									.forEach { item: Any? ->
 										adapter.addAdapter(
@@ -149,7 +141,7 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 										)
 										)
 										val billStatus = item.getInteger("billStatus")
-										value[1] = paymentStatus[billStatus - 1]
+					value[1] = paymentStatus.getOrNull(billStatus - 1) ?: getString(R.string.none)
 										value[3] = "${item.getString("currReportElectric")}-${
 											item.getString("lastReportElectric")
 										}=${item.getString("useElectric")}"
@@ -233,7 +225,7 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 										)
 										)
 										val billStatus = item.getInteger("billStatus")
-										value[1] = paymentStatus[billStatus - 1]
+					value[1] = paymentStatus.getOrNull(billStatus - 1) ?: getString(R.string.none)
 										value[3] = "${item.getString("currReportElectric")}-${
 											item.getString("lastReportElectric")
 										}=${item.getString("useElectric")}"
@@ -297,35 +289,26 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 			}
 		}
 
-		userInfo
+		loadUserInfo()
 		return binding.root
-	}
-
-	val userInfo: Unit
-		get() {
-			model.addAndNext("kbp/auth/userInfo", 0)
-		}
-
-	fun getRoom(username: String?) {
-		model.addAndNext("kbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 1)
 	}
 
 	fun getElectricityConsumption(roomCode: String, startDate: String?, endDate: String?) {
 		model.addAndNext(
-				"kbp/ele/wechat/eleConsume",
-				"{\"roomCode\":\"$roomCode\",\"startDate\":\"$startDate\",\"endDate\":\"$endDate\"}",
-				2
+			"kbp/ele/wechat/eleConsume",
+			JSONObject.of("roomCode", roomCode, "startDate", startDate, "endDate", endDate).toJSONString(),
+			2
 		)
 	}
 
 	fun getElectricityBill(roomCode: String) {
 		model.addAndNext(
-				"kbp/ele/mobile/billRecord", "{\"roomCode\":\"$roomCode\",\"billType\":1}", 3
+			"kbp/ele/mobile/billRecord", JSONObject.of("roomCode", roomCode, "billType", 1).toJSONString(), 3
 		)
 	}
 
 	fun getDetail(id: String, room: String?) {
-		model.addAndNext("kbp/ele/mobile/billRecord", "{\"id\":\"$id\",\"roomCode\":\"$room\"}", 4)
+		model.addAndNext("kbp/ele/mobile/billRecord", JSONObject.of("id", id, "roomCode", room).toJSONString(), 4)
 	}
 
 	fun recharge(id: String?, roomCode: String, amount: Float) {
@@ -339,5 +322,9 @@ class EnergyElectricityFeeFragment : BaseFragment() {
 				id
 		), 5
 		)
+	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
 	}
 }

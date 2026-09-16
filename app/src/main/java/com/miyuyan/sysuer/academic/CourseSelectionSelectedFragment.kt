@@ -30,7 +30,6 @@ import com.miyuyan.sysuer.databinding.ItemActionChipBinding
 import com.miyuyan.sysuer.databinding.ItemCourseSelectionBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CourseSelectionSelectedFragment : BaseFragment() {
@@ -90,7 +89,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 				}
 				list.root.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 					override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
-						if (!v.canScrollVertically(1) && total > (page - 1) * 10 && dy > 0) selectedCourses
+						if (!v.canScrollVertically(1) && total > (page - 1) * 10 && dy > 0) selectedCourses()
 						head.elevation =
 							(if (v.canScrollVertically(-1)) config.dpToPx(2) else 0).toFloat()
 					}
@@ -124,7 +123,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 			}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getIntValue("code") == 200) {
 						when (code) {
 							0 -> {
@@ -144,7 +143,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 				}
 			}
 		}
-		selectedCourses
+		selectedCourses()
 		return binding.root
 	}
 
@@ -164,31 +163,30 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 		)
 	}
 
-	val selectedCourses: Unit
-		get() {
-			val args = JSONObject.of(
-				"successStatus",
-				"$success",
-				"failureStatus",
-				"$failure",
-				"retiredClass",
-				"$retired",
-				"waitingScreen",
-				"$waiting"
-			)
-			if (!category.isNullOrEmpty()) args["courseCateCode"] = category
-			model.addAndNext(
-				"jwxt/choose-course-front-server/selectedCourse/list",
-				"{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${args.toJSONString()}}",
-				0
-			)
-		}
+	private fun selectedCourses() {
+		val args = JSONObject.of(
+			"successStatus",
+			"$success",
+			"failureStatus",
+			"$failure",
+			"retiredClass",
+			"$retired",
+			"waitingScreen",
+			"$waiting"
+		)
+		if (!category.isNullOrEmpty()) args["courseCateCode"] = category
+		model.addAndNext(
+			"jwxt/choose-course-front-server/selectedCourse/list",
+			"{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${args.toJSONString()}}",
+			0
+		)
+	}
 
 	fun regetSelectedCourses() {
 		page = 1
 		total = -1
 		courseSelectedAdapter!!.clear()
-		selectedCourses
+		selectedCourses()
 	}
 
 	fun setPNP(type: String?, id: String) {

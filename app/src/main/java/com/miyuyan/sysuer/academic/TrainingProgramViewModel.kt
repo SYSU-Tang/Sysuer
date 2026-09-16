@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class TrainingProgramViewModel(application: Application) : AndroidViewModel(application) {
@@ -81,7 +80,7 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().filter { it.second.getInteger("code") == 200 }
+			model.messageChannel.filter { it.second.getInteger("code") == 200 }
 				.collect { (code, response) ->
 					when (code) {
 						1 -> {
@@ -142,55 +141,52 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 							responseData.getJSONArray("rows").forEach { o: Any? ->
 								val obj = o as JSONObject
 								val keys = intArrayOf(
-									R.string.profession,
-									R.string.grade,
-									R.string.college,
-									R.string.training_category,
-									R.string.study_period,
-									R.string.discipline_category,
-									R.string.degree,
-									R.string.profession_code,
-									R.string.profession_id
+										R.string.profession,
+										R.string.grade,
+										R.string.college,
+										R.string.training_category,
+										R.string.study_period,
+										R.string.discipline_category,
+										R.string.degree,
+										R.string.profession_code,
+										R.string.profession_id
 								)
 								newSections.add(
-									SectionData(
-										title = obj.getString("name"),
-										transitionName = "PersonalTrainingProgram_${o.getString("teachPlanNumber")}",
-										rows = extractValue(
-											application, obj, keys, arrayOf(
-												"professionName",
-												"grade",
-												"manageUnitName",
-												"trainTypeName",
-												"educationalSystem",
-												"disciplineCateName",
-												"degreeGrantName",
-												"professionCode",
-												"professionId"
-											)
-										),
-										footerMenus = mutableStateListOf(
-											MenuItem(
-												application.getString(R.string.view_detail)
-											) {
-												_viewDetailProgramId.value =
+										SectionData(
+												title = obj.getString("name"),
+												transitionName = "PersonalTrainingProgram_${
 													o.getString("teachPlanNumber")
-												true
-											})
-									)
+												}",
+												rows = extractValue(
+														application, obj, keys, arrayOf(
+														"professionName",
+														"grade",
+														"manageUnitName",
+														"trainTypeName",
+														"educationalSystem",
+														"disciplineCateName",
+														"degreeGrantName",
+														"professionCode",
+														"professionId"
+												)
+												),
+												footerMenus = mutableStateListOf(
+														MenuItem(
+																application.getString(R.string.view_detail)
+														) {
+															_viewDetailProgramId.value =
+																o.getString("teachPlanNumber")
+															true
+														})
+										)
 								)
 							}
 							_resultSections.value = newSections
 						}
 					}
-					model.nextAll()
 				}
 		}
 		loadInitialData()
-	}
-
-	fun next() {
-		model.next()
 	}
 
 	private fun loadInitialData() {
@@ -198,29 +194,28 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 		fetchTypes()
 		fetchColleges("")
 		fetchProfessions("")
-		next()
 	}
 
 	fun fetchColleges(keyword: String) {
-		model.add(
-			"jwxt/base-info/department/recruitUnitPull",
-			"{\"departmentName\":\"$keyword\",\"subordinateDepartmentNumber\":null,\"id\":null}",
-			1
+		model.addAndNext(
+				"jwxt/base-info/department/recruitUnitPull",
+				"{\"departmentName\":\"$keyword\",\"subordinateDepartmentNumber\":null,\"id\":null}",
+				1
 		)
 	}
 
 	private fun fetchGrades() {
-		model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=127", 2)
+		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=127", 2)
 	}
 
 	private fun fetchTypes() {
-		model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 3)
+		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 3)
 	}
 
 	fun fetchProfessions(keyword: String) {
-		model.add(
-			"jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode=$keyword",
-			4
+		model.addAndNext(
+				"jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode=$keyword",
+				4
 		)
 	}
 
@@ -283,19 +278,19 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 
 	private fun fetchResults() {
 		val params = JSONObject.of(
-			"manageUnitNum",
-			_selectedCollegeId.value,
-			"grade",
-			_selectedGradeId.value,
-			"professionCode",
-			_selectedProfessionId.value,
-			"trainTypeCode",
-			_selectedTypeId.value
+				"manageUnitNum",
+				_selectedCollegeId.value,
+				"grade",
+				_selectedGradeId.value,
+				"professionCode",
+				_selectedProfessionId.value,
+				"trainTypeCode",
+				_selectedTypeId.value
 		)
 		model.addAndNext(
-			"jwxt/training-programe/training-programe/undergradute/profession-info",
-			"{\"pageNo\":${++resultPage},\"pageSize\":10,\"total\":true,\"param\":$params}",
-			5
+				"jwxt/training-programe/training-programe/undergradute/profession-info",
+				"{\"pageNo\":${++resultPage},\"pageSize\":10,\"total\":true,\"param\":$params}",
+				5
 		)
 	}
 

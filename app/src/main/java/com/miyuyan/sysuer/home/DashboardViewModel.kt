@@ -3,8 +3,9 @@ package com.miyuyan.sysuer.home
 import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
@@ -21,11 +22,7 @@ import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
 import com.miyuyan.sysuer.model.JwxtModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -43,16 +40,15 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	val finalExamWeek: StateFlow<String> = _finalExamWeek.asStateFlow()
 	private val _todayExamIndex = MutableStateFlow(-1)
 	val todayExamIndex: StateFlow<Int> = _todayExamIndex.asStateFlow()
-	private val _selectedCourses = mutableStateListOf<JSONObject>()
-//	val selectedCourses: SnapshotStateList<JSONObject> = _selectedCourses
-	private val _todayCourses = mutableStateListOf<JSONObject>()
-	val todayCourses: SnapshotStateList<JSONObject> = _todayCourses
-	private val _recentCourses = mutableStateListOf<JSONObject>()
-	val tomorrowCourses: SnapshotStateList<JSONObject> = _recentCourses
-	private val _week18Exams = mutableStateListOf<JSONObject>()
-	val week18Exams: SnapshotStateList<JSONObject> = _week18Exams
-	private val _week19Exams = mutableStateListOf<JSONObject>()
-	val week19Exams: SnapshotStateList<JSONObject> = _week19Exams
+	private val _selectedCourses = MutableStateFlow<List<JSONObject>>(emptyList())
+	private val _todayCourses = MutableStateFlow<List<JSONObject>>(emptyList())
+	val todayCourses: StateFlow<List<JSONObject>> = _todayCourses.asStateFlow()
+	private val _recentCourses = MutableStateFlow<List<JSONObject>>(emptyList())
+	val tomorrowCourses: StateFlow<List<JSONObject>> = _recentCourses.asStateFlow()
+	private val _week18Exams = MutableStateFlow<List<JSONObject>>(emptyList())
+	val week18Exams: StateFlow<List<JSONObject>> = _week18Exams.asStateFlow()
+	private val _week19Exams = MutableStateFlow<List<JSONObject>>(emptyList())
+	val week19Exams: StateFlow<List<JSONObject>> = _week19Exams.asStateFlow()
 	private val _progressMax = MutableStateFlow(0)
 	val progressMax: StateFlow<Int> = _progressMax.asStateFlow()
 	private val _progressCurrent = MutableStateFlow(0)
@@ -68,14 +64,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		_navigateToCourseDetail.value = null
 	}
 
-	private val _dashboardShortcuts = mutableStateListOf<DashboardShortcutEntity>()
-	val dashboardShortcuts: SnapshotStateList<DashboardShortcutEntity> = _dashboardShortcuts
+	private val _dashboardShortcuts = MutableStateFlow<List<DashboardShortcutEntity>>(emptyList())
+	val dashboardShortcuts: StateFlow<List<DashboardShortcutEntity>> = _dashboardShortcuts.asStateFlow()
 
 	fun loadDashboardShortcuts() {
 		viewModelScope.launch(Dispatchers.IO) {
-			val shortcuts = db.collectionDao().getCollectedDashboardShortcuts()
-			_dashboardShortcuts.clear()
-			_dashboardShortcuts.addAll(shortcuts)
+			_dashboardShortcuts.value = db.collectionDao().getCollectedDashboardShortcuts()
 		}
 	}
 
@@ -114,26 +108,26 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		}
 	}
 
-	private val _orderShortcuts = mutableStateListOf<DashboardShortcutEntity>()
-	val orderShortcuts: SnapshotStateList<DashboardShortcutEntity> = _orderShortcuts
+	private val _orderShortcuts = MutableStateFlow<List<DashboardShortcutEntity>>(emptyList())
+	val orderShortcuts: StateFlow<List<DashboardShortcutEntity>> = _orderShortcuts.asStateFlow()
 
 	fun loadOrderShortcuts() {
 		viewModelScope.launch(Dispatchers.IO) {
-			val shortcuts = db.collectionDao().getCollectedDashboardShortcuts()
-			_orderShortcuts.clear()
-			_orderShortcuts.addAll(shortcuts)
+			_orderShortcuts.value = db.collectionDao().getCollectedDashboardShortcuts()
 		}
 	}
 
 	fun moveOrderShortcut(from: Int, to: Int) {
 		if (from == to) return
-		val item = _orderShortcuts.removeAt(from)
-		_orderShortcuts.add(to, item)
+		val list = _orderShortcuts.value.toMutableList()
+		val item = list.removeAt(from)
+		list.add(to, item)
+		_orderShortcuts.value = list
 	}
 
 	fun saveOrderShortcuts() {
 		viewModelScope.launch(Dispatchers.IO) {
-			_orderShortcuts.forEachIndexed { index, entity ->
+			_orderShortcuts.value.forEachIndexed { index, entity ->
 				db.collectionDao().updateDashboardShortcutPosition(entity.shortcutId ?: 0, index)
 			}
 			loadDashboardShortcuts()
@@ -197,7 +191,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
 		val markdown = if (isAfterEmpty) {
-			val next = _recentCourses.getOrNull(0)
+		val next = _recentCourses.value.getOrNull(0)
 			"###### ${application.getString(R.string.no_class_today)}\n\n${application.getString(R.string.next_class)}：**${
 				next?.getString("courseName") ?: application.getString(R.string.none)
 			}**\n\n${application.getString(R.string.location)}：**${
@@ -208,7 +202,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				)
 			}**"
 		} else {
-			val current = _todayCourses.getOrNull(beforeSize)
+		val current = _todayCourses.value.getOrNull(beforeSize)
 			"###### ${current?.getString("courseName") ?: application.getString(R.string.none)}\n\n${
 				application.getString(
 					R.string.location
@@ -227,65 +221,69 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	private fun scheduleIslandTick() {
-		ClassIsland.updateCourseData(_todayCourses, _recentCourses)
+		ClassIsland.updateCourseData(_todayCourses.value, _recentCourses.value)
 		ClassIsland.triggerAndScheduleTick(application)
 	}
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().filter { it.second.getInteger("code") == 200 }
+			model.messageChannel.filter { it.second.getInteger("code") == 200 }
 				.collect { (code, response) ->
 					when (code) {
-						1 -> {
-							_todayCourses.clear()
-							_recentCourses.clear()
-							val (beforeArray, afterArray) = response.getJSONArray("data")
-								.map { it as JSONObject }.filter { item ->
-									item["status"] = getTimePosition(
-										"${item.getString("teachingDate")} ${
-											item.getString("startTime")
-										}",
-										"${item.getString("teachingDate")} ${item.getString("endTime")}"
-									)
-									item["time"] =
-										"${item.getString("startTime")}~${item.getString("endTime")}"
-									item["course"] =
-										"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
-									val isToday = "TD" == item.getString("useflag")
-									if (isToday) _todayCourses.add(item) else _recentCourses.add(
-										item
-									)
-									isToday
-								}.partition { it.getString("status") == "before" }
-							_progressMax.value = _todayCourses.size
-							_progressCurrent.value = beforeArray.size
-							updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
-							scheduleIslandTick()
-						}
+					1 -> {
+						val todayList = mutableListOf<JSONObject>()
+						val recentList = mutableListOf<JSONObject>()
+						val (beforeArray, afterArray) = response.getJSONArray("data")
+							.map { it as JSONObject }.filter { item ->
+								item["status"] = getTimePosition(
+									"${item.getString("teachingDate")} ${
+										item.getString("startTime")
+									}",
+									"${item.getString("teachingDate")} ${item.getString("endTime")}"
+								)
+								item["time"] =
+									"${item.getString("startTime")}~${item.getString("endTime")}"
+								item["course"] =
+									"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
+								val isToday = "TD" == item.getString("useflag")
+								if (isToday) todayList.add(item) else recentList.add(
+									item
+								)
+								isToday
+							}.partition { it.getString("status") == "before" }
+						_todayCourses.value = todayList
+						_recentCourses.value = recentList
+						_progressMax.value = todayList.size
+						_progressCurrent.value = beforeArray.size
+						updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
+						scheduleIslandTick()
+					}
 
-						2 -> {
-							_week18Exams.clear()
-							_week19Exams.clear()
-							response.getJSONArray("data")?.forEachIndexed { i, v ->
-								val exams = if (i == 0) _week18Exams else _week19Exams
-								val timetable = (v as JSONObject).getJSONObject("timetable")
-								timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }
-									.forEach {
-										(timetable[it] as JSONArray?)?.apply {
-											forEach { exam ->
-												(exam as JSONObject)["status"] =
-													getDatePosition(exam.getString("examDate"))
-												exams.add(exam)
-											}
+					2 -> {
+						val week18List = mutableListOf<JSONObject>()
+						val week19List = mutableListOf<JSONObject>()
+						response.getJSONArray("data")?.forEachIndexed { i, v ->
+							val exams = if (i == 0) week18List else week19List
+							val timetable = (v as JSONObject).getJSONObject("timetable")
+							timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }
+								.forEach {
+									(timetable[it] as JSONArray?)?.apply {
+										forEach { exam ->
+											(exam as JSONObject)["status"] =
+												getDatePosition(exam.getString("examDate"))
+											exams.add(exam)
 										}
 									}
-								_todayExamIndex.value =
-									exams.indexOfFirst { it.getString("status") == "in" }.let {
-										if (it < 0) exams.indexOfFirst { e -> e.getString("status") == "after" } else it
-									}
-							}
-							_isShowWeek18.value = _week.value != "19"
+								}
 						}
+						_week18Exams.value = week18List
+						_week19Exams.value = week19List
+						_todayExamIndex.value =
+							(week18List + week19List).indexOfFirst { it.getString("status") == "in" }.let {
+								if (it < 0) (week18List + week19List).indexOfFirst { e -> e.getString("status") == "after" } else it
+							}
+						_isShowWeek18.value = _week.value != "19"
+					}
 
 						3 -> {
 							_term.value =
@@ -304,16 +302,15 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 									?.getString("examWeekId") ?: ""
 						}
 
-						6 -> {
-							_selectedCourses.addAll(
-								response.getJSONObject("data").getJSONArray("rows")
-									.filterIsInstance<JSONObject>()
-							)
-							_selectedCourses.firstOrNull { it.getString("courseName") == examSubject }
-								?.let {
-									_navigateToCourseDetail.value = it
-								}
-						}
+					6 -> {
+						val newCourses = response.getJSONObject("data").getJSONArray("rows")
+							.filterIsInstance<JSONObject>()
+						_selectedCourses.value = _selectedCourses.value + newCourses
+						_selectedCourses.value.firstOrNull { it.getString("courseName") == examSubject }
+							?.let {
+								_navigateToCourseDetail.value = it
+							}
+					}
 					}
 				}
 		}
@@ -349,12 +346,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	fun getSelectedCourses(courseName: String) {
 		examSubject = courseName
-		if (_selectedCourses.isEmpty()) model.addAndNext(
+		if (_selectedCourses.value.isEmpty()) model.addAndNext(
 			"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
 			"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"${_term.value}\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
 			6
 		)
-		else _selectedCourses.firstOrNull { it.getString("courseName") == examSubject }?.let {
+		else _selectedCourses.value.firstOrNull { it.getString("courseName") == examSubject }?.let {
 			_navigateToCourseDetail.value = it
 		}
 	}

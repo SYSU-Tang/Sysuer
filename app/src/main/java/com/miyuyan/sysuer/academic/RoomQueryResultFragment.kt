@@ -14,7 +14,6 @@ import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.databinding.FragmentCourseQueryResultBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class RoomQueryResultFragment : StaggerFragment() {
@@ -38,7 +37,7 @@ class RoomQueryResultFragment : StaggerFragment() {
 		model = JwxtModel(requireContext())
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (_, response) ->
+				model.messageChannel.collect { (_, response) ->
 			if (response.getInteger("code") == 200) response.getJSONObject("data").getJSONArray("data").forEach { item: Any? ->
 				val values: ArrayList<String?> = extractValue(item as JSONObject, arrayOf("yearTerm", "date", "week", "dayWeek", "campus", "teachingBuild", "teachingBuildNum", "classroomNum", "floor", "classroomID", "seatCount"))
 				arrayOf("oneSection",
@@ -85,12 +84,11 @@ class RoomQueryResultFragment : StaggerFragment() {
 				}
 			}
 		}
-		rooms
+		rooms()
 		return courseQueryResultBinding.root
 	}
 	
-	val rooms: Unit
-		get() {
-			model.addAndNext("jwxt/schedule/agg/classroomOccupy/pageCheckList", "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
-		}
+	private fun rooms() {
+		model.addAndNext("jwxt/schedule/agg/classroomOccupy/pageCheckList", "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
+	}
 }

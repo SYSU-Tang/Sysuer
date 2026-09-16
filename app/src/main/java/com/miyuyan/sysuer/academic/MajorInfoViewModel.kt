@@ -12,7 +12,6 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.SectionData
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class MajorInfoViewModel(application: Application) : AndroidViewModel(application) {
@@ -26,7 +25,7 @@ class MajorInfoViewModel(application: Application) : AndroidViewModel(applicatio
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && response.get("data") != null) {
 					when (code) {
 						0 -> _categories.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())

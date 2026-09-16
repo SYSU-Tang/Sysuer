@@ -41,8 +41,7 @@ class GymModel(context: Context) : BaseModel(context) {
 					data = if (data is JSONArray) JSONObject.of("data", data)
 					else data as JSONObject
 					result = CommonUtil.Tuple2(request.second, data)
-//					message.postValue(result)
-					messageChannel.trySend(result)
+					sendMessage(result)
 				} ?: run {
 				if (!authorizationManager.isAuthorized(content)) login(request)
 				else if (Pattern.compile("人机识别检测").matcher(content).find()) login(request)
@@ -50,7 +49,7 @@ class GymModel(context: Context) : BaseModel(context) {
 				else http.handler.post { contextUtil.toast(content) }
 			}
 			400 -> {
-				println("GymModel: ${response.code} $content")
+//				println("GymModel: ${response.code} $content")
 				http.handler.post { contextUtil.toast(content) }
 			}
 			401 -> login(request)

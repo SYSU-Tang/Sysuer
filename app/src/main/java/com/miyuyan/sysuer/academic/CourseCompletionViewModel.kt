@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CourseCompletionViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,7 +20,7 @@ class CourseCompletionViewModel(application: Application) : AndroidViewModel(app
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && response.get("data") != null) {
 					when (code) {
 						0 -> {

@@ -36,9 +36,7 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 					contextUtil.toast(CommonUtil.toStringOrDefault(contentJSON.getString("message")))
 				}
 				result = CommonUtil.Tuple2(request.second, contentJSON)
-//				message.postValue(result)
-				messageChannel.trySend(result)
-				afterLoginRequest.remove(request)
+				sendMessage(result)
 			}
 		} ?: run {
 			if (!authorizationManager.isAuthorized(content)) login(request)

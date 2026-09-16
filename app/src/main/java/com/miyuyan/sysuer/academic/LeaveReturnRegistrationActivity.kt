@@ -1,7 +1,6 @@
 package com.miyuyan.sysuer.academic
 
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.receiveAsFlow
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.Lifecycle
@@ -31,7 +30,7 @@ class LeaveReturnRegistrationActivity : BaseActivity() {
 		setContentView(binding.root)
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect {
+				model.messageChannel.collect {
 				(first, response) ->
 						if (response.getInteger("code") == 200) {
 				if (first == 0) {
@@ -52,11 +51,10 @@ class LeaveReturnRegistrationActivity : BaseActivity() {
 		}
 		}
 	}
-		years
+		years()
 	}
 	
-	val years: Unit
-		get() {
-			model.addAndNext("jjrlfx/api/sm-jjrlfx/student/school-year", 0)
-		}
+	private fun years() {
+		model.addAndNext("jjrlfx/api/sm-jjrlfx/student/school-year", 0)
+	}
 }

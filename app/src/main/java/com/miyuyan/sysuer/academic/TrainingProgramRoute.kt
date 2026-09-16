@@ -95,50 +95,50 @@ fun TrainingProgramRoute(
 	}
 
 	ActivityPager(
-		title = stringResource(if (showResults) R.string.result else R.string.training_program_query),
-		onNavigationClick = {
-			if (showResults) viewModel.navigateBack()
-			else backStack.navigateBack()
-		},
-		isNestedScrollEnabled = false,
-		sharedTransitionScope = sharedTransitionScope,
-		animatedVisibilityScope = animatedVisibilityScope,
-		sharedKey = "TrainingProgram",
-		topBarMenus = {
-			if (showResults) listOf(
-				exportMarkdownMenuItem(
-					backStack,
-					resultSections,
-					stringResource(R.string.training_program_query),
-					stringResource(R.string.training_program_query)
+			title = stringResource(if (showResults) R.string.result else R.string.training_program_query),
+			onNavigationClick = {
+				if (showResults) viewModel.navigateBack()
+				else backStack.navigateBack()
+			},
+			isNestedScrollEnabled = false,
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope,
+			sharedKey = "TrainingProgram",
+			topBarMenus = {
+				if (showResults) listOf(
+						exportMarkdownMenuItem(
+								backStack,
+								resultSections,
+								stringResource(R.string.training_program_query),
+								stringResource(R.string.training_program_query)
+						)
 				)
-			)
-			else emptyList()
-		}) {
+				else emptyList()
+			}) {
 		SharedTransitionLayout {
 			AnimatedContent(
-				targetState = showResults, label = "query_to_result", transitionSpec = {
-					fadeIn() togetherWith fadeOut()
-				}) { showResultsState ->
+					targetState = showResults, label = "query_to_result", transitionSpec = {
+				fadeIn() togetherWith fadeOut()
+			}) { showResultsState ->
 				if (showResultsState) {
 					Box(
-						modifier = Modifier
-							.fillMaxSize()
-							.sharedBounds(
-								sharedContentState = rememberSharedContentState(key = "query_button"),
-								animatedVisibilityScope = this@AnimatedContent,
-							)
+							modifier = Modifier
+								.fillMaxSize()
+								.sharedBounds(
+										sharedContentState = rememberSharedContentState(key = "query_button"),
+										animatedVisibilityScope = this@AnimatedContent,
+								)
 					) {
 						StaggerScreen(
-							sections = resultSections,
-							onScrollBottom = { viewModel.loadMore() },
-							sharedTransitionScope = sharedTransitionScope,
-							animatedVisibilityScope = animatedVisibilityScope,
+								sections = resultSections,
+								onScrollBottom = { viewModel.loadMore() },
+								sharedTransitionScope = sharedTransitionScope,
+								animatedVisibilityScope = animatedVisibilityScope,
 						)
 					}
 				} else {
 					TrainingProgramForm(
-						viewModel, this@SharedTransitionLayout, this@AnimatedContent
+							viewModel, this@SharedTransitionLayout, this@AnimatedContent
 					)
 				}
 			}
@@ -154,14 +154,14 @@ private fun TrainingProgramForm(
 	animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
 	Column(
-		modifier = Modifier
-			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
-			.padding(
-				horizontal = dimensionResource(R.dimen.horizontal_margin),
-				vertical = dimensionResource(R.dimen.vertical_padding)
-			),
-		verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
+			modifier = Modifier
+				.fillMaxSize()
+				.verticalScroll(rememberScrollState())
+				.padding(
+						horizontal = dimensionResource(R.dimen.horizontal_margin),
+						vertical = dimensionResource(R.dimen.vertical_padding)
+				),
+			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 	) {
 		Text(text = stringResource(R.string.college))
 		CollegeDropdown(viewModel)
@@ -178,31 +178,31 @@ private fun TrainingProgramForm(
 		HorizontalDivider(modifier = Modifier.padding(vertical = dimensionResource(R.dimen.vertical_margin)))
 
 		Row(
-			modifier = Modifier.fillMaxWidth(),
-			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
 		) {
 			OutlinedButton(
-				onClick = { viewModel.reset() },
-				modifier = Modifier.weight(1f),
-				shapes = ButtonDefaults.shapes()
+					onClick = { viewModel.reset() },
+					modifier = Modifier.weight(1f),
+					shapes = ButtonDefaults.shapes()
 			) {
 				Text(stringResource(R.string.reset))
 			}
 			FilledTonalButton(
-				onClick = { viewModel.query() },
-				modifier = Modifier
-					.weight(1f)
-					.then(
-						if (sharedTransitionScope != null && animatedVisibilityScope != null) with(
-						sharedTransitionScope
-					) {
-						Modifier.sharedBounds(
-							sharedContentState = rememberSharedContentState(key = "query_button"),
-							animatedVisibilityScope = animatedVisibilityScope
-						)
-					}
-					else Modifier),
-				shapes = ButtonDefaults.shapes()) {
+					onClick = { viewModel.query() },
+					modifier = Modifier
+						.weight(1f)
+						.then(
+								if (sharedTransitionScope != null && animatedVisibilityScope != null) with(
+								sharedTransitionScope
+						) {
+							Modifier.sharedBounds(
+									sharedContentState = rememberSharedContentState(key = "query_button"),
+									animatedVisibilityScope = animatedVisibilityScope
+							)
+						}
+						else Modifier),
+					shapes = ButtonDefaults.shapes()) {
 				Text(stringResource(R.string.query))
 			}
 		}
@@ -217,22 +217,21 @@ private fun CollegeDropdown(viewModel: TrainingProgramViewModel) {
 	val selectedCollegeName by viewModel.selectedCollegeName.collectAsState()
 	ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
 		OutlinedTextField(
-			value = selectedCollegeName,
-			onValueChange = {
-				viewModel.updateSelectedCollegeName(it)
-				viewModel.fetchColleges(it)
-				viewModel.next()
-				expanded = true
-			},
-			label = { Text(stringResource(R.string.college)) },
-			trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-			modifier = Modifier
-				.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-				.fillMaxWidth(),
-			singleLine = true
+				value = selectedCollegeName,
+				onValueChange = {
+					viewModel.updateSelectedCollegeName(it)
+					viewModel.fetchColleges(it)
+					expanded = true
+				},
+				label = { Text(stringResource(R.string.college)) },
+				trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+				modifier = Modifier
+					.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+					.fillMaxWidth(),
+				singleLine = true
 		)
 		ExposedDropdownMenu(
-			expanded = expanded, onDismissRequest = { expanded = false }) {
+				expanded = expanded, onDismissRequest = { expanded = false }) {
 			collegeNames.forEachIndexed { index, name ->
 				DropdownMenuItem(text = { Text(name) }, onClick = {
 					viewModel.onCollegeSelected(index)
@@ -251,22 +250,21 @@ private fun ProfessionDropdown(viewModel: TrainingProgramViewModel) {
 	val selectedProfessionName by viewModel.selectedProfessionName.collectAsState()
 	ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
 		OutlinedTextField(
-			value = selectedProfessionName,
-			onValueChange = {
-				viewModel.updateSelectedProfessionName(it)
-				viewModel.fetchProfessions(it)
-				viewModel.next()
-				expanded = true
-			},
-			label = { Text(stringResource(R.string.profession)) },
-			trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-			modifier = Modifier
-				.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-				.fillMaxWidth(),
-			singleLine = true
+				value = selectedProfessionName,
+				onValueChange = {
+					viewModel.updateSelectedProfessionName(it)
+					viewModel.fetchProfessions(it)
+					expanded = true
+				},
+				label = { Text(stringResource(R.string.profession)) },
+				trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+				modifier = Modifier
+					.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+					.fillMaxWidth(),
+				singleLine = true
 		)
 		ExposedDropdownMenu(
-			expanded = expanded, onDismissRequest = { expanded = false }) {
+				expanded = expanded, onDismissRequest = { expanded = false }) {
 			professionNames.forEachIndexed { index, name ->
 				DropdownMenuItem(text = { Text(name) }, onClick = {
 					viewModel.onProfessionSelected(index)
@@ -288,11 +286,11 @@ private fun GradePicker(
 	if (gradeNames.isEmpty()) return
 
 	val listState = rememberLazyListState(
-		initialFirstVisibleItemIndex = selectedGradeIndex
+			initialFirstVisibleItemIndex = selectedGradeIndex
 	)
 
 	val snapBehavior = rememberSnapFlingBehavior(
-		lazyListState = listState
+			lazyListState = listState
 	)
 
 	val scope = rememberCoroutineScope()
@@ -308,7 +306,7 @@ private fun GradePicker(
 
 			layoutInfo.visibleItemsInfo.minByOrNull {
 				abs(
-					(it.offset + it.size / 2) - viewportCenter
+						(it.offset + it.size / 2) - viewportCenter
 				)
 			}?.index
 		}
@@ -332,7 +330,7 @@ private fun GradePicker(
 		if (selectedGradeIndex in gradeNames.indices && selectedGradeIndex != centerIndex) {
 			scope.launch {
 				listState.animateScrollToItem(
-					index = selectedGradeIndex
+						index = selectedGradeIndex
 				)
 			}
 		}
@@ -341,33 +339,33 @@ private fun GradePicker(
 	val itemHeight = 44.dp
 
 	Box(
-		modifier = Modifier
-			.fillMaxWidth()
-			.height(itemHeight * 3),
-		contentAlignment = Alignment.Center
+			modifier = Modifier
+				.fillMaxWidth()
+				.height(itemHeight * 3),
+			contentAlignment = Alignment.Center
 	) {
 
 		/*
 		 * iOS Picker 中间选中区域
 		 */
 		Box(
-			modifier = Modifier
-				.fillMaxWidth()
-				.height(itemHeight)
-				.squircleClip(itemHeight / 2)
-				.background(
-					MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.64f)
-				)
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(itemHeight)
+					.squircleClip(itemHeight / 2)
+					.background(
+							MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.64f)
+					)
 		)
 
 		LazyColumn(
-			state = listState,
-			flingBehavior = snapBehavior,
-			modifier = Modifier.fillMaxSize(),
-			contentPadding = PaddingValues(
-				vertical = itemHeight
-			),
-			horizontalAlignment = Alignment.CenterHorizontally
+				state = listState,
+				flingBehavior = snapBehavior,
+				modifier = Modifier.fillMaxSize(),
+				contentPadding = PaddingValues(
+						vertical = itemHeight
+				),
+				horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			itemsIndexed(gradeNames) { index, name ->
 				val distanceFromCenter = remember {
@@ -379,7 +377,7 @@ private fun GradePicker(
 							it.index == index
 						}?.let { item ->
 							abs(
-								item.offset + item.size / 2 - viewportCenter
+									item.offset + item.size / 2 - viewportCenter
 							).toFloat() / item.size
 						} ?: 3f
 					}
@@ -391,29 +389,29 @@ private fun GradePicker(
 				val selected = index == centerIndex
 
 				Box(
-					modifier = Modifier
-						.fillMaxWidth()
-						.height(itemHeight)
-						.graphicsLayer {
-							scaleX = scale
-							scaleY = scale
-							this.alpha = alpha
-						}
-						.squircleClip(itemHeight / 2)
-						.clickable {
-							scope.launch {
-								listState.animateScrollToItem(
-									index = index
-								)
+						modifier = Modifier
+							.fillMaxWidth()
+							.height(itemHeight)
+							.graphicsLayer {
+								scaleX = scale
+								scaleY = scale
+								this.alpha = alpha
 							}
-						}, contentAlignment = Alignment.Center
+							.squircleClip(itemHeight / 2)
+							.clickable {
+								scope.launch {
+									listState.animateScrollToItem(
+											index = index
+									)
+								}
+							}, contentAlignment = Alignment.Center
 				) {
 					Text(
-						text = name,
-						style = if (selected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
-						fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
-						color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-						textAlign = TextAlign.Center
+							text = name,
+							style = if (selected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+							fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
+							color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+							textAlign = TextAlign.Center
 					)
 				}
 			}
@@ -429,9 +427,9 @@ private fun TypeChips(viewModel: TrainingProgramViewModel) {
 	FlowRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
 		typeNames.forEachIndexed { index, name ->
 			FilterChip(
-				selected = typeIds.getOrNull(index) == selectedTypeId,
-				onClick = { viewModel.onTypeSelected(index) },
-				label = { Text(name) })
+					selected = typeIds.getOrNull(index) == selectedTypeId,
+					onClick = { viewModel.onTypeSelected(index) },
+					label = { Text(name) })
 		}
 	}
 }

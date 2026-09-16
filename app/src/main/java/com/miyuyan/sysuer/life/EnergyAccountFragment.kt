@@ -25,7 +25,6 @@ import com.miyuyan.sysuer.model.ZhnyModel
 import com.miyuyan.sysuer.todo.TitleAdapter
 import com.miyuyan.sysuer.view.ButtonAdapter
 import com.miyuyan.sysuer.view.PreferenceAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -55,7 +54,7 @@ class EnergyAccountFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					println("code = $code , response = $response")
 					if (response.getInteger("code") == 200) {
 						when (code) {
@@ -101,12 +100,11 @@ class EnergyAccountFragment : BaseFragment() {
 			recyclerViewScroll.root.layoutManager = LinearLayoutManager(requireContext())
 			recyclerViewScroll.root.adapter = adapter
 		}
-		userInfo
+		loadUserInfo()
 		return binding.root
 	}
 	
-	val userInfo: Unit
-		get() {
+	private fun loadUserInfo() {
 			model.addAndNext("kbp/auth/userInfo", 0)
 		}
 	
@@ -147,5 +145,9 @@ class EnergyAccountFragment : BaseFragment() {
 					}
 				}
 			})
+	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
 	}
 }

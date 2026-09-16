@@ -20,7 +20,6 @@ import com.miyuyan.sysuer.preference.FilterPreference
 import com.miyuyan.sysuer.preference.PreferenceParamsBuilder
 import com.miyuyan.sysuer.preference.RangeSliderPreference
 import com.miyuyan.sysuer.preference.SliderPreference
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import rikka.preference.SimpleMenuPreference
 
@@ -56,7 +55,7 @@ class CourseQueryFilterFragment : PreferenceFragmentCompat() {
 		(0..<6).forEach { pos: Int -> this.getData(pos) }
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						val option = ArrayList<String?>()
 						val number = ArrayList<String?>()

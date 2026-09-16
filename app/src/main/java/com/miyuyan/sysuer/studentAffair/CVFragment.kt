@@ -12,12 +12,9 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.XgxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CVFragment : StaggerFragment() {
-	@JvmField
-	var view: View? = null
 	lateinit var model: XgxtModel
 	override fun onDestroyView() {
 		super.onDestroyView()
@@ -27,87 +24,84 @@ class CVFragment : StaggerFragment() {
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
 	): View? {
-		if (view == null) {
-			view = super.onCreateView(inflater, container, savedInstanceState)
-			model = XgxtModel(requireContext())
-			viewLifecycleOwner.lifecycleScope.launch {
-				viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-					model.messageChannel.receiveAsFlow().collect { (_, response) ->
-						if (response.getInteger("code") == 200) {
-							val data = response.getJSONObject("data")
+		val view = super.onCreateView(inflater, container, savedInstanceState)
+		model = XgxtModel(requireContext())
+		viewLifecycleOwner.lifecycleScope.launch {
+			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.collect { (_, response) ->
+					if (response.getInteger("code") == 200) {
+						val data = response.getJSONObject("data")
+						addSection(
+								getString(R.string.cv), mutableListOf(
+								"学号",
+								"姓名",
+								"培养单位",
+								"专业",
+								"培养层次",
+								"电话号码",
+								"邮箱",
+								"最后修改时间",
+								"家庭人均月收入(元)",
+								"在校每月平均消费(元)",
+								"爱好特长",
+								"勤工助学经历",  /*"", */
+								"工作时间",
+								"性别",
+								"住宿地址"
+						), extractValue(
+								data, arrayOf(
+								"xh",
+								"xm",
+								"pydw",
+								"zymc",
+								"pycc",
+								"dhhm",
+								"email",
+								"zhxgsj",
+								"jtrjysr",
+								"zxmypjxf",
+								"ahtc",
+								"qgzxjls",  /*"kqgzxsjs",*/
+								"gzsjs",
+								"xb",
+								"ssdz"
+						)
+						)
+						)
+						data.getJSONArray("hjqks").forEach { i: Any? ->
 							addSection(
-									getString(R.string.cv), mutableListOf(
-									"学号",
-									"姓名",
-									"培养单位",
-									"专业",
-									"培养层次",
-									"电话号码",
-									"邮箱",
-									"最后修改时间",
-									"家庭人均月收入(元)",
-									"在校每月平均消费(元)",
-									"爱好特长",
-									"勤工助学经历",  /*"", */
-									"工作时间",
-									"性别",
-									"住宿地址"
+									getString(R.string.award),
+									mutableListOf("颁奖单位", "颁奖日期", "奖项"),
+									extractValue(
+											i as JSONObject, arrayOf("bjdw", "bjrq", "jxmc")
+									)
+							)
+						}
+						data.getJSONArray("rzjls").forEach { i: Any? ->
+							addSection(
+									getString(R.string.experience), mutableListOf(
+									"工作单位",
+									"工作开始年月",
+									"工作结束年月",
+									"工作职务",
+									"证明人",
+									"证明人单位"
 							), extractValue(
-									data, arrayOf(
-									"xh",
-									"xm",
-									"pydw",
-									"zymc",
-									"pycc",
-									"dhhm",
-									"email",
-									"zhxgsj",
-									"jtrjysr",
-									"zxmypjxf",
-									"ahtc",
-									"qgzxjls",  /*"kqgzxsjs",*/
-									"gzsjs",
-									"xb",
-									"ssdz"
+									i as JSONObject, arrayOf(
+									"gzdw", "gzksny", "gzjsny", "gzzw", "zmr", "zmrdwhzw"
 							)
 							)
 							)
-							data.getJSONArray("hjqks").forEach { i: Any? ->
-								addSection(
-										getString(R.string.award),
-										mutableListOf("颁奖单位", "颁奖日期", "奖项"),
-										extractValue(
-												i as JSONObject, arrayOf("bjdw", "bjrq", "jxmc")
-										)
-								)
-							}
-							data.getJSONArray("rzjls").forEach { i: Any? ->
-								addSection(
-										getString(R.string.experience), mutableListOf(
-										"工作单位",
-										"工作开始年月",
-										"工作结束年月",
-										"工作职务",
-										"证明人",
-										"证明人单位"
-								), extractValue(
-										i as JSONObject, arrayOf(
-										"gzdw", "gzksny", "gzjsny", "gzzw", "zmr", "zmrdwhzw"
-								)
-								)
-								)
-							}
 						}
 					}
 				}
 			}
-			cV
 		}
+		loadCV()
 		return view
 	}
 
-	val cV: Unit
-		get() {
-			model.addAndNext("qgzx/api/sm-qgzx/xsjl/get", 0)
-		}
+	private fun loadCV() {
+		model.addAndNext("qgzx/api/sm-qgzx/xsjl/get", 0)
+	}
 }

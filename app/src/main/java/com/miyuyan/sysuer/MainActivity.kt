@@ -155,7 +155,7 @@ class MainActivity : BaseActivity() {
 							this@MainActivity,
 							receiver,
 							IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-							ContextCompat.RECEIVER_EXPORTED
+ContextCompat.RECEIVER_NOT_EXPORTED
 						)
 						receiverRegistered = true
 						if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(

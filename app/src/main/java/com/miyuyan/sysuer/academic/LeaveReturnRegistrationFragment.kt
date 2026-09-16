@@ -29,7 +29,6 @@ import com.miyuyan.sysuer.databinding.ItemTitleBinding
 import com.miyuyan.sysuer.model.XgxtModel
 import com.miyuyan.sysuer.view.RecyclerAdapter
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -39,7 +38,7 @@ import java.time.format.DateTimeFormatter
 class LeaveReturnRegistrationFragment : StaggerFragment() {
 	val leaveDate: MutableLiveData<Long?> = MutableLiveData<Long?>()
 	val returnDate: MutableLiveData<Long?> = MutableLiveData<Long?>()
-	var root: View? = null
+	private var _root: View? = null
 	var transportation: JSONArray? = null
 	var destination: JSONArray? = null
 	var country: String? = ""
@@ -56,8 +55,7 @@ class LeaveReturnRegistrationFragment : StaggerFragment() {
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
 	): View? {
-		if (root == null) {
-			root = super.onCreateView(inflater, container, savedInstanceState)
+		_root = super.onCreateView(inflater, container, savedInstanceState)
 			id = requireArguments().getString("Id")
 			model = XgxtModel(requireContext())
 			val leave: MutableList<String?> = mutableListOf()
@@ -94,7 +92,7 @@ class LeaveReturnRegistrationFragment : StaggerFragment() {
 			dialogRegionBinding.county.recyclerView.overScrollMode = RecyclerView.OVER_SCROLL_ALWAYS
 			viewLifecycleOwner.lifecycleScope.launch {
 				viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-					model.messageChannel.receiveAsFlow().collect { (code, response) ->
+					model.messageChannel.collect { (code, response) ->
 						if (response.getInteger("code") == 200) {
 							when (code) {
 								0 -> {
@@ -372,8 +370,7 @@ class LeaveReturnRegistrationFragment : StaggerFragment() {
 				}
 			}
 			getInfo(id)
-		}
-		return root
+		return _root
 	}
 
 	fun save(

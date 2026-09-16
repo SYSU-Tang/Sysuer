@@ -14,7 +14,6 @@ import com.miyuyan.sysuer.view.SectionData
 import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class ExamViewModel(application: Application) : AndroidViewModel(application) {
@@ -31,7 +30,7 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200) {
 					when (code) {
 						1 -> termList.value = response.getJSONArray("data")

@@ -12,7 +12,6 @@ import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.databinding.FragmentResultBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class AssistantEvaluationResultFragment : StaggerFragment() {
@@ -33,11 +32,11 @@ class AssistantEvaluationResultFragment : StaggerFragment() {
 			.addView(super.onCreateView(inflater, resultBinding.root, savedInstanceState))
 		model = JwxtModel(requireContext())
 		setScrollBottom {
-			if ((page - 1) * 10 < total) result
+			if ((page - 1) * 10 < total) result()
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) if (code == 0) {
 						val data = response.getJSONObject("data")
 						if (total == -1) total = data.getInteger("total")
@@ -48,12 +47,11 @@ class AssistantEvaluationResultFragment : StaggerFragment() {
 				}
 			}
 		}
-		result
+		result()
 		return resultBinding.root
 	}
 	
-	val result: Unit
-		get() {
-			model.addAndNext("jwxt/assistant-manage/assistantEvaluation/evaluationResultPageList?code=jwxsd_zjpjck", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
-		}
+	private fun result() {
+		model.addAndNext("jwxt/assistant-manage/assistantEvaluation/evaluationResultPageList?code=jwxsd_zjpjck", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
+	}
 }

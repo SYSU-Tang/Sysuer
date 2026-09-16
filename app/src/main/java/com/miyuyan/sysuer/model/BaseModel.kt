@@ -11,14 +11,18 @@ import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.CookieManager
 import com.miyuyan.sysuer.api.HttpManager
 import com.miyuyan.sysuer.view.UiState
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
-import java.util.ArrayDeque
+import java.util.Queue
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseModel(context: Context) {
 	val contextUtil: ContextUtil = ContextUtil(context)
@@ -27,15 +31,32 @@ abstract class BaseModel(context: Context) {
 		cookieManager = CookieManager(context)
 		setCache(context.cacheDir)
 	}
-	val state = mutableMapOf<Int, MutableStateFlow<UiState>>()
-	private val queue = ArrayDeque<CommonUtil.Tuple2<Request, Int>>()
 
-	val messageChannel = Channel<CommonUtil.Tuple2<Int, JSONObject>>(
-		capacity = Channel.UNLIMITED
+	private val _messageChannel = MutableSharedFlow<Pair<Int, JSONObject>>(
+		extraBufferCapacity = 256
 	)
-	val afterLoginRequest: MutableSet<CommonUtil.Tuple2<Request, Int>?> = mutableSetOf()
+	val messageChannel = _messageChannel.asSharedFlow()
+
+	private val state = ConcurrentHashMap<Int, MutableStateFlow<UiState>>()
+	private val queue: Queue<RequestJob> = ConcurrentLinkedQueue()
+
+	private val isRequesting = AtomicBoolean(false)
+	private val isLoggingIn = AtomicBoolean(false)
+	private val afterLoginJobs = mutableListOf<RequestJob>()
+
+	protected open val maxRetryCount: Int = 2
+
+	data class RequestJob(
+		val request: Request,
+		val what: Int,
+		var retryCount: Int = 0,
+	)
+
+	fun getUiState(code: Int): MutableStateFlow<UiState> =
+		state.getOrPut(code) { MutableStateFlow(UiState.Unstarted) }
+
 	fun add(request: Request, what: Int) {
-		queue.add(CommonUtil.Tuple2(request, what))
+		enqueue(RequestJob(request, what))
 	}
 
 	fun add(path: String?, what: Int) {
@@ -47,34 +68,33 @@ abstract class BaseModel(context: Context) {
 	}
 
 	fun add(path: String?, data: String? = null, type: String? = null, what: Int) {
-		queue.add(
-			CommonUtil.Tuple2(
-				http.generateRequest(
-					"https://${authorizationManager.host}/$path", data, type
-				).build(), what
-			)
-		)
+		val url = "https://${authorizationManager.host}/$path"
+		enqueue(RequestJob(http.generateRequest(url, data, type).build(), what))
 	}
 
 	fun set(path: String?, data: String? = null, type: String? = null, what: Int) {
-		queue.add(CommonUtil.Tuple2(http.generateRequest("$path", data, type).build(), what))
+		enqueue(RequestJob(http.generateRequest("$path", data, type).build(), what))
 	}
 
 	fun setAndNext(path: String?, data: String? = null, type: String? = null, what: Int) {
-		queue.add(CommonUtil.Tuple2(http.generateRequest("$path", data, type).build(), what))
+		enqueue(RequestJob(http.generateRequest("$path", data, type).build(), what))
 		next()
 	}
 
 	fun next() {
-		val request: CommonUtil.Tuple2<Request, Int>? = nextRequest
-		request?.let { request(it) }
+		if (!isRequesting.compareAndSet(false, true)) return
+		val job = queue.poll() ?: run {
+			isRequesting.set(false)
+			return
+		}
+		execute(job)
 	}
 
 	val nextRequest: CommonUtil.Tuple2<Request, Int>?
-		get() = queue.poll()
+		get() = queue.firstOrNull()?.let { CommonUtil.Tuple2(it.request, it.what) }
 
 	fun nextAll() {
-		while (!queue.isEmpty()) next()
+		while (queue.isNotEmpty()) next()
 	}
 
 	fun addAndNext(path: String?, data: String? = null, type: String? = null, code: Int) {
@@ -90,95 +110,116 @@ abstract class BaseModel(context: Context) {
 		addAndNext(path, null, code)
 	}
 
-	fun login(request: CommonUtil.Tuple2<Request, Int>?) {
-		val empty = afterLoginRequest.isEmpty()
-		afterLoginRequest.add(request)
-		if (empty) {
-			login {
-				afterLoginRequest.forEach { request: CommonUtil.Tuple2<Request, Int>? ->
-					retry(
-						request!!
-					)
-				}
+	private fun enqueue(job: RequestJob) {
+		queue.add(job)
+		if (!isRequesting.get()) next()
+	}
+
+	private fun execute(job: RequestJob) {
+		getUiState(job.what).value = UiState.Loading
+		val call = http.client.newCall(job.request)
+		call.enqueue(object : Callback {
+			override fun onFailure(call: Call, e: IOException) {
+				isRequesting.set(false)
+				getUiState(job.what).value = UiState.Error
+				handleFailure(job, e)
+				next()
 			}
+
+			@Throws(IOException::class)
+			override fun onResponse(call: Call, response: Response) {
+				isRequesting.set(false)
+				response.use { response ->
+					handleResponse(job, response)
+				}
+				next()
+			}
+		})
+	}
+
+	fun request(request: CommonUtil.Tuple2<Request, Int>) {
+		enqueue(RequestJob(request.first, request.second))
+	}
+
+	fun request(request: Request, code: Int) {
+		enqueue(RequestJob(request, code))
+	}
+
+	fun login(job: RequestJob) {
+		synchronized(afterLoginJobs) {
+			afterLoginJobs.add(job)
+			if (!isLoggingIn.compareAndSet(false, true)) return
 		}
+		login {
+			val pending: List<RequestJob>
+			synchronized(afterLoginJobs) {
+				pending = afterLoginJobs.toList()
+				afterLoginJobs.clear()
+				isLoggingIn.set(false)
+			}
+			pending.forEach { retry(it) }
+		}
+	}
+
+	fun login(request: CommonUtil.Tuple2<Request, Int>) {
+		login(RequestJob(request.first, request.second))
 	}
 
 	fun login(afterLogin: () -> Unit) {
 		contextUtil.login(authorizationManager.targetUrl, afterLogin)
 	}
 
-	fun request(request: CommonUtil.Tuple2<Request, Int>) {
-		run(request.first, object : Callback {
-			override fun onFailure(call: Call, e: IOException) {
-				getUiState(request.second).value = UiState.Error
-				handleFailure(request, e)
-			}
-
-			@Throws(IOException::class)
-			override fun onResponse(call: Call, response: Response) {
-				handleResponse(request, response)
-			}
-		})
-	}
-
-	protected open fun handleFailure(request: CommonUtil.Tuple2<Request, Int>, e: IOException) {
+	protected open fun handleFailure(job: RequestJob, e: IOException) {
 		e.printStackTrace()
 		http.handler.post { contextUtil.toast(R.string.no_net_connected) }
-		getUiState(request.second).value = UiState.Error
 	}
 
-	/**
-	 * 执行请求
-	 * @param request 请求
-	 * @return 响应
-	 * */
+	protected open fun handleFailure(
+		request: CommonUtil.Tuple2<Request, Int>,
+		e: IOException,
+	) {
+		handleFailure(RequestJob(request.first, request.second), e)
+	}
+
 	fun execute(request: CommonUtil.Tuple2<Request, Int>): CommonUtil.Tuple2<Int, JSONObject>? {
-		val call = http.client.newCall(request.first)
+		val job = RequestJob(request.first, request.second)
+		val call = http.client.newCall(job.request)
 		return try {
-			handleResponse(request, call.execute())
+			handleResponse(job, call.execute())
 		} catch (e: IOException) {
-			handleFailure(request, e)
+			getUiState(job.what).value = UiState.Error
+			handleFailure(job, e)
 			null
 		}
 	}
 
-	/**
-	 * 执行请求
-	 * @param request 请求
-	 * @param code 状态码
-	 * @return 响应
-	 * */
 	fun execute(request: Request, code: Int): CommonUtil.Tuple2<Int, JSONObject>? {
+		val job = RequestJob(request, code)
 		return try {
-			handleResponse(CommonUtil.Tuple2(request, code), http.client.newCall(request).execute())
+			handleResponse(job, http.client.newCall(request).execute())
 		} catch (e: IOException) {
-			handleFailure(CommonUtil.Tuple2(request, code), e)
+			getUiState(job.what).value = UiState.Error
+			handleFailure(job, e)
 			null
 		}
 	}
 
-	/**
-	 * 发送请求
-	 * @param path 路径
-	 * @param data 数据
-	 * @param type 类型
-	 * @param callback 回调
-	 * */
 	fun run(path: String, data: String? = null, type: String? = null, callback: Callback) {
 		run(
-			http.generateRequest("https://${authorizationManager.host}/$path", data, type).build(),
-			callback
+			http.generateRequest("https://${authorizationManager.host}/$path", data, type)
+				.build(), callback
 		)
 	}
 
-	/**
-	 * 发送请求
-	 * @param request 请求
-	 * @param callback 回调
-	 * */
 	fun run(request: Request, callback: Callback) {
 		http.client.newCall(request).enqueue(callback)
+	}
+
+	protected open fun handleResponse(
+		job: RequestJob,
+		response: Response,
+	): CommonUtil.Tuple2<Int, JSONObject>? {
+		return handleResponse(CommonUtil.Tuple2(job.request, job.what), response)
 	}
 
 	protected open fun handleResponse(
@@ -196,8 +237,9 @@ abstract class BaseModel(context: Context) {
 					contextUtil.toast(contentJSON.getString("message", ""))
 				}
 				result = CommonUtil.Tuple2(request.second, contentJSON)
-				messageChannel.trySend(result)
-				afterLoginRequest.remove(request)
+				_messageChannel.tryEmit(result.first to result.second)
+				synchronized(afterLoginJobs) { afterLoginJobs.removeAll { it.what == request.second } }
+				getUiState(request.second).value = UiState.Content
 			}
 		} ?: run {
 			if (!authorizationManager.isAuthorized(content)) login(request)
@@ -206,22 +248,32 @@ abstract class BaseModel(context: Context) {
 		return result
 	}
 
+	protected open fun retry(job: RequestJob) {
+		if (job.retryCount >= maxRetryCount) {
+			getUiState(job.what).value = UiState.Error
+			synchronized(afterLoginJobs) { afterLoginJobs.removeAll { it.what == job.what } }
+			return
+		}
+		job.retryCount++
+		val updated = RequestJob(updateRequest(job.request), job.what, job.retryCount)
+		execute(updated)
+	}
+
 	protected open fun retry(request: CommonUtil.Tuple2<Request, Int>) {
-		request.first = updateRequest(request.first)
-		request(request)
+		retry(RequestJob(request.first, request.second))
 	}
 
-	fun request(request: Request, code: Int) {
-		request(CommonUtil.Tuple2(request, code))
+	protected fun sendMessage(what: Int, data: JSONObject) {
+		_messageChannel.tryEmit(what to data)
 	}
 
-	val host: String
-		get() = authorizationManager.host
-	val cookieManager: CookieManager?
-		get() = http.cookieManager
+	protected fun sendMessage(result: CommonUtil.Tuple2<Int, JSONObject>) {
+		_messageChannel.tryEmit(result.first to result.second)
+	}
 
-	open fun updateRequest(request: Request): Request {
-		val newRequest = request.newBuilder().url(request.url.newBuilder().host(host).build())
+	fun updateRequest(request: Request): Request {
+		val newRequest = request.newBuilder()
+			.url(request.url.newBuilder().host(host).build())
 			.header("Cookie", cookie)
 		if (http.isTokenRequired) newRequest.header("token", token)
 		if (http.isAuthorizationRequired) newRequest.header("Authorization", authorization)
@@ -229,8 +281,15 @@ abstract class BaseModel(context: Context) {
 	}
 
 	fun dispose() {
+		queue.clear()
+		synchronized(afterLoginJobs) { afterLoginJobs.clear() }
 		contextUtil.dispose()
 	}
+
+	val host: String
+		get() = authorizationManager.host
+	val cookieManager: CookieManager?
+		get() = http.cookieManager
 
 	val cookie: String
 		get() = cookieManager?.toSimpleString(host) ?: ""
@@ -238,8 +297,4 @@ abstract class BaseModel(context: Context) {
 		get() = http.authorizationJar?.getAuthorization(host) ?: ""
 	val token: String
 		get() = http.authorizationJar?.getToken(host) ?: ""
-
-	@OptIn(ExperimentalStdlibApi::class)
-	fun getUiState(code: Int): MutableStateFlow<UiState> =
-		state.getOrPutIfNull(code) { MutableStateFlow(UiState.Unstarted) }
 }

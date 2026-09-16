@@ -20,7 +20,6 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.XgxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class LeaveReturnListFragment : StaggerFragment() {
@@ -39,7 +38,7 @@ class LeaveReturnListFragment : StaggerFragment() {
 		viewModel.year.observe(getViewLifecycleOwner(), Observer { year: String? -> this.getList(year) })
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (_, response) ->
+				model.messageChannel.collect { (_, response) ->
 					if (response.getInteger("code") == 200) {
 						clear()
 						response.getJSONArray("data").forEachIndexed { index, e ->

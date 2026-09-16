@@ -93,7 +93,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -176,10 +175,10 @@ internal fun DashboardScreen(
 	val week by dashboardViewModel.week.collectAsStateWithLifecycle()
 	val finalExamWeek by dashboardViewModel.finalExamWeek.collectAsStateWithLifecycle()
 	val showWeek18 by dashboardViewModel.isShowWeek18.collectAsStateWithLifecycle()
-	val todayCourses = dashboardViewModel.todayCourses
-	val recentCourses = dashboardViewModel.tomorrowCourses
-	val week18Exams = dashboardViewModel.week18Exams
-	val week19Exams = dashboardViewModel.week19Exams
+	val todayCourses by dashboardViewModel.todayCourses.collectAsStateWithLifecycle(emptyList())
+	val recentCourses by dashboardViewModel.tomorrowCourses.collectAsStateWithLifecycle(emptyList())
+	val week18Exams by dashboardViewModel.week18Exams.collectAsStateWithLifecycle(emptyList())
+	val week19Exams by dashboardViewModel.week19Exams.collectAsStateWithLifecycle(emptyList())
 	val todayExamIndex by dashboardViewModel.todayExamIndex.collectAsStateWithLifecycle()
 	val nextClassIndex by dashboardViewModel.progressCurrent.collectAsStateWithLifecycle()
 	val nextClassMarkdown by dashboardViewModel.nextClassMarkdown.collectAsStateWithLifecycle()
@@ -361,7 +360,7 @@ private fun DashboardOrderDialog(
 	dashboardViewModel: DashboardViewModel,
 ) {
 	if (!show) return
-	val shortcuts = dashboardViewModel.orderShortcuts
+	val shortcuts by dashboardViewModel.orderShortcuts.collectAsStateWithLifecycle()
 	val confirmText = stringResource(R.string.confirm)
 	val orderText = stringResource(R.string.service_order)
 	ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -627,7 +626,7 @@ private fun ShortcutSection(
 	val scan = stringResource(R.string.scan)
 	val qrcode = stringResource(R.string.qrcode)
 	val courseSchedule = stringResource(R.string.course_schedule)
-	val shortcuts = vm.dashboardShortcuts
+	val shortcuts by vm.dashboardShortcuts.collectAsStateWithLifecycle()
 	LaunchedEffect(Unit) { vm.loadDashboardShortcuts() }
 	FlowRow(
 			modifier = Modifier
@@ -761,8 +760,8 @@ private fun ScheduleSection(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CourseSection(
-	todayCourses: SnapshotStateList<JSONObject>,
-	recentCourses: SnapshotStateList<JSONObject>,
+	todayCourses: List<JSONObject>,
+	recentCourses: List<JSONObject>,
 	showDate: Int,
 	nextClassIndex: Int = 0,
 	onCourseClick: (CourseDetail) -> Unit,
@@ -827,7 +826,7 @@ private fun CourseSection(
 							modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
 							bringIntoViewRequester
 					) else Modifier).then(
-									if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+							if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
 									sharedContentState = rememberSharedContentState(
@@ -920,8 +919,8 @@ private fun CourseItem(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ExamSection(
-	week18Exams: SnapshotStateList<JSONObject>,
-	week19Exams: SnapshotStateList<JSONObject>,
+	week18Exams: List<JSONObject>,
+	week19Exams: List<JSONObject>,
 	showWeek18: Boolean,
 	todayExamIndex: Int = 0,
 	onToggle: (Boolean) -> Unit,
@@ -1128,8 +1127,7 @@ private fun TodoSection(
 						dimensionResource(R.dimen.horizontal_margin),
 						dimensionResource(R.dimen.vertical_margin)
 				)
-		)else
-		todoManager.TodoListScreen(todoList = todoList, addTrigger = addTrigger)
+		) else todoManager.TodoListScreen(todoList = todoList, addTrigger = addTrigger)
 	}
 }
 

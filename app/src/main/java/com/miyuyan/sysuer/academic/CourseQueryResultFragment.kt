@@ -13,7 +13,6 @@ import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.databinding.FragmentCourseQueryResultBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CourseQueryResultFragment : StaggerFragment() {
@@ -38,11 +37,11 @@ class CourseQueryResultFragment : StaggerFragment() {
 				}
 			}
 		setScrollBottom {
-			if ((page - 1) * 10 < total) courses
+			if ((page - 1) * 10 < total) courses()
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (_, response) ->
+				model.messageChannel.collect { (_, response) ->
 					if (response.getInteger("code") == 200) {
 						if (total == -1) total = response.getJSONObject("data").getInteger("total")
 						response.getJSONObject("data").getJSONArray("rows").forEach { e: Any? ->
@@ -55,14 +54,13 @@ class CourseQueryResultFragment : StaggerFragment() {
 				}
 			}
 		}
-		courses
+		courses()
 		return courseQueryResultBinding.getRoot()
 	}
 	
-	val courses: Unit
-		get() {
-			model.addAndNext("jwxt/schedule/agg/schoolOpeningCoursesSchedule/querySchoolOpeningCourses", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
-		}
+	private fun courses() {
+		model.addAndNext("jwxt/schedule/agg/schoolOpeningCoursesSchedule/querySchoolOpeningCourses", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
+	}
 	
 	fun reset() {
 		clear()

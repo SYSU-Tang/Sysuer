@@ -23,6 +23,7 @@ import java.security.spec.X509EncodedKeySpec
 import java.util.ArrayDeque
 import java.util.Base64
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 import javax.crypto.Cipher
@@ -42,8 +43,8 @@ class LoginManager(private val context: Context) {
 	private val casAuthorizationManager = AuthorizationManager(
 			"https://cas.sysu.edu.cn", "https://cas.sysu.edu.cn"
 	)
-	var loginListener: LoginListener? = null
-	var isLoginSuccess: Boolean = true
+	@Volatile var loginListener: LoginListener? = null
+	@Volatile var isLoginSuccess: Boolean = true
 	private val publicKey: String
 		get() {
 			return try {
@@ -64,12 +65,22 @@ class LoginManager(private val context: Context) {
 		captcha: String? = null
 	): String {
 		try {
+			val bodyJson = JSONObject.of(
+				"authType", "webLocalAuth",
+				"dataField", JSONObject.of(
+					"username", username ?: "",
+					"password", password ?: "",
+					"publicKeyId", publicKeyId ?: ""
+				).also { json ->
+					if (!captcha.isNullOrEmpty()) json["vcode"] = captcha
+				}
+			)
 			return client.newCall(
-					Request.Builder().post(
-								("{\"authType\":\"webLocalAuth\",\"dataField\":{\"username\":\"$username\",\"password\":\"$password\",\"publicKeyId\":\"$publicKeyId\"${if (captcha.isNullOrEmpty()) "" else ",\"vcode\":\"$captcha\""}}}").toRequestBody(
-										"application/json".toMediaTypeOrNull()
-								)
-						).url("https://cas.sysu.edu.cn/esc-sso/api/v3/auth/doLogin").build()
+				Request.Builder().post(
+					bodyJson.toJSONString().toRequestBody(
+						"application/json".toMediaTypeOrNull()
+					)
+				).url("https://cas.sysu.edu.cn/esc-sso/api/v3/auth/doLogin").build()
 			).execute().body.string()
 		} catch (_: IOException) {
 			onError("404", "登录失败")
@@ -77,7 +88,8 @@ class LoginManager(private val context: Context) {
 		return ""
 	}
 
-	private fun request(path: String, isRedirect: Boolean = false) {
+	private fun request(path: String, isRedirect: Boolean = false, depth: Int = 0) {
+		require(depth < 10) { "Too many redirects ($depth)" }
 		try {
 			val response = client.newCall(
 					Request.Builder()
@@ -88,11 +100,12 @@ class LoginManager(private val context: Context) {
 			if (response.header("Content-Type", "")?.contains("application/json") == true) {
 				val json = JSONObject.parse(body)
 				when (val code = json.getString("code")) {
-					"0" -> request(
-							if (json.containsKey("data")) json.getJSONObject("data")
-								.getString("redirect")
-							else json.getString("redirect")
-					)
+				"0" -> request(
+					if (json.containsKey("data")) json.getJSONObject("data")
+						.getString("redirect")
+					else json.getString("redirect"),
+					depth = depth + 1
+				)
 
 					"401" -> { //                    List<Cookie> list = getWebvpnKey(path);
 						//                    if (!list.isEmpty())
@@ -124,7 +137,7 @@ class LoginManager(private val context: Context) {
 
 	/**
 	 * 解析重定向 URL
-	 * 
+	 *
 	 * @param response 响应 JSON 字符串
 	 * @return 重定向 URL
 	 */
@@ -145,10 +158,17 @@ class LoginManager(private val context: Context) {
 	@Throws(Exception::class)
 	fun loginForKTP(username: String, password: String): Boolean {
 		val password = AESCBCEncrypter.encryptByCBC(
-				password, "ktp4567890123456", "ktp4567890123456"
+				password, AES_KEY, AES_IV
 		)!!
-		val data =
-			"{\"email\":\"$username\",\"password\":\"$password\",\"remember\":\"1\",\"code\":\"\",\"mobile\":\"\",\"type\":\"login\",\"encryption\":1}"
+		val data = JSONObject.of(
+			"email", username,
+			"password", password,
+			"remember", "1",
+			"code", "",
+			"mobile", "",
+			"type", "login",
+			"encryption", 1
+		).toJSONString()
 		val response = client.newCall(
 				Request.Builder().post(data.toRequestBody("application/json".toMediaTypeOrNull()))
 					.url("https://openapiv5.ketangpai.com//UserApi/login").build()
@@ -199,7 +219,7 @@ class LoginManager(private val context: Context) {
 
 	/**
 	 * 登录，使用指定的用户名和密码登录
-	 * 
+	 *
 	 * @param username 用户名
 	 * @param password 密码
 	 * @param service  登录服务
@@ -212,6 +232,7 @@ class LoginManager(private val context: Context) {
 		captcha: String?
 	) {
 		val now = System.currentTimeMillis()
+		synchronized(timestamps) {
 		if (!timestamps.isEmpty()) {
 			val top = timestamps.getLast()
 			if (top != null && now - top > 4000) timestamps.clear()
@@ -221,6 +242,7 @@ class LoginManager(private val context: Context) {
 			return
 		}
 		timestamps.add(now)
+		}
 		CompletableFuture.supplyAsync {
 			return@supplyAsync when (host) {
 				TargetHost.SYSU -> loginSysu(username, password, service, captcha)
@@ -524,7 +546,7 @@ class LoginManager(private val context: Context) {
 	}
 
 	class CookieStore(val cookieManager: CookieManager) : AndroidCookieJar() {
-		private val _cookieStore = mutableMapOf<String?, MutableList<Cookie>?>()
+		private val _cookieStore = ConcurrentHashMap<String, MutableList<Cookie>>()
 		override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
 			val host = url.host
 			val currentCookies = _cookieStore[host]
@@ -641,7 +663,7 @@ class LoginManager(private val context: Context) {
 	internal object AESCBCEncrypter {
 		/**
 		 * AES-CBC 加密，PKCS7 填充，输出 Base64 字符串
-		 * 
+		 *
 		 * @param plaintext 明文字符串
 		 * @param key       密钥字符串（UTF-8 编码后长度必须为 16、24 或 32 字节）
 		 * @param iv        初始向量字符串（UTF-8 编码后长度必须为 16 字节）
@@ -671,5 +693,7 @@ class LoginManager(private val context: Context) {
 
 	companion object {
 		private const val TIMEOUT = 15L
+		private const val AES_KEY = "ktp4567890123456" // Server-dictated
+		private const val AES_IV = "ktp4567890123456"  // Server-dictated
 	}
 }

@@ -894,7 +894,7 @@
     <string name="next_class_time">距《%1$s》上课还有 %2$d %3$s</string>
     <string name="remaining_class_time">距《%1$s》下课还有 %2$d %3$s</string>
     <string name="hour">时</string>
-    <string name="no_class">没课程中</string>
+    <string name="no_class">没课中</string>
     <string name="immediate_class">快上课</string>
     <string name="all_course_finished">今日课程已结束🎉</string>
     <string name="no_next_class">没有下一节课，太爽了!</string>
@@ -909,4 +909,6 @@
     <string name="load_failed">加载失败</string>
     <string name="year_month">%d年%d月</string>
     <string name="from_to_number">第%d节到第%d节</string>
+
+    <string name="user_avatar">用户头像</string>
 </resources>

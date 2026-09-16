@@ -18,7 +18,6 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.databinding.FragmentAssistantInfoFilterBinding
 import com.miyuyan.sysuer.databinding.ItemFilterChipBinding
 import com.miyuyan.sysuer.model.JwxtModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.function.Consumer
 
@@ -51,14 +50,14 @@ class AssistantInfoFilterFragment : BaseFragment() {
 		val pop = PopupMenu(requireContext(), binding.term.root)
 		binding.term.root.setOnClickListener { pop.show() }
 		model = JwxtModel(requireContext())
-		term.observe(requireActivity(), Observer { acadYearSemester: String? ->
+term.observe(viewLifecycleOwner, Observer { acadYearSemester: String? ->
 			acadYearSemester?.let {
 				binding.term.itemContent.text = it
 			}
 		})
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						when (code) {
 							0 -> {
@@ -69,7 +68,7 @@ class AssistantInfoFilterFragment : BaseFragment() {
 											false
 										}
 								})
-								this@AssistantInfoFilterFragment.campuses
+								this@AssistantInfoFilterFragment.campuses()
 							}
 							1 -> response.getJSONArray("data").forEach(Consumer { c: Any? ->
 								val item = ItemFilterChipBinding.inflate(inflater, binding.campus, false)
@@ -86,17 +85,15 @@ class AssistantInfoFilterFragment : BaseFragment() {
 				}
 			}
 		}
-		terms
+		terms()
 		model.next()
 		return binding.getRoot()
 	}
 	
-	val terms: Unit
-		get() {
-			model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
-		}
-	val campuses: Unit
-		get() {
-			model.add("jwxt/base-info/campus/findCampusNamesBox", 1)
-		}
+	private fun terms() {
+		model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
+	}
+	private fun campuses() {
+		model.add("jwxt/base-info/campus/findCampusNamesBox", 1)
+	}
 }

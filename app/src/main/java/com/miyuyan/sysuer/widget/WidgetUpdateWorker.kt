@@ -52,7 +52,7 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) :
 	
 	private val data: JSONArray?
 		get() {
-			term
+			term()
 			val r1: CommonUtil.Tuple2<Int, JSONObject>? = model.execute(model.nextRequest!!)
 			val term: String? = r1?.second?.getJSONObject("data")?.getString("acadYearSemester")
 			getWeek(term)
@@ -61,10 +61,9 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) :
 			val r3: CommonUtil.Tuple2<Int, JSONObject>? = model.execute(model.nextRequest!!)
 			return if (r2 != null && r3 != null) JSONArray.of(r1?.second, r2.second, r3.second) else null
 		}
-	val term: Unit
-		get() {
-			model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 0)
-		}
+	private fun term() {
+		model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 0)
+	}
 	
 	fun getWeek(term: String?) {
 		model.add("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 1)

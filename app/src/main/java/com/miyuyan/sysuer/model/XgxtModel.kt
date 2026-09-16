@@ -39,8 +39,7 @@ class XgxtModel(context: Context) : BaseModel(context) {
 							contextUtil.toast(data.getString("msg", ""))
 						}
 //						message.postValue(result)
-						messageChannel.trySend(result)
-						afterLoginRequest.remove(request)
+						sendMessage(result)
 					}
 				} ?: run {
 				if (!authorizationManager.isAuthorized(content)) login(request)

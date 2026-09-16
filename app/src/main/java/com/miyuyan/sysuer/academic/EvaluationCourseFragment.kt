@@ -22,7 +22,6 @@ import com.miyuyan.sysuer.databinding.RecyclerViewScrollBinding
 import com.miyuyan.sysuer.model.PjxtModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.Map
@@ -82,8 +81,8 @@ class EvaluationCourseFragment : BaseFragment() {
 		binding.root.adapter = adp
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
-					if (response.get("code") == "200") if (code == 1) {
+				model.messageChannel.collect { (code, response) ->
+				if (response.getIntValue("code", -1) == 200) if (code == 1) {
 						val result = response.getJSONObject("result")
 						result.getJSONArray("list").forEach { e: Any? -> adp.add(e as JSONObject) }
 						if (result.getInteger("total") / 20.0 > page) getEvaluation(type, rwid, pjrdm!!)
@@ -95,6 +94,11 @@ class EvaluationCourseFragment : BaseFragment() {
 		return binding.root
 	}
 	
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+
 	fun getEvaluation(wjid: String?, rwid: String?, pjrdm: String) {
 		model.addAndNext(String.format(Locale.getDefault(), "personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", pjrdm, wjid, rwid, page++), 1)
 	}

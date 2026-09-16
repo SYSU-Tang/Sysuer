@@ -13,7 +13,6 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.SectionData
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class SchoolWorkWarningViewModel(application: Application) : AndroidViewModel(application) {
@@ -27,7 +26,7 @@ class SchoolWorkWarningViewModel(application: Application) : AndroidViewModel(ap
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (_, response) ->
+			model.messageChannel.collect { (_, response) ->
 				if (response.getInteger("code") == 200) response.getJSONObject("data")?.let {
 					if (total == -1) total = it.getInteger("total")
 					var order = sections.size

@@ -16,8 +16,8 @@ open class BaseFragment : Fragment() {
 		return super.onCreateView(inflater, container, savedInstanceState)
 	}
 	
-	override fun onDestroy() {
-		super.onDestroy()
+	override fun onDestroyView() {
+		super.onDestroyView()
 		if (::config.isInitialized) config.contextUtil.disposable.dispose()
 	}
 }

@@ -27,7 +27,6 @@ import com.miyuyan.sysuer.databinding.RecyclerViewScrollBinding
 import com.miyuyan.sysuer.model.IportalModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class NewsFragment : BaseFragment() {
@@ -38,10 +37,17 @@ class NewsFragment : BaseFragment() {
 
 	companion object {
 		fun getInstance(position: Int): NewsFragment {
-			val newsFragment = NewsFragment()
-			newsFragment.position = position
-			return newsFragment
+			return NewsFragment().apply {
+				arguments = Bundle().apply {
+					putInt("position", position)
+				}
+			}
 		}
+	}
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		position = arguments?.getInt("position", 0) ?: 0
 	}
 
 	override fun onCreateView(
@@ -100,7 +106,7 @@ class NewsFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					(if (code == 3) response.getJSONArray("data")
 					else response.getJSONObject("data")
 						.getJSONArray("records")).forEach { item: Any? ->
@@ -128,29 +134,25 @@ class NewsFragment : BaseFragment() {
 		return binding.root
 	}
 
-	val news: Unit
-		get() {
-			model.addAndNext("ai_service/content-portal/recommend/query-recommend", "", 3)
-		}
-	val subscription: Unit
-		get() {
-			baseRequest("3ytr4e6c", 2)
-		}
-	val notice: Unit
-		get() {
-			baseRequest("3ytunvv6", 4)
-		}
-	val dailyNews: Unit
-		get() {
-			baseRequest("4cef8rqw", 5)
-		}
+	private fun news() {
+		model.addAndNext("ai_service/content-portal/recommend/query-recommend", "", 3)
+	}
+	private fun subscription() {
+		baseRequest("3ytr4e6c", 2)
+	}
+	private fun notice() {
+		baseRequest("3ytunvv6", 4)
+	}
+	private fun dailyNews() {
+		baseRequest("4cef8rqw", 5)
+	}
 
 	fun getData() {
 		when (position) {
-			0 -> news
-			1 -> subscription
-			2 -> notice
-			3 -> dailyNews
+			0 -> news()
+			1 -> subscription()
+			2 -> notice()
+			3 -> dailyNews()
 		}
 	}
 

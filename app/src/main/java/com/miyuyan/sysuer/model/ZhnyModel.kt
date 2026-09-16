@@ -36,8 +36,7 @@ class ZhnyModel(context: Context) : BaseModel(context) {
 						login(request)
 					}
 //					message.postValue(result)
-					messageChannel.trySend(result)
-					afterLoginRequest.remove(request)
+					sendMessage(result)
 				} ?: run {
 				if (!authorizationManager.isAuthorized(content)) login(request)
 				else if (!authorizationManager.isAccessible(content)) retry(request)

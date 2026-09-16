@@ -308,7 +308,7 @@ class HttpManager(val handler: Handler = Handler(Looper.getMainLooper())) {
 		sendRequest(generateGetRequest(url).delete().build(), what)
 	}
 
-	private val requestStatus = mutableMapOf<Int, Status>()
+private val requestStatus = java.util.concurrent.ConcurrentHashMap<Int, Status>()
 
 	/**
 	 * 获取请求状态

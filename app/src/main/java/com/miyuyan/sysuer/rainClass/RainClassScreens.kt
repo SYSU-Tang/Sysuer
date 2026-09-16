@@ -77,14 +77,14 @@ import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.TargetHost
 import com.miyuyan.sysuer.browser.BrowserActivity
-import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTerm
-import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTimestamp
-import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.formatTimestampMillis
-import com.miyuyan.sysuer.rainClass.RainClassModel.Companion.getTermColor
+import com.miyuyan.sysuer.model.RainClassModel
+import com.miyuyan.sysuer.model.RainClassModel.Companion.formatTerm
+import com.miyuyan.sysuer.model.RainClassModel.Companion.formatTimestamp
+import com.miyuyan.sysuer.model.RainClassModel.Companion.formatTimestampMillis
+import com.miyuyan.sysuer.model.RainClassModel.Companion.getTermColor
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionCard
 import com.miyuyan.sysuer.view.SectionData
-import kotlinx.coroutines.flow.receiveAsFlow
 
 @Preview(showBackground = true)
 @Composable
@@ -103,7 +103,7 @@ fun CourseScreen(
 	val courseList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
 	val model: RainClassModel = remember { RainClassModel(context) }
-	val message = model.messageChannel.receiveAsFlow()
+	val message = model.messageChannel
 
 	LaunchedEffect(message) {
 		message.collect { (what, response) ->
@@ -225,7 +225,7 @@ fun ExamScreen(onRequestScrollToAccount: () -> Unit = {}) {
 	val examList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
 	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel.receiveAsFlow()
+	val message = model.messageChannel
 	var selectedExamJson by rememberSaveable { mutableStateOf<String?>(null) }
 	val selectedExam = remember(selectedExamJson) {
 		selectedExamJson?.let { JSONObject.parseObject(it) }
@@ -385,7 +385,7 @@ fun ExamDetailScreen(
 	val examInfo = remember { mutableStateOf<JSONObject?>(null) }
 	val isLoading = remember { mutableStateOf(true) }
 	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel.receiveAsFlow()
+	val message = model.messageChannel
 
 	LaunchedEffect(Unit) {
 		model.getExamInfo(examSummary.getIntValue("id"), examSummary.getIntValue("classroom_id"))
@@ -618,7 +618,7 @@ fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
 	val problemList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
 	val isLoading = remember { mutableStateOf(true) }
 	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel.receiveAsFlow()
+	val message = model.messageChannel
 	val answers = remember { mutableStateMapOf<Int, String>() }
 
 	LaunchedEffect(Unit) {
@@ -767,7 +767,7 @@ fun AccountScreen() {
 	val isLoading = remember { mutableStateOf(true) }
 	val scrollState = rememberScrollState()
 	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel.receiveAsFlow()
+	val message = model.messageChannel
 
 	LaunchedEffect(message) {
 		message.collect { (what, response) ->

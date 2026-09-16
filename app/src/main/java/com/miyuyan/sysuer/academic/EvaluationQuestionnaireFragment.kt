@@ -27,7 +27,6 @@ import com.miyuyan.sysuer.databinding.ItemOptionBinding
 import com.miyuyan.sysuer.model.PjxtModel
 import com.miyuyan.sysuer.todo.TitleAdapter
 import com.miyuyan.sysuer.view.RecyclerViewHolder
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class EvaluationQuestionnaireFragment : BaseFragment() {
@@ -66,8 +65,8 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, data) ->
-					if (data.get("code") == "200") {
+				model.messageChannel.collect { (code, data) ->
+				if (data.getIntValue("code", -1) == 200) {
 						when (code) {
 							1 -> data.getJSONObject("result").getJSONArray("assessedObjList")
 								.forEach { l: Any? ->
@@ -187,6 +186,12 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		}
 		return binding.root
 	}
+
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+
 
 	fun String.encodeNonAscii(): String {
 		val sb = StringBuilder()

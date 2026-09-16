@@ -67,6 +67,7 @@ fun StatePage(
 					LoadingIndicator()
 				}
 			}
+			else -> {}
 		}
 	}
 }

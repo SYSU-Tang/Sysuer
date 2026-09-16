@@ -14,7 +14,6 @@ import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.XgxtModel
 import com.miyuyan.sysuer.view.EditTextDialog
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class RecruitmentInfoFragment : StaggerFragment() {
@@ -46,42 +45,40 @@ class RecruitmentInfoFragment : StaggerFragment() {
 			}
 		})
 		setScrollBottom {
-			if ((page - 1) * 10 < total) recruitment
+			if ((page - 1) * 10 < total) recruitment()
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, data) ->
+				model.messageChannel.collect { (code, data) ->
 					if (data.containsKey("code") && data.getInteger("code") == 200) {
 						when (code) {
 							0 -> {
 								total = data.getJSONObject("data").getInteger("total")
 								data.getJSONObject("data").getJSONArray("list").forEach { i: Any? ->
-										addSection(
-												(i as JSONObject).getString("qgzxgwmc"),
-												mutableListOf(
-														"岗位名称",
-														"岗位类型",
-														"所在校区",
-														"岗位地址",
-														"开始时间",
-														"结束时间",
-														"状态",
-														"设岗单位"
-												),
-												extractValue(
-														i, arrayOf(
-														"qgzxgwmc",
-														"qgzxgwlxmc",
-														"qgzxszxymc",
-														"qgzxdwdz",
-														"qgzxgwzpkssj",
-														"qgzxgwzpjssj",
-														"state",
-														"sgdwmc"
-												)
-												)
-										)
-									}
+									addSection(
+											(i as JSONObject).getString("qgzxgwmc"), mutableListOf(
+											"岗位名称",
+											"岗位类型",
+											"所在校区",
+											"岗位地址",
+											"开始时间",
+											"结束时间",
+											"状态",
+											"设岗单位"
+									), extractValue(
+											i, arrayOf(
+											"qgzxgwmc",
+											"qgzxgwlxmc",
+											"qgzxszxymc",
+											"qgzxdwdz",
+											"qgzxgwzpkssj",
+											"qgzxgwzpjssj",
+											"state",
+											"sgdwmc"
+									)
+									)
+									)
+								}
 							}
 
 							1, 2, 3 -> {
@@ -119,17 +116,17 @@ class RecruitmentInfoFragment : StaggerFragment() {
 				}
 			}
 		}
-		year
-		campus
-		jobType
-		recruitment
+		year()
+		campus()
+		jobType()
+		recruitment()
 		model.next()
 		return view
 	}
 
 	private fun regetRecruitment() {
 		reset()
-		recruitment
+		recruitment()
 	}
 
 	private fun reset() {
@@ -138,32 +135,31 @@ class RecruitmentInfoFragment : StaggerFragment() {
 		clear()
 	}
 
-	val recruitment: Unit
-		get() {
-			val url = StringBuilder("qgzx/api/sm-qgzx/gwsq?pageSize=10&pageNum=${page++}")
-			mapOf(
-					viewModel.year to "qgzxnd",
-					viewModel.jobType to "gwlxids",
-					viewModel.campus to "xqids",
-					viewModel.jobName to "qgzxgwmc",
-					viewModel.unitName to "sgdwmc"
-			).forEach { (k, v) ->
-				k.value?.takeUnless { it.isEmpty() }?.let {
-					url.append("&$v=$it")
-				}
+	private fun recruitment() {
+		val url = StringBuilder("qgzx/api/sm-qgzx/gwsq?pageSize=10&pageNum=${page++}")
+		mapOf(
+				viewModel.year to "qgzxnd",
+				viewModel.jobType to "gwlxids",
+				viewModel.campus to "xqids",
+				viewModel.jobName to "qgzxgwmc",
+				viewModel.unitName to "sgdwmc"
+		).forEach { (k, v) ->
+			k.value?.takeUnless { it.isEmpty() }?.let {
+				url.append("&$v=$it")
 			}
-			model.addAndNext("$url", 0)
 		}
-	val year: Unit
-		get() {
-			model.add("qgzx/api/sm-qgzx/gwsq/ndlist/get", 1)
-		}
-	val campus: Unit
-		get() {
-			model.add("qgzx/api/sm-qgzx/gwsq/xylist/get", 2)
-		}
-	val jobType: Unit
-		get() {
-			model.add("qgzx/api/sm-qgzx/gwsq/gwlxlist/get", 3)
-		}
+		model.addAndNext("$url", 0)
+	}
+
+	private fun year() {
+		model.add("qgzx/api/sm-qgzx/gwsq/ndlist/get", 1)
+	}
+
+	private fun campus() {
+		model.add("qgzx/api/sm-qgzx/gwsq/xylist/get", 2)
+	}
+
+	private fun jobType() {
+		model.add("qgzx/api/sm-qgzx/gwsq/gwlxlist/get", 3)
+	}
 }

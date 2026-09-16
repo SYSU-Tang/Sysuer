@@ -14,7 +14,7 @@ object DateTimeManager {
 	 *
 	 * @return 当前日期
 	 */
-	val today: LocalDate = LocalDate.now()
+	val today: LocalDate get() = LocalDate.now()
 	val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 	val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 

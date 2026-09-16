@@ -46,8 +46,7 @@ class PjxtModel(context: Context) : BaseModel(context) {
 							}
 						}
 //						message.postValue(result)
-						messageChannel.trySend(result)
-						afterLoginRequest.remove(request)
+						sendMessage(result)
 					} ?: run {
 					if (!authorizationManager.isAuthorized(content)) login(request)
 					else if (!authorizationManager.isAccessible(content)) retry(request)

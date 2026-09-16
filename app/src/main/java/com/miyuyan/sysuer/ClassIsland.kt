@@ -270,7 +270,7 @@ object ClassIsland {
 				val remainingMins = result.remainingMinutes.toInt()
 				val remainingSecs = result.remainingSeconds.toInt()
 				val elapsed = result.elapsedMinutes.toInt()
-				val isDownCount = remainingMins == 1 && remainingSecs >= 0
+				val isDownCount = remainingMins <= 1 && remainingSecs >= 0
 				if (isDownCount) unit = TimeUnit.SECONDS
 				val remainingDisplay =
 					if (isDownCount) "${remainingSecs}$secondString" else "${remainingMins}$minuteString"

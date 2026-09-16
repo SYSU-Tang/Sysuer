@@ -36,7 +36,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class ClassroomQueryActivity : BaseActivity() {
@@ -86,11 +85,11 @@ class ClassroomQueryActivity : BaseActivity() {
 			query.setOnClickListener {
 				roomAdapter.clear()
 				page = 1
-				room
+				room()
 			}
 			result.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 				override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-					if (!recyclerView.canScrollVertically(1) && total / 20 + 1 >= page) room
+					if (!recyclerView.canScrollVertically(1) && total / 20 + 1 >= page) room()
 				}
 			})
 			reset.setOnClickListener {
@@ -119,10 +118,10 @@ class ClassroomQueryActivity : BaseActivity() {
 			dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 			binding.dateText.text = date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
 		})
-		campus
+		campus()
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					println(response)
 					if (response.getInteger("code") == 200) {
 						if (code == 3) {
@@ -175,31 +174,29 @@ class ClassroomQueryActivity : BaseActivity() {
 		model.next()
 	}
 	
-	val campus: Unit
-		get() {
-			model.add("jwxt/base-info/campus/findCampusNamesBox", 1)
-		}
+	private fun campus() {
+		model.add("jwxt/base-info/campus/findCampusNamesBox", 1)
+	}
 	
 	fun getOffice(campus: String?) {
 		campusLiveData.value = campus
 		model.addAndNext("jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull", "{\"campusIdList\":[\"$campus\"]}", 2)
 	}
 	
-	val room: Unit
-		get() {
-			val teachingBuildIDs = mutableListOf<String?>()
-			val classType = mutableListOf<String>()
-			binding.typeGroup.checkedChipIds.forEach { e: Int? ->
-				classType.add(if (e == R.id.self_study_room) "003" else "002")
-			}
-			binding.officeGroup.checkedChipIds.forEach { e: Int? ->
-				if (findViewById<View>(e!!).isVisible) teachingBuildIDs.add(office[e])
-			}
-			if (teachingBuildIDs.isEmpty()) model.contextUtil.toast(R.string.select_teaching_building)
-			else model.addAndNext("jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom", "{\"pageNo\":${page++},\"pageSize\":20,\"param\":{\"dateStr\":\"$dateStr\",\"teachingBuildIDs\":${
-				JSONArray.toJSONString(teachingBuildIDs)
-			},\"startClassTimes\":$startClassTime,\"endClassTimes\":$endClassTime,\"classRoomTagList\":${JSONArray.toJSONString(classType)}}}", 3)
+	private fun room() {
+		val teachingBuildIDs = mutableListOf<String?>()
+		val classType = mutableListOf<String>()
+		binding.typeGroup.checkedChipIds.forEach { e: Int? ->
+			classType.add(if (e == R.id.self_study_room) "003" else "002")
 		}
+		binding.officeGroup.checkedChipIds.forEach { e: Int? ->
+			if (findViewById<View>(e!!).isVisible) teachingBuildIDs.add(office[e])
+		}
+		if (teachingBuildIDs.isEmpty()) model.contextUtil.toast(R.string.select_teaching_building)
+		else model.addAndNext("jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom", "{\"pageNo\":${page++},\"pageSize\":20,\"param\":{\"dateStr\":\"$dateStr\",\"teachingBuildIDs\":${
+			JSONArray.toJSONString(teachingBuildIDs)
+		},\"startClassTimes\":$startClassTime,\"endClassTimes\":$endClassTime,\"classRoomTagList\":${JSONArray.toJSONString(classType)}}}", 3)
+	}
 	
 	class RoomAdapter : RecyclerAdapter<JSONObject>() {
 		private var host: String? = null

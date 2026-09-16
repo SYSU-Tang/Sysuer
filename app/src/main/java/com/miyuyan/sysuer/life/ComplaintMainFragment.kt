@@ -25,7 +25,6 @@ import com.miyuyan.sysuer.databinding.ItemFileBinding
 import com.miyuyan.sysuer.model.XinfangModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
@@ -90,7 +89,7 @@ class ComplaintMainFragment : com.miyuyan.sysuer.BaseFragment() {
 		loadCaptcha(binding.captchaImage)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					when (code) {
 						0 -> {
 							if (response.getBoolean("ok")) {
@@ -109,6 +108,10 @@ class ComplaintMainFragment : com.miyuyan.sysuer.BaseFragment() {
 		}
 		
 		return binding.root
+	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
 	}
 	
 	/*

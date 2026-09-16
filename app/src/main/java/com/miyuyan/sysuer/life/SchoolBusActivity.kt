@@ -22,7 +22,6 @@ import com.miyuyan.sysuer.model.PortalModel
 import com.miyuyan.sysuer.view.Pager2Adapter
 import com.miyuyan.sysuer.view.StaggerFragment
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.stream.IntStream
 
@@ -75,7 +74,7 @@ class SchoolBusActivity : BaseActivity() {
 		binding.appBarLayout.addView(header.root)
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getJSONObject("meta").getInteger("statusCode") == 200) {
 						if (code == 0) {
 							data = response.getJSONObject("data")

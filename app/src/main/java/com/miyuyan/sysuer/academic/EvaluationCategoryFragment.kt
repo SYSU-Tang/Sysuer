@@ -21,7 +21,6 @@ import com.miyuyan.sysuer.databinding.RecyclerViewScrollBinding
 import com.miyuyan.sysuer.model.PjxtModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class EvaluationCategoryFragment : BaseFragment() {
@@ -83,13 +82,13 @@ class EvaluationCategoryFragment : BaseFragment() {
 		binding.root.adapter = categoryAdapter
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, data) ->
-					if (data.get("code") == "200") if (code == 1) data.getJSONObject("result")
+				model.messageChannel.collect { (code, data) ->
+				if (data.getIntValue("code", -1) == 200) if (code == 1) data.getJSONObject("result")
 						.getJSONArray("list").forEach { categoryAdapter.add(it as JSONObject) }
 				}
 			}
 		}
-		evaluation
+		evaluation()
 		return binding.root
 	}
 
@@ -98,13 +97,17 @@ class EvaluationCategoryFragment : BaseFragment() {
 		staggeredGridLayoutManager.setSpanCount(config.column)
 	}
 
-	val evaluation: Unit
-		get() {
-			model.addAndNext(
-					"personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10",
-					1
-			)
-		}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+
+	private fun evaluation() {
+		model.addAndNext(
+				"personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10",
+				1
+		)
+	}
 
 	class CategoryAdapter : RecyclerAdapter<JSONObject>() {
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {

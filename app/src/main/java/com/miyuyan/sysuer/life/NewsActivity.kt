@@ -59,12 +59,12 @@ class NewsActivity : BaseActivity() {
 		(0..<4).forEach { adapter.add(NewsFragment.getInstance(it)) }
 		val binding = ActivityNewsBinding.inflate(layoutInflater).apply {
 			pager.adapter = adapter
-			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int -> tab?.text = arrayOf("资讯", "公众号", "通知", "今日中大")[position] }.attach()
+			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab, position: Int -> tab.text = arrayOf("资讯", "公众号", "通知", "今日中大")[position] }.attach()
 			sugs.adapter = suggestionAdapter
 			sugs.layoutManager = GridLayoutManager(this@NewsActivity, 1)
 		}
 		setContentView(binding.root)
-		config.setCallback { suggestions }
+		config.setCallback { suggestions() }
 		http = HttpManager(object : Handler(mainLooper) {
 			override fun handleMessage(msg: Message) {
 				val response = msg.getData()
@@ -82,7 +82,7 @@ class NewsActivity : BaseActivity() {
 					}
 					if (!authorizationManager.isAccessible(json)) {
 						config.toast(R.string.educational_wifi_warning)
-						suggestions
+						suggestions()
 						return
 					}
 				}
@@ -108,6 +108,7 @@ class NewsActivity : BaseActivity() {
 			setParams(this@NewsActivity.config)
 			setAuthorizationRequired(true)
 			setAuthorizationJar(AuthorizationJar(this@NewsActivity))
+			header = mutableMapOf("clientid" to "sysuer")
 		}
 		edit = binding.searchView.editText.apply {
 			setOnEditorActionListener { _: TextView?, _: Int, _: KeyEvent? ->
@@ -131,10 +132,9 @@ class NewsActivity : BaseActivity() {
 		}
 	}
 	
-	val suggestions: Unit
-		get() {
-			getSuggestions("${edit.text}")
-		}
+	private fun suggestions() {
+		getSuggestions("${edit.text}")
+	}
 	
 	fun getSuggestions(keyword: String) {
 		http.postRequest(authorizationManager.host + "ai_service/search-server/needle/suggest", "{\"aliasName\":\"collection_data\",\"keyWord\":\"$keyword\"}", 1)

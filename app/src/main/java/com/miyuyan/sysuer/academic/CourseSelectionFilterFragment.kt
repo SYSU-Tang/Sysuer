@@ -19,7 +19,6 @@ import com.google.android.material.transition.MaterialContainerTransform
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.databinding.FragmentCourseFilterBinding
 import com.miyuyan.sysuer.model.JwxtModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CourseSelectionFilterFragment : BaseFragment() {
@@ -44,7 +43,7 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		binding.container.setColumnCount(config.column)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						val data = response.getJSONArray("data")
 						if (data != null) {
@@ -116,7 +115,7 @@ class CourseSelectionFilterFragment : BaseFragment() {
 	}
 	
 	fun submit() {
-		map
+		map()
 		findNavController().previousBackStackEntry?.savedStateHandle?.apply {
 			set("filter_name", filterName)
 			set("filter_value", filterValue)
@@ -128,15 +127,14 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		model.add(arrayOf("jwxt/base-info/campus/findCampusNamesBox", "jwxt/base-info/codedata/findcodedataNames?datableNumber=233", "jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1", "jwxt/base-info/codedata/findcodedataNames?datableNumber=204", "jwxt/base-info/codedata/findcodedataNames?datableNumber=387")[i], i)
 	}
 	
-	val map: Unit
-		get() {
-			filterValue?.courseName = getEditText(binding.course)
-			filterValue?.teachingTeacherNum = getEditText(binding.teacher)
-			filterValue?.courseUnitNum = getEditText(binding.school)
-			filterName?.courseName = getEditText(binding.course)
-			filterName?.teachingTeacherNum = getEditText(binding.teacher)
-			filterName?.courseUnitNum = getEditText(binding.school)
-		}
+	private fun map() {
+		filterValue?.courseName = getEditText(binding.course)
+		filterValue?.teachingTeacherNum = getEditText(binding.teacher)
+		filterValue?.courseUnitNum = getEditText(binding.school)
+		filterName?.courseName = getEditText(binding.course)
+		filterName?.teachingTeacherNum = getEditText(binding.teacher)
+		filterName?.courseUnitNum = getEditText(binding.school)
+	}
 	
 	fun getEditText(editText: EditText): String {
 		return editText.text.toString().trim()

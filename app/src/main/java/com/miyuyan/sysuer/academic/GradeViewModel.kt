@@ -15,11 +15,10 @@ import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class GradeViewModel(application: Application) : AndroidViewModel(application) {
-	val model = JwxtModel(application)
+	private val model = JwxtModel(application)
 	val scores = mutableStateListOf<JSONObject>()
 	val sections = mutableStateListOf<SectionData>()
 
@@ -77,7 +76,7 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				when (code) {
 					1 -> {

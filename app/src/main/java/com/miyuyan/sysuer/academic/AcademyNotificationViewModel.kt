@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class AcademyNotificationViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,7 +23,7 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200) {
 					when (code) {
 						0 -> {

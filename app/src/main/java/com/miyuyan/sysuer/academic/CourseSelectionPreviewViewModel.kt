@@ -12,7 +12,6 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.model.JwxtModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CourseSelectionPreviewViewModel(application: Application) : AndroidViewModel(application) {
@@ -36,7 +35,7 @@ class CourseSelectionPreviewViewModel(application: Application) : AndroidViewMod
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				when (code) {
 					0 -> {

@@ -11,7 +11,6 @@ import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class AssistantInfoResultFragment : StaggerFragment() {
@@ -29,11 +28,11 @@ class AssistantInfoResultFragment : StaggerFragment() {
 		val view = super.onCreateView(inflater, container, savedInstanceState)
 		model = JwxtModel(requireContext())
 		setScrollBottom {
-			if (page * 10 < total) result
+			if (page * 10 < total) result()
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						if (code == 0) {
 							total = response.getJSONObject("data").getInteger("total")
@@ -45,7 +44,7 @@ class AssistantInfoResultFragment : StaggerFragment() {
 				}
 			}
 		}
-		result
+		result()
 		return view
 	}
 	
@@ -53,18 +52,17 @@ class AssistantInfoResultFragment : StaggerFragment() {
 		model.addAndNext("jwxt/assistant-manage/assistantInfoQuery/pageList?code=jwxsd_zjxxck", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":$query}", 0)
 	}
 	
-	val result: Unit
-		get() {
-			val filter = JSONObject()
-			val setFilter = { key: String?, value: String? ->
-				if (requireArguments().containsKey(key) && !requireArguments().getString(key)
-						.isNullOrEmpty()) filter[value] = requireArguments().getString(key)
-			}
-			setFilter("term", "semester")
-			setFilter("campus", "studyCampusCode")
-			setFilter("courseNumber", "courseNum")
-			setFilter("courseName", "courseName")
-			setFilter("teacherName", "teacherName")
-			getResult("$filter")
+	private fun result() {
+		val filter = JSONObject()
+		val setFilter = { key: String?, value: String? ->
+			if (requireArguments().containsKey(key) && !requireArguments().getString(key)
+					.isNullOrEmpty()) filter[value] = requireArguments().getString(key)
 		}
+		setFilter("term", "semester")
+		setFilter("campus", "studyCampusCode")
+		setFilter("courseNumber", "courseNum")
+		setFilter("courseName", "courseName")
+		setFilter("teacherName", "teacherName")
+		getResult("$filter")
+	}
 }

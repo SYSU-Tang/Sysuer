@@ -51,7 +51,7 @@ class ContextUtil(val context: Context) {
 
 	private val sharedPreferences: SharedPreferences =
 		context.getSharedPreferences("privacy", Context.MODE_PRIVATE)
-	private val loginManager: LoginManager = LoginManager(context)
+private val loginManager: LoginManager = LoginManager(context.applicationContext)
 	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
 	private val handler = Handler(Looper.getMainLooper())
 	val disposable: CompositeDisposable = CompositeDisposable()
@@ -81,14 +81,14 @@ class ContextUtil(val context: Context) {
 	 * @return 对应的 px 值
 	 */
 	fun dpToPx(dps: Int): Int = (context.resources.displayMetrics.density * dps).roundToInt()
-	val userName: String
+	private val userName: String
 		/**
 		 * 获取用户名
 		 * 
 		 * @return 用户名
 		 */
 		get() = sharedPreferences.getString("username", "") ?: ""
-	val password: String
+	private val password: String
 		/**
 		 * 获取密码
 		 * 

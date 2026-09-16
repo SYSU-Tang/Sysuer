@@ -100,11 +100,11 @@ class SettingManager(private val context: Context) {
 	 * 设置字体大小
 	 * @param fontSize 字体大小
 	 * */
-	fun setFontSize(fontSize: Float): Context {
-		val config = context.resources.configuration
-		config.fontScale = fontSize
-		return context.createConfigurationContext(config)
-	}
+fun setFontSize(fontSize: Float): Context {
+	val config = Configuration(context.resources.configuration)
+	config.fontScale = fontSize
+	return context.createConfigurationContext(config)
+}
 
 	/**
 	 * 字体大小

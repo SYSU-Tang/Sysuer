@@ -18,7 +18,6 @@ import com.miyuyan.sysuer.api.CommonUtil.toStringOrDefault
 import com.miyuyan.sysuer.databinding.FragmentComplaintResponseBinding
 import com.miyuyan.sysuer.life.ComplaintSquareFragment.SquareAdapter
 import com.miyuyan.sysuer.model.XinfangModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class ComplaintResponseFragment : BaseFragment() {
@@ -52,7 +51,7 @@ class ComplaintResponseFragment : BaseFragment() {
 		binding.recyclerView.setLayoutManager(StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL))
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					when (code) {
 						0 -> {
 							if (response.getBoolean("ok")) response.getString("data")
@@ -70,6 +69,11 @@ class ComplaintResponseFragment : BaseFragment() {
 		return binding.getRoot()
 	}
 	
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
+	}
+
 	fun getResponse(textInputLayout: TextInputLayout) {
 		var phone: String? = null
 		if (textInputLayout.getEditText() != null) phone = textInputLayout.getEditText()!!
@@ -80,10 +84,10 @@ class ComplaintResponseFragment : BaseFragment() {
 	}
 	
 	fun getCode(phone: String?) {
-		model.addAndNext("jsp_api/code_send", "{\"m\":\"$phone\",\"t\":\"jsjb\"}", 0)
+		model.addAndNext("jsp_api/code_send", JSONObject.of("m", phone, "t", "jsjb").toJSONString(), 0)
 	}
 	
 	fun getResponse(phone: String?) {
-		model.addAndNext("jsp_api/jsjb_list", "{\"mobile\":\"$phone\"}", 1)
+		model.addAndNext("jsp_api/jsjb_list", JSONObject.of("mobile", phone).toJSONString(), 1)
 	}
 }

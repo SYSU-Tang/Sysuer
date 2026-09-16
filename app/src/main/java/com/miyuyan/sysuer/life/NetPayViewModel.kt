@@ -22,7 +22,6 @@ import com.miyuyan.sysuer.model.NetPayModel
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -86,7 +85,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, data) ->
+			model.messageChannel.collect { (code, data) ->
 			when (code) {
 				0, 1, 6 -> {
 					parse(data.getString("data")).selectFirst("tbody")?.select("tr")
@@ -275,10 +274,11 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 
 	fun selectTime(index: Int) {
 		timeIndex = index
+		val date = oldDate ?: return
 		newOutDateStr = if (index == 0) {
-			oldDate!!.plusDays(15).format(formatter)
+			date.plusDays(15).format(formatter)
 		} else {
-			oldDate!!.plusMonths(months[index]).format(formatter)
+			date.plusMonths(months[index]).format(formatter)
 		}
 		fee = fees[index]
 	}

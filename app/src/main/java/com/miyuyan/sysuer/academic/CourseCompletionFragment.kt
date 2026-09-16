@@ -11,7 +11,6 @@ import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.StaggerFragment
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CourseCompletionFragment : StaggerFragment() {
@@ -27,10 +26,10 @@ class CourseCompletionFragment : StaggerFragment() {
 	                          savedInstanceState: Bundle?): View? {
 		val view = super.onCreateView(inflater, container, savedInstanceState)
 		model = JwxtModel(requireActivity())
-		studentCourse
+		studentCourse()
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200 && response.get("data") != null) {
 						if (code == 0) response.getJSONObject("data").getJSONArray("rows").forEach { a: Any? ->
 							val values: ArrayList<String?> = extractValue(a as JSONObject, arrayOf("acadYearSemester", "courseNumber", "courseName", "courseCategoryName", "credit",  /**/"acadYearSemester", "achievementCourseNumber", "achievementCourseName", "achievementCourseCategoryName", "achievementCredit", "ispassed", "achievementPoint"))
@@ -46,8 +45,7 @@ class CourseCompletionFragment : StaggerFragment() {
 		return view
 	}
 	
-	val studentCourse: Unit
-		get() {
-			model.add("jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse", "{\"pageNo\":${++page},\"pageSize\":10,\"total\":true,\"param\":{\"cultureTypeCode\":\"01\"}}", 0)
-		}
+	private fun studentCourse() {
+		model.add("jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse", "{\"pageNo\":${++page},\"pageSize\":10,\"total\":true,\"param\":{\"cultureTypeCode\":\"01\"}}", 0)
+	}
 }

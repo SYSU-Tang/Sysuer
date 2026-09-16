@@ -20,7 +20,6 @@ import com.miyuyan.sysuer.databinding.FragmentEnergyDashboardBinding
 import com.miyuyan.sysuer.model.ZhnyModel
 import com.miyuyan.sysuer.todo.TitleAdapter
 import com.miyuyan.sysuer.view.PreferenceAdapter
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -43,14 +42,14 @@ class EnergyDashboardFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.receiveAsFlow().collect { (code, response) ->
+				model.messageChannel.collect { (code, response) ->
 //			println("code = $code , response = $response")
 					if (response.getInteger("code") == 200) {
 						val data = response.getJSONObject("data")
 						when (code) {
 							0 -> {
 								val name = data.getString("username")
-								waterInfo
+								loadWaterInfo()
 								getElectricityInfo(name)
 								getRoom(name)
 							}
@@ -164,12 +163,11 @@ class EnergyDashboardFragment : BaseFragment() {
 				}
 			}
 		}
-		userInfo
+		loadUserInfo()
 		return binding.root
 	}
 
-	val userInfo: Unit
-		get() {
+	private fun loadUserInfo() {
 			model.addAndNext("kbp/auth/userInfo", 0)
 		}
 
@@ -177,8 +175,7 @@ class EnergyDashboardFragment : BaseFragment() {
 		model.addAndNext("kbp/ele/wechat/eleSituation?username=$username", 1)
 	}
 
-	val waterInfo: Unit
-		get() {
+	private fun loadWaterInfo() {
 			model.addAndNext("kbp/cwbs/user/usage/stats", "", 2)
 		}
 
@@ -192,5 +189,9 @@ class EnergyDashboardFragment : BaseFragment() {
 
 	fun getRoom(username: String?) {
 		model.addAndNext("kbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 4)
+	}
+	override fun onDestroyView() {
+		super.onDestroyView()
+		model.dispose()
 	}
 }

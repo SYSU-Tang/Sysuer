@@ -9,7 +9,6 @@ import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.PortalModel
 import com.miyuyan.sysuer.view.RecyclerStateViewModel
 import com.miyuyan.sysuer.view.UiState
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -21,7 +20,7 @@ class AgendaViewModel(application: Application) : AndroidViewModel(application),
 
 	init {
 		viewModelScope.launch {
-			portalModel.messageChannel.receiveAsFlow().collect { (code, response) ->
+			portalModel.messageChannel.collect { (code, response) ->
 				if (code == 0) {
 					if (response.getJSONObject("meta")
 							.getInteger("statusCode") == 200 && response.get("data") != null
@@ -58,8 +57,8 @@ class AgendaViewModel(application: Application) : AndroidViewModel(application),
 	}
 
 	override fun retry() {
-		println("retry")
-		portalModel.nextAll()
+		uiState.value = UiState.Loading
+//		portalModel.retry()
 	}
 
 	override fun onCleared() {

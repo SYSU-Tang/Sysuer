@@ -8,29 +8,21 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
-class CalendarManager {
-	val today: LocalDate = LocalDate.now()
-	val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
-	val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-	val year: Int
-		get() = today.year
-	
-	fun toDateString(millis: Long): String? = dateFormatter.format(toDate(millis))
-	fun toDateString(date: LocalDate?): String? = dateFormatter.format(date)
-	fun toDateStringPLus(days: Int): String? = toDateString(today.plusDays(days.toLong()))
-	fun toDateTimeString(date: LocalDateTime?): String? = dateTimeFormatter.format(date)
-	val firstOfMonth: LocalDate?
-		get() = today.with(TemporalAdjusters.firstDayOfMonth())
-	val endOfMonth: LocalDate?
-		get() = today.with(TemporalAdjusters.lastDayOfMonth())
-	
-	fun toDate(millis: Long): LocalDate? =
-		Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
-	
-	fun toMillis(date: LocalDate): Long = toMillis(date.atTime(LocalTime.NOON))
-	fun toMillis(date: LocalDateTime): Long =
-		date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-	
-	fun toMillis(date: String?): Long =
-		toMillis(LocalDate.parse(date))
+object CalendarManager {
+    val today: LocalDate get() = DateTimeManager.today
+    val dateFormatter: DateTimeFormatter get() = DateTimeManager.dateFormatter
+    val dateTimeFormatter: DateTimeFormatter get() = DateTimeManager.dateTimeFormatter
+    val year: Int get() = DateTimeManager.year
+
+    fun toDateString(millis: Long): String? = DateTimeManager.toDateString(millis)
+    fun toDateString(date: LocalDate?): String? = DateTimeManager.toDateString(date)
+    fun toDateStringPLus(days: Int): String? = DateTimeManager.toDateStringPLus(days)
+    fun toDateTimeString(date: LocalDateTime?): String? = DateTimeManager.toDateTimeString(date)
+    val firstOfMonth: LocalDate? get() = DateTimeManager.firstOfMonth
+    val endOfMonth: LocalDate? get() = DateTimeManager.endOfMonth
+
+    fun toDate(millis: Long): LocalDate? = DateTimeManager.toDate(millis)
+    fun toMillis(date: LocalDate): Long = DateTimeManager.toMillis(date)
+    fun toMillis(date: LocalDateTime): Long = DateTimeManager.toMillis(date)
+    fun toMillis(date: String?): Long = DateTimeManager.toMillis(date)
 }

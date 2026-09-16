@@ -29,7 +29,6 @@ import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
@@ -60,7 +59,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200) when (code) {
 					0 -> {
 						response.getJSONObject("data")?.let {

@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class RegistrationViewModel(application: Application) : AndroidViewModel(application) {
@@ -29,7 +28,7 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && response.get("data") != null) {
 					when (code) {
 						0 -> _registerInfo.value = response.getJSONObject("data")

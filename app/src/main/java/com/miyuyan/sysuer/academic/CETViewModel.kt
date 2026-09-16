@@ -9,7 +9,6 @@ import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class CETViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,7 +24,7 @@ class CETViewModel(application: Application) : AndroidViewModel(application) {
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.receiveAsFlow().collect { (code, response) ->
+			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && code == 0) {
 					val data = response.getJSONObject("data")
 					if (data != null) {
