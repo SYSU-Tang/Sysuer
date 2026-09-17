@@ -101,7 +101,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:transitionName="miniapp"
+        android:transitionName="CourseSchedule"
         app:backgroundTint="#0000"
         app:fabAlignmentMode="end"
         app:fabAnimationMode="slide"

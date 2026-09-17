@@ -133,7 +133,7 @@ fun CETRoute(
 		animatedVisibilityScope = animatedVisibilityScope,
 		sharedKey = "CET",
 		pageContent = {
-			StatePage(uiState) {
+			StatePage(state = uiState) {
 				StaggerScreen(
 					sections = sections, onScrollBottom = { viewModel.fetchNextPage() })
 			}

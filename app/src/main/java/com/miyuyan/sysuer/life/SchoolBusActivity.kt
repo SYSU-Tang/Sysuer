@@ -74,15 +74,18 @@ class SchoolBusActivity : BaseActivity() {
 		binding.appBarLayout.addView(header.root)
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
-					if (response.getJSONObject("meta").getInteger("statusCode") == 200) {
-						if (code == 0) {
-							data = response.getJSONObject("data")
-							day.value = true
+				launch {
+					model.messageChannel.collect { (code, response) ->
+						if (response.getJSONObject("meta").getInteger("statusCode") == 200) {
+							if (code == 0) {
+								data = response.getJSONObject("data")
+								day.value = true
+							}
 						}
 					}
 				}
-				day.collect { b: Boolean ->
+				launch {
+					day.collect { b: Boolean ->
 					val key = if (b) "workDay" else "holiday"
 					data?.run {
 						if (getJSONArray(key).isEmpty()) IntStream.range(0, pager2Adapter.itemCount)
@@ -144,6 +147,7 @@ class SchoolBusActivity : BaseActivity() {
 							header.option.setSimpleItems(routes.toTypedArray<String?>())
 						}
 					}
+				}
 				}
 			}
 		}

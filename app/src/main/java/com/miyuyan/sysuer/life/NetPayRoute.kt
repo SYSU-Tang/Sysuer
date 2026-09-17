@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.miyuyan.sysuer.R
@@ -53,6 +54,7 @@ import com.miyuyan.sysuer.view.KeyValueRow
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.StaggerScreen
+import com.miyuyan.sysuer.view.StatePage
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -63,42 +65,47 @@ fun NetPayRoute(
 ) {
 	val viewModel: NetPayViewModel = viewModel()
 	val activity = LocalActivity.current
+	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+	val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
+	val snackbarActionLabel by viewModel.snackbarActionLabel.collectAsStateWithLifecycle()
+	val snackbarAction by viewModel.snackbarAction.collectAsStateWithLifecycle()
 	val snackbar = remember { SnackbarHostState() }
 	LaunchedEffect(
-		viewModel.snackbarMessage
+			snackbarMessage
 	) {
-		if (!viewModel.snackbarMessage.isNullOrEmpty()) {
+		if (!snackbarMessage.isNullOrEmpty()) {
 			when (snackbar.showSnackbar(
-				viewModel.snackbarMessage ?: "", viewModel.snackbarActionLabel, true
+					snackbarMessage ?: "", snackbarActionLabel, true
 			)) {
-				ActionPerformed -> viewModel.snackbarAction?.let { it() }
+				ActionPerformed -> snackbarAction?.let { it() }
 				Dismissed -> {
 					viewModel.clearSnackbar()
 				}
 			}
 		}
 	}
-
 	ActivityPager(
-		snackbar = snackbar,
-		onNavigationClick = { backStack.navigateBack(activity) },
-		title = stringResource(R.string.net_manager),
-		navs = listOf(
-			MenuItem(stringResource(R.string.order), Icons.Rounded.AttachMoney),
-			MenuItem(stringResource(R.string.status), Icons.Rounded.Web),
-		),
-		isNestedScrollEnabled = false,
-		sharedTransitionScope = sharedTransitionScope,
-		animatedVisibilityScope = animatedVisibilityScope,
-		sharedKey = "NetPay"
+			snackbar = snackbar,
+			onNavigationClick = { backStack.navigateBack(activity) },
+			title = stringResource(R.string.net_manager),
+			navs = listOf(
+					MenuItem(stringResource(R.string.order), Icons.Rounded.AttachMoney),
+					MenuItem(stringResource(R.string.status), Icons.Rounded.Web),
+			),
+			isNestedScrollEnabled = false,
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope,
+			sharedKey = "NetPay"
 	) {
-		StaggerScreen(
-			sections = when (it) {
-				0 -> viewModel.orderSections
-				1 -> viewModel.statusSections
-				else -> viewModel.orderSections
-			}
-		)
+		StatePage(state = if (it == 0) uiState else null) {
+			StaggerScreen(
+					sections = when (it) {
+						0 -> viewModel.orderSections
+						1 -> viewModel.statusSections
+						else -> viewModel.orderSections
+					}
+			)
+		}
 	}
 	NetPayDialog(viewModel)
 }
@@ -106,44 +113,54 @@ fun NetPayRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NetPayDialog(viewModel: NetPayViewModel) {
-	val sheetState = rememberBottomSheetState(SheetValue.Hidden)
+	val sheetState = rememberBottomSheetState(SheetValue.Expanded)
 
-	if (viewModel.showPayDialog) {
+	val showPayDialog by viewModel.showPayDialog.collectAsStateWithLifecycle()
+	val serviceName by viewModel.serviceName.collectAsStateWithLifecycle()
+	val oldDateStr by viewModel.oldDateStr.collectAsStateWithLifecycle()
+	val timeIndex by viewModel.timeIndex.collectAsStateWithLifecycle()
+	val newOutDateStr by viewModel.newOutDateStr.collectAsStateWithLifecycle()
+	val fee by viewModel.fee.collectAsStateWithLifecycle()
+
+	if (showPayDialog) {
 		ModalBottomSheet(
-			onDismissRequest = { viewModel.closePayDialog() },
-			sheetState = sheetState,
-			dragHandle = { BottomSheetDefaults.DragHandle() },
+				onDismissRequest = { viewModel.closePayDialog() },
+				sheetState = sheetState,
+				dragHandle = { BottomSheetDefaults.DragHandle() },
 		) {
 			Column(
-				modifier = Modifier.fillMaxWidth(),
-				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+					modifier = Modifier.fillMaxWidth(),
+					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
 			) {
-				KeyValueRow(RowData(stringResource(R.string.service), viewModel.serviceName))
-				KeyValueRow(RowData(stringResource(R.string.old_out_date), viewModel.oldDateStr))
-				if (viewModel.timeIndex >= 0) {
-					KeyValueRow(
+				KeyValueRow(RowData(stringResource(R.string.service), serviceName))
+				KeyValueRow(
 						RowData(
-							stringResource(R.string.new_out_date),
-							viewModel.newOutDateStr
+								stringResource(R.string.old_out_date), oldDateStr
 						)
+				)
+				if (timeIndex >= 0) {
+					KeyValueRow(
+							RowData(
+									stringResource(R.string.new_out_date), newOutDateStr
+							)
 					)
-					KeyValueRow(RowData(stringResource(R.string.fee), "¥${viewModel.fee}"))
+					KeyValueRow(RowData(stringResource(R.string.fee), "¥$fee"))
 				}
 				TimeDropdown(
-					selectedIndex = viewModel.timeIndex,
-					options = viewModel.timeOptions,
-					onSelect = { viewModel.selectTime(it) },
+						selectedIndex = timeIndex,
+						options = viewModel.timeOptions,
+						onSelect = { viewModel.selectTime(it) },
 				)
 				FilledTonalButton(
-					onClick = { viewModel.submitOrder() },
-					enabled = viewModel.timeIndex >= 0,
-					shapes = ButtonDefaults.shapes(),
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(
-							dimensionResource(R.dimen.horizontal_padding),
-							dimensionResource(R.dimen.vertical_padding)
-						),
+						onClick = { viewModel.submitOrder() },
+						enabled = timeIndex >= 0,
+						shapes = ButtonDefaults.shapes(),
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(
+									dimensionResource(R.dimen.horizontal_padding),
+									dimensionResource(R.dimen.vertical_padding)
+							),
 				) {
 					Text(stringResource(R.string.submit))
 				}
@@ -165,56 +182,56 @@ private fun TimeDropdown(
 
 	Column {
 		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.clickable { expanded = true }
-				.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-				),
-			horizontalArrangement = Arrangement.SpaceBetween,
-			verticalAlignment = Alignment.CenterVertically,
+				modifier = Modifier
+					.fillMaxWidth()
+					.clickable { expanded = true }
+					.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_padding)
+					),
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically,
 		) {
 			Text(
-				text = stringResource(R.string.time),
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.onSurfaceVariant,
+					text = stringResource(R.string.time),
+					style = MaterialTheme.typography.titleMedium,
+					color = MaterialTheme.colorScheme.onSurfaceVariant,
 			)
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				Text(
-					text = selectedText,
-					style = MaterialTheme.typography.bodyLarge,
-					fontWeight = FontWeight.Medium,
-					color = if (selectedIndex >= 0) MaterialTheme.colorScheme.primary
-					else MaterialTheme.colorScheme.onSurfaceVariant,
+						text = selectedText,
+						style = MaterialTheme.typography.bodyLarge,
+						fontWeight = FontWeight.Medium,
+						color = if (selectedIndex >= 0) MaterialTheme.colorScheme.primary
+						else MaterialTheme.colorScheme.onSurfaceVariant,
 				)
 				Spacer(Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 				Icon(
-					imageVector = if (expanded) Icons.Default.KeyboardArrowUp
-					else Icons.Default.KeyboardArrowDown,
-					contentDescription = null,
-					tint = MaterialTheme.colorScheme.onSurfaceVariant,
+						imageVector = if (expanded) Icons.Default.KeyboardArrowUp
+						else Icons.Default.KeyboardArrowDown,
+						contentDescription = null,
+						tint = MaterialTheme.colorScheme.onSurfaceVariant,
 				)
 			}
 		}
 		Box(modifier = Modifier.align(Alignment.End)) {
 			DropdownMenu(
-				expanded = expanded,
-				onDismissRequest = { expanded = false },
+					expanded = expanded,
+					onDismissRequest = { expanded = false },
 			) {
 				options.forEachIndexed { index, option ->
 					DropdownMenuItem(
-						text = {
-							Text(
-								text = option,
-								color = if (index == selectedIndex) MaterialTheme.colorScheme.primary
-								else MaterialTheme.colorScheme.onSurface,
-							)
-						},
-						onClick = {
-							onSelect(index)
-							expanded = false
-						},
+							text = {
+								Text(
+										text = option,
+										color = if (index == selectedIndex) MaterialTheme.colorScheme.primary
+										else MaterialTheme.colorScheme.onSurface,
+								)
+							},
+							onClick = {
+								onSelect(index)
+								expanded = false
+							},
 					)
 				}
 			}

@@ -3,6 +3,7 @@ package com.miyuyan.sysuer.view
 import android.content.DialogInterface
 import android.view.View
 import android.widget.GridLayout
+import androidx.annotation.IntDef
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -19,7 +20,19 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 	private var selected = -1
 	private var selectable = false
 	private var multipleSelectable = false
-	private var iconGravity = -1
+
+	@IntDef(
+			MaterialButton.ICON_GRAVITY_TEXT_TOP,
+			MaterialButton.ICON_GRAVITY_TEXT_START,
+			MaterialButton.ICON_GRAVITY_TEXT_END,
+			MaterialButton.ICON_GRAVITY_TOP,
+			MaterialButton.ICON_GRAVITY_START,
+			MaterialButton.ICON_GRAVITY_END,
+	)
+	@Retention(AnnotationRetention.SOURCE)
+	annotation class IconGravity
+
+	private var iconGravity: Int? = null
 	private var gravity = -1
 
 	init {
@@ -76,7 +89,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 			if (multipleSelectable) menu.isChecked = !menu.isChecked
 			else if (selectable) selectMenu(position)
 		}
-		if (iconGravity != -1) menu.iconGravity = iconGravity
+		iconGravity?.let { menu.iconGravity = it }
 		if (gravity != -1) menu.gravity = gravity
 		menuBinding.grid.addView(menu)
 	}
@@ -137,8 +150,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 		menuBinding.positive.text = text
 		menuBinding.positive.setOnClickListener {
 			action.onClick(
-					this.dialog,
-					DialogInterface.BUTTON_POSITIVE
+					this.dialog, DialogInterface.BUTTON_POSITIVE
 			)
 		}
 		menuBinding.buttonGroup.setVisibility(View.VISIBLE)
@@ -148,8 +160,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 		menuBinding.positive.setText(text)
 		menuBinding.positive.setOnClickListener {
 			action.onClick(
-					this.dialog,
-					DialogInterface.BUTTON_POSITIVE
+					this.dialog, DialogInterface.BUTTON_POSITIVE
 			)
 		}
 		menuBinding.buttonGroup.setVisibility(View.VISIBLE)
@@ -159,8 +170,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 		menuBinding.negative.text = text
 		menuBinding.negative.setOnClickListener {
 			action.onClick(
-					this.dialog,
-					DialogInterface.BUTTON_NEGATIVE
+					this.dialog, DialogInterface.BUTTON_NEGATIVE
 			)
 		}
 		menuBinding.buttonGroup.setVisibility(View.VISIBLE)
@@ -170,8 +180,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 		menuBinding.negative.setText(text)
 		menuBinding.negative.setOnClickListener {
 			action.onClick(
-					this.dialog,
-					DialogInterface.BUTTON_NEGATIVE
+					this.dialog, DialogInterface.BUTTON_NEGATIVE
 			)
 		}
 		menuBinding.buttonGroup.setVisibility(View.VISIBLE)
@@ -181,8 +190,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 		menuBinding.neutral.text = text
 		menuBinding.neutral.setOnClickListener {
 			action.onClick(
-					this.dialog,
-					DialogInterface.BUTTON_NEUTRAL
+					this.dialog, DialogInterface.BUTTON_NEUTRAL
 			)
 		}
 		menuBinding.buttonGroup.setVisibility(View.VISIBLE)
@@ -192,8 +200,7 @@ class GridMenuDialog(private val activity: FragmentActivity) {
 		menuBinding.neutral.setText(text)
 		menuBinding.neutral.setOnClickListener {
 			action.onClick(
-					this.dialog,
-					DialogInterface.BUTTON_NEUTRAL
+					this.dialog, DialogInterface.BUTTON_NEUTRAL
 			)
 		}
 		menuBinding.buttonGroup.setVisibility(View.VISIBLE)

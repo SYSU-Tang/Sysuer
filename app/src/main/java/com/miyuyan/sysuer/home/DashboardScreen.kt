@@ -1,8 +1,11 @@
 package com.miyuyan.sysuer.home
 
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.ClipData
 import android.content.Intent
+import android.view.View
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -103,6 +106,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.dimensionResource
@@ -117,7 +121,6 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.work.Data
@@ -134,7 +137,6 @@ import com.miyuyan.sysuer.MainActivity
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.academic.AgendaActivity
 import com.miyuyan.sysuer.academic.CourseScheduleActivity
-import com.miyuyan.sysuer.academic.ExamActivity
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.PreferenceViewModel
@@ -142,6 +144,7 @@ import com.miyuyan.sysuer.api.SettingManager
 import com.miyuyan.sysuer.api.TodoManager
 import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.nav.CourseDetail
+import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.todo.TodoActivity
 import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
@@ -162,7 +165,7 @@ internal fun DashboardScreen(
 	backStack: MutableList<NavKey>,
 ) {
 	val context = LocalContext.current
-	val activity = remember { context as FragmentActivity }
+	val activity = LocalActivity.current
 	val config = remember { ContextUtil(context) }
 	val coroutineScope = rememberCoroutineScope()
 	LaunchedEffect(Unit) {
@@ -239,18 +242,22 @@ internal fun DashboardScreen(
 			ScheduleSection(
 					nextClassMarkdown = nextClassMarkdown,
 					dateText = dateText,
-					onNextClassClick = {
+					onNextClassClick = { view ->
 						context.startActivity(
-								Intent(context, CourseScheduleActivity::class.java),
-								ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
-									.toBundle()
+								Intent(context, CourseScheduleActivity::class.java), activity?.let {
+							ActivityOptionsCompat.makeSceneTransitionAnimation(
+									it, view, "miniapp"
+							)
+						}?.toBundle()
 						)
 					},
-					onTimeCardClick = {
+					onTimeCardClick = { view ->
 						context.startActivity(
-								Intent(context, AgendaActivity::class.java),
-								ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
-									.toBundle()
+								Intent(context, AgendaActivity::class.java), activity?.let {
+							ActivityOptionsCompat.makeSceneTransitionAnimation(
+									it, view, "miniapp"
+							)
+						}?.toBundle()
 						)
 					})
 		}
@@ -290,7 +297,16 @@ internal fun DashboardScreen(
 						}
 						config.toast(R.string.copy_successfully)
 					},
-					activity = activity,
+					onTitleClick = { view ->
+						view.transitionName = "CourseSchedule"
+						context.startActivity(
+								Intent(context, CourseScheduleActivity::class.java), activity?.let {
+							ActivityOptionsCompat.makeSceneTransitionAnimation(
+									it, view, "CourseSchedule"
+							)
+						}?.toBundle()
+						)
+					},
 					sharedTransitionScope = sharedTransitionScope,
 					animatedVisibilityScope = animatedVisibilityScope
 			)
@@ -326,8 +342,12 @@ internal fun DashboardScreen(
 						}
 						config.toast(R.string.copy_successfully)
 					},
-					activity = activity,
-					coroutineScope = coroutineScope
+					onTitleClick = {
+						backStack.add(Exam)
+					},
+					coroutineScope = coroutineScope,
+					sharedTransitionScope = sharedTransitionScope,
+					animatedVisibilityScope = animatedVisibilityScope,
 			)
 		}
 
@@ -345,8 +365,9 @@ internal fun DashboardScreen(
 			TodoSection(todoList = todoList, onViewAllClick = {
 				context.startActivity(
 						Intent(context, TodoActivity::class.java),
-						ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
-				)
+						activity
+							?.let { it1 -> ActivityOptionsCompat.makeSceneTransitionAnimation(it1) }
+							?.toBundle())
 			}, todoManager = todoManager)
 		}
 	}
@@ -619,7 +640,7 @@ private fun ShortcutSection(
 	vm: DashboardViewModel,
 	hm: HomeViewModel,
 	config: ContextUtil,
-	activity: FragmentActivity,
+	activity: Activity?,
 	onShowActionDialog: (ServiceConfig) -> Unit,
 ) {
 	val context = LocalContext.current
@@ -660,9 +681,10 @@ private fun ShortcutSection(
 			}, onClick = {
 				context.startActivity(
 						Intent(
-								context, CourseScheduleActivity::class.java
-						), ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
-				)
+						context, CourseScheduleActivity::class.java
+				),
+						activity?.let { ActivityOptionsCompat.makeSceneTransitionAnimation(it) }
+							?.toBundle())
 			})
 		}
 		shortcuts.forEach { entity ->
@@ -687,10 +709,11 @@ private fun ShortcutSection(
 								it.resolveActivity(context.packageManager) != null
 							}?.let {
 								context.startActivity(
-										it,
-										ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
-											.toBundle()
-								)
+										it, activity?.let { it1 ->
+									ActivityOptionsCompat.makeSceneTransitionAnimation(
+											it1
+									)
+								}?.toBundle())
 							}
 						} catch (_: Exception) {
 							config.toast(R.string.activity_not_found)
@@ -701,9 +724,9 @@ private fun ShortcutSection(
 						context.startActivity(
 								Intent(context, BrowserActivity::class.java).setData(
 										url.toUri()
-								),
-								ActivityOptionsCompat.makeSceneTransitionAnimation(activity)
-									.toBundle()
+								), activity?.let { it1 ->
+							ActivityOptionsCompat.makeSceneTransitionAnimation(it1)
+						}?.toBundle()
 						)
 					}
 
@@ -721,16 +744,16 @@ private fun ShortcutSection(
 private fun ScheduleSection(
 	nextClassMarkdown: String,
 	dateText: String,
-	onNextClassClick: () -> Unit,
-	onTimeCardClick: () -> Unit,
+	onNextClassClick: (View) -> Unit,
+	onTimeCardClick: (View) -> Unit,
 ) {
+	val view = LocalView.current
 	Row(
 			modifier = Modifier.fillMaxWidth(),
 			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
 	) {
 		OutlinedCard(
-				modifier = Modifier.weight(1.25f), onClick = onNextClassClick
-		) {
+				modifier = Modifier.weight(1.25f), onClick = { onNextClassClick(view) }) {
 			if (nextClassMarkdown.isNotEmpty()) Markdown(
 					rememberMarkdownState(nextClassMarkdown),
 					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
@@ -742,8 +765,7 @@ private fun ScheduleSection(
 			)
 		}
 		OutlinedCard(
-				modifier = Modifier.weight(1f), onClick = onTimeCardClick
-		) {
+				modifier = Modifier.weight(1f), onClick = { onTimeCardClick(view) }) {
 			if (nextClassMarkdown.isNotEmpty()) Markdown(
 					rememberMarkdownState(dateText),
 					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
@@ -765,25 +787,32 @@ private fun CourseSection(
 	showDate: Int,
 	nextClassIndex: Int = 0,
 	onCourseClick: (CourseDetail) -> Unit,
+	onTitleClick: (View) -> Unit,
 	onCourseLongClick: (String) -> Unit,
 	sharedTransitionScope: SharedTransitionScope?,
-	animatedVisibilityScope: AnimatedVisibilityScope?,
-	activity: FragmentActivity,
+	animatedVisibilityScope: AnimatedVisibilityScope?
 ) {
-	val context = LocalContext.current
 	var selectedIndex by rememberSaveable { mutableIntStateOf(showDate) }
 	val courses = if (selectedIndex == 0) todayCourses else recentCourses
 
 	Row(
-			modifier = Modifier.fillMaxWidth(),
+			modifier = Modifier
+				.fillMaxWidth()
+				.then(
+						if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+					with(sharedTransitionScope) {
+						Modifier.sharedBounds(
+								sharedContentState = rememberSharedContentState(
+										key = "Course"
+								),
+								animatedVisibilityScope = animatedVisibilityScope,
+						)
+					}
+				} else Modifier),
 			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.SpaceBetween
-	) {
-		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) {
-			context.startActivity(
-					Intent(context, CourseScheduleActivity::class.java),
-					ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
-			)
+			horizontalArrangement = Arrangement.SpaceBetween) {
+		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) { view ->
+			onTitleClick(view)
 		}
 
 		SingleChoiceSegmentedButtonRow {
@@ -925,11 +954,12 @@ private fun ExamSection(
 	todayExamIndex: Int = 0,
 	onToggle: (Boolean) -> Unit,
 	onExamClick: (JSONObject) -> Unit,
+	onTitleClick: () -> Unit,
 	onExamLongClick: (String) -> Unit,
-	activity: FragmentActivity,
 	coroutineScope: CoroutineScope,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
-	val context = LocalContext.current
 	val exams = if (showWeek18) week18Exams else week19Exams
 	var selectedIndex by remember { mutableIntStateOf(if (showWeek18) 0 else 1) }
 	LaunchedEffect(selectedIndex) {
@@ -937,15 +967,23 @@ private fun ExamSection(
 	}
 
 	Row(
-			modifier = Modifier.fillMaxWidth(),
+			modifier = Modifier
+				.fillMaxWidth()
+				.then(
+						if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+					with(sharedTransitionScope) {
+						Modifier.sharedBounds(
+								sharedContentState = rememberSharedContentState(
+										key = "Exam"
+								),
+								animatedVisibilityScope = animatedVisibilityScope,
+						)
+					}
+				} else Modifier),
 			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.SpaceBetween
-	) {
+			horizontalArrangement = Arrangement.SpaceBetween) {
 		CardTitle(R.drawable.exam, text = stringResource(R.string.exam)) {
-			context.startActivity(
-					Intent(context, ExamActivity::class.java),
-					ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle()
-			)
+			onTitleClick()
 		}
 		SingleChoiceSegmentedButtonRow {
 			listOf(R.string.week18, R.string.week19).forEachIndexed { index, label ->
@@ -1167,12 +1205,15 @@ fun GenericButton(
 fun RowScope.CardTitle(
 	image: Int,
 	text: String = "",
-	onClick: () -> Unit = {},
+	onClick: (View) -> Unit = {},
 ) {
+	val view = LocalView.current
 	Row(
 			modifier = Modifier
 				.weight(1f)
-				.clickable(onClick = onClick, indication = null, interactionSource = null),
+				.clickable(
+						onClick = { onClick(view) }, indication = null, interactionSource = null
+				),
 			verticalAlignment = Alignment.CenterVertically,
 	) {
 		Icon(
@@ -1192,13 +1233,14 @@ fun RowScope.CardTitle(
 @Composable
 fun RowScope.CardTitle(
 	image: ImageVector,
-	text: String = "",
-	onClick: () -> Unit = {},
+	text: String,
+	onClick: (View) -> Unit = {},
 ) {
+	val view = LocalView.current
 	Row(
 			modifier = Modifier
 				.clickable(
-						onClick = onClick, indication = null, interactionSource = null
+						onClick = { onClick(view) }, indication = null, interactionSource = null
 				)
 				.weight(1f),
 			verticalAlignment = Alignment.CenterVertically,
@@ -1211,6 +1253,7 @@ fun RowScope.CardTitle(
 				color = MaterialTheme.colorScheme.primary
 		)
 	}
+	LocalView.current.transitionName = "miniapp"
 }
 
 @Composable

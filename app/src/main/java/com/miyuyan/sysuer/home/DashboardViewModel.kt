@@ -305,7 +305,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 					6 -> {
 						val newCourses = response.getJSONObject("data").getJSONArray("rows")
 							.filterIsInstance<JSONObject>()
-						_selectedCourses.value = _selectedCourses.value + newCourses
+						_selectedCourses.value += newCourses
 						_selectedCourses.value.firstOrNull { it.getString("courseName") == examSubject }
 							?.let {
 								_navigateToCourseDetail.value = it

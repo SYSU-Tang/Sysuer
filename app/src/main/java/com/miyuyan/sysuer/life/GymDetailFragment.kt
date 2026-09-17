@@ -95,150 +95,158 @@ class GymDetailFragment : BaseFragment() {
 		dialog.setContentView(dialogBinding.root)
 		if (viewModel.position.value == null) viewModel.position.value = 0
 		viewModel.position.observe(viewLifecycleOwner) { p: Int? ->
-		if (p != null) loadInfo()
+			if (p != null) loadInfo()
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
-					when (code) {
-						0 -> {
-							reset(fieldAdapter)
-							hash = md5("$response")
-							var availableCapacity = 0
-							var rows = -1
-							val name = MutableLiveData(false)
-							response.getJSONArray("data").forEach { item: Any? ->
-								val timeslots = (item as JSONObject).getJSONArray("Timeslots")
-								if (timeslots != null) {
-									if (rows == -1) {
-										fieldAdapter.add(
-												JSONObject.of(
-														"Name", getString(R.string.time), "Type", 2
-												)
-										)
-										timeslots.forEach { o: Any? ->
+				launch {
+					model.messageChannel.collect { (code, response) ->
+						when (code) {
+							0 -> {
+								reset(fieldAdapter)
+								hash = md5("$response")
+								var availableCapacity = 0
+								var rows = -1
+								val name = MutableLiveData(false)
+								response.getJSONArray("data").forEach { item: Any? ->
+									val timeslots = (item as JSONObject).getJSONArray("Timeslots")
+									if (timeslots != null) {
+										if (rows == -1) {
 											fieldAdapter.add(
 													JSONObject.of(
-															"Name", "${
-														(o as JSONObject).getString("Start")
-													}\n${
-														o.getString("End")
-													}", "Type", 2
+															"Name",
+															getString(R.string.time),
+															"Type",
+															2
 													)
 											)
-										}
-										name.value = true
-										rows = timeslots.size + 1
-										gridLayoutManager.spanCount = rows
-									} // 第一列
-									val fieldName = Pattern.compile("(.+)-")
-										.matcher(item.getString("VenueName")).replaceAll("") // 第一行
-									fieldAdapter.add(
-											JSONObject().fluentPut("VenueName", fieldName)
-												.fluentPut("Type", 0)
-									)
-									timeslots.forEach { data: Any? ->
-										val venueBooking = item.clone()
-										venueBooking.remove("Timeslots")
-										venueBooking["TimeSlots"] = JSONArray.of(
-												(data as JSONObject).clone().fluentPut(
-														"Date", "${
-													data.getString("Date")
-												}T00:00:00.000Z"
-												).apply {
-													remove("AvailableCapacity")
-												})
+											timeslots.forEach { o: Any? ->
+												fieldAdapter.add(
+														JSONObject.of(
+																"Name", "${
+															(o as JSONObject).getString("Start")
+														}\n${
+															o.getString("End")
+														}", "Type", 2
+														)
+												)
+											}
+											name.value = true
+											rows = timeslots.size + 1
+											gridLayoutManager.spanCount = rows
+										} // 第一列
+										val fieldName = Pattern.compile("(.+)-")
+											.matcher(item.getString("VenueName"))
+											.replaceAll("") // 第一行
 										fieldAdapter.add(
-												data.clone().fluentPut("VenueBooking", venueBooking)
-													.fluentPut("Type", 1)
-													.fluentPut("Venue", fieldName).fluentPut(
-															"Duration",
-															"${data.getString("Start")}~${
-																data.getString("End")
-															}"
-													)
+												JSONObject().fluentPut("VenueName", fieldName)
+													.fluentPut("Type", 0)
 										)
-										data.getInteger("AvailableCapacity")?.let {
-											availableCapacity += it
+										timeslots.forEach { data: Any? ->
+											val venueBooking = item.clone()
+											venueBooking.remove("Timeslots")
+											venueBooking["TimeSlots"] = JSONArray.of(
+													(data as JSONObject).clone().fluentPut(
+															"Date", "${
+														data.getString("Date")
+													}T00:00:00.000Z"
+													).apply {
+														remove("AvailableCapacity")
+													})
+											fieldAdapter.add(
+													data.clone()
+														.fluentPut("VenueBooking", venueBooking)
+														.fluentPut("Type", 1)
+														.fluentPut("Venue", fieldName).fluentPut(
+																"Duration",
+																"${data.getString("Start")}~${
+																	data.getString("End")
+																}"
+														)
+											)
+											data.getInteger("AvailableCapacity")?.let {
+												availableCapacity += it
+											}
 										}
-									}
-									if (fieldAdapter.itemCount % rows != 0) (0..<(rows - fieldAdapter.itemCount % rows)).forEach { _ ->
-										fieldAdapter.add(JSONObject.of("Type", 3))
+										if (fieldAdapter.itemCount % rows != 0) (0..<(rows - fieldAdapter.itemCount % rows)).forEach { _ ->
+											fieldAdapter.add(JSONObject.of("Type", 3))
+										}
 									}
 								}
+								if (viewModel.position.value != null) dateAdapter!!.setAvailableCapacity(
+										viewModel.position.value!!, availableCapacity
+								)
+								getFee(id!!)
 							}
-							if (viewModel.position.value != null) dateAdapter!!.setAvailableCapacity(
-									viewModel.position.value!!, availableCapacity
-							)
-							getFee(id!!)
-						}
 
-						1 -> {
-							fee.clear()
-							response.getJSONArray("data")?.run {
-								forEach { fee[(it as JSONObject).getString("UserRole")] = it }
+							1 -> {
+								fee.clear()
+								response.getJSONArray("data")?.run {
+									forEach { fee[(it as JSONObject).getString("UserRole")] = it }
+								}
+								loadMe()
 							}
-						loadMe()
-						}
 
-						2 -> {
-							response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
-								userId = it.getJSONObject(0).getString("UserId")
+							2 -> {
+								response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
+									userId = it.getJSONObject(0).getString("UserId")
+								}
+								getType(id)
 							}
-							getType(id)
-						}
 
-						3 -> {
-							response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
-								type = it.getJSONObject(0).getString("TypeIdentity")
+							3 -> {
+								response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
+									type = it.getJSONObject(0).getString("TypeIdentity")
+								}
 							}
-						}
 
-						4 -> {
-							println("Reserve: $response")//response.getJSONObject("data").run {
-							if (response.getInteger("Code") == 200) config.toast(
-									response.getString("data")
-										?: getString(R.string.reserve_success)
-							)
-							else config.toast(response.getString("Result")) // 订单编号
-							//}
+							4 -> {
+								println("Reserve: $response")//response.getJSONObject("data").run {
+								if (response.getInteger("Code") == 200) config.toast(
+										response.getString("data")
+											?: getString(R.string.reserve_success)
+								)
+								else config.toast(response.getString("Result")) // 订单编号
+								//}
+							}
 						}
 					}
 				}
-				viewModel.selected.collect { selected: MutableSet<Int>? ->
-					fieldAdapter.selected = selected
-					val studentFee = fee["学生"]
-					if (studentFee != null) {
-						fieldAdapter.selected?.isEmpty().let {
-							binding.submit.setEnabled(it == false)
-							if (it == true) binding.info.text = getString(R.string.unselected)
-							else {
-								val info = StringBuilder()
-								val items = JSONArray()
-								fieldAdapter.selected?.forEach { e: Int ->
-									info.append(fieldAdapter.get(e).getString("Venue")).append(" ")
-										.append(fieldAdapter.get(e).getString("Duration"))
-										.append("+")
-									items.add(fieldAdapter.get(e).getJSONObject("VenueBooking"))
-								}
-								val venueName =
-									fieldAdapter.get(fieldAdapter.selected!!.toList()[0])
-										.getJSONObject("VenueBooking").getString("VenueName")
-								val creditFee =
-									studentFee.getInteger("CreditFee") * fieldAdapter.selected?.size!!
-								binding.submit.setOnClickListener {
-									reserve(
-											items,
-											venueName,
+				launch {
+					viewModel.selected.collect { selected: MutableSet<Int>? ->
+						fieldAdapter.selected = selected
+						val studentFee = fee["学生"]
+						if (studentFee != null) {
+							fieldAdapter.selected?.isEmpty().let {
+								binding.submit.setEnabled(it == false)
+								if (it == true) binding.info.text = getString(R.string.unselected)
+								else {
+									val info = StringBuilder()
+									val items = JSONArray()
+									fieldAdapter.selected?.forEach { e: Int ->
+										info.append(fieldAdapter.get(e).getString("Venue"))
+											.append(" ")
+											.append(fieldAdapter.get(e).getString("Duration"))
+											.append("+")
+										items.add(fieldAdapter.get(e).getJSONObject("VenueBooking"))
+									}
+									val venueName =
+										fieldAdapter.get(fieldAdapter.selected!!.toList()[0])
+											.getJSONObject("VenueBooking").getString("VenueName")
+									val creditFee =
+										studentFee.getInteger("CreditFee") * fieldAdapter.selected?.size!!
+									binding.submit.setOnClickListener {
+										reserve(
+												items, venueName, creditFee
+										)
+									}
+									binding.info.text = String.format(
+											Locale.getDefault(),
+											"%s=%d元",
+											info.deleteCharAt(info.length - 1),
 											creditFee
 									)
 								}
-								binding.info.text = String.format(
-										Locale.getDefault(),
-										"%s=%d元",
-										info.deleteCharAt(info.length - 1),
-										creditFee
-								)
 							}
 						}
 					}
@@ -247,6 +255,7 @@ class GymDetailFragment : BaseFragment() {
 		}
 		return binding.root
 	}
+
 	override fun onDestroyView() {
 		super.onDestroyView()
 		model.dispose()

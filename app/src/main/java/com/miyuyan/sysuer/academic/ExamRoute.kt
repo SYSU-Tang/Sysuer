@@ -161,7 +161,7 @@ fun ExamRoute(
 				}
 			}
 		}) {
-		StatePage(uiState) {
+		StatePage(state = uiState) {
 			StaggerScreen(sections = examViewModel.sections)
 		}
 	}

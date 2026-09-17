@@ -51,7 +51,7 @@ class ContextUtil(val context: Context) {
 
 	private val sharedPreferences: SharedPreferences =
 		context.getSharedPreferences("privacy", Context.MODE_PRIVATE)
-private val loginManager: LoginManager = LoginManager(context.applicationContext)
+	private val loginManager: LoginManager = LoginManager(context.applicationContext)
 	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
 	private val handler = Handler(Looper.getMainLooper())
 	val disposable: CompositeDisposable = CompositeDisposable()
@@ -60,12 +60,9 @@ private val loginManager: LoginManager = LoginManager(context.applicationContext
 
 	init {
 		if (userName.isNotEmpty() && password.isNotEmpty()) disposable.add(
-			accountManager.setAccountAsync(
-				TargetHost.SYSU,
-				userName,
-				password,
-				true
-			).subscribe { sharedPreferences.edit { remove("username").remove("password") } })
+				accountManager.setAccountAsync(
+						TargetHost.SYSU, userName, password, true
+				).subscribe { sharedPreferences.edit { remove("username").remove("password") } })
 	}
 
 	fun getColorFromAttr(attr: Int): Int {
@@ -133,17 +130,12 @@ private val loginManager: LoginManager = LoginManager(context.applicationContext
 	 */
 	fun loginForUrl(service: String?, host: String, captcha: String?, afterLogin: Runnable?) {
 		disposable.add(
-			accountManager.getActiveAccountAsync(host).subscribe { (username, password) ->
-				if (!username.isNullOrEmpty() && !password.isNullOrEmpty() && !service.isNullOrEmpty()) performLogin(
-					service,
-					host,
-					username,
-					password,
-					captcha,
-					afterLogin
-				)
-				else changeAccount(service, host, captcha, afterLogin)
-			})
+				accountManager.getActiveAccountAsync(host).subscribe { (username, password) ->
+					if (!username.isNullOrEmpty() && !password.isNullOrEmpty() && !service.isNullOrEmpty()) performLogin(
+							service, host, username, password, captcha, afterLogin
+					)
+					else changeAccount(service, host, captcha, afterLogin)
+				})
 	}
 
 	fun loginByQrCode(host: String, imageView: ImageView, afterLogin: Runnable?) {
@@ -222,21 +214,22 @@ private val loginManager: LoginManager = LoginManager(context.applicationContext
 				binding!!.captchaGroup.isVisible = true
 				binding!!.captchaText.editText?.setText(captcha)
 				loginManager.cookieJar.saveFromResponse(
-					"https://cas.sysu.edu.cn/esc-sso/api/v1/image/getRandcode".toHttpUrl(),
-					listOf(
-						Cookie.Builder().name("SESSION").value(
-							Base64.getEncoder()
-								.encodeToString(UUID.randomUUID().toString().toByteArray())
-						).domain("cas.sysu.edu.cn").build()
-					)
+						"https://cas.sysu.edu.cn/esc-sso/api/v1/image/getRandcode".toHttpUrl(),
+						listOf(
+								Cookie.Builder().name("SESSION").value(
+										Base64.getEncoder().encodeToString(
+													UUID.randomUUID().toString().toByteArray()
+											)
+								).domain("cas.sysu.edu.cn").build()
+						)
 				)
 				fun loadCaptcha() {
 					CompletableFuture.supplyAsync {
 						try {
 							loginManager.client.newCall(
-								Request.Builder()
-									.url("https://cas.sysu.edu.cn/esc-sso/api/v1/image/getRandcode")
-									.build()
+									Request.Builder()
+										.url("https://cas.sysu.edu.cn/esc-sso/api/v1/image/getRandcode")
+										.build()
 							).execute().use { response ->
 								if (response.isSuccessful) response.body.bytes()
 								else null
@@ -258,32 +251,37 @@ private val loginManager: LoginManager = LoginManager(context.applicationContext
 				loadCaptcha()
 			}
 			if (dialog == null) dialog =
-				MaterialAlertDialogBuilder(activity).setView(binding!!.root).setTitle(R.string.privacy)
+				MaterialAlertDialogBuilder(activity).setView(binding!!.root)
+					.setTitle(R.string.privacy)
 					.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
 						val username = binding!!.username.edit.text.toString()
 						val password = binding!!.password.edit.text.toString()
 						val captcha = binding!!.captchaText.editText?.text.toString()
 						if (username.isEmpty() || password.isEmpty()) toast(R.string.username_password_warning)
 						else disposable.add(
-							accountManager.setAccountAsync(
-								host,
-								username,
-								password,
-								true
-							).subscribe {
-								performLogin(service, host, username, password, captcha, afterLogin)
-							})
+								accountManager.setAccountAsync(
+										host, username, password, true
+								).subscribe {
+									performLogin(
+											service,
+											host,
+											username,
+											password,
+											captcha,
+											afterLogin
+									)
+								})
 					}.setNegativeButton(R.string.cancel, null).create()
 		}
 		disposable.add(
-			accountManager.getActiveAccountAsync(host).observeOn(AndroidSchedulers.mainThread())
-				.subscribe({ (username, password) ->
-					if (!username.isNullOrEmpty() && !password.isNullOrEmpty()) {
-						binding?.password?.edit?.setText(password)
-						binding?.username?.edit?.setText(username)
-					}
-					dialog?.show()
-				}, {})
+				accountManager.getActiveAccountAsync(host).observeOn(AndroidSchedulers.mainThread())
+					.subscribe({ (username, password) ->
+						if (!username.isNullOrEmpty() && !password.isNullOrEmpty()) {
+							binding?.password?.edit?.setText(password)
+							binding?.username?.edit?.setText(username)
+						}
+						dialog?.show()
+					}, {})
 		)
 	}
 
@@ -291,12 +289,18 @@ private val loginManager: LoginManager = LoginManager(context.applicationContext
 		disposable.dispose()
 	}
 
-	val width: Int?
+	val width
 		get() = if (SDK_INT >= Build.VERSION_CODES.R) ContextCompat.getSystemService(
-			context,
-			WindowManager::class.java
+				context, WindowManager::class.java
 		)?.currentWindowMetrics?.bounds?.width()
 		else context.resources.displayMetrics.widthPixels
+
+	val height
+		get() = if (SDK_INT >= Build.VERSION_CODES.R) ContextCompat.getSystemService(
+				context, WindowManager::class.java
+		)?.currentWindowMetrics?.bounds?.height()
+		else context.resources.displayMetrics.heightPixels
+
 	val column: Int
 		/**
 		 * 获取列数，根据屏幕宽度动态调整，手机屏幕为一列，以此类推

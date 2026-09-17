@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -72,6 +71,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -445,6 +445,9 @@ class TodoManager(
 
 		if (showCustomRemindDialog) {
 			var customMinutes by remember { mutableIntStateOf(0) }
+			val state = rememberSliderState(
+					value = customMinutes.toFloat(), steps = 58, trackRange = 0f..59f
+			)
 			AlertDialog(
 					onDismissRequest = { showCustomRemindDialog = false },
 					title = { Text(stringResource(R.string.custom_remind_title)) },
@@ -452,18 +455,16 @@ class TodoManager(
 						Column {
 							Text("$customMinutes ${stringResource(R.string.minute)}")
 							Slider(
-									value = customMinutes.toFloat(),
-									onValueChange = { customMinutes = it.toInt() },
-									valueRange = 0f..59f,
-									steps = 58,
-									thumb = {
-										Box(
-												modifier = Modifier
-													.size(width = 4.dp, height = 24.dp)
-													.clip(RoundedCornerShape(50))
-													.background(MaterialTheme.colorScheme.primary)
-										)
-									})
+									state = state,
+									modifier = Modifier,
+									enabled = true,
+									onValueChange = {
+										customMinutes = it.toInt()
+										state.value = it
+									},
+									onValueChangeFinished = null,
+									colors = SliderDefaults.colors(),
+									interactionSource = remember { MutableInteractionSource() })
 						}
 					},
 					confirmButton = {
@@ -810,7 +811,7 @@ class TodoManager(
 			if (selected != null && selected !in items) {
 				ElevatedFilterChip(
 						modifier = Modifier.combinedClickable(
-						onClick = {
+								onClick = {
 					onSelect(
 							selected
 					)
@@ -873,6 +874,9 @@ class TodoManager(
 //					.background(MaterialTheme.colorScheme.primary))
 //			})
 //		}
+		val state = rememberSliderState(
+				value = priority.toFloat(), steps = 3, trackRange = 0f..4f
+		)
 		Column(
 				modifier = modifier
 		) {
@@ -891,11 +895,13 @@ class TodoManager(
 				Text(priorityLabels[priority], style = MaterialTheme.typography.bodyMedium)
 			}
 			Slider(
-					value = priority.toFloat(),
+					state = state,
 					modifier = Modifier.fillMaxWidth(),
-					onValueChange = { onPriorityChange(it.toInt()) },
-					valueRange = 0f..4f,
-					steps = 3,
+					enabled = true,
+					onValueChange = {
+						onPriorityChange(it.toInt())
+						state.value = it
+					},
 					colors = SliderDefaults.colors(
 							activeTrackColor = when (priority) {
 								0 -> MaterialTheme.colorScheme.outline
@@ -906,14 +912,7 @@ class TodoManager(
 								else -> MaterialTheme.colorScheme.primary
 							}
 					),
-					thumb = {
-						Box(
-								modifier = Modifier
-									.size(width = 4.dp, height = 24.dp)
-									.clip(RoundedCornerShape(50))
-									.background(MaterialTheme.colorScheme.primary)
-						)
-					})
+					interactionSource = remember { MutableInteractionSource() })
 		}
 	}
 
@@ -932,7 +931,7 @@ class TodoManager(
 			items.forEach { name ->
 				ElevatedFilterChip(
 						modifier = Modifier.combinedClickable(
-								onClick = { onToggle(name) },
+						onClick = { onToggle(name) },
 						onLongClick = { onDelete?.invoke(name) },
 						interactionSource = remember { MutableInteractionSource() }),
 						selected = name in selectedTags,
@@ -953,7 +952,7 @@ class TodoManager(
 			selectedTags.filter { it !in items }.forEach { name ->
 				ElevatedFilterChip(
 						modifier = Modifier.combinedClickable(
-								onClick = { onToggle(name) },
+						onClick = { onToggle(name) },
 						onLongClick = { onDelete?.invoke(name) },
 						interactionSource = remember { MutableInteractionSource() },
 						indication = null

@@ -36,8 +36,8 @@ import com.miyuyan.sysuer.view.UiState.Unstarted
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatePage(
-	state: UiState,
 	modifier: Modifier = Modifier,
+	state: UiState? = null,
 	emptyWarning: String = stringResource(R.string.no_data),
 	onRetry: () -> Unit = {},
 	content: @Composable () -> Unit = {}
@@ -67,7 +67,10 @@ fun StatePage(
 					LoadingIndicator()
 				}
 			}
-			else -> {}
+
+			else -> {
+				content()
+			}
 		}
 	}
 }

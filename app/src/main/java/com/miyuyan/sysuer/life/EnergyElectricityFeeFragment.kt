@@ -79,211 +79,218 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 		val detailDialog = PreferenceDialog(requireContext())
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
-					if (response.getInteger("code") == 200) {
-						when (code) {
-							0 -> getRoom(response.getJSONObject("data").getString("username"))
-							1 -> {
-								val items = ArrayAdapter<Any?>(
-										requireContext(), android.R.layout.simple_list_item_1
-								)
-								binding.spinner.setAdapter(items)
-								response.getJSONArray("data").forEach { roomInfo: Any? ->
-									rooms.add(
-											CommonUtil.Tuple2(
-													(roomInfo as JSONObject).getString("roomName"),
-													roomInfo.getString("roomCode")
-											)
+				launch {
+					model.messageChannel.collect { (code, response) ->
+						if (response.getInteger("code") == 200) {
+							when (code) {
+								0 -> getRoom(response.getJSONObject("data").getString("username"))
+								1 -> {
+									val items = ArrayAdapter<Any?>(
+											requireContext(), android.R.layout.simple_list_item_1
 									)
-									items.add(roomInfo.getString("roomName"))
-								}
-							}
-
-							2 -> response.getJSONObject("data").getJSONArray("useEleByDayList")
-								.forEach { item: Any? ->
-									val content = (item as JSONObject).getString("useElectric")
-										?: getString(R.string.no_data_available)
-									val date = LocalDate.parse(item.getString("date"), formatter)
-									val calendar = Calendar().apply {
-										scheme = content
-										year = date.year
-										month = date.monthValue
-										day = date.dayOfMonth
-									}
-									binding.calendarView.addSchemeDate(calendar)
-								}
-
-							3 -> {
-							resetAdapter(adapter)
-								response.getJSONObject("data").getJSONArray("list")
-									.forEach { item: Any? ->
-										adapter.addAdapter(
-												TitleAdapter(
-														(item as JSONObject).getString(
-																"billPeriod"
-														)
+									binding.spinner.setAdapter(items)
+									response.getJSONArray("data").forEach { roomInfo: Any? ->
+										rooms.add(
+												CommonUtil.Tuple2(
+														(roomInfo as JSONObject).getString("roomName"),
+														roomInfo.getString("roomCode")
 												)
 										)
-										val preferenceAdapter = PreferenceAdapter()
-										val value: ArrayList<String?> = extractValue(
-												item, arrayOf(
-												"billPeriod",
-												"billStatus",
-												"remark",
-												"useElectric",
-												"name",
-												"campusName",
-												"areaInfo",
-												"unitPrice",
-												"totalUseAmount",
-												"payedUseAmount",
-												"billTime"
-										)
-										)
-										val billStatus = item.getInteger("billStatus")
-					value[1] = paymentStatus.getOrNull(billStatus - 1) ?: getString(R.string.none)
-										value[3] = "${item.getString("currReportElectric")}-${
-											item.getString("lastReportElectric")
-										}=${item.getString("useElectric")}"
-										preferenceAdapter.set(
-												mutableListOf(
-														R.string.bill_period,
-														R.string.status,
-														R.string.remark,
-														R.string.electricity_consumption,
-														R.string.payer,
-														R.string.campus,
-														R.string.dorm,
-														R.string.price,
-														R.string.fee,
-														R.string.paid_fee,
-														R.string.pay_time
-												), value, mutableListOf(
-												R.drawable.calendar,
-												if (billStatus == 3 || billStatus == 5) R.drawable.check else R.drawable.uncheck,
-												R.drawable.text,
-												R.drawable.flash,
-												R.drawable.account,
-												R.drawable.location,
-												R.drawable.home,
-												R.drawable.money,
-												R.drawable.money,
-												R.drawable.money,
-												R.drawable.time
-										), requireContext()
-										)
-										preferenceAdapter.hideNull = true
-										val buttonAdapter = ButtonAdapter().apply {
-											add(getString(R.string.view_detail))
-											if (billStatus == 1) add(getString(R.string.pay_fee))
-											setListener { button: Button?, position: Int ->
-												when (position) {
-													0 -> button?.setOnClickListener {
-														getDetail(
-																item.getString(
-																		"id"
-																), roomCode.value
-														)
-													}
+										items.add(roomInfo.getString("roomName"))
+									}
+								}
 
-													1 -> button?.setOnClickListener {
-														recharge(
-																item.getString(
-																		"id"
-																),
-																roomCode.value!!,
-																item.getFloat("totalUseAmount")
-														)
+								2 -> response.getJSONObject("data").getJSONArray("useEleByDayList")
+									.forEach { item: Any? ->
+										val content = (item as JSONObject).getString("useElectric")
+											?: getString(R.string.no_data_available)
+										val date =
+											LocalDate.parse(item.getString("date"), formatter)
+										val calendar = Calendar().apply {
+											scheme = content
+											year = date.year
+											month = date.monthValue
+											day = date.dayOfMonth
+										}
+										binding.calendarView.addSchemeDate(calendar)
+									}
+
+								3 -> {
+									resetAdapter(adapter)
+									response.getJSONObject("data").getJSONArray("list")
+										.forEach { item: Any? ->
+											adapter.addAdapter(
+													TitleAdapter(
+															(item as JSONObject).getString(
+																	"billPeriod"
+															)
+													)
+											)
+											val preferenceAdapter = PreferenceAdapter()
+											val value: ArrayList<String?> = extractValue(
+													item, arrayOf(
+													"billPeriod",
+													"billStatus",
+													"remark",
+													"useElectric",
+													"name",
+													"campusName",
+													"areaInfo",
+													"unitPrice",
+													"totalUseAmount",
+													"payedUseAmount",
+													"billTime"
+											)
+											)
+											val billStatus = item.getInteger("billStatus")
+											value[1] = paymentStatus.getOrNull(billStatus - 1)
+												?: getString(R.string.none)
+											value[3] = "${item.getString("currReportElectric")}-${
+												item.getString("lastReportElectric")
+											}=${item.getString("useElectric")}"
+											preferenceAdapter.set(
+													mutableListOf(
+															R.string.bill_period,
+															R.string.status,
+															R.string.remark,
+															R.string.electricity_consumption,
+															R.string.payer,
+															R.string.campus,
+															R.string.dorm,
+															R.string.price,
+															R.string.fee,
+															R.string.paid_fee,
+															R.string.pay_time
+													), value, mutableListOf(
+													R.drawable.calendar,
+													if (billStatus == 3 || billStatus == 5) R.drawable.check else R.drawable.uncheck,
+													R.drawable.text,
+													R.drawable.flash,
+													R.drawable.account,
+													R.drawable.location,
+													R.drawable.home,
+													R.drawable.money,
+													R.drawable.money,
+													R.drawable.money,
+													R.drawable.time
+											), requireContext()
+											)
+											preferenceAdapter.hideNull = true
+											val buttonAdapter = ButtonAdapter().apply {
+												add(getString(R.string.view_detail))
+												if (billStatus == 1) add(getString(R.string.pay_fee))
+												setListener { button: Button?, position: Int ->
+													when (position) {
+														0 -> button?.setOnClickListener {
+															getDetail(
+																	item.getString(
+																			"id"
+																	), roomCode.value
+															)
+														}
+
+														1 -> button?.setOnClickListener {
+															recharge(
+																	item.getString(
+																			"id"
+																	),
+																	roomCode.value!!,
+																	item.getFloat("totalUseAmount")
+															)
+														}
 													}
 												}
 											}
+
+											adapter.addAdapter(preferenceAdapter)
+											adapter.addAdapter(buttonAdapter)
 										}
+								}
 
-										adapter.addAdapter(preferenceAdapter)
-										adapter.addAdapter(buttonAdapter)
-									}
-							}
+								4 -> {
+									detailDialog.clear()
+									response.getJSONObject("data").getJSONArray("list")
+										.forEach { item: Any? ->
+											val value: ArrayList<String?> = extractValue(
+													(item as JSONObject), arrayOf(
+													"billPeriod",
+													"billStatus",
+													"remark",
+													"useElectric",
+													"name",
+													"campusName",
+													"areaInfo",
+													"unitPrice",
+													"totalUseAmount",
+													"payedUseAmount",
+													"useAmount",
+													"billTime"
+											)
+											)
+											val billStatus = item.getInteger("billStatus")
+											value[1] = paymentStatus.getOrNull(billStatus - 1)
+												?: getString(R.string.none)
+											value[3] = "${item.getString("currReportElectric")}-${
+												item.getString("lastReportElectric")
+											}=${item.getString("useElectric")}"
+											detailDialog.getAdapter().set(
+													mutableListOf(
+															R.string.bill_period,
+															R.string.status,
+															R.string.remark,
+															R.string.electricity_consumption,
+															R.string.payer,
+															R.string.campus,
+															R.string.dorm,
+															R.string.price,
+															R.string.fee,
+															R.string.paid_fee,
+															R.string.unpaid_fee,
+															R.string.pay_time
+													), value, mutableListOf(
+													R.drawable.calendar,
+													if (billStatus == 3 || billStatus == 5) R.drawable.check else R.drawable.uncheck,
+													R.drawable.text,
+													R.drawable.flash,
+													R.drawable.account,
+													R.drawable.location,
+													R.drawable.home,
+													R.drawable.money,
+													R.drawable.money,
+													R.drawable.money,
+													R.drawable.money,
+													R.drawable.time
+											), requireContext()
+											)
+											detailDialog.getAdapter().hideNull = true
+										}
+									detailDialog.show()
+								}
 
-							4 -> {
-								detailDialog.clear()
-								response.getJSONObject("data").getJSONArray("list")
-									.forEach { item: Any? ->
-										val value: ArrayList<String?> = extractValue(
-												(item as JSONObject), arrayOf(
-												"billPeriod",
-												"billStatus",
-												"remark",
-												"useElectric",
-												"name",
-												"campusName",
-												"areaInfo",
-												"unitPrice",
-												"totalUseAmount",
-												"payedUseAmount",
-												"useAmount",
-												"billTime"
-										)
-										)
-										val billStatus = item.getInteger("billStatus")
-					value[1] = paymentStatus.getOrNull(billStatus - 1) ?: getString(R.string.none)
-										value[3] = "${item.getString("currReportElectric")}-${
-											item.getString("lastReportElectric")
-										}=${item.getString("useElectric")}"
-										detailDialog.getAdapter().set(
-												mutableListOf(
-														R.string.bill_period,
-														R.string.status,
-														R.string.remark,
-														R.string.electricity_consumption,
-														R.string.payer,
-														R.string.campus,
-														R.string.dorm,
-														R.string.price,
-														R.string.fee,
-														R.string.paid_fee,
-														R.string.unpaid_fee,
-														R.string.pay_time
-												), value, mutableListOf(
-												R.drawable.calendar,
-												if (billStatus == 3 || billStatus == 5) R.drawable.check else R.drawable.uncheck,
-												R.drawable.text,
-												R.drawable.flash,
-												R.drawable.account,
-												R.drawable.location,
-												R.drawable.home,
-												R.drawable.money,
-												R.drawable.money,
-												R.drawable.money,
-												R.drawable.money,
-												R.drawable.time
-										), requireContext()
-										)
-										detailDialog.getAdapter().hideNull = true
-									}
-								detailDialog.show()
+								5 -> {
+									config.toast(response.getString("msg"))
+									roomCode.value?.let { getElectricityBill(it) }
+								}
 							}
-
-							5 -> {
-								config.toast(response.getString("msg"))
-								roomCode.value?.let { getElectricityBill(it) }
-							}
-						}
-					} //else config.toast(response.getString("msg"))
+						} //else config.toast(response.getString("msg"))
+					}
 				}
-
-				roomCode.collect { v: String? ->
-					v?.takeUnless { it.isEmpty() }?.let {
-						val date = LocalDate.of(
-								binding.calendarView.selectedCalendar.year,
-								binding.calendarView.selectedCalendar.month,
-								1
-						)
-						getElectricityConsumption(
-								it,
-								date.with(TemporalAdjusters.firstDayOfMonth()).format(formatter),
-								date.with(TemporalAdjusters.lastDayOfMonth()).format(formatter)
-						)
-						getElectricityBill(it)
+				launch {
+					roomCode.collect { v: String? ->
+						v?.takeUnless { it.isEmpty() }?.let {
+							val date = LocalDate.of(
+									binding.calendarView.selectedCalendar.year,
+									binding.calendarView.selectedCalendar.month,
+									1
+							)
+							getElectricityConsumption(
+									it,
+									date.with(TemporalAdjusters.firstDayOfMonth())
+										.format(formatter),
+									date.with(TemporalAdjusters.lastDayOfMonth()).format(formatter)
+							)
+							getElectricityBill(it)
+						}
 					}
 				}
 			}
@@ -295,20 +302,27 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 
 	fun getElectricityConsumption(roomCode: String, startDate: String?, endDate: String?) {
 		model.addAndNext(
-			"kbp/ele/wechat/eleConsume",
-			JSONObject.of("roomCode", roomCode, "startDate", startDate, "endDate", endDate).toJSONString(),
-			2
+				"kbp/ele/wechat/eleConsume",
+				JSONObject.of("roomCode", roomCode, "startDate", startDate, "endDate", endDate)
+					.toJSONString(),
+				2
 		)
 	}
 
 	fun getElectricityBill(roomCode: String) {
 		model.addAndNext(
-			"kbp/ele/mobile/billRecord", JSONObject.of("roomCode", roomCode, "billType", 1).toJSONString(), 3
+				"kbp/ele/mobile/billRecord",
+				JSONObject.of("roomCode", roomCode, "billType", 1).toJSONString(),
+				3
 		)
 	}
 
 	fun getDetail(id: String, room: String?) {
-		model.addAndNext("kbp/ele/mobile/billRecord", JSONObject.of("id", id, "roomCode", room).toJSONString(), 4)
+		model.addAndNext(
+				"kbp/ele/mobile/billRecord",
+				JSONObject.of("id", id, "roomCode", room).toJSONString(),
+				4
+		)
 	}
 
 	fun recharge(id: String?, roomCode: String, amount: Float) {
@@ -323,6 +337,7 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 		), 5
 		)
 	}
+
 	override fun onDestroyView() {
 		super.onDestroyView()
 		model.dispose()

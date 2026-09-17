@@ -13,7 +13,7 @@ class Config {
 	var fragment: Fragment? = null // 关联的 Fragment 对象
 	var afterLogin: Runnable? = null // 登录成功后的回调 Runnable 对象
 	var contextUtil: ContextUtil
-	
+
 	/**
 	 * 构造函数，用于初始化 Params 对象
 	 * 
@@ -23,7 +23,7 @@ class Config {
 		this.activity = activity
 		contextUtil = ContextUtil(activity)
 	}
-	
+
 	/**
 	 * 构造函数，用于初始化 Params 对象
 	 * 
@@ -34,7 +34,7 @@ class Config {
 		activity = fragment.requireActivity()
 		contextUtil = ContextUtil(fragment.requireContext())
 	}
-	
+
 	/**
 	 * 设置登录回调
 	 * 
@@ -43,7 +43,7 @@ class Config {
 	fun setCallback(afterLogin: Runnable?) {
 		this.afterLogin = afterLogin
 	}
-	
+
 	/**
 	 * 将 dp 值转换为 px 值
 	 * 
@@ -58,6 +58,14 @@ class Config {
 		 * @return 屏幕宽度（px）
 		 */
 		get() = contextUtil.width
+
+	val height: Int?
+		/**
+		 * 获取屏幕高度
+		 *
+		 * @return 屏幕高度（px）
+		 */
+		get() = contextUtil.height
 	val column: Int
 		/**
 		 * 获取列数，根据屏幕宽度动态调整，手机屏幕为一列，以此类推
@@ -67,16 +75,22 @@ class Config {
 		get() = contextUtil.column
 	val context: Context
 		get() = contextUtil.context
-	
+
 	/**
 	 * 打开浏览器
 	 * 
 	 * @param url 要打开的 URL
 	 * @return 点击事件监听器
 	 */
-	fun browse(url: String?): View.OnClickListener =
-		View.OnClickListener { context.startActivity(Intent(context, BrowserActivity::class.java).setData(Uri.parse(url))) }
-	
+	fun browse(url: String?): View.OnClickListener = View.OnClickListener {
+		context.startActivity(
+				Intent(
+						context,
+						BrowserActivity::class.java
+				).setData(Uri.parse(url))
+		)
+	}
+
 	/**
 	 * 复制文本到剪贴板
 	 * 
@@ -86,7 +100,7 @@ class Config {
 	fun copy(tag: String?, text: String?) {
 		contextUtil.copy(tag, text)
 	}
-	
+
 	/**
 	 * 显示 Toast 消息
 	 * 
@@ -95,7 +109,7 @@ class Config {
 	fun toast(resource: Int) {
 		contextUtil.toast(resource)
 	}
-	
+
 	/**
 	 * 显示 Toast 消息
 	 * 
@@ -104,7 +118,7 @@ class Config {
 	fun toast(toast: String?) {
 		contextUtil.toast(toast)
 	}
-	
+
 	/**
 	 * 跳转登录页面
 	 * 

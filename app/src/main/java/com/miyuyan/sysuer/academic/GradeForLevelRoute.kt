@@ -129,7 +129,7 @@ fun GradeForLevelRoute(
 					) { minGradeValue = it; onFilterChange() }
 				}
 			}) {
-		StatePage(uiState, onRetry = viewModel::reFetchGrade) {
+		StatePage(state = uiState, onRetry = viewModel::reFetchGrade) {
 			StaggerScreen(
 					sections = viewModel.sections, onScrollBottom = viewModel::fetchMoreGrade
 			)

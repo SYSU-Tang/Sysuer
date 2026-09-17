@@ -82,7 +82,7 @@ class ComplaintSquareFragment : BaseFragment() {
 				detail.text =
 					"#${item.getString("createDate")}  #${item.getString("questionType", "未分类")}"
 				request.text = item.getString("description", "暂无公开答复内容")
-				response.setMarkdown(item.getString("dfnr"))
+				response.setMarkdown(item.getString("dfnr"), true)
 			}
 		}
 	}
