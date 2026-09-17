@@ -71,7 +71,6 @@ import com.miyuyan.sysuer.academic.RegistrationRoute
 import com.miyuyan.sysuer.academic.SchoolEnrollmentRoute
 import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
 import com.miyuyan.sysuer.academic.TrainingProgramRoute
-import com.miyuyan.sysuer.rainClass.RainClassRoute
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.browser.RichTextRoute
 import com.miyuyan.sysuer.extra.AboutRoute
@@ -95,14 +94,15 @@ import com.miyuyan.sysuer.nav.NetPay
 import com.miyuyan.sysuer.nav.Pay
 import com.miyuyan.sysuer.nav.PersonalInformation
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram
-import com.miyuyan.sysuer.nav.Registration
 import com.miyuyan.sysuer.nav.RainClass
+import com.miyuyan.sysuer.nav.Registration
 import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.nav.Update
+import com.miyuyan.sysuer.rainClass.RainClassRoute
 import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
 import java.io.File
@@ -126,41 +126,46 @@ class MainActivity : BaseActivity() {
 					if (isAgree == true) {
 						if (spm.update) mainViewModel.getLatestVersion()
 						listOf(                            /*NextClassWidget::class.java,*/  /*TodayClassWidget.class, */
-							TomorrowClassWidget::class.java/*, RecentClassWidget::class.java*/
+								TomorrowClassWidget::class.java/*, RecentClassWidget::class.java*/
 						).forEach {
 							sendBroadcast(
-								Intent(
-									this@MainActivity, it
-								).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE).putExtra(
-									AppWidgetManager.EXTRA_APPWIDGET_IDS,
-									AppWidgetManager.getInstance(this@MainActivity)
-										.getAppWidgetIds(ComponentName(this@MainActivity, it))
-								)
+									Intent(
+											this@MainActivity, it
+									).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE).putExtra(
+											AppWidgetManager.EXTRA_APPWIDGET_IDS,
+											AppWidgetManager.getInstance(this@MainActivity)
+												.getAppWidgetIds(
+														ComponentName(
+																this@MainActivity,
+																it
+														)
+												)
+									)
 							)
 						}
 						receiver = object : BroadcastReceiver() {
 							override fun onReceive(context: Context?, intent: Intent) {
 								if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action && intent.getLongExtra(
-										DownloadManager.EXTRA_DOWNLOAD_ID, -1
+											DownloadManager.EXTRA_DOWNLOAD_ID, -1
 									) == downloadId
 								) {
 									config.toast(R.string.download_complete)
 									com.miyuyan.sysuer.api.DownloadManager.openFile(
-										this@MainActivity, path
+											this@MainActivity, path
 									)
 								}
 							}
 						}
 						ContextCompat.registerReceiver(
-							this@MainActivity,
-							receiver,
-							IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-ContextCompat.RECEIVER_NOT_EXPORTED
+								this@MainActivity,
+								receiver,
+								IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+								ContextCompat.RECEIVER_NOT_EXPORTED
 						)
 						receiverRegistered = true
 						if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
-							arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-							PackageManager.PERMISSION_GRANTED
+								arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+								PackageManager.PERMISSION_GRANTED
 						)
 					}
 				}
@@ -168,29 +173,30 @@ ContextCompat.RECEIVER_NOT_EXPORTED
 					MainScreen()
 				} else {
 					AlertDialog(
-						title = { Text(stringResource(R.string.user_agreement_and_privacy_policy)) },
-						text = {
-							Markdown(
-								"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)",
-								modifier = Modifier
-							)
-						},
-						onDismissRequest = {},
-						dismissButton = {
-							TextButton(
-								onClick = { supportFinishAfterTransition() },
-								shapes = ButtonDefaults.shapes()
-							) {
-								Text(stringResource(R.string.exit))
-							}
-						},
-						confirmButton = {
-							TextButton(
-								onClick = { spm.isAgree = true }, shapes = ButtonDefaults.shapes()
-							) {
-								Text(stringResource(R.string.confirm))
-							}
-						})
+							title = { Text(stringResource(R.string.user_agreement_and_privacy_policy)) },
+							text = {
+								Markdown(
+										"请认真阅读[用户协议](https://sysu-tang.github.io/sysuer-website/docs/userAgreement)和[隐私政策](https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy)",
+										modifier = Modifier
+								)
+							},
+							onDismissRequest = {},
+							dismissButton = {
+								TextButton(
+										onClick = { supportFinishAfterTransition() },
+										shapes = ButtonDefaults.shapes()
+								) {
+									Text(stringResource(R.string.exit))
+								}
+							},
+							confirmButton = {
+								TextButton(
+										onClick = { spm.isAgree = true },
+										shapes = ButtonDefaults.shapes()
+								) {
+									Text(stringResource(R.string.confirm))
+								}
+							})
 				}
 			}
 		}
@@ -205,166 +211,166 @@ ContextCompat.RECEIVER_NOT_EXPORTED
 				SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
 					entry<Home> {
 						HomeRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<CourseSelected> {
 						CourseSelectedRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<CourseDetail> {
 						CourseDetailRoute(
-							backStack,
-							it,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								it,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<RichText> {
 						RichTextRoute(
-							backStack,
-							it,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								it,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<CET> {
 						CETRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<Dorm> {
 						DormRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<Exam> {
 						ExamRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<Grade> {
 						GradeRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<GradeForLevel> {
 						GradeForLevelRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<LeaveSlip> {
 						LeaveSlipRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<NetPay> {
 						NetPayRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<Pay> {
 						PayRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<Registration> {
 						RegistrationRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<MajorInfo> {
 						MajorInfoRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<PersonalInformation> {
 						PersonalInformationRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<PersonalTrainingProgram> { key ->
 						PersonalTrainingProgramRoute(
-							backStack,
-							key,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								key,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<TrainingProgram> {
 						TrainingProgramRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<SchoolWorkWarning> {
 						SchoolWorkWarningRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<SchoolEnrollment> {
 						SchoolEnrollmentRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<AcademyNotification> {
 						AcademyNotificationRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<RainClass> {
 						RainClassRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<About> {
 						AboutRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 					entry<Update> {
 						UpdateRoute(
-							backStack,
-							sharedTransitionScope = this@SharedTransitionLayout,
-							animatedVisibilityScope = LocalNavAnimatedContentScope.current
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
 				})
@@ -382,17 +388,17 @@ ContextCompat.RECEIVER_NOT_EXPORTED
 		var enforce = false
 		if (dismissed) return
 		if (PackageInfoCompat.getLongVersionCode(
-				packageManager.getPackageInfo(
-					packageName, 0
-				)
+					packageManager.getPackageInfo(
+							packageName, 0
+					)
 			) < response.getInteger("version")
 		) {
 			path = "${
 				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 			}/${getString(R.string.app_name)}${response.getString("versionName")}.apk"
 			link = response.getString(
-				"link",
-				"https://github.com/SYSU-Tang/Sysuer/releases/latest/download/app-release.apk"
+					"link",
+					"https://github.com/SYSU-Tang/Sysuer/releases/latest/download/app-release.apk"
 			)
 			content = response.getString("description", "暂无更新描述")
 			title = R.string.release_version_detected
@@ -400,7 +406,7 @@ ContextCompat.RECEIVER_NOT_EXPORTED
 			showUpdateDialog = true
 		} else if (settingManager.developerMode && settingManager.betaCheck) {
 			if (response.containsKey("minorVersion") && response.containsKey("majorVersion") && response.containsKey(
-					"generationVersion"
+						"generationVersion"
 				)
 			) {
 				val minorVersion = response.getInteger("minorVersion")
@@ -413,8 +419,8 @@ ContextCompat.RECEIVER_NOT_EXPORTED
 						Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 					}/${getString(R.string.app_name)}$versionName.apk"
 					link = response.getString(
-						"previewLink",
-						"https://github.com/SYSU-Tang/Sysuer/releases/download/$versionName/app-release.apk"
+							"previewLink",
+							"https://github.com/SYSU-Tang/Sysuer/releases/download/$versionName/app-release.apk"
 					)
 					title = R.string.beta_version_detected
 					content = response.getString("previewDescription", "暂无更新描述")
@@ -431,51 +437,51 @@ ContextCompat.RECEIVER_NOT_EXPORTED
 
 		if (showUpdateDialog) AlertDialog(title = { Text(stringResource(title)) }, text = {
 			Markdown(
-				content,
-				modifier = Modifier.verticalScroll(rememberScrollState()),
-				typography = markdownTypography(
-					h3 = MaterialTheme.typography.titleLarge
-				)
+					content,
+					modifier = Modifier.verticalScroll(rememberScrollState()),
+					typography = markdownTypography(
+							h3 = MaterialTheme.typography.titleLarge
+					)
 			)
 		}, onDismissRequest = { close() }, dismissButton = {
 			if (!enforce) TextButton(
-				onClick = { close() }, shapes = ButtonDefaults.shapes()
+					onClick = { close() }, shapes = ButtonDefaults.shapes()
 			) {
 				Text(stringResource(R.string.cancel))
 			}
 		}, confirmButton = {
 			FlowRow(horizontalArrangement = Arrangement.End) {
 				TextButton(
-					onClick = {
-						startActivity(
-							Intent(
-								Intent.ACTION_VIEW, link.toUri()
+						onClick = {
+							startActivity(
+									Intent(
+											Intent.ACTION_VIEW, link.toUri()
+									)
 							)
-						)
-						close()
-					}, shapes = ButtonDefaults.shapes()
+							close()
+						}, shapes = ButtonDefaults.shapes()
 				) {
 					Text(stringResource(R.string.download_in_browser))
 				}
 				TextButton(
-					onClick = {
-						downloadId = getSystemService(DownloadManager::class.java).enqueue(
-							DownloadManager.Request(link.toUri())
-								.setDestinationUri(Uri.fromFile(File(path)))
-								.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-						)
-						close()
-					}, shapes = ButtonDefaults.shapes()
+						onClick = {
+							downloadId = getSystemService(DownloadManager::class.java).enqueue(
+									DownloadManager.Request(link.toUri())
+										.setDestinationUri(Uri.fromFile(File(path)))
+										.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+							)
+							close()
+						}, shapes = ButtonDefaults.shapes()
 				) {
 					Text(stringResource(R.string.download_in_system))
 				}
 				TextButton(
-					onClick = {
-						com.miyuyan.sysuer.api.DownloadManager.downloadFile(
-							this@MainActivity, link, path
-						)
-						close()
-					}, shapes = ButtonDefaults.shapes()
+						onClick = {
+							com.miyuyan.sysuer.api.DownloadManager.downloadFile(
+									this@MainActivity, link, path
+							)
+							close()
+						}, shapes = ButtonDefaults.shapes()
 				) {
 					Text(stringResource(R.string.download_in_app))
 				}
@@ -491,7 +497,7 @@ ContextCompat.RECEIVER_NOT_EXPORTED
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 		if (requestCode == PackageManager.PERMISSION_GRANTED) {
 			if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) config.toast(
-				R.string.permission_granted
+					R.string.permission_granted
 			)
 		}
 	}
@@ -512,30 +518,30 @@ fun ServiceSearchResults(
 
 ) {
 	if (results.isEmpty()) Text(
-		text = stringResource(R.string.search),
-		modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
-		style = MaterialTheme.typography.bodyMedium,
+			text = stringResource(R.string.search),
+			modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+			style = MaterialTheme.typography.bodyMedium,
 	)
 	else LazyColumn(modifier = Modifier.fillMaxSize()) {
 		items(results, key = { it.id }) { item ->
 			ListItem(
-				overlineContent = {
-					item.name?.let {
-						Text(
-							it,
-							maxLines = 1,
-							overflow = TextOverflow.Ellipsis,
-							style = MaterialTheme.typography.titleMedium,
-						)
-					}
-				},
-				modifier = Modifier.clickable(onClick = { onResultClick(item) }),
+					overlineContent = {
+						item.name?.let {
+							Text(
+									it,
+									maxLines = 1,
+									overflow = TextOverflow.Ellipsis,
+									style = MaterialTheme.typography.titleMedium,
+							)
+						}
+					},
+					modifier = Modifier.clickable(onClick = { onResultClick(item) }),
 			) {
 				item.description?.let {
 					Text(
-						it,
-						overflow = TextOverflow.Ellipsis,
-						style = MaterialTheme.typography.bodySmall,
+							it,
+							overflow = TextOverflow.Ellipsis,
+							style = MaterialTheme.typography.bodySmall,
 					)
 				}
 			}

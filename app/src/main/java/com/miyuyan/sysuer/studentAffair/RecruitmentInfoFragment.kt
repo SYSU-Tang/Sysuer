@@ -84,7 +84,7 @@ class RecruitmentInfoFragment : StaggerFragment() {
 							1, 2, 3 -> {
 								val menu = listOf(
 										viewModel.yearPop, viewModel.campusPop, viewModel.typePop
-								)[code - 1]?.menu!!
+								)[code - 1]?.menu ?: return@collect
 								if (menu.hasVisibleItems()) return@collect
 								val name = listOf(
 										viewModel.yearName,
