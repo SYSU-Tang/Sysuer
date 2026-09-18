@@ -6,14 +6,14 @@ import androidx.lifecycle.ViewModel
 import com.miyuyan.sysuer.view.EditTextDialog
 
 class StudentPartTimeViewModel : ViewModel() {
-	val year: MutableLiveData<String?> = MutableLiveData<String?>("2026")
-	val jobType: MutableLiveData<String?> = MutableLiveData<String?>("")
-	val campus: MutableLiveData<String?> = MutableLiveData<String?>("")
-	@JvmField val yearName: MutableLiveData<String?> = MutableLiveData<String?>("2026")
-	@JvmField val jobTypeName: MutableLiveData<String?> = MutableLiveData<String?>("")
-	@JvmField val campusName: MutableLiveData<String?> = MutableLiveData<String?>("")
-	@JvmField val jobName: MutableLiveData<String?> = MutableLiveData<String?>("")
-	@JvmField val unitName: MutableLiveData<String?> = MutableLiveData<String?>("")
+	val year: MutableLiveData<String?> = MutableLiveData("2026")
+	val jobType: MutableLiveData<String?> = MutableLiveData("")
+	val campus: MutableLiveData<String?> = MutableLiveData("")
+	@JvmField val yearName: MutableLiveData<String?> = MutableLiveData("2026")
+	@JvmField val jobTypeName: MutableLiveData<String?> = MutableLiveData("")
+	@JvmField val campusName: MutableLiveData<String?> = MutableLiveData("")
+	@JvmField val jobName: MutableLiveData<String?> = MutableLiveData("")
+	@JvmField val unitName: MutableLiveData<String?> = MutableLiveData("")
 	@JvmField var yearPop: PopupMenu? = null
 	@JvmField var campusPop: PopupMenu? = null
 	@JvmField var typePop: PopupMenu? = null

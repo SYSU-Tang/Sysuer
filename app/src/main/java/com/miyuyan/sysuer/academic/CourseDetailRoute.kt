@@ -31,7 +31,7 @@ fun CourseDetailRoute(
 	val viewModel: CourseDetailViewModel = viewModel()
 	val context = LocalContext.current
 	val activity = LocalActivity.current
-	println("navKey: $navKey courseId: ${navKey.courseId} courseNum: ${navKey.courseNum}")
+	println("navKey: course_${navKey.courseId}_${navKey.courseNum}")
 	LaunchedEffect(navKey.courseId, navKey.courseNum) {
 		viewModel.initFromIntent(navKey.courseNum, navKey.courseId)
 	}

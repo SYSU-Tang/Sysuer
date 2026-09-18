@@ -39,6 +39,7 @@
       {
         "id": 105,
         "name": "课程进度",
+        "route": "CourseCompletion",
         "activity": ".academic.CourseCompletionActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/gradua/#/completionstatusStu?code=jwxsd_kcwcqtj&resourceName=%25E8%25AF%25BE%25E7%25A8%258B%25E5%25AE%258C%25E6%2588%2590%25E6%2583%2585%25E5%2586%25B5%25E7%25BB%259F%25E8%25AE%25A1",
         "description": "课程完成情况查询，查看已修课程的学分学时分布情况与毕业要求的学分学时分布情况进度对比、已修课程的学分统计和成绩详情"

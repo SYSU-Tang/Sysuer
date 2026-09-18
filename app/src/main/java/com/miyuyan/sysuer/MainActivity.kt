@@ -57,6 +57,7 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import com.miyuyan.sysuer.academic.AcademyNotificationRoute
 import com.miyuyan.sysuer.academic.CETRoute
+import com.miyuyan.sysuer.academic.CourseCompletionRoute
 import com.miyuyan.sysuer.academic.CourseDetailRoute
 import com.miyuyan.sysuer.academic.CourseSelectedRoute
 import com.miyuyan.sysuer.academic.DormRoute
@@ -81,6 +82,7 @@ import com.miyuyan.sysuer.life.PayRoute
 import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.AcademyNotification
 import com.miyuyan.sysuer.nav.CET
+import com.miyuyan.sysuer.nav.CourseCompletion
 import com.miyuyan.sysuer.nav.CourseDetail
 import com.miyuyan.sysuer.nav.CourseSelected
 import com.miyuyan.sysuer.nav.Dorm
@@ -136,8 +138,7 @@ class MainActivity : BaseActivity() {
 											AppWidgetManager.getInstance(this@MainActivity)
 												.getAppWidgetIds(
 														ComponentName(
-																this@MainActivity,
-																it
+																this@MainActivity, it
 														)
 												)
 									)
@@ -227,6 +228,13 @@ class MainActivity : BaseActivity() {
 						CourseDetailRoute(
 								backStack,
 								it,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<CourseCompletion> {
+						CourseCompletionRoute(
+								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
