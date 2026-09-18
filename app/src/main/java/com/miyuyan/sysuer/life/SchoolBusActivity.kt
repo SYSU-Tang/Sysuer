@@ -27,7 +27,7 @@ import java.util.stream.IntStream
 
 class SchoolBusActivity : BaseActivity() {
 
-	val day = MutableStateFlow(true)
+	val day = MutableStateFlow(false)
 	lateinit var model: PortalModel
 	override fun onDestroy() {
 		super.onDestroy()
@@ -86,68 +86,68 @@ class SchoolBusActivity : BaseActivity() {
 				}
 				launch {
 					day.collect { b: Boolean ->
-					val key = if (b) "workDay" else "holiday"
-					data?.run {
-						if (getJSONArray(key).isEmpty()) IntStream.range(0, pager2Adapter.itemCount)
-							.forEach { j -> (pager2Adapter.get(j) as StaggerFragment).clear() }
-						else {
-							var i = 0
-							getJSONArray(key).forEach { item: Any? ->
-								val fragment: StaggerFragment
-								notice.setMessage((item as JSONObject).getString("note"))
-								if (pager2Adapter.itemCount > i) {
-									fragment = pager2Adapter.get(i) as StaggerFragment
-									fragment.clear()
-								} else {
-									routes.add(item.getString("drivingDirectionName"))
-									fragment = StaggerFragment()
-									pager2Adapter.add(fragment)
-								}
-								i++
-								fragment.addSection(
-										getString(R.string.route_detail),
-										R.drawable.bus,
-										CommonUtil.getString(
-												this@SchoolBusActivity,
-												intArrayOf(
-														R.string.route,
-														R.string.start,
-														R.string.end
-												)
-										),
-										extractValue(
-												item, arrayOf(
-												"drivingDirectionName", "startStation", "endStation"
-										)
-										)
-								)
-								item.getJSONArray("schoolBusShuttleMomentList").forEach {
+						val key = if (b) "workDay" else "holiday"
+						data?.run {
+							if (getJSONArray(key).isEmpty()) IntStream
+								.range(0, pager2Adapter.itemCount)
+								.forEach { j -> (pager2Adapter.get(j) as StaggerFragment).clear() }
+							else {
+								var i = 0
+								getJSONArray(key).forEach { item: Any? ->
+									val fragment: StaggerFragment
+									notice.setMessage((item as JSONObject).getString("note"))
+									if (pager2Adapter.itemCount > i) {
+										fragment = pager2Adapter.get(i) as StaggerFragment
+										fragment.clear()
+									} else {
+										routes.add(item.getString("drivingDirectionName"))
+										fragment = StaggerFragment()
+										pager2Adapter.add(fragment)
+									}
+									i++
 									fragment.addSection(
-											(it as JSONObject).getString("time"),
+											getString(R.string.route_detail),
 											R.drawable.bus,
 											CommonUtil.getString(
 													this@SchoolBusActivity, intArrayOf(
-													R.string.passenger,
-													R.string.vehicles,
-													R.string.time,
-													R.string.route
+													R.string.route, R.string.start, R.string.end
 											)
 											),
 											extractValue(
-													it, arrayOf(
-													"passenger",
-													"vehiclesType",
-													"time",
-													"drivingRoute"
+													item, arrayOf(
+													"drivingDirectionName",
+													"startStation",
+													"endStation"
 											)
 											)
 									)
+									item.getJSONArray("schoolBusShuttleMomentList").forEach {
+										fragment.addSection(
+												(it as JSONObject).getString("time"),
+												R.drawable.bus,
+												CommonUtil.getString(
+														this@SchoolBusActivity, intArrayOf(
+														R.string.passenger,
+														R.string.vehicles,
+														R.string.time,
+														R.string.route
+												)
+												),
+												extractValue(
+														it, arrayOf(
+														"passenger",
+														"vehiclesType",
+														"time",
+														"drivingRoute"
+												)
+												)
+										)
+									}
 								}
+								header.option.setSimpleItems(routes.toTypedArray<String?>())
 							}
-							header.option.setSimpleItems(routes.toTypedArray<String?>())
 						}
 					}
-				}
 				}
 			}
 		}
