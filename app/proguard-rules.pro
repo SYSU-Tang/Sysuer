@@ -25,7 +25,6 @@
 -keep class com.miyuyan.sysuer.view.CustomWeekView
 -keep class com.miyuyan.sysuer.view.FeeMonthView
 -keep class com.miyuyan.sysuer.view.FeeWeekView
-# fastjson2.kotlin 扩展需要 kotlin.Metadata 来解析 data class 构造函数
 -keep class kotlin.Metadata { *; }
 -dontwarn kotlin.Metadata
 -keepclassmembers class * {

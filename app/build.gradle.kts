@@ -19,7 +19,7 @@ android {
 	defaultConfig {
 		val generation = "2"
 		val major = "0"
-		val minor = "1"
+		val minor = "2"
 		val beta = true
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
@@ -112,14 +112,14 @@ dependencies {
 	}
 	implementation(libs.firebase.crashlytics)
 	implementation(libs.firebase.analytics)
-	implementation(libs.markwon) 
-	implementation(libs.ext.tables) 
-	implementation(libs.ext.strikethrough) 
+//	implementation(libs.markwon)
+//	implementation(libs.ext.tables)
+//	implementation(libs.ext.strikethrough)
 	implementation(libs.google.material)
 	implementation(libs.recyclerview)
-	implementation(libs.recycler) 
-	implementation(libs.recycler.table) 
-	implementation(libs.inline.parser) 
+//	implementation(libs.recycler)
+//	implementation(libs.recycler.table)
+//	implementation(libs.inline.parser)
 	implementation(libs.androidx.core.remoteviews)
 	implementation(libs.androidx.fragment)
 	implementation(libs.zxing.core)
@@ -132,14 +132,14 @@ dependencies {
 	debugImplementation(libs.ui.test.manifest)
 	implementation(libs.api)
 	implementation(libs.provider)
-	implementation(libs.html) 
+//	implementation(libs.html)
 	implementation(platform(libs.editor.bom))
 	implementation(libs.editor)
 	implementation(libs.language.textmate)
 	implementation(project(":CalendarView"))
 	implementation(project(":compose-preference"))
 	implementation(libs.okhttp.java.net.cookiejar)
-	implementation(libs.miuix.blur.android)
+//	implementation(libs.miuix.blur.android)
 	implementation(libs.miuix.ui)
 	implementation(libs.miuix.preference)
 	implementation(libs.miuix.icons)
@@ -151,8 +151,8 @@ dependencies {
 	implementation(libs.jsoup)
 	ksp(libs.androidx.room3.compiler)
 	implementation(libs.richtext.commonmark)
-	implementation(libs.commonmark.core)
-	implementation(libs.commonmark.tables)
+//	implementation(libs.commonmark.core)
+//	implementation(libs.commonmark.tables)
 	implementation(libs.fastjson2.kotlin)
 	configurations.all {
 		exclude(group = "com.atlassian.commonmark")
