@@ -7,9 +7,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +43,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -66,76 +68,50 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
 import coil.compose.AsyncImage
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.TargetHost
 import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.model.RainClassModel
-import com.miyuyan.sysuer.model.RainClassModel.Companion.formatTerm
-import com.miyuyan.sysuer.model.RainClassModel.Companion.formatTimestamp
-import com.miyuyan.sysuer.model.RainClassModel.Companion.formatTimestampMillis
-import com.miyuyan.sysuer.model.RainClassModel.Companion.getTermColor
+import com.miyuyan.sysuer.nav.RainClassDetail
+import com.miyuyan.sysuer.rainClass.RainClassViewModel.Companion.formatTerm
+import com.miyuyan.sysuer.rainClass.RainClassViewModel.Companion.formatTimestampMillie
+import com.miyuyan.sysuer.rainClass.RainClassViewModel.Companion.getTermColor
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionCard
 import com.miyuyan.sysuer.view.SectionData
+import com.miyuyan.sysuer.view.StaggerScreen
+import com.miyuyan.sysuer.view.StatePage
+import com.miyuyan.sysuer.view.UiState
 
-@Preview(showBackground = true)
-@Composable
-fun CourseScreenPreview() {
-	MaterialTheme {
-		CourseScreen()
-	}
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+		ExperimentalMaterial3Api::class,
+		androidx.compose.animation.ExperimentalSharedTransitionApi::class
+)
 @Composable
 fun CourseScreen(
-	searchQuery: String = "", onRequestScrollToAccount: () -> Unit = {}
+	backStack: MutableList<NavKey>,
+	searchQuery: String = "",
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
-	val context = LocalContext.current
-	val courseList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-	val isLoading = remember { mutableStateOf(true) }
-	val model: RainClassModel = remember { RainClassModel(context) }
-	val message = model.messageChannel
+	val viewModel: RainClassViewModel = viewModel()
+	val courseList by viewModel.courseList.collectAsStateWithLifecycle()
+	val courseUiState by viewModel.courseUiState.collectAsStateWithLifecycle()
 
-	LaunchedEffect(message) {
-		message.collect { (what, response) ->
-			if (what == RainClassModel.GET_COURSE_LIST) {
-				isLoading.value = false
-				if (response.containsKey("errcode") && response.getInteger("errcode") == 401002) {
-					onRequestScrollToAccount()
-				} else if (response.containsKey("errcode") && response.getInteger("errcode") == 0) {
-					val data = response.getJSONObject("data")
-					if (data != null) {
-						val list = data.getJSONArray("list")
-						if (list != null) {
-							courseList.value = list.map { it as JSONObject }
-						}
-					}
-				}
-			}
-		}
-	}
-
-	fun getCourseList() {
-		isLoading.value = true
-		model.getCourseList()
-	}
-
-	LaunchedEffect(Unit) {
-		getCourseList()
-	}
-
-	val filteredList = remember(searchQuery, courseList.value) {
-		if (searchQuery.isBlank()) courseList.value
-		else courseList.value.filter { item ->
+	val filteredList = remember(searchQuery, courseList) {
+		if (searchQuery.isBlank()) courseList
+		else courseList.filter { item ->
 			val course = item.getJSONObject("course")
 			val teacher = item.getJSONObject("teacher")
 			course?.getString("name")?.contains(searchQuery, ignoreCase = true) == true || teacher
@@ -143,11 +119,7 @@ fun CourseScreen(
 		}
 	}
 
-	if (isLoading.value) {
-		Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-			CircularProgressIndicator()
-		}
-	} else {
+	StatePage(state = courseUiState) {
 		LazyVerticalGrid(
 				columns = GridCells.Adaptive(minSize = 340.dp),
 				modifier = Modifier.fillMaxSize(),
@@ -160,10 +132,25 @@ fun CourseScreen(
 				val course = courseItem.getJSONObject("course")
 				val teacher = courseItem.getJSONObject("teacher")
 				val termColor = getTermColor(courseItem.getInteger("term"))
+				val classId = courseItem.getInteger("classroom_id")?.toString() ?: ""
 				Card(
-						modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-						containerColor = termColor, contentColor = Color.White
-				)
+						modifier = Modifier
+							.fillMaxWidth()
+							.then(
+									if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+								with(sharedTransitionScope) {
+									Modifier.sharedBounds(
+											sharedContentState = rememberSharedContentState(
+													key = "RainClassDetail_$classId"
+											),
+											animatedVisibilityScope = animatedVisibilityScope
+									)
+								}
+							} else Modifier)
+							.clickable { backStack.add(RainClassDetail(classId)) },
+						colors = CardDefaults.cardColors(
+								containerColor = termColor, contentColor = Color.White
+						)
 				) {
 					ListItem(
 							modifier = Modifier,
@@ -220,12 +207,11 @@ fun CourseScreen(
 }
 
 @Composable
-fun ExamScreen(onRequestScrollToAccount: () -> Unit = {}) {
-	val context = LocalContext.current
-	val examList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-	val isLoading = remember { mutableStateOf(true) }
-	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel
+fun ExamScreen(
+) {
+	val viewModel: RainClassViewModel = viewModel()
+	val examList by viewModel.examList.collectAsStateWithLifecycle()
+	val examsUiState by viewModel.examsUiState.collectAsStateWithLifecycle()
 	var selectedExamJson by rememberSaveable { mutableStateOf<String?>(null) }
 	val selectedExam = remember(selectedExamJson) {
 		selectedExamJson?.let { JSONObject.parseObject(it) }
@@ -240,41 +226,13 @@ fun ExamScreen(onRequestScrollToAccount: () -> Unit = {}) {
 		}
 	}
 
-	LaunchedEffect(message) {
-		message.collect { (what, response) ->
-			if (what == RainClassModel.GET_EXAMS_LIST) {
-				isLoading.value = false
-				if (response.containsKey("errcode") && response.getInteger("errcode") == 401002) {
-					onRequestScrollToAccount()
-				} else if (response.containsKey("code") && response.getInteger("code") == 0) {
-					val data = response.getJSONObject("data")
-					if (data != null) {
-						val upcoming = data.getJSONArray("upcomingExam")
-						if (upcoming != null) {
-							examList.value = upcoming.map { it as JSONObject }
-						}
-					}
-				}
-			}
-		}
-	}
-
-	fun getExams() {
-		isLoading.value = true
-		model.getExams()
-	}
-
-	LaunchedEffect(Unit) {
-		getExams()
-	}
-
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(modifier = Modifier.fillMaxSize()) {
-			if (isLoading.value) {
+			if (examsUiState == UiState.Loading) {
 				Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 					CircularProgressIndicator()
 				}
-			} else if (examList.value.isEmpty()) {
+			} else if (examList.isEmpty()) {
 				Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 					Text(
 							text = stringResource(R.string.no_exam),
@@ -289,8 +247,8 @@ fun ExamScreen(onRequestScrollToAccount: () -> Unit = {}) {
 						horizontalArrangement = Arrangement.spacedBy(16.dp),
 						verticalArrangement = Arrangement.spacedBy(16.dp)
 				) {
-					items(examList.value.size) { index ->
-						val exam = examList.value[index]
+					items(examList.size) { index ->
+						val exam = examList[index]
 						ExamItem(exam) {
 							selectedExamJson = exam.toJSONString()
 						}
@@ -306,7 +264,8 @@ fun ExamScreen(onRequestScrollToAccount: () -> Unit = {}) {
 		) {
 			selectedExam?.let { exam ->
 				if (examStarted) {
-					ExamPaperScreen(examSummary = exam, onBack = { examStarted = false })
+					ExamPaperScreen(
+							examSummary = exam, onBack = { examStarted = false })
 				} else {
 					ExamDetailScreen(
 							examSummary = exam,
@@ -326,14 +285,14 @@ fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				AsyncImage(
 						model = exam.getString("user_avatar"),
-						contentDescription = "教师头像",
+						contentDescription = stringResource(R.string.user_avatar),
 						modifier = Modifier
 							.size(32.dp)
 							.clip(CircleShape)
 				)
 				Spacer(modifier = Modifier.size(8.dp))
 				Text(
-						text = exam.getString("classroom_name") ?: "",
+						text = exam.getString("classroom_name", stringResource(R.string.none)),
 						style = MaterialTheme.typography.labelMedium,
 						color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
@@ -344,30 +303,36 @@ fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
 				}) {
 					Icon(
 							Icons.AutoMirrored.Filled.OpenInNew,
-							contentDescription = "打开网页版",
+							contentDescription = stringResource(R.string.open_in_browser),
 							modifier = Modifier.size(20.dp)
 					)
 				}
 			}
 			Spacer(modifier = Modifier.height(8.dp))
 			Text(
-					text = exam.getString("title") ?: "未知考试",
+					text = exam.getString("title", stringResource(R.string.unknown)),
 					style = MaterialTheme.typography.titleMedium,
 					fontWeight = FontWeight.Bold
 			)
 			Spacer(modifier = Modifier.height(8.dp))
 			Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
 				Column {
-					Text(text = "开始时间", style = MaterialTheme.typography.labelSmall)
 					Text(
-							text = formatTimestamp(exam.getLong("start_time")),
+							text = stringResource(R.string.start_time),
+							style = MaterialTheme.typography.labelSmall
+					)
+					Text(
+							text = formatTimestampMillie(exam.getLong("start_time")),
 							style = MaterialTheme.typography.bodySmall
 					)
 				}
 				Column {
-					Text(text = "结束时间", style = MaterialTheme.typography.labelSmall)
 					Text(
-							text = formatTimestamp(exam.getLong("end_time")),
+							text = stringResource(R.string.end_time),
+							style = MaterialTheme.typography.labelSmall
+					)
+					Text(
+							text = formatTimestampMillie(exam.getLong("end_time")),
 							style = MaterialTheme.typography.bodySmall
 					)
 				}
@@ -381,25 +346,15 @@ fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
 fun ExamDetailScreen(
 	examSummary: JSONObject, onBack: () -> Unit, onStartExam: () -> Unit
 ) {
+	val viewModel: RainClassViewModel = viewModel()
 	val context = LocalContext.current
-	val examInfo = remember { mutableStateOf<JSONObject?>(null) }
-	val isLoading = remember { mutableStateOf(true) }
-	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel
+	val examInfo by viewModel.examInfo.collectAsStateWithLifecycle()
+	val examInfoUiState by viewModel.examInfoUiState.collectAsStateWithLifecycle()
 
 	LaunchedEffect(Unit) {
-		model.getExamInfo(examSummary.getIntValue("id"), examSummary.getIntValue("classroom_id"))
-	}
-
-	LaunchedEffect(message) {
-		message.collect { (what, response) ->
-			if (what == RainClassModel.GET_EXAM_INFO) {
-				isLoading.value = false
-				if (response.containsKey("success") && response.getBoolean("success")) {
-					examInfo.value = response.getJSONObject("data")
-				}
-			}
-		}
+		viewModel.getExamInfo(
+				examSummary.getIntValue("id"), examSummary.getIntValue("classroom_id")
+		)
 	}
 
 	Scaffold(
@@ -408,12 +363,18 @@ fun ExamDetailScreen(
 				.background(MaterialTheme.colorScheme.surface),
 			topBar = {
 				TopAppBar(
-						title = { Text(examSummary.getString("title") ?: "考试详情") },
+						title = {
+					Text(
+							examSummary.getString(
+									"title", stringResource(R.string.exam_detail)
+							)
+					)
+				},
 						navigationIcon = {
 							IconButton(onClick = onBack) {
 								Icon(
 										Icons.AutoMirrored.Filled.ArrowBack,
-										contentDescription = "返回"
+										contentDescription = stringResource(R.string.back)
 								)
 							}
 						},
@@ -423,7 +384,7 @@ fun ExamDetailScreen(
 							}) {
 								Icon(
 										Icons.AutoMirrored.Filled.OpenInNew,
-										contentDescription = "打开网页版"
+										contentDescription = stringResource(R.string.open_in_browser)
 								)
 							}
 						},
@@ -440,7 +401,7 @@ fun ExamDetailScreen(
 					Button(
 							onClick = onStartExam,
 							modifier = Modifier.fillMaxWidth(),
-							enabled = !isLoading.value
+							enabled = examInfoUiState != UiState.Loading
 					) {
 						Text("开始答题", style = MaterialTheme.typography.titleMedium)
 					}
@@ -451,160 +412,138 @@ fun ExamDetailScreen(
 					.fillMaxSize()
 					.padding(top = innerPadding.calculateTopPadding())
 		) {
-			if (isLoading.value) {
+			if (examInfoUiState == UiState.Loading) {
 				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 			} else {
-				examInfo.value?.let { info ->
-					Column(
-							modifier = Modifier
-								.fillMaxSize()
-								.verticalScroll(rememberScrollState())
-								.padding(horizontal = 16.dp)
-								.padding(bottom = innerPadding.calculateBottomPadding() + 16.dp),
-							verticalArrangement = Arrangement.spacedBy(16.dp)
-					) {
+				examInfo?.let { info ->
+					val sections = remember { mutableStateListOf<SectionData>() }
+					sections.clear()
 
-						Text(text = "考试详情", style = MaterialTheme.typography.titleMedium)
-						ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-							Column(
-									modifier = Modifier.padding(16.dp),
-									verticalArrangement = Arrangement.spacedBy(12.dp)
-							) {
-								DetailRow(
-										"当前状态",
-										when (info.getJSONObject("result")?.getInteger("status")) {
-											0 -> "未开始"
-											1 -> "进行中"
-											2 -> "已提交"
-											else -> "未知"
-										}
-								)
-								DetailRow("总分", "${info.getString("total_score")} 分")
-								DetailRow("题目数量", "${info.getString("problem_count")} 题")
-								val limit = info.getInteger("limit")
-								if (limit != null && limit > 0) {
-									DetailRow("限时", "$limit 分钟")
-								}
-								DetailRow(
-										"计分方式", when (info.getInteger("way_of_score")) {
-									1 -> "最高分"
-									2 -> "最后一次"
-									else -> "普通"
-								}
-								)
-								DetailRow("允许重试", "${info.getInteger("max_retry")} 次")
-								DetailRow(
-										"手动阅卷",
-										if (info.getInteger("is_manual_review") == 1) "是" else "否"
-								)
-								DetailRow(
-										"强制确认",
-										if (info.getBoolean("force_confirm") == true) "是" else "否"
-								)
-								HorizontalDivider(
-										modifier = Modifier.padding(vertical = 4.dp),
-										color = MaterialTheme.colorScheme.outlineVariant.copy(
-												alpha = 0.5f
-										)
-								)
-								DetailRow(
-										"开始时间",
-										formatTimestampMillis(info.getLong("start_time"))
-								)
-								DetailRow(
-										"截止时间", formatTimestampMillis(info.getLong("deadline"))
-								)
-								if (info.getBoolean("limit_early_submission") == true) {
-									DetailRow(
-											"限制早交",
-											"开启 (${info.getInteger("limit_early_submission_time")} 分钟)"
-									)
-								}
-							}
-						}
+					val resultStatus = when (info.getJSONObject("result")?.getInteger("status")) {
+						0 -> "未开始"
+						1 -> "进行中"
+						2 -> "已提交"
+						else -> "未知"
+					}
+					val examRows = remember { mutableStateListOf<RowData>() }
+					examRows += RowData("当前状态", resultStatus)
+					examRows += RowData("总分", "${info.getString("total_score")} 分")
+					examRows += RowData("题目数量", "${info.getString("problem_count")} 题")
+					info.getInteger("limit")
+						?.let { if (it > 0) examRows += RowData("限时", "$it 分钟") }
+					examRows += RowData(
+							"计分方式", when (info.getInteger("way_of_score")) {
+						1 -> "最高分"
+						2 -> "最后一次"
+						else -> "普通"
+					}
+					)
+					examRows += RowData("允许重试", "${info.getInteger("max_retry")} 次")
+					examRows += RowData(
+							"手动阅卷", if (info.getInteger("is_manual_review") == 1) "是" else "否"
+					)
+					examRows += RowData(
+							"强制确认", if (info.getBoolean("force_confirm") == true) "是" else "否"
+					)
+					examRows += RowData(
+							"开始时间", formatTimestampMillie(info.getLong("start_time"))
+					)
+					examRows += RowData(
+							"截止时间", formatTimestampMillie(info.getLong("deadline"))
+					)
+					if (info.getBoolean("limit_early_submission") == true) {
+						examRows += RowData(
+								"限制早交",
+								"开启 (${info.getInteger("limit_early_submission_time")} 分钟)"
+						)
+					}
+					sections += SectionData(
+							title = stringResource(R.string.exam_detail), rows = examRows
+					)
 
-						Text(text = "监考规则与限制", style = MaterialTheme.typography.titleMedium)
-						ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-							Column(
-									modifier = Modifier.padding(16.dp),
-									verticalArrangement = Arrangement.spacedBy(12.dp)
-							) {
-								DetailRow(
-										"在线监考",
-										if (info.getInteger("online_proctor") == 1) "开启" else "关闭"
-								)
-								DetailRow(
-										"随机人脸",
-										if (info.getInteger("web_random_take_face_photo") == 1) "开启" else "关闭"
-								)
-								DetailRow(
-										"人脸识别",
-										if (info.getJSONObject("face_auth_status")
-												?.getInteger("online_proctor") == 1
-										) "开启"
-										else "关闭"
-								)
-								DetailRow(
-										"切屏监测",
-										if (info.getInteger("page_switch_detection") == 1) "开启" else "关闭"
-								)
-								DetailRow(
-										"截屏保护",
-										if (info.getInteger("app_capture_screen") == 1 || info.getInteger(
-													"open_screen_cuts"
-											) == 1
-										) "开启"
-										else "关闭"
-								)
-								DetailRow(
-										"离线考试",
-										if (info.getBoolean("is_offline") == true) "是" else "否"
-								)
-								DetailRow(
-										"加密传输",
-										if (info.getString("encrypt") == "True") "是" else "否"
-								)
-								val restriction = info.getString("access_restriction_info")
-								if (!restriction.isNullOrBlank()) {
-									DetailRow("进入限制", restriction)
-								}
-							}
-						}
+					val proctorRows = remember { mutableStateListOf<RowData>() }
+					proctorRows += RowData(
+							"在线监考",
+							if (info.getInteger("online_proctor") == 1) "开启" else "关闭"
+					)
+					proctorRows += RowData(
+							"随机人脸",
+							if (info.getInteger("web_random_take_face_photo") == 1) "开启" else "关闭"
+					)
+					proctorRows += RowData(
+							"人脸识别",
+							if (info.getJSONObject("face_auth_status")
+									?.getInteger("online_proctor") == 1
+							) "开启"
+							else "关闭"
+					)
+					proctorRows += RowData(
+							"切屏监测",
+							if (info.getInteger("page_switch_detection") == 1) "开启" else "关闭"
+					)
+					proctorRows += RowData(
+							"截屏保护",
+							if (info.getInteger("app_capture_screen") == 1 || info.getInteger(
+										"open_screen_cuts"
+								) == 1
+							) "开启"
+							else "关闭"
+					)
+					proctorRows += RowData(
+							"离线考试", if (info.getBoolean("is_offline") == true) "是" else "否"
+					)
+					proctorRows += RowData(
+							"加密传输", if (info.getString("encrypt") == "True") "是" else "否"
+					)
+					info.getString("access_restriction_info")?.takeIf { it.isNotBlank() }?.let {
+						proctorRows += RowData("进入限制", it)
+					}
+					sections += SectionData(
+							title = "监考规则与限制", rows = proctorRows
+					)
 
-						Text(text = "考生身份", style = MaterialTheme.typography.titleMedium)
-						ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-							Row(
-									modifier = Modifier.padding(16.dp),
-									verticalAlignment = Alignment.CenterVertically
-							) {
-								val user = info.getJSONObject("user")
-								AsyncImage(
-										model = user?.getString("avatar"),
-										contentDescription = "考生头像",
-										modifier = Modifier
-											.size(48.dp)
-											.clip(CircleShape),
-										contentScale = ContentScale.Crop
-								)
-								Spacer(modifier = Modifier.width(16.dp))
-								Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-									DetailRow("姓名", user?.getString("user_name") ?: "未知")
-									DetailRow("学号", user?.getString("school_number") ?: "未知")
-								}
-							}
+					val user = info.getJSONObject("user")
+					val identityRows = remember { mutableStateListOf<RowData>() }
+					identityRows += RowData("姓名", user?.getString("user_name") ?: "未知")
+					identityRows += RowData("学号", user?.getString("school_number") ?: "未知")
+					sections += SectionData(
+							title = "考生身份", rows = identityRows, footer = {
+						Row(
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(
+											horizontal = dimensionResource(R.dimen.horizontal_padding),
+											vertical = dimensionResource(R.dimen.vertical_padding)
+									), verticalAlignment = Alignment.CenterVertically
+						) {
+							AsyncImage(
+									model = user?.getString("avatar"),
+									contentDescription = "考生头像",
+									modifier = Modifier
+										.size(48.dp)
+										.clip(CircleShape),
+									contentScale = ContentScale.Crop
+							)
 						}
-						val description = info.getString("description")
-						if (!description.isNullOrBlank()) {
-							Text(text = "考试说明", style = MaterialTheme.typography.titleMedium)
+					})
+
+					info.getString("description")?.takeIf { it.isNotBlank() }?.let { desc ->
+						sections += SectionData(
+								title = "考试说明", footer = {
 							Text(
-									text = description,
+									text = desc,
+									modifier = Modifier.fillMaxWidth(),
 									style = MaterialTheme.typography.bodyMedium,
 									color = MaterialTheme.colorScheme.onSurfaceVariant
 							)
-						}
-
-						Spacer(modifier = Modifier.height(32.dp))
+						})
 					}
+
+					StaggerScreen(
+							modifier = Modifier.padding(
+									bottom = innerPadding.calculateBottomPadding()
+							), sections = sections
+					)
 				}
 			}
 		}
@@ -613,33 +552,16 @@ fun ExamDetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
-	val context = LocalContext.current
-	val problemList = remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-	val isLoading = remember { mutableStateOf(true) }
-	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel
+fun ExamPaperScreen(
+	examSummary: JSONObject, onBack: () -> Unit
+) {
+	val viewModel: RainClassViewModel = viewModel()
+	val problemList by viewModel.problemList.collectAsStateWithLifecycle()
+	val problemUiState by viewModel.problemUiState.collectAsStateWithLifecycle()
 	val answers = remember { mutableStateMapOf<Int, String>() }
 
 	LaunchedEffect(Unit) {
-		model.getProblem(examSummary.getIntValue("id"))
-	}
-
-	LaunchedEffect(message) {
-		message.collect { (what, response) ->
-			if (what == RainClassModel.GET_PROBLEM_INFO) {
-				isLoading.value = false
-				if (response.containsKey("errcode") && response.getInteger("errcode") == 0) {
-					val data = response.getJSONObject("data")
-					if (data != null) {
-						val problems = data.getJSONArray("problems")
-						if (problems != null) {
-							problemList.value = problems.map { it as JSONObject }
-						}
-					}
-				}
-			}
-		}
+		viewModel.getProblem(examSummary.getIntValue("id"))
 	}
 
 	Scaffold(
@@ -670,7 +592,7 @@ fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
 					Button(
 							onClick = { /* TODO: Submit exam */ },
 							modifier = Modifier.fillMaxWidth(),
-							enabled = !isLoading.value
+							enabled = problemUiState != UiState.Loading
 					) {
 						Text("提交试卷", style = MaterialTheme.typography.titleMedium)
 					}
@@ -681,7 +603,7 @@ fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
 					.fillMaxSize()
 					.padding(innerPadding)
 		) {
-			if (isLoading.value) {
+			if (problemUiState == UiState.Loading) {
 				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 			} else {
 				LazyColumn(
@@ -689,7 +611,7 @@ fun ExamPaperScreen(examSummary: JSONObject, onBack: () -> Unit) {
 						contentPadding = PaddingValues(16.dp),
 						verticalArrangement = Arrangement.spacedBy(24.dp)
 				) {
-					items(problemList.value) { problem ->
+					items(problemList) { problem ->
 						ProblemItem(
 								problem = problem,
 								answer = answers[problem.getIntValue("index")] ?: "",
@@ -752,45 +674,12 @@ fun ProblemItem(problem: JSONObject, answer: String, onAnswerChange: (String) ->
 
 
 @Composable
-fun DetailRow(label: String, value: String) {
-	Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-		Text(text = label, color = MaterialTheme.colorScheme.onSurfaceVariant)
-		Text(text = value, fontWeight = FontWeight.Medium)
-	}
-}
-
-@Composable
 fun AccountScreen() {
-	val context = LocalContext.current
-	val userInfo = remember { mutableStateOf<JSONObject?>(null) }
-	val isLoginRequired = remember { mutableStateOf(false) }
-	val isLoading = remember { mutableStateOf(true) }
+	val viewModel: RainClassViewModel = viewModel()
+	val userInfo by viewModel.userInfo.collectAsStateWithLifecycle()
+	val isLoginRequired by viewModel.isLoginRequired.collectAsStateWithLifecycle()
+	val userUiState by viewModel.userUiState.collectAsStateWithLifecycle()
 	val scrollState = rememberScrollState()
-	val model = remember { RainClassModel(context) }
-	val message = model.messageChannel
-
-	LaunchedEffect(message) {
-		message.collect { (what, response) ->
-			if (what == RainClassModel.GET_USER_INFO) {
-				isLoading.value = false
-				if (response.containsKey("op") && response.getString("op") == "web_redirect") {
-					isLoginRequired.value = true
-				} else {
-					userInfo.value = response.getJSONObject("data")?.getJSONObject("user_profile")
-					isLoginRequired.value = false
-				}
-			}
-		}
-	}
-
-	fun getUserInfo() {
-		isLoading.value = true
-		model.getUserInfo()
-	}
-
-	LaunchedEffect(Unit) {
-		getUserInfo()
-	}
 
 	Column(
 			modifier = Modifier
@@ -799,24 +688,27 @@ fun AccountScreen() {
 				.padding(16.dp),
 			horizontalAlignment = Alignment.CenterHorizontally
 	) {
-		if (isLoading.value) {
+		if (userUiState == UiState.Loading) {
 			Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 				CircularProgressIndicator()
 			}
-		} else if (isLoginRequired.value) {
+		} else if (isLoginRequired) {
 			Text(text = "请扫码登录雨课堂", style = MaterialTheme.typography.titleMedium)
 			Spacer(modifier = Modifier.height(16.dp))
 			Card(elevation = CardDefaults.cardElevation()) {
 				AndroidView(factory = { ctx ->
 					ImageView(ctx).apply {
-						model.contextUtil.loginByQrCode(TargetHost.YU_KE_TANG, this) {
-							getUserInfo()
+						ctx.let {
+							val model = RainClassModel(it)
+							model.contextUtil.loginByQrCode(TargetHost.YU_KE_TANG, this) {
+								viewModel.getUserInfo()
+							}
 						}
 					}
 				}, modifier = Modifier.fillMaxSize())
 			}
-		} else if (userInfo.value != null) {
-			val info = userInfo.value!!
+		} else if (userInfo != null) {
+			val info = userInfo!!
 			val noneString = stringResource(R.string.none)
 			val rows = remember {
 				mutableStateListOf<RowData>()
@@ -884,6 +776,8 @@ fun syncCookiesToWeb(context: Context) {
 
 fun openExamInBrowser(context: Context, examId: Int) {
 	syncCookiesToWeb(context)
-	val intent = Intent(context, BrowserActivity::class.java).setData("https://examination.xuetangx.com/exam/$examId?isFrom=2".toUri())
+	val intent = Intent(
+			context, BrowserActivity::class.java
+	).setData("https://examination.xuetangx.com/exam/$examId?isFrom=2".toUri())
 	context.startActivity(intent)
 }

@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.nav.RainClass
+import com.miyuyan.sysuer.nav.RainClassDetail
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.theme.SysuerTheme
 
@@ -22,6 +23,13 @@ class RainClassActivity : BaseActivity() {
 							backStack = backStack, entryProvider = entryProvider {
 						entry<RainClass> {
 							RainClassRoute(
+									backStack = backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+						entry<RainClassDetail> {
+							RainClassDetailRoute(
 									backStack = backStack,
 									sharedTransitionScope = this@SharedTransitionLayout,
 									animatedVisibilityScope = LocalNavAnimatedContentScope.current
