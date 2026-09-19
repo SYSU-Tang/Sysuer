@@ -52,6 +52,7 @@ fun MutableList<NavKey>.navigateBack(activity: Activity? = null) {
 @Serializable data object AssistantEvaluation : NavKey
 @Serializable data object LeaveSlip : NavKey
 @Serializable data object RainClass : NavKey
+@Serializable data class RainClassDetail(val classId: String) : NavKey
 @Serializable data object SchoolBus : NavKey
 @Serializable data object EnergyFee : NavKey
 @Serializable data object Pay : NavKey

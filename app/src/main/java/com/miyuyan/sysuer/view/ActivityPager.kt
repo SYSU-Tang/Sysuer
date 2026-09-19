@@ -6,6 +6,11 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
@@ -43,6 +48,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TabIndicatorScope
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,6 +58,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -84,6 +91,7 @@ import com.miyuyan.sysuer.theme.SysuerTheme
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.squircle.squircleBorder
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -95,6 +103,7 @@ fun ActivityPager(
 	navs: List<MenuItem> = emptyList(),
 	snackbar: SnackbarHostState = remember { SnackbarHostState() },
 	topBarContent: @Composable (Int) -> Unit = {},
+	isTopBarContentFixed: Boolean = false,
 	onNavigationClick: (() -> Unit)? = null,
 	onPageChange: ((Int) -> Unit)? = null,
 	isNestedScrollEnabled: Boolean = true,
@@ -250,8 +259,7 @@ fun ActivityPager(
 													width = Dp.Unspecified,
 													color = MaterialTheme.colorScheme.primary,
 													shape = RoundedCornerShape(
-															topStart = 2.dp,
-															topEnd = 2.dp
+															topStart = 2.dp, topEnd = 2.dp
 													)
 											)
 										})
@@ -269,13 +277,12 @@ fun ActivityPager(
 													width = Dp.Unspecified,
 													color = MaterialTheme.colorScheme.primary,
 													shape = RoundedCornerShape(
-															topStart = 2.dp,
-															topEnd = 2.dp
+															topStart = 2.dp, topEnd = 2.dp
 													)
 											)
 										})
 							}
-							AnimatedContent(
+							if (isTopBarContentFixed) topBarContent(pagerState.currentPage) else AnimatedContent(
 									targetState = pagerState.currentPage,
 									transitionSpec = { expandVertically() togetherWith shrinkVertically() },
 									label = "topBarExpand"
@@ -491,4 +498,203 @@ fun exportMarkdownMenuItem(
 			)
 	)
 	true
+}
+
+@Composable
+fun TabIndicatorScope.SquircleAnimatedIndicator(
+	index: Int,
+	modifier: Modifier = Modifier,
+	horizontalPadding: Dp = 16.dp,
+	height: Dp = 36.dp,
+	isTabScrollable: Boolean = true,
+) {
+	val colors = listOf(
+			MaterialTheme.colorScheme.primary,
+			MaterialTheme.colorScheme.secondary,
+			MaterialTheme.colorScheme.tertiary,
+	)
+
+	val indicatorColor by animateColorAsState(
+			targetValue = colors[index % colors.size], label = "indicatorColor"
+	)
+
+	/*
+	 * 记录当前 Indicator 的左右边界。
+	 *
+	 * 不直接动画 width + offset，
+	 * 而是分别控制 left / right，
+	 * 这样才能做出“拉伸”效果。
+	 */
+	var startAnimatable by remember {
+		mutableStateOf<Animatable<Dp, AnimationVector1D>?>(null)
+	}
+
+	var endAnimatable by remember {
+		mutableStateOf<Animatable<Dp, AnimationVector1D>?>(null)
+	}
+
+	/*
+	 * 保存目标值。
+	 *
+	 * tabIndicatorLayout 会不断重新测量，
+	 * 所以不要直接在里面 launch。
+	 */
+	var targetStart by remember {
+		mutableStateOf<Dp?>(null)
+	}
+
+	var targetEnd by remember {
+		mutableStateOf<Dp?>(null)
+	}
+
+	var animationDirection by remember {
+		mutableIntStateOf(0)
+	}
+
+	Box(modifier
+		.tabIndicatorLayout { measurable, constraints, tabPositions ->
+
+			val position = tabPositions.getOrNull(index) ?: return@tabIndicatorLayout layout(
+					constraints.maxWidth, constraints.maxHeight
+			) {}
+
+//			val center = (position.left + position.right) / 2
+
+			val indicatorWidth = position.contentWidth + horizontalPadding * 2
+
+//			val contentLeft = (position.right - position.left - position.contentWidth) / 2
+//			println("left ${position.left} right ${position.right}")
+
+			val newStart =
+				if (isTabScrollable) position.left - horizontalPadding//center - indicatorWidth / 2
+				else (position.left + position.right) / 2 - indicatorWidth / 2
+			val newEnd = newStart + indicatorWidth//position.right//center + indicatorWidth / 2
+
+			val oldStart = targetStart
+			val oldEnd = targetEnd
+
+			if (oldStart != null && oldEnd != null) {
+				animationDirection = when {
+					newStart > oldStart -> 1
+					newStart < oldStart -> -1
+					else -> animationDirection
+				}
+			}
+
+			targetStart = newStart
+			targetEnd = newEnd
+
+			val startAnim = startAnimatable ?: Animatable(
+					newStart, Dp.VectorConverter
+			).also {
+				startAnimatable = it
+			}
+
+			val endAnim = endAnimatable ?: Animatable(
+					newEnd, Dp.VectorConverter
+			).also {
+				endAnimatable = it
+			}
+
+			val indicatorHeight = height.roundToPx().coerceAtMost(constraints.maxHeight)
+
+			/*
+			 * Indicator 的实际宽度。
+			 */
+			val start = startAnim.value.roundToPx()
+			val end = endAnim.value.roundToPx()
+
+			val width = (end - start).coerceAtLeast(1)
+
+			val placeable = measurable.measure(
+					constraints.copy(
+							minWidth = width,
+							maxWidth = width,
+							minHeight = indicatorHeight,
+							maxHeight = indicatorHeight
+					)
+			)
+
+			val y = (constraints.maxHeight - indicatorHeight) / 2
+			layout(
+					constraints.maxWidth, constraints.maxHeight
+			) {
+				placeable.place(
+						x = start, y = y
+				)
+			}
+		}
+		.squircleBorder(
+				width = 2.dp,
+				color = indicatorColor,
+				cornerRadius = height / 2f,
+		)            /*.drawBehind {
+
+				val stroke = 2.dp.toPx()
+
+				*//*
+				 * 由于 Indicator 高度已经独立出来，
+				 * 这里的 size.height 就是 indicator 本身的高度。
+				 *//*
+				val radius = size.height / 2f
+
+				drawRoundRect(
+						color = indicatorColor, topLeft = Offset(
+						stroke / 2, stroke / 2
+				), size = Size(
+						width = size.width - stroke, height = size.height - stroke
+				), cornerRadius = CornerRadius(
+						x = radius, y = radius
+				), style = Stroke(
+						width = stroke
+				)
+				)
+			}*/)
+	LaunchedEffect(targetStart, targetEnd) {
+
+		val start = startAnimatable ?: return@LaunchedEffect
+
+		val end = endAnimatable ?: return@LaunchedEffect
+
+		val newStart = targetStart ?: return@LaunchedEffect
+
+		val newEnd = targetEnd ?: return@LaunchedEffect
+
+		if (animationDirection > 0) {
+
+			launch {
+				start.animateTo(
+						newStart, spring(
+						dampingRatio = 1f, stiffness = 250f
+				)
+				)
+			}
+
+			launch {
+				end.animateTo(
+						newEnd, spring(
+						dampingRatio = 1f, stiffness = 1200f
+				)
+				)
+			}
+
+		} else {
+
+			launch {
+				start.animateTo(
+						newStart, spring(
+						dampingRatio = 1f, stiffness = 1200f
+				)
+				)
+			}
+
+			launch {
+				end.animateTo(
+						newEnd, spring(
+						dampingRatio = 1f, stiffness = 250f
+				)
+				)
+			}
+		}
+	}
 }

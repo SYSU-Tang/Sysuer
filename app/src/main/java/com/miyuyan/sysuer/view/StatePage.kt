@@ -39,7 +39,7 @@ fun StatePage(
 	modifier: Modifier = Modifier,
 	state: UiState? = null,
 	emptyWarning: String = stringResource(R.string.no_data),
-	onRetry: () -> Unit = {},
+	onRetry: (() -> Unit)? = null,
 	content: @Composable () -> Unit = {}
 ) {
 	Box(modifier = modifier.fillMaxSize()) {
@@ -114,7 +114,7 @@ private fun EmptyView(
 
 @Composable
 private fun ErrorView(
-	modifier: Modifier = Modifier, onRetry: () -> Unit
+	modifier: Modifier = Modifier, onRetry: (() -> Unit)? = null
 ) {
 	Column(
 			modifier = modifier.fillMaxSize(),
@@ -135,10 +135,12 @@ private fun ErrorView(
 				text = stringResource(R.string.load_failed),
 				style = MaterialTheme.typography.displaySmall
 		)
-		OutlinedButton(
-				onClick = onRetry, shapes = ButtonDefaults.shapes()
-		) {
-			Text(stringResource(R.string.retry))
+		onRetry?.let {
+			OutlinedButton(
+					onClick = it, shapes = ButtonDefaults.shapes()
+			) {
+				Text(stringResource(R.string.retry))
+			}
 		}
 	}
 }

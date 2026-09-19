@@ -97,6 +97,7 @@ import com.miyuyan.sysuer.nav.Pay
 import com.miyuyan.sysuer.nav.PersonalInformation
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram
 import com.miyuyan.sysuer.nav.RainClass
+import com.miyuyan.sysuer.nav.RainClassDetail
 import com.miyuyan.sysuer.nav.Registration
 import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.nav.SchoolEnrollment
@@ -104,6 +105,7 @@ import com.miyuyan.sysuer.nav.SchoolWorkWarning
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.nav.Update
+import com.miyuyan.sysuer.rainClass.RainClassDetailRoute
 import com.miyuyan.sysuer.rainClass.RainClassRoute
 import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
@@ -377,6 +379,14 @@ class MainActivity : BaseActivity() {
 					entry<Update> {
 						UpdateRoute(
 								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<RainClassDetail> {
+						RainClassDetailRoute(
+								backStack,
+								it,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)

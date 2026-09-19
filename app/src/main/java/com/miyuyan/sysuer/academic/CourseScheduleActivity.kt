@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.GridLayout
 import android.widget.PopupMenu
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +24,7 @@ import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.DownloadManager
 import com.miyuyan.sysuer.databinding.ActivityCourseScheduleBinding
 import com.miyuyan.sysuer.databinding.ItemAgendaBinding
+import com.miyuyan.sysuer.databinding.ItemCourseCellBinding
 import com.miyuyan.sysuer.databinding.ItemDetailBinding
 import com.miyuyan.sysuer.databinding.ItemDurationBinding
 import com.miyuyan.sysuer.databinding.ItemWeekdayBinding
@@ -120,10 +122,12 @@ class CourseScheduleActivity : BaseActivity() {
 				ItemDurationBinding.inflate(layoutInflater, binding.day, false).apply {
 					courseDuration.text = period.replace("~", "\n")
 					courseOrder.text = "${i + 1}"
+					root.setBackgroundResource(R.drawable.course_grid_cell)
 					root.setLayoutParams(
 							GridLayout.LayoutParams(
 									GridLayout.spec(i, 1.0f), GridLayout.spec(0)
 							).apply {
+								setGravity(Gravity.FILL)
 								if (i == 4 || i == 8) topMargin = 16
 							})
 				}
@@ -176,6 +180,28 @@ class CourseScheduleActivity : BaseActivity() {
 			binding.day.addView(column)
 			binding.week.addView(itemBinding.root)
 		} // 初始化周历
+		for (row in 0..<11) {
+			for (col in 1..<8) {
+				binding.day.addView(
+						ItemCourseCellBinding.inflate(
+						layoutInflater, binding.day, false
+				).apply {
+					root.layoutParams = GridLayout.LayoutParams(
+							GridLayout.spec(row, 1.0f), GridLayout.spec(col, 1.0f)
+					).apply {
+						width = 0
+						height = 0
+						setGravity(Gravity.FILL)
+						if (row == 4 || row == 8) topMargin = 16
+					}
+					root.setOnClickListener {
+						add.isVisible = !add.isVisible
+					}
+//							root.setBackgroundResource(R.drawable.course_grid_cell)
+				}.root
+				)
+			}
+		}
 		val detailDialog = BottomSheetDialog(this)
 		detailBinding = ItemDetailBinding.inflate(layoutInflater)
 		detailDialog.setContentView(detailBinding.root)
@@ -357,7 +383,7 @@ class CourseScheduleActivity : BaseActivity() {
 
 							6 -> response.getJSONObject("data").getJSONArray("rows").also {
 								selectedCourses[currentTerm] = it.filterIsInstance<JSONObject>()
-							}.takeIf { it.isNotEmpty() }?.first {
+							}.takeIf { it.isNotEmpty() }?.firstOrNull {
 								(it as JSONObject).getString("courseName") == targetSubject
 							}?.also {
 								startActivity(
@@ -373,7 +399,7 @@ class CourseScheduleActivity : BaseActivity() {
 												this@CourseScheduleActivity, binding.week, "miniapp"
 										).toBundle()
 								)
-							}
+							} ?: config.toast(getString(R.string.course_not_found))
 						}
 						model.nextAll()
 					}
@@ -445,9 +471,9 @@ class CourseScheduleActivity : BaseActivity() {
 				getSelectedCourses(course)
 				return@setOnClickListener
 			}
-			selectedCourse.first {
+			selectedCourse.firstOrNull {
 				it.getString("courseName") == course
-			}.also {
+			}?.also {
 				startActivity(
 						Intent(this, CourseDetailActivity::class.java).putExtra(
 								"id", it.getString("teachingClassId")
@@ -457,7 +483,7 @@ class CourseScheduleActivity : BaseActivity() {
 								this, binding.week, "miniapp"
 						).toBundle()
 				)
-			}
+			} ?: config.toast(R.string.course_not_found)
 		}
 	}
 

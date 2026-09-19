@@ -29,12 +29,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarDefaults.appBarWithSearchColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.alibaba.fastjson2.JSONObject
@@ -57,6 +58,7 @@ import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
+import com.miyuyan.sysuer.view.StatePage
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlin.time.Duration.Companion.milliseconds
@@ -69,15 +71,18 @@ fun AcademyNotificationRoute(
 	animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
 	val viewModel: AcademyNotificationViewModel = viewModel()
-	val academicNotices by viewModel.academicNotices.observeAsState(emptyList())
-	val schoolNotices by viewModel.schoolNotices.observeAsState(emptyList())
-	val noticeContent by viewModel.noticeContent.observeAsState()
+	val academicNotices by viewModel.academicNotices.collectAsStateWithLifecycle()
+	val schoolNotices by viewModel.schoolNotices.collectAsStateWithLifecycle()
+	val noticeContent by viewModel.noticeContent.collectAsStateWithLifecycle(null)
 	var sharedElementBounds by remember { mutableStateOf<Rect?>(null) }
 	val context = LocalContext.current
 	val activity = context as? Activity
 
 	val textFieldState1 = rememberTextFieldState()
 	val textFieldState2 = rememberTextFieldState()
+
+	val academicNoticesUiState by viewModel.academicNoticesUiState.collectAsStateWithLifecycle()
+	val schoolNoticesUiState by viewModel.schoolNoticesUiState.collectAsStateWithLifecycle()
 
 	LaunchedEffect(textFieldState1) {
 		snapshotFlow { textFieldState1.text.toString() }.debounce(300L.milliseconds)
@@ -96,7 +101,7 @@ fun AcademyNotificationRoute(
 	LaunchedEffect(noticeContent) {
 		noticeContent?.let { content ->
 			val intent = Intent(context, BrowserActivity::class.java).putExtra(
-				"data", ("""<!DOCTYPE html><html><head>
+					"data", ("""<!DOCTYPE html><html><head>
 																			  <style>
                                             body{
                                             padding: 24px !important;
@@ -124,7 +129,7 @@ fun AcademyNotificationRoute(
 						x = bounds.left
 						y = bounds.top
 						layoutParams = ViewGroup.LayoutParams(
-							bounds.width.toInt(), bounds.height.toInt()
+								bounds.width.toInt(), bounds.height.toInt()
 						)
 						transitionName = "miniapp"
 					}
@@ -139,7 +144,7 @@ fun AcademyNotificationRoute(
 				}
 			} ?: activity?.let {
 				ActivityOptionsCompat.makeSceneTransitionAnimation(
-					it, it.window.decorView, "miniapp"
+						it, it.window.decorView, "miniapp"
 				).toBundle()
 			}
 
@@ -149,59 +154,59 @@ fun AcademyNotificationRoute(
 	}
 
 	ActivityPager(
-		title = stringResource(id = R.string.academic_affair_notice),
-		tabs = mutableListOf(
-			MenuItem(stringResource(id = R.string.academic_affair_notice)),
-			MenuItem(stringResource(id = R.string.school_affair_notice))
-		),
-		sharedKey = "AcademyNotification",
-		sharedTransitionScope = sharedTransitionScope,
-		animatedVisibilityScope = animatedVisibilityScope,
-		onNavigationClick = { backStack.navigateBack(activity) },
-		topBarContent = {
-			val setQuery = when (it) {
-				0 -> textFieldState1::setTextAndPlaceCursorAtEnd
-				else -> textFieldState2::setTextAndPlaceCursorAtEnd
-			}
+			title = stringResource(id = R.string.academic_affair_notice),
+			tabs = mutableListOf(
+					MenuItem(stringResource(id = R.string.academic_affair_notice)),
+					MenuItem(stringResource(id = R.string.school_affair_notice))
+			),
+			isTopBarContentFixed = true,
+			sharedKey = "AcademyNotification",
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope,
+			onNavigationClick = { backStack.navigateBack(activity) },
+			topBarContent = {
+				val setQuery = when (it) {
+					0 -> textFieldState1::setTextAndPlaceCursorAtEnd
+					else -> textFieldState2::setTextAndPlaceCursorAtEnd
+				}
 
+				fun getQuery(): TextFieldState = when (it) {
+					0 -> textFieldState1
+					else -> textFieldState2
+				}
 
-			fun getQuery(): TextFieldState = when (it) {
-				0 -> textFieldState1
-				else -> textFieldState2
-			}
+				val searchBarState = rememberSearchBarState()
+				SearchBarDefaults.InputField(
+						textFieldState = getQuery(),
+						searchBarState = searchBarState,
+						onSearch = {},
+						placeholder = {
+							Text(
+									modifier = Modifier.clearAndSetSemantics {},
+									text = stringResource(R.string.search)
+							)
+						},
+						leadingIcon = {
+							IconButton(onClick = {
 
-			val searchBarState = rememberSearchBarState()
-			SearchBarDefaults.InputField(
-				textFieldState = getQuery(),
-				searchBarState = searchBarState,
-				onSearch = {},
-				placeholder = {
-					Text(
-						modifier = Modifier.clearAndSetSemantics {},
-						text = stringResource(R.string.search)
-					)
-				},
-				leadingIcon = {
-					IconButton(onClick = {
-
-					}) {
-						Icon(
-							Icons.Rounded.Search,
-							contentDescription = stringResource(R.string.search)
-						)
-					}
-				},
-				trailingIcon = {
-					if (getQuery().text.isNotEmpty()) IconButton(onClick = {
-						setQuery("")
-					}) {
-						Icon(
-							Icons.Rounded.Close,
-							contentDescription = stringResource(R.string.clear)
-						)
-					}
-				},
-			)
+							}) {
+								Icon(
+										Icons.Rounded.Search,
+										contentDescription = stringResource(R.string.search)
+								)
+							}
+						},
+						trailingIcon = {
+							if (getQuery().text.isNotEmpty()) IconButton(onClick = {
+								setQuery("")
+							}) {
+								Icon(
+										Icons.Rounded.Close,
+										contentDescription = stringResource(R.string.clear)
+								)
+							}
+						},
+				)
 //			AppBarWithSearch(
 //				scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior(),
 //				windowInsets = SearchBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal),
@@ -243,19 +248,23 @@ fun AcademyNotificationRoute(
 //					)
 //				},
 //			)
-		},
-		pageContent = { page ->
-			AnimatedContent(targetState = page, label = "page_transition") { targetPage ->
-				NewsList(
-					newsList = if (targetPage == 0) academicNotices else schoolNotices,
-					sharedTransitionScope = sharedTransitionScope,
-					animatedVisibilityScope = animatedVisibilityScope
-				) { notice, bounds ->
-					sharedElementBounds = bounds
-					viewModel.fetchContent(notice.getString("id"))
+			},
+			pageContent = { page ->
+				AnimatedContent(targetState = page, label = "page_transition") { targetPage ->
+					StatePage(
+							state = if (targetPage == 0) academicNoticesUiState else schoolNoticesUiState
+					) {
+						NewsList(
+								newsList = if (targetPage == 0) academicNotices else schoolNotices,
+								sharedTransitionScope = sharedTransitionScope,
+								animatedVisibilityScope = animatedVisibilityScope
+						) { notice, bounds ->
+							sharedElementBounds = bounds
+							viewModel.fetchContent(notice.getString("id"))
+						}
+					}
 				}
-			}
-		})
+			})
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -267,17 +276,17 @@ fun NewsList(
 	onItemClick: (JSONObject, Rect) -> Unit,
 ) {
 	LazyVerticalStaggeredGrid(
-		columns = StaggeredGridCells.Adaptive(240.dp),
-		modifier = Modifier.fillMaxSize(),
-		contentPadding = PaddingValues(dimensionResource(R.dimen.content_padding)),
-		horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_padding)),
-		verticalItemSpacing = dimensionResource(R.dimen.vertical_padding)
+			columns = StaggeredGridCells.Adaptive(240.dp),
+			modifier = Modifier.fillMaxSize(),
+			contentPadding = PaddingValues(dimensionResource(R.dimen.content_padding)),
+			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_padding)),
+			verticalItemSpacing = dimensionResource(R.dimen.vertical_padding)
 	) {
 		items(newsList, key = { it.getString("id") }) { item ->
 			NewsItem(
-				item = item,
-				sharedTransitionScope = sharedTransitionScope,
-				animatedVisibilityScope = animatedVisibilityScope
+					item = item,
+					sharedTransitionScope = sharedTransitionScope,
+					animatedVisibilityScope = animatedVisibilityScope
 			) { bounds ->
 				onItemClick(item, bounds)
 			}
@@ -296,29 +305,30 @@ fun NewsItem(
 	var currentBounds by remember { mutableStateOf(Rect.Zero) }
 	with(sharedTransitionScope) {
 		Card(
-			onClick = { onClick(currentBounds) },
-			modifier = Modifier
-				.fillMaxWidth()
-				.onGloballyPositioned { currentBounds = it.boundsInWindow() }
-				.sharedBounds(
-					rememberSharedContentState(key = "news_${item.getString("id")}"),
-					animatedVisibilityScope = animatedVisibilityScope
-				)) {
-			Column(
+				onClick = { onClick(currentBounds) },
 				modifier = Modifier
-					.padding(
-						dimensionResource(R.dimen.horizontal_padding),
-						dimensionResource(R.dimen.vertical_padding)
-					)
-					.fillMaxWidth(),
-				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_padding))
+					.fillMaxWidth()
+					.onGloballyPositioned { currentBounds = it.boundsInWindow() }
+					.sharedBounds(
+							rememberSharedContentState(key = "news_${item.getString("id")}"),
+							animatedVisibilityScope = animatedVisibilityScope
+					)) {
+			Column(
+					modifier = Modifier
+						.padding(
+								dimensionResource(R.dimen.horizontal_padding),
+								dimensionResource(R.dimen.vertical_padding)
+						)
+						.fillMaxWidth(),
+					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_padding))
 			) {
 				Text(
-					text = item.getString("title", ""), style = MaterialTheme.typography.titleMedium
+						text = item.getString("title", ""),
+						style = MaterialTheme.typography.titleMedium
 				)
 				Text(
-					text = item.getString("deliveryDate", ""),
-					style = MaterialTheme.typography.bodySmall,
+						text = item.getString("deliveryDate", ""),
+						style = MaterialTheme.typography.bodySmall,
 				)
 			}
 		}

@@ -209,7 +209,7 @@ class HttpManager(val handler: Handler = Handler(Looper.getMainLooper())) {
 	 * @param type 请求数据类型
 	 * @return 请求构建器
 	 */
-	fun generateRequest(url: String, data: String?, type: String?): Request.Builder {
+	fun generateRequest(url: String, data: String? = null, type: String? = null): Request.Builder {
 		val request = Request.Builder().url(url)
 		val host = url.toHttpUrl().host
 		if (cookieManager != null) request.header("Cookie", cookieManager!!.toSimpleString(host))
