@@ -77,7 +77,7 @@
                     android:layout_height="wrap_content" />-->
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/add_time_button"
+                    android:id="@+id/add_time_segment"
                     style="@style/Widget.Material3Expressive.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

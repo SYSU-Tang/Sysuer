@@ -912,4 +912,11 @@
     <string name="from_to_section">From %d to %d</string>
 
     <string name="user_avatar">User Avatar</string>
+    <string name="class_location">Class Location</string>
+    <string name="time_segment">Time Segment</string>
+    <string name="time_segment_x">Time Segment %d</string>
+    <string name="from_to_week">Week %d to Week %d</string>
+    <string name="course_name_empty_warning">Course name cannot be empty</string>
+    <string name="no_time_segment_warning">Please add at least one time segment</string>
+    <string name="course_add_success">Course added successfully</string>
 </resources>

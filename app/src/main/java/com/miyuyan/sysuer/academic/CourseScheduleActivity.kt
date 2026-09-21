@@ -40,6 +40,21 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 
+data class CourseData(
+	val name: String,
+	val location: String,
+	val segments: List<CourseTimeSegmentData>,
+)
+
+data class CourseTimeSegmentData(
+	val term: String?,
+	val dayIndex: Int,
+	val weekStart: Int,
+	val weekEnd: Int,
+	val sectionStart: Int,
+	val sectionEnd: Int,
+)
+
 class CourseScheduleActivity : BaseActivity() {
 	private var targetSubject: String? = null
 	val weeks: MutableList<Int> = mutableListOf()
@@ -69,7 +84,65 @@ class CourseScheduleActivity : BaseActivity() {
 		val id: MutableLiveData<String?> = MutableLiveData<String?>()
 		val views: MutableList<View> = mutableListOf()
 		val terms: MutableList<String> = mutableListOf()
+		val courseSegments = mutableListOf<CourseAddTime>()
 		val daySimpleNames = resources.getStringArray(R.array.weeks_simple)
+		val addDialogBinding = DialogCourseScheduleAddBinding.inflate(layoutInflater)
+		val addDialog = BottomSheetDialog(this)
+		addDialog.setContentView(addDialogBinding.root)
+		fun MutableList<CourseAddTime>.updateSegmentLabels() {
+			forEachIndexed { index, segment ->
+				segment.setIndex(index + 1)
+			}
+		}
+
+		fun MutableList<CourseAddTime>.clearAll() {
+			forEach { segment ->
+				addDialogBinding.timeSegments.removeView(segment.addBinding.root)
+			}
+			clear()
+		}
+
+		fun MutableList<CourseAddTime>.add(initial: CourseAddTime.() -> Unit = {}) {
+			val segment = CourseAddTime(this@CourseScheduleActivity).apply {
+				loadTerms(terms)
+				setTerm(currentTerm)
+				setWeekValueTo(weeks.lastOrNull() ?: 17)
+				onDelete = {
+					remove(this)
+					addDialogBinding.timeSegments.removeView(addBinding.root)
+					updateSegmentLabels()
+				}
+				initial()
+			}
+			add(segment)
+			addDialogBinding.timeSegments.addView(
+					segment.addBinding.root, addDialogBinding.timeSegments.childCount - 1
+			)
+			updateSegmentLabels()
+		}
+		addDialogBinding.apply {
+			addTimeSegment.setOnClickListener {
+				courseSegments.add()
+			}
+			addButton.setOnClickListener {
+				val name = courseName.text?.toString().orEmpty()
+				if (name.isBlank()) {
+					config.toast(R.string.course_name_empty_warning)
+					return@setOnClickListener
+				}
+				if (courseSegments.isEmpty()) {
+					config.toast(R.string.no_time_segment_warning)
+					return@setOnClickListener
+				}
+				val data = CourseData(
+						name = name,
+						location = location.text?.toString().orEmpty(),
+						segments = courseSegments.map { it.collectData() },
+				)
+				saveCourse(data)
+				addDialog.dismiss()
+			}
+		}
 		binding = ActivityCourseScheduleBinding.inflate(layoutInflater).apply {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			today.setOnClickListener {
@@ -82,7 +155,9 @@ class CourseScheduleActivity : BaseActivity() {
 			next.setOnClickListener { changeWeek(currentWeekIndex + 1) }
 			toolbar.menu.add(0, 0, 0, "新增").setIcon(R.drawable.add)
 				.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener {
-
+					courseSegments.clearAll()
+					courseSegments.add()
+					addDialog.show()
 					true
 				}
 			toolbar.menu.add(0, 0, 0, "导出").setIcon(R.drawable.export)
@@ -131,9 +206,6 @@ class CourseScheduleActivity : BaseActivity() {
 		val color =
 			model.contextUtil.getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim)
 		val nowTime = LocalTime.now()
-		val addDialog = BottomSheetDialog(this)
-		val addDialogBinding = DialogCourseScheduleAddBinding.inflate(layoutInflater)
-		addDialog.setContentView(addDialogBinding.root)
 		duration.forEachIndexed { i, period ->
 			val durationBinding =
 				ItemDurationBinding.inflate(layoutInflater, binding.day, false).apply {
@@ -219,18 +291,11 @@ class CourseScheduleActivity : BaseActivity() {
 //									val weekday = resources.getStringArray(R.array.weeks)[col - 1]
 //									config.toast("$weekday 第${row + 1}节 ${duration[row]}")
 
-									val courseAddTime =
-										CourseAddTime(this@CourseScheduleActivity).apply {
-											setSectionValue(row + 1)
-											loadTerms(terms)
-											setTerm(currentTerm)
-											setDay(col - 1)
-											setWeekValueTo(weeks.last())
-										}
-									addDialogBinding.timeSegments.addView(
-											courseAddTime.addBinding.root,
-											addDialogBinding.timeSegments.childCount - 1
-									)
+									courseSegments.clearAll()
+									courseSegments.add {
+										setSectionValue(row + 1)
+										setDay(col - 1)
+									}
 									addDialog.show()
 								} else {
 									lastClickTime = now
@@ -554,10 +619,20 @@ class CourseScheduleActivity : BaseActivity() {
 		model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
 	}
 
+	fun saveCourse(data: CourseData) {
+		android.util.Log.d(TAG, "saveCourse: $data")
+		config.toast(R.string.course_add_success)
+	}
+
+	companion object {
+		private const val TAG = "CourseScheduleActivity"
+	}
+
 	class CourseAddTime(context: Context) {
 		val daySimpleNames = context.resources.getStringArray(R.array.weeks_simple)
 		val termPop = MaterialPopupMenu<String>(context)
 		val dayPop = MaterialPopupMenu<String>(context)
+		var onDelete: (() -> Unit)? = null
 		val addBinding = ItemCourseAddTimeBinding.inflate(LayoutInflater.from(context)).apply {
 			weekSlider.addOnChangeListener { slider, _, _ ->
 				weekContent.text = context.getString(
@@ -567,6 +642,7 @@ class CourseScheduleActivity : BaseActivity() {
 				)
 			}
 			weekSlider.setValues(1f, 17f)
+			weekContent.text = context.getString(R.string.from_to_week, 1, 17)
 			sectionSlider.addOnChangeListener { slider, _, _ ->
 				sectionContent.text = context.getString(
 						R.string.from_to_section,
@@ -574,6 +650,7 @@ class CourseScheduleActivity : BaseActivity() {
 						slider.values.getOrNull(1)?.toInt()
 				)
 			}
+			sectionContent.text = context.getString(R.string.from_to_section, 1, 11)
 			listOf(termItem, dayItem, weekItem, sectionItem).forEachIndexed { index, layout ->
 				layout.updateAppearance(index, 4)
 			}
@@ -581,15 +658,24 @@ class CourseScheduleActivity : BaseActivity() {
 				termContent.text = it
 			}
 			termItem.setOnClickListener {
-				termPop.show(it, it.parent as View, it.x.toInt())
+				termPop.show(termItem, root, termTitle.x.toInt())
 			}
 			dayPop.onNameChange = {
 				dayContent.text = it
 			}
 			dayPop.setItems(daySimpleNames.map { s -> "星期$s" })
 			dayItem.setOnClickListener {
-				dayPop.show(it, it.parent as View, it.x.toInt())
+				dayPop.show(it, it.parent as View, dayTitle.x.toInt())
 			}
+			close.setOnClickListener {
+				onDelete?.invoke()
+			}
+		}
+
+		fun setIndex(index: Int) {
+			addBinding.timeSegment.text = addBinding.root.context.getString(
+					R.string.time_segment_x, index
+			)
 		}
 
 		fun loadTerms(terms: List<String>) {
@@ -612,5 +698,17 @@ class CourseScheduleActivity : BaseActivity() {
 			addBinding.weekSlider.valueTo = valueTo.toFloat()
 		}
 
+		fun collectData(): CourseTimeSegmentData {
+			val weekValues = addBinding.weekSlider.values
+			val sectionValues = addBinding.sectionSlider.values
+			return CourseTimeSegmentData(
+					term = termPop.value,
+					dayIndex = dayPop.selectedIndex ?: 0,
+					weekStart = weekValues.getOrNull(0)?.toInt() ?: 1,
+					weekEnd = weekValues.getOrNull(1)?.toInt() ?: 1,
+					sectionStart = sectionValues.getOrNull(0)?.toInt() ?: 1,
+					sectionEnd = sectionValues.getOrNull(1)?.toInt() ?: 1,
+			)
+		}
 	}
 }

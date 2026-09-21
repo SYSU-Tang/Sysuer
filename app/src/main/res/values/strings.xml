@@ -893,5 +893,9 @@
     <string name="course_not_found">未发现该课程</string>
     <string name="class_location">上课位置</string>
     <string name="time_segment">时间段</string>
+    <string name="time_segment_x">时间段 %d</string>
     <string name="from_to_week">第%d周~第%d周</string>
+    <string name="course_name_empty_warning">课程名称不能为空</string>
+    <string name="no_time_segment_warning">请至少添加一个时间段</string>
+    <string name="course_add_success">课程添加成功</string>
 </resources>
