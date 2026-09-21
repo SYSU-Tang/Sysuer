@@ -51,9 +51,13 @@
         <item>19:55~20:40</item>
         <item>20:50~21:35</item>
     </string-array>
-    <string-array name="number">
+    <string-array name="section">
         <item>1</item>
         <item>11</item>
+    </string-array>
+    <string-array name="week">
+        <item>1</item>
+        <item>17</item>
     </string-array>
     <string-array name="months">
         <item>1月</item>

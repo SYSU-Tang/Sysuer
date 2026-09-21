@@ -206,7 +206,7 @@
                     android:valueFrom="1"
                     android:valueTo="11"
                     app:thumbHeight="24dp"
-                    app:values="@array/number" />
+                    app:values="@array/section" />
 
                 <View
                     android:layout_width="match_parent"

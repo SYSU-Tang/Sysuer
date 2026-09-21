@@ -909,7 +909,7 @@
     <string name="retry">Retry</string>
     <string name="load_failed">Load failed</string>
     <string name="year_month">%d/%d</string>
-    <string name="from_to_number">From %d to %d</string>
+    <string name="from_to_section">From %d to %d</string>
 
     <string name="user_avatar">User Avatar</string>
 </resources>

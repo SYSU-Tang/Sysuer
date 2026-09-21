@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:showIn="@layout/dialog_course_schedule_add">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/time_segment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/horizontal_margin"
+        android:text="@string/time_segment"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        app:layout_constraintBottom_toBottomOf="@id/barrier"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/close"
+        style="?attr/materialIconButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/close"
+        app:layout_constraintBottom_toBottomOf="@id/barrier"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="close,time_segment" />
+
+    <com.google.android.material.listitem.ListItemLayout
+        android:id="@+id/term_item"
+        style="@style/Widget.Material3.ListItemLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/barrier">
+
+        <com.google.android.material.listitem.ListItemCardView
+            android:id="@+id/term_card"
+            style="@style/Widget.Material3.ListItemCardView.Segmented"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/term_icon"
+                    style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/calendar" />
+
+                <TextView
+                    android:id="@+id/term_title"
+                    style="@style/Widget.Material3.TextView.ListItem.LabelText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/horizontal_margin"
+                    android:text="@string/term"
+                    app:layout_constraintBottom_toTopOf="@id/term_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/term_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/term_content"
+                    style="@style/Widget.Material3.TextView.ListItem.SupportingText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/none"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/term_title"
+                    app:layout_constraintTop_toBottomOf="@id/term_title" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.listitem.ListItemCardView>
+
+    </com.google.android.material.listitem.ListItemLayout>
+
+    <com.google.android.material.listitem.ListItemLayout
+        android:id="@+id/week_item"
+        style="@style/Widget.Material3.ListItemLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/vertical_gap"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/term_item">
+
+        <com.google.android.material.listitem.ListItemCardView
+            android:id="@+id/week_card"
+            style="@style/Widget.Material3.ListItemCardView.Segmented"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/week_icon"
+                    style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/course" />
+
+                <TextView
+                    android:id="@+id/week_title"
+                    style="@style/Widget.Material3.TextView.ListItem.LabelText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/horizontal_margin"
+                    android:gravity="start"
+                    android:text="@string/week_range"
+                    app:layout_constraintBottom_toTopOf="@id/week_slider"
+                    app:layout_constraintEnd_toStartOf="@id/week_content"
+                    app:layout_constraintStart_toEndOf="@id/week_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/week_content"
+                    style="@style/Widget.Material3.TextView.ListItem.TrailingSupportingText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="@string/none"
+                    app:layout_constraintBottom_toTopOf="@id/week_slider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/week_title"
+                    app:layout_constraintTop_toTopOf="@id/week_title" />
+
+                <com.google.android.material.slider.RangeSlider
+                    android:id="@+id/week_slider"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:stepSize="1"
+                    android:text="@string/date"
+                    android:valueFrom="1"
+                    android:valueTo="17"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/week_icon"
+                    app:layout_constraintTop_toBottomOf="@id/week_title"
+                    app:thumbHeight="24dp" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.listitem.ListItemCardView>
+    </com.google.android.material.listitem.ListItemLayout>
+
+    <com.google.android.material.listitem.ListItemLayout
+        android:id="@+id/day_item"
+        style="@style/Widget.Material3.ListItemLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/vertical_gap"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/week_item">
+
+        <com.google.android.material.listitem.ListItemCardView
+            android:id="@+id/day_card"
+            style="@style/Widget.Material3.ListItemCardView.Segmented"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/day_icon"
+                    style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/priority" />
+
+                <TextView
+                    android:id="@+id/day_title"
+                    style="@style/Widget.Material3.TextView.ListItem.LabelText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/horizontal_margin"
+                    android:text="@string/week"
+                    app:layout_constraintBottom_toTopOf="@id/day_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/day_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/day_content"
+                    style="@style/Widget.Material3.TextView.ListItem.SupportingText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/none"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/day_title"
+                    app:layout_constraintTop_toBottomOf="@id/day_title" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.listitem.ListItemCardView>
+
+    </com.google.android.material.listitem.ListItemLayout>
+
+    <com.google.android.material.listitem.ListItemLayout
+        android:id="@+id/section_item"
+        style="@style/Widget.Material3.ListItemLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/vertical_gap"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/day_item">
+
+        <com.google.android.material.listitem.ListItemCardView
+            android:id="@+id/section_card"
+            style="@style/Widget.Material3.ListItemCardView.Segmented"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/section_icon"
+                    style="@style/Widget.Material3.ImageView.ListItem.LeadingIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/time" />
+
+                <TextView
+                    android:id="@+id/section_title"
+                    style="@style/Widget.Material3.TextView.ListItem.LabelText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/horizontal_margin"
+                    android:gravity="start"
+                    android:text="@string/section"
+                    app:layout_constraintBottom_toTopOf="@id/section_slider"
+                    app:layout_constraintEnd_toStartOf="@id/section_content"
+                    app:layout_constraintStart_toEndOf="@id/section_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/section_content"
+                    style="@style/Widget.Material3.TextView.ListItem.TrailingSupportingText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="@string/none"
+                    app:layout_constraintBottom_toTopOf="@id/section_slider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/section_title"
+                    app:layout_constraintTop_toTopOf="@id/section_title" />
+
+                <com.google.android.material.slider.RangeSlider
+                    android:id="@+id/section_slider"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="0dp"
+                    android:stepSize="1"
+                    android:text="@string/date"
+                    android:valueFrom="1"
+                    android:valueTo="11"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/section_icon"
+                    app:layout_constraintTop_toBottomOf="@id/section_title"
+                    app:thumbHeight="24dp"
+                    app:values="@array/section" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.listitem.ListItemCardView>
+    </com.google.android.material.listitem.ListItemLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

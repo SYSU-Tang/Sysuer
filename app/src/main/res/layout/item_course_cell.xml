@@ -7,16 +7,4 @@
     app:cardBackgroundColor="@android:color/transparent"
     app:cardCornerRadius="4dp"
     app:strokeColor="?colorOutlineVariant"
-    app:strokeWidth="0.5dp">
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/add"
-        style="@style/Widget.Material3Expressive.Button.IconButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:contentDescription="@string/add"
-        android:visibility="gone"
-        app:icon="@drawable/add"/>
-
-</com.google.android.material.card.MaterialCardView>
+    app:strokeWidth="0.5dp" />

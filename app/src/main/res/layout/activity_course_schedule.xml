@@ -4,6 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <FrameLayout
+        android:id="@+id/mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true" />
+
     <com.google.android.material.appbar.AppBarLayout
         style="@style/SYSUER.AppBarLayout"
         android:layout_width="match_parent"
@@ -14,14 +20,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:transitionName="miniapp"
-            app:layout_scrollFlags="scroll|enterAlways"
             app:navigationIcon="?homeAsUpIndicator" />-->
 
         <LinearLayout
+            android:id="@+id/bar"
             android:layout_width="match_parent"
-            android:transitionName="CourseSchedule"
             android:layout_height="wrap_content"
-            android:gravity="center">
+            android:gravity="center"
+            android:transitionName="CourseSchedule"
+            app:layout_scrollFlags="scroll|enterAlways">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/last"
@@ -94,27 +101,29 @@
             android:layout_height="match_parent"
             android:columnCount="8"
             android:orientation="vertical"
+            android:paddingBottom="54dp"
             android:rowCount="11" />
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/toolbar"
+        style="@style/Widget.Material3.BottomAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:backgroundTint="#0000"
+        app:backgroundTint="@android:color/transparent"
         app:fabAlignmentMode="end"
-        app:fabAnimationMode="slide"
+        app:fabAnimationMode="scale"
         app:hideOnScroll="true"
         app:layout_behavior="com.google.android.material.bottomappbar.BottomAppBar$Behavior"
         app:navigationIcon="@drawable/ic_nav_back_rounded"
         app:navigationIconTint="@null" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!--<com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/export"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/export"
         app:layout_anchor="@id/toolbar"
-        app:srcCompat="@drawable/export" />
+        app:srcCompat="@drawable/export" />-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

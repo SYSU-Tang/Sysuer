@@ -4,7 +4,7 @@
     android:layout_width="0dp"
     android:layout_height="0dp"
     android:layout_gravity="fill"
-    app:cardCornerRadius="8dp"
+    app:cardCornerRadius="4dp"
     app:contentPadding="4dp">
 
     <com.google.android.material.textview.MaterialTextView

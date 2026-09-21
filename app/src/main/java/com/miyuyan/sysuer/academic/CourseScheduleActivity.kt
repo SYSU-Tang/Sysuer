@@ -1,15 +1,16 @@
 package com.miyuyan.sysuer.academic
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.GridLayout
-import android.widget.PopupMenu
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
@@ -23,12 +24,15 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.DownloadManager
 import com.miyuyan.sysuer.databinding.ActivityCourseScheduleBinding
+import com.miyuyan.sysuer.databinding.DialogCourseScheduleAddBinding
+import com.miyuyan.sysuer.databinding.DialogCourseScheduleDetailBinding
 import com.miyuyan.sysuer.databinding.ItemAgendaBinding
+import com.miyuyan.sysuer.databinding.ItemCourseAddTimeBinding
 import com.miyuyan.sysuer.databinding.ItemCourseCellBinding
-import com.miyuyan.sysuer.databinding.ItemDetailBinding
 import com.miyuyan.sysuer.databinding.ItemDurationBinding
 import com.miyuyan.sysuer.databinding.ItemWeekdayBinding
 import com.miyuyan.sysuer.model.JwxtModel
+import com.miyuyan.sysuer.view.MaterialPopupMenu
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
@@ -45,7 +49,7 @@ class CourseScheduleActivity : BaseActivity() {
 	var currentWeek: Int = 0
 	lateinit var binding: ActivityCourseScheduleBinding
 	var selectedCourses: MutableMap<String, List<JSONObject>> = mutableMapOf()
-	lateinit var detailBinding: ItemDetailBinding
+	lateinit var detailBinding: DialogCourseScheduleDetailBinding
 	lateinit var model: JwxtModel
 	override fun onDestroy() {
 		super.onDestroy()
@@ -65,38 +69,48 @@ class CourseScheduleActivity : BaseActivity() {
 		val id: MutableLiveData<String?> = MutableLiveData<String?>()
 		val views: MutableList<View> = mutableListOf()
 		val terms: MutableList<String> = mutableListOf()
+		val daySimpleNames = resources.getStringArray(R.array.weeks_simple)
 		binding = ActivityCourseScheduleBinding.inflate(layoutInflater).apply {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			today.setOnClickListener {
 				changeTerm(realTime.first!!)
 				changeWeek(realTime.second!!)
 			}
-			export.setOnClickListener {
-				printTable()
-			}
+
 			month.text = resources.getStringArray(R.array.months)[LocalDate.now().monthValue - 1]
 			last.setOnClickListener { changeWeek(currentWeekIndex - 1) }
 			next.setOnClickListener { changeWeek(currentWeekIndex + 1) }
+			toolbar.menu.add(0, 0, 0, "新增").setIcon(R.drawable.add)
+				.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener {
+
+					true
+				}
+			toolbar.menu.add(0, 0, 0, "导出").setIcon(R.drawable.export)
+				.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener {
+					printTable()
+					true
+				}
+
 		}
-		val weekPop = PopupMenu(
-				this,
-				binding.weekTime,
-				0,
-				0,
-				com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow
-		)
-		val termPop = PopupMenu(
-				this,
-				binding.term,
-				0,
-				0,
-				com.google.android.material.R.style.Widget_Material3_PopupMenu_Overflow
-		)
+		val weekPop = MaterialPopupMenu<Int>(
+				this
+		).apply {
+			onSelectChange = {
+				it?.let { newWeekIndex -> changeWeek(newWeekIndex) }
+			}
+		}
+		val termPop = MaterialPopupMenu<String>(
+				this
+		).apply {
+			onValueChange = {
+				it?.let { newTerm -> changeTerm(newTerm) }
+			}
+		}
 		binding.term.setOnClickListener {
-			termPop.show()
+			termPop.show(binding.bar, binding.mask, it.x.toInt())
 		}
 		binding.weekTime.setOnClickListener {
-			weekPop.show()
+			weekPop.show(binding.bar, binding.mask, it.x.toInt())
 		}
 		setContentView(binding.root)
 		gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
@@ -117,6 +131,9 @@ class CourseScheduleActivity : BaseActivity() {
 		val color =
 			model.contextUtil.getColorFromAttr(com.google.android.material.R.attr.colorSurfaceDim)
 		val nowTime = LocalTime.now()
+		val addDialog = BottomSheetDialog(this)
+		val addDialogBinding = DialogCourseScheduleAddBinding.inflate(layoutInflater)
+		addDialog.setContentView(addDialogBinding.root)
 		duration.forEachIndexed { i, period ->
 			val durationBinding =
 				ItemDurationBinding.inflate(layoutInflater, binding.day, false).apply {
@@ -156,7 +173,7 @@ class CourseScheduleActivity : BaseActivity() {
 			}
 			binding.day.addView(durationBinding.root)
 		} // 初始化课程时间
-		resources.getStringArray(R.array.weeks_simple).forEachIndexed { i, week ->
+		daySimpleNames.forEachIndexed { i, week ->
 			val itemBinding = ItemWeekdayBinding.inflate(layoutInflater, binding.week, false)
 			itemBinding.courseWeek.text = week
 			itemBinding.courseDate.text = getOldDate(i - weekday)
@@ -182,29 +199,52 @@ class CourseScheduleActivity : BaseActivity() {
 		} // 初始化周历
 		for (row in 0..<11) {
 			for (col in 1..<8) {
+				var lastClickTime = 0L
 				binding.day.addView(
 						ItemCourseCellBinding.inflate(
-						layoutInflater, binding.day, false
-				).apply {
-					root.layoutParams = GridLayout.LayoutParams(
-							GridLayout.spec(row, 1.0f), GridLayout.spec(col, 1.0f)
-					).apply {
-						width = 0
-						height = 0
-						setGravity(Gravity.FILL)
-						if (row == 4 || row == 8) topMargin = 16
-					}
-					root.setOnClickListener {
-						add.isVisible = !add.isVisible
-					}
-//							root.setBackgroundResource(R.drawable.course_grid_cell)
-				}.root
+								layoutInflater, binding.day, false
+						).apply {
+							root.layoutParams = GridLayout.LayoutParams(
+									GridLayout.spec(row, 1.0f), GridLayout.spec(col, 1.0f)
+							).apply {
+								width = 0
+								height = 0
+								setGravity(Gravity.FILL)
+								if (row == 4 || row == 8) topMargin = 16
+							}
+							root.setOnClickListener {
+								val now = System.currentTimeMillis()
+								if (now - lastClickTime in 0..300) {
+									lastClickTime = 0L
+//									val weekday = resources.getStringArray(R.array.weeks)[col - 1]
+//									config.toast("$weekday 第${row + 1}节 ${duration[row]}")
+
+									val courseAddTime =
+										CourseAddTime(this@CourseScheduleActivity).apply {
+											setSectionValue(row + 1)
+											loadTerms(terms)
+											setTerm(currentTerm)
+											setDay(col - 1)
+											setWeekValueTo(weeks.last())
+										}
+									addDialogBinding.timeSegments.addView(
+											courseAddTime.addBinding.root,
+											addDialogBinding.timeSegments.childCount - 1
+									)
+									addDialog.show()
+								} else {
+									lastClickTime = now
+								}
+							}
+						}.root
 				)
 			}
 		}
 		val detailDialog = BottomSheetDialog(this)
-		detailBinding = ItemDetailBinding.inflate(layoutInflater)
+		detailBinding = DialogCourseScheduleDetailBinding.inflate(layoutInflater)
 		detailDialog.setContentView(detailBinding.root)
+
+
 		val palettes = arrayOf(
 				androidx.appcompat.R.attr.colorPrimary to com.google.android.material.R.attr.colorOnPrimary,
 				com.google.android.material.R.attr.colorSecondary to com.google.android.material.R.attr.colorOnSecondary,
@@ -283,7 +323,7 @@ class CourseScheduleActivity : BaseActivity() {
 													"$campus-$teachingBuildingName-$classroomNum"
 												setDialogDetail(
 														course, location, teacher, getString(
-														R.string.from_to_number,
+														R.string.from_to_section,
 														startClassTimes,
 														endClassTimes
 												), detail.getString("assistantInfo")
@@ -320,6 +360,7 @@ class CourseScheduleActivity : BaseActivity() {
 								availableTerms()
 								getAvailableWeeks(currentTerm)
 								getTable(currentTerm, currentWeek)
+								termPop.value = currentTerm
 								realTime.first = currentTerm
 							}
 
@@ -334,7 +375,7 @@ class CourseScheduleActivity : BaseActivity() {
 										binding.month.text =
 											resources.getStringArray(R.array.months)[date.monthValue - 1]
 										for (i in 0..6) (binding.week.getChildAt(i + 1)
-											.findViewById<View?>(R.id.course_date) as MaterialTextView).text =
+											.findViewById<View>(R.id.course_date) as MaterialTextView).text =
 											String.format(
 													Locale.getDefault(),
 													"%2d%s",
@@ -347,34 +388,26 @@ class CourseScheduleActivity : BaseActivity() {
 
 							4 -> {
 								terms.clear()
-								termPop.menu.clear()
 								response.getJSONArray("data")
 									.forEach { e: Any? -> terms.add((e as JSONObject).getString("acadYearSemester")) }
 								terms.forEach { e: String ->
-									termPop.menu.add(getString(R.string.term_x, e))
-										.setOnMenuItemClickListener {
-											changeTerm(e)
-											true
-										}
+									termPop.addItem(getString(R.string.term_x, e), e)
 								}
+								termPop.value = currentTerm
 							}
 
 							5 -> {
 								weeks.clear()
-								weekPop.menu.clear()
 								val nowWeekly =
 									response.getJSONObject("data").getString("nowWeekly")
 								if (nowWeekly != null) currentWeek = nowWeekly.toInt()
 								response.getJSONObject("data").getJSONArray("weeklyList")
 									.forEach { e: Any? -> weeks.add((e as JSONObject).getInteger("weekly")) }
-								weeks.forEachIndexed { index, e: Int ->
-									weekPop.menu.add(getString(R.string.week_d, e))
-										.setOnMenuItemClickListener {
-											changeWeek(index)
-											true
-										}
+								weeks.forEach { e: Int ->
+									weekPop.addItem(getString(R.string.week_d, e))
 								}
 								currentWeekIndex = weeks.indexOf(currentWeek)
+								weekPop.select(currentWeekIndex)
 								binding.weekTime.text =
 									String.format(getString(R.string.week_d), currentWeek)
 								getTable(currentTerm, currentWeek)
@@ -493,7 +526,7 @@ class CourseScheduleActivity : BaseActivity() {
 		else {
 			currentWeek = weeks[newWeekIndex]
 			currentWeekIndex = newWeekIndex
-			binding.weekTime.text = String.format(getString(R.string.week_d), currentWeek)
+			binding.weekTime.text = getString(R.string.week_d, currentWeek)
 			getTable(currentTerm, currentWeek)
 			getRange(currentTerm, currentWeek)
 			model.nextAll()
@@ -519,5 +552,65 @@ class CourseScheduleActivity : BaseActivity() {
 
 	private fun term() {
 		model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
+	}
+
+	class CourseAddTime(context: Context) {
+		val daySimpleNames = context.resources.getStringArray(R.array.weeks_simple)
+		val termPop = MaterialPopupMenu<String>(context)
+		val dayPop = MaterialPopupMenu<String>(context)
+		val addBinding = ItemCourseAddTimeBinding.inflate(LayoutInflater.from(context)).apply {
+			weekSlider.addOnChangeListener { slider, _, _ ->
+				weekContent.text = context.getString(
+						R.string.from_to_week,
+						slider.values.getOrNull(0)?.toInt(),
+						slider.values.getOrNull(1)?.toInt()
+				)
+			}
+			weekSlider.setValues(1f, 17f)
+			sectionSlider.addOnChangeListener { slider, _, _ ->
+				sectionContent.text = context.getString(
+						R.string.from_to_section,
+						slider.values.getOrNull(0)?.toInt(),
+						slider.values.getOrNull(1)?.toInt()
+				)
+			}
+			listOf(termItem, dayItem, weekItem, sectionItem).forEachIndexed { index, layout ->
+				layout.updateAppearance(index, 4)
+			}
+			termPop.onNameChange = {
+				termContent.text = it
+			}
+			termItem.setOnClickListener {
+				termPop.show(it, it.parent as View, it.x.toInt())
+			}
+			dayPop.onNameChange = {
+				dayContent.text = it
+			}
+			dayPop.setItems(daySimpleNames.map { s -> "星期$s" })
+			dayItem.setOnClickListener {
+				dayPop.show(it, it.parent as View, it.x.toInt())
+			}
+		}
+
+		fun loadTerms(terms: List<String>) {
+			termPop.setItems(terms)
+		}
+
+		fun setTerm(term: String) {
+			termPop.name = term
+		}
+
+		fun setDay(dayIndex: Int) {
+			dayPop.selectedIndex = dayIndex
+		}
+
+		fun setSectionValue(value: Int) {
+			addBinding.sectionSlider.values = listOf(value.toFloat(), value.toFloat())
+		}
+
+		fun setWeekValueTo(valueTo: Int) {
+			addBinding.weekSlider.valueTo = valueTo.toFloat()
+		}
+
 	}
 }

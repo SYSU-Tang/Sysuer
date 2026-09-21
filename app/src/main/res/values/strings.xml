@@ -884,11 +884,14 @@
     <string name="retry">重试</string>
     <string name="load_failed">加载失败</string>
     <string name="year_month">%d年%d月</string>
-    <string name="from_to_number">第%d节到第%d节</string>
+    <string name="from_to_section">第%d节~第%d节</string>
     <string name="user_avatar">用户头像</string>
     <string name="unknown">未知</string>
     <string name="charging">充电中</string>
     <string name="uncharge">未充电</string>
     <string name="exam_detail">考试详情</string>
     <string name="course_not_found">未发现该课程</string>
+    <string name="class_location">上课位置</string>
+    <string name="time_segment">时间段</string>
+    <string name="from_to_week">第%d周~第%d周</string>
 </resources>

@@ -25,8 +25,8 @@ class CookieManager(context: Context) {
 		return if (strings.isEmpty()) "" else strings.joinToString(separator = ";")
 	}
 
-	fun toSimpleString(host: String?): String = get(host).stream().map { c: String? ->
-		c!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
+	fun toSimpleString(host: String?): String = get(host).stream().map { c: String ->
+		c.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
 	}.collect(Collectors.joining(";"))
 
 	fun set(host: String?, cookieSet: MutableSet<String?>) {

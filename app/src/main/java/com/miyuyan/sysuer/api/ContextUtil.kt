@@ -43,6 +43,7 @@ import kotlin.concurrent.Volatile
 import kotlin.math.roundToInt
 
 class ContextUtil(val context: Context) {
+
 	fun getAvailableActivity(): FragmentActivity? =
 		if (context is FragmentActivity && !context.isFinishing && !context.isDestroyed) context
 		else (context.applicationContext as? Application)?.currentActivity?.let {
@@ -65,11 +66,11 @@ class ContextUtil(val context: Context) {
 				).subscribe { sharedPreferences.edit { remove("username").remove("password") } })
 	}
 
-	fun getColorFromAttr(attr: Int): Int {
+	fun getColorFromAttr(attr: Int): Int
 //		val typedValue = TypedValue()
 //		context.theme.resolveAttribute(attr, typedValue, true)
-		return MaterialColors.getColor(context, attr, context.getColor(R.color.md_theme_primary))
-	}
+			= MaterialColors.getColor(context, attr, context.getColor(R.color.md_theme_primary))
+
 
 	/**
 	 * 将 dp 值转换为 px 值
@@ -218,8 +219,8 @@ class ContextUtil(val context: Context) {
 						listOf(
 								Cookie.Builder().name("SESSION").value(
 										Base64.getEncoder().encodeToString(
-													UUID.randomUUID().toString().toByteArray()
-											)
+												UUID.randomUUID().toString().toByteArray()
+										)
 								).domain("cas.sysu.edu.cn").build()
 						)
 				)
@@ -263,12 +264,7 @@ class ContextUtil(val context: Context) {
 										host, username, password, true
 								).subscribe {
 									performLogin(
-											service,
-											host,
-											username,
-											password,
-											captcha,
-											afterLogin
+											service, host, username, password, captcha, afterLogin
 									)
 								})
 					}.setNegativeButton(R.string.cancel, null).create()

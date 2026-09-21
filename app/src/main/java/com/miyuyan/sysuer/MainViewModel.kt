@@ -8,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
-import java.io.IOException
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 	val httpManager = HttpManager()
@@ -21,14 +20,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 	 */
 	suspend fun getLatestVersion() = withContext(Dispatchers.IO) {
 		httpManager.client.newCall(
-			httpManager.generateRequest(
-				"https://sysu-tang.github.io/latest.json", null, null
-			).build()
+				httpManager.generateRequest(
+						"https://sysu-tang.github.io/latest.json", null, null
+				).build()
 		).execute()
 	}.use { response ->
-		if (!response.isSuccessful) {
-			throw IOException("Unexpected response code: ${response.code}")
+		if (response.isSuccessful) {
+			_update.value = JSONObject.parseObject(response.body.string())
 		}
-		_update.value = JSONObject.parseObject(response.body.string())
 	}
 }

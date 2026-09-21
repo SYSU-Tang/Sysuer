@@ -908,7 +908,7 @@
     <string name="retry">重试</string>
     <string name="load_failed">加载失败</string>
     <string name="year_month">%d年%d月</string>
-    <string name="from_to_number">第%d节到第%d节</string>
+    <string name="from_to_section">第%d节到第%d节</string>
 
     <string name="user_avatar">用户头像</string>
 </resources>
