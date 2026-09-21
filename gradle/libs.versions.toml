@@ -1,5 +1,5 @@
 [versions]
-agp = "9.4.0"
+agp = "9.4.1"
 androidxAppcompat = "1.8.0"
 api = "13.1.5"
 editorBom = "0.24.6"
