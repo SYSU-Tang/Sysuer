@@ -101,22 +101,19 @@ class GradeForLevelViewModel(application: Application) : AndroidViewModel(applic
 							}
 						}
 					}
-					model.nextAll()
 				}
 			}
 		}
 	}
 
 	fun fetchOptions() {
-		model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 0)
-		model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
-		model.add("jwxt/base-info/base-category/SfqyBox", 2)
-		model.nextAll()
+		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 0)
+		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
+		model.addAndNext("jwxt/base-info/base-category/SfqyBox", 2)
 	}
 
 	fun fetchGrade() {
-		uiState.value =
-			if (page == 1) UiState.Loading else UiState.LoadMore
+		uiState.value = if (page == 1) UiState.Loading else UiState.LoadMore
 		model.addAndNext(
 				"jwxt/achievement-manage/achievement/selfPageList",
 				"{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":$args}",

@@ -754,7 +754,7 @@ private fun ScheduleSection(
 	) {
 		OutlinedCard(
 				modifier = Modifier.weight(1.25f), onClick = { onNextClassClick(view) }) {
-			if (nextClassMarkdown.isNotEmpty()) Markdown(
+			Markdown(
 					rememberMarkdownState(nextClassMarkdown),
 					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
 					typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
@@ -766,7 +766,7 @@ private fun ScheduleSection(
 		}
 		OutlinedCard(
 				modifier = Modifier.weight(1f), onClick = { onTimeCardClick(view) }) {
-			if (nextClassMarkdown.isNotEmpty()) Markdown(
+			Markdown(
 					rememberMarkdownState(dateText),
 					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
 					typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),

@@ -358,13 +358,14 @@ class CourseScheduleActivity : BaseActivity() {
 											)
 											val item = itemAgendaBinding.root
 											if (isStop != null && "0" != isStop) {
-												item.setEnabled(false)
-												item.setCardBackgroundColor(
-														MaterialColors.getColor(
-																item,
-																com.google.android.material.R.attr.colorErrorContainer
-														)
-												)
+												item.isEnabled = false
+												item.setAlpha(0.5f)
+//												item.setCardBackgroundColor(
+//														MaterialColors.getColor(
+//																item,
+//																com.google.android.material.R.attr.colorErrorContainer
+//														)
+//												)
 											} else {
 												val colorIndex = assignedColors.getOrPut(course) {
 													var idx = abs(course.hashCode()) % palettes.size
@@ -499,13 +500,11 @@ class CourseScheduleActivity : BaseActivity() {
 								)
 							} ?: config.toast(getString(R.string.course_not_found))
 						}
-						model.nextAll()
 					}
 				}
 			}
 		}
 		term()
-		model.next()
 	}
 
 	fun getSelectedCourses(courseName: String?) {
@@ -518,11 +517,11 @@ class CourseScheduleActivity : BaseActivity() {
 	}
 
 	fun getAvailableWeeks(academicYear: String?) {
-		model.add("jwxt/base-info/school-calender/weekly?academicYear=$academicYear", 5)
+		model.addAndNext("jwxt/base-info/school-calender/weekly?academicYear=$academicYear", 5)
 	}
 
 	private fun availableTerms() {
-		model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4)
+		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4)
 	}
 
 	fun getOldDate(distanceDay: Int): String {
@@ -537,12 +536,11 @@ class CourseScheduleActivity : BaseActivity() {
 			getAvailableWeeks(currentTerm)
 			getTable(currentTerm, currentWeek)
 			getRange(currentTerm, currentWeek)
-			model.nextAll()
 		}
 	}
 
 	fun getRange(academicYear: String, week: Int) {
-		model.add(
+		model.addAndNext(
 				String.format(
 						Locale.getDefault(),
 						"jwxt/base-info/school-calender?academicYear=%s&weekly=%d",
@@ -599,7 +597,7 @@ class CourseScheduleActivity : BaseActivity() {
 	}
 
 	fun getTable(academicYear: String, week: Int) {
-		if (academicYear.isNotEmpty() && week > 0) model.add(
+		if (academicYear.isNotEmpty() && week > 0) model.addAndNext(
 				"jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=$academicYear&weekly=$week",
 				1
 		)
@@ -616,7 +614,7 @@ class CourseScheduleActivity : BaseActivity() {
 	}
 
 	private fun term() {
-		model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
+		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
 	}
 
 	fun saveCourse(data: CourseData) {

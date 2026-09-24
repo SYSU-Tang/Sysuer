@@ -81,6 +81,7 @@ class PreferenceCategoryScope internal constructor() {
 	fun item(content: @Composable () -> Unit) {
 		collectedItems.add(content)
 	}
+
 }
 
 /**

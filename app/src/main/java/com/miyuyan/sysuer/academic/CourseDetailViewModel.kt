@@ -49,19 +49,11 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 				if (response.getInteger("code") == 200) {
 					val data = response.getJSONObject("data")
 					if (data != null) when (code) {
-						1 -> {
-							handleOutlineInfo(data)
-							model.nextAll()
-						}
+						1 -> handleOutlineInfo(data)
 
-						2 -> {
-							handleOutline2(data)
-							model.nextAll()
-						}
+						2 -> handleOutline2(data)
 
-						3 -> {
-							handleOutlineIdQuery(data)
-						}
+						3 -> handleOutlineIdQuery(data)
 					}
 				}
 			}
@@ -83,7 +75,6 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		this@CourseDetailViewModel.courseId.value = courseId
 		if (classNum != null) fetchCourseOutline()
 		else fetchCourseOutline2()
-		model.next()
 	}
 
 	private fun handleOutlineInfo(data: JSONObject) {
@@ -129,7 +120,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		if (outlineLoaded) return
 		outlineLoaded = true
 		val code = classNum.value ?: return
-		model.add(
+		model.addAndNext(
 				"jwxt/training-programe/courseoutline/getalloutlineinfo?courseNum=$code&auditStatus=99",
 				1
 		)
@@ -139,7 +130,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		if (outline2Loaded) return
 		outline2Loaded = true
 		val id = courseId.value ?: return
-		model.add("jwxt/base-info/courseLibrary/findById?id=$id", 2)
+		model.addAndNext("jwxt/base-info/courseLibrary/findById?id=$id", 2)
 	}
 
 	fun getOutlineId() {
@@ -230,9 +221,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		_detailSections.add(SectionData(app.getString(R.string.course_detail), rows = detailRows))
 		_detailSections.add(
 				SectionData(
-						courseName.value,
-						rows = introRows,
-						rowOrientation = RowOrientation.Vertical
+						courseName.value, rows = introRows, rowOrientation = RowOrientation.Vertical
 				)
 		)
 	}

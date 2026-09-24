@@ -74,23 +74,20 @@ class AssistantEvaluationQueryFragment : PreferenceFragmentCompat() {
 								unit?.entryValues = extractValue.second!!.toTypedArray<String?>()
 							}
 						}
-						model.nextAll()
 					}
 				}
 			}
 		}
 		loadYearTerm()
-		model.next()
-
 		return binding.root
 	}
 
 	private fun loadYearTerm() {
-		model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
+		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
 	}
 
 	fun getUnit(params: String?) {
-		model.add("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$params", 1)
+		model.addAndNext("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$params", 1)
 	}
 
 	val params: JSONObject

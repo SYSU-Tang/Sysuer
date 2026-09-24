@@ -172,7 +172,7 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 			).post(data).addHeader("Content-Type", "application/x-www-form-urlencoded").build()
 		).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
-				model.http.handler.post { model.contextUtil.toast(R.string.no_net_connected) }
+				model.contextUtil.toast(R.string.no_net_connected)
 			}
 
 			override fun onResponse(call: Call, response: Response) {
@@ -190,7 +190,7 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	fun openWechat(location: String) {
-		model.http.handler.post {
+		viewModelScope.launch {
 			val app = getApplication<Application>()
 			model.contextUtil.copy("recharge", location)
 			val intent = Intent.createChooser(

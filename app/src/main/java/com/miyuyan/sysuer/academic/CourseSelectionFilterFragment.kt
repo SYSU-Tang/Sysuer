@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class CourseSelectionFilterFragment : BaseFragment() {
 	var filterValue: CourseFilterValueData? = null
 	var filterName: CourseFilterNameData? = null
-	
+
 	//lateinit var vm: CourseSelectionViewModel
 	lateinit var binding: FragmentCourseFilterBinding
 	lateinit var model: JwxtModel
@@ -32,13 +32,14 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		super.onDestroyView()
 		model.dispose()
 	}
-	
+
 	private val args: CourseSelectionFilterFragmentArgs by navArgs()
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+	): View {
 		super.onCreateView(inflater, container, savedInstanceState)
-		model = JwxtModel(requireContext())		//vm = ViewModelProvider(requireActivity())[CourseSelectionViewModel::class.java]
+		model =
+			JwxtModel(requireContext())        //vm = ViewModelProvider(requireActivity())[CourseSelectionViewModel::class.java]
 		binding = FragmentCourseFilterBinding.inflate(inflater, container, false)
 		binding.container.setColumnCount(config.column)
 		viewLifecycleOwner.lifecycleScope.launch {
@@ -52,14 +53,56 @@ class CourseSelectionFilterFragment : BaseFragment() {
 							items.add("")
 							itemCodes.add("")
 							data.forEach { a: Any? ->
-								items.add((a as JSONObject).getString(arrayOf("campusName", "dataName", "minorName", "dataName", "dataName")[code]))
-								itemCodes.add(a.getString(arrayOf("id", "dataNumber", "sectionNumber", "dataNumber", "dataNumber")[code]))
+								items.add(
+										(a as JSONObject).getString(
+												arrayOf(
+														"campusName",
+														"dataName",
+														"minorName",
+														"dataName",
+														"dataName"
+												)[code]
+										)
+								)
+								itemCodes.add(
+										a.getString(
+												arrayOf(
+														"id",
+														"dataNumber",
+														"sectionNumber",
+														"dataNumber",
+														"dataNumber"
+												)[code]
+										)
+								)
 							}
-							val textView = arrayOf(binding.campus, binding.days, binding.sections, binding.languages, binding.special)[code]
+							val textView = arrayOf(
+									binding.campus,
+									binding.days,
+									binding.sections,
+									binding.languages,
+									binding.special
+							)[code]
 							textView.setSimpleItems(items.toTypedArray())
 							textView.setOnItemClickListener { _: AdapterView<*>?, _: View?, i: Int, _: Long ->
-								filterValue?.set(arrayOf("campus", "day", "section", "language", "special")[code], itemCodes[i])
-								filterName?.set(arrayOf("campus", "day", "section", "language", "special")[code], items[i])
+								filterValue?.set(
+										arrayOf(
+												"campus",
+												"day",
+												"section",
+												"language",
+												"special"
+										)[code], itemCodes[i]
+								)
+								filterName?.set(
+										arrayOf(
+												"campus",
+												"day",
+												"section",
+												"language",
+												"special"
+										)[code], items[i]
+								)
 							}
 						}
 					}
@@ -68,13 +111,13 @@ class CourseSelectionFilterFragment : BaseFragment() {
 			}
 		}
 		(0..<5).forEach { getData(it) }
-		model.next()
-		requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object :
-			OnBackPressedCallback(true) {
-			override fun handleOnBackPressed() {
-				submit()
-			}
-		})
+		requireActivity().onBackPressedDispatcher.addCallback(
+				viewLifecycleOwner,
+				object : OnBackPressedCallback(true) {
+					override fun handleOnBackPressed() {
+						submit()
+					}
+				})
 		args.courseSelectionNameFilter?.let {
 			filterName = it
 			load()
@@ -84,7 +127,7 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		}
 		return binding.root
 	}
-	
+
 	private fun load() {
 		binding.campus.setText(filterName?.studyCampusId, false)
 		binding.course.setText(filterName?.courseName)
@@ -95,13 +138,13 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		binding.school.setText(filterName?.courseUnitNum)
 		binding.teacher.setText(filterName?.teachingTeacherNum)
 	}
-	
+
 	fun reset() {
 		filterValue = CourseFilterValueData()
 		filterName = CourseFilterNameData()
 		load()
 	}
-	
+
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		view.transitionName = "miniapp"
@@ -113,7 +156,7 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		sharedElementEnterTransition = transition
 		sharedElementReturnTransition = transition
 	}
-	
+
 	fun submit() {
 		map()
 		findNavController().previousBackStackEntry?.savedStateHandle?.apply {
@@ -122,11 +165,19 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		}
 		findNavController().popBackStack()
 	}
-	
+
 	fun getData(i: Int) {
-		model.add(arrayOf("jwxt/base-info/campus/findCampusNamesBox", "jwxt/base-info/codedata/findcodedataNames?datableNumber=233", "jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1", "jwxt/base-info/codedata/findcodedataNames?datableNumber=204", "jwxt/base-info/codedata/findcodedataNames?datableNumber=387")[i], i)
+		model.addAndNext(
+				arrayOf(
+						"jwxt/base-info/campus/findCampusNamesBox",
+						"jwxt/base-info/codedata/findcodedataNames?datableNumber=233",
+						"jwxt/base-info/AcadyeartermSet/minorName?schoolYear=2025-1",
+						"jwxt/base-info/codedata/findcodedataNames?datableNumber=204",
+						"jwxt/base-info/codedata/findcodedataNames?datableNumber=387"
+				)[i], i
+		)
 	}
-	
+
 	private fun map() {
 		filterValue?.courseName = getEditText(binding.course)
 		filterValue?.teachingTeacherNum = getEditText(binding.teacher)
@@ -135,8 +186,6 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		filterName?.teachingTeacherNum = getEditText(binding.teacher)
 		filterName?.courseUnitNum = getEditText(binding.school)
 	}
-	
-	fun getEditText(editText: EditText): String {
-		return editText.text.toString().trim()
-	}
+
+	fun getEditText(editText: EditText): String = editText.text.toString().trim()
 }

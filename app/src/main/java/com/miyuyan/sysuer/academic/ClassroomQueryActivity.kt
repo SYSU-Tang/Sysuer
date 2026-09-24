@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.viewbinding.ViewBinding
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.bumptech.glide.Glide
@@ -26,25 +27,25 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.slider.RangeSlider
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.R
+import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.databinding.ActivityClassroomQueryBinding
 import com.miyuyan.sysuer.databinding.ItemClassroomResultBinding
 import com.miyuyan.sysuer.databinding.ItemFilterChipBinding
 import com.miyuyan.sysuer.model.JwxtModel
+import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.RecyclerAdapter
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
 
 class ClassroomQueryActivity : BaseActivity() {
-	val office: MutableMap<Int?, String?> = mutableMapOf()
-	val campusLiveData: MutableLiveData<String?> = MutableLiveData<String?>()
-	lateinit var model: JwxtModel
-	var dateStr: String? = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-	var startClassTime: String = "1"
-	var endClassTime: String = "11"
+	val office: MutableMap<Int, String> = mutableMapOf()
+	val campus: MutableLiveData<String> = MutableLiveData<String>()
+	val model: JwxtModel by lazy {
+		JwxtModel(this)
+	}
+	var dateMillis: MutableLiveData<Long> = MutableLiveData(System.currentTimeMillis())
+	var startClassTime: Int = 1
+	var endClassTime: Int = 11
 	var page: Int = 1
 	var total: Int = 0
 	lateinit var binding: ActivityClassroomQueryBinding
@@ -52,12 +53,14 @@ class ClassroomQueryActivity : BaseActivity() {
 		super.onDestroy()
 		model.dispose()
 	}
-	
+
+	@OptIn(ExperimentalStdlibApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val roomAdapter = RoomAdapter()
-		val dateDialog = MaterialDatePicker.Builder.datePicker().build()
-		val classroom = mutableMapOf<String?, ArrayList<Chip?>?>()
+		val dateDialog =
+			MaterialDatePicker.Builder.datePicker().setSelection(dateMillis.value).build()
+		val classroom = mutableMapOf<String, MutableList<Chip>>()
 		binding = ActivityClassroomQueryBinding.inflate(layoutInflater).apply {
 			campusSelectAll.setOnClickListener {
 				campusGroup.children.drop(0).forEach {
@@ -71,16 +74,18 @@ class ClassroomQueryActivity : BaseActivity() {
 			}
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			result.adapter = roomAdapter
-			result.layoutManager = StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL)
+			result.layoutManager =
+				StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL)
 			BottomSheetBehavior.from<LinearLayout?>(resultSheet)
 				.setState(BottomSheetBehavior.STATE_HIDDEN)
 			date.setOnClickListener {
 				dateDialog.show(supportFragmentManager, null)
 			}
-			timeSlider.addOnChangeListener { slider: RangeSlider?, _, _ ->
-				startClassTime = String.format(Locale.getDefault(), "%.0f", slider!!.values[0])
-				endClassTime = String.format(Locale.getDefault(), "%.0f", slider.values[1])
-				time.text = String.format(getString(R.string.section_range_x), startClassTime, endClassTime)
+			timeSlider.addOnChangeListener { slider: RangeSlider, _, _ ->
+				val (start, end) = slider.values
+				startClassTime = start.toInt()
+				endClassTime = end.toInt()
+				time.text = getString(R.string.from_to_section, startClassTime, endClassTime)
 			}
 			query.setOnClickListener {
 				roomAdapter.clear()
@@ -93,149 +98,167 @@ class ClassroomQueryActivity : BaseActivity() {
 				}
 			})
 			reset.setOnClickListener {
-				officeGroup.checkedChipIds.forEach { e: Int? ->
-					(officeGroup.findViewById<View>(e!!) as Chip).isChecked = false
+				officeGroup.checkedChipIds.forEach { e: Int ->
+					(officeGroup.findViewById<View>(e) as Chip).isChecked = false
 				}
-				campusGroup.checkedChipIds.forEach { e: Int? ->
-					(campusGroup.findViewById<View>(e!!) as Chip).isChecked = false
+				campusGroup.checkedChipIds.forEach { e: Int ->
+					(campusGroup.findViewById<View>(e) as Chip).isChecked = false
 				}
-				typeGroup.checkedChipIds.forEach { e: Int? ->
-					(typeGroup.findViewById<View>(e!!) as Chip).isChecked = true
+				typeGroup.checkedChipIds.forEach { e: Int ->
+					(typeGroup.findViewById<View>(e) as Chip).isChecked = true
 				}
 				timeSlider.values = mutableListOf(1.0f, 11.0f)
-				dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-				dateText.text = LocalDate.now()
-					.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
+				dateMillis.value = System.currentTimeMillis()
 			}
-			dateText.text = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
 		}
-		setContentView(binding.getRoot())
-		model = JwxtModel(this)
-		dateDialog.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { selection: Long? ->
-			val date = Instant.ofEpochMilli(selection!!)
-				.atZone(ZoneId.systemDefault())
-				.toLocalDate()
-			dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-			binding.dateText.text = date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
+		setContentView(binding.root)
+		dateMillis.observe(this) { dateMillis ->
+			binding.dateText.text = DateTimeManager.toDateString(
+					dateMillis, DateTimeFormatter.ofPattern("yyyy年MM月dd日")
+			)
+		}
+		dateDialog.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { selection: Long ->
+			dateMillis.value = selection
 		})
 		campus()
+		roomAdapter.listener = object : AdapterListener {
+			override fun onBind(
+				adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>,
+				holder: RecyclerView.ViewHolder,
+				position: Int
+			) {
+				val item = roomAdapter.get(position)
+				ItemClassroomResultBinding.bind(holder.itemView).apply {
+					location.text = item.getString("teachingBuildingName")
+					time.text = item.getString("classTimes")
+					floor.text = item.getString("floor")
+					seat.text = item.getString("seats")
+					type.text = item.getString("classRoomTag")
+					name.text = item.getString("classRoomNum")
+					root.setOnClickListener {}
+					Glide.with(root.context).load(
+							GlideUrl(
+									"https://${model.host}/jwxt/base-info/classroom/classRoomView?fileName=jspic.png&filePath=" + item.get(
+											"photoPath"
+									),
+									LazyHeaders.Builder().addHeader("Cookie", model.cookie)
+										.addHeader("Referer", "https://jwxt.sysu.edu.cn/").build()
+							)
+					).placeholder(R.drawable.logo)
+						.override((145 * 3.6).toInt(), (132 * 3.6).toInt()).fitCenter().into(image)
+				}
+			}
+
+			override fun onCreate(
+				adapter: RecyclerView.Adapter<RecyclerView.ViewHolder?>, binding: ViewBinding?
+			) {
+			}
+		}
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
 				model.messageChannel.collect { (code, response) ->
-					println(response)
 					if (response.getInteger("code") == 200) {
-						if (code == 3) {
-							val data = response.getJSONObject("data")
-							total = data.getInteger("total")
-							data.getJSONArray("rows")
-								.forEach { a: Any? -> roomAdapter.add(a as JSONObject) }
-							BottomSheetBehavior.from<LinearLayout?>(binding.resultSheet)
-								.setState(BottomSheetBehavior.STATE_EXPANDED)
-							roomAdapter.setHost(model.host)
-							roomAdapter.setCookie(model.cookieManager!!.toSimpleString(model.host))
-						} else {
-							binding.timeSlider.valueFrom = 1f
-							response.getJSONArray("data").forEach { campusInfo: Any? ->
-								when (code) {
-									1 -> {
-										val id = (campusInfo as JSONObject).getString("id")
-										val chip = ItemFilterChipBinding.inflate(layoutInflater, binding.campusGroup, false)
-											.getRoot()
-										binding.campusGroup.addView(chip)
-										chip.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-											if (isChecked) {
-												if (classroom.containsKey(id)) classroom[id]?.forEach { e: Chip? ->
-													e!!.visibility = View.VISIBLE
+						when (code) {
+							3 -> {
+								val data = response.getJSONObject("data")
+								total = data.getInteger("total")
+								data.getJSONArray("rows")
+									.forEach { a: Any? -> roomAdapter.add(a as JSONObject) }
+								BottomSheetBehavior.from<LinearLayout?>(binding.resultSheet)
+									.setState(BottomSheetBehavior.STATE_EXPANDED)
+							}
+
+							else -> {
+								binding.timeSlider.valueFrom = 1f
+								response.getJSONArray("data").forEach { campusInfo: Any? ->
+									when (code) {
+										1 -> {
+											val id = (campusInfo as JSONObject).getString("id")
+											val chip = ItemFilterChipBinding.inflate(
+													layoutInflater, binding.campusGroup, false
+											).root.apply {
+												text = campusInfo.getString("campusName")
+												setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+													if (isChecked) {
+														if (classroom.containsKey(id)) classroom[id]?.forEach { e: Chip ->
+															e.isVisible = true
+														}
+														else getOffice(id)
+													} else classroom[id]?.forEach { e: Chip ->
+														e.isVisible = false
+													}
 												}
-												else getOffice(id)
-											} else classroom[id]?.forEach { e: Chip? ->
-												e!!.visibility = View.GONE
 											}
+											binding.campusGroup.addView(chip)
 										}
-										chip.text = campusInfo.getString("campusName")
-									}
-									2 -> {
-										classroom.computeIfAbsent(campusLiveData.getValue()) { _: String? -> ArrayList() }
-										val chip = ItemFilterChipBinding.inflate(layoutInflater, binding.officeGroup, false)
-											.getRoot()
-										binding.officeGroup.addView(chip)
-										office[chip.id] = (campusInfo as JSONObject).getString("id")
-										chip.text = campusInfo.getString("dataName")
-										classroom[campusLiveData.getValue()]?.add(chip)
+
+										2 -> {
+											val chip = ItemFilterChipBinding.inflate(
+													layoutInflater, binding.officeGroup, false
+											).root
+											binding.officeGroup.addView(chip)
+											office[chip.id] =
+												(campusInfo as JSONObject).getString("id")
+											chip.text = campusInfo.getString("dataName")
+											classroom.getOrPutIfNull(
+													campus.value ?: ""
+											) { mutableListOf() }.add(chip)
+										}
 									}
 								}
 							}
 						}
-						model.nextAll()
 					}
 				}
 			}
 		}
-		model.next()
 	}
-	
+
 	private fun campus() {
-		model.add("jwxt/base-info/campus/findCampusNamesBox", 1)
+		model.addAndNext("jwxt/base-info/campus/findCampusNamesBox", 1)
 	}
-	
-	fun getOffice(campus: String?) {
-		campusLiveData.value = campus
-		model.addAndNext("jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull", "{\"campusIdList\":[\"$campus\"]}", 2)
+
+	fun getOffice(campusName: String) {
+		campus.value = campusName
+		model.addAndNext(
+				"jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull",
+				"{\"campusIdList\":[\"$campusName\"]}",
+				2
+		)
 	}
-	
+
 	private fun room() {
 		val teachingBuildIDs = mutableListOf<String?>()
 		val classType = mutableListOf<String>()
-		binding.typeGroup.checkedChipIds.forEach { e: Int? ->
+		binding.typeGroup.checkedChipIds.forEach { e: Int ->
 			classType.add(if (e == R.id.self_study_room) "003" else "002")
 		}
-		binding.officeGroup.checkedChipIds.forEach { e: Int? ->
-			if (findViewById<View>(e!!).isVisible) teachingBuildIDs.add(office[e])
-		}
-		if (teachingBuildIDs.isEmpty()) model.contextUtil.toast(R.string.select_teaching_building)
-		else model.addAndNext("jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom", "{\"pageNo\":${page++},\"pageSize\":20,\"param\":{\"dateStr\":\"$dateStr\",\"teachingBuildIDs\":${
-			JSONArray.toJSONString(teachingBuildIDs)
-		},\"startClassTimes\":$startClassTime,\"endClassTimes\":$endClassTime,\"classRoomTagList\":${JSONArray.toJSONString(classType)}}}", 3)
-	}
-	
-	class RoomAdapter : RecyclerAdapter<JSONObject>() {
-		private var host: String? = null
-		private var cookie: String? = null
-		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-			return object :
-				RecyclerView.ViewHolder(ItemClassroomResultBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-											.getRoot()) {}
-		}
-		
-		fun setHost(host: String?) {
-			this.host = host
-		}
-		
-		fun setCookie(cookie: String) {
-			this.cookie = cookie
-		}
-		
-		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-			val item = get(position)
-			ItemClassroomResultBinding.bind(holder.itemView).apply {
-				location.text = item.getString("teachingBuildingName")
-				time.text = item.getString("classTimes")
-				floor.text = item.getString("floor")
-				seat.text = item.getString("seats")
-				type.text = item.getString("classRoomTag")
-				name.text = item.getString("classRoomNum")
-				getRoot().setOnClickListener {}
-				Glide.with(root.context)
-					.load(GlideUrl("https://$host/jwxt/base-info/classroom/classRoomView?fileName=jspic.png&filePath=" + item.get("photoPath"), LazyHeaders.Builder()
-						.addHeader("Cookie", cookie!!)
-						.addHeader("Referer", "https://jwxt.sysu.edu.cn/")
-						.build()))
-					.placeholder(R.drawable.logo)
-					.override((145 * 3.6).toInt(), (132 * 3.6).toInt())
-					.fitCenter()
-					.into(image)
+		binding.officeGroup.checkedChipIds.filter { findViewById<View>(it).isVisible }
+			.forEach { e: Int ->
+				teachingBuildIDs.add(office[e])
 			}
-			super.onBindViewHolder(holder, position)
-		}
+		if (teachingBuildIDs.isEmpty()) model.contextUtil.toast(R.string.select_teaching_building)
+		else model.addAndNext(
+				"jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom",
+				"{\"pageNo\":${page++},\"pageSize\":20,\"param\":{\"dateStr\":\"${
+					DateTimeManager.toDateString(dateMillis.value ?: System.currentTimeMillis())
+				}\",\"teachingBuildIDs\":${
+					JSONArray.toJSONString(teachingBuildIDs)
+				},\"startClassTimes\":$startClassTime,\"endClassTimes\":$endClassTime,\"classRoomTagList\":${
+					JSONArray.toJSONString(
+							classType
+					)
+				}}}",
+				3
+		)
+	}
+
+	class RoomAdapter : RecyclerAdapter<JSONObject>() {
+		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+			object : RecyclerView.ViewHolder(
+					ItemClassroomResultBinding.inflate(
+							LayoutInflater.from(parent.context), parent, false
+					).root
+			) {}
 	}
 }

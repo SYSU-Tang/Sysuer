@@ -21,10 +21,10 @@ class GymModel(context: Context) : BaseModel(context) {
 	                                                                               "gym-443.webvpn.sysu.edu.cn").also {
 		it.setTargetUrl(TargetUrl.GYM, TargetUrl.GYM_WEBVPN)
 	}
-	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
+	override val http: HttpManager = HttpManager().apply {
 		cookieManager = CookieManager(context)
 		ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
-		setAuthorizationRequired(true)
+		isAuthorizationRequired = true
 		authorizationJar = AuthorizationJar(context)
 		header = mutableMapOf("Accept" to "application/json, text/plain, */*")
 	}
@@ -46,11 +46,11 @@ class GymModel(context: Context) : BaseModel(context) {
 				if (!authorizationManager.isAuthorized(content)) login(request)
 				else if (Pattern.compile("人机识别检测").matcher(content).find()) login(request)
 				else if (!authorizationManager.isAccessible(content)) retry(request)
-				else http.handler.post { contextUtil.toast(content) }
+				else contextUtil.toast(content)
 			}
 			400 -> {
 //				println("GymModel: ${response.code} $content")
-				http.handler.post { contextUtil.toast(content) }
+				contextUtil.toast(content)
 			}
 			401 -> login(request)
 		}

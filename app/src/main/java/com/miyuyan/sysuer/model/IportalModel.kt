@@ -17,10 +17,10 @@ class IportalModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager = AuthorizationManager("iportal.sysu.edu.cn", "iportal-443.webvpn.sysu.edu.cn").also {
 		it.setTargetUrl(TargetUrl.NEWS, TargetUrl.NEWS_WEBVPN)
 	}
-	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
+	override val http: HttpManager = HttpManager().apply {
 		cookieManager = CookieManager(context)
 		authorizationJar = AuthorizationJar(context)
-		setAuthorizationRequired(true)
+		isAuthorizationRequired = true
 		header = mutableMapOf("clientid" to "sysuer")
 	}
 	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,

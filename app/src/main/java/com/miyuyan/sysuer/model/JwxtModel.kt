@@ -1,8 +1,6 @@
 package com.miyuyan.sysuer.model
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.AuthorizationManager
 import com.miyuyan.sysuer.api.CommonUtil
@@ -17,9 +15,9 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 		AuthorizationManager("jwxt.sysu.edu.cn", "jwxt-443.webvpn.sysu.edu.cn").also {
 			it.setTargetUrl(TargetUrl.JWXT, TargetUrl.JWXT_WEBVPN)
 		}
-	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
+	override val http: HttpManager = HttpManager().apply {
 		cookieManager = CookieManager(context)
-		setReferrer("https://jwxt.sysu.edu.cn/")
+		referer = "https://jwxt.sysu.edu.cn/"
 	}
 
 	override fun handleResponse(
@@ -32,9 +30,7 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 			val code = contentJSON.getInteger("code")
 			if (code == 53000007) login(request)
 			else {
-				if (code != 200) http.handler.post {
-					contextUtil.toast(CommonUtil.toStringOrDefault(contentJSON.getString("message")))
-				}
+				if (code != 200) toast(contentJSON.getString("message", ""))
 				result = CommonUtil.Tuple2(request.second, contentJSON)
 				sendMessage(result)
 			}

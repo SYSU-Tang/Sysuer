@@ -111,7 +111,6 @@ class RecruitmentInfoFragment : StaggerFragment() {
 								}
 							}
 						}
-						model.nextAll()
 					}
 				}
 			}
@@ -120,7 +119,6 @@ class RecruitmentInfoFragment : StaggerFragment() {
 		campus()
 		jobType()
 		recruitment()
-		model.next()
 		return view
 	}
 
@@ -152,14 +150,14 @@ class RecruitmentInfoFragment : StaggerFragment() {
 	}
 
 	private fun year() {
-		model.add("qgzx/api/sm-qgzx/gwsq/ndlist/get", 1)
+		model.addAndNext("qgzx/api/sm-qgzx/gwsq/ndlist/get", 1)
 	}
 
 	private fun campus() {
-		model.add("qgzx/api/sm-qgzx/gwsq/xylist/get", 2)
+		model.addAndNext("qgzx/api/sm-qgzx/gwsq/xylist/get", 2)
 	}
 
 	private fun jobType() {
-		model.add("qgzx/api/sm-qgzx/gwsq/gwlxlist/get", 3)
+		model.addAndNext("qgzx/api/sm-qgzx/gwsq/gwlxlist/get", 3)
 	}
 }

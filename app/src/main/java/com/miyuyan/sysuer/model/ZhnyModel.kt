@@ -17,9 +17,9 @@ class ZhnyModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager = AuthorizationManager("zhny.sysu.edu.cn", "zhny.sysu.edu.cn").also {
 		it.setTargetUrl(TargetUrl.ZHNY, TargetUrl.ZHNY)
 	}
-	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
+	override val http: HttpManager = HttpManager().apply {
 		cookieManager = CookieManager(context)
-		setAuthorizationRequired(true)
+		isAuthorizationRequired = true
 		authorizationJar = AuthorizationJar(context)
 	}
 	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,

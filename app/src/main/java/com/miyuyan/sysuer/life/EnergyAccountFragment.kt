@@ -136,7 +136,7 @@ class EnergyAccountFragment : BaseFragment() {
 				override fun onResponse(call: Call, response: Response) {
 					val location = response.header("Location")
 					if (!location.isNullOrEmpty()) {
-						model.http.handler.post {
+						lifecycleScope.launch {
 							config.copy("recharge", location)
 							val intent = Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, location).putExtra(Intent.EXTRA_SUBJECT, getString(R.string.recharge)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
 							                                  getString(R.string.share))

@@ -15,7 +15,7 @@ class RainClassModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager =
 		AuthorizationManager("www.yuketang.cn", "www.yuketang.cn")
 
-//	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
+//	override val http: HttpManager = HttpManager().apply {
 //		cookieManager = CookieManager(context)
 //		header = mutableMapOf("xtbz" to "ykt")
 //	}

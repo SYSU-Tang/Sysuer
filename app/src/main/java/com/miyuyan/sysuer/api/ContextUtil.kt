@@ -106,21 +106,29 @@ class ContextUtil(val context: Context) {
 	}
 
 	/**
-	 * 显示 Toast 消息
-	 * 
+	 * 显示 Toast 消息（自动切换到主线程）
+	 *
 	 * @param resource 字符串资源 ID
 	 */
 	fun toast(resource: Int) {
-		Toast.makeText(context, resource, Toast.LENGTH_LONG).show()
+		if (Looper.myLooper() == Looper.getMainLooper()) {
+			Toast.makeText(context, resource, Toast.LENGTH_LONG).show()
+		} else {
+			handler.post { Toast.makeText(context, resource, Toast.LENGTH_LONG).show() }
+		}
 	}
 
 	/**
-	 * 显示 Toast 消息
-	 * 
+	 * 显示 Toast 消息（自动切换到主线程）
+	 *
 	 * @param toast 要显示的文本
 	 */
 	fun toast(toast: String?) {
-		Toast.makeText(context, toast, Toast.LENGTH_LONG).show()
+		if (Looper.myLooper() == Looper.getMainLooper()) {
+			Toast.makeText(context, toast, Toast.LENGTH_LONG).show()
+		} else {
+			handler.post { Toast.makeText(context, toast, Toast.LENGTH_LONG).show() }
+		}
 	}
 
 	/**

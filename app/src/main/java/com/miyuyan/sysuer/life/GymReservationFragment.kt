@@ -197,10 +197,10 @@ class GymReservationFragment : BaseFragment() {
 	fun deleteReservation(bookingId: String) {
 		model.run(
 				model.http
-					.generateGetRequest("https://${model.host}/api/BookingRequestVenue/$bookingId")
+					.generateRequest("https://${model.host}/api/BookingRequestVenue/$bookingId")
 					.delete().build(), object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
-				model.http.handler.post { model.contextUtil.toast(R.string.no_net_connected) }
+				model.contextUtil.toast(R.string.no_net_connected)
 			}
 
 			override fun onResponse(call: Call, response: Response) {

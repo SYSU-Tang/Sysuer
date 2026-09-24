@@ -53,7 +53,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	val progressMax: StateFlow<Int> = _progressMax.asStateFlow()
 	private val _progressCurrent = MutableStateFlow(0)
 	val progressCurrent: StateFlow<Int> = _progressCurrent.asStateFlow()
-	private val _nextClassMarkdown = MutableStateFlow("")
+	private val _nextClassMarkdown = MutableStateFlow(application.getString(R.string.loading))
 	val nextClassMarkdown: StateFlow<String> = _nextClassMarkdown.asStateFlow()
 	private val _isShowWeek18 = MutableStateFlow(true)
 	val isShowWeek18: StateFlow<Boolean> = _isShowWeek18.asStateFlow()

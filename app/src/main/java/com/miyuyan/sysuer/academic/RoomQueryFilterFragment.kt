@@ -176,7 +176,7 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 	}
 
 	fun getData(pos: Int) {
-		model.add(
+		model.addAndNext(
 				mutableListOf<String?>(
 						"jwxt/base-info/campus/findCampusNamesBox",
 						"jwxt/base-info/teaching-building/pull",

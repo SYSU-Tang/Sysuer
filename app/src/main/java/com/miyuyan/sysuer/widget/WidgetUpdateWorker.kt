@@ -62,15 +62,15 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) :
 			return if (r2 != null && r3 != null) JSONArray.of(r1?.second, r2.second, r3.second) else null
 		}
 	private fun term() {
-		model.add("jwxt/base-info/acadyearterm/showNewAcadlist", 0)
+		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 0)
 	}
-	
+
 	fun getWeek(term: String?) {
-		model.add("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 1)
+		model.addAndNext("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 1)
 	}
 	
 	fun getTodayCourses(term: String?) {
-		model.add("jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term", 2)
+		model.addAndNext("jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term", 2)
 	}
 	
 	class JwxtWidgetModel(context: Context) : JwxtModel(context) {

@@ -338,13 +338,12 @@ class CourseSelectionMainFragment : BaseFragment() {
 	fun sortPE(data: String) {
 		model.run("jwxt/choose-course-front-server/selectedCourse/updateSportsSelectedlist", data, null, object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
-				model.http.handler.post { config.toast(R.string.save_fail) }
+				config.toast(R.string.save_fail)
 			}
 			
 			override fun onResponse(call: Call, response: Response) {
-				if (response.isSuccessful && response.code == 200) model.http.handler.post {
+				if (response.isSuccessful && response.code == 200)
 					config.toast(R.string.save_successful)
-				}
 				else model.login {
 					sortPE(data)
 				}

@@ -8,7 +8,6 @@ import android.widget.CompoundButton
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation.findNavController
@@ -19,7 +18,6 @@ import com.miyuyan.sysuer.databinding.FragmentAssistantInfoFilterBinding
 import com.miyuyan.sysuer.databinding.ItemFilterChipBinding
 import com.miyuyan.sysuer.model.JwxtModel
 import kotlinx.coroutines.launch
-import java.util.function.Consumer
 
 class AssistantInfoFilterFragment : BaseFragment() {
 	lateinit var model: JwxtModel
@@ -27,10 +25,10 @@ class AssistantInfoFilterFragment : BaseFragment() {
 		super.onDestroyView()
 		model.dispose()
 	}
-	
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+	): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		val term: MutableLiveData<String?> = MutableLiveData<String?>()
 		val campus: MutableLiveData<String?> = MutableLiveData<String?>()
@@ -50,50 +48,52 @@ class AssistantInfoFilterFragment : BaseFragment() {
 		val pop = PopupMenu(requireContext(), binding.term.root)
 		binding.term.root.setOnClickListener { pop.show() }
 		model = JwxtModel(requireContext())
-term.observe(viewLifecycleOwner, Observer { acadYearSemester: String? ->
+		term.observe(viewLifecycleOwner) { acadYearSemester: String? ->
 			acadYearSemester?.let {
 				binding.term.itemContent.text = it
 			}
-		})
+		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 				model.messageChannel.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						when (code) {
 							0 -> {
-								response.getJSONArray("data").forEach(Consumer { t: Any? ->
+								response.getJSONArray("data").forEach { t: Any? ->
 									pop.menu.add((t as JSONObject).getString("acadYearSemester"))
 										.setOnMenuItemClickListener {
 											term.value = t.getString("acadYearSemester")
 											false
 										}
-								})
-								this@AssistantInfoFilterFragment.campuses()
+								}
+								campuses()
 							}
-							1 -> response.getJSONArray("data").forEach(Consumer { c: Any? ->
-								val item = ItemFilterChipBinding.inflate(inflater, binding.campus, false)
-								item.getRoot().text = (c as JSONObject).getString("campusName")
-								item.getRoot()
-									.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-										if (isChecked) campus.value = c.getString("id")
-									}
-								binding.campus.addView(item.getRoot())
-							})
+
+							1 -> response.getJSONArray("data").forEach { c: Any? ->
+								val item =
+									ItemFilterChipBinding.inflate(inflater, binding.campus, false)
+										.apply {
+											root.text = (c as JSONObject).getString("campusName")
+											root.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+												if (isChecked) campus.value = c.getString("id")
+											}
+										}
+								binding.campus.addView(item.root)
+							}
 						}
-						model.nextAll()
 					}
 				}
 			}
 		}
 		terms()
-		model.next()
-		return binding.getRoot()
+		return binding.root
 	}
-	
+
 	private fun terms() {
-		model.add("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
+		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
 	}
+
 	private fun campuses() {
-		model.add("jwxt/base-info/campus/findCampusNamesBox", 1)
+		model.addAndNext("jwxt/base-info/campus/findCampusNamesBox", 1)
 	}
 }

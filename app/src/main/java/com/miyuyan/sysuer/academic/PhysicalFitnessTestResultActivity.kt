@@ -6,7 +6,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CookieManager
-import com.miyuyan.sysuer.api.HttpManager
 import com.miyuyan.sysuer.api.TargetUrl
 import com.miyuyan.sysuer.databinding.ActivityPagerBinding
 import com.miyuyan.sysuer.view.Pager2Adapter
@@ -18,7 +17,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
 class PhysicalFitnessTestResultActivity : BaseActivity() {
-	lateinit var http: HttpManager
+
 	var position: Int = 0
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -28,8 +27,8 @@ class PhysicalFitnessTestResultActivity : BaseActivity() {
 			toolbar.setTitle(R.string.physical_fitness_test_result)
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			pager.adapter = adp
-			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab?, position: Int ->
-				tab?.text = mutableListOf<String?>("体测成绩", "体育积分", "游泳")[position]
+			TabLayoutMediator(tabLayout, pager) { tab: TabLayout.Tab, position: Int ->
+				tab.text = mutableListOf("体测成绩", "体育积分", "游泳")[position]
 			}.attach()
 		}
 		setContentView(binding.root)

@@ -39,7 +39,6 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 		super.onCreateView(inflater, container, savedInstanceState)
 		val adapter = ConcatAdapter()
 		val formatter = DateTimeFormatter.ofPattern("yyyy-MM")
-
 		val binding = FragmentWaterFeeBinding.inflate(inflater, container, false).apply {
 			list.layoutManager = LinearLayoutManager(requireContext())
 			list.adapter = adapter
@@ -261,7 +260,6 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 				).format(formatter)
 				)
 				getWaterBill(it)
-				model.nextAll()
 			}
 		}
 		return binding.root
@@ -269,7 +267,7 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 
 
 	fun getWaterConsumption(room: String, date: String?) {
-		model.add(
+		model.addAndNext(
 			"kbp/cwbs/month/usage/stats",
 			JSONObject.of("roomCode", room, "staticsMonth", date).toJSONString(),
 			2
@@ -277,7 +275,7 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 	}
 
 	fun getWaterBill(room: String) {
-		model.add("kbp/cwbs/mobile/room/bill/list", JSONObject.of("roomCode", room).toJSONString(), 3)
+		model.addAndNext("kbp/cwbs/mobile/room/bill/list", JSONObject.of("roomCode", room).toJSONString(), 3)
 	}
 
 	fun getDetail(billId: String?) {

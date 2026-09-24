@@ -1,11 +1,7 @@
 package com.miyuyan.sysuer.life
 
 import android.app.Application
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
@@ -312,7 +308,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 				"application/x-www-form-urlencoded",
 				object : Callback {
 					override fun onFailure(call: Call, e: IOException) {
-						model.http.handler.post { toast(R.string.no_net_connected) }
+						model.toast(R.string.no_net_connected)
 					}
 
 					override fun onResponse(call: Call, response: Response) {
@@ -349,7 +345,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 				"application/x-www-form-urlencoded",
 				object : Callback {
 					override fun onFailure(call: Call, e: IOException) {
-						model.http.handler.post { toast(R.string.no_net_connected) }
+						model.toast(R.string.no_net_connected)
 					}
 
 					override fun onResponse(call: Call, response: Response) {
@@ -407,17 +403,14 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 				).build(),
 		).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
-				model.http.handler.post { toast(R.string.no_net_connected) }
+				model.toast(R.string.no_net_connected)
 			}
 
 			override fun onResponse(call: Call, response: Response) {
 				val location = response.header("Location")
 				if (!location.isNullOrEmpty()) {
-					model.http.handler.post {
-						val app = getApplication<Application>()
-						val clipboard =
-							app.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-						clipboard.setPrimaryClip(ClipData.newPlainText("recharge", location))
+					viewModelScope.launch {
+						model.contextUtil.copy("", location)
 						val intent = Intent.createChooser(
 								Intent(Intent.ACTION_SEND).setType("text/plain")
 									.putExtra(Intent.EXTRA_TEXT, location)
@@ -425,9 +418,9 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 									.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
 								getString(R.string.share),
 						)
-						if (intent.resolveActivity(app.packageManager) != null) {
+						if (intent.resolveActivity(application.packageManager) != null) {
 							intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-							app.startActivity(intent)
+							application.startActivity(intent)
 						}
 					}
 				}
@@ -444,11 +437,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 	}
 
 	private fun toast(resId: Int) {
-		Toast.makeText(
-				getApplication(),
-				resId,
-				Toast.LENGTH_SHORT,
-		).show()
+		model.contextUtil.toast(resId)
 	}
 
 	private fun getString(resId: Int): String = application.getString(resId)

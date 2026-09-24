@@ -20,10 +20,7 @@ class CookieManager(context: Context) {
 				HttpCookie.parse(it)[0].value
 			}
 
-	fun toString(host: String?): String {
-		val strings = get(host)
-		return if (strings.isEmpty()) "" else strings.joinToString(separator = ";")
-	}
+	fun toString(host: String?): String = get(host).joinToString(separator = ";")
 
 	fun toSimpleString(host: String?): String = get(host).stream().map { c: String ->
 		c.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
@@ -56,8 +53,7 @@ class CookieManager(context: Context) {
 	}
 
 	fun add(host: String, cookie: String) {
-		val parts: Array<String?> =
-			cookie.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+		val parts: Array<String?> = cookie.split("=").dropLastWhile { it.isEmpty() }.toTypedArray()
 		if ("rememberMe" != parts[0]) add(
 				host, Cookie.Builder().domain(host).name(parts[0]!!).value(parts[1]!!).build()
 		)

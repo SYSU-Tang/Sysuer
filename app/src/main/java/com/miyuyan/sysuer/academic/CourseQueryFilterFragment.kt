@@ -121,12 +121,10 @@ class CourseQueryFilterFragment : PreferenceFragmentCompat() {
 								}
 							}
 						}
-						model.nextAll()
 					}
 				}
 			}
 		}
-		model.next()
 		return binding.getRoot()
 	}
 
@@ -150,15 +148,15 @@ class CourseQueryFilterFragment : PreferenceFragmentCompat() {
 	//        model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=350", 4);
 	//    }
 	fun getTeachingBuilding(text: String?) {
-		model.add("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$text", 5)
+		model.addAndNext("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$text", 5)
 	}
 
 	fun getClassroom(text: String) {
-		model.add("jwxt/base-info/classroom/getClassRoomAllPull", "{\"queryParam\":\"$text\"}", 6)
+		model.addAndNext("jwxt/base-info/classroom/getClassRoomAllPull", "{\"queryParam\":\"$text\"}", 6)
 	}
 
 	fun getData(pos: Int) {
-		model.add(
+		model.addAndNext(
 				mutableListOf<String?>(
 						"jwxt/base-info/acadyearterm/findAcadyeartermNamesBox",
 						"jwxt/base-info/campus/findCampusNamesBox",

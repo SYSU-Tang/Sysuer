@@ -18,7 +18,7 @@ class XinfangModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager = AuthorizationManager("xinfang.sysu.edu.cn", "xinfang-443.webvpn.sysu.edu.cn").also {
 		it.setTargetUrl(TargetUrl.XINFANG, TargetUrl.XINFANG_WEBVPN)
 	}
-	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
+	override val http: HttpManager = HttpManager().apply {
 		cookieManager = CookieManager(context)
 	}
 	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,

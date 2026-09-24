@@ -21,7 +21,7 @@ class PjxtModel(context: Context) : BaseModel(context) {
 			it.endsWith("21")
 		}?.let {
 			login(request)
-		} ?: http.handler.post { contextUtil.toast(R.string.no_net_connected) }
+		} ?: contextUtil.toast(R.string.no_net_connected)
 	}
 	
 	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>, response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
@@ -41,9 +41,7 @@ class PjxtModel(context: Context) : BaseModel(context) {
 							JSONObject.parse(content)
 						result = CommonUtil.Tuple2(request.second, data)
 						data?.takeIf { it.containsKey("code") && it.getString("code") != "200" }?.let {
-							http.handler.post {
-								contextUtil.toast(CommonUtil.toStringOrDefault(data.getString("msg")))
-							}
+							contextUtil.toast(CommonUtil.toStringOrDefault(data.getString("msg")))
 						}
 //						message.postValue(result)
 						sendMessage(result)

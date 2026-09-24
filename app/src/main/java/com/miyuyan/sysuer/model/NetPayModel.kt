@@ -18,7 +18,7 @@ open class NetPayModel(context: Context) : BaseModel(context) {
 		AuthorizationManager("netpay.sysu.edu.cn", "netpay.sysu.edu.cn").also {
 			it.setTargetUrl(TargetUrl.NETPAY, TargetUrl.NETPAY)
 		}
-	override val http: HttpManager = HttpManager(Handler(Looper.getMainLooper())).apply {
+	override val http: HttpManager = HttpManager().apply {
 		cookieManager = CookieManager(context)
 		header = mutableMapOf("accept-language" to "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7")
 	}

@@ -28,14 +28,12 @@ class PortalModel(context: Context) : BaseModel(context) {
 					val meta = contentJSON.getJSONObject("meta")
 					if (!meta.getBoolean("success")) {
 						if (meta.getInteger("statusCode") == 302) login(request)
-						else http.handler.post {
-							contextUtil.toast(meta.getString("message",""))
-						}
+						else toast(meta.getString("message",""))
+
 					}
 					else {
-						if (meta.getInteger("statusCode") != 200) http.handler.post {
-							contextUtil.toast(meta.getString("message",""))
-						}
+						if (meta.getInteger("statusCode") != 200)
+							toast(meta.getString("message",""))
 						sendMessage(result)
 					}
 				} ?: run {

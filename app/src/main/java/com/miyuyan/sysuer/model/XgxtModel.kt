@@ -31,13 +31,11 @@ class XgxtModel(context: Context) : BaseModel(context) {
 					val meta: JSONObject? = if (data.containsKey("meta")) data.getJSONObject("meta") else null
 					meta?.let {
 						if (meta.containsKey("statusCode") && meta.getInteger("statusCode") == 302) login(request)
-						else http.handler.post {
-							contextUtil.toast(CommonUtil.toStringOrDefault(meta.getString("message", "")))
-						}
+						else toast(CommonUtil.toStringOrDefault(meta.getString("message", "")))
 					} ?: run {
-						if (data.containsKey("code") && data.getInteger("code") != 200) http.handler.post {
-							contextUtil.toast(data.getString("msg", ""))
-						}
+						if (data.containsKey("code") && data.getInteger("code") != 200)
+							toast(data.getString("msg", ""))
+
 //						message.postValue(result)
 						sendMessage(result)
 					}
