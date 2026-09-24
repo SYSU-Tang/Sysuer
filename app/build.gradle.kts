@@ -8,6 +8,7 @@ plugins {
 	id("kotlin-parcelize")
 	id("androidx.navigation.safeargs")
 	id("androidx.room3")
+	id("com.google.dagger.hilt.android")
 }
 room3 {
 	schemaDirectory("$projectDir/schemas")
@@ -15,7 +16,7 @@ room3 {
 android {
 	namespace = "com.miyuyan.sysuer"
 	compileSdk = 37
-	
+
 	defaultConfig {
 		val generation = "2"
 		val major = "0"
@@ -32,12 +33,15 @@ android {
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled = true
 	}
-	
+
 	buildTypes {
 		release {
 			isMinifyEnabled = true
 			isShrinkResources = true
-			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+			proguardFiles(
+					getDefaultProguardFile("proguard-android-optimize.txt"),
+					"proguard-rules.pro"
+			)
 		}
 	}
 	compileOptions {
@@ -151,13 +155,8 @@ dependencies {
 	implementation(libs.jsoup)
 	ksp(libs.androidx.room3.compiler)
 	implementation(libs.richtext.commonmark)
-//	implementation(libs.commonmark.core)
-//	implementation(libs.commonmark.tables)
 	implementation(libs.fastjson2.kotlin)
-	configurations.all {
-		exclude(group = "com.atlassian.commonmark")
-//		exclude(group = "top.yukonga.miuix.kmp", module = "miuix-navigation3-ui-runtime")
-//		exclude(group = "top.yukonga.miuix.kmp", module = "miuix-navigation3-ui-runtime-android")
-	}
+	implementation(libs.hilt.android)
+	ksp(libs.hilt.android.compiler)
 
 }
