@@ -111,10 +111,8 @@ class ContextUtil(val context: Context) {
 	 * @param resource 字符串资源 ID
 	 */
 	fun toast(resource: Int) {
-		if (Looper.myLooper() == Looper.getMainLooper()) {
+		ContextCompat.getMainExecutor(context).execute {
 			Toast.makeText(context, resource, Toast.LENGTH_LONG).show()
-		} else {
-			handler.post { Toast.makeText(context, resource, Toast.LENGTH_LONG).show() }
 		}
 	}
 
@@ -124,10 +122,8 @@ class ContextUtil(val context: Context) {
 	 * @param toast 要显示的文本
 	 */
 	fun toast(toast: String?) {
-		if (Looper.myLooper() == Looper.getMainLooper()) {
+		ContextCompat.getMainExecutor(context).execute {
 			Toast.makeText(context, toast, Toast.LENGTH_LONG).show()
-		} else {
-			handler.post { Toast.makeText(context, toast, Toast.LENGTH_LONG).show() }
 		}
 	}
 
@@ -218,7 +214,8 @@ class ContextUtil(val context: Context) {
 			DialogAccountBinding.inflate(LayoutInflater.from(activity)).apply {
 				password.editLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
 			}
-		activity.runOnUiThread {
+
+		ContextCompat.getMainExecutor(activity).execute {
 			if (captcha != null) {
 				binding!!.captchaGroup.isVisible = true
 				binding!!.captchaText.editText?.setText(captcha)

@@ -39,11 +39,11 @@ class AgendaActivity : BaseActivity() {
 			})
 			calendarView.setOnMonthChangeListener { year: Int, month: Int ->
 				binding.toolbar.setSubtitle(
-					getString(R.string.year_month, year, month)
+						getString(R.string.year_month, year, month)
 				)
 			}
 			toolbar.setSubtitle(
-				getString(R.string.year_month, calendarView.curYear, calendarView.curMonth)
+					getString(R.string.year_month, calendarView.curYear, calendarView.curMonth)
 			)
 			calendarView.setSelectSingleMode()
 			content.viewModel = viewModel
@@ -68,16 +68,16 @@ class AgendaActivity : BaseActivity() {
 
 	private fun loadAgenda(date: Long) {
 		viewModel.loadSchedule(
-			DateTimeManager.toDate(date)
+				DateTimeManager.toDate(date)
 		)
 	}
 
 	internal class AgendaAdapter : RecyclerAdapter<JSONObject>() {
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
 			object : RecyclerView.ViewHolder(
-				ItemPreferenceBinding.inflate(
-					LayoutInflater.from(parent.context), parent, false
-				).root
+					ItemPreferenceBinding.inflate(
+							LayoutInflater.from(parent.context), parent, false
+					).root
 			) {}
 
 

@@ -209,6 +209,12 @@
         "name": "Energy Management System",
         "url": "https://cas.sysu.edu.cn/esc-sso/login?service=https://zhny.sysu.edu.cn/h5",
         "description": "Campus energy management system, with functions such as water and electricity consumption inquiry"
+      },
+      {
+        "id": 408,
+        "name": "Electronic Certificate Platform",
+        "url": "https://ecert.sysu.edu.cn/Integrated_platform/modules/student/OnlineAppL",
+        "description": "Campus electronic certificate platform, for applying various certificates such as GPA certificates, grade certificates, rank certificates, enrollment certificates, and six-level certificates"
       }
     ]
   },

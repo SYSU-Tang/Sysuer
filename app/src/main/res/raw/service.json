@@ -208,6 +208,12 @@
         "name": "综合能源管理系统",
         "url": "https://cas.sysu.edu.cn/esc-sso/login?service=https://zhny.sysu.edu.cn/h5",
         "description": "校园综合能源管理系统，查看水费、电费的能源费用"
+      },
+      {
+        "id": 408,
+        "name": "电子证明平台",
+        "url": "https://ecert.sysu.edu.cn/Integrated_platform/modules/student/OnlineAppL",
+        "description": "校园电子证明平台，办理各类绩点证明、成绩证明、排名证明、在学证明、四六级等电子证明"
       }
     ]
   },
