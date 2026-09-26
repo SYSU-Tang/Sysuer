@@ -898,4 +898,5 @@
     <string name="course_name_empty_warning">课程名称不能为空</string>
     <string name="no_time_segment_warning">请至少添加一个时间段</string>
     <string name="course_add_success">课程添加成功</string>
+    <string name="swimming_status">游泳达标</string>
 </resources>

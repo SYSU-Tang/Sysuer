@@ -55,6 +55,7 @@
       {
         "id": 107,
         "name": "体测",
+        "route": "PhysicalFitnessTestResult",
         "activity": ".academic.PhysicalFitnessTestResultActivity",
         "url": "https://tice.sysu.edu.cn/",
         "description": "体质测试结果查询、体育积分查询、游泳达标查询"

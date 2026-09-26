@@ -70,6 +70,7 @@ import com.miyuyan.sysuer.academic.LeaveSlipRoute
 import com.miyuyan.sysuer.academic.MajorInfoRoute
 import com.miyuyan.sysuer.academic.PersonalInformationRoute
 import com.miyuyan.sysuer.academic.PersonalTrainingProgramRoute
+import com.miyuyan.sysuer.academic.PhysicalFitnessTestResultRoute
 import com.miyuyan.sysuer.academic.RegistrationRoute
 import com.miyuyan.sysuer.academic.SchoolEnrollmentRoute
 import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
@@ -100,6 +101,7 @@ import com.miyuyan.sysuer.nav.NetPay
 import com.miyuyan.sysuer.nav.Pay
 import com.miyuyan.sysuer.nav.PersonalInformation
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram
+import com.miyuyan.sysuer.nav.PhysicalFitnessTestResult
 import com.miyuyan.sysuer.nav.RainClass
 import com.miyuyan.sysuer.nav.RainClassDetail
 import com.miyuyan.sysuer.nav.Registration
@@ -298,6 +300,13 @@ class MainActivity : BaseActivity() {
 					}
 					entry<LeaveReturnRegistration> {
 						LeaveReturnRegistrationRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<PhysicalFitnessTestResult> {
+						PhysicalFitnessTestResultRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
