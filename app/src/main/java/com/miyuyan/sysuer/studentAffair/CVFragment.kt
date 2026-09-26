@@ -28,7 +28,7 @@ class CVFragment : StaggerFragment() {
 		model = XgxtModel(requireContext())
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (_, response) ->
+				model.message.collect { (_, response) ->
 					if (response.getInteger("code") == 200) {
 						val data = response.getJSONObject("data")
 						addSection(

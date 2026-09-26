@@ -65,7 +65,7 @@ class RainClassViewModel(application: Application) : AndroidViewModel(applicatio
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (what, response) ->
+			model.message.collect { (what, response) ->
 				when (what) {
 					GET_COURSE_LIST -> if (response.containsKey("errcode") && response.getInteger("errcode") == 401002) {
 						_loginRequired.tryEmit(Unit)

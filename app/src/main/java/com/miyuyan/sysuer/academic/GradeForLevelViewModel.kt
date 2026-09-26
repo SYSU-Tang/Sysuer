@@ -37,7 +37,7 @@ class GradeForLevelViewModel(application: Application) : AndroidViewModel(applic
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 				if (response.getInteger("code") == 200) {
 					when (code) {
 						0 -> _trainTypeOptions.addAll(

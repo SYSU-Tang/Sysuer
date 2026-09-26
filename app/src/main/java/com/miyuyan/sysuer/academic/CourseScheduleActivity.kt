@@ -331,7 +331,7 @@ class CourseScheduleActivity : BaseActivity() {
 		val assignedColors = mutableMapOf<String, Int>()
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						when (code) {
 							1 -> {

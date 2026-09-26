@@ -83,7 +83,7 @@ class GymListFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					response.getJSONArray("data")?.takeUnless { it.isEmpty() }?.let {
 						when (code) {
 							1 -> it.forEach { e -> fieldAdapter.add(e as JSONObject) }

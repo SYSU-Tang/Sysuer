@@ -54,7 +54,7 @@ class EnergyAccountFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					println("code = $code , response = $response")
 					if (response.getInteger("code") == 200) {
 						when (code) {

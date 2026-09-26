@@ -35,7 +35,7 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 		super.onViewCreated(view, savedInstanceState)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						if (response.get("data") != null) {
 							if (code == 0) {

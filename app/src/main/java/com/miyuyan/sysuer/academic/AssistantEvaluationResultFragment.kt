@@ -36,7 +36,7 @@ class AssistantEvaluationResultFragment : StaggerFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) if (code == 0) {
 						val data = response.getJSONObject("data")
 						if (total == -1) total = data.getInteger("total")

@@ -25,7 +25,7 @@ class MajorInfoViewModel(application: Application) : AndroidViewModel(applicatio
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && response.get("data") != null) {
 					when (code) {
 						0 -> _categories.addAll(response.getJSONArray("data").filterIsInstance<JSONObject>())

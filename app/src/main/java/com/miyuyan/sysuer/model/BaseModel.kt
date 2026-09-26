@@ -142,12 +142,12 @@ abstract class BaseModel(context: Context) {
 	// ============================================================================================
 
 	/** 内部消息通道，用于向 ViewModel / UI 传递 (requestCode to JSON) 数据响应 */
-	private val _messageChannel = MutableSharedFlow<Pair<Int, JSONObject>>(
+	private val _message = MutableSharedFlow<Pair<Int, JSONObject>>(
 			extraBufferCapacity = 256
 	)
 
 	/** 供外部 ViewModel 订阅的消息 Flow 通道 */
-	val messageChannel: SharedFlow<Pair<Int, JSONObject>> = _messageChannel.asSharedFlow()
+	val message: SharedFlow<Pair<Int, JSONObject>> = _message.asSharedFlow()
 
 	/** 按 requestCode 存储并维护每个请求所对应的 UI 状态 (UiState) */
 	private val stateMap = ConcurrentHashMap<Int, MutableStateFlow<UiState>>()
@@ -194,9 +194,9 @@ abstract class BaseModel(context: Context) {
 	// 并发请求发起 (Concurrent Execution)
 	// ============================================================================================
 
-	/** 最新入队的请求任务 */
-	@Volatile
-	private var lastJob: RequestJob? = null
+//	/** 最新入队的请求任务 */
+//	@Volatile
+//	private var lastJob: RequestJob? = null
 
 //	/** 获取最新入队的请求任务 (兼容 [nextRequest] 属性) */
 //	val nextRequest: Pair<Request, Int>?
@@ -209,7 +209,7 @@ abstract class BaseModel(context: Context) {
 	 * @return 提交的 [RequestJob]
 	 */
 	fun enqueueRequest(job: RequestJob): RequestJob {
-		lastJob = job
+//		lastJob = job
 		allJobs[job.requestCode] = job
 		executeJobAsync(job)
 		return job
@@ -410,15 +410,18 @@ abstract class BaseModel(context: Context) {
 
 			ResponseStatus.NORMAL -> {
 				val result = json?.let { contentJSON ->
-					if (contentJSON.getInteger("code") != 200) {
-						toast(
-								contentJSON.getString("message") ?: contentJSON.getString("msg", "")
-
-						)
-					}
+//					if (contentJSON.getInteger("code") != 200) {
+//						toast(
+//								contentJSON.getString("message") ?: contentJSON.getString(
+//										"msg",
+//										content
+//								)
+//
+//						)
+//					}
 					Pair(request.second, contentJSON)
 				} ?: Pair(request.second, JSONObject.of("data", content))
-				_messageChannel.tryEmit(result)
+				_message.tryEmit(result)
 				failedJobs.remove(request.second)
 				pendingLoginJobs.removeIf { it.requestCode == request.second }
 				allJobs[request.second]?.status = JobStatus.SUCCESS

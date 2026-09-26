@@ -16,7 +16,7 @@ class DormViewModel(application: Application) : AndroidViewModel(application) {
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, data) ->
+			model.message.collect { (code, data) ->
 				if (data.containsKey("code") && data.getInteger("code") == 200) {
 					_dormInfo.value = data.getJSONObject("data")
 				}

@@ -28,7 +28,7 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && response.get("data") != null) {
 					when (code) {
 						0 -> _registerInfo.value = response.getJSONObject("data")

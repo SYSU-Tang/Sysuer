@@ -37,7 +37,7 @@ class RoomQueryResultFragment : StaggerFragment() {
 		model = JwxtModel(requireContext())
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (_, response) ->
+				model.message.collect { (_, response) ->
 			if (response.getInteger("code") == 200) response.getJSONObject("data").getJSONArray("data").forEach { item: Any? ->
 				val values: ArrayList<String?> = extractValue(item as JSONObject, arrayOf("yearTerm", "date", "week", "dayWeek", "campus", "teachingBuild", "teachingBuildNum", "classroomNum", "floor", "classroomID", "seatCount"))
 				arrayOf("oneSection",

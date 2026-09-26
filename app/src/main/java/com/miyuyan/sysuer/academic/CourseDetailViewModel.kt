@@ -44,7 +44,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 //			println("code: $code response: $response")
 				if (response.getInteger("code") == 200) {
 					val data = response.getJSONObject("data")

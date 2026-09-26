@@ -49,7 +49,7 @@ class RecruitmentInfoFragment : StaggerFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, data) ->
+				model.message.collect { (code, data) ->
 					if (data.containsKey("code") && data.getInteger("code") == 200) {
 						when (code) {
 							0 -> {

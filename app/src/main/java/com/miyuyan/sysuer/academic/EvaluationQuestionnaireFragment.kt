@@ -65,7 +65,7 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, data) ->
+				model.message.collect { (code, data) ->
 				if (data.getIntValue("code", -1) == 200) {
 						when (code) {
 							1 -> data.getJSONObject("result").getJSONArray("assessedObjList")

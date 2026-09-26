@@ -106,7 +106,7 @@ class NewsFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					(if (code == 3) response.getJSONArray("data")
 					else response.getJSONObject("data")
 						.getJSONArray("records")).forEach { item: Any? ->

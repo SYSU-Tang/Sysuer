@@ -81,7 +81,7 @@ class NewsActivity : BaseActivity() {
 		setContentView(binding.root)
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (requestCode, data) ->
+				model.message.collect { (requestCode, data) ->
 					if (requestCode == 1) {
 						suggestionAdapter.clear()
 						data.getJSONObject("data")?.getJSONArray("suggests")?.forEach {

@@ -227,7 +227,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.filter { it.second.getInteger("code") == 200 }
+			model.message.filter { it.second.getInteger("code") == 200 }
 				.collect { (code, response) ->
 					when (code) {
 					1 -> {

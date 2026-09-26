@@ -24,7 +24,7 @@ class CETViewModel(application: Application) : AndroidViewModel(application) {
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && code == 0) {
 					val data = response.getJSONObject("data")
 					if (data != null) {

@@ -94,7 +94,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, data) ->
+			model.message.collect { (code, data) ->
 				when (code) {
 					0, 1, 6 -> {
 						val rows = parse(data.getString("data")).selectFirst("tbody")?.select("tr")

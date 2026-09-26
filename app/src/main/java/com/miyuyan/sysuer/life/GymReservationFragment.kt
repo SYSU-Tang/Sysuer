@@ -95,7 +95,7 @@ class GymReservationFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (code == 0) response.getJSONArray("data").forEach { item: Any? ->
 						val preferenceAdapter = PreferenceAdapter()
 						val titleAdapter =

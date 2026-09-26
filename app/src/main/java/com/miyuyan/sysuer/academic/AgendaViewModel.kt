@@ -2,34 +2,38 @@ package com.miyuyan.sysuer.academic
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.PortalModel
 import com.miyuyan.sysuer.view.RecyclerStateViewModel
 import com.miyuyan.sysuer.view.UiState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AgendaViewModel(application: Application) : AndroidViewModel(application),
 	RecyclerStateViewModel {
 	private val portalModel = PortalModel(application)
 	override val uiState = portalModel.getUiState(0)
-	val scheduleList = MutableLiveData<JSONArray?>()
+	private val _scheduleList = MutableStateFlow<JSONArray?>(null)
+	val scheduleList = _scheduleList.asFlow()
 
 	init {
 		viewModelScope.launch {
-			portalModel.messageChannel.collect { (code, response) ->
+			portalModel.message.collect { (code, response) ->
 				if (code == 0) {
 					if (response.getJSONObject("meta")
 							.getInteger("statusCode") == 200 && response.get("data") != null
 					) response.getJSONArray("data").takeIf { it.isNotEmpty() }?.let {
 						val list = it.getJSONObject(0).getJSONArray("newUserScheduleDetailList")
-						scheduleList.value = list
+						_scheduleList.value = list
 						uiState.value = if (list.isNotEmpty()) UiState.Content else UiState.Empty
 					} ?: run {
-						scheduleList.value = null
+						_scheduleList.value = null
 						uiState.value = UiState.Empty
 					} else uiState.value = UiState.Error
 				}
@@ -58,7 +62,7 @@ class AgendaViewModel(application: Application) : AndroidViewModel(application),
 
 	override fun retry() {
 		uiState.value = UiState.Loading
-//		portalModel.retry()
+		portalModel.retryAll()
 	}
 
 	override fun onCleared() {

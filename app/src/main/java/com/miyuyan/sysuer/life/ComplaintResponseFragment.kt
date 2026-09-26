@@ -51,7 +51,7 @@ class ComplaintResponseFragment : BaseFragment() {
 		binding.recyclerView.setLayoutManager(StaggeredGridLayoutManager(config.column, StaggeredGridLayoutManager.VERTICAL))
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					when (code) {
 						0 -> {
 							if (response.getBoolean("ok")) response.getString("data")

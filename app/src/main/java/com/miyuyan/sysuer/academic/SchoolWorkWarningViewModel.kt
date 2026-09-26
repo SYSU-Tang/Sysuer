@@ -26,7 +26,7 @@ class SchoolWorkWarningViewModel(application: Application) : AndroidViewModel(ap
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (_, response) ->
+			model.message.collect { (_, response) ->
 				if (response.getInteger("code") == 200) response.getJSONObject("data")?.let {
 					if (total == -1) total = it.getInteger("total")
 					var order = sections.size

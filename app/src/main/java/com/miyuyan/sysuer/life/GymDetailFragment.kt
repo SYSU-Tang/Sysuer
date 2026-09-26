@@ -100,7 +100,7 @@ class GymDetailFragment : BaseFragment() {
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 				launch {
-					model.messageChannel.collect { (code, response) ->
+					model.message.collect { (code, response) ->
 						when (code) {
 							0 -> {
 								reset(fieldAdapter)

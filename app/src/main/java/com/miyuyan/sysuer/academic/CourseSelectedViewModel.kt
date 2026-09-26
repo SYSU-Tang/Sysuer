@@ -29,7 +29,7 @@ class CourseSelectedViewModel(application: Application) : AndroidViewModel(appli
 	
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (_, response) ->
+			model.message.collect { (_, response) ->
 			if (response.getInteger("code") == 200) {
 				val data = response.getJSONObject("data")
 				if (total == -1) total = data.getInteger("total")

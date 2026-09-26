@@ -1,8 +1,6 @@
 package com.miyuyan.sysuer.view
 
 import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
@@ -45,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -52,14 +51,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.miyuyan.sysuer.R
+import kotlinx.coroutines.launch
 
 data class RowData(
 	val key: String?,
@@ -221,15 +222,17 @@ fun SectionCard(
 
 @Composable
 fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horizontal) {
-	val context = LocalContext.current
+	val coroutineScope = rememberCoroutineScope()
+	val clipboard = LocalClipboard.current
 	val modifier = Modifier
 		.fillMaxWidth()
 		.clickable {
 			if (row.onClick != null) {
 				row.onClick?.invoke()
 			} else {
-				val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-				clip.setPrimaryClip(ClipData.newPlainText(row.key, row.value))
+				coroutineScope.launch {
+					clipboard.setClipEntry(ClipData.newPlainText(row.key, row.value).toClipEntry())
+				}
 			}
 		}
 		.padding(
@@ -237,32 +240,38 @@ fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horiz
 				vertical = dimensionResource(R.dimen.vertical_padding)
 		)
 	if (orientation == RowOrientation.Horizontal) {
-		Row(
-				modifier = modifier,
-				horizontalArrangement = Arrangement.SpaceBetween,
-				verticalAlignment = Alignment.CenterVertically
-		) {
-			SelectionContainer {
-				Text(
-						text = row.key ?: "",
-						style = MaterialTheme.typography.bodyLarge,
-						modifier = Modifier.weight(1f),
-						color = MaterialTheme.colorScheme.onSurfaceVariant
-				)
-			}
-			if (row.value != null && row.key != null) Spacer(
-					modifier = Modifier.width(
-							dimensionResource(R.dimen.horizontal_margin)
+		SelectionContainer {
+			Row(
+					modifier = modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.SpaceBetween,
+					verticalAlignment = Alignment.CenterVertically
+			) {
+				row.key?.let {
+					Text(
+							text = it,
+							style = MaterialTheme.typography.bodyLarge,
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
+							modifier = Modifier.weight(1f, fill = false)
 					)
-			)
-			SelectionContainer {
-				Text(
-						text = row.value ?: "",
-						style = MaterialTheme.typography.bodyLarge,
-						modifier = Modifier.weight(1.2f),
-						textAlign = TextAlign.End,
-						color = MaterialTheme.colorScheme.primary
-				)
+				}
+
+				if (row.value != null && row.key != null) {
+					Spacer(
+							modifier = Modifier.width(
+									dimensionResource(R.dimen.horizontal_margin)
+							)
+					)
+				}
+
+				row.value?.let {
+					Text(
+							text = it,
+							style = MaterialTheme.typography.bodyLarge,
+							textAlign = TextAlign.End,
+							color = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.weight(1.2f, fill = false)
+					)
+				}
 			}
 		}
 	} else {
@@ -367,7 +376,7 @@ fun List<SectionData>.toMarkdown(): String {
 		}
 		markdown.append(i + 1).append(" | ").append(section.rows.map { it.value }
 			.joinToString(" | ") { it?.trim()?.replace("\n", "<br>")?.replace("\r", "") ?: "" })
-			.append("\n")
+			.append(" |\n")
 	}
 	return "$markdown"
 }

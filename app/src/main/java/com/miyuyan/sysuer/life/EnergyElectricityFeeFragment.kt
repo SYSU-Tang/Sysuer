@@ -80,7 +80,7 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 				launch {
-					model.messageChannel.collect { (code, response) ->
+					model.message.collect { (code, response) ->
 						if (response.getInteger("code") == 200) {
 							when (code) {
 								0 -> getRoom(response.getJSONObject("data").getString("username"))

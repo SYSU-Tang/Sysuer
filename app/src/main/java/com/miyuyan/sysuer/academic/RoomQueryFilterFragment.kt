@@ -64,7 +64,7 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 		val dateSelection = findPreference<PreferenceCategory>("dateSelection")!!
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (what, response) ->
+				model.message.collect { (what, response) ->
 					if (response.getInteger("code") == 200) {
 						val option = mutableListOf<String>()
 						val number = mutableListOf<String>()

@@ -80,7 +80,7 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.filter { it.second.getInteger("code") == 200 }
+			model.message.filter { it.second.getInteger("code") == 200 }
 				.collect { (code, response) ->
 					when (code) {
 						1 -> {

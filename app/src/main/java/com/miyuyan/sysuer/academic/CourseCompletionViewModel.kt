@@ -35,7 +35,7 @@ class CourseCompletionViewModel(application: Application) : AndroidViewModel(app
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && response.get("data") != null) {
 					when (code) {
 						0 -> {

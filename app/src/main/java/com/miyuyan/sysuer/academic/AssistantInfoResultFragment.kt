@@ -32,7 +32,7 @@ class AssistantInfoResultFragment : StaggerFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						if (code == 0) {
 							total = response.getJSONObject("data").getInteger("total")

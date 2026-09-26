@@ -81,7 +81,7 @@ class EvaluationCourseFragment : BaseFragment() {
 		binding.root.adapter = adp
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 				if (response.getIntValue("code", -1) == 200) if (code == 1) {
 						val result = response.getJSONObject("result")
 						result.getJSONArray("list").forEach { e: Any? -> adp.add(e as JSONObject) }

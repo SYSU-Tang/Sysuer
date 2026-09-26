@@ -41,7 +41,7 @@ class CourseQueryResultFragment : StaggerFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (_, response) ->
+				model.message.collect { (_, response) ->
 					if (response.getInteger("code") == 200) {
 						if (total == -1) total = response.getJSONObject("data").getInteger("total")
 						response.getJSONObject("data").getJSONArray("rows").forEach { e: Any? ->

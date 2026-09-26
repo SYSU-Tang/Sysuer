@@ -32,7 +32,7 @@ class SchoolEnrollmentViewModel(application: Application) : AndroidViewModel(app
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 				if (response.getInteger("code") == 200) {
 					val data = response.getJSONObject("data") ?: return@collect
 					when (code) {

@@ -55,7 +55,7 @@ class CourseQueryFilterFragment : PreferenceFragmentCompat() {
 		(0..<6).forEach { pos: Int -> this.getData(pos) }
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						val option = ArrayList<String?>()
 						val number = ArrayList<String?>()

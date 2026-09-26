@@ -44,7 +44,7 @@ class CourseSelectionFilterFragment : BaseFragment() {
 		binding.container.setColumnCount(config.column)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						val data = response.getJSONArray("data")
 						if (data != null) {

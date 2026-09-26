@@ -30,7 +30,7 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (code, response) ->
+			model.message.collect { (code, response) ->
 				if (response.getInteger("code") == 200) {
 					when (code) {
 						1 -> termList.value = response.getJSONArray("data")

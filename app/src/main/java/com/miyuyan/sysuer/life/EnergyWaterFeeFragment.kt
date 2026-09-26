@@ -67,7 +67,7 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 		val paymentStatuses = resources.getStringArray(R.array.payment_status)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
 						when (code) {
 							0 -> getRoom(response.getJSONObject("data").getString("username"))

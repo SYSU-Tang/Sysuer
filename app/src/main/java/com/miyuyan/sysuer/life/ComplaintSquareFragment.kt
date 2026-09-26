@@ -37,7 +37,7 @@ class ComplaintSquareFragment : BaseFragment() {
 		model = XinfangModel(requireContext())
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					if (code == 0) if (response.getBoolean("ok")) response.getJSONArray("data")
 						.forEach { adapter.add(it as JSONObject) }
 					else config.toast(response.getString("msg"))

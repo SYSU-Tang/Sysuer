@@ -82,7 +82,7 @@ class EvaluationCategoryFragment : BaseFragment() {
 		binding.root.adapter = categoryAdapter
 		viewLifecycleOwner.lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, data) ->
+				model.message.collect { (code, data) ->
 				if (data.getIntValue("code", -1) == 200) if (code == 1) data.getJSONObject("result")
 						.getJSONArray("list").forEach { categoryAdapter.add(it as JSONObject) }
 				}

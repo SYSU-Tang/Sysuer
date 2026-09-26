@@ -89,7 +89,7 @@ class ComplaintMainFragment : com.miyuyan.sysuer.BaseFragment() {
 		loadCaptcha(binding.captchaImage)
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					when (code) {
 						0 -> {
 							if (response.getBoolean("ok")) {

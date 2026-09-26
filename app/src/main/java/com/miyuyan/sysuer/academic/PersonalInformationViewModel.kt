@@ -17,7 +17,7 @@ class PersonalInformationViewModel(application: Application) : AndroidViewModel(
 
 	init {
 		viewModelScope.launch {
-			model.messageChannel.collect { (_, response) ->
+			model.message.collect { (_, response) ->
 				if (response.containsKey("code") && response.getInteger("code") == 200) {
 					_infoList.value = response.getJSONArray("data").filterIsInstance<JSONObject>()
 				}

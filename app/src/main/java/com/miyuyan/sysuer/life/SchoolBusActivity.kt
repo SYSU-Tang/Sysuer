@@ -75,7 +75,7 @@ class SchoolBusActivity : BaseActivity() {
 		lifecycleScope.launch {
 			repeatOnLifecycle(Lifecycle.State.STARTED) {
 				launch {
-					model.messageChannel.collect { (code, response) ->
+					model.message.collect { (code, response) ->
 						if (response.getJSONObject("meta").getInteger("statusCode") == 200) {
 							if (code == 0) {
 								data = response.getJSONObject("data")

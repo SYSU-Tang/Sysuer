@@ -38,7 +38,7 @@ class GymAccountFragment : BaseFragment() {
 		}
 		viewLifecycleOwner.lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect { (code, response) ->
+				model.message.collect { (code, response) ->
 					when (code) {
 						0 -> {
 							val preferenceAdapter = PreferenceAdapter()
