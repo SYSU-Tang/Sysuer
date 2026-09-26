@@ -13,6 +13,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.PendingIntentCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.miyuyan.sysuer.R
 import kotlinx.coroutines.CoroutineScope
@@ -72,13 +73,13 @@ object DownloadManager {
 		listener: DownloadListener? = null
 	) {
 		downloadFile(
-			context,
-			Request.Builder()
-				.header("Cookie", CookieManager(context).toSimpleString(url.toHttpUrl().host))
-				.url(url).build(),
-			path,
-			notify,
-			listener
+				context,
+				Request.Builder()
+					.header("Cookie", CookieManager(context).toSimpleString(url.toHttpUrl().host))
+					.url(url).build(),
+				path,
+				notify,
+				listener
 		)
 	}
 
@@ -100,11 +101,11 @@ object DownloadManager {
 	) {
 		okHttpClient.newCall(request).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
-				CoroutineScope(Dispatchers.Main).launch {
+				ContextCompat.getMainExecutor(context).execute {
 					Toast.makeText(
-						context,
-						"${context.getString(R.string.download_error)}:${e.message}",
-						Toast.LENGTH_SHORT
+							context,
+							"${context.getString(R.string.download_error)}:${e.message}",
+							Toast.LENGTH_SHORT
 					).show()
 				}
 				listener?.onDownloadError(404, e.message)
@@ -121,9 +122,10 @@ object DownloadManager {
 				if (parentFile != null && !parentFile.isDirectory()) parentFile.mkdirs()
 				try {
 					NotificationManagerCompat.from(context).createNotificationChannel(
-						NotificationChannelCompat.Builder(
-							"update", NotificationManagerCompat.IMPORTANCE_DEFAULT
-						).setDescription("中大儿下载通知").setName("文件下载进度和下载路径通知").build()
+							NotificationChannelCompat.Builder(
+									"update", NotificationManagerCompat.IMPORTANCE_DEFAULT
+							).setDescription("中大儿下载通知").setName("文件下载进度和下载路径通知")
+								.build()
 					)
 					response.body.byteStream().use { stream ->
 						FileOutputStream(savePath).use { fos ->
@@ -147,9 +149,9 @@ object DownloadManager {
 					if (notify) notifyDownloadError(context, e.message)
 					CoroutineScope(Dispatchers.Main).launch {
 						Toast.makeText(
-							context,
-							"${context.getString(R.string.download_error)}:${e.message}",
-							Toast.LENGTH_SHORT
+								context,
+								"${context.getString(R.string.download_error)}:${e.message}",
+								Toast.LENGTH_SHORT
 						).show()
 					}
 				}
@@ -177,15 +179,15 @@ object DownloadManager {
 	 */
 	fun getOpenFileIntent(context: Context, path: String?): Intent? = path?.let { path ->
 		Intent.createChooser(
-			Intent(Intent.ACTION_VIEW).addCategory("android.intent.category.DEFAULT")
-				.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-				.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setDataAndType(
-					FileProvider.getUriForFile(
-						context, "com.sysu.edu.fileProvider", File(path)
-					), MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-						path.substring(path.lastIndexOf(".") + 1).lowercase(Locale.getDefault())
+				Intent(Intent.ACTION_VIEW).addCategory("android.intent.category.DEFAULT")
+					.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+					.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setDataAndType(
+							FileProvider.getUriForFile(
+									context, "com.sysu.edu.fileProvider", File(path)
+							), MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+							path.substring(path.lastIndexOf(".") + 1).lowercase(Locale.getDefault())
 					)
-				), context.getString(R.string.share)
+					), context.getString(R.string.share)
 		)
 	}
 
@@ -219,23 +221,23 @@ object DownloadManager {
 	fun notifyDownloadProgress(context: Context, progress: Long, total: Long) {
 		val indeterminate = total == -1L
 		val progressString = if (indeterminate) String.format(
-			Locale.getDefault(), "%.2fMB", progress / 1024.0f / 1024.0f
+				Locale.getDefault(), "%.2fMB", progress / 1024.0f / 1024.0f
 		) else String.format(
-			Locale.getDefault(),
-			"%.2fMB/%.2fMB",
-			progress / 1024.0f / 1024.0f,
-			total / 1024.0f / 1024.0f
+				Locale.getDefault(),
+				"%.2fMB/%.2fMB",
+				progress / 1024.0f / 1024.0f,
+				total / 1024.0f / 1024.0f
 		)
 		val builder = NotificationCompat.Builder(context, "update")
 			.setContentTitle(context.getString(R.string.download)).setContentText(progressString)
 			.setSmallIcon(R.drawable.down)
 			.setStyle(NotificationCompat.BigTextStyle().bigText(progressString)).setProgress(
-				if (indeterminate) 0 else total.toInt(),
-				if (indeterminate) 0 else progress.toInt(),
-				indeterminate
+					if (indeterminate) 0 else total.toInt(),
+					if (indeterminate) 0 else progress.toInt(),
+					indeterminate
 			).setPriority(NotificationCompat.PRIORITY_DEFAULT)
 		if (ActivityCompat.checkSelfPermission(
-				context, Manifest.permission.POST_NOTIFICATIONS
+					context, Manifest.permission.POST_NOTIFICATIONS
 			) == PackageManager.PERMISSION_GRANTED
 		) NotificationManagerCompat.from(context).notify(1002, builder.build())
 	}
@@ -249,7 +251,7 @@ object DownloadManager {
 				PendingIntentCompat.getActivity(context, 0, it1, PendingIntent.FLAG_ONE_SHOT, false)
 			}).setProgress(1, 1, false).setPriority(NotificationCompat.PRIORITY_DEFAULT)
 		if (ActivityCompat.checkSelfPermission(
-				context, Manifest.permission.POST_NOTIFICATIONS
+					context, Manifest.permission.POST_NOTIFICATIONS
 			) == PackageManager.PERMISSION_GRANTED
 		) NotificationManagerCompat.from(context).notify(1002, builder.build())
 		path?.let { it1 ->
@@ -264,7 +266,7 @@ object DownloadManager {
 			.setSmallIcon(R.drawable.down).setProgress(1, 0, false)
 			.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 		if (ActivityCompat.checkSelfPermission(
-				context, Manifest.permission.POST_NOTIFICATIONS
+					context, Manifest.permission.POST_NOTIFICATIONS
 			) == PackageManager.PERMISSION_GRANTED
 		) NotificationManagerCompat.from(context).notify(1002, builder.build())
 	}

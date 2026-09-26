@@ -150,7 +150,6 @@ import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -1121,7 +1120,8 @@ private fun TodoSection(
 	onViewAllClick: () -> Unit,
 	todoManager: TodoManager,
 ) {
-	var addTrigger = MutableSharedFlow<Unit>()
+	var isAddRequested by remember { mutableStateOf(false) }
+
 	Row(
 			modifier = Modifier.fillMaxWidth(),
 			verticalAlignment = Alignment.CenterVertically,
@@ -1132,7 +1132,7 @@ private fun TodoSection(
 		}
 		SingleChoiceSegmentedButtonRow {
 			SegmentedButton(
-					onClick = { addTrigger.tryEmit(Unit) },
+					onClick = { isAddRequested = true },
 					selected = false,
 					shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
 					icon = {},
@@ -1159,14 +1159,19 @@ private fun TodoSection(
 	}
 
 	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-		if (todoList.isEmpty()) Text(
-				text = stringResource(R.string.no_todo),
-				style = MaterialTheme.typography.bodyLarge,
-				modifier = Modifier.padding(
-						dimensionResource(R.dimen.horizontal_margin),
-						dimensionResource(R.dimen.vertical_margin)
-				)
-		) else todoManager.TodoListScreen(todoList = todoList, addTrigger = addTrigger)
+		todoManager.TodoListScreen(
+				todoList = todoList,
+				isAddRequested = isAddRequested,
+				onAddHandled = { isAddRequested = false }) {
+			Text(
+					text = stringResource(R.string.no_todo),
+					style = MaterialTheme.typography.bodyLarge,
+					modifier = Modifier.padding(
+							dimensionResource(R.dimen.horizontal_margin),
+							dimensionResource(R.dimen.vertical_margin)
+					)
+			)
+		}
 	}
 }
 

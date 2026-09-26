@@ -64,6 +64,7 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -74,7 +75,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -103,8 +103,8 @@ import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.todo.TodoInfo
 import com.miyuyan.sysuer.todo.TodoModel
 import com.miyuyan.sysuer.todo.TodoReminderReceiver
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.squircle.squircleBackground
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -640,16 +640,7 @@ class TodoManager(
 						SubtaskSection(
 								subtasks = subtasks,
 								onAdd = { showSubtaskDialog = true },
-								onToggle = { index ->
-									val item = subtasks[index]
-									val current = item.getIntValue("status", TodoInfo.TODO)
-									item["status"] =
-										if (current == TodoInfo.DONE) TodoInfo.TODO else TodoInfo.DONE
-								},
-								onDelete = { index -> subtasks.removeAt(index) },
-								onTitleChange = { index, newTitle ->
-									subtasks[index]["title"] = newTitle
-								})
+								onDelete = { index -> subtasks.removeAt(index) })
 						PrioritySection(
 								modifier = modifier,
 								priority = priority,
@@ -778,7 +769,9 @@ class TodoManager(
 		onAdd: () -> Unit,
 		onDelete: ((String) -> Unit)? = null,
 	) {
-		FlowRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
+		FlowRow(
+				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
+		) {
 			AssistChip(label = { Text(label) }, onClick = { })
 			items.forEach { name ->
 				ElevatedFilterChip(
@@ -803,7 +796,7 @@ class TodoManager(
 			if (selected != null && selected !in items) {
 				ElevatedFilterChip(
 						modifier = Modifier.combinedClickable(
-								onClick = {
+						onClick = {
 					onSelect(
 							selected
 					)
@@ -894,8 +887,25 @@ class TodoManager(
 						onPriorityChange(it.toInt())
 						state.value = it
 					},
+					thumb = {
+						Box(
+								modifier = Modifier
+									.size(width = 4.dp, height = 24.dp)
+									.squircleBackground(
+											when (it.value.toInt()) {
+												0 -> MaterialTheme.colorScheme.outline
+												1 -> MaterialTheme.colorScheme.tertiary
+												2 -> MaterialTheme.colorScheme.primary
+												3 -> MaterialTheme.colorScheme.secondary
+												4 -> MaterialTheme.colorScheme.error
+												else -> MaterialTheme.colorScheme.primary
+											}, 24.dp
+									)
+
+						)
+					},
 					colors = SliderDefaults.colors(
-							activeTrackColor = when (priority) {
+							activeTrackColor = when (state.value.toInt()) {
 								0 -> MaterialTheme.colorScheme.outline
 								1 -> MaterialTheme.colorScheme.tertiary
 								2 -> MaterialTheme.colorScheme.primary
@@ -944,7 +954,7 @@ class TodoManager(
 			selectedTags.filter { it !in items }.forEach { name ->
 				ElevatedFilterChip(
 						modifier = Modifier.combinedClickable(
-								onClick = { onToggle(name) },
+						onClick = { onToggle(name) },
 						onLongClick = { onDelete?.invoke(name) },
 						interactionSource = remember { MutableInteractionSource() },
 						indication = null
@@ -1021,7 +1031,7 @@ class TodoManager(
 				supportingContent = {
 					FlowRow(horizontalArrangement = Arrangement.SpaceBetween) {
 						quickDates.forEach { (label, action) ->
-							AssistChip(
+							SuggestionChip(
 									onClick = action,
 									contentPadding = PaddingValues(0.dp),
 									label = {
@@ -1152,9 +1162,7 @@ class TodoManager(
 	fun SubtaskSection(
 		subtasks: SnapshotStateList<JSONObject>,
 		onAdd: () -> Unit,
-		onToggle: (Int) -> Unit,
 		onDelete: (Int) -> Unit,
-		onTitleChange: (Int, String) -> Unit,
 	) {
 		SegmentedListItem(
 				onClick = onAdd,
@@ -1169,18 +1177,24 @@ class TodoManager(
 				},
 				trailingContent = {
 					Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.add))
-				},
-				overlineContent = {
-					Text(
-							stringResource(R.string.subtask),
-							style = MaterialTheme.typography.bodyLargeEmphasized
-					)
 				}) {
+			Text(
+					stringResource(R.string.subtask),
+					style = MaterialTheme.typography.bodyLargeEmphasized
+			)
 //					Text(timeValue ?: noneStr, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMediumEmphasized)
 		}
 		subtasks.forEachIndexed { index, item ->
-			val isDone = item.getIntValue("status", TodoInfo.TODO) == TodoInfo.DONE
-			val itemTitle = item.getString("title") ?: ""
+			var isDone by remember {
+				mutableStateOf(
+						item.getIntValue(
+								"status", TodoInfo.TODO
+						) == TodoInfo.DONE
+				)
+			}
+			var itemTitle by remember {
+				mutableStateOf(item.getString("title", ""))
+			}
 			SegmentedListItem(
 					onClick = {},
 					modifier = Modifier.fillMaxWidth(),
@@ -1189,23 +1203,10 @@ class TodoManager(
 					),
 					colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
 					leadingContent = {
-						Checkbox(checked = isDone, onCheckedChange = { onToggle(index) })
-					},
-					overlineContent = {
-						TextField(
-								value = itemTitle,
-								onValueChange = { onTitleChange(index, it) },
-								colors = TextFieldDefaults.colors(
-										focusedContainerColor = Color.Transparent,
-										unfocusedContainerColor = Color.Transparent,
-										disabledContainerColor = Color.Transparent,
-										focusedIndicatorColor = Color.Transparent,
-										unfocusedIndicatorColor = Color.Transparent,
-										disabledIndicatorColor = Color.Transparent
-								),
-								textStyle = MaterialTheme.typography.bodyMedium.copy(textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None),
-								singleLine = true
-						)
+						Checkbox(checked = isDone, onCheckedChange = {
+							item["status"] = if (it) TodoInfo.TODO else TodoInfo.DONE
+							isDone = it
+						})
 					},
 					trailingContent = {
 						IconButton(onClick = { onDelete(index) }) {
@@ -1215,7 +1216,25 @@ class TodoManager(
 									tint = MaterialTheme.colorScheme.error
 							)
 						}
-					}) {}
+					}) {
+				TextField(
+						value = itemTitle,
+						onValueChange = {
+							item["title"] = it
+							itemTitle = it
+						},
+						colors = TextFieldDefaults.colors(
+								focusedContainerColor = Color.Transparent,
+								unfocusedContainerColor = Color.Transparent,
+								disabledContainerColor = Color.Transparent,
+								focusedIndicatorColor = Color.Transparent,
+								unfocusedIndicatorColor = Color.Transparent,
+								disabledIndicatorColor = Color.Transparent
+						),
+						textStyle = MaterialTheme.typography.bodyMedium.copy(textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None),
+						singleLine = true
+				)
+			}
 		}
 	}
 
@@ -1315,18 +1334,29 @@ class TodoManager(
 	fun TodoListScreen(
 		modifier: Modifier = Modifier,
 		todoList: List<TodoEntity>,
-		addTrigger: SharedFlow<Unit>,
+		isAddRequested: Boolean = false,
+		onAddHandled: () -> Unit = {},
+		content: @Composable () -> Unit,
 	) {
 		var showAddDialog by remember { mutableStateOf(false) }
 		var showEditDialog by remember { mutableStateOf(false) }
 		var editingTodo by remember { mutableStateOf<TodoEntity?>(null) }
 		var copyTodo by remember { mutableStateOf(TodoEntity()) }
 
+		if (isAddRequested) {
+			copyTodo = TodoEntity()
+			showAddDialog = true
+			onAddHandled()
+		}
+
 		if (showAddDialog) {
 			TodoDetailDialog(
 					initialTodo = copyTodo,
 					isAdd = true,
-					onDismiss = { showAddDialog = false; copyTodo = TodoEntity() },
+					onDismiss = {
+						showAddDialog = false
+						copyTodo = TodoEntity()
+					},
 					onConfirm = { todo ->
 						addTodo(todo)
 						showAddDialog = false
@@ -1353,48 +1383,43 @@ class TodoManager(
 			)
 		}
 
-		LaunchedEffect(Unit) {
-			addTrigger.collect {
-				copyTodo = TodoEntity()
-				showAddDialog = true
-
-			}
-		}
-
-		val grouped = todoList.groupBy { it.dueDate ?: "无预定日期" }
-		Column(
-				modifier = modifier
-					.fillMaxWidth()
-					.padding(
-							vertical = dimensionResource(R.dimen.vertical_padding)
-					)
-		) {
-			grouped.forEach { (dateHeader, todos) ->
-				Text(
-						dateHeader,
-						style = MaterialTheme.typography.titleMedium,
-						modifier = Modifier.padding(
-								dimensionResource(R.dimen.horizontal_padding),
-								dimensionResource(R.dimen.vertical_padding)
+		if (todoList.isEmpty()) content()
+		else {
+			val grouped = todoList.groupBy { it.dueDate ?: "无预定日期" }
+			Column(
+					modifier = modifier
+						.fillMaxWidth()
+						.padding(
+								vertical = dimensionResource(R.dimen.vertical_padding)
 						)
-				)
-				todos.forEachIndexed { index, todo ->
-					TodoItem(
-							todo = todo,
-							index = index,
-							count = todos.size,
-							color = Color.Transparent,
-							onClick = {
-								editingTodo = todo
-								showEditDialog = true
-							},
-							onToggle = { toggleTodoStatus(todo) },
-							onDelete = { deleteTodo(todo.id) },
-							onCopy = {
-								copyTodo = todo.copy()
-								showAddDialog = true
-							},
+			) {
+				grouped.forEach { (dateHeader, todos) ->
+					Text(
+							dateHeader,
+							style = MaterialTheme.typography.titleMedium,
+							modifier = Modifier.padding(
+									dimensionResource(R.dimen.horizontal_padding),
+									dimensionResource(R.dimen.vertical_padding)
+							)
 					)
+					todos.forEachIndexed { index, todo ->
+						TodoItem(
+								todo = todo,
+								index = index,
+								count = todos.size,
+								color = Color.Transparent,
+								onClick = {
+									editingTodo = todo
+									showEditDialog = true
+								},
+								onToggle = { toggleTodoStatus(todo) },
+								onDelete = { deleteTodo(todo.id) },
+								onCopy = {
+									copyTodo = todo.copy()
+									showAddDialog = true
+								},
+						)
+					}
 				}
 			}
 		}
