@@ -26,7 +26,7 @@ class PersonalInformationViewModel(application: Application) : AndroidViewModel(
 	}
 
 	fun fetchPersonalInfo() {
-		model.addAndNext("xsxx/api/sm-xsxx/info/student/view", 0)
+		model.enqueue("xsxx/api/sm-xsxx/info/student/view", 0)
 	}
 
 	override fun onCleared() {

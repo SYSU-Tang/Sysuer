@@ -3,43 +3,26 @@ package com.miyuyan.sysuer.model
 import android.content.Context
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.AuthorizationManager
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.TargetUrl
-import okhttp3.Request
-import okhttp3.Response
 
 class PortalModel(context: Context) : BaseModel(context) {
-	override val authorizationManager: AuthorizationManager = AuthorizationManager("portal.sysu.edu.cn",
-	                                                                               "portal.sysu.edu.cn").also {
+	override val authorizationManager: AuthorizationManager = AuthorizationManager(
+		"portal.sysu.edu.cn", "portal.sysu.edu.cn"
+	).also {
 		it.setTargetUrl(TargetUrl.PORTAL, TargetUrl.PORTAL)
 	}
-	
-	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,
-	                            response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
-		val content = response.body.string()
-		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
-		when (response.code) {
-			302 -> login(request)
-			200 -> response.header("Content-Type")
-				?.takeIf { it.contains("application/json") }
-				?.let {
-					val contentJSON = JSONObject.parse(content)
-					result = CommonUtil.Tuple2(request.second, contentJSON)
-					val meta = contentJSON.getJSONObject("meta")
-					if (!meta.getBoolean("success")) {
-						if (meta.getInteger("statusCode") == 302) login(request)
-						else toast(meta.getString("message",""))
 
-					}
-					else {
-						if (meta.getInteger("statusCode") != 200)
-							toast(meta.getString("message",""))
-						sendMessage(result)
-					}
-				} ?: run {
-				if (!authorizationManager.isAuthorized(content)) login(request)
+	override fun checkResponseStatus(
+		code: Int,
+		content: String,
+		json: JSONObject?
+	): ResponseStatus {
+		if (code == 302) return ResponseStatus.NEEDS_LOGIN
+		json?.getJSONObject("meta")?.let { meta ->
+			if (meta.getBoolean("success") == false && meta.getInteger("statusCode") == 302) {
+				return ResponseStatus.NEEDS_LOGIN
 			}
 		}
-		return result
+		return super.checkResponseStatus(code, content, json)
 	}
 }

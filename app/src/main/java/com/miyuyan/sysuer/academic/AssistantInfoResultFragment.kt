@@ -49,7 +49,7 @@ class AssistantInfoResultFragment : StaggerFragment() {
 	}
 	
 	fun getResult(query: String?) {
-		model.addAndNext("jwxt/assistant-manage/assistantInfoQuery/pageList?code=jwxsd_zjxxck", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":$query}", 0)
+		model.enqueue("jwxt/assistant-manage/assistantInfoQuery/pageList?code=jwxsd_zjxxck", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":$query}", 0)
 	}
 	
 	private fun result() {

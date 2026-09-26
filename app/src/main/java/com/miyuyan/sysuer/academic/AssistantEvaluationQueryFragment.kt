@@ -83,11 +83,11 @@ class AssistantEvaluationQueryFragment : PreferenceFragmentCompat() {
 	}
 
 	private fun loadYearTerm() {
-		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
+		model.enqueue("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
 	}
 
 	fun getUnit(params: String?) {
-		model.addAndNext("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$params", 1)
+		model.enqueue("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$params", 1)
 	}
 
 	val params: JSONObject

@@ -47,6 +47,7 @@
       {
         "id": 106,
         "name": "离返校登记",
+        "route": "LeaveReturnRegistration",
         "activity": ".academic.LeaveReturnRegistrationActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/#/leaveAndReturn?blxn=%222025-2026%22",
         "description": "离返校登记，学生在假期前提交离返校情况，记录离返校时间、原因等"

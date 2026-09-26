@@ -3,7 +3,6 @@ package com.miyuyan.sysuer.api
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.os.Message
 import okhttp3.Cache
 import okhttp3.Call
@@ -20,10 +19,8 @@ import java.util.concurrent.TimeUnit
 
 /**
  * 构造函数
- *
- * @param handler 处理消息的 Handler 对象
  */
-class HttpManager(/*val handler: Handler = Handler(Looper.getMainLooper())*/) {
+class HttpManager {
 	/**
 	 * 获取 CookieManager 管理器
 	 * 
@@ -33,34 +30,20 @@ class HttpManager(/*val handler: Handler = Handler(Looper.getMainLooper())*/) {
 
 	var handler: Handler? = null
 
-	//	@JvmField
 	var referer: String? = null // Referer 头字段值
 
-	//	@JvmField
 	var cookie: String? = null // Cookie 头字段值
 
-	//	@JvmField
 	var authorization: String? = null // Authorization 头字段值
 
-//	@JvmField
-//	var config: Config? = null // 请求参数对象
-
-	//	@JvmField
 	var ua: String? = null // User-Agent 头字段值
 
-//	@JvmField
-//	var target: String? = null // 目标 URL
-
-	//	@JvmField
 	var isAuthorizationRequired: Boolean = false // 是否需要 Authorization 头字段
 
-	//	@JvmField
 	var isTokenRequired: Boolean = false // 是否需要 token 头字段
 
-	//	@JvmField
 	var header: MutableMap<String, String?>? = null // 自定义请求头字段
 
-	//	@JvmField
 	var authorizationJar: AuthorizationJar? = null // 自定义 Authorization 头字段
 
 	/**
@@ -74,13 +57,12 @@ class HttpManager(/*val handler: Handler = Handler(Looper.getMainLooper())*/) {
 	/**
 	 * 设置请求参数
 	 *
-	 * @param config 请求参数对象
+	 * @param context 请求参数对象
 	 */
-	fun setParams(config: Context) {
-//		this.config = config
-		cookieManager = CookieManager(config)
-		authorizationJar = AuthorizationJar(config)
-		setCache(config.cacheDir)
+	fun initContext(context: Context) {
+		cookieManager = CookieManager(context)
+		authorizationJar = AuthorizationJar(context)
+		setCache(context.cacheDir)
 	}
 
 	fun setCache(dir: File) {
@@ -166,13 +148,11 @@ class HttpManager(/*val handler: Handler = Handler(Looper.getMainLooper())*/) {
 	 * @param what    消息标识
 	 */
 	fun sendRequest(request: Request, what: Int) {
-//		requestStatus[what] = Status.LOADING
 		client.newCall(request).enqueue(object : Callback {
 			override fun onFailure(
 				call: Call,
 				e: IOException,
 			) {
-//				requestStatus[what] = Status.ERROR
 				sendFailure()
 			}
 
@@ -186,12 +166,12 @@ class HttpManager(/*val handler: Handler = Handler(Looper.getMainLooper())*/) {
 						putInt("code", response.code)
 						putBoolean(
 								"isJSON",
-								response.header("Content-Type")?.contains("application/json") ?: false
+								response.header("Content-Type")?.contains("application/json")
+									?: false
 						)
 						putString("data", content)
 					}
 				})
-//				requestStatus[what] = Status.SUCCESS
 			}
 		})
 	}

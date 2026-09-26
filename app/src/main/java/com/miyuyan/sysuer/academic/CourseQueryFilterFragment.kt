@@ -148,16 +148,16 @@ class CourseQueryFilterFragment : PreferenceFragmentCompat() {
 	//        model.add("jwxt/base-info/codedata/findcodedataNames?datableNumber=350", 4);
 	//    }
 	fun getTeachingBuilding(text: String?) {
-		model.addAndNext("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$text", 5)
+		model.enqueue("jwxt/base-info/department/findCommonDepartmentPull?nameParm=$text", 5)
 	}
 
 	fun getClassroom(text: String) {
-		model.addAndNext("jwxt/base-info/classroom/getClassRoomAllPull", "{\"queryParam\":\"$text\"}", 6)
+		model.enqueue("jwxt/base-info/classroom/getClassRoomAllPull", "{\"queryParam\":\"$text\"}", 6)
 	}
 
 	fun getData(pos: Int) {
-		model.addAndNext(
-				mutableListOf<String?>(
+		model.enqueue(
+				mutableListOf(
 						"jwxt/base-info/acadyearterm/findAcadyeartermNamesBox",
 						"jwxt/base-info/campus/findCampusNamesBox",
 						"jwxt/base-info/codedata/findcodedataNames?datableNumber=216",

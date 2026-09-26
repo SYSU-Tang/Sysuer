@@ -214,13 +214,13 @@ open class StaggerFragment : BaseFragment() {
 			}
 		}
 
-		fun setKeyAndValue(map: Map<String, Any?>) {
-			val keys = map["keys"] as? MutableList<String?>
-			val values = map["values"] as? MutableList<String?>
-			if (keys != null && values != null) {
-				setKeyAndValue(keys, values)
-			}
-		}
+//		fun setKeyAndValue(map: Map<String, Any?>) {
+//			val keys = map["keys"] as? MutableList<String?>
+//			val values = map["values"] as? MutableList<String?>
+//			if (keys != null && values != null) {
+//				setKeyAndValue(keys, values)
+//			}
+//		}
 
 		fun add(row: Int = -1, key: String?, value: String?) {
 			this@StaggerFragment.addRow(sectionIndex, key, value)

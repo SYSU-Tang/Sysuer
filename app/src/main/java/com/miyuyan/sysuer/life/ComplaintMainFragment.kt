@@ -124,7 +124,7 @@ class ComplaintMainFragment : com.miyuyan.sysuer.BaseFragment() {
 	
 	fun uploadAttachment(uri: android.net.Uri) {
 		val fileRequestBody = FileManager.getAttachmentRequestBody(requireContext(), uri)
-		model.request(model.http.generateRequest("https://${model.host}/jsp_api/upload", null, null)
+		model.enqueue(model.http.generateRequest("https://${model.host}/jsp_api/upload", null, null)
 						  .post(MultipartBody.Builder()
 									.setType(MultipartBody.FORM)
 									.addFormDataPart("file", fileRequestBody.fileName, fileRequestBody.file)

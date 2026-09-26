@@ -148,7 +148,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 	}
 
 	fun unselect(classId: String, code: String?, type: String?) {
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/choose-course-front-server/classCourseInfo/course/back",
 			"{\"courseId\":\"$classId\",\"clazzId\":\"$code\",\"selectedType\":\"$type\"}",
 			1
@@ -156,7 +156,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 	}
 
 	fun select(code: String, type: String?, category: String?) {
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/choose-course-front-server/classCourseInfo/course/choose",
 			"{\"clazzId\":\"$code\",\"selectedType\":\"$type\",\"selectedCate\":\"$category\",\"check\":true}",
 			1
@@ -175,7 +175,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 			"$waiting"
 		)
 		if (!category.isNullOrEmpty()) args["courseCateCode"] = category
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/choose-course-front-server/selectedCourse/list",
 			"{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${args.toJSONString()}}",
 			0
@@ -190,7 +190,7 @@ class CourseSelectionSelectedFragment : BaseFragment() {
 	}
 
 	fun setPNP(type: String?, id: String) {
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/choose-course-front-server/selectedCourse/setTwoTier?type=$type",
 			"{\"clazzId\":\"$id\"}",
 			1

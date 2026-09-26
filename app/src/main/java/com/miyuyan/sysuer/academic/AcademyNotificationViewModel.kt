@@ -60,7 +60,7 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 	}
 
 	fun fetchAcademicNotice(keyword: String? = null) {
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/system-manage/info-delivery?column=01&deliveryObject=02&status=1&resourceCode=jwgld&title=$keyword",
 				0
 		)
@@ -68,7 +68,7 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 
 	fun fetchSchoolNotice(keyword: String? = null) {
 		schoolNoticesUiState.value = UiState.Loading
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/system-manage/info-delivery?column=02&deliveryObject=02&status=1&resourceCode=jwgld&title=$keyword",
 				1
 		)
@@ -76,7 +76,7 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 
 	fun fetchContent(id: String) {
 		academicNoticesUiState.value = UiState.Loading
-		model.addAndNext("jwxt/system-manage/info-delivery/noticeId?id=$id", 2)
+		model.enqueue("jwxt/system-manage/info-delivery/noticeId?id=$id", 2)
 	}
 
 	fun clearNoticeContent() {

@@ -276,23 +276,23 @@ class GymDetailFragment : BaseFragment() {
 	}
 
 	fun getInfo(id: String, from: String?, to: String?) {
-		model.addAndNext("api/venue/available-slots/range?venueTypeId=$id&start=$from&end=$to", 0)
+		model.enqueue("api/venue/available-slots/range?venueTypeId=$id&start=$from&end=$to", 0)
 	}
 
 	fun getFee(id: String) {
-		model.addAndNext("api/venuetype/$id/feetemplates", 1)
+		model.enqueue("api/venuetype/$id/feetemplates", 1)
 	}
 
 	private fun loadMe() {
-		model.addAndNext("api/swimmer/me", 2)
+		model.enqueue("api/swimmer/me", 2)
 	}
 
 	fun getType(id: String?) {
-		model.addAndNext("api/venue/type/$id", 3)
+		model.enqueue("api/venue/type/$id", 3)
 	}
 
 	fun reserve(payload: String?) {
-		model.addAndNext("api/BookingRequestVenue", payload, 4)
+		model.enqueue("api/BookingRequestVenue", payload, 4)
 	}
 
 	/**

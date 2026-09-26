@@ -107,14 +107,14 @@ class GradeForLevelViewModel(application: Application) : AndroidViewModel(applic
 	}
 
 	fun fetchOptions() {
-		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 0)
-		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
-		model.addAndNext("jwxt/base-info/base-category/SfqyBox", 2)
+		model.enqueue("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 0)
+		model.enqueue("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
+		model.enqueue("jwxt/base-info/base-category/SfqyBox", 2)
 	}
 
 	fun fetchGrade() {
 		uiState.value = if (page == 1) UiState.Loading else UiState.LoadMore
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/achievement-manage/achievement/selfPageList",
 				"{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":$args}",
 				3

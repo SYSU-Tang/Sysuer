@@ -4,7 +4,9 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class Application : Application() {
 	var currentActivity: FragmentActivity? = null
 		private set

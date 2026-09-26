@@ -52,6 +52,6 @@ class AssistantEvaluationResultFragment : StaggerFragment() {
 	}
 	
 	private fun result() {
-		model.addAndNext("jwxt/assistant-manage/assistantEvaluation/evaluationResultPageList?code=jwxsd_zjpjck", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
+		model.enqueue("jwxt/assistant-manage/assistantEvaluation/evaluationResultPageList?code=jwxsd_zjpjck", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
 	}
 }

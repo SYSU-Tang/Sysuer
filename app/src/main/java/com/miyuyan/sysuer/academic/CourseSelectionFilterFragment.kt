@@ -106,7 +106,6 @@ class CourseSelectionFilterFragment : BaseFragment() {
 							}
 						}
 					}
-					model.nextAll()
 				}
 			}
 		}
@@ -167,7 +166,7 @@ class CourseSelectionFilterFragment : BaseFragment() {
 	}
 
 	fun getData(i: Int) {
-		model.addAndNext(
+		model.enqueue(
 				arrayOf(
 						"jwxt/base-info/campus/findCampusNamesBox",
 						"jwxt/base-info/codedata/findcodedataNames?datableNumber=233",

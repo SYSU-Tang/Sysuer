@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.WindowManager
@@ -16,6 +17,7 @@ import android.widget.CompoundButton
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.NumberPicker
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.ColorUtils
@@ -27,6 +29,7 @@ import androidx.core.view.setMargins
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -59,7 +62,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class TodoManager(
-	private val context: Context, private val concatAdapter: ConcatAdapter
+	private val context: Context,
+	private val concatAdapter: ConcatAdapter,
 ) {
 	private val activity: FragmentActivity get() = context as FragmentActivity
 	private var function: Int = TodoInfo.ADD
@@ -94,14 +98,9 @@ class TodoManager(
 			todoInfo.subtask = JSONArray(adapter.data)
 		}
 	}
-	val todoModel: TodoModel by lazy {
-		val repository = TodoRepository(
-				TodoDatabase.getDatabase(activity, activity.lifecycleScope).todoDao()
-		)
-		ViewModelProvider(activity, TodoModelFactory(repository))[TodoModel::class.java]
-	}
+	val todoModel: TodoModel by activity.viewModels()
 	private val dialogTodoBinding: DialogTodoBinding by lazy {
-		DialogTodoBinding.inflate(activity.layoutInflater).apply {
+		DialogTodoBinding.inflate(LayoutInflater.from(context)).apply {
 			prioritySlider.addOnChangeListener { _: Slider?, value: Float, _: Boolean ->
 				todoInfo.priority = value.toInt()
 				priorityValue.text =

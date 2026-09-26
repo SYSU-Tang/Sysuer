@@ -103,7 +103,7 @@ class EvaluationCategoryFragment : BaseFragment() {
 	}
 
 	private fun evaluation() {
-		model.addAndNext(
+		model.enqueue(
 				"personnelEvaluation/listObtainPersonnelEvaluationTasks?pageNum=1&pageSize=10",
 				1
 		)

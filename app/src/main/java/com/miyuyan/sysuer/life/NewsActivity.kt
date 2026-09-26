@@ -2,8 +2,6 @@ package com.miyuyan.sysuer.life
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -14,6 +12,9 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -22,24 +23,20 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.AuthorizationJar
-import com.miyuyan.sysuer.api.AuthorizationManager
 import com.miyuyan.sysuer.api.CommonUtil.trim
-import com.miyuyan.sysuer.api.HttpManager
-import com.miyuyan.sysuer.api.TargetUrl
 import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.databinding.ActivityNewsBinding
+import com.miyuyan.sysuer.databinding.ItemPreferenceBinding
+import com.miyuyan.sysuer.model.IportalModel
 import com.miyuyan.sysuer.view.AdapterListener
 import com.miyuyan.sysuer.view.Pager2Adapter
 import com.miyuyan.sysuer.view.RecyclerAdapter
+import kotlinx.coroutines.launch
 
 class NewsActivity : BaseActivity() {
-	lateinit var http: HttpManager
-	val authorizationManager: AuthorizationManager = AuthorizationManager(
-			"https://iportal.sysu.edu.cn/",
-			"https://iportal-443.webvpn.sysu.edu.cn/"
-	)
+	val model: IportalModel by lazy { IportalModel(this) }
 	lateinit var edit: EditText
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val adapter = Pager2Adapter(this)
@@ -50,20 +47,17 @@ class NewsActivity : BaseActivity() {
 					holder: RecyclerView.ViewHolder,
 					position: Int
 				) {
-					holder.itemView.setOnClickListener { v: View? ->
+					holder.itemView.setOnClickListener { v: View ->
 						startActivity(
 								Intent(
-										this@NewsActivity,
-										BrowserActivity::class.java
+										this@NewsActivity, BrowserActivity::class.java
 								).setData(
-										"https://iportal.sysu.edu.cn/searchWeb/#/index?searchWord=${
-											get(
-													position
-											)
+										"https://${model.host}/searchWeb/#/index?searchWord=${
+											get(position)
 										}&module=default&size=10&current=1&sortType=score&searchType=3".toUri()
 								),
 								ActivityOptionsCompat
-									.makeSceneTransitionAnimation(this@NewsActivity, v!!, "miniapp")
+									.makeSceneTransitionAnimation(this@NewsActivity, v, "miniapp")
 									.toBundle()
 						)
 					}
@@ -85,54 +79,18 @@ class NewsActivity : BaseActivity() {
 			sugs.layoutManager = GridLayoutManager(this@NewsActivity, 1)
 		}
 		setContentView(binding.root)
-		config.setCallback { suggestions() }
-		http = HttpManager().apply {
-			handler = object : Handler(mainLooper) {
-				override fun handleMessage(msg: Message) {
-					val response = msg.getData()
-					val isJSON = response.getBoolean("isJSON")
-					val json = response.getString("data")
-					if (json == null) {
-						config.toast(R.string.no_net_connected)
-						return
-					}
-					if (!isJSON) {
-						if (!authorizationManager.isAuthorized(json)) {
-							config.toast(R.string.login_warning)
-							config.gotoLogin(if (authorizationManager.isAccessible) TargetUrl.NEWS else TargetUrl.NEWS_WEBVPN)
-							return
-						}
-						if (!authorizationManager.isAccessible(json)) {
-							config.toast(R.string.educational_wifi_warning)
-							suggestions()
-							return
-						}
-					}
-					val data = JSONObject.parseObject(json)
-					when (data.get("code")) {
-						"0000" -> {
-							if (msg.what == 1) {
-								suggestionAdapter.clear()
-								data.getJSONObject("data").getJSONArray("suggests")
-									.forEach { suggestionAdapter.add(it as String?) }
-							} else if (data.get("code") == 496) {
-								config.toast(data.getString("message"))
-								config.gotoLogin(if (authorizationManager.isAccessible) TargetUrl.NEWS else TargetUrl.NEWS_WEBVPN)
-							} //suggestion
-						}
-
-						else -> {
-							config.toast(data.getString("code") + "\n" + data.getString("message"))
+		lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.STARTED) {
+				model.messageChannel.collect { (requestCode, data) ->
+					if (requestCode == 1) {
+						suggestionAdapter.clear()
+						data.getJSONObject("data")?.getJSONArray("suggests")?.forEach {
+							suggestionAdapter.add(it as String?)
 						}
 					}
 				}
 			}
-			setParams(this@NewsActivity)
-			isAuthorizationRequired = true
-			authorizationJar = AuthorizationJar(this@NewsActivity)
-			header = mutableMapOf("clientid" to "sysuer")
 		}
-
 		edit = binding.searchView.editText.apply {
 			setOnEditorActionListener { _: TextView?, _: Int, _: KeyEvent? ->
 				binding.searchView.hide()
@@ -159,22 +117,27 @@ class NewsActivity : BaseActivity() {
 	}
 
 	fun getSuggestions(keyword: String) {
-		http.postRequest(
-				authorizationManager.host + "ai_service/search-server/needle/suggest",
-				"{\"aliasName\":\"collection_data\",\"keyWord\":\"$keyword\"}",
-				1
-		)
+		val data = JSONObject.of("aliasName", "collection_data", "keyWord", keyword).toJSONString()
+		model.enqueue("ai_service/search-server/needle/suggest", data = data, code = 1)
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+		model.dispose()
 	}
 
 	internal class SuggestionAdapter : RecyclerAdapter<String?>() {
 		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 			return object : RecyclerView.ViewHolder(
-					LayoutInflater.from(parent.context).inflate(R.layout.item_sug, parent, false)
+					LayoutInflater.from(parent.context)
+						.inflate(R.layout.item_preference, parent, false)
 			) {}
 		}
 
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-			(holder.itemView as TextView).text = trim(get(position))
+			val binding = ItemPreferenceBinding.bind(holder.itemView)
+			binding.itemTitle.text = trim(get(position))
+			binding.itemContent.text = "${get(position)}"
 			super.onBindViewHolder(holder, position)
 		}
 	}

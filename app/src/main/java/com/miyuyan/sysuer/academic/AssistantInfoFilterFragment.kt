@@ -90,10 +90,10 @@ class AssistantInfoFilterFragment : BaseFragment() {
 	}
 
 	private fun terms() {
-		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
+		model.enqueue("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 0)
 	}
 
 	private fun campuses() {
-		model.addAndNext("jwxt/base-info/campus/findCampusNamesBox", 1)
+		model.enqueue("jwxt/base-info/campus/findCampusNamesBox", 1)
 	}
 }

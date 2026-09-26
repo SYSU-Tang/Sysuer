@@ -57,6 +57,7 @@ import com.miyuyan.sysuer.home.HomeViewModel
 import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.home.ServiceScreen
 import com.miyuyan.sysuer.home.ServiceViewModel
+import com.miyuyan.sysuer.todo.TodoModel
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
 import kotlinx.coroutines.launch
@@ -75,7 +76,8 @@ fun HomeRoute(
 	val serviceViewModel: ServiceViewModel = viewModel()
 	val spm: PreferenceViewModel = viewModel()
 	val settingManager = SettingManager.getInstance(context)
-	val todoManager = TodoManager(context, LocalLifecycleOwner.current.lifecycleScope)
+	val todoModel: TodoModel = viewModel()
+	val todoManager = TodoManager(context, LocalLifecycleOwner.current.lifecycleScope, todoModel)
 	val progressMax by dashboardViewModel.progressMax.collectAsStateWithLifecycle()
 	val progressCurrent by dashboardViewModel.progressCurrent.collectAsStateWithLifecycle()
 	val searchBarState = rememberContainedSearchBarState()
@@ -90,8 +92,7 @@ fun HomeRoute(
 		if (searchQuery.isBlank()) allItems
 		else allItems.filter { item ->
 			item.name?.contains(
-				searchQuery,
-				true
+					searchQuery, true
 			) == true || item.description?.contains(searchQuery, ignoreCase = true) == true
 		}.sortedWith(compareByDescending<ServiceConfig> { item ->
 			when {
@@ -116,128 +117,125 @@ fun HomeRoute(
 		} else null
 		intent?.let {
 			context.startActivity(
-				it,
-				activity?.let { it1 -> ActivityOptionsCompat.makeSceneTransitionAnimation(it1) }
-					?.toBundle()
-			)
+					it,
+					activity?.let { it1 -> ActivityOptionsCompat.makeSceneTransitionAnimation(it1) }
+						?.toBundle())
 		} ?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
 	}
 	ActivityPager(
-		title = stringResource(R.string.app_name),
-		navs = listOf(
-			MenuItem(stringResource(R.string.dashboard), Icons.Rounded.Dashboard),
-			MenuItem(stringResource(R.string.service), Icons.Rounded.GridView),
-			MenuItem(stringResource(R.string.account), Icons.Rounded.Person),
-		),
-		topBarContent = { page ->
-			when (page) {
-				0 -> {
-					if (progressMax > 0) LinearProgressIndicator(
-						progress = { progressCurrent.toFloat() / progressMax },
-						modifier = Modifier.fillMaxWidth(),
-					)
-					else LinearProgressIndicator(
-						progress = { 1f },
-						modifier = Modifier.fillMaxWidth(),
-					)
-				}
-
-				1 -> {
-					val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
-					val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
-						searchBarColors = SearchBarDefaults.containedColors(state = searchBarState)
-					)
-					val inputField = @Composable {
-						SearchBarDefaults.InputField(
-							textFieldState = rememberTextFieldState(),
-							searchBarState = searchBarState,
-							colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
-							onSearch = { },
-							placeholder = {
-								Text(
-									modifier = Modifier.clearAndSetSemantics {},
-									text = stringResource(R.string.search)
-								)
-							},
-							leadingIcon = {
-								Icon(
-									Icons.Rounded.Search,
-									contentDescription = stringResource(R.string.search)
-								)
-							},
+			title = stringResource(R.string.app_name),
+			navs = listOf(
+					MenuItem(stringResource(R.string.dashboard), Icons.Rounded.Dashboard),
+					MenuItem(stringResource(R.string.service), Icons.Rounded.GridView),
+					MenuItem(stringResource(R.string.account), Icons.Rounded.Person),
+			),
+			topBarContent = { page ->
+				when (page) {
+					0 -> {
+						if (progressMax > 0) LinearProgressIndicator(
+								progress = { progressCurrent.toFloat() / progressMax },
+								modifier = Modifier.fillMaxWidth(),
+						)
+						else LinearProgressIndicator(
+								progress = { 1f },
+								modifier = Modifier.fillMaxWidth(),
 						)
 					}
-					AppBarWithSearch(
-						scrollBehavior = scrollBehavior,
-						windowInsets = SearchBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal),
-						state = searchBarState,
-						colors = SearchBarDefaults.appBarWithSearchColors(
-							appBarContainerColor = Color.Transparent,
-						),
-						inputField = inputField,
-					)
-					ExpandedFullScreenContainedSearchBar(
-						state = searchBarState,
-						inputField = @Composable {
+
+					1 -> {
+						val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+						val appBarWithSearchColors = SearchBarDefaults.appBarWithSearchColors(
+								searchBarColors = SearchBarDefaults.containedColors(state = searchBarState)
+						)
+						val inputField = @Composable {
 							SearchBarDefaults.InputField(
-								textFieldState = textFieldState,
-								searchBarState = searchBarState,
-								colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
-								onSearch = { },
-								placeholder = {
-									Text(
-										modifier = Modifier.clearAndSetSemantics {},
-										text = stringResource(R.string.search)
+									textFieldState = rememberTextFieldState(),
+									searchBarState = searchBarState,
+									colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
+									onSearch = { },
+									placeholder = {
+										Text(
+												modifier = Modifier.clearAndSetSemantics {},
+												text = stringResource(R.string.search)
+										)
+									},
+									leadingIcon = {
+										Icon(
+												Icons.Rounded.Search,
+												contentDescription = stringResource(R.string.search)
+										)
+									},
+							)
+						}
+						AppBarWithSearch(
+								scrollBehavior = scrollBehavior,
+								windowInsets = SearchBarDefaults.windowInsets.only(WindowInsetsSides.Horizontal),
+								state = searchBarState,
+								colors = SearchBarDefaults.appBarWithSearchColors(
+										appBarContainerColor = Color.Transparent,
+								),
+								inputField = inputField,
+						)
+						ExpandedFullScreenContainedSearchBar(
+								state = searchBarState,
+								inputField = @Composable {
+									SearchBarDefaults.InputField(
+											textFieldState = textFieldState,
+											searchBarState = searchBarState,
+											colors = appBarWithSearchColors.searchBarColors.inputFieldColors,
+											onSearch = { },
+											placeholder = {
+												Text(
+														modifier = Modifier.clearAndSetSemantics {},
+														text = stringResource(R.string.search)
+												)
+											},
+											leadingIcon = {
+												IconButton(onClick = {
+													scope.launch { searchBarState.animateToCollapsed() }
+												}) {
+													Icon(
+															Icons.AutoMirrored.Rounded.ArrowBack,
+															contentDescription = stringResource(R.string.back)
+													)
+												}
+											},
 									)
 								},
-								leadingIcon = {
-									IconButton(onClick = {
-										scope.launch { searchBarState.animateToCollapsed() }
-									}) {
-										Icon(
-											Icons.AutoMirrored.Rounded.ArrowBack,
-											contentDescription = stringResource(R.string.back)
-										)
-									}
-								},
-							)
-						},
-					) {
-						ServiceSearchResults(results = searchResults, onResultClick = { item ->
-							scope.launch { searchBarState.animateToCollapsed() }
-							navigateToServiceItem(item)
-						})
+						) {
+							ServiceSearchResults(results = searchResults, onResultClick = { item ->
+								scope.launch { searchBarState.animateToCollapsed() }
+								navigateToServiceItem(item)
+							})
+						}
 					}
 				}
-			}
-		},
-		pageContent = { page ->
-			when (page) {
-				0 -> DashboardScreen(
-					dashboardViewModel,
-					homeViewModel,
-					spm,
-					todoManager,
-					settingManager,
-					sharedTransitionScope,
-					animatedVisibilityScope,
-					backStack
-				)
+			},
+			pageContent = { page ->
+				when (page) {
+					0 -> DashboardScreen(
+							dashboardViewModel,
+							homeViewModel,
+							spm,
+							todoManager,
+							settingManager,
+							sharedTransitionScope,
+							animatedVisibilityScope,
+							backStack
+					)
 
-				1 -> ServiceScreen(
-					homeViewModel,
-					serviceViewModel,
-					backStack,
-					sharedTransitionScope,
-					animatedVisibilityScope
-				)
+					1 -> ServiceScreen(
+							homeViewModel,
+							serviceViewModel,
+							backStack,
+							sharedTransitionScope,
+							animatedVisibilityScope
+					)
 
-				2 -> AccountScreen(
-					backStack,
-					sharedTransitionScope,
-					animatedVisibilityScope
-				) { activity?.let { recreate(it) } }
-			}
-		},
+					2 -> AccountScreen(
+							backStack, sharedTransitionScope, animatedVisibilityScope
+					) { activity?.let { recreate(it) } }
+				}
+			},
 	)
 }

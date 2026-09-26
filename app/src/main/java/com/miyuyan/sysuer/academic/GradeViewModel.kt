@@ -47,7 +47,7 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 			isFetchingGrade = true
 			if (this.maxGrade < 0) this.maxGrade = maxGrade
 			if (position < 0) position = pos
-			model.addAndNext(
+			model.enqueue(
 				"jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse",
 				"{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"achievementCourseNumber\":\"$classNumber\",\"beforeAchievementPoint\":\"$maxGrade\",\"afterAchievementPoint\":\"$maxGrade\",\"cultureTypeCode\":\"01\"}}",
 				5
@@ -220,21 +220,21 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	fun fetchPull() {
-		model.addAndNext("jwxt/achievement-manage/score-check/getPull", 2)
+		model.enqueue("jwxt/achievement-manage/score-check/getPull", 2)
 	}
 
 	fun fetchNow() {
-		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 3)
+		model.enqueue("jwxt/base-info/acadyearterm/showNewAcadlist", 3)
 	}
 
 	fun fetchScore() {
 		if (year != null && trainType != null) {
 			val termValue = if (termIndex == 0) "" else termIndex.toString()
-			model.addAndNext(
+			model.enqueue(
 				"jwxt/achievement-manage/score-check/list?scoSchoolYear=$year&trainTypeCode=$trainType&addScoreFlag=true&scoSemester=$termValue",
 				1
 			)
-			model.addAndNext(
+			model.enqueue(
 				"jwxt/achievement-manage/score-check/getSortByYear?scoSchoolYear=${year ?: ""}&trainTypeCode=$trainType&addScoreFlag=true&scoSemester=$termValue",
 				4
 			)
@@ -243,11 +243,11 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 
 	fun fetchAllYear() {
 		if (trainType != null) {
-			model.addAndNext(
+			model.enqueue(
 				"jwxt/achievement-manage/score-check/list?trainTypeCode=$trainType&addScoreFlag=true",
 				1
 			)
-			model.addAndNext(
+			model.enqueue(
 				"jwxt/achievement-manage/score-check/getSortByYear?trainTypeCode=$trainType&addScoreFlag=true",
 				4
 			)

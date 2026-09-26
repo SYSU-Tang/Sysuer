@@ -100,7 +100,7 @@ class EvaluationCourseFragment : BaseFragment() {
 	}
 
 	fun getEvaluation(wjid: String?, rwid: String?, pjrdm: String) {
-		model.addAndNext(String.format(Locale.getDefault(), "personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", pjrdm, wjid, rwid, page++), 1)
+		model.enqueue(String.format(Locale.getDefault(), "personnelEvaluation/listEcaluationRalationshipEnriry?pjrdm=%s&wjid=%s&rwid=%s&pageNum=%d&pageSize=20", pjrdm, wjid, rwid, page++), 1)
 	}
 	
 	override fun onConfigurationChanged(newConfig: Configuration) {

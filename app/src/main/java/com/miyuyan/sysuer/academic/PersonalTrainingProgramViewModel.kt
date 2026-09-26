@@ -47,19 +47,19 @@ class PersonalTrainingProgramViewModel(application: Application) : AndroidViewMo
 	}
 	
 	fun fetchMyProgram() {
-		model.addAndNext("jwxt/training-programe/training-programe/undergradute/student/personalMainProgram", 0)
+		model.enqueue("jwxt/training-programe/training-programe/undergradute/student/personalMainProgram", 0)
 	}
 	
 	fun fetchBasicInfo() {
-		model.addAndNext("jwxt/training-programe/trainingBasicInfo/getBasicInformation?id=$programId", 2)
+		model.enqueue("jwxt/training-programe/trainingBasicInfo/getBasicInformation?id=$programId", 2)
 	}
 	
 	private fun fetchCourseTable() {
-		model.addAndNext("jwxt/training-programe/schemeSubmitAgg/getTableByProgramId?programId=$programId", 1)
+		model.enqueue("jwxt/training-programe/schemeSubmitAgg/getTableByProgramId?programId=$programId", 1)
 	}
 	
 	private fun fetchCredit() {
-		model.addAndNext("jwxt/training-programe/trainingReqGraduate/showReqGraduateCreits?grade&cultivateId=$programId&cultivateCategoryId=01", 3)
+		model.enqueue("jwxt/training-programe/trainingReqGraduate/showReqGraduateCreits?grade&cultivateId=$programId&cultivateCategoryId=01", 3)
 	}
 	
 	override fun onCleared() {

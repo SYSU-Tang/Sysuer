@@ -63,10 +63,10 @@ class GymReservationFragment : BaseFragment() {
 					val datePicker = picker.setSelection(viewModel.reservationFromTo.value!!.first)
 						.setCalendarConstraints(
 								CalendarConstraints.Builder().setValidator(
-											CompositeDateValidator.allOf(
-													listOf(DateValidatorPointBackward.before(it))
-											)
-									).build()
+										CompositeDateValidator.allOf(
+												listOf(DateValidatorPointBackward.before(it))
+										)
+								).build()
 						).build()
 					datePicker.show(getParentFragmentManager(), "datePicker")
 					datePicker.addOnPositiveButtonClickListener(
@@ -80,10 +80,10 @@ class GymReservationFragment : BaseFragment() {
 					val datePicker = picker.setSelection(viewModel.reservationFromTo.value!!.second)
 						.setCalendarConstraints(
 								CalendarConstraints.Builder().setValidator(
-											CompositeDateValidator.allOf(
-													listOf(DateValidatorPointForward.from(it))
-											)
-									).build()
+										CompositeDateValidator.allOf(
+												listOf(DateValidatorPointForward.from(it))
+										)
+								).build()
 						).build()
 					datePicker.show(getParentFragmentManager(), "datePicker")
 					datePicker.addOnPositiveButtonClickListener(
@@ -181,21 +181,24 @@ class GymReservationFragment : BaseFragment() {
 	}
 
 	fun reset() {
-		concatAdapter.adapters.forEach { adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder?>? ->
-			concatAdapter.removeAdapter(adapter!!)
+		concatAdapter.adapters.forEach { adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder?> ->
+			concatAdapter.removeAdapter(adapter)
 		}
 	}
 
 	private fun loadReservation() {
-			if (viewModel.reservationFromTo.value != null && viewModel.reservationFromTo.value!!.second != null && viewModel.reservationFromTo.value!!.first != null) model.addAndNext(
-					"api/BookingRequestVenue?all=false&startDate=${dateFormat.format(viewModel.reservationFromTo.value!!.first)}&endDate=${
-						dateFormat.format(viewModel.reservationFromTo.value!!.second)
+		val (from, to) = viewModel.reservationFromTo.value ?: return
+		if (from != null && to != null) {
+			model.enqueue(
+					"api/BookingRequestVenue?all=false&startDate=${DateTimeManager.toDateString(from)}&endDate=${
+						DateTimeManager.toDateString(to)
 					}&waitingList=false", 0
 			)
 		}
+	}
 
 	fun deleteReservation(bookingId: String) {
-		model.run(
+		model.call(
 				model.http
 					.generateRequest("https://${model.host}/api/BookingRequestVenue/$bookingId")
 					.delete().build(), object : Callback {
@@ -208,7 +211,7 @@ class GymReservationFragment : BaseFragment() {
 				//println(response.code)
 				//println(response.message)
 				//println(response.headers.toMultimap())
-				if (response.isSuccessful) viewLifecycleOwner.lifecycleScope.launch {
+				if (response.isSuccessful) lifecycleScope.launch {
 					regetReservation()
 				}
 			}

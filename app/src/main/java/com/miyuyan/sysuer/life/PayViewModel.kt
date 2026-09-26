@@ -118,19 +118,19 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	fun fetchToPayList() {
-		model.addAndNext("client/api/client/necessary/list", "{}", 0)
+		model.enqueue("client/api/client/necessary/list", "{}", 0)
 	}
 
 	fun fetchSelectivePayList() {
-		model.addAndNext("client/api/client/chooce/list", "{}", 1)
+		model.enqueue("client/api/client/chooce/list", "{}", 1)
 	}
 
 	fun fetchFeeList(year: String) {
-		model.addAndNext("client/api/client/record/feelist", "{\"year\":$year}", 2)
+		model.enqueue("client/api/client/record/feelist", "{\"year\":$year}", 2)
 	}
 
 	fun fetchPaymentList(from: String, to: String?) {
-		model.addAndNext(
+		model.enqueue(
 			"client/api/client/record/paymentlist",
 			"{\"startTime\":\"$from\",\"overTime\":\"$to\"}",
 			3
@@ -138,19 +138,19 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	fun fetchRefundList() {
-		model.addAndNext("client/api/client/refund/list", "{}", 4)
+		model.enqueue("client/api/client/refund/list", "{}", 4)
 	}
 
 	fun check(data: JSONObject) {
-		model.addAndNext("client/api/client/necessary/pay/check", data.toJSONString(), 5)
+		model.enqueue("client/api/client/necessary/pay/check", data.toJSONString(), 5)
 	}
 
 	fun submit() {
-		model.addAndNext("client/api/client/necessary/submitOrder", toPayItems.toJSONString(), 6)
+		model.enqueue("client/api/client/necessary/submitOrder", toPayItems.toJSONString(), 6)
 	}
 
 	fun cancel(payOrder: String) {
-		model.addAndNext(
+		model.enqueue(
 			"client/api/client/necessary/operate",
 			"{\"operateCode\":\"CANCEL_PAY\",\"orderNo\":\"$payOrder\"}",
 			7
@@ -158,7 +158,7 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	fun viewDetail(payOrder: String, payNo: String) {
-		model.addAndNext(
+		model.enqueue(
 			"client/api/client/record/paymentlist/detail",
 			"{\"orderNo\":\"$payOrder\",\"outPayNo\":\"${payNo}\"}",
 			8

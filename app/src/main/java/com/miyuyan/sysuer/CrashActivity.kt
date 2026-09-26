@@ -40,9 +40,9 @@ class CrashActivity : BaseActivity() {
 				}
 				supportFinishAfterTransition()
 			}
+			crashContent.setMarkdown(createDetailedIssueBody(RuntimeException(crashInfo)))
 		}
 		setContentView(binding.root)
-		binding.crashContent.setMarkdown(createDetailedIssueBody(RuntimeException(crashInfo)))
 	}
 
 	fun openIssueInBrowser() {

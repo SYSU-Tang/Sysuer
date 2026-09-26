@@ -317,21 +317,21 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun getTerm() {
-		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 3)
+		model.enqueue("jwxt/base-info/acadyearterm/showNewAcadlist", 3)
 	}
 
 	fun getWeek(term: String?) {
-		model.addAndNext("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 4)
+		model.enqueue("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 4)
 	}
 
 	fun getTodayCourses(term: String = "") {
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term", 1
 		)
 	}
 
 	fun getExams(term: String, weekId: String?) {
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck",
 			"{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}",
 			2
@@ -339,14 +339,14 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun getExamWeekName(term: String) {
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5
 		)
 	}
 
 	fun getSelectedCourses(courseName: String) {
 		examSubject = courseName
-		if (_selectedCourses.value.isEmpty()) model.addAndNext(
+		if (_selectedCourses.value.isEmpty()) model.enqueue(
 			"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
 			"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"${_term.value}\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
 			6

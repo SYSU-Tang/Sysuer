@@ -88,11 +88,11 @@ class CourseSelectionPreviewViewModel(application: Application) : AndroidViewMod
 		isLoading.value = true
 		val data = JSONObject.of("pageNo", page++, "pageSize", 10, "param", JSONObject.of("hiddenSelectedStatus", if (hiddenSelectedStatus.value) "1" else "", "type", type.intValue))
 		data.getJSONObject("param").putAll(JSONObject.from(filterValue, JSONWriter.Feature.FieldBased))
-		model.addAndNext("jwxt/choose-course-front-server/schoolCourse/pageList", "$data", 0)
+		model.enqueue("jwxt/choose-course-front-server/schoolCourse/pageList", "$data", 0)
 	}
 	
 	fun like(classesID: String) {
-		model.addAndNext("jwxt/choose-course-front-server/stuCollectedCourse/create", "{\"classesID\":\"$classesID\",\"selectedType\":\"1\"}", 1)
+		model.enqueue("jwxt/choose-course-front-server/stuCollectedCourse/create", "{\"classesID\":\"$classesID\",\"selectedType\":\"1\"}", 1)
 	}
 	
 	override fun onCleared() {

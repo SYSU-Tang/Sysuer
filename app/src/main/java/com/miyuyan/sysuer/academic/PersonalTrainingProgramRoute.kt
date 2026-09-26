@@ -194,7 +194,7 @@ fun PersonalTrainingProgramRoute(
 										"practiceTestCredit"
 									)
 								),
-								transitionName = "course_${
+								key = "course_${
 									course.getString(
 										"courseId"
 									)
@@ -260,7 +260,7 @@ fun PersonalTrainingProgramRoute(
 										"practiceTestCredit"
 									),
 								),
-								transitionName = "course_${
+								key = "course_${
 									course.getString(
 										"courseId"
 									)

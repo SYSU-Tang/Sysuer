@@ -211,11 +211,11 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 
 	fun loadOrders() {
 		_uiState.value = UiState.Loading
-		model.addAndNext("netpay/c/site/orders", "", 0)
+		model.enqueue("netpay/c/site/orders", "", 0)
 	}
 
 	fun loadStatus() {
-		model.addAndNext(
+		model.enqueue(
 				"netpay/c/site/stopAndResumeList",
 				"personal=1",
 				"application/x-www-form-urlencoded",
@@ -224,7 +224,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 	}
 
 	fun loadBills() {
-		model.addAndNext(
+		model.enqueue(
 				"netpay/c/site/bills", "personal=1", "application/x-www-form-urlencoded", 6
 		)
 	}
@@ -241,7 +241,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 	}
 
 	fun stop(serviceId: String?) {
-		model.addAndNext(
+		model.enqueue(
 				"netpay/c/site/stop",
 				"serviceId=$serviceId",
 				"application/x-www-form-urlencoded",
@@ -250,7 +250,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 	}
 
 	fun resume(serviceId: String?) {
-		model.addAndNext(
+		model.enqueue(
 				"netpay/c/site/resume",
 				"serviceId=$serviceId",
 				"application/x-www-form-urlencoded",
@@ -259,7 +259,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 	}
 
 	fun cancelPay(orderId: String) {
-		model.addAndNext(
+		model.enqueue(
 				"netpay/c/site/cancelOrder",
 				"orderId=$orderId&type=web",
 				"application/x-www-form-urlencoded",
@@ -302,7 +302,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 
 	private fun orderNetPay(time: Double, fee: Int, serviceId: String) {
 		val timeStr = if (time < 1) time.toFloat() else time.toInt().toFloat()
-		model.run(
+		model.call(
 				"netpay/c/site/prepareOrder",
 				"type=web&months=$timeStr&moneys=$fee&serviceIds=$serviceId",
 				"application/x-www-form-urlencoded",
@@ -339,7 +339,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 	}
 
 	fun continuePay(orderId: String) {
-		model.run(
+		model.call(
 				"netpay/c/site/continueToPay",
 				"out_trade_no=$orderId",
 				"application/x-www-form-urlencoded",

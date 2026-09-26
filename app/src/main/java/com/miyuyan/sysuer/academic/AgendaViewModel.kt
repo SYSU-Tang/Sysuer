@@ -51,7 +51,7 @@ class AgendaViewModel(application: Application) : AndroidViewModel(application),
 				"teamWorkDeptId",
 				null
 		)
-		portalModel.addAndNext(
+		portalModel.enqueue(
 				"newClient/api/schedule/newSchedule/getScheduleByTimeZone", "$args", 0
 		)
 	}

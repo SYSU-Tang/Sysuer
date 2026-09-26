@@ -209,7 +209,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun fetchLeaveSlips() {
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/reports-register/askLeaveAgg/selfAskLeaveInfoList",
 				"{\"param\":{},\"pageNo\":${++page},\"pageSize\":10,\"total\":true}",
 				0
@@ -224,7 +224,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun fetchLeaveTypes() {
-		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=436", 1)
+		model.enqueue("jwxt/base-info/codedata/findcodedataNames?datableNumber=436", 1)
 	}
 
 	/*{"semester":"2025-2","askLeaveDaysCount":0.5,"askLeaveTypeCode":"1","askLeaveTypeName":"短假","askLeaveBeginDate":"2026-08-16 08:00:00","askLeaveEndDate":"2026-08-16 12:00:00","askLeaveReasonCode":"1","askLeaveReasonExplanation":".","fileName":"中山大学logo.png","filePath":"reports-register/2026-08/16/2088838751325556736.png","whetherStuApply":"1"}*/
@@ -262,7 +262,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 			leaveData["filePath"] = it.getString("filePath")
 		}
 //		println(leaveData.toJSONString())
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/reports-register/askLeaveAgg/applyLeave",
 				leaveData.toJSONString(),
 				3
@@ -270,11 +270,11 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun fetchTerms() {
-		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 4)
+		model.enqueue("jwxt/base-info/acadyearterm/showNewAcadlist", 4)
 	}
 
 	fun uploadAttachment(fileRequestBody: FileRequestBody) {
-		model.request(
+		model.enqueue(
 				model.http.generateRequest(
 						"https://${model.host}/jwxt//reports-register/askLeaveAgg/importFile?",
 						null,

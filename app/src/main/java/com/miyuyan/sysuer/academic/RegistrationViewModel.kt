@@ -46,16 +46,16 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
 	}
 
 	fun fetchRegisterInfo() {
-		model.addAndNext("jwxt/reports-register/stuRegistration/getSelfRegisterInfo", 0)
+		model.enqueue("jwxt/reports-register/stuRegistration/getSelfRegisterInfo", 0)
 	}
 
 	fun fetchPayInfo(year: String = currentYear) {
 		currentYear = year
-		model.addAndNext("jwxt/reports-register/stuRegistration/getSelfPayInfoDetail?acadYear=$year", 1)
+		model.enqueue("jwxt/reports-register/stuRegistration/getSelfPayInfoDetail?acadYear=$year", 1)
 	}
 
 	fun fetchHistoryNextPage() {
-		model.addAndNext("jwxt/reports-register/stuRegistration/getSelfRegisterList",
+		model.enqueue("jwxt/reports-register/stuRegistration/getSelfRegisterList",
 			"{\"pageNo\":${++historyPage},\"pageSize\":10,\"total\":true,\"param\":{}}", 2)
 	}
 

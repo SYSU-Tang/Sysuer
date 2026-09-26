@@ -6,9 +6,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
+import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.model.RainClassModel
-import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -232,43 +232,41 @@ class RainClassViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun getCourseList() {
-		model.addAndNext("v2/api/web/courses/list?identity=2", GET_COURSE_LIST)
+		model.enqueue("v2/api/web/courses/list?identity=2", GET_COURSE_LIST)
 	}
 
 	fun getUserInfo() {
-		model.addAndNext("v/course_meta/user_info", GET_USER_INFO)
+		model.enqueue("v/course_meta/user_info", GET_USER_INFO)
 	}
 
 	fun getExams() {
-		model.addAndNext("api/v3/classroom/on-lesson-upcoming-exam", GET_EXAMS_LIST)
+		model.enqueue("api/v3/classroom/on-lesson-upcoming-exam", GET_EXAMS_LIST)
 	}
 
 	fun getExamInfo(examId: Int, classroomId: Int) {
-		model.addAndNext("v/exam/cover?exam_id=$examId&classroom_id=$classroomId", GET_EXAM_INFO)
+		model.enqueue("v/exam/cover?exam_id=$examId&classroom_id=$classroomId", GET_EXAM_INFO)
 	}
 
 	fun getCourseInfo(courseId: String) {
-		model.addAndNext("v2/api/web/classrooms/$courseId?role=5", GET_CLASSROOM_INFO)
+		model.enqueue("v2/api/web/classrooms/$courseId?role=5", GET_CLASSROOM_INFO)
 	}
 
 	fun getProblem(examId: Int) {
-		model.setAndNext(
+		model.enqueueUrl(
 				"https://examination.xuetangx.com/exam_room/show_paper?exam_id=$examId",
-				null,
-				null,
-				GET_PROBLEM_INFO
+				code = GET_PROBLEM_INFO
 		)
 	}
 
 	fun getStudyLog(courseId: String, type: Int, page: Int = 0) {
-		model.addAndNext(
+		model.enqueue(
 				"v2/api/web/logs/learn/$courseId?actype=$type&page=$page&offset=20&sort=-1",
 				GET_STUDY_LOG
 		)
 	}
 
 	fun getStudyLogStatus(courseId: String, activityId: JSONArray) {
-		model.request(
+		model.enqueue(
 				model.http.generateRequest(
 						"https://${model.host}/mooc-api/v1/lms/learn/course/pub_new_pro",
 						JSONObject.of(
@@ -402,7 +400,7 @@ class RainClassViewModel(application: Application) : AndroidViewModel(applicatio
 }
 	* */
 	fun getChapter(courseId: String) {
-		model.request(
+		model.enqueue(
 				model.http.generateRequest(
 						"https://${model.host}/mooc-api/v1/lms/learn/course/chapter?cid=$courseId",
 				).header("xtbz", "ykt").build(), GET_CHAPTER

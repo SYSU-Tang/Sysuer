@@ -45,7 +45,7 @@ class CETViewModel(application: Application) : AndroidViewModel(application) {
 	fun fetchNextPage() {
 		if (_uiState.value == UiState.Loading || (page > 0 && (_scores.value.size >= total))) return
 		_uiState.value = if (page == 0) UiState.Loading else UiState.LoadMore
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/achievement-manage/englishGradeAchievement/stuPageList",
 			"{\"pageNo\":${++page},\"pageSize\":10,\"total\":true,\"param\":{}}",
 			0

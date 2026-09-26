@@ -168,19 +168,19 @@ class EnergyDashboardFragment : BaseFragment() {
 	}
 
 	private fun loadUserInfo() {
-			model.addAndNext("kbp/auth/userInfo", 0)
+			model.enqueue("kbp/auth/userInfo", 0)
 		}
 
 	fun getElectricityInfo(username: String?) {
-		model.addAndNext("kbp/ele/wechat/eleSituation?username=$username", 1)
+		model.enqueue("kbp/ele/wechat/eleSituation?username=$username", 1)
 	}
 
 	private fun loadWaterInfo() {
-			model.addAndNext("kbp/cwbs/user/usage/stats", "", 2)
+			model.enqueue("kbp/cwbs/user/usage/stats", "", 2)
 		}
 
 	fun getOrderInfo(room: String?, date: String?) {
-		model.addAndNext(
+		model.enqueue(
 				"kbp/record/roomBalance/detail",
 				"{\"dateType\":\"month\",\"roomCode\":\"$room\",\"dateRange\":\"$date\",\"id\":null,\"tradeTime\":\"\"}",
 				3
@@ -188,7 +188,7 @@ class EnergyDashboardFragment : BaseFragment() {
 	}
 
 	fun getRoom(username: String?) {
-		model.addAndNext("kbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 4)
+		model.enqueue("kbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 4)
 	}
 	override fun onDestroyView() {
 		super.onDestroyView()

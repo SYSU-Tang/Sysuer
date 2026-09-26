@@ -91,7 +91,7 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 	}
 
 	private fun info() {
-		model.addAndNext("client/api/client/person/get", "{}", 0)
+		model.enqueue("client/api/client/person/get", "{}", 0)
 	}
 
 	override fun onDestroyView() {

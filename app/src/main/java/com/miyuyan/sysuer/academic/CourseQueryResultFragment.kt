@@ -59,7 +59,7 @@ class CourseQueryResultFragment : StaggerFragment() {
 	}
 	
 	private fun courses() {
-		model.addAndNext("jwxt/schedule/agg/schoolOpeningCoursesSchedule/querySchoolOpeningCourses", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
+		model.enqueue("jwxt/schedule/agg/schoolOpeningCoursesSchedule/querySchoolOpeningCourses", "{\"pageNo\":${page++},\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
 	}
 	
 	fun reset() {

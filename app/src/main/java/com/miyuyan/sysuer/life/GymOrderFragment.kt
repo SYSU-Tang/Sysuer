@@ -150,7 +150,7 @@ class GymOrderFragment : BaseFragment() {
 	}
 
 	private fun loadOrder() {
-		model.addAndNext(
+		model.enqueue(
 				"api/transaction/Me?StartDate=${DateTimeManager.toDateString(viewModel.from)}&EndDate=${
 					DateTimeManager.toDateString(viewModel.to)
 				}&Page=${++page}&PageSize=10", 0

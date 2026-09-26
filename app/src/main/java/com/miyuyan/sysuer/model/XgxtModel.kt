@@ -3,47 +3,23 @@ package com.miyuyan.sysuer.model
 import android.content.Context
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.AuthorizationManager
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.TargetUrl
-import okhttp3.Request
-import okhttp3.Response
 
 class XgxtModel(context: Context) : BaseModel(context) {
-	override val authorizationManager: AuthorizationManager = AuthorizationManager("xgxt.sysu.edu.cn", "xgxt-443.webvpn.sysu.edu.cn").also {
+	override val authorizationManager: AuthorizationManager = AuthorizationManager(
+			"xgxt.sysu.edu.cn", "xgxt-443.webvpn.sysu.edu.cn"
+	).also {
 		it.setTargetUrl(TargetUrl.XGXT, TargetUrl.XGXT_WEBVPN)
 	}
-	
-	override fun handleResponse(request: CommonUtil.Tuple2<Request, Int>,
-	                            response: Response): CommonUtil.Tuple2<Int, JSONObject>? {
-		val content = response.body.string()
-		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
-		when (response.code) {
-			0 -> {
-				authorizationManager.isAccessible = false
-				retry(request)
-			}
-			302 -> login(request)
-			200 -> response.header("Content-Type")
-				?.takeIf { it.contains("application/json") }
-				?.let {
-					val data = JSONObject.parse(content)
-					result = CommonUtil.Tuple2(request.second, data)
-					val meta: JSONObject? = if (data.containsKey("meta")) data.getJSONObject("meta") else null
-					meta?.let {
-						if (meta.containsKey("statusCode") && meta.getInteger("statusCode") == 302) login(request)
-						else toast(CommonUtil.toStringOrDefault(meta.getString("message", "")))
-					} ?: run {
-						if (data.containsKey("code") && data.getInteger("code") != 200)
-							toast(data.getString("msg", ""))
 
-//						message.postValue(result)
-						sendMessage(result)
-					}
-				} ?: run {
-				if (!authorizationManager.isAuthorized(content)) login(request)
-				else if (!authorizationManager.isAccessible(content)) retry(request)
-			}
+	override fun checkResponseStatus(
+		code: Int, content: String, json: JSONObject?
+	): ResponseStatus {
+		if (code == 0) return ResponseStatus.NEEDS_CAMPUS_NETWORK
+		if (code == 302) return ResponseStatus.NEEDS_LOGIN
+		json?.getJSONObject("meta")?.getInteger("statusCode")?.let { c ->
+			if (c == 302) return ResponseStatus.NEEDS_LOGIN
 		}
-		return result
+		return super.checkResponseStatus(code, content, json)
 	}
 }

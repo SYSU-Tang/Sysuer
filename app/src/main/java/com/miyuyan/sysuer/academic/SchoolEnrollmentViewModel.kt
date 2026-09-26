@@ -67,7 +67,7 @@ class SchoolEnrollmentViewModel(application: Application) : AndroidViewModel(app
 	}
 
 	fun fetchBasicInfo() {
-		model.addAndNext("jwxt/student-status/countrystu/studentRollView", 0)
+		model.enqueue("jwxt/student-status/countrystu/studentRollView", 0)
 	}
 
 	fun fetchFamily() {
@@ -99,7 +99,7 @@ class SchoolEnrollmentViewModel(application: Application) : AndroidViewModel(app
 	}
 
 	private fun fetchPaginated(url: String, code: Int) {
-		model.addAndNext(
+		model.enqueue(
 				url,
 				"{\"pageNo\":${++pages[code]},\"pageSize\":10,\"total\":true,\"param\":{}}",
 				code

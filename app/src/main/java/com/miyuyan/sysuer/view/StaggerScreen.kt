@@ -75,7 +75,7 @@ data class SectionData(
 	val rowOrientation: RowOrientation = RowOrientation.Horizontal,
 	val footerMenus: SnapshotStateList<MenuItem> = mutableStateListOf(),
 	var footer: (@Composable ColumnScope.() -> Unit)? = null,
-	val transitionName: String? = null,
+	val key: String? = null,
 )
 
 @Composable
@@ -89,57 +89,69 @@ fun SectionCard(
 ) {
 	var expanded by rememberSaveable { mutableStateOf(defaultExpanded) }
 
-	ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-		Column(
+	ElevatedCard(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(vertical = dimensionResource(R.dimen.vertical_padding))
-		) {
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
+				.then(
+						if (sharedTransitionScope != null && animatedVisibilityScope != null && section.key != null) {
+					with(sharedTransitionScope) {
+						Modifier.sharedBounds(
+								sharedContentState = rememberSharedContentState(
+										key = section.key
+								),
+								animatedVisibilityScope = animatedVisibilityScope,
+						)
+					}
+				} else Modifier)) {
+		Column(
 				modifier = Modifier
 					.fillMaxWidth()
-					.clickable(enabled = isExpandable) {
-						expanded = !expanded
-					}
-					.padding(
-						horizontal = dimensionResource(R.dimen.horizontal_padding),
-						vertical = dimensionResource(R.dimen.vertical_padding)
-					)) {
+					.padding(vertical = dimensionResource(R.dimen.vertical_padding))
+		) {
+			Row(
+					verticalAlignment = Alignment.CenterVertically,
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable(enabled = isExpandable) {
+							expanded = !expanded
+						}
+						.padding(
+								horizontal = dimensionResource(R.dimen.horizontal_padding),
+								vertical = dimensionResource(R.dimen.vertical_padding)
+						)) {
 				section.icon?.let {
 					Icon(
-						painter = painterResource(it),
-						contentDescription = null,
-						modifier = Modifier.size(ButtonDefaults.IconSize),
-						tint = MaterialTheme.colorScheme.primary
+							painter = painterResource(it),
+							contentDescription = null,
+							modifier = Modifier.size(ButtonDefaults.IconSize),
+							tint = MaterialTheme.colorScheme.primary
 					)
 					Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 				}
 				section.title?.let {
 					Text(
-						text = it,
-						style = MaterialTheme.typography.headlineSmall,
-						color = MaterialTheme.colorScheme.primary,
-						modifier = Modifier.weight(1f)
+							text = it,
+							style = MaterialTheme.typography.titleLarge,
+							color = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.weight(1f)
 					)
 				}
 				if (isExpandable) {
 					val rotation by animateFloatAsState(
-						targetValue = if (expanded) 180f else 0f,
-						label = "ExpandIconRotation"
+							targetValue = if (expanded) 180f else 0f, label = "ExpandIconRotation"
 					)
 					Icon(
-						imageVector = Icons.Default.KeyboardArrowDown,
-						contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
-						modifier = Modifier.rotate(rotation),
-						tint = MaterialTheme.colorScheme.primary
+							imageVector = Icons.Default.KeyboardArrowDown,
+							contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
+							modifier = Modifier.rotate(rotation),
+							tint = MaterialTheme.colorScheme.primary
 					)
 				}
 			}
 			AnimatedVisibility(
-				visible = expanded,
-				enter = expandVertically() + fadeIn(),
-				exit = shrinkVertically() + fadeOut()
+					visible = expanded,
+					enter = expandVertically() + fadeIn(),
+					exit = shrinkVertically() + fadeOut()
 			) {
 				Column {
 					section.rows.forEach { row ->
@@ -152,35 +164,37 @@ fun SectionCard(
 
 			if (section.footerMenus.isNotEmpty()) {
 				Row(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(
-							horizontal = dimensionResource(R.dimen.horizontal_padding),
-							vertical = dimensionResource(R.dimen.vertical_padding)
-						),
-					horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(
+									horizontal = dimensionResource(R.dimen.horizontal_padding),
+									vertical = dimensionResource(R.dimen.vertical_padding)
+							),
+						horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
 				) {
 					section.footerMenus.forEach { item ->
 						FilledTonalButton(
-							onClick = { item.onClick() },
-							modifier = Modifier
-								.weight(1f)
-								.then(
-									if (sharedTransitionScope != null && animatedVisibilityScope != null && section.transitionName != null) {
-									with(sharedTransitionScope) {
-										Modifier.sharedBounds(
-											sharedContentState = rememberSharedContentState(key = section.transitionName),
-											animatedVisibilityScope = animatedVisibilityScope,
-										)
-									}
-								} else Modifier),
-							shapes = ButtonDefaults.shapes(),
-							enabled = item.enabled) {
+								onClick = { item.onClick() },
+								modifier = Modifier
+									.weight(1f)
+									.then(
+											if (sharedTransitionScope != null && animatedVisibilityScope != null && item.key != null) {
+										with(sharedTransitionScope) {
+											Modifier.sharedBounds(
+													sharedContentState = rememberSharedContentState(
+															key = item.key
+													),
+													animatedVisibilityScope = animatedVisibilityScope,
+											)
+										}
+									} else Modifier),
+								shapes = ButtonDefaults.shapes(),
+								enabled = item.enabled) {
 							item.icon?.let {
 								Icon(
-									it,
-									contentDescription = item.title,
-									modifier = Modifier.size(dimensionResource(R.dimen.icon_size))
+										it,
+										contentDescription = item.title,
+										modifier = Modifier.size(dimensionResource(R.dimen.icon_size))
 								)
 								Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
 							}
@@ -193,12 +207,12 @@ fun SectionCard(
 			}
 			section.footer?.let {
 				Column(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(
-							horizontal = dimensionResource(R.dimen.horizontal_padding),
-							vertical = dimensionResource(R.dimen.vertical_padding)
-						), content = it
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(
+									horizontal = dimensionResource(R.dimen.horizontal_padding),
+									vertical = dimensionResource(R.dimen.vertical_padding)
+							), content = it
 				)
 			}
 		}
@@ -219,35 +233,35 @@ fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horiz
 			}
 		}
 		.padding(
-			horizontal = dimensionResource(R.dimen.horizontal_padding),
-			vertical = dimensionResource(R.dimen.vertical_padding)
+				horizontal = dimensionResource(R.dimen.horizontal_padding),
+				vertical = dimensionResource(R.dimen.vertical_padding)
 		)
 	if (orientation == RowOrientation.Horizontal) {
 		Row(
-			modifier = modifier,
-			horizontalArrangement = Arrangement.SpaceBetween,
-			verticalAlignment = Alignment.CenterVertically
+				modifier = modifier,
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
 		) {
 			SelectionContainer {
 				Text(
-					text = row.key ?: "",
-					style = MaterialTheme.typography.bodyLarge,
-					modifier = Modifier.weight(1f),
-					color = MaterialTheme.colorScheme.onSurfaceVariant
+						text = row.key ?: "",
+						style = MaterialTheme.typography.bodyLarge,
+						modifier = Modifier.weight(1f),
+						color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
 			}
 			if (row.value != null && row.key != null) Spacer(
-				modifier = Modifier.width(
-					dimensionResource(R.dimen.horizontal_margin)
-				)
+					modifier = Modifier.width(
+							dimensionResource(R.dimen.horizontal_margin)
+					)
 			)
 			SelectionContainer {
 				Text(
-					text = row.value ?: "",
-					style = MaterialTheme.typography.bodyLarge,
-					modifier = Modifier.weight(1.2f),
-					textAlign = TextAlign.End,
-					color = MaterialTheme.colorScheme.primary
+						text = row.value ?: "",
+						style = MaterialTheme.typography.bodyLarge,
+						modifier = Modifier.weight(1.2f),
+						textAlign = TextAlign.End,
+						color = MaterialTheme.colorScheme.primary
 				)
 			}
 		}
@@ -255,22 +269,22 @@ fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horiz
 		Column(modifier = modifier) {
 			SelectionContainer {
 				Text(
-					text = row.key ?: "",
-					style = MaterialTheme.typography.bodyLarge,
-					color = MaterialTheme.colorScheme.onSurfaceVariant
+						text = row.key ?: "",
+						style = MaterialTheme.typography.bodyLarge,
+						color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
 			}
 			if (row.value != null && row.key != null) Spacer(
-				modifier = Modifier.height(
-					dimensionResource(R.dimen.vertical_margin)
-				)
+					modifier = Modifier.height(
+							dimensionResource(R.dimen.vertical_margin)
+					)
 			)
 			SelectionContainer {
 				Text(
-					text = row.value ?: "",
-					style = MaterialTheme.typography.bodyLarge,
-					color = MaterialTheme.colorScheme.primary,
-					modifier = Modifier.fillMaxWidth()
+						text = row.value ?: "",
+						style = MaterialTheme.typography.bodyLarge,
+						color = MaterialTheme.colorScheme.primary,
+						modifier = Modifier.fillMaxWidth()
 				)
 			}
 		}
@@ -304,13 +318,13 @@ fun StaggerScreen(
 	val nestedScrollConnection = rememberNestedScrollInteropConnection()
 	if (!isNestedEnabled) {
 		FlowRow(
-			modifier = modifier
-				.fillMaxWidth()
-				.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-				),
-			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
+				modifier = modifier
+					.fillMaxWidth()
+					.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_padding)
+					),
+				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 		) {
 			sections.forEach { section ->
 				SectionCard(section, isHideNull = isHideNull)
@@ -320,21 +334,21 @@ fun StaggerScreen(
 	}
 
 	LazyVerticalStaggeredGrid(
-		state = state,
-		columns = StaggeredGridCells.Adaptive(240.dp),
-		modifier = modifier
-			.fillMaxSize()
-			.nestedScroll(nestedScrollConnection),
-		contentPadding = PaddingValues(dimensionResource(R.dimen.horizontal_margin)),
-		verticalItemSpacing = dimensionResource(R.dimen.vertical_margin),
-		horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
+			state = state,
+			columns = StaggeredGridCells.Adaptive(240.dp),
+			modifier = modifier
+				.fillMaxSize()
+				.nestedScroll(nestedScrollConnection),
+			contentPadding = PaddingValues(dimensionResource(R.dimen.horizontal_margin)),
+			verticalItemSpacing = dimensionResource(R.dimen.vertical_margin),
+			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
 	) {
 		itemsIndexed(sections) { _, section ->
 			SectionCard(
-				section,
-				isHideNull = isHideNull,
-				sharedTransitionScope = sharedTransitionScope,
-				animatedVisibilityScope = animatedVisibilityScope
+					section,
+					isHideNull = isHideNull,
+					sharedTransitionScope = sharedTransitionScope,
+					animatedVisibilityScope = animatedVisibilityScope
 			)
 		}
 	}

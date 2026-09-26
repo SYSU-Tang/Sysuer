@@ -123,9 +123,9 @@ class GymAccountFragment : BaseFragment() {
 	}
 
 	private fun loadAccount() {
-			model.addAndNext("api/Credit/Me", 0)
+			model.enqueue("api/Credit/Me", 0)
 		}
 	private fun loadSwimmer() {
-			model.addAndNext("api/swimmer/me", 1)
+			model.enqueue("api/swimmer/me", 1)
 		}
 }

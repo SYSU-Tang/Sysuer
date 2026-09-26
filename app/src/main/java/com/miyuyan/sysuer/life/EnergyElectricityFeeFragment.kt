@@ -301,7 +301,7 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 	}
 
 	fun getElectricityConsumption(roomCode: String, startDate: String?, endDate: String?) {
-		model.addAndNext(
+		model.enqueue(
 				"kbp/ele/wechat/eleConsume",
 				JSONObject.of("roomCode", roomCode, "startDate", startDate, "endDate", endDate)
 					.toJSONString(),
@@ -310,7 +310,7 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 	}
 
 	fun getElectricityBill(roomCode: String) {
-		model.addAndNext(
+		model.enqueue(
 				"kbp/ele/mobile/billRecord",
 				JSONObject.of("roomCode", roomCode, "billType", 1).toJSONString(),
 				3
@@ -318,7 +318,7 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 	}
 
 	fun getDetail(id: String, room: String?) {
-		model.addAndNext(
+		model.enqueue(
 				"kbp/ele/mobile/billRecord",
 				JSONObject.of("id", id, "roomCode", room).toJSONString(),
 				4
@@ -326,7 +326,7 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 	}
 
 	fun recharge(id: String?, roomCode: String, amount: Float) {
-		model.addAndNext(
+		model.enqueue(
 				"kbp/ele/mobile/pay/bill/recharge", String.format(
 				Locale.getDefault(),
 				"{\"roomCode\":\"%s\",\"actualBillAmount\":%.2f,\"useTypeEleAndMoneyList\":[{\"billAmount\":%.2f,\"useEleType\":1,\"idList\":[\"%s\"]}],\"rechargeType\":16}",

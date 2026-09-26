@@ -129,6 +129,22 @@
         <item>状态</item>
     </string-array>
 
+    <string-array name="leave_return_detail_keys">
+        <item>姓名</item>
+        <item>学号</item>
+        <item>年级</item>
+        <item>培养层次</item>
+        <item>专业</item>
+        <item>学院</item>
+        <item>联系电话</item>
+        <item>宿舍地址</item>
+        <item>紧急联系人</item>
+        <item>紧急联系人联系电话</item>
+        <item>节假日名称</item>
+        <item>节假日时间</item>
+        <item>返校报到时间段</item>
+    </string-array>
+
     <string-array name="registration_info_keys">
         <item>社会实践</item>
         <item>科研</item>

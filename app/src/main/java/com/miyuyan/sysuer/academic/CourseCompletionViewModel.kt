@@ -12,6 +12,7 @@ import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.nav.CourseDetail
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.SectionData
+import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -28,28 +29,36 @@ class CourseCompletionViewModel(application: Application) : AndroidViewModel(app
 	private var page = 0
 	private var total = -1
 
+	val creditUiState = model.getUiState(0)
+
+	val courseUiState = model.getUiState(1)
+
 	init {
 		viewModelScope.launch {
 			model.messageChannel.collect { (code, response) ->
 				if (response.getInteger("code") == 200 && response.get("data") != null) {
 					when (code) {
 						0 -> {
-							_creditHours.emit(
-									response.getJSONArray("data").filterIsInstance<JSONObject>()
-							)
-
+							creditUiState.value =
+								if (response.getJSONArray("data").isEmpty()) UiState.Empty else {
+									_creditHours.emit(
+											response.getJSONArray("data")
+												.filterIsInstance<JSONObject>()
+									)
+									UiState.Content
+								}
 						}
 
 						1 -> {
 							val data = response.getJSONObject("data")
 							if (total == -1) total = data.getInteger("total")
-
-							data.getJSONArray("rows").filterIsInstance<JSONObject>()
+							if (total == 0) courseUiState.value = UiState.Empty
+							else data.getJSONArray("rows").filterIsInstance<JSONObject>()
 								.forEach { item ->
 									_courseList.add(
 											SectionData(
 													title = item.getString("courseName"),
-													transitionName = "course__${item.getString("courseNumber")}",
+													key = "course__${item.getString("courseNumber")}",
 													footerMenus = mutableStateListOf(
 															MenuItem(application.getString(R.string.course_outline)) {
 																viewModelScope.launch {
@@ -104,27 +113,30 @@ class CourseCompletionViewModel(application: Application) : AndroidViewModel(app
 	}
 
 	fun fetchCreditHours() {
-		model.addAndNext(
+		creditUiState.value = UiState.Loading
+		model.enqueue(
 				"jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/creditHoursStu?cultureTypeCode=01",
 				"",
 				0
 		)
 	}
 
-	fun fetchCourseList() {
-		model.addAndNext(
+	fun fetchCourseList(courseName: String = "") {
+		courseUiState.value = if (page == 0) UiState.Loading
+		else UiState.LoadMore
+		model.enqueue(
 				"jwxt/gradua-degree/graduatemsg/studentsGraduationExamination/studentCourse",
-				"""{"pageNo":${++page},"pageSize":10,"total":true,"param":{"cultureTypeCode":"01"}}""",
+				"""{"pageNo":${++page},"pageSize":10,"total":true,"param":{"cultureTypeCode":"01","courseName":"$courseName"}}""",
 				1
 		)
 	}
 
-//	fun reFetchCourseList() {
-//		_courseList.clear()
-//		page = 0
-//		total = -1
-//		fetchCourseList()
-//	}
+	fun refetchCourseList(courseName: String = "") {
+		_courseList.clear()
+		page = 0
+		total = -1
+		fetchCourseList(courseName)
+	}
 
 	fun hasMore(): Boolean = page * 10 < total
 	override fun onCleared() {

@@ -129,7 +129,7 @@ class HomeworkMainFragment : BaseFragment() {
 					}
 				}
 			}
-			setParams(requireContext())
+			initContext(requireContext())
 		}
 		getLmsTask(authorizationJar.getToken("lms.sysu.edu.cn"))
 		return binding.root

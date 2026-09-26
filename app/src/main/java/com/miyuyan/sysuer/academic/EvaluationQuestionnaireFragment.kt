@@ -215,7 +215,7 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 		pjzt: String?,
 		bpmc: String?,
 	) {
-		model.addAndNext(
+		model.enqueue(
 				"evaluationPattern/getQuestionnaireTopic?rwid=$rwid&wjid=$wjid&sxz=$sxz&pjrdm=$pjrdm&bpdm=$bpdm&kcdm=$kcdm&rwh=${rwh?.encodeNonAscii()}&pjzt=$pjzt&bpmc=$bpmc",
 				1
 		)
@@ -231,7 +231,7 @@ class EvaluationQuestionnaireFragment : BaseFragment() {
 
 	fun postEvaluation(mode: String?, what: Int) {
 		answers["pjzt"] = mode
-		model.addAndNext("evaluationPattern/submitSaveEvaluation", "$answers", what)
+		model.enqueue("evaluationPattern/submitSaveEvaluation", "$answers", what)
 	}
 }
 

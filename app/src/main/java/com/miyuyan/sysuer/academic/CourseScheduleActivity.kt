@@ -509,7 +509,7 @@ class CourseScheduleActivity : BaseActivity() {
 
 	fun getSelectedCourses(courseName: String?) {
 		targetSubject = courseName
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
 				"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"$currentTerm\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
 				6
@@ -517,11 +517,11 @@ class CourseScheduleActivity : BaseActivity() {
 	}
 
 	fun getAvailableWeeks(academicYear: String?) {
-		model.addAndNext("jwxt/base-info/school-calender/weekly?academicYear=$academicYear", 5)
+		model.enqueue("jwxt/base-info/school-calender/weekly?academicYear=$academicYear", 5)
 	}
 
 	private fun availableTerms() {
-		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4)
+		model.enqueue("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 4)
 	}
 
 	fun getOldDate(distanceDay: Int): String {
@@ -540,7 +540,7 @@ class CourseScheduleActivity : BaseActivity() {
 	}
 
 	fun getRange(academicYear: String, week: Int) {
-		model.addAndNext(
+		model.enqueue(
 				String.format(
 						Locale.getDefault(),
 						"jwxt/base-info/school-calender?academicYear=%s&weekly=%d",
@@ -592,12 +592,11 @@ class CourseScheduleActivity : BaseActivity() {
 			binding.weekTime.text = getString(R.string.week_d, currentWeek)
 			getTable(currentTerm, currentWeek)
 			getRange(currentTerm, currentWeek)
-			model.nextAll()
 		}
 	}
 
 	fun getTable(academicYear: String, week: Int) {
-		if (academicYear.isNotEmpty() && week > 0) model.addAndNext(
+		if (academicYear.isNotEmpty() && week > 0) model.enqueue(
 				"jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=$academicYear&weekly=$week",
 				1
 		)
@@ -614,7 +613,7 @@ class CourseScheduleActivity : BaseActivity() {
 	}
 
 	private fun term() {
-		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
+		model.enqueue("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
 	}
 
 	fun saveCourse(data: CourseData) {

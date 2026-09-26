@@ -49,7 +49,7 @@ class SchoolWorkWarningViewModel(application: Application) : AndroidViewModel(ap
 			alarmTerm?.let { append(",\"alarmTerm\":\"$it\"") }
 			append("}}")
 		}
-		model.addAndNext("jwxt/alarm/alarm-archives/student/archives", param, 0)
+		model.enqueue("jwxt/alarm/alarm-archives/student/archives", param, 0)
 	}
 	
 	fun refresh() {

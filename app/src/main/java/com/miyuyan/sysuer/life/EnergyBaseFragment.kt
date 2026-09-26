@@ -14,11 +14,11 @@ abstract class EnergyBaseFragment : BaseFragment() {
 	abstract val model: ZhnyModel
 
 	fun loadUserInfo() {
-		model.addAndNext("kbp/auth/userInfo", 0)
+		model.enqueue("kbp/auth/userInfo", 0)
 	}
 
 	fun getRoom(username: String?) {
-		model.addAndNext(
+		model.enqueue(
 			"kbp/admin/sys/personRoom/list",
 			JSONObject.of("username", username).toJSONString(),
 			1

@@ -154,7 +154,7 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 								newSections.add(
 										SectionData(
 												title = obj.getString("name"),
-												transitionName = "PersonalTrainingProgram_${
+												key = "PersonalTrainingProgram_${
 													o.getString("teachPlanNumber")
 												}",
 												rows = extractValue(
@@ -197,7 +197,7 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 	}
 
 	fun fetchColleges(keyword: String) {
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/base-info/department/recruitUnitPull",
 				"{\"departmentName\":\"$keyword\",\"subordinateDepartmentNumber\":null,\"id\":null}",
 				1
@@ -205,15 +205,15 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 	}
 
 	private fun fetchGrades() {
-		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=127", 2)
+		model.enqueue("jwxt/base-info/codedata/findcodedataNames?datableNumber=127", 2)
 	}
 
 	private fun fetchTypes() {
-		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 3)
+		model.enqueue("jwxt/base-info/codedata/findcodedataNames?datableNumber=97", 3)
 	}
 
 	fun fetchProfessions(keyword: String) {
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/base-info/profession-direction/pull?majorProfessionDircetion=1&nameCode=$keyword",
 				4
 		)
@@ -287,7 +287,7 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 				"trainTypeCode",
 				_selectedTypeId.value
 		)
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/training-programe/training-programe/undergradute/profession-info",
 				"{\"pageNo\":${++resultPage},\"pageSize\":10,\"total\":true,\"param\":$params}",
 				5

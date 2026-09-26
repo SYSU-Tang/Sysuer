@@ -95,18 +95,15 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.ViewModelProvider
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.theme.ExpressiveShapes
-import com.miyuyan.sysuer.todo.TodoDatabase
 import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.todo.TodoInfo
 import com.miyuyan.sysuer.todo.TodoModel
-import com.miyuyan.sysuer.todo.TodoModelFactory
 import com.miyuyan.sysuer.todo.TodoReminderReceiver
-import com.miyuyan.sysuer.todo.TodoRepository
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -118,13 +115,8 @@ import java.util.Locale
 class TodoManager(
 	private val context: Context,
 	private val lifecycleScope: LifecycleCoroutineScope,
+	val todoModel: TodoModel,
 ) {
-	val todoModel: TodoModel by lazy {
-		val repository = TodoRepository(TodoDatabase.getDatabase(context, lifecycleScope).todoDao())
-		ViewModelProvider(
-				context as androidx.fragment.app.FragmentActivity, TodoModelFactory(repository)
-		)[TodoModel::class.java]
-	}
 	private val colors = listOf(
 			"#757575",
 			"#F44336",
@@ -791,7 +783,7 @@ class TodoManager(
 			items.forEach { name ->
 				ElevatedFilterChip(
 						modifier = Modifier.combinedClickable(
-								onClick = { onSelect(name) },
+						onClick = { onSelect(name) },
 						onLongClick = { onDelete?.invoke(name) }),
 						selected = name == selected,
 						onClick = { onSelect(name) },
@@ -952,7 +944,7 @@ class TodoManager(
 			selectedTags.filter { it !in items }.forEach { name ->
 				ElevatedFilterChip(
 						modifier = Modifier.combinedClickable(
-						onClick = { onToggle(name) },
+								onClick = { onToggle(name) },
 						onLongClick = { onDelete?.invoke(name) },
 						interactionSource = remember { MutableInteractionSource() },
 						indication = null
@@ -1323,7 +1315,7 @@ class TodoManager(
 	fun TodoListScreen(
 		modifier: Modifier = Modifier,
 		todoList: List<TodoEntity>,
-		addTrigger: Int = 0,
+		addTrigger: SharedFlow<Unit>,
 	) {
 		var showAddDialog by remember { mutableStateOf(false) }
 		var showEditDialog by remember { mutableStateOf(false) }
@@ -1361,10 +1353,11 @@ class TodoManager(
 			)
 		}
 
-		LaunchedEffect(addTrigger) {
-			if (addTrigger > 0) {
+		LaunchedEffect(Unit) {
+			addTrigger.collect {
 				copyTodo = TodoEntity()
 				showAddDialog = true
+
 			}
 		}
 

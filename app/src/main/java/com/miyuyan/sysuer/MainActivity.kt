@@ -64,6 +64,8 @@ import com.miyuyan.sysuer.academic.DormRoute
 import com.miyuyan.sysuer.academic.ExamRoute
 import com.miyuyan.sysuer.academic.GradeForLevelRoute
 import com.miyuyan.sysuer.academic.GradeRoute
+import com.miyuyan.sysuer.academic.LeaveReturnRegistrationDetailRoute
+import com.miyuyan.sysuer.academic.LeaveReturnRegistrationRoute
 import com.miyuyan.sysuer.academic.LeaveSlipRoute
 import com.miyuyan.sysuer.academic.MajorInfoRoute
 import com.miyuyan.sysuer.academic.PersonalInformationRoute
@@ -90,6 +92,8 @@ import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.nav.Grade
 import com.miyuyan.sysuer.nav.GradeForLevel
 import com.miyuyan.sysuer.nav.Home
+import com.miyuyan.sysuer.nav.LeaveReturnRegistration
+import com.miyuyan.sysuer.nav.LeaveReturnRegistrationDetail
 import com.miyuyan.sysuer.nav.LeaveSlip
 import com.miyuyan.sysuer.nav.MajorInfo
 import com.miyuyan.sysuer.nav.NetPay
@@ -241,6 +245,14 @@ class MainActivity : BaseActivity() {
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<LeaveReturnRegistrationDetail> { key ->
+						LeaveReturnRegistrationDetailRoute(
+								backStack = backStack,
+								key = key,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
 					entry<RichText> {
 						RichTextRoute(
 								backStack,
@@ -279,6 +291,13 @@ class MainActivity : BaseActivity() {
 					}
 					entry<GradeForLevel> {
 						GradeForLevelRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<LeaveReturnRegistration> {
+						LeaveReturnRegistrationRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current

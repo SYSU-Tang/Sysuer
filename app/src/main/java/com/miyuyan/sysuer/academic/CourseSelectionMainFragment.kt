@@ -288,7 +288,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 	}
 	
 	fun getPE() {
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/sportsSelectedlist", 4)
+		model.enqueue("jwxt/choose-course-front-server/selectedCourse/sportsSelectedlist", 4)
 	}
 	
 	fun getCourseList(selectedType: Int, selectedCate: Int, term: String?) {
@@ -314,29 +314,29 @@ class CourseSelectionMainFragment : BaseFragment() {
 		                                       "collectionStatus",
 		                                       if (binding.head.onlyCollection.isChecked) "1" else "0"))
 		data.getJSONObject("param").putAll(JSONObject.from(filterValue, JSONWriter.Feature.FieldBased))
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/list", "$data", 1)
+		model.enqueue("jwxt/choose-course-front-server/classCourseInfo/course/list", "$data", 1)
 	}
 	
 	fun like(code: String) {
-		model.addAndNext("jwxt/choose-course-front-server/stuCollectedCourse/create", "{\"classesID\":\"$code\",\"selectedType\":\"1\"}", 3)
+		model.enqueue("jwxt/choose-course-front-server/stuCollectedCourse/create", "{\"classesID\":\"$code\",\"selectedType\":\"1\"}", 3)
 	}
 	
 	private fun info() {
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0)
+		model.enqueue("jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo", 0)
 	}
 	
 	fun select(code: String) {
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/choose", String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, getType(), getCategory()), 3)
+		model.enqueue("jwxt/choose-course-front-server/classCourseInfo/course/choose", String.format(Locale.getDefault(), "{\"clazzId\":\"%s\",\"selectedType\":\"%d\",\"selectedCate\":\"%d\",\"check\":true}", code, getType(), getCategory()), 3)
 	}
 	
 	fun getType(): Int = typeCate.value?.first ?: 1
 	fun getCategory(): Int = typeCate.value?.second ?: 11
 	fun unselect(classId: String, code: String?) {
-		model.addAndNext("jwxt/choose-course-front-server/classCourseInfo/course/back", String.format(Locale.getDefault(), "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}", classId, code, getType()), 3)
+		model.enqueue("jwxt/choose-course-front-server/classCourseInfo/course/back", String.format(Locale.getDefault(), "{\"courseId\":\"%s\",\"clazzId\":\"%s\",\"selectedType\":\"%d\"}", classId, code, getType()), 3)
 	}
 	
 	fun sortPE(data: String) {
-		model.run("jwxt/choose-course-front-server/selectedCourse/updateSportsSelectedlist", data, null, object : Callback {
+		model.call("jwxt/choose-course-front-server/selectedCourse/updateSportsSelectedlist", data, null, object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
 				config.toast(R.string.save_fail)
 			}

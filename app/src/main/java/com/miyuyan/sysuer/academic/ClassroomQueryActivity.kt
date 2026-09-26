@@ -215,12 +215,12 @@ class ClassroomQueryActivity : BaseActivity() {
 	}
 
 	private fun campus() {
-		model.addAndNext("jwxt/base-info/campus/findCampusNamesBox", 1)
+		model.enqueue("jwxt/base-info/campus/findCampusNamesBox", 1)
 	}
 
 	fun getOffice(campusName: String) {
 		campus.value = campusName
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/schedule/agg/selfStudyClassRoom/buildingConditionPull",
 				"{\"campusIdList\":[\"$campusName\"]}",
 				2
@@ -238,7 +238,7 @@ class ClassroomQueryActivity : BaseActivity() {
 				teachingBuildIDs.add(office[e])
 			}
 		if (teachingBuildIDs.isEmpty()) model.contextUtil.toast(R.string.select_teaching_building)
-		else model.addAndNext(
+		else model.enqueue(
 				"jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom",
 				"{\"pageNo\":${page++},\"pageSize\":20,\"param\":{\"dateStr\":\"${
 					DateTimeManager.toDateString(dateMillis.value ?: System.currentTimeMillis())

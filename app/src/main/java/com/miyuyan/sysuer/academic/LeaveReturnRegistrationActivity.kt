@@ -1,60 +1,56 @@
 package com.miyuyan.sysuer.academic
 
-import kotlinx.coroutines.launch
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.Lifecycle
 import android.os.Bundle
-import android.view.View
-import android.widget.AdapterView
-import androidx.lifecycle.ViewModelProvider
-import com.alibaba.fastjson2.JSONObject
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
-import com.miyuyan.sysuer.databinding.ActivityLeaveReturnRegistrationBinding
-import com.miyuyan.sysuer.model.XgxtModel
+import com.miyuyan.sysuer.browser.RichTextRoute
+import com.miyuyan.sysuer.nav.LeaveReturnRegistrationDetail
+import com.miyuyan.sysuer.nav.RichText
+import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.theme.SysuerTheme
+import com.miyuyan.sysuer.nav.LeaveReturnRegistration as LeaveReturnRegistrationKey
 
 class LeaveReturnRegistrationActivity : BaseActivity() {
-	lateinit var model: XgxtModel
-	override fun onDestroy() {
-		super.onDestroy()
-		model.dispose()
-	}
-	
+	@OptIn(ExperimentalSharedTransitionApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		model = XgxtModel(this)
-		val viewModel = ViewModelProvider(this).get<LeaveReturnRegistrationViewModel>(LeaveReturnRegistrationViewModel::class.java)
-		val binding = ActivityLeaveReturnRegistrationBinding.inflate(layoutInflater).apply {
-			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-		}
-		setContentView(binding.root)
-		lifecycleScope.launch {
-			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				model.messageChannel.collect {
-				(first, response) ->
-						if (response.getInteger("code") == 200) {
-				if (first == 0) {
-					response.getJSONArray("data")?.let {
-						val years = ArrayList<String?>()
-						it.forEach { o: Any? -> years.add((o as JSONObject).getString("label", "")) }
-						binding.years.apply {
-							setSimpleItems(years.toTypedArray<String?>())
-							setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
-								viewModel.year.value = it.getJSONObject(position).getString("value")
-							}
-							setText(years[0], false)
+		enableEdgeToEdge()
+		setContent {
+			val backStack = rememberNavBackStack(LeaveReturnRegistrationKey)
+			SysuerTheme(settingManager) {
+				SharedTransitionLayout {
+					SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
+						entry<LeaveReturnRegistrationKey> {
+							LeaveReturnRegistrationRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
 						}
-						viewModel.year.value = it.getJSONObject(0).getString("value")
-					}
+						entry<LeaveReturnRegistrationDetail> { key ->
+							LeaveReturnRegistrationDetailRoute(
+									backStack = backStack,
+									key = key,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+						entry<RichText> {
+							RichTextRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+					})
 				}
 			}
 		}
-		}
-	}
-		years()
-	}
-	
-	private fun years() {
-		model.addAndNext("jjrlfx/api/sm-jjrlfx/student/school-year", 0)
 	}
 }

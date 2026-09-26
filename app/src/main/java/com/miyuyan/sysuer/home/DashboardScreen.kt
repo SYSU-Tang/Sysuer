@@ -150,6 +150,7 @@ import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -855,7 +856,7 @@ private fun CourseSection(
 							modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
 							bringIntoViewRequester
 					) else Modifier).then(
-							if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+									if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
 									sharedContentState = rememberSharedContentState(
@@ -1120,7 +1121,7 @@ private fun TodoSection(
 	onViewAllClick: () -> Unit,
 	todoManager: TodoManager,
 ) {
-	var addTrigger by remember { mutableIntStateOf(0) }
+	var addTrigger = MutableSharedFlow<Unit>()
 	Row(
 			modifier = Modifier.fillMaxWidth(),
 			verticalAlignment = Alignment.CenterVertically,
@@ -1131,7 +1132,7 @@ private fun TodoSection(
 		}
 		SingleChoiceSegmentedButtonRow {
 			SegmentedButton(
-					onClick = { addTrigger++ },
+					onClick = { addTrigger.tryEmit(Unit) },
 					selected = false,
 					shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
 					icon = {},

@@ -1,12 +1,13 @@
 package com.miyuyan.sysuer.model
 
 import android.content.Context
-import android.os.Handler
 import android.os.Looper
+import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
+import com.alibaba.fastjson2.JSONValidator
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.AuthorizationManager
-import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.CookieManager
 import com.miyuyan.sysuer.api.HttpManager
@@ -66,6 +67,15 @@ abstract class BaseModel(context: Context) {
 	}
 
 	/**
+	 * 表示响应拦截判定的状态类型
+	 */
+	enum class ResponseStatus {
+		NORMAL,                // 正常响应
+		NEEDS_LOGIN,           // 需要登录 / 身份校验失效
+		NEEDS_CAMPUS_NETWORK   // 需要校园网 / WebVPN 模式且不可直连访问
+	}
+
+	/**
 	 * 网络请求任务数据类
 	 *
 	 * @property request OkHttp 请求对象
@@ -83,49 +93,49 @@ abstract class BaseModel(context: Context) {
 		var status: JobStatus = JobStatus.IDLE,
 		var isSync: Boolean = false
 	) {
-		/** 兼容旧版代码属性 [what] */
-		val what: Int get() = requestCode
-
-		/** 兼容三参数构造函数 (request, what, retryCount) */
-		constructor(request: Request, what: Int, retryCount: Int) : this(
-			request = request,
-			requestCode = what,
-			retryCount = retryCount,
-			createdAt = System.currentTimeMillis(),
-			status = JobStatus.IDLE,
-			isSync = false
-		)
-
-		/** 兼容四参数构造函数 (request, what, retryCount, isSync) */
-		constructor(request: Request, what: Int, retryCount: Int, isSync: Boolean) : this(
-			request = request,
-			requestCode = what,
-			retryCount = retryCount,
-			createdAt = System.currentTimeMillis(),
-			status = JobStatus.IDLE,
-			isSync = isSync
-		)
+//		/** 兼容旧版代码属性 [what] */
+//		val what: Int get() = requestCode
+//
+//		/** 兼容三参数构造函数 (request, what, retryCount) */
+//		constructor(request: Request, what: Int, retryCount: Int) : this(
+//				request = request,
+//				requestCode = what,
+//				retryCount = retryCount,
+//				createdAt = System.currentTimeMillis(),
+//				status = JobStatus.IDLE,
+//				isSync = false
+//		)
+//
+//		/** 兼容四参数构造函数 (request, what, retryCount, isSync) */
+//		constructor(request: Request, what: Int, retryCount: Int, isSync: Boolean) : this(
+//				request = request,
+//				requestCode = what,
+//				retryCount = retryCount,
+//				createdAt = System.currentTimeMillis(),
+//				status = JobStatus.IDLE,
+//				isSync = isSync
+//		)
 	}
 
-	/**
-	 * 网络响应结果包装数据类
-	 *
-	 * @property requestCode 请求识别码
-	 * @property data 响应的 JSON 数据
-	 * @property isSuccess 请求与业务逻辑是否成功
-	 * @property errorMessage 错误信息
-	 */
-	data class ResponseResult(
-		val requestCode: Int,
-		val data: JSONObject?,
-		val isSuccess: Boolean = true,
-		val errorMessage: String? = null,
-	) {
-		/** 转换为旧版 [CommonUtil.Tuple2] 对象 */
-		fun toTuple(): CommonUtil.Tuple2<Int, JSONObject>? {
-			return data?.let { CommonUtil.Tuple2(requestCode, it) }
-		}
-	}
+//	/**
+//	 * 网络响应结果包装数据类
+//	 *
+//	 * @property requestCode 请求识别码
+//	 * @property data 响应的 JSON 数据
+//	 * @property isSuccess 请求与业务逻辑是否成功
+//	 * @property errorMessage 错误信息
+//	 */
+//	data class ResponseResult(
+//		val requestCode: Int,
+//		val data: JSONObject?,
+//		val isSuccess: Boolean = true,
+//		val errorMessage: String? = null,
+//	) {
+//		/** 转换为旧版 [Pair] 对象 */
+//		fun toTuple(): Pair<Int, JSONObject>? {
+//			return data?.let { Pair(requestCode, it) }
+//		}
+//	}
 
 	// ============================================================================================
 	// 状态管理与事件通道
@@ -188,9 +198,9 @@ abstract class BaseModel(context: Context) {
 	@Volatile
 	private var lastJob: RequestJob? = null
 
-	/** 获取最新入队的请求任务 (兼容 [nextRequest] 属性) */
-	val nextRequest: CommonUtil.Tuple2<Request, Int>?
-		get() = lastJob?.let { CommonUtil.Tuple2(it.request, it.requestCode) }
+//	/** 获取最新入队的请求任务 (兼容 [nextRequest] 属性) */
+//	val nextRequest: Pair<Request, Int>?
+//		get() = lastJob?.let { Pair(it.request, it.requestCode) }
 
 	/**
 	 * 提交请求任务并立即并发执行（不排队）
@@ -228,15 +238,6 @@ abstract class BaseModel(context: Context) {
 		return enqueueRequest(RequestJob(request, requestCode))
 	}
 
-	/**
-	 * 提交请求并立即并发执行 (兼容命名)
-	 */
-	fun enqueueAndExecute(
-		path: String?, data: String? = null, type: String? = null, requestCode: Int
-	): RequestJob {
-		return enqueueUrlRequest(path, data, type, requestCode)
-	}
-
 	// ============================================================================================
 	// 请求执行逻辑 (Async & Sync Execution)
 	// ============================================================================================
@@ -250,8 +251,7 @@ abstract class BaseModel(context: Context) {
 		job.status = JobStatus.EXECUTING
 		updateUiState(job.requestCode, UiState.Loading)
 
-		val call = http.client.newCall(job.request)
-		call.enqueue(object : Callback {
+		http.client.newCall(job.request).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
 				job.status = JobStatus.FAILED
 				failedJobs[job.requestCode] = job
@@ -275,11 +275,9 @@ abstract class BaseModel(context: Context) {
 	 * @param requestCode 请求识别码
 	 * @return 响应 Tuple2 或 null
 	 */
-	fun executeSync(request: Request, requestCode: Int): CommonUtil.Tuple2<Int, JSONObject>? {
+	fun executeSync(request: Request, requestCode: Int): Pair<Int, JSONObject>? {
 		val job = RequestJob(
-			request = request,
-			requestCode = requestCode,
-			isSync = true
+				request = request, requestCode = requestCode, isSync = true
 		)
 		allJobs[requestCode] = job
 		return executeSyncInternal(job)
@@ -288,7 +286,7 @@ abstract class BaseModel(context: Context) {
 	/**
 	 * 同步执行单个 [RequestJob] 任务
 	 */
-	protected open fun executeSyncInternal(job: RequestJob): CommonUtil.Tuple2<Int, JSONObject>? {
+	protected open fun executeSyncInternal(job: RequestJob): Pair<Int, JSONObject>? {
 		job.status = JobStatus.EXECUTING
 		job.isSync = true
 		updateUiState(job.requestCode, UiState.Loading)
@@ -318,9 +316,10 @@ abstract class BaseModel(context: Context) {
 	 * 根据相对路径发起原生 OkHttp 异步回调请求
 	 */
 	fun executeAsync(path: String, data: String? = null, type: String? = null, callback: Callback) {
-		val url = "https://${authorizationManager.host}/$path"
-		val request = http.generateRequest(url, data, type).build()
-		executeAsync(request, callback)
+		executeAsync(
+				http.generateRequest("https://${authorizationManager.host}/$path", data, type)
+					.build(), callback
+		)
 	}
 
 	// ============================================================================================
@@ -328,17 +327,43 @@ abstract class BaseModel(context: Context) {
 	// ============================================================================================
 
 	/**
-	 * 判断当前响应是否为未登录/身份认证失效状态。
-	 * 子类可通过重写此方法定制各自特色的未登录检测机制，也可在 [handleResponse] 中直接调用 [login]。
+	 * 结合 HTTP 状态码 [code]、响应体文本 [content] 以及解析后的 [json] 对象综合判断响应状态。
 	 *
-	 * @param response OkHttp Response 对象
-	 * @param content 响应体文本内容
-	 * @return 若检测到未登录则返回 true
+	 * 基类仅进行基础 HTTP 状态码与非 JSON 文本的鉴权校验。若响应为 JSON，非通用字段的校验在各自 Model 中进行重写。
+	 *
+	 * @param code HTTP 响应状态码 (response.code)
+	 * @param content 响应体原始文本
+	 * @param json 尝试解析出的 JSON 对象（若非 JSON 响应则为 null）
+	 * @return [ResponseStatus] 枚举：NORMAL (正常)、NEEDS_LOGIN (需登录)、NEEDS_CAMPUS_NETWORK (需校园网)
 	 */
-	protected open fun isLoginRequired(response: Response, content: String): Boolean {
-		if (response.code == 401 || response.code == 302) return true
-		return !authorizationManager.isAuthorized(content)
+	protected open fun checkResponseStatus(
+		code: Int, content: String, json: JSONObject?
+	): ResponseStatus {
+		// 1. 通过 HTTP 状态码进行初步判断
+		when (code) {
+			302, 401 -> return ResponseStatus.NEEDS_LOGIN
+			403, 0 -> return ResponseStatus.NEEDS_CAMPUS_NETWORK
+		}
+
+		// 2. 非 JSON 类型 (HTML/纯文本) 才进行 AuthorizationManager 鉴权/网络可达性判断
+		if (json == null) {
+			if (!authorizationManager.isAuthorized(content)) {
+				return ResponseStatus.NEEDS_LOGIN
+			}
+			if (!authorizationManager.isAccessible(content)) {
+				return ResponseStatus.NEEDS_CAMPUS_NETWORK
+			}
+		}
+
+		return ResponseStatus.NORMAL
 	}
+
+//	/**
+//	 * 兼容旧版 [isLoginRequired] 函数，转接至 [checkResponseStatus]
+//	 */
+//	protected open fun isLoginRequired(response: Response, content: String): Boolean {
+//		return checkResponseStatus(response.code, content, null) == ResponseStatus.NEEDS_LOGIN
+//	}
 
 	/**
 	 * 处理 OkHttp 请求响应（接受 [RequestJob] 参数）
@@ -347,73 +372,79 @@ abstract class BaseModel(context: Context) {
 	protected open fun handleResponse(
 		job: RequestJob,
 		response: Response,
-	): CommonUtil.Tuple2<Int, JSONObject>? {
-		return handleResponse(CommonUtil.Tuple2(job.request, job.requestCode), response)
+	): Pair<Int, JSONObject>? {
+		return handleResponse(Pair(job.request, job.requestCode), response)
 	}
 
 	/**
 	 * 处理 OkHttp 请求响应（默认通用实现）
-	 * 子类如需定制解析（例如 GymModel, JwxtModel 等）可重写此方法
+	 * 子类如需定制解析（例如 GymModel, JwxtModel 等）可重写此方法或重写 [checkResponseStatus]
 	 */
 	protected open fun handleResponse(
-		request: CommonUtil.Tuple2<Request, Int>,
+		request: Pair<Request, Int>,
 		response: Response,
-	): CommonUtil.Tuple2<Int, JSONObject>? {
+	): Pair<Int, JSONObject>? {
 		val content = response.body.string()
-		var result: CommonUtil.Tuple2<Int, JSONObject>? = null
+		val isJsonContentType =
+			response.header("Content-Type")?.contains("application/json") == true
+		val json = if (isJsonContentType || JSONValidator.from(content).validate()) {
+			try {
+				val parsed = JSON.parse(content)
+				if (parsed is JSONArray) JSONObject.of("data", parsed) else parsed as? JSONObject
+			} catch (_: Exception) {
+				null
+			}
+		} else null
 
-		if (isLoginRequired(response, content)) {
-			login(request)
-			return null
-		}
-
-		response.header("Content-Type")?.takeIf { it.contains("application/json") }?.let {
-			val contentJSON = JSONObject.parse(content)
-			val code = contentJSON.getInteger("code")
-
-			if (code == 53000007) {
+		return when (checkResponseStatus(response.code, content, json)) {
+			ResponseStatus.NEEDS_LOGIN -> {
 				login(request)
-			} else {
-				if (code != 200) {
-					contextUtil.toast(contentJSON.getString("message", ""))
-				}
-				result = CommonUtil.Tuple2(request.second, contentJSON)
-				_messageChannel.tryEmit(result.first to result.second)
+				null
+			}
 
+			ResponseStatus.NEEDS_CAMPUS_NETWORK -> {
+				authorizationManager.isAccessible = false
+				retry(request)
+				null
+			}
+
+			ResponseStatus.NORMAL -> {
+				val result = json?.let { contentJSON ->
+					if (contentJSON.getInteger("code") != 200) {
+						toast(
+								contentJSON.getString("message") ?: contentJSON.getString("msg", "")
+
+						)
+					}
+					Pair(request.second, contentJSON)
+				} ?: Pair(request.second, JSONObject.of("data", content))
+				_messageChannel.tryEmit(result)
 				failedJobs.remove(request.second)
 				pendingLoginJobs.removeIf { it.requestCode == request.second }
 				allJobs[request.second]?.status = JobStatus.SUCCESS
 				updateUiState(request.second, UiState.Content)
-			}
-		} ?: run {
-			if (!authorizationManager.isAccessible(content)) {
-				retry(request)
+				Pair(result.first, result.second)
 			}
 		}
-		return result
 	}
 
 	/**
 	 * 处理网络请求失败异常
 	 */
 	protected open fun handleFailure(job: RequestJob, e: IOException) {
-		handleFailure(CommonUtil.Tuple2(job.request, job.requestCode), e)
+		handleFailure(Pair(job.request, job.requestCode), e)
 	}
 
 	/**
 	 * 处理网络请求失败异常（接受 Tuple2 参数，可被子类重写）
 	 */
 	protected open fun handleFailure(
-		request: CommonUtil.Tuple2<Request, Int>,
+		request: Pair<Request, Int>,
 		e: IOException,
 	) {
 		e.printStackTrace()
-		contextUtil.toast(R.string.no_net_connected)
+		toast(R.string.no_net_connected)
 	}
-
-	// ============================================================================================
-	// 登录重试与统一 Retry 机制 (Login & Retry Pipeline)
-	// ============================================================================================
 
 	/**
 	 * 触发登录流程并在登录完成后重启挂起的请求任务
@@ -433,14 +464,13 @@ abstract class BaseModel(context: Context) {
 			}
 			isLoggingIn.set(false)
 
-			// 登录完成后，依据每个任务原始的请求模式 (同步/异步) 并发重启请求
 			pendingList.forEach { pendingJob ->
 				val updatedJob = RequestJob(
-					request = updateRequest(pendingJob.request),
-					requestCode = pendingJob.requestCode,
-					retryCount = pendingJob.retryCount,
-					status = JobStatus.RETRYING,
-					isSync = pendingJob.isSync
+						request = updateRequest(pendingJob.request),
+						requestCode = pendingJob.requestCode,
+						retryCount = pendingJob.retryCount,
+						status = JobStatus.RETRYING,
+						isSync = pendingJob.isSync
 				)
 				allJobs[pendingJob.requestCode] = updatedJob
 				if (updatedJob.isSync) {
@@ -478,12 +508,12 @@ abstract class BaseModel(context: Context) {
 		job.retryCount++
 		job.status = JobStatus.RETRYING
 		val updatedJob = RequestJob(
-			request = updateRequest(job.request),
-			requestCode = job.requestCode,
-			retryCount = job.retryCount,
-			createdAt = job.createdAt,
-			status = JobStatus.RETRYING,
-			isSync = job.isSync
+				request = updateRequest(job.request),
+				requestCode = job.requestCode,
+				retryCount = job.retryCount,
+				createdAt = job.createdAt,
+				status = JobStatus.RETRYING,
+				isSync = job.isSync
 		)
 		allJobs[job.requestCode] = updatedJob
 		failedJobs.remove(job.requestCode)
@@ -502,7 +532,7 @@ abstract class BaseModel(context: Context) {
 	/**
 	 * 重试 Tuple2 格式的请求
 	 */
-	open fun retry(request: CommonUtil.Tuple2<Request, Int>) {
+	open fun retry(request: Pair<Request, Int>) {
 		retry(RequestJob(request.first, request.second))
 	}
 
@@ -544,19 +574,19 @@ abstract class BaseModel(context: Context) {
 		return newRequest.build()
 	}
 
-	/**
-	 * 发送响应数据消息到 [messageChannel]
-	 */
-	protected fun sendMessage(requestCode: Int, data: JSONObject) {
-		_messageChannel.tryEmit(requestCode to data)
-	}
+//	/**
+//	 * 发送响应数据消息到 [messageChannel]
+//	 */
+//	protected fun sendMessage(requestCode: Int, data: JSONObject) {
+//		_messageChannel.tryEmit(requestCode to data)
+//	}
 
-	/**
-	 * 发送 [CommonUtil.Tuple2] 响应数据消息到 [messageChannel]
-	 */
-	protected fun sendMessage(result: CommonUtil.Tuple2<Int, JSONObject>) {
-		_messageChannel.tryEmit(result.first to result.second)
-	}
+//	/**
+//	 * 发送 [Pair] 响应数据消息到 [messageChannel]
+//	 */
+//	protected fun sendMessage(result: Pair<Int, JSONObject>) {
+//		_messageChannel.tryEmit(result.first to result.second)
+//	}
 
 	/**
 	 * 释放并清理所有任务与状态资源
@@ -587,56 +617,34 @@ abstract class BaseModel(context: Context) {
 	val token: String
 		get() = http.authorizationJar?.getToken(host) ?: ""
 
-	// ============================================================================================
-	// 兼容层 API (Backwards Compatibility Delegates)
-	// 为保持与既有 ViewModels 与子类完全兼容，保留旧函数名并转接到重构后的规范函数
-	// ============================================================================================
-
-	fun add(request: Request, what: Int) = enqueueRequest(request, what)
-	fun add(path: String?, what: Int) = enqueueUrlRequest(path, requestCode = what)
-	fun add(path: String?, data: String?, what: Int) =
-		enqueueUrlRequest(path, data, requestCode = what)
-
-	fun add(path: String?, data: String? = null, type: String? = null, what: Int) =
-		enqueueUrlRequest(path, data, type, what)
-
-	fun set(path: String?, data: String? = null, type: String? = null, what: Int) {
-		enqueueRequest(http.generateRequest(path ?: "", data, type).build(), what)
+	fun enqueueUrl(url: String, data: String? = null, type: String? = null, code: Int) {
+		enqueueRequest(http.generateRequest(url, data, type).build(), code)
 	}
 
-	fun setAndNext(path: String?, data: String? = null, type: String? = null, what: Int) {
-		set(path, data, type, what)
-	}
+	fun enqueue(path: String, data: String? = null, type: String? = null, code: Int) =
+		enqueueUrlRequest(path, data, type, code)
 
-	fun next() = true
-	fun nextAll() = Unit
+	fun enqueue(path: String, data: String?, code: Int) = enqueueUrlRequest(path, data, null, code)
 
-	fun addAndNext(path: String?, data: String? = null, type: String? = null, code: Int) =
-		enqueueAndExecute(path, data, type, code)
+	fun enqueue(path: String, code: Int) = enqueueUrlRequest(path, null, null, code)
 
-	fun addAndNext(path: String?, data: String?, code: Int) =
-		enqueueAndExecute(path, data, null, code)
-
-	fun addAndNext(path: String?, code: Int) = enqueueAndExecute(path, null, null, code)
-
-	fun request(request: CommonUtil.Tuple2<Request, Int>) =
-		enqueueRequest(request.first, request.second)
-
-	fun request(request: Request, code: Int) = enqueueRequest(request, code)
+	fun enqueue(request: Request, code: Int) = enqueueRequest(request, code)
 
 	fun login(job: RequestJob) = triggerLoginAndPendingRetry(job)
-	fun login(request: CommonUtil.Tuple2<Request, Int>) =
-		login(RequestJob(request.first, request.second))
+	fun login(request: Pair<Request, Int>) = login(RequestJob(request.first, request.second))
 
-	fun execute(request: CommonUtil.Tuple2<Request, Int>) =
-		executeSync(request.first, request.second)
+	fun execute(request: Pair<Request, Int>) = executeSync(request.first, request.second)
 
 	fun execute(request: Request, code: Int) = executeSync(request, code)
 
-	fun run(path: String, data: String? = null, type: String? = null, callback: Callback) =
+	fun execute(path: String, data: String? = null, type: String? = null, code: Int) =
+		executeSync(http.generateRequest(path, data, type).build(), code)
+
+
+	fun call(path: String, data: String? = null, type: String? = null, callback: Callback) =
 		executeAsync(path, data, type, callback)
 
-	fun run(request: Request, callback: Callback) = executeAsync(request, callback)
+	fun call(request: Request, callback: Callback) = executeAsync(request, callback)
 
 	fun toast(message: String) = contextUtil.toast(message)
 

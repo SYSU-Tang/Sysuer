@@ -146,18 +146,18 @@ class RecruitmentInfoFragment : StaggerFragment() {
 				url.append("&$v=$it")
 			}
 		}
-		model.addAndNext("$url", 0)
+		model.enqueue("$url", 0)
 	}
 
 	private fun year() {
-		model.addAndNext("qgzx/api/sm-qgzx/gwsq/ndlist/get", 1)
+		model.enqueue("qgzx/api/sm-qgzx/gwsq/ndlist/get", 1)
 	}
 
 	private fun campus() {
-		model.addAndNext("qgzx/api/sm-qgzx/gwsq/xylist/get", 2)
+		model.enqueue("qgzx/api/sm-qgzx/gwsq/xylist/get", 2)
 	}
 
 	private fun jobType() {
-		model.addAndNext("qgzx/api/sm-qgzx/gwsq/gwlxlist/get", 3)
+		model.enqueue("qgzx/api/sm-qgzx/gwsq/gwlxlist/get", 3)
 	}
 }

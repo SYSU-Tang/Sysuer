@@ -25,7 +25,7 @@ class DormViewModel(application: Application) : AndroidViewModel(application) {
 	}
 	
 	fun fetchDormInfo() {
-		model.addAndNext("ssgl/api/sm-ssgl/stu-info", 0)
+		model.enqueue("ssgl/api/sm-ssgl/stu-info", 0)
 	}
 	
 	override fun onCleared() {

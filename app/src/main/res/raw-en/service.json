@@ -47,6 +47,7 @@
       {
         "id": 106,
         "name": "Left Return Campus Registration",
+        "route": "LeaveReturnRegistration",
         "activity": ".academic.LeaveReturnRegistrationActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/jjrlfx/#/leaveAndReturn?blxn=%222025-2026%22",
         "description": "Left Return Campus Registration system, where students submit off-campus registration applications before the end of the semester, recording off-campus departure time, reason, etc."

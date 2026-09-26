@@ -89,6 +89,6 @@ class RoomQueryResultFragment : StaggerFragment() {
 	}
 	
 	private fun rooms() {
-		model.addAndNext("jwxt/schedule/agg/classroomOccupy/pageCheckList", "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
+		model.enqueue("jwxt/schedule/agg/classroomOccupy/pageCheckList", "{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":${requireArguments().getString("params")}}", 0)
 	}
 }

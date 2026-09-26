@@ -240,7 +240,6 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 								getWaterBill(roomCode.value!!)
 							}
 						}
-						model.nextAll()
 					} else if (response.getInteger("code") == 201) config.toast(
 							response.getString(
 									"msg", ""
@@ -267,7 +266,7 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 
 
 	fun getWaterConsumption(room: String, date: String?) {
-		model.addAndNext(
+		model.enqueue(
 			"kbp/cwbs/month/usage/stats",
 			JSONObject.of("roomCode", room, "staticsMonth", date).toJSONString(),
 			2
@@ -275,15 +274,15 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 	}
 
 	fun getWaterBill(room: String) {
-		model.addAndNext("kbp/cwbs/mobile/room/bill/list", JSONObject.of("roomCode", room).toJSONString(), 3)
+		model.enqueue("kbp/cwbs/mobile/room/bill/list", JSONObject.of("roomCode", room).toJSONString(), 3)
 	}
 
 	fun getDetail(billId: String?) {
-		model.addAndNext("kbp/cwbs/mobile/room/bill/get/$billId", 4)
+		model.enqueue("kbp/cwbs/mobile/room/bill/get/$billId", 4)
 	}
 
 	fun recharge(billId: String?, room: String, amount: Float) {
-		model.addAndNext(
+		model.enqueue(
 				"kbp/cwbs/mobile/room/bill/pay",
 				"{\"roomCode\":\"$room\",\"billAmount\":$amount,\"idList\":[\"$billId\"],\"isMobile\":true,\"rechargeChannel\":6,\"rechargeMethod\":16}",
 				5

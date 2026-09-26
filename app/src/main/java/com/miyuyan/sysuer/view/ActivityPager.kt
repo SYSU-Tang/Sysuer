@@ -377,6 +377,7 @@ data class MenuItem(
 	val icon: ImageVector? = null, /*val painter: Painter? = null,*/
 	val enabled: Boolean = true,
 	val content: @Composable () -> Unit = {},
+	val key: String? = null,
 	val onClick: () -> Boolean = { false }
 )
 

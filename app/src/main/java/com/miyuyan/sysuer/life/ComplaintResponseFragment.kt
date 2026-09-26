@@ -84,10 +84,10 @@ class ComplaintResponseFragment : BaseFragment() {
 	}
 	
 	fun getCode(phone: String?) {
-		model.addAndNext("jsp_api/code_send", JSONObject.of("m", phone, "t", "jsjb").toJSONString(), 0)
+		model.enqueue("jsp_api/code_send", JSONObject.of("m", phone, "t", "jsjb").toJSONString(), 0)
 	}
 	
 	fun getResponse(phone: String?) {
-		model.addAndNext("jsp_api/jsjb_list", JSONObject.of("mobile", phone).toJSONString(), 1)
+		model.enqueue("jsp_api/jsjb_list", JSONObject.of("mobile", phone).toJSONString(), 1)
 	}
 }

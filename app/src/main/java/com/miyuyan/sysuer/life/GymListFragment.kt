@@ -119,10 +119,10 @@ class GymListFragment : BaseFragment() {
 	}
 
 	private fun loadCampus() {
-		model.addAndNext("api/Campus/active", 1)
+		model.enqueue("api/Campus/active", 1)
 	}
 	private fun loadVenue() {
-		model.addAndNext("api/venuetype/all", 2)
+		model.enqueue("api/venuetype/all", 2)
 	}
 
 	private class FieldAdapter : RecyclerAdapter<JSONObject>() {

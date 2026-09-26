@@ -123,7 +123,6 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 								it.entryValues = number.toTypedArray()
 							}
 						}
-						model.nextAll()
 					}
 				}
 			}
@@ -152,7 +151,7 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 		}
 		val datePreference = findPreference<Preference>("date")
 		datePicker = MaterialDatePicker.Builder.dateRangePicker().build()
-		datePicker.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { _: Pair<Long?, Long?>? ->
+		datePicker.addOnPositiveButtonClickListener(MaterialPickerOnPositiveButtonClickListener { _ ->
 			datePreference?.setSummary(datePicker.headerText)
 		})
 		classroomPreference.setOnPreferenceChangeListener { _, newValue ->
@@ -176,8 +175,8 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 	}
 
 	fun getData(pos: Int) {
-		model.addAndNext(
-				mutableListOf<String?>(
+		model.enqueue(
+				mutableListOf(
 						"jwxt/base-info/campus/findCampusNamesBox",
 						"jwxt/base-info/teaching-building/pull",
 						"jwxt/base-info/acadyearterm/findAcadyeartermNamesBox",
@@ -187,11 +186,11 @@ class RoomQueryFilterFragment : PreferenceFragmentCompat() {
 	}
 
 	fun getTeachingBuilding(campus: String?) {
-		model.addAndNext("jwxt/base-info/teaching-building/pull?campusId=${campus ?: ""}", 4)
+		model.enqueue("jwxt/base-info/teaching-building/pull?campusId=${campus ?: ""}", 4)
 	}
 
 	fun getClassRoom(campus: String?, building: String?, value: String?) {
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/base-info/classroom/queryclassroombymulticondition?campusId=${campus ?: ""}&buildingId=${building ?: ""}&classroomCode=${value ?: ""}",
 				5
 		)

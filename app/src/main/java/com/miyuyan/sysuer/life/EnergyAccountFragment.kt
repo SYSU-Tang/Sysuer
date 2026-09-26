@@ -105,19 +105,19 @@ class EnergyAccountFragment : BaseFragment() {
 	}
 	
 	private fun loadUserInfo() {
-			model.addAndNext("kbp/auth/userInfo", 0)
+			model.enqueue("kbp/auth/userInfo", 0)
 		}
 	
 	fun getRoom(username: String?) {
-		model.addAndNext("kbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 1)
+		model.enqueue("kbp/admin/sys/personRoom/list", "{\"username\":\"$username\"}", 1)
 	}
 	
 	fun getBalance(room: String?) {
-		model.addAndNext("kbp/pay/roomBalance?roomCode=$room", 2)
+		model.enqueue("kbp/pay/roomBalance?roomCode=$room", 2)
 	}
 	
 	fun recharge(amount: Int, room: String?, remark: String?) {
-		model.addAndNext("kbp/pay/recharge/zdPay", "{\"payAmount\":$amount,\"body\":\"房间钱包充值\",\"rechargeChannel\":6,\"accountType\":7,\"rechargeType\":7,\"params\":{\"roomCode\":\"$room\"},\"remark\":\"$remark\"}", 3)
+		model.enqueue("kbp/pay/recharge/zdPay", "{\"payAmount\":$amount,\"body\":\"房间钱包充值\",\"rechargeChannel\":6,\"accountType\":7,\"rechargeType\":7,\"params\":{\"roomCode\":\"$room\"},\"remark\":\"$remark\"}", 3)
 	}
 	
 	fun gotoWechat(data: JSONObject) {

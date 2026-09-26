@@ -135,7 +135,7 @@ class NewsFragment : BaseFragment() {
 	}
 
 	private fun news() {
-		model.addAndNext("ai_service/content-portal/recommend/query-recommend", "", 3)
+		model.enqueue("ai_service/content-portal/recommend/query-recommend", "", 3)
 	}
 	private fun subscription() {
 		baseRequest("3ytr4e6c", 2)
@@ -157,7 +157,7 @@ class NewsFragment : BaseFragment() {
 	}
 
 	fun baseRequest(code: String?, what: Int) {
-		model.addAndNext(
+		model.enqueue(
 				"ai_service/content-portal/user/content/page",
 				"{\"pageSize\":20,\"currentPage\":${page++},\"apiCode\":\"$code\",\"notice\":false}",
 				what

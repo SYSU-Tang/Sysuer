@@ -67,6 +67,22 @@
         <item>Status</item>
     </string-array>
 
+    <string-array name="leave_return_detail_keys">
+        <item>Name</item>
+        <item>Student ID</item>
+        <item>Grade</item>
+        <item>Training Level</item>
+        <item>Major</item>
+        <item>Academy/Department</item>
+        <item>Contact Number</item>
+        <item>Dormitory Address</item>
+        <item>Emergency Contact</item>
+        <item>Emergency Contact Phone</item>
+        <item>Holiday Name</item>
+        <item>Holiday Time</item>
+        <item>Return Registration Period</item>
+    </string-array>
+
     <string-array name="registration_info_keys">
         <item>Social Practice</item>
         <item>Scientific Research</item>

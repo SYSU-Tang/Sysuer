@@ -59,7 +59,7 @@ class CourseSelectedViewModel(application: Application) : AndroidViewModel(appli
 					                         arrayOf("courseName", "courseCategoryName", "courseUnitName", "scheduleExamTime", "examFormName", "credit", "teachingClassId", "teachingClassNum", "teachingClassName", "courseNum")))
 					_sections.add(SectionData(title = item.getString("courseName"),
 					                          rows = rows,
-					                          transitionName = "course_${item.getString("teachingClassId")}_${item.getString("courseNum")}",
+					                          key = "course_${item.getString("teachingClassId")}_${item.getString("courseNum")}",
 					                          footerMenus = mutableStateListOf(com.miyuyan.sysuer.view.MenuItem(title = application.getString(R.string.course_detail), onClick = {
 						                          viewModelScope.launch {
 							                          _navigationEvents.emit(CourseDetail(item.getString("teachingClassId"), item.getString("courseNum")))
@@ -73,7 +73,7 @@ class CourseSelectedViewModel(application: Application) : AndroidViewModel(appli
 	}
 	
 	fun fetchCourseList(courseName: String = "") {
-		model.addAndNext("jwxt/choose-course-front-server/selectedCourse/list",
+		model.enqueue("jwxt/choose-course-front-server/selectedCourse/list",
 		                 "{\"pageNo\":${++page},\"pageSize\":10,\"total\":true,\"param\":{\"courseName\":\"$courseName\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
 		                 1)
 	}

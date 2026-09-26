@@ -102,6 +102,6 @@ class CVFragment : StaggerFragment() {
 	}
 
 	private fun loadCV() {
-		model.addAndNext("qgzx/api/sm-qgzx/xsjl/get", 0)
+		model.enqueue("qgzx/api/sm-qgzx/xsjl/get", 0)
 	}
 }

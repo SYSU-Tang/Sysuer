@@ -120,7 +120,7 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		if (outlineLoaded) return
 		outlineLoaded = true
 		val code = classNum.value ?: return
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/training-programe/courseoutline/getalloutlineinfo?courseNum=$code&auditStatus=99",
 				1
 		)
@@ -130,12 +130,12 @@ class CourseDetailViewModel(application: Application) : AndroidViewModel(applica
 		if (outline2Loaded) return
 		outline2Loaded = true
 		val id = courseId.value ?: return
-		model.addAndNext("jwxt/base-info/courseLibrary/findById?id=$id", 2)
+		model.enqueue("jwxt/base-info/courseLibrary/findById?id=$id", 2)
 	}
 
 	fun getOutlineId() {
 		val infoId = courseInfoId.value ?: return
-		model.addAndNext(
+		model.enqueue(
 				"jwxt/training-programe/courseoutline/showOutlineUpdataCourse",
 				"{\"pageNo\":1,\"pageSize\":10,\"total\":true,\"param\":{\"outlineCourseInfoId\":\"$infoId\"}}",
 				3

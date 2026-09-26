@@ -50,7 +50,7 @@ class MajorInfoViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 	
 	fun fetchCategories() {
-		model.addAndNext("jwxt/base-info/codedata/findcodedataNames?datableNumber=135", 0)
+		model.enqueue("jwxt/base-info/codedata/findcodedataNames?datableNumber=135", 0)
 	}
 	
 	fun fetchMajorList(tabIndex: Int) {
@@ -60,7 +60,7 @@ class MajorInfoViewModel(application: Application) : AndroidViewModel(applicatio
 			val page = pages.getOrPut(tabIndex) { 0 } + 1
 			pages[tabIndex] = page
 			println("fetchMajorList $tabIndex $page")
-			model.addAndNext("jwxt/base-info/profession-direction/list", "{\"pageNo\":$page,\"pageSize\":10,\"total\":true,\"param\":{\"majorProfessionDircetion\":\"0\",\"disciplineCateCode\":\"$categoryCode\"}}", tabIndex + 1)
+			model.enqueue("jwxt/base-info/profession-direction/list", "{\"pageNo\":$page,\"pageSize\":10,\"total\":true,\"param\":{\"majorProfessionDircetion\":\"0\",\"disciplineCateCode\":\"$categoryCode\"}}", tabIndex + 1)
 		}
 	}
 	

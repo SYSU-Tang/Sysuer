@@ -89,15 +89,15 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	fun getTerms() {
-		model.addAndNext("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
+		model.enqueue("jwxt/base-info/acadyearterm/findAcadyeartermNamesBox", 1)
 	}
 
 	fun getTerm() {
-		model.addAndNext("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
+		model.enqueue("jwxt/base-info/acadyearterm/showNewAcadlist", 2)
 	}
 
 	fun getExamWeek(term: String?) {
-		model.addAndNext(
+		model.enqueue(
 			"jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 3
 		)
 	}
@@ -107,6 +107,6 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
 		_uiState.value = UiState.Loading
 		if (term.value != null) data["acadYear"] = term.value
 		if (examWeekId.value != null) data["examWeekName"] = examWeekId.value
-		model.addAndNext("jwxt/examination-manage/classroomResource/queryStuEaxmInfo", "$data", 4)
+		model.enqueue("jwxt/examination-manage/classroomResource/queryStuEaxmInfo", "$data", 4)
 	}
 }

@@ -155,6 +155,6 @@ class SchoolBusActivity : BaseActivity() {
 	}
 
 	fun getData() {
-		model.addAndNext("newClient/api/extraCard/schoolBusShuttleInfo/selectSchoolBusMap", 0)
+		model.enqueue("newClient/api/extraCard/schoolBusShuttleInfo/selectSchoolBusMap", 0)
 	}
 }

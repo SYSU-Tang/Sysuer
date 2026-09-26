@@ -54,7 +54,7 @@ class ComplaintSquareFragment : BaseFragment() {
 	}
 
 	private fun loadSquare() {
-			model.addAndNext("jsp_api/hsgc", "", 0)
+			model.enqueue("jsp_api/hsgc", "", 0)
 		}
 
 	override fun onConfigurationChanged(newConfig: Configuration) {

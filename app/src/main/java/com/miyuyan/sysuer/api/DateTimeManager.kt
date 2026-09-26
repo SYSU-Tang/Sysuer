@@ -37,7 +37,7 @@ object DateTimeManager {
 		millis: Long,
 		formatter: DateTimeFormatter = dateFormatter,
 		unit: TimeUnit = TimeUnit.MILLISECONDS
-	): String? = formatter.format(toDate(millis, unit))
+	): String = formatter.format(toDate(millis, unit))
 
 	/**
 	 * 将日期转换为日期字符串（格式：yyyy-MM-dd）
@@ -47,7 +47,7 @@ object DateTimeManager {
 	 */
 	fun toDateString(
 		date: LocalDate?, formatter: DateTimeFormatter = dateFormatter
-	): String? = formatter.format(date)
+	): String = formatter.format(date)
 
 	/**
 	 * 计算未来或过去指定天数后的日期字符串（格式：yyyy-MM-dd）
@@ -56,7 +56,7 @@ object DateTimeManager {
 	 * @param days 天数为正数时，返回未来日期；为负数时，返回过去日期
 	 * @return 日期字符串（格式：yyyy-MM-dd）
 	 */
-	fun toDateStringPLus(days: Int, formatter: DateTimeFormatter = dateFormatter): String? =
+	fun toDateStringPLus(days: Int, formatter: DateTimeFormatter = dateFormatter): String =
 		toDateString(today.plusDays(days.toLong()), formatter)
 
 	/**
@@ -67,7 +67,7 @@ object DateTimeManager {
 	 */
 	fun toDateTimeString(
 		date: LocalDateTime?, formatter: DateTimeFormatter = dateTimeFormatter
-	): String? = formatter.format(date)
+	): String = formatter.format(date)
 
 
 	/**
@@ -80,7 +80,7 @@ object DateTimeManager {
 		millis: Long,
 		formatter: DateTimeFormatter = dateTimeFormatter,
 		unit: TimeUnit = TimeUnit.MILLISECONDS
-	): String? = formatter.format(toDateTime(millis, unit))
+	): String = formatter.format(toDateTime(millis, unit))
 
 
 	/**
@@ -152,6 +152,7 @@ object DateTimeManager {
 	 * @param date 日期字符串（格式：yyyy-MM-dd）
 	 * @return 时间戳（毫秒）
 	 */
-	fun toMillis(date: String?, formatter: DateTimeFormatter = dateFormatter): Long =
-		toMillis(LocalDate.parse(date, formatter))
+	fun toMillis(date: String?, formatter: DateTimeFormatter = dateFormatter): Long? =
+		if (date.isNullOrEmpty()) null
+		else toMillis(LocalDate.parse(date, formatter))
 }
