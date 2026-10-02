@@ -1,6 +1,5 @@
 package com.miyuyan.preference
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,59 +26,61 @@ val LocalPreferenceCount = compositionLocalOf { 1 }
  *             推荐配合 `Icon(painterResource(...), contentDescription)` 使用。
  * @param trailing 标题右侧的尾部 Composable(例如 Switch、Checkbox、文字摘要)。
  *                 与 [summary] 同时存在时,优先显示 [summary] 在下方。
+ * @param content 标题下方的自定义内容区 Composable(例如 Slider、ChipGroup、进度条)。
+ *                传非 null 值时优先于 [summary] 显示,标题移至上方 overline 位置。
  */
 @Composable
 fun Preference(
-	onClick: (() -> Unit)?,
-	title: String,
 	modifier: Modifier = Modifier,
+	onClick: (() -> Unit)? = null,
+	title: String,
 	enabled: Boolean = true,
 	icon: @Composable (() -> Unit)? = null,
 	trailing: (@Composable () -> Unit)? = null,
 	summary: String? = null,
+	titleModifier: Modifier = Modifier,
+	content: (@Composable () -> Unit)? = null,
 ) {
 	val index = LocalPreferenceIndex.current
 	val count = LocalPreferenceCount.current
 	SegmentedListItem(
-		onClick = onClick ?: {},
-		enabled = enabled,
-		verticalAlignment = Alignment.CenterVertically,
-		modifier = modifier.fillMaxWidth(),
-		shapes = ListItemDefaults.segmentedShapes(index, count),
-		colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-		leadingContent = {
-			if (icon != null) {
-				icon()
-			}
-		},
-		overlineContent = if (summary != null) {
-			{
-				Row(verticalAlignment = Alignment.CenterVertically) {
-					Text(
-						title,
-						style = MaterialTheme.typography.bodyLarge,
-						modifier = Modifier.weight(1f)
-					)
-					trailing?.invoke()
+			onClick = onClick ?: {},
+			enabled = enabled,
+			verticalAlignment = Alignment.CenterVertically,
+			modifier = modifier.fillMaxWidth(),
+			shapes = ListItemDefaults.segmentedShapes(index, count),
+			colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+			leadingContent = {
+				if (icon != null) {
+					icon()
 				}
-			}
-		} else null,
-	) {
-		if (summary == null) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
+			},
+			overlineContent = if (summary != null || content != null) {
+				{
+					Text(
+							modifier = titleModifier,
+							text = title,
+							style = MaterialTheme.typography.bodyLarge,
+					)
+				}
+			} else null,
+			trailingContent = trailing) {
+		when {
+			content != null -> content()
+			summary != null -> {
 				Text(
-					title,
-					style = MaterialTheme.typography.bodyLarge,
-					modifier = Modifier.weight(1f)
+						summary,
+						style = MaterialTheme.typography.labelMedium,
+						color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
-				trailing?.invoke()
 			}
-		} else {
-			Text(
-				summary,
-				style = MaterialTheme.typography.bodyMedium,
-				color = MaterialTheme.colorScheme.onSurfaceVariant
-			)
+			else -> {
+				Text(
+						modifier = titleModifier,
+						text = title,
+						style = MaterialTheme.typography.bodyLarge,
+				)
+			}
 		}
 	}
 }

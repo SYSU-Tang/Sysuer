@@ -7,23 +7,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 
 @Composable
-fun IconTextPreference(
+fun ItemPreference(
 	title: String,
 	icon: Int,
 	modifier: Modifier = Modifier,
 	summary: String? = null,
+	onClick: (() -> Unit)? = null,
 ) {
 	Preference(
-		onClick = null,
-		title = title,
-		modifier = modifier,
-		icon = {
-			Icon(
-				painterResource(icon),
-				contentDescription = title,
-				tint = MaterialTheme.colorScheme.primary
-			)
-		},
-		summary = summary,
+			onClick = onClick,
+			title = title,
+			modifier = modifier,
+			icon = {
+				Icon(
+						painterResource(icon),
+						contentDescription = title,
+						tint = MaterialTheme.colorScheme.primary
+				)
+			},
+			summary = summary,
 	)
 }
