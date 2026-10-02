@@ -20,6 +20,8 @@ android {
 	buildToolsVersion = "37.0.0"
 	buildFeatures {
 		compose = true
+		dataBinding = true
+		viewBinding = true
 	}
 
 }
@@ -28,12 +30,12 @@ dependencies {
 	implementation(platform(libs.compose.bom))
 	implementation(libs.activity.compose)
 	implementation(libs.androidx.core.ktx)
+	implementation(libs.androidx.material3.window.size.class1)
 	implementation(libs.androidx.runtime)
 	implementation(libs.androidx.ui)
 	implementation(libs.appcompat)
 	implementation(libs.androidx.material3)
 	implementation(libs.androidx.navigation3.runtime)
-//	implementation(libs.lifecycle.viewmodel.ktx)
 	implementation(libs.ui.graphics)
 	implementation(libs.androidx.preference.ktx)
 	implementation(libs.ui.tooling.preview)
