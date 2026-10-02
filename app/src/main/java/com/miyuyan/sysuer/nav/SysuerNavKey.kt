@@ -61,6 +61,7 @@ fun MutableList<NavKey>.navigateBack(activity: Activity? = null) {
 @Serializable data object NetPay : NavKey
 @Serializable data object Complaint : NavKey
 @Serializable data object About : NavKey
+@Serializable data object Privacy : NavKey
 @Serializable data object Update : NavKey
 
 //val NavKey.routeName: String

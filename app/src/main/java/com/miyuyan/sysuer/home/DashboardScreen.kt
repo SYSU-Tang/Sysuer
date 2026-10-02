@@ -754,27 +754,31 @@ private fun ScheduleSection(
 	) {
 		OutlinedCard(
 				modifier = Modifier.weight(1.25f), onClick = { onNextClassClick(view) }) {
-			Markdown(
-					rememberMarkdownState(nextClassMarkdown),
-					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-					typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-					modifier = Modifier.padding(
-							dimensionResource(R.dimen.horizontal_padding),
-							dimensionResource(R.dimen.vertical_padding)
-					)
-			)
+			AnimatedContent(nextClassMarkdown) {
+				Markdown(
+						rememberMarkdownState(it),
+						colors = markdownColor(text = MaterialTheme.colorScheme.primary),
+						typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
+						modifier = Modifier.padding(
+								dimensionResource(R.dimen.horizontal_padding),
+								dimensionResource(R.dimen.vertical_padding)
+						)
+				)
+			}
 		}
 		OutlinedCard(
 				modifier = Modifier.weight(1f), onClick = { onTimeCardClick(view) }) {
-			Markdown(
-					rememberMarkdownState(dateText),
-					colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-					typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-					modifier = Modifier.padding(
-							dimensionResource(R.dimen.horizontal_padding),
-							dimensionResource(R.dimen.vertical_padding)
-					)
-			)
+			AnimatedContent(dateText) {
+				Markdown(
+						rememberMarkdownState(it),
+						colors = markdownColor(text = MaterialTheme.colorScheme.primary),
+						typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
+						modifier = Modifier.padding(
+								dimensionResource(R.dimen.horizontal_padding),
+								dimensionResource(R.dimen.vertical_padding)
+						)
+				)
+			}
 		}
 	}
 }
@@ -855,7 +859,7 @@ private fun CourseSection(
 							modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
 							bringIntoViewRequester
 					) else Modifier).then(
-									if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+							if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
 									sharedContentState = rememberSharedContentState(
@@ -904,7 +908,8 @@ private fun CourseItem(
 			shape = RoundedCornerShape(0.dp),
 			modifier = Modifier
 				.fillMaxHeight()
-				.combinedClickable(onClick = onClick, onLongClick = { onLongClick("courseName") })
+				.combinedClickable(
+						onClick = onClick, onLongClick = { onLongClick("courseName") })
 				.alpha(alpha)
 	) {
 		Column(
@@ -1105,7 +1110,9 @@ private fun ExamItem(
 			).forEach { (text, icon) ->
 				GenericButton(icon = icon, text = text) {
 					coroutineScope.launch {
-						clipboard.setClipEntry(ClipData.newPlainText("exam", text).toClipEntry())
+						clipboard.setClipEntry(
+								ClipData.newPlainText("exam", text).toClipEntry()
+						)
 					}
 				}
 			}
@@ -1259,7 +1266,6 @@ fun RowScope.CardTitle(
 				color = MaterialTheme.colorScheme.primary
 		)
 	}
-	LocalView.current.transitionName = "miniapp"
 }
 
 @Composable

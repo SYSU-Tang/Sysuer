@@ -362,6 +362,7 @@
       {
         "id": 708,
         "name": "全校开课课程",
+        "route": "CourseQuery",
         "activity": ".academic.CourseQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/openingCoursesStu?code=jwxsd_qxkckk&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%25BC%2580%25E8%25AF%25BE%25E8%25AF%25BE%25E7%25A8%258B",
         "description": "课程信息管理系统，课程大纲、教学资源、作业提交等学习支持"
@@ -401,6 +402,7 @@
       {
         "id": 713,
         "name": "助教信息",
+        "route": "AssistantInfo",
         "activity": ".academic.AssistantInfoActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/zjgl/#/assistantInfoQuery?code=jwxsd_zjxxck&resourceName=%25E5%258A%25A9%25E6%2595%2599%25E4%25BF%25A1%25E6%2581%25AF%25E6%259F%25A5%25E7%259C%258B",
         "description": "助教信息查询系统，显示助教姓名、负责课程等"
@@ -416,6 +418,7 @@
       {
         "id": 715,
         "activity": ".academic.RoomQueryActivity",
+        "route": "RoomQuery",
         "name": "教室占用情况",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/#/classroomCheckStu?code=jwxsd_jsskqkjkxjscx&resourceName=%25E6%2595%2599%25E5%25AE%25A4%25E4%25B8%258A%25E8%25AF%25BE%25E6%2583%2585%25E5%2586%25B5%25E5%258F%258A%25E7%25A9%25BA%25E9%2597%25B2%25E6%2595%2599%25E5%25AE%25A4%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "教室查询系统，显示教学楼、实验楼等教室的空闲时间、占用情况等"
@@ -424,6 +427,7 @@
         "id": 716,
         "activity": ".academic.AssistantEvaluationActivity",
         "name": "助教考核",
+        "route": "AssistantEvaluation",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/#/classroomCheckStu?code=jwxsd_jsskqkjkxjscx&resourceName=%25E6%2595%2599%25E5%25AE%25A4%25E4%25B8%258A%25E8%25AF%25BE%25E6%2583%2585%25E5%2586%25B5%25E5%258F%258A%25E7%25A9%25BA%25E9%2597%25B2%25E6%2595%2599%25E5%25AE%25A4%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "助教考核结果查询系统，显示助教姓名、负责课程、考核成绩等"
       },

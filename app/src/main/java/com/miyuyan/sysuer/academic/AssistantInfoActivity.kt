@@ -1,24 +1,48 @@
 package com.miyuyan.sysuer.academic
 
 import android.os.Bundle
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI.setupWithNavController
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
-import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.databinding.ActivityAssistantInfoBinding
+import com.miyuyan.sysuer.browser.RichTextRoute
+import com.miyuyan.sysuer.nav.AssistantInfo
+import com.miyuyan.sysuer.nav.RichText
+import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.theme.SysuerTheme
 
 class AssistantInfoActivity : BaseActivity() {
+	@OptIn(ExperimentalSharedTransitionApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		val binding = ActivityAssistantInfoBinding.inflate(layoutInflater)
-		setContentView(binding.getRoot())
-		val navController = (supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment).navController
-		setupWithNavController(binding.toolbar, navController, AppBarConfiguration.Builder()
-			.setFallbackOnNavigateUpListener {
-				supportFinishAfterTransition()
-				false
+		enableEdgeToEdge()
+		setContent {
+			val backStack = rememberNavBackStack(AssistantInfo)
+			SysuerTheme(settingManager) {
+				SharedTransitionLayout {
+					SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
+						entry<AssistantInfo> {
+							AssistantInfoRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+						entry<RichText> {
+							RichTextRoute(
+									backStack,
+									it,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+					})
+				}
 			}
-			.build())
+		}
 	}
 }

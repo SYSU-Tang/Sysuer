@@ -21,6 +21,7 @@ import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
+import java.security.cert.CertPathValidatorException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -445,6 +446,15 @@ abstract class BaseModel(context: Context) {
 		request: Pair<Request, Int>,
 		e: IOException,
 	) {
+		var cause: Throwable? = e
+		while (cause != null) {
+			if (cause is CertPathValidatorException) {
+				authorizationManager.isAccessible = false
+				retryAll()
+				return
+			}
+			cause = cause.cause
+		}
 		e.printStackTrace()
 		toast(R.string.no_net_connected)
 	}

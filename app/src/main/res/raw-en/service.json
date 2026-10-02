@@ -363,6 +363,7 @@
       {
         "id": 708,
         "name": "All School Opening Courses",
+        "route": "CourseQuery",
         "activity": ".academic.CourseQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/#/openingCoursesStu?code=jwxsd_qxkckk&resourceName=%25E5%2585%25A8%25E6%25A0%25A1%25E5%25BC%2580%25E8%25AF%25BE%25E8%25AF%25BE%25E7%25A8%258B",
         "description": "Course information management system, providing learning support such as course outlines, teaching resources, and assignment submissions"
@@ -401,6 +402,7 @@
       {
         "id": 713,
         "name": "Teaching Assistants",
+        "route": "AssistantInfo",
         "activity": ".academic.AssistantInfoActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/zjgl/#/assistantInfoQuery?code=jwxsd_zjxxck&resourceName=%25E5%258A%25A9%25E6%2595%2599%25E4%25BF%25A1%25E6%2581%25AF%25E6%259F%25A5%25E7%259C%258B",
         "description": "Teaching assistants information inquiry system, with functions such as assistant names, courses they are teaching, and contact information"
@@ -416,12 +418,14 @@
       {
         "id": 715,
         "name": "Classroom Occupation Status",
+        "route": "RoomQuery",
         "activity": ".academic.RoomQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/#/classroomCheckStu?code=jwxsd_jsskqkjkxjscx&resourceName=%25E6%2595%2599%25E5%25AE%25A4%25E4%25B8%258A%25E8%25AF%25BE%25E6%2583%2585%25E5%2586%25B5%25E5%258F%258A%25E7%25A9%25BA%25E9%2597%25B2%25E6%2595%2599%25E5%25AE%25A4%25E6%259F%25A5%25E8%25AF%25A2",
         "description": "Classroom inquiry system, with functions such as available classrooms, class schedule, and room capacity inquiry"
       },
       {
         "id": 716,
+        "route": "AssistantEvaluation",
         "name": "Assistant Evaluation",
         "activity": ".academic.AssistantEvaluationActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/schedule-web/#/classroomCheckStu?code=jwxsd_jsskqkjkxjscx&resourceName=%25E6%2595%2599%25E5%25AE%25A4%25E4%25B8%258A%25E8%25AF%25BE%25E6%2583%2585%25E5%2586%25B5%25E5%258F%258A%25E7%25A9%25BA%25E9%2597%25B2%25E6%2595%2599%25E5%25AE%25A4%25E6%259F%25A5%25E8%25AF%25A2",

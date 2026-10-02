@@ -6,6 +6,8 @@ import com.miyuyan.sysuer.api.AuthorizationManager
 import com.miyuyan.sysuer.api.CookieManager
 import com.miyuyan.sysuer.api.HttpManager
 import com.miyuyan.sysuer.api.TargetUrl
+import java.io.IOException
+import java.security.cert.CertPathValidatorException
 
 open class JwxtModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager =
@@ -18,9 +20,7 @@ open class JwxtModel(context: Context) : BaseModel(context) {
 	}
 
 	override fun checkResponseStatus(
-		code: Int,
-		content: String,
-		json: JSONObject?
+		code: Int, content: String, json: JSONObject?
 	): ResponseStatus {
 		if (json?.getInteger("code") == 53000007) return ResponseStatus.NEEDS_LOGIN
 		return super.checkResponseStatus(code, content, json)

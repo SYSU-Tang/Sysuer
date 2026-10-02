@@ -20,7 +20,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:transitionName="miniapp"
-                app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title" app:layout_collapseMode="pin"
+                app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title"
+                app:layout_collapseMode="pin"
                 app:navigationIcon="?homeAsUpIndicator"
                 app:title="@string/privacy" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>

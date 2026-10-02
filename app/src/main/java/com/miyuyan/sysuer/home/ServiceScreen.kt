@@ -94,7 +94,9 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.full.primaryConstructor
 
 @OptIn(
-	ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalFoundationApi::class
+		ExperimentalMaterial3Api::class,
+		ExperimentalLayoutApi::class,
+		ExperimentalFoundationApi::class
 )
 @Composable
 internal fun ServiceScreen(
@@ -116,63 +118,62 @@ internal fun ServiceScreen(
 		serviceViewModel.loadServiceData()
 	}
 	ServiceActionDialog(
-		item = showActionItem,
-		onDismiss = { showActionItem = null },
-		onShowOrder = { _ -> showActionItem = null; showOrderDialog = true },
-		serviceViewModel = serviceViewModel,
-		homeViewModel = homeViewModel,
-		config = config,
+			item = showActionItem,
+			onDismiss = { showActionItem = null },
+			onShowOrder = { _ -> showActionItem = null; showOrderDialog = true },
+			serviceViewModel = serviceViewModel,
+			homeViewModel = homeViewModel,
+			config = config,
 	)
 
 	ServiceOrderDialog(
-		show = showOrderDialog,
-		onDismiss = { showOrderDialog = false },
-		serviceViewModel = serviceViewModel,
+			show = showOrderDialog,
+			onDismiss = { showOrderDialog = false },
+			serviceViewModel = serviceViewModel,
 	)
 	val nestedScrollConnection = rememberNestedScrollInteropConnection()
-	val verticalMargin = dimensionResource(R.dimen.vertical_margin)
 
 	LazyColumn(
-		modifier = Modifier
-			.fillMaxSize()
-			.nestedScroll(nestedScrollConnection),
-		verticalArrangement = Arrangement.spacedBy(verticalMargin),
+			modifier = Modifier
+				.fillMaxSize()
+				.nestedScroll(nestedScrollConnection),
+			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
 	) {
 		if (collection.isNotEmpty()) {
 			item(key = "collection") {
 				ServiceBox(
-					title = stringResource(R.string.collect),
-					items = serviceViewModel.collection,
-					onItemClick = {
-						navigateToServiceItem(
-							context, backStack, it, homeViewModel.actionMap
-						)
-					},
-					onItemLongClick = { showActionItem = it },
-					onTitleClick = { showOrderDialog = true },
-					sharedTransitionScope = sharedTransitionScope,
-					animatedVisibilityScope = animatedVisibilityScope,
+						title = stringResource(R.string.collect),
+						items = serviceViewModel.collection,
+						onItemClick = {
+							navigateToServiceItem(
+									context, backStack, it, homeViewModel.actionMap
+							)
+						},
+						onItemLongClick = { showActionItem = it },
+						onTitleClick = { showOrderDialog = true },
+						sharedTransitionScope = sharedTransitionScope,
+						animatedVisibilityScope = animatedVisibilityScope,
 				)
 			}
 		}
 
 		items(serviceData, key = { it.first }) { (name, items) ->
 			ServiceBox(
-				title = name,
-				items = items,
-				onItemClick = {
-					navigateToServiceItem(
-						context, backStack, it, homeViewModel.actionMap
-					)
-				},
-				onItemLongClick = { showActionItem = it },
-				sharedTransitionScope = sharedTransitionScope,
-				animatedVisibilityScope = animatedVisibilityScope,
+					title = name,
+					items = items,
+					onItemClick = {
+						navigateToServiceItem(
+								context, backStack, it, homeViewModel.actionMap
+						)
+					},
+					onItemLongClick = { showActionItem = it },
+					sharedTransitionScope = sharedTransitionScope,
+					animatedVisibilityScope = animatedVisibilityScope,
 			)
 		}
 
 		item(key = "bottomSpacer") {
-			Spacer(modifier = Modifier.height(verticalMargin))
+			Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
 		}
 	}
 }
@@ -195,13 +196,13 @@ fun navigateToServiceItem(
 	}
 	getServiceItemIntent(context, item, null)?.let {
 		(context as FragmentActivity).startActivity(
-			it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle()
+				it, ActivityOptionsCompat.makeSceneTransitionAnimation(context).toBundle()
 		)
 		return
 	}
 
-	if (actionMap.containsKey(item.id)) actionMap[item.id]?.invoke(context)
-		?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
+	if (actionMap.containsKey(item.id)) actionMap[item.id]?.invoke(context) ?: ContextUtil
+		.getInstance(context).toast(R.string.activity_not_found)
 }
 
 private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: Intent?): Intent? {
@@ -236,56 +237,56 @@ private fun ServiceBox(
 	animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
 	Row(
-		modifier = Modifier.fillMaxWidth().padding(
-			horizontal = dimensionResource(R.dimen.horizontal_margin),
-			vertical = dimensionResource(R.dimen.vertical_margin)
-		).apply {
-			if (onTitleClick != null) combinedClickable(onClick = onTitleClick)
-		},
-		verticalAlignment = Alignment.CenterVertically,
+			modifier = Modifier.fillMaxWidth().padding(
+					horizontal = dimensionResource(R.dimen.horizontal_margin),
+					vertical = dimensionResource(R.dimen.vertical_margin)
+			).apply {
+				if (onTitleClick != null) combinedClickable(onClick = onTitleClick)
+			},
+			verticalAlignment = Alignment.CenterVertically,
 	) {
 		Text(
-			text = title,
-			style = MaterialTheme.typography.titleMedium,
-			color = MaterialTheme.colorScheme.primary,
+				text = title,
+				style = MaterialTheme.typography.titleMedium,
+				color = MaterialTheme.colorScheme.primary,
 		)
 	}
 	Card(
-		modifier = Modifier.fillMaxWidth(),
-		shape = MaterialTheme.shapes.small,
-		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+			modifier = Modifier.fillMaxWidth(),
+			shape = MaterialTheme.shapes.small,
+			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
 	) {
 		FlowRow(
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-				),
-			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
-			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_padding)
+					),
+				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
 		) {
 			items.forEach { item ->
 				LongClickableElevatedAssistChip(
-					modifier = Modifier.then(
-						if (sharedTransitionScope != null && animatedVisibilityScope != null && item.route != null) {
-						with(sharedTransitionScope) {
-							Modifier.sharedBounds(
-								sharedContentState = rememberSharedContentState(
-									key = item.route
-								), animatedVisibilityScope = animatedVisibilityScope
-							)
-						}
-					} else Modifier),
-					onClick = {
-						onItemClick(item)
-					},
-					onLongClick = { onItemLongClick(item) },
-					label = item.name,
-					colors = if (item.activity.isNullOrBlank()) AssistChipDefaults.elevatedAssistChipColors(
-						containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-					)
-					else AssistChipDefaults.elevatedAssistChipColors(),
+						modifier = Modifier.then(
+								if (sharedTransitionScope != null && animatedVisibilityScope != null && item.route != null) {
+							with(sharedTransitionScope) {
+								Modifier.sharedBounds(
+										sharedContentState = rememberSharedContentState(
+												key = item.route
+										), animatedVisibilityScope = animatedVisibilityScope
+								)
+							}
+						} else Modifier),
+						onClick = {
+							onItemClick(item)
+						},
+						onLongClick = { onItemLongClick(item) },
+						label = item.name,
+						colors = if (item.activity.isNullOrBlank()) AssistChipDefaults.elevatedAssistChipColors(
+								containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+						)
+						else AssistChipDefaults.elevatedAssistChipColors(),
 				)
 			}
 		}
@@ -318,38 +319,41 @@ private fun ServiceActionDialog(
 		isShortcutCollected = serviceViewModel.isDashboardShortcutCollected(itemId)
 	}
 
-	ModalBottomSheet(onDismissRequest = onDismiss,
-		sheetState = rememberBottomSheetState(SheetValue.Expanded)) {
+	ModalBottomSheet(
+			onDismissRequest = onDismiss, sheetState = rememberBottomSheetState(
+			initialValue = SheetValue.Hidden,
+	)
+	) {
 		Column(modifier = Modifier.fillMaxWidth()) {
 			Card(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-						horizontal = dimensionResource(R.dimen.horizontal_margin),
-						vertical = dimensionResource(R.dimen.vertical_margin)
-					),
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+								horizontal = dimensionResource(R.dimen.horizontal_margin),
+								vertical = dimensionResource(R.dimen.vertical_margin)
+						),
 			) {
 				Markdown(
-					rememberMarkdownState("$markdown"),
-					colors = markdownColor(),
-					typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
-					modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+						rememberMarkdownState("$markdown"),
+						colors = markdownColor(),
+						typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
+						modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
 				)
 			}
 
 			FlowRow(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-						horizontal = dimensionResource(R.dimen.horizontal_margin),
-						vertical = dimensionResource(R.dimen.vertical_margin)
-					),
-				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
-				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap)),
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+								horizontal = dimensionResource(R.dimen.horizontal_margin),
+								vertical = dimensionResource(R.dimen.vertical_margin)
+						),
+					horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap)),
 			) {
 				GenericTonalButton(
-					image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-					text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)
+						image = if (isServiceCollected) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+						text = stringResource(if (isServiceCollected) R.string.cancel_collect else R.string.collect)
 				) {
 					isServiceCollected = !isServiceCollected
 					coroutineScope.launch {
@@ -365,8 +369,8 @@ private fun ServiceActionDialog(
 				}
 
 				GenericTonalButton(
-					image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut,
-					text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
+						image = if (isShortcutCollected) Icons.Rounded.Close else Icons.AutoMirrored.Rounded.Shortcut,
+						text = stringResource(if (isShortcutCollected) R.string.cancel_add_shortcut else R.string.add_to_dashboard)
 				) {
 					isShortcutCollected = !isShortcutCollected
 					coroutineScope.launch {
@@ -382,11 +386,12 @@ private fun ServiceActionDialog(
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Output, text = stringResource(R.string.add_to_launcher)
+						image = Icons.Rounded.Output,
+						text = stringResource(R.string.add_to_launcher)
 				) {
 					if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
 						getServiceItemIntent(
-							context, item, Intent(context, MainActivity::class.java)
+								context, item, Intent(context, MainActivity::class.java)
 						)?.let { intent ->
 							ShortcutInfoCompat.Builder(context, "$itemId").setShortLabel(name)
 								.setLongLabel(name)
@@ -394,50 +399,61 @@ private fun ServiceActionDialog(
 								.setIntent(intent.setAction(Intent.ACTION_VIEW)).build()
 						}?.let { info ->
 							ShortcutManagerCompat.requestPinShortcut(
-								context, info,
-								PendingIntent.getBroadcast(
-									context, 0,
-									ShortcutManagerCompat.createShortcutResultIntent(context, info),
-									PendingIntent.FLAG_IMMUTABLE,
-								).intentSender,
+									context, info,
+									PendingIntent.getBroadcast(
+											context, 0,
+											ShortcutManagerCompat.createShortcutResultIntent(
+													context, info
+											),
+											PendingIntent.FLAG_IMMUTABLE,
+									).intentSender,
 							)
 						}
 					} else config.toast(R.string.fail_to_add_shortcut)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.ClearAll, text = stringResource(R.string.service_order)
+						image = Icons.Rounded.ClearAll,
+						text = stringResource(R.string.service_order)
 				) {
 					onShowOrder(item)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.KeyboardVoice, text = stringResource(R.string.feedback)
+						image = Icons.Rounded.KeyboardVoice,
+						text = stringResource(R.string.feedback)
 				) {
 					context.startActivity(
-						Intent(Intent.ACTION_VIEW).setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri())
-							.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+							Intent(Intent.ACTION_VIEW)
+								.setData("https://github.com/SYSU-Tang/Sysuer/issues/new?title=反馈：服务->$name&labels=bug,crash-report".toUri())
+								.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
 					)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
+						image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
 				) {
 					val itemUrl = item.url
 					if (!itemUrl.isNullOrBlank()) context.startActivity(
-						Intent(
-							context, BrowserActivity::class.java
-						).setData(itemUrl.toUri())
+							Intent(
+									context, BrowserActivity::class.java
+							).setData(itemUrl.toUri())
 					)
 				}
 
 				GenericTonalButton(
-					image = Icons.Rounded.Book, text = stringResource(R.string.guide)
+						image = Icons.Rounded.Book, text = stringResource(R.string.guide)
 				) {
 					if (!item.doc.isNullOrBlank()) context.startActivity(
-						Intent(
-							context, BrowserActivity::class.java
-						).setData("https://sysu-tang.github.io/sysuer-website${CommonUtil.trim(item.doc)}".toUri())
+							Intent(
+									context, BrowserActivity::class.java
+							).setData(
+									"https://sysu-tang.github.io/sysuer-website${
+										CommonUtil.trim(
+												item.doc
+										)
+									}".toUri()
+							)
 					)
 					else config.toast(R.string.undeveloped_warning)
 				}
@@ -463,62 +479,68 @@ private fun ServiceOrderDialog(
 	ModalBottomSheet(onDismissRequest = onDismiss) {
 		Column(modifier = Modifier.fillMaxWidth()) {
 			Text(
-				stringResource(R.string.service_order),
-				style = MaterialTheme.typography.titleMedium,
-				modifier = Modifier.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_margin)
-				),
+					stringResource(R.string.service_order),
+					style = MaterialTheme.typography.titleMedium,
+					modifier = Modifier.padding(
+							dimensionResource(R.dimen.horizontal_padding),
+							dimensionResource(R.dimen.vertical_margin)
+					),
 			)
 			LazyColumn(modifier = Modifier.fillMaxWidth()) {
 				itemsIndexed(orderCollection, key = { _, item -> item.id }) { index, item ->
 					ListItem(
-						overlineContent = {
-							item.name?.let {
-								Text(
-									it,
-									maxLines = 1,
-									overflow = TextOverflow.Ellipsis,
-									style = MaterialTheme.typography.titleMedium,
-								)
-							}
-						},
-						leadingContent = {
-							Row {
-								IconButton(
-									onClick = {
-										if (index > 0) serviceViewModel.moveOrderCollection(
-											index, index - 1
-										)
-									},
-									enabled = index > 0,
-								) {
-									Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = null)
+							overlineContent = {
+								item.name?.let {
+									Text(
+											it,
+											maxLines = 1,
+											overflow = TextOverflow.Ellipsis,
+											style = MaterialTheme.typography.titleMedium,
+									)
 								}
-								IconButton(
-									onClick = {
-										if (index < orderCollection.lastIndex) serviceViewModel.moveOrderCollection(
-											index, index + 1
+							},
+							leadingContent = {
+								Row {
+									IconButton(
+											onClick = {
+												if (index > 0) serviceViewModel.moveOrderCollection(
+														index, index - 1
+												)
+											},
+											enabled = index > 0,
+									) {
+										Icon(
+												Icons.Rounded.KeyboardArrowUp,
+												contentDescription = null
 										)
-									},
-									enabled = index < orderCollection.lastIndex,
-								) {
-									Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = null)
+									}
+									IconButton(
+											onClick = {
+												if (index < orderCollection.lastIndex) serviceViewModel.moveOrderCollection(
+														index, index + 1
+												)
+											},
+											enabled = index < orderCollection.lastIndex,
+									) {
+										Icon(
+												Icons.Rounded.KeyboardArrowDown,
+												contentDescription = null
+										)
+									}
 								}
-							}
-						},
-						modifier = Modifier.animateItem(),
+							},
+							modifier = Modifier.animateItem(),
 					) {}
 				}
 			}
 			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-						dimensionResource(R.dimen.horizontal_margin),
-						dimensionResource(R.dimen.vertical_margin)
-					),
-				horizontalArrangement = Arrangement.End,
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+								dimensionResource(R.dimen.horizontal_margin),
+								dimensionResource(R.dimen.vertical_margin)
+						),
+					horizontalArrangement = Arrangement.End,
 			) {
 				TextButton(onClick = {
 					serviceViewModel.saveOrderCollection()
@@ -542,24 +564,24 @@ fun LongClickableElevatedAssistChip(
 	content: @Composable RowScope.() -> Unit = {},
 ) {
 	Surface(
-		shape = AssistChipDefaults.shape,
-		modifier = modifier.height(AssistChipDefaults.Height),
-		color = if (enabled) colors.containerColor else colors.disabledContainerColor,
-		contentColor = if (enabled) colors.labelColor else colors.disabledLabelColor,
-		shadowElevation = if (enabled) elevation.elevation else elevation.disabledElevation,
-		tonalElevation = if (enabled) elevation.elevation else elevation.disabledElevation,
+			shape = AssistChipDefaults.shape,
+			modifier = modifier.height(AssistChipDefaults.Height),
+			color = if (enabled) colors.containerColor else colors.disabledContainerColor,
+			contentColor = if (enabled) colors.labelColor else colors.disabledLabelColor,
+			shadowElevation = if (enabled) elevation.elevation else elevation.disabledElevation,
+			tonalElevation = if (enabled) elevation.elevation else elevation.disabledElevation,
 	) {
 		Row(
-			modifier = Modifier
-				.combinedClickable(
-					interactionSource = remember { MutableInteractionSource() },
-					role = Role.Button,
-					enabled = enabled,
-					onClick = onClick,
-					onLongClick = onLongClick,
-				)
-				.padding(AssistChipDefaults.ContentPadding),
-			verticalAlignment = Alignment.CenterVertically
+				modifier = Modifier
+					.combinedClickable(
+							interactionSource = remember { MutableInteractionSource() },
+							role = Role.Button,
+							enabled = enabled,
+							onClick = onClick,
+							onLongClick = onLongClick,
+					)
+					.padding(AssistChipDefaults.ContentPadding),
+				verticalAlignment = Alignment.CenterVertically
 		) {
 			if (leadingIcon != null) {
 				leadingIcon()
@@ -584,10 +606,10 @@ fun GenericTonalButton(
 ) {
 	FilledTonalButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
 		Icon(
-			painter = painterResource(image),
-			contentDescription = text,
-			tint = MaterialTheme.colorScheme.primary,
-			modifier = Modifier.size(ButtonDefaults.IconSize)
+				painter = painterResource(image),
+				contentDescription = text,
+				tint = MaterialTheme.colorScheme.primary,
+				modifier = Modifier.size(ButtonDefaults.IconSize)
 		)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(text)

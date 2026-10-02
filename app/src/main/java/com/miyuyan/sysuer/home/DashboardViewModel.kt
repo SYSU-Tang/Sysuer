@@ -3,9 +3,6 @@ package com.miyuyan.sysuer.home
 import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
@@ -22,6 +19,9 @@ import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
 import com.miyuyan.sysuer.model.JwxtModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -65,7 +65,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	private val _dashboardShortcuts = MutableStateFlow<List<DashboardShortcutEntity>>(emptyList())
-	val dashboardShortcuts: StateFlow<List<DashboardShortcutEntity>> = _dashboardShortcuts.asStateFlow()
+	val dashboardShortcuts: StateFlow<List<DashboardShortcutEntity>> =
+		_dashboardShortcuts.asStateFlow()
 
 	fun loadDashboardShortcuts() {
 		viewModelScope.launch(Dispatchers.IO) {
@@ -81,9 +82,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	fun collectService(serviceId: Int, serviceJson: String, position: Int?) {
 		viewModelScope.launch(Dispatchers.IO) {
 			db.collectionDao().addService(
-				ServiceCollectionEntity(
-					serviceId = serviceId, serviceJson = serviceJson, position = position
-				)
+					ServiceCollectionEntity(
+							serviceId = serviceId, serviceJson = serviceJson, position = position
+					)
 			)
 		}
 	}
@@ -95,9 +96,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	fun addDashboardShortcut(shortcutId: Int, shortcutJson: String, position: Int?) {
 		viewModelScope.launch(Dispatchers.IO) {
 			db.collectionDao().addDashboardShortcut(
-				DashboardShortcutEntity(
-					shortcutId = shortcutId, shortcutJson = shortcutJson, position = position
-				)
+					DashboardShortcutEntity(
+							shortcutId = shortcutId,
+							shortcutJson = shortcutJson,
+							position = position
+					)
 			)
 		}
 	}
@@ -140,16 +143,15 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		getApplication<Application>().resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
 
 	val dateText: String
-		get() {
-			val md = StringBuilder()
+		get() = buildString {
 			if (_week.value.isNotEmpty()) {
-				if (_week.value.isDigitsOnly()) md.append("###### 第${_week.value}周\n")
-				else md.append("###### ${_week.value}\n")
+				if (_week.value.isDigitsOnly()) append("###### 第${_week.value}周\n")
+				else append("###### ${_week.value}\n")
 			}
-			if (_term.value.isNotEmpty()) md.append("###### 第${_term.value}学期\n")
-			if (date != null) md.append(date).append("\n\n")
-			if (weekDay != null) md.append(weekDay)
-			return "$md"
+			if (_term.value.isNotEmpty()) append("###### 第${_term.value}学期\n")
+			if (date != null) append(date).append("\n\n")
+			if (weekDay != null) append(weekDay)
+
 		}
 
 	fun setShowWeek18(showWeek18: Boolean) {
@@ -191,27 +193,27 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
 		val markdown = if (isAfterEmpty) {
-		val next = _recentCourses.value.getOrNull(0)
+			val next = _recentCourses.value.getOrNull(0)
 			"###### ${application.getString(R.string.no_class_today)}\n\n${application.getString(R.string.next_class)}：**${
 				next?.getString("courseName") ?: application.getString(R.string.none)
 			}**\n\n${application.getString(R.string.location)}：**${
 				next?.getString("teachingPlace") ?: application.getString(R.string.none)
 			}**\n\n${application.getString(R.string.time)}：**${
 				next?.getString("time") ?: application.getString(
-					R.string.none
+						R.string.none
 				)
 			}**"
 		} else {
-		val current = _todayCourses.value.getOrNull(beforeSize)
+			val current = _todayCourses.value.getOrNull(beforeSize)
 			"###### ${current?.getString("courseName") ?: application.getString(R.string.none)}\n\n${
 				application.getString(
-					R.string.location
+						R.string.location
 				)
 			}：**${
 				current?.getString("teachingPlace") ?: application.getString(R.string.none)
 			}**\n\n${application.getString(R.string.time)}：**${
 				current?.getString("time") ?: application.getString(
-					R.string.none
+						R.string.none
 				)
 			}**\n\n${
 				application.getString(R.string.date)
@@ -230,60 +232,64 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			model.message.filter { it.second.getInteger("code") == 200 }
 				.collect { (code, response) ->
 					when (code) {
-					1 -> {
-						val todayList = mutableListOf<JSONObject>()
-						val recentList = mutableListOf<JSONObject>()
-						val (beforeArray, afterArray) = response.getJSONArray("data")
-							.map { it as JSONObject }.filter { item ->
-								item["status"] = getTimePosition(
-									"${item.getString("teachingDate")} ${
-										item.getString("startTime")
-									}",
-									"${item.getString("teachingDate")} ${item.getString("endTime")}"
-								)
-								item["time"] =
-									"${item.getString("startTime")}~${item.getString("endTime")}"
-								item["course"] =
-									"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
-								val isToday = "TD" == item.getString("useflag")
-								if (isToday) todayList.add(item) else recentList.add(
-									item
-								)
-								isToday
-							}.partition { it.getString("status") == "before" }
-						_todayCourses.value = todayList
-						_recentCourses.value = recentList
-						_progressMax.value = todayList.size
-						_progressCurrent.value = beforeArray.size
-						updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
-						scheduleIslandTick()
-					}
+						1 -> {
+							val todayList = mutableListOf<JSONObject>()
+							val recentList = mutableListOf<JSONObject>()
+							val (beforeArray, afterArray) = response.getJSONArray("data")
+								.map { it as JSONObject }.filter { item ->
+									item["status"] = getTimePosition(
+											"${item.getString("teachingDate")} ${
+												item.getString("startTime")
+											}",
+											"${item.getString("teachingDate")} ${item.getString("endTime")}"
+									)
+									item["time"] =
+										"${item.getString("startTime")}~${item.getString("endTime")}"
+									item["course"] =
+										"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
+									val isToday = "TD" == item.getString("useflag")
+									if (isToday) todayList.add(item) else recentList.add(
+											item
+									)
+									isToday
+								}.partition { it.getString("status") == "before" }
+							_todayCourses.value = todayList
+							_recentCourses.value = recentList
+							_progressMax.value = todayList.size
+							_progressCurrent.value = beforeArray.size
+							updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
+							scheduleIslandTick()
+						}
 
-					2 -> {
-						val week18List = mutableListOf<JSONObject>()
-						val week19List = mutableListOf<JSONObject>()
-						response.getJSONArray("data")?.forEachIndexed { i, v ->
-							val exams = if (i == 0) week18List else week19List
-							val timetable = (v as JSONObject).getJSONObject("timetable")
-							timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }
-								.forEach {
-									(timetable[it] as JSONArray?)?.apply {
-										forEach { exam ->
-											(exam as JSONObject)["status"] =
-												getDatePosition(exam.getString("examDate"))
-											exams.add(exam)
+						2 -> {
+							val week18List = mutableListOf<JSONObject>()
+							val week19List = mutableListOf<JSONObject>()
+							response.getJSONArray("data")?.forEachIndexed { i, v ->
+								val exams = if (i == 0) week18List else week19List
+								val timetable = (v as JSONObject).getJSONObject("timetable")
+								timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }
+									.forEach {
+										(timetable[it] as JSONArray?)?.apply {
+											forEach { exam ->
+												(exam as JSONObject)["status"] =
+													getDatePosition(exam.getString("examDate"))
+												exams.add(exam)
+											}
 										}
 									}
-								}
-						}
-						_week18Exams.value = week18List
-						_week19Exams.value = week19List
-						_todayExamIndex.value =
-							(week18List + week19List).indexOfFirst { it.getString("status") == "in" }.let {
-								if (it < 0) (week18List + week19List).indexOfFirst { e -> e.getString("status") == "after" } else it
 							}
-						_isShowWeek18.value = _week.value != "19"
-					}
+							_week18Exams.value = week18List
+							_week19Exams.value = week19List
+							_todayExamIndex.value = (week18List + week19List)
+								.indexOfFirst { it.getString("status") == "in" }.let {
+								if (it < 0) (week18List + week19List).indexOfFirst { e ->
+									e.getString(
+											"status"
+									) == "after"
+								} else it
+							}
+							_isShowWeek18.value = _week.value != "19"
+						}
 
 						3 -> {
 							_term.value =
@@ -302,15 +308,15 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 									?.getString("examWeekId") ?: ""
 						}
 
-					6 -> {
-						val newCourses = response.getJSONObject("data").getJSONArray("rows")
-							.filterIsInstance<JSONObject>()
-						_selectedCourses.value += newCourses
-						_selectedCourses.value.firstOrNull { it.getString("courseName") == examSubject }
-							?.let {
-								_navigateToCourseDetail.value = it
-							}
-					}
+						6 -> {
+							val newCourses = response.getJSONObject("data").getJSONArray("rows")
+								.filterIsInstance<JSONObject>()
+							_selectedCourses.value += newCourses
+							_selectedCourses.value
+								.firstOrNull { it.getString("courseName") == examSubject }?.let {
+									_navigateToCourseDetail.value = it
+								}
+						}
 					}
 				}
 		}
@@ -326,30 +332,31 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	fun getTodayCourses(term: String = "") {
 		model.enqueue(
-			"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term", 1
+				"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term",
+				1
 		)
 	}
 
 	fun getExams(term: String, weekId: String?) {
 		model.enqueue(
-			"jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck",
-			"{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}",
-			2
+				"jwxt/examination-manage/classroomResource/queryStuEaxmInfo?code=jwxsd_ksxxck",
+				"{\"acadYear\":\"$term\",\"examWeekId\":\"$weekId\",\"examWeekName\":\"18-19周期末考\",\"examDate\":\"\"}",
+				2
 		)
 	}
 
 	fun getExamWeekName(term: String) {
 		model.enqueue(
-			"jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5
+				"jwxt/schedule/agg/commonScheduleExamTime/queryExamWeekName?yearTerm=$term", 5
 		)
 	}
 
 	fun getSelectedCourses(courseName: String) {
 		examSubject = courseName
 		if (_selectedCourses.value.isEmpty()) model.enqueue(
-			"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
-			"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"${_term.value}\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
-			6
+				"jwxt/choose-course-front-server/electiveCourseResult/queryHistory",
+				"{\"pageNo\":1,\"pageSize\":100,\"total\":true,\"param\":{\"yearTerm\":\"${_term.value}\",\"successStatus\":\"1\",\"failureStatus\":\"0\",\"retiredClass\":\"0\",\"waitingScreen\":\"0\"}}",
+				6
 		)
 		else _selectedCourses.value.firstOrNull { it.getString("courseName") == examSubject }?.let {
 			_navigateToCourseDetail.value = it

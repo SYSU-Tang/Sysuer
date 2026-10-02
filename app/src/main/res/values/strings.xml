@@ -583,6 +583,7 @@
     <string name="developer_disabled">开发者模式关闭</string>
     <string name="no_interval_year">无区间年度</string>
     <string name="assistant_evaluation">助教考核</string>
+    <string name="assistant_info">助教信息</string>
     <string name="website">网站</string>
     <string name="ua">浏览器标识</string>
     <string name="pc_mode">电脑模式</string>
@@ -899,4 +900,8 @@
     <string name="no_time_segment_warning">请至少添加一个时间段</string>
     <string name="course_add_success">课程添加成功</string>
     <string name="swimming_status">游泳达标</string>
+    <string name="click_to_copy">点击复制</string>
+    <string name="click_to_edit">点击编辑</string>
+    <string name="warning">警告</string>
+    <string name="section_d">第%d节</string>
 </resources>

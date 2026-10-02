@@ -1,24 +1,48 @@
 package com.miyuyan.sysuer.academic
 
 import android.os.Bundle
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI.setupWithNavController
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
-import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.databinding.ActivityAssistantEvaluationResultBinding
+import com.miyuyan.sysuer.browser.RichTextRoute
+import com.miyuyan.sysuer.nav.AssistantEvaluation
+import com.miyuyan.sysuer.nav.RichText
+import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.theme.SysuerTheme
 
 class AssistantEvaluationActivity : BaseActivity() {
+	@OptIn(ExperimentalSharedTransitionApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		val binding = ActivityAssistantEvaluationResultBinding.inflate(layoutInflater)
-		setContentView(binding.root)
-		val fragment = supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment?
-		if (fragment != null) setupWithNavController(binding.toolbar, fragment.navController, AppBarConfiguration.Builder()
-			.setFallbackOnNavigateUpListener {
-				supportFinishAfterTransition()
-				false
+		enableEdgeToEdge()
+		setContent {
+			val backStack = rememberNavBackStack(AssistantEvaluation)
+			SysuerTheme(settingManager) {
+				SharedTransitionLayout {
+					SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
+						entry<AssistantEvaluation> {
+							AssistantEvaluationRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+						entry<RichText> {
+							RichTextRoute(
+									backStack,
+									it,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+					})
+				}
 			}
-			.build())
+		}
 	}
 }

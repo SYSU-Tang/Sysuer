@@ -33,7 +33,7 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 
 	override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
-		viewLifecycleOwner.lifecycleScope.launch {
+		lifecycleScope.launch {
 			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 				model.message.collect { (code, response) ->
 					if (response.getInteger("code") == 200) {
@@ -75,7 +75,7 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 													preference.title as String?,
 													preference.summary as String?
 											)
-											model.contextUtil.toast(R.string.copy_successfully)
+											model.toast(R.string.copy_successfully)
 											false
 										}
 									}
@@ -83,7 +83,7 @@ class PrivacyFragment : PreferenceFragmentCompat() {
 								}
 							}
 						}
-					} else model.contextUtil.toast(response.getString("message"))
+					} else model.toast(response.getString("message"))
 				}
 			}
 		}

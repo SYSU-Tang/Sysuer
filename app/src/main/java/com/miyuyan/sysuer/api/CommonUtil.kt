@@ -123,9 +123,9 @@ object CommonUtil {
 		array: JSONArray,
 		nameKey: String?,
 		valueKey: String?,
-	                           ): Tuple2<ArrayList<String?>?, ArrayList<String?>?> {
-		val names = ArrayList<String?>()
-		val values = ArrayList<String?>()
+	                           ): Tuple2<ArrayList<String>, ArrayList<String>> {
+		val names = ArrayList<String>()
+		val values = ArrayList<String>()
 		array.forEach { i: Any? ->
 			names.add((i as JSONObject).getString(nameKey))
 			values.add(i.getString(valueKey))

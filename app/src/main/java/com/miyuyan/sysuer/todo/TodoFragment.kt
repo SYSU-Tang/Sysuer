@@ -94,7 +94,7 @@ class TodoFragment : BaseFragment() {
 	}
 	
 	val date: String
-		get() = DateTimeManager.toDateString(calendarView.selectedCalendar.timeInMillis) ?: ""
+		get() = DateTimeManager.toDateString(calendarView.selectedCalendar.timeInMillis)
 	
 	fun refresh() {
 		val a = mutableListOf<String>()

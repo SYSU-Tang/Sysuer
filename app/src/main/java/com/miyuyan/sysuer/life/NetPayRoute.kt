@@ -129,8 +129,7 @@ fun NetPayDialog(viewModel: NetPayViewModel) {
 				dragHandle = { BottomSheetDefaults.DragHandle() },
 		) {
 			Column(
-					modifier = Modifier.fillMaxWidth(),
-					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+					modifier = Modifier.fillMaxWidth()
 			) {
 				KeyValueRow(RowData(stringResource(R.string.service), serviceName))
 				KeyValueRow(

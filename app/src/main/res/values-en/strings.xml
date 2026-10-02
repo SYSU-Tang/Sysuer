@@ -560,6 +560,7 @@
     <string name="developer_disabled">Developer Mode Disabled</string>
     <string name="no_interval_year">No Interval Year</string>
     <string name="assistant_evaluation">Assistant Evaluation</string>
+    <string name="assistant_info">Assistant Info</string>
     <string name="website">Website</string>
     <string name="ua">User Agent</string>
     <string name="pc_mode">PC Mode</string>

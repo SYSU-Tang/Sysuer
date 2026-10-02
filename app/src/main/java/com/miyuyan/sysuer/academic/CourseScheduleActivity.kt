@@ -60,8 +60,8 @@ class CourseScheduleActivity : BaseActivity() {
 	val weeks: MutableList<Int> = mutableListOf()
 	val realTime: CommonUtil.Tuple2<String?, Int?> = CommonUtil.Tuple2(null, null)
 	var currentTerm: String = ""
-	var currentWeekIndex: Int = -1
-	var currentWeek: Int = 0
+	var weekIndex: Int = -1
+	var week: Int = 0
 	lateinit var binding: ActivityCourseScheduleBinding
 	var selectedCourses: MutableMap<String, List<JSONObject>> = mutableMapOf()
 	lateinit var detailBinding: DialogCourseScheduleDetailBinding
@@ -146,13 +146,14 @@ class CourseScheduleActivity : BaseActivity() {
 		binding = ActivityCourseScheduleBinding.inflate(layoutInflater).apply {
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			today.setOnClickListener {
-				changeTerm(realTime.first!!)
-				changeWeek(realTime.second!!)
+//				changeTerm(realTime.first!!)
+//				changeWeek(realTime.second!!)
+				changeTermWeek(realTime.first!!, realTime.second!!)
 			}
 
 			month.text = resources.getStringArray(R.array.months)[LocalDate.now().monthValue - 1]
-			last.setOnClickListener { changeWeek(currentWeekIndex - 1) }
-			next.setOnClickListener { changeWeek(currentWeekIndex + 1) }
+			last.setOnClickListener { changeWeek(weekIndex - 1) }
+			next.setOnClickListener { changeWeek(weekIndex + 1) }
 			toolbar.menu.add(0, 0, 0, "新增").setIcon(R.drawable.add)
 				.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM).setOnMenuItemClickListener {
 					courseSegments.clearAll()
@@ -182,10 +183,10 @@ class CourseScheduleActivity : BaseActivity() {
 			}
 		}
 		binding.term.setOnClickListener {
-			termPop.show(binding.bar, binding.mask, it.x.toInt())
+			termPop.show(binding.bar, binding.root, it.x.toInt())
 		}
 		binding.weekTime.setOnClickListener {
-			weekPop.show(binding.bar, binding.mask, it.x.toInt())
+			weekPop.show(binding.bar, binding.root, it.x.toInt())
 		}
 		setContentView(binding.root)
 		gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
@@ -196,7 +197,7 @@ class CourseScheduleActivity : BaseActivity() {
 				val diffX = e2.x - e1.x
 				val diffY = e2.y - e1.y
 				return if (abs(diffX) > abs(diffY) && abs(diffX) > 80 && abs(velocityX) > 200) {
-					changeWeek(currentWeekIndex + if (diffX > 0) -1 else 1)
+					changeWeek(weekIndex + if (diffX > 0) -1 else 1)
 					true
 				} else false
 			}
@@ -304,7 +305,7 @@ class CourseScheduleActivity : BaseActivity() {
 						}.root
 				)
 			}
-		}
+		} // 初始化课程时间
 		val detailDialog = BottomSheetDialog(this)
 		detailBinding = DialogCourseScheduleDetailBinding.inflate(layoutInflater)
 		detailDialog.setContentView(detailBinding.root)
@@ -425,7 +426,7 @@ class CourseScheduleActivity : BaseActivity() {
 								binding.term.text = currentTerm
 								availableTerms()
 								getAvailableWeeks(currentTerm)
-								getTable(currentTerm, currentWeek)
+								getCourseSchedule(currentTerm, week)
 								termPop.value = currentTerm
 								realTime.first = currentTerm
 							}
@@ -466,18 +467,17 @@ class CourseScheduleActivity : BaseActivity() {
 								weeks.clear()
 								val nowWeekly =
 									response.getJSONObject("data").getString("nowWeekly")
-								if (nowWeekly != null) currentWeek = nowWeekly.toInt()
+								if (nowWeekly != null) week = nowWeekly.toInt()
 								response.getJSONObject("data").getJSONArray("weeklyList")
 									.forEach { e: Any? -> weeks.add((e as JSONObject).getInteger("weekly")) }
 								weeks.forEach { e: Int ->
 									weekPop.addItem(getString(R.string.week_d, e))
 								}
-								currentWeekIndex = weeks.indexOf(currentWeek)
-								weekPop.select(currentWeekIndex)
-								binding.weekTime.text =
-									String.format(getString(R.string.week_d), currentWeek)
-								getTable(currentTerm, currentWeek)
-								realTime.second = currentWeekIndex
+								weekIndex = weeks.indexOf(week)
+								weekPop.select(weekIndex)
+								binding.weekTime.text = getString(R.string.week_d, week)
+								getCourseSchedule(currentTerm, week)
+								realTime.second = weekIndex
 							}
 
 							6 -> response.getJSONObject("data").getJSONArray("rows").also {
@@ -498,7 +498,7 @@ class CourseScheduleActivity : BaseActivity() {
 												this@CourseScheduleActivity, binding.week, "miniapp"
 										).toBundle()
 								)
-							} ?: config.toast(getString(R.string.course_not_found))
+							} ?: model.toast(getString(R.string.course_not_found))
 						}
 					}
 				}
@@ -534,12 +534,12 @@ class CourseScheduleActivity : BaseActivity() {
 			currentTerm = newTerm
 			binding.term.text = currentTerm
 			getAvailableWeeks(currentTerm)
-			getTable(currentTerm, currentWeek)
-			getRange(currentTerm, currentWeek)
+			getCourseSchedule(currentTerm, week)
+			getWeekRange(currentTerm, week)
 		}
 	}
 
-	fun getRange(academicYear: String, week: Int) {
+	fun getWeekRange(academicYear: String, week: Int) {
 		model.enqueue(
 				String.format(
 						Locale.getDefault(),
@@ -584,18 +584,35 @@ class CourseScheduleActivity : BaseActivity() {
 	}
 
 	fun changeWeek(newWeekIndex: Int) {
-		if (newWeekIndex < 0) model.contextUtil.toast(R.string.first_week_warning)
-		else if (newWeekIndex >= weeks.size) model.contextUtil.toast(R.string.last_week_warning)
+		if (newWeekIndex < 0) model.toast(R.string.first_week_warning)
+		else if (newWeekIndex >= weeks.size) model.toast(R.string.last_week_warning)
 		else {
-			currentWeek = weeks[newWeekIndex]
-			currentWeekIndex = newWeekIndex
-			binding.weekTime.text = getString(R.string.week_d, currentWeek)
-			getTable(currentTerm, currentWeek)
-			getRange(currentTerm, currentWeek)
+			week = weeks[newWeekIndex]
+			weekIndex = newWeekIndex
+			binding.weekTime.text = getString(R.string.week_d, week)
+			getCourseSchedule(currentTerm, week)
+			getWeekRange(currentTerm, week)
 		}
 	}
 
-	fun getTable(academicYear: String, week: Int) {
+	fun changeTermWeek(newTerm: String, newWeekIndex: Int) {
+		if (newTerm != currentTerm) {
+			currentTerm = newTerm
+			binding.term.text = currentTerm
+			getAvailableWeeks(currentTerm)
+		}
+		if (newWeekIndex < 0) model.toast(R.string.first_week_warning)
+		else if (newWeekIndex >= weeks.size) model.toast(R.string.last_week_warning)
+		else if (newWeekIndex != weekIndex) {
+			week = weeks[newWeekIndex]
+			weekIndex = newWeekIndex
+			binding.weekTime.text = getString(R.string.week_d, week)
+		}
+		getCourseSchedule(currentTerm, week)
+		getWeekRange(currentTerm, week)
+	}
+
+	fun getCourseSchedule(academicYear: String, week: Int) {
 		if (academicYear.isNotEmpty() && week > 0) model.enqueue(
 				"jwxt/timetable-search/classTableInfo/queryStudentClassTable?academicYear=$academicYear&weekly=$week",
 				1
@@ -655,14 +672,14 @@ class CourseScheduleActivity : BaseActivity() {
 				termContent.text = it
 			}
 			termItem.setOnClickListener {
-				termPop.show(termItem, root, termTitle.x.toInt())
+				termPop.show(termItem, root, termTitle)
 			}
 			dayPop.onNameChange = {
 				dayContent.text = it
 			}
 			dayPop.setItems(daySimpleNames.map { s -> "星期$s" })
 			dayItem.setOnClickListener {
-				dayPop.show(it, it.parent as View, dayTitle.x.toInt())
+				dayPop.show(it, it.parent as View, dayTitle)
 			}
 			close.setOnClickListener {
 				onDelete?.invoke()
@@ -700,7 +717,7 @@ class CourseScheduleActivity : BaseActivity() {
 			val sectionValues = addBinding.sectionSlider.values
 			return CourseTimeSegmentData(
 					term = termPop.value,
-					dayIndex = dayPop.selectedIndex ?: 0,
+					dayIndex = dayPop.selectedIndex,
 					weekStart = weekValues.getOrNull(0)?.toInt() ?: 1,
 					weekEnd = weekValues.getOrNull(1)?.toInt() ?: 1,
 					sectionStart = sectionValues.getOrNull(0)?.toInt() ?: 1,

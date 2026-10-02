@@ -51,7 +51,8 @@ class HttpManager {
 	 *
 	 * @return OkHttpClient 客户端
 	 */
-	var client: OkHttpClient = OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+	var client: OkHttpClient = OkHttpClient.Builder()
+		.connectTimeout(30, TimeUnit.SECONDS)
 		.readTimeout(30, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).build()
 
 	/**

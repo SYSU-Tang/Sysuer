@@ -96,9 +96,8 @@ fun PayRoute(
 		viewModel.fetchSelectivePayList()
 		viewModel.fetchFeeList(DateTimeManager.year.toString())
 		viewModel.fetchPaymentList(
-				DateTimeManager.toDateTimeString(DateTimeManager.firstOfMonth?.atStartOfDay())
-					?: "",
-				DateTimeManager.toDateTimeString(DateTimeManager.endOfMonth?.atStartOfDay()) ?: ""
+				DateTimeManager.toDateTimeString(DateTimeManager.firstOfMonth?.atStartOfDay()),
+				DateTimeManager.toDateTimeString(DateTimeManager.endOfMonth?.atStartOfDay())
 		)
 		viewModel.fetchRefundList()
 	}

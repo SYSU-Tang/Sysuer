@@ -9,6 +9,7 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.nav.Update
 import com.miyuyan.sysuer.theme.SysuerTheme
 
 class AboutActivity : BaseActivity() {
@@ -21,9 +22,16 @@ class AboutActivity : BaseActivity() {
 					SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
 						entry<About> {
 							AboutRoute(
-								backStack,
-								sharedTransitionScope = this@SharedTransitionLayout,
-								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+						entry<Update> {
+							UpdateRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
 							)
 						}
 					})

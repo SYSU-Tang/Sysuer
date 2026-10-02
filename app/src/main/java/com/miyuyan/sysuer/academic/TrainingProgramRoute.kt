@@ -277,7 +277,7 @@ private fun ProfessionDropdown(viewModel: TrainingProgramViewModel) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun GradePicker(
+fun GradePicker(
 	viewModel: TrainingProgramViewModel
 ) {
 	val gradeNames by viewModel.gradeNames.collectAsState()

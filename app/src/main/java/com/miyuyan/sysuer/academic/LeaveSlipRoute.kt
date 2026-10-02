@@ -112,82 +112,82 @@ fun LeaveSlipRoute(
 		apply = false
 	}
 	ActivityPager(
-		title = stringResource(R.string.leave_slip),
-		floatingActionButton = {
-			if (apply) {
-				Column(
-					modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
-					horizontalAlignment = Alignment.End,
-					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
-				) {
-					ExtendedFloatingActionButton(
-						expanded = fabExpanded,
-						onClick = { viewModel.reset() },
-						text = { Text(stringResource(R.string.reset)) },
-						icon = {
+			title = stringResource(R.string.leave_slip),
+			floatingActionButton = {
+				if (apply) {
+					Column(
+							modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
+							horizontalAlignment = Alignment.End,
+							verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
+					) {
+						ExtendedFloatingActionButton(
+								expanded = fabExpanded,
+								onClick = { viewModel.reset() },
+								text = { Text(stringResource(R.string.reset)) },
+								icon = {
+									Icon(
+											imageVector = Icons.Rounded.Refresh,
+											contentDescription = stringResource(R.string.reset)
+									)
+								})
+						ExtendedFloatingActionButton(expanded = fabExpanded, onClick = {
+							viewModel.submitLeaveSlip()
+						}, icon = {
 							Icon(
-								imageVector = Icons.Rounded.Refresh,
-								contentDescription = stringResource(R.string.reset)
+									imageVector = Icons.Default.Edit,
+									contentDescription = stringResource(R.string.submit)
 							)
-						})
-					ExtendedFloatingActionButton(expanded = fabExpanded, onClick = {
-						viewModel.submitLeaveSlip()
-					}, icon = {
-						Icon(
-							imageVector = Icons.Default.Edit,
-							contentDescription = stringResource(R.string.submit)
-						)
-					}, text = { Text(stringResource(R.string.submit)) })
+						}, text = { Text(stringResource(R.string.submit)) })
+					}
+				} else {
+					ExtendedFloatingActionButton(
+							expanded = fabExpanded,
+							onClick = {
+								viewModel.resetSubmitSuccess()
+								apply = true
+							},
+							modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
+							icon = {
+								Icon(
+										imageVector = Icons.Default.Edit,
+										contentDescription = stringResource(R.string.ask_for_leave)
+								)
+							},
+							text = { Text(stringResource(R.string.ask_for_leave)) })
 				}
-			} else {
-				ExtendedFloatingActionButton(
-					expanded = fabExpanded,
-					onClick = {
-						viewModel.resetSubmitSuccess()
-						apply = true
-					},
-					modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
-					icon = {
-						Icon(
-							imageVector = Icons.Default.Edit,
-							contentDescription = stringResource(R.string.ask_for_leave)
+			},
+			onNavigationClick = { if (apply) apply = false else backStack.navigateBack() },
+			isNestedScrollEnabled = false,
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope,
+			sharedKey = "LeaveSlip",
+			topBarMenus = {
+				listOf(
+						exportMarkdownMenuItem(
+								backStack,
+								viewModel.sections,
+								stringResource(R.string.leave_slip),
+								stringResource(R.string.leave_slip)
 						)
-					},
-					text = { Text(stringResource(R.string.ask_for_leave)) })
-			}
-		},
-		onNavigationClick = { if (apply) apply = false else backStack.navigateBack() },
-		isNestedScrollEnabled = false,
-		sharedTransitionScope = sharedTransitionScope,
-		animatedVisibilityScope = animatedVisibilityScope,
-		sharedKey = "LeaveSlip",
-		topBarMenus = {
-			listOf(
-				exportMarkdownMenuItem(
-					backStack,
-					viewModel.sections,
-					stringResource(R.string.leave_slip),
-					stringResource(R.string.leave_slip)
 				)
-			)
-		}) {
+			}) {
 		if (apply) ApplyPage(viewModel, onUpload = {
 			val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
 				type = "*/*"
 				addCategory(Intent.CATEGORY_OPENABLE)
 				putExtra(
-					Intent.EXTRA_MIME_TYPES,
-					arrayOf("image/jpeg", "image/png", "image/gif", "application/pdf")
+						Intent.EXTRA_MIME_TYPES,
+						arrayOf("image/jpeg", "image/png", "image/gif", "application/pdf")
 				)
 			}
 			fileLauncher.launch(intent)
 		})
 		else StaggerScreen(
-			sections = viewModel.sections,
-			onScrollBottom = {
-				if (viewModel.hasMore) viewModel.fetchLeaveSlips()
-			},
-			onScrollTopChanged = { fabExpanded = it },
+				sections = viewModel.sections,
+				onScrollBottom = {
+					if (viewModel.hasMore) viewModel.fetchLeaveSlips()
+				},
+				onScrollTopChanged = { fabExpanded = it },
 		)
 	}
 }
@@ -238,16 +238,16 @@ fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
 		endMillis = viewModel.endMillis
 	}
 	LaunchedEffect(
-		leaveDays,
-		leaveReasonDescription,
-		leaveReason,
-		leaveReasonName,
-		startPeriod,
-		endPeriod,
-		startMillis,
-		endMillis,
-		leaveType,
-		leaveTypeName
+			leaveDays,
+			leaveReasonDescription,
+			leaveReason,
+			leaveReasonName,
+			startPeriod,
+			endPeriod,
+			startMillis,
+			endMillis,
+			leaveType,
+			leaveTypeName
 	) {
 		viewModel.leaveDays = leaveDays
 		viewModel.leaveReasonDescription = leaveReasonDescription
@@ -296,51 +296,51 @@ fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
 		}
 	}
 	Column(
-		modifier = Modifier
-			.fillMaxSize()
-			.verticalScroll(rememberScrollState())
-			.nestedScroll(rememberNestedScrollInteropConnection())
-			.padding(
-				dimensionResource(R.dimen.horizontal_padding),
-				dimensionResource(R.dimen.vertical_padding)
-			),
-		verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
+			modifier = Modifier
+				.fillMaxSize()
+				.verticalScroll(rememberScrollState())
+				.nestedScroll(rememberNestedScrollInteropConnection())
+				.padding(
+						dimensionResource(R.dimen.horizontal_padding),
+						dimensionResource(R.dimen.vertical_padding)
+				),
+			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 	) {
 		WarningCard()
 		OutlinedTextField(
-			modifier = Modifier.fillMaxWidth(),
-			value = leaveDays,
-			singleLine = true,
-			suffix = { Text(stringResource(R.string.day)) },
-			leadingIcon = {
-				Icon(
-					imageVector = Icons.Default.CalendarMonth,
-					contentDescription = stringResource(R.string.day)
-				)
-			},
-			onValueChange = { input ->
-				val filtered = input.filter { c -> c.isDigit() || c == '.' }
-				leaveDays = if (filtered.indexOf('.') != filtered.lastIndexOf('.')) {
-					val idx = filtered.lastIndexOf('.')
-					filtered.substring(0, idx) + filtered.substring(idx + 1)
-				} else filtered
-			},
-			label = { Text(stringResource(R.string.leave_day)) },
-			supportingText = { Text(leaveTypeName) },
-			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+				modifier = Modifier.fillMaxWidth(),
+				value = leaveDays,
+				singleLine = true,
+				suffix = { Text(stringResource(R.string.day)) },
+				leadingIcon = {
+					Icon(
+							imageVector = Icons.Default.CalendarMonth,
+							contentDescription = stringResource(R.string.day)
+					)
+				},
+				onValueChange = { input ->
+					val filtered = input.filter { c -> c.isDigit() || c == '.' }
+					leaveDays = if (filtered.indexOf('.') != filtered.lastIndexOf('.')) {
+						val idx = filtered.lastIndexOf('.')
+						filtered.substring(0, idx) + filtered.substring(idx + 1)
+					} else filtered
+				},
+				label = { Text(stringResource(R.string.leave_day)) },
+				supportingText = { Text(leaveTypeName) },
+				keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 		)
 
 		OutlinedTextField(
-			modifier = Modifier.fillMaxWidth(),
-			value = leaveReasonDescription,
-			onValueChange = { leaveReasonDescription = it },
-			label = { Text(stringResource(R.string.leave_reason)) },
-			leadingIcon = {
-				Icon(
-					imageVector = Icons.Default.Edit,
-					contentDescription = stringResource(R.string.leave_reason)
-				)
-			})
+				modifier = Modifier.fillMaxWidth(),
+				value = leaveReasonDescription,
+				onValueChange = { leaveReasonDescription = it },
+				label = { Text(stringResource(R.string.leave_reason)) },
+				leadingIcon = {
+					Icon(
+							imageVector = Icons.Default.Edit,
+							contentDescription = stringResource(R.string.leave_reason)
+					)
+				})
 		FlowRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))) {
 			AssistChip(label = { Text(stringResource(R.string.leave_reason)) }, onClick = { })
 			leaveReasons.forEach { item ->
@@ -348,53 +348,53 @@ fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
 				val dataName = item.getString("dataName")
 				val isSelected = dataNumber == leaveReason
 				ElevatedFilterChip(
-					onClick = {
-						leaveReason = if (isSelected) null else dataNumber
-						leaveReasonName = if (isSelected) null else dataName
-					},
-					label = {
-						Text(dataName)
-					},
-					selected = isSelected,
-					leadingIcon = if (isSelected) {
-						{
-							Icon(
-								imageVector = Icons.Filled.Done,
-								contentDescription = "Checked",
-								modifier = Modifier.size(FilterChipDefaults.IconSize)
-							)
-						}
-					} else null,
+						onClick = {
+							leaveReason = if (isSelected) null else dataNumber
+							leaveReasonName = if (isSelected) null else dataName
+						},
+						label = {
+							Text(dataName)
+						},
+						selected = isSelected,
+						leadingIcon = if (isSelected) {
+							{
+								Icon(
+										imageVector = Icons.Filled.Done,
+										contentDescription = "Checked",
+										modifier = Modifier.size(FilterChipDefaults.IconSize)
+								)
+							}
+						} else null,
 				)
 			}
 		}
 		Row(
-			modifier = Modifier.fillMaxWidth(),
-			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)),
-			verticalAlignment = Alignment.CenterVertically
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)),
+				verticalAlignment = Alignment.CenterVertically
 		) {
 			OutlinedTextField(
-				modifier = Modifier.weight(1f),
-				value = DateTimeManager.toDateString(startMillis) ?: "",
-				onValueChange = {},
-				readOnly = true,
-				singleLine = true,
-				label = { Text(stringResource(R.string.start_time)) },
-				leadingIcon = {
-					IconButton(onClick = { showStartDatePicker = true }) {
-						Icon(
-							imageVector = Icons.Default.CalendarMonth,
-							contentDescription = stringResource(R.string.start_time)
-						)
-					}
-				},
+					modifier = Modifier.weight(1f),
+					value = DateTimeManager.toDateString(startMillis),
+					onValueChange = {},
+					readOnly = true,
+					singleLine = true,
+					label = { Text(stringResource(R.string.start_time)) },
+					leadingIcon = {
+						IconButton(onClick = { showStartDatePicker = true }) {
+							Icon(
+									imageVector = Icons.Default.CalendarMonth,
+									contentDescription = stringResource(R.string.start_time)
+							)
+						}
+					},
 			)
 			SingleChoiceSegmentedButtonRow {
 				listOf(R.string.morning, R.string.afternoon).forEachIndexed { index, label ->
 					SegmentedButton(
-						shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
-						onClick = { startPeriod = index },
-						selected = index == startPeriod,
+							shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+							onClick = { startPeriod = index },
+							selected = index == startPeriod,
 					) {
 						Text(stringResource(label))
 					}
@@ -402,32 +402,32 @@ fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
 			}
 		}
 		Row(
-			modifier = Modifier.fillMaxWidth(),
-			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)),
-			verticalAlignment = Alignment.CenterVertically
+				modifier = Modifier.fillMaxWidth(),
+				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin)),
+				verticalAlignment = Alignment.CenterVertically
 		) {
 			OutlinedTextField(
-				modifier = Modifier.weight(1f),
-				value = DateTimeManager.toDateString(endMillis) ?: "",
-				onValueChange = {},
-				readOnly = true,
-				singleLine = true,
-				label = { Text(stringResource(R.string.end_time)) },
-				leadingIcon = {
-					IconButton(onClick = { showEndDatePicker = true }) {
-						Icon(
-							imageVector = Icons.Default.CalendarMonth,
-							contentDescription = stringResource(R.string.end_time)
-						)
-					}
-				},
+					modifier = Modifier.weight(1f),
+					value = DateTimeManager.toDateString(endMillis),
+					onValueChange = {},
+					readOnly = true,
+					singleLine = true,
+					label = { Text(stringResource(R.string.end_time)) },
+					leadingIcon = {
+						IconButton(onClick = { showEndDatePicker = true }) {
+							Icon(
+									imageVector = Icons.Default.CalendarMonth,
+									contentDescription = stringResource(R.string.end_time)
+							)
+						}
+					},
 			)
 			SingleChoiceSegmentedButtonRow {
 				listOf(R.string.morning, R.string.afternoon).forEachIndexed { index, label ->
 					SegmentedButton(
-						shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
-						onClick = { endPeriod = index },
-						selected = index == endPeriod,
+							shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+							onClick = { endPeriod = index },
+							selected = index == endPeriod,
 					) {
 						Text(stringResource(label))
 					}
@@ -438,35 +438,36 @@ fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
 		val delete = stringResource(R.string.delete)
 		val preview = stringResource(R.string.preview)
 		SectionCard(
-			section = SectionData(
-				title = stringResource(R.string.attachment),
-				rows = viewModel.attachmentRows,
-				rowOrientation = RowOrientation.Vertical,
-				footerMenus = remember(attachment) {
-					mutableStateListOf(
-						MenuItem(
-							upload,
-							enabled = !hasAttachment
-						) { onUpload(); true },
-						MenuItem(
-							delete,
-							enabled = hasAttachment
-						) { viewModel.deleteAttachment(); true },
-						MenuItem(preview, enabled = hasAttachment) {
-							context.startActivity(
-								Intent(context, BrowserActivity::class.java).setData(
-									"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
-										attachment?.getString(
-											"filePath"
+				section = SectionData(
+						title = stringResource(R.string.attachment),
+						rows = viewModel.attachmentRows,
+						rowOrientation = RowOrientation.Vertical,
+						footerMenus = remember(attachment) {
+							mutableStateListOf(
+									MenuItem(
+									upload, enabled = !hasAttachment
+							) { onUpload(); true },
+									MenuItem(
+											delete, enabled = hasAttachment
+									) { viewModel.deleteAttachment(); true },
+									MenuItem(preview, enabled = hasAttachment) {
+										context.startActivity(
+												Intent(
+														context,
+														BrowserActivity::class.java
+												).setData(
+														"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
+															attachment?.getString(
+																	"filePath"
+															)
+														}&fileName=${
+															attachment?.getString("fileName")
+														}".toUri()
+												)
 										)
-									}&fileName=${
-										attachment?.getString("fileName")
-									}".toUri()
-								)
-							)
-							true
+										true
+									})
 						})
-				})
 		)
 		Text("文件类型：jpg,jpeg,png,gif,pdf", style = MaterialTheme.typography.labelMedium)
 	}

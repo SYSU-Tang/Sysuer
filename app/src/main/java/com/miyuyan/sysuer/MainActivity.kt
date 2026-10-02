@@ -56,9 +56,12 @@ import com.alibaba.fastjson2.JSONObject
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import com.miyuyan.sysuer.academic.AcademyNotificationRoute
+import com.miyuyan.sysuer.academic.AssistantEvaluationRoute
+import com.miyuyan.sysuer.academic.AssistantInfoRoute
 import com.miyuyan.sysuer.academic.CETRoute
 import com.miyuyan.sysuer.academic.CourseCompletionRoute
 import com.miyuyan.sysuer.academic.CourseDetailRoute
+import com.miyuyan.sysuer.academic.CourseQueryRoute
 import com.miyuyan.sysuer.academic.CourseSelectedRoute
 import com.miyuyan.sysuer.academic.DormRoute
 import com.miyuyan.sysuer.academic.ExamRoute
@@ -72,21 +75,26 @@ import com.miyuyan.sysuer.academic.PersonalInformationRoute
 import com.miyuyan.sysuer.academic.PersonalTrainingProgramRoute
 import com.miyuyan.sysuer.academic.PhysicalFitnessTestResultRoute
 import com.miyuyan.sysuer.academic.RegistrationRoute
+import com.miyuyan.sysuer.academic.RoomQueryRoute
 import com.miyuyan.sysuer.academic.SchoolEnrollmentRoute
 import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
 import com.miyuyan.sysuer.academic.TrainingProgramRoute
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.browser.RichTextRoute
 import com.miyuyan.sysuer.extra.AboutRoute
+import com.miyuyan.sysuer.extra.PrivacyRoute
 import com.miyuyan.sysuer.extra.UpdateRoute
 import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.life.NetPayRoute
 import com.miyuyan.sysuer.life.PayRoute
 import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.AcademyNotification
+import com.miyuyan.sysuer.nav.AssistantEvaluation
+import com.miyuyan.sysuer.nav.AssistantInfo
 import com.miyuyan.sysuer.nav.CET
 import com.miyuyan.sysuer.nav.CourseCompletion
 import com.miyuyan.sysuer.nav.CourseDetail
+import com.miyuyan.sysuer.nav.CourseQuery
 import com.miyuyan.sysuer.nav.CourseSelected
 import com.miyuyan.sysuer.nav.Dorm
 import com.miyuyan.sysuer.nav.Exam
@@ -102,10 +110,12 @@ import com.miyuyan.sysuer.nav.Pay
 import com.miyuyan.sysuer.nav.PersonalInformation
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram
 import com.miyuyan.sysuer.nav.PhysicalFitnessTestResult
+import com.miyuyan.sysuer.nav.Privacy
 import com.miyuyan.sysuer.nav.RainClass
 import com.miyuyan.sysuer.nav.RainClassDetail
 import com.miyuyan.sysuer.nav.Registration
 import com.miyuyan.sysuer.nav.RichText
+import com.miyuyan.sysuer.nav.RoomQuery
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
@@ -128,6 +138,7 @@ class MainActivity : BaseActivity() {
 		spm.isFirstLaunch = false
 		setContent {
 			SysuerTheme(settingManager) {
+
 				val mainViewModel: MainViewModel = viewModel()
 				val isAgree by spm.isAgreeLiveData.observeAsState()
 				val updateData by mainViewModel.update.collectAsStateWithLifecycle()
@@ -404,6 +415,13 @@ class MainActivity : BaseActivity() {
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<Privacy> {
+						PrivacyRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
 					entry<Update> {
 						UpdateRoute(
 								backStack,
@@ -415,6 +433,34 @@ class MainActivity : BaseActivity() {
 						RainClassDetailRoute(
 								backStack,
 								it,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<AssistantEvaluation> {
+						AssistantEvaluationRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<AssistantInfo> {
+						AssistantInfoRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<RoomQuery> {
+						RoomQueryRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<CourseQuery> {
+						CourseQueryRoute(
+								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
