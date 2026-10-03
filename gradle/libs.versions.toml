@@ -151,6 +151,7 @@ okhttp-java-net-cookiejar = { group = "com.squareup.okhttp3", name = "okhttp-jav
 androidx-core-remoteviews = { group = "androidx.core", name = "core-remoteviews", version.ref = "coreRemoteviewsVersion" }
 #dev-enro = { group = "dev.enro", name = "enro", version.ref = "enroVersion" }
 androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferencesRxjava3" }
 androidx-datastore-preferences-rxjava3 = { group = "androidx.datastore", name = "datastore-preferences-rxjava3", version.ref = "datastorePreferencesRxjava3" }
 rxandroid = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxandroid" }
 #androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }

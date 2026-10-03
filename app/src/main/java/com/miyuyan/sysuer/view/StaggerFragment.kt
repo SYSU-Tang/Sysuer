@@ -29,11 +29,11 @@ import kotlinx.coroutines.launch
 open class StaggerFragment : BaseFragment() {
 
 	val sections: SnapshotStateList<SectionData> = mutableStateListOf()
-	val hideNull: MutableLiveData<Boolean?> = MutableLiveData<Boolean?>(false)
-	val staggeredListener: MutableLiveData<AdapterListener?> = MutableLiveData<AdapterListener?>()
-	val scrollBottom: MutableLiveData<Runnable?> = MutableLiveData<Runnable?>()
+	val hideNull: MutableLiveData<Boolean?> = MutableLiveData(false)
+	val staggeredListener: MutableLiveData<AdapterListener?> = MutableLiveData()
+	val scrollBottom: MutableLiveData<Runnable?> = MutableLiveData()
 	val isScrolledToTop: MutableLiveData<Boolean> = MutableLiveData<Boolean>(true)
-	val nestedScrollingEnabled: MutableLiveData<Boolean?> = MutableLiveData<Boolean?>(true)
+	val nestedScrollingEnabled: MutableLiveData<Boolean?> = MutableLiveData(true)
 	var position: Int = 0
 	val sectionAdapter: SectionAdapter = SectionAdapter()
 	override fun onCreateView(

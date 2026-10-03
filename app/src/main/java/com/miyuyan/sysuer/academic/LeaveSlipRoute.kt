@@ -77,7 +77,6 @@ import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.WarningCard
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun LeaveSlipRoute(
 	backStack: MutableList<NavKey>,
@@ -192,7 +191,6 @@ fun LeaveSlipRoute(
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
 	var leaveDays by rememberSaveable { mutableStateOf(viewModel.leaveDays) }

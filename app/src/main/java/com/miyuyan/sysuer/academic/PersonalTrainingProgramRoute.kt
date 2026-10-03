@@ -27,7 +27,6 @@ import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram as PersonalTrainingProgramKey
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PersonalTrainingProgramRoute(
 	backStack: MutableList<NavKey>,

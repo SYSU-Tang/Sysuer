@@ -41,7 +41,7 @@ abstract class MultiWeekView(context: Context) : BaseWeekView(context) {
 				val isPreSelected = isSelectPreCalendar(calendar, it)
 				val isNextSelected = isSelectNextCalendar(calendar, it)
 				if (calendar.hasScheme()) {
-					if ((if (isSelected) onDrawSelected(canvas, calendar, it * mItemWidth + mDelegate.calendarPaddingLeft, true, isPreSelected, isNextSelected) else false) || !isSelected) { //将画笔设置为标记颜色
+					if ((isSelected && onDrawSelected(canvas, calendar, it * mItemWidth + mDelegate.calendarPaddingLeft, true, isPreSelected, isNextSelected)) || !isSelected) { //将画笔设置为标记颜色
 						mSchemePaint.setColor(if (calendar.schemeColor != 0) calendar.schemeColor else mDelegate.schemeThemeColor)
 						onDrawScheme(canvas, calendar, it * mItemWidth + mDelegate.calendarPaddingLeft, isSelected)
 					}

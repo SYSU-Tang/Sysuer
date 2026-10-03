@@ -62,13 +62,13 @@ import java.util.Locale
 import java.util.function.Consumer
 
 class CourseSelectionMainFragment : BaseFragment() {
-	val type: MutableLiveData<Int?> = MutableLiveData<Int?>()
-	val category: MutableLiveData<Int?> = MutableLiveData<Int?>()
+	val type: MutableLiveData<Int?> = MutableLiveData()
+	val category: MutableLiveData<Int?> = MutableLiveData()
 	val typeCate: MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?> = MediatorLiveData<CommonUtil.Tuple2<Int?, Int?>?>(CommonUtil.Tuple2(1, 11)).apply {
-		addSource<Int?>(type, Observer {
+		addSource(type, Observer {
 			typeCate.value = CommonUtil.Tuple2(type.value ?: 1, getCategory())
 		})
-		addSource<Int?>(category, Observer {
+		addSource(category, Observer {
 			typeCate.value = CommonUtil.Tuple2(getType(), category.value ?: 11)
 		})
 	}
@@ -179,7 +179,7 @@ class CourseSelectionMainFragment : BaseFragment() {
 									toolbar.title = data.getString("electiveCourseStageName")
 									val start = data.getString("startTime", "")
 									val end = data.getString("endTime", "")
-									if (!start.isEmpty() && !end.isEmpty()) toolbar.subtitle = "${start}~${end}"
+									if (start.isNotEmpty() && end.isNotEmpty()) toolbar.subtitle = "${start}~${end}"
 									courseList()
 								}
 							}

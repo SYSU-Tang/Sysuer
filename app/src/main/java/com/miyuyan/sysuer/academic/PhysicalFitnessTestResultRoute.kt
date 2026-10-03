@@ -21,7 +21,6 @@ import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.StatePage
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PhysicalFitnessTestResultRoute(
 	backStack: MutableList<NavKey>,

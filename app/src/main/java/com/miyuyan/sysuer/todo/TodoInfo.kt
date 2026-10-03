@@ -3,15 +3,15 @@ package com.miyuyan.sysuer.todo
 import androidx.lifecycle.MutableLiveData
 
 class TodoInfo {
-	@JvmField val title: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val description: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val dueDate: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val ddlDate: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val dueTime: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val remindTime: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val type: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val location: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val subject: MutableLiveData<String?> = MutableLiveData<String?>()
+	@JvmField val title: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val description: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val dueDate: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val ddlDate: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val dueTime: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val remindTime: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val type: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val location: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val subject: MutableLiveData<String?> = MutableLiveData()
 	
 	/**
 	 * 获取优先级
@@ -23,14 +23,14 @@ class TodoInfo {
 	 * 
 	 * @return 优先级
 	 */
-	@JvmField val priority: MutableLiveData<Int?> = MutableLiveData<Int?>()
-	val subtask: MutableLiveData<String?> = MutableLiveData<String?>()
-	val attachment: MutableLiveData<String?> = MutableLiveData<String?>()
-	val doneDate: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val status: MutableLiveData<Int?> = MutableLiveData<Int?>(0)
-	val color: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val tag: MutableLiveData<String?> = MutableLiveData<String?>()
-	@JvmField val id: MutableLiveData<Int?> = MutableLiveData<Int?>(0)
+	@JvmField val priority: MutableLiveData<Int?> = MutableLiveData()
+	val subtask: MutableLiveData<String?> = MutableLiveData()
+	val attachment: MutableLiveData<String?> = MutableLiveData()
+	val doneDate: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val status: MutableLiveData<Int?> = MutableLiveData(0)
+	val color: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val tag: MutableLiveData<String?> = MutableLiveData()
+	@JvmField val id: MutableLiveData<Int?> = MutableLiveData(0)
 	@JvmField var function: Int = ADD
 	
 	init {

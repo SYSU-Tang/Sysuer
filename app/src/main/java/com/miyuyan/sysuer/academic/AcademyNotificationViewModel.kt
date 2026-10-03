@@ -34,29 +34,24 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 							val list = response.getJSONObject("data").getJSONArray("list")
 							academicNoticesUiState.value =
 								if (list.isEmpty()) UiState.Empty else UiState.Content
-							_academicNotices.emit(list.filterIsInstance<JSONObject>())
+							_academicNotices.tryEmit(list.filterIsInstance<JSONObject>())
 						}
 
 						1 -> {
 							val list = response.getJSONObject("data").getJSONArray("list")
 							schoolNoticesUiState.value =
 								if (list.isEmpty()) UiState.Empty else UiState.Content
-							_schoolNotices.emit(list.filterIsInstance<JSONObject>())
+							_schoolNotices.tryEmit(list.filterIsInstance<JSONObject>())
 						}
 
 						2 -> {
 							val data = response.getString("data")
-							_noticeContent.emit(data)
+							_noticeContent.tryEmit(data)
 						}
 					}
 				}
 			}
 		}
-	}
-
-	fun fetchNotices() {
-		fetchAcademicNotice()
-		fetchSchoolNotice()
 	}
 
 	fun fetchAcademicNotice(keyword: String? = null) {

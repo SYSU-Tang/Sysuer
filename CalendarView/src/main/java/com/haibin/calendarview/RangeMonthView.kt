@@ -64,7 +64,7 @@ abstract class RangeMonthView(context: Context?) : BaseMonthView(context) {
 		val isPreSelected = isSelectPreCalendar(calendar, calendarIndex)
 		val isNextSelected = isSelectNextCalendar(calendar, calendarIndex)
 		if (calendar.hasScheme()) { //标记的日子
-			val isDrawSelected = if (isSelected) onDrawSelected(canvas, calendar, x, y, true, isPreSelected, isNextSelected) else false            // 是否继续绘制选中的onDrawScheme
+			val isDrawSelected = isSelected && onDrawSelected(canvas, calendar, x, y, true, isPreSelected, isNextSelected)            // 是否继续绘制选中的onDrawScheme
 			if (isDrawSelected || !isSelected) { //将画笔设置为标记颜色
 				mSchemePaint.setColor(if (calendar.schemeColor != 0) calendar.schemeColor else mDelegate.schemeThemeColor)
 				onDrawScheme(canvas, calendar, x, y, true)

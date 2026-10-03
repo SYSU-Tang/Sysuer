@@ -34,6 +34,9 @@
     <string name="type">Type</string>
     <string name="reset">Reset</string>
     <string name="news">News</string>
+    <string name="official_account">Official Accounts</string>
+    <string name="notification">Notifications</string>
+    <string name="daily_news">SYSU Daily</string>
     <string name="campus">Campus</string>
     <string name="field">Field</string>
     <string name="exam_name">Exam Subject</string>

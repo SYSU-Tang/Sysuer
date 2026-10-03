@@ -439,7 +439,7 @@ private fun DashboardOrderDialog(
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DashboardActionDialog(
 	item: ServiceConfig?,
@@ -783,7 +783,6 @@ private fun ScheduleSection(
 	}
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CourseSection(
 	todayCourses: List<JSONObject>,
@@ -885,7 +884,6 @@ private fun CourseSection(
 	}
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CourseItem(
 	modifier: Modifier = Modifier,
@@ -950,7 +948,6 @@ private fun CourseItem(
 	}
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ExamSection(
 	week18Exams: List<JSONObject>,
@@ -1043,7 +1040,6 @@ private fun ExamSection(
 	}
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExamItem(
 	exam: JSONObject,
@@ -1120,7 +1116,6 @@ private fun ExamItem(
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TodoSection(
 	todoList: List<TodoEntity>,

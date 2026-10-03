@@ -24,7 +24,6 @@ import com.miyuyan.sysuer.view.SectionData
 import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PersonalInformationRoute(
     backStack: MutableList<NavKey>,
@@ -68,7 +67,7 @@ fun PersonalInformationRoute(
                 dict[field.getString("zdmc")] = field.getString("zdzwm")
             }
             val data = item.getJSONObject("data")
-            if (data != null && !data.isEmpty()) {
+            if (data != null && data.isNotEmpty()) {
                 val rows = mutableStateListOf<RowData>()
                 data.forEach { (k, v) ->
                     rows.add(RowData(dict.getOrDefault(k, k), toStringOrDefault<Any?>(v)))

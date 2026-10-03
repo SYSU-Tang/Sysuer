@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.GridLayout
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.view.forEachIndexed
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
@@ -83,7 +82,7 @@ class CourseScheduleActivity : BaseActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		model = JwxtModel(this)
-		val id: MutableLiveData<String?> = MutableLiveData<String?>()
+		val id: MutableLiveData<String?> = MutableLiveData()
 		val views: MutableList<View> = mutableListOf()
 		val terms: MutableList<String> = mutableListOf()
 		val courseSegments = mutableListOf<CourseAddTime>()

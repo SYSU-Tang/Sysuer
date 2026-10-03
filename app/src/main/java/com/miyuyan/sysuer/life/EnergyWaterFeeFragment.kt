@@ -31,7 +31,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class EnergyWaterFeeFragment : EnergyBaseFragment() {
-	val roomCode: MutableLiveData<String?> = MutableLiveData<String?>()
+	val roomCode: MutableLiveData<String?> = MutableLiveData()
 	override val model: ZhnyModel by lazy { ZhnyModel(requireContext()) }
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

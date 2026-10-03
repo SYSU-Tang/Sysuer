@@ -66,7 +66,6 @@ import com.miyuyan.sysuer.R
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CourseSelectionPreviewScreen(
     viewModel: CourseSelectionPreviewViewModel = viewModel(),

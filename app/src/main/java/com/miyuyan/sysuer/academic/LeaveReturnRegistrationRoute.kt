@@ -38,7 +38,6 @@ import com.miyuyan.sysuer.view.SectionData
 import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.StatePage
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LeaveReturnRegistrationRoute(
 	backStack: MutableList<NavKey>,

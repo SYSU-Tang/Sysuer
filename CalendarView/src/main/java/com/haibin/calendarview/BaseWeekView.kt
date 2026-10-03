@@ -49,7 +49,7 @@ abstract class BaseWeekView(context: Context) : BaseView(context) {
 	 * @param isNotice isNotice
 	 */
 	fun performClickCalendar(calendar: Calendar, isNotice: Boolean) {
-		if (mParentLayout != null && mDelegate.mInnerListener != null && mItems != null && !mItems!!.isEmpty()) {
+		if (mParentLayout != null && mDelegate.mInnerListener != null && mItems != null && mItems!!.isNotEmpty()) {
 			val week = if (mItems!!.contains(mDelegate.currentDay)) CalendarUtil.getWeekViewIndexFromCalendar(mDelegate.currentDay, mDelegate.weekStart) else CalendarUtil.getWeekViewIndexFromCalendar(calendar, mDelegate.weekStart)
 			var curIndex = week
 			var currentCalendar = mItems!![week]

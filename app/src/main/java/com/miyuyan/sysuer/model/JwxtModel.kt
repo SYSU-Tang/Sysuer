@@ -6,8 +6,6 @@ import com.miyuyan.sysuer.api.AuthorizationManager
 import com.miyuyan.sysuer.api.CookieManager
 import com.miyuyan.sysuer.api.HttpManager
 import com.miyuyan.sysuer.api.TargetUrl
-import java.io.IOException
-import java.security.cert.CertPathValidatorException
 
 open class JwxtModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager =

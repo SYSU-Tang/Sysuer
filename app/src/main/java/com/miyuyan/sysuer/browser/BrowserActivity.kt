@@ -75,7 +75,7 @@ import java.io.IOException
 import java.util.regex.Pattern
 
 class BrowserActivity : BaseActivity() {
-	val progress: MutableLiveData<Int?> = MutableLiveData<Int?>()
+	val progress: MutableLiveData<Int?> = MutableLiveData()
 	val disposable: CompositeDisposable by lazy { config.contextUtil.disposable }
 	lateinit var web: SysuerWebView
 	lateinit var binding: ActivityBrowserBinding
@@ -713,7 +713,7 @@ class BrowserActivity : BaseActivity() {
 			goForward()
 		}
 		if (intent.hasExtra("data") && intent.getStringExtra("data") != null) {
-			webSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36")
+			webSettings.userAgentString = "Mozilla/5.0 (Linux; Android 14; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36"
 			web.loadDataWithBaseURL("https://jwxt.sysu.edu.cn",
 			                        intent.getStringExtra("data") ?: "",
 			                        "text/html",

@@ -121,7 +121,7 @@ class GradeViewModel(application: Application) : AndroidViewModel(application) {
 						var rank = ""
 						var point = ""
 						val compulsorySelectList = pull.getJSONArray("compulsorySelectList")
-						if (!compulsorySelectList.isEmpty()) {
+						if (compulsorySelectList.isNotEmpty()) {
 							rank = compulsorySelectList.getJSONObject(0).getString("rank")
 							point = compulsorySelectList.getJSONObject(0).getString("vegPoint")
 						}

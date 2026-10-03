@@ -22,7 +22,7 @@ class FilterPreference(context: Context,
 	
 	constructor(context: Context, attrs: AttributeSet? = null) : this(context, attrs, R.attr.filterPreferenceStyle)
 	
-	val valueLiveData: MutableLiveData<String?> = MutableLiveData<String?>()
+	val valueLiveData: MutableLiveData<String?> = MutableLiveData()
 	var isFilter: Boolean = false
 	var canEdit: Boolean = false
 	var textWatcher: TextWatcher? = null

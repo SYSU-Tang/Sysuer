@@ -43,7 +43,6 @@ import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.StaggerScreen
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun GradeRoute(
 	backStack: MutableList<NavKey>,

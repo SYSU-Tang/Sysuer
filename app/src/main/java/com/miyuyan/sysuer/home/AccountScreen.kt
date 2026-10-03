@@ -7,26 +7,14 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ColorLens
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavKey
-import com.miyuyan.preference.ChoicePreference
-import com.miyuyan.preference.EditPreference
-import com.miyuyan.preference.FilterPreference
-import com.miyuyan.preference.FilteredEditMenuPreference
 import com.miyuyan.preference.JumpPreference
-import com.miyuyan.preference.MenuPreference
 import com.miyuyan.preference.PreferenceCategory
 import com.miyuyan.preference.PreferenceScreen
-import com.miyuyan.preference.SliderPreference
-import com.miyuyan.preference.WheelPreference
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.extra.AboutActivity
@@ -36,7 +24,6 @@ import com.miyuyan.sysuer.extra.UpdateActivity
 import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.Privacy
 import com.miyuyan.sysuer.nav.Update
-import kotlin.math.roundToInt
 
 @Composable
 fun AccountScreen(

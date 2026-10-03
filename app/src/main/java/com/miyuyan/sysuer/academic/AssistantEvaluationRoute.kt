@@ -45,7 +45,6 @@ import kotlinx.coroutines.launch
  * 悬浮按钮"查询"触发检索并翻到结果页；结果页为状态页 + 瀑布流卡片，滚动到底部自动
  * 分页，悬浮按钮"导出"生成 Markdown 预览。
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun AssistantEvaluationRoute(
 	backStack: MutableList<NavKey>,

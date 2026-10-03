@@ -8,7 +8,7 @@ class CourseSelectionViewModel : ViewModel() {
 
     @JvmField
     val filterValue: MutableLiveData<MutableMap<String?, String?>?> =
-        MutableLiveData<MutableMap<String?, String?>?>(HashMap())
+        MutableLiveData(HashMap())
     var returnData: String? = null
         get() {
             return if (field == null) "" else field

@@ -61,7 +61,6 @@ import com.miyuyan.sysuer.view.SectionCard
 import com.miyuyan.sysuer.view.SectionData
 import com.miyuyan.sysuer.view.StatePage
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LeaveReturnRegistrationDetailRoute(
 	backStack: MutableList<NavKey>,
@@ -296,7 +295,6 @@ fun LeaveReturnRegistrationDetailRoute(
 			})
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExposedDropdownField(
 	label: String,
@@ -335,7 +333,6 @@ private fun ExposedDropdownField(
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePickerField(
 	label: String,

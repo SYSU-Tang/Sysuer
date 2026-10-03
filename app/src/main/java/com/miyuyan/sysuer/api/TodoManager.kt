@@ -321,7 +321,6 @@ class TodoManager(
 		}
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class)
 	@Composable
 	fun TodoDetailDialog(
 		initialTodo: TodoEntity = TodoEntity(),
@@ -759,7 +758,6 @@ class TodoManager(
 				})
 	}
 
-	@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 	@Composable
 	fun SingleSection(
 		label: String,
@@ -918,7 +916,6 @@ class TodoManager(
 		}
 	}
 
-	@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 	@Composable
 	fun TagSection(
 		label: String,
@@ -978,7 +975,6 @@ class TodoManager(
 		}
 	}
 
-	@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 	@Composable
 	fun DateSection(
 		label: String,
@@ -1238,7 +1234,6 @@ class TodoManager(
 		}
 	}
 
-	@OptIn(ExperimentalLayoutApi::class)
 	@Composable
 	fun ColorPickerSection(
 		colors: List<String>,

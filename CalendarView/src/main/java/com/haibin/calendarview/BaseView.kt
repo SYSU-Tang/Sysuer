@@ -266,7 +266,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 * 添加事件标记，来自Map
 	 */
 	fun addSchemesFromMap() {
-		if (mDelegate.mSchemeDatesMap != null && !mDelegate.mSchemeDatesMap.isEmpty()) {
+		if (mDelegate.mSchemeDatesMap != null && mDelegate.mSchemeDatesMap.isNotEmpty()) {
 			mItems!!.forEach {
 				if (mDelegate.mSchemeDatesMap.containsKey("$it")) {
 					val d = mDelegate.mSchemeDatesMap["$it"] ?: return@forEach

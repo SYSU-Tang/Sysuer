@@ -276,12 +276,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 								val timetable = (v as JSONObject).getJSONObject("timetable")
 								timetable.keys.sortedBy { it.toIntOrNull() ?: Int.MAX_VALUE }
 									.forEach {
-										(timetable[it] as JSONArray?)?.apply {
-											forEach { exam ->
-												(exam as JSONObject)["status"] =
-													getDatePosition(exam.getString("examDate"))
-												exams.add(exam)
-											}
+										(timetable[it] as JSONArray?)?.onEach { exam ->
+											(exam as JSONObject)["status"] =
+												getDatePosition(exam.getString("examDate"))
+											exams.add(exam)
 										}
 									}
 							}

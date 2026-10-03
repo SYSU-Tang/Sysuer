@@ -64,12 +64,10 @@ class DataStoreManager @Inject constructor(
 			return getManagerInstance(context).rxDataStore
 		}
 
-		@OptIn(ExperimentalCoroutinesApi::class)
 		@Synchronized
 		fun saveContent(context: Context, title: String, content: String, callback: () -> Unit = {}): Disposable =
 			getManagerInstance(context).saveContent(title, content, callback)
 
-		@OptIn(ExperimentalCoroutinesApi::class)
 		@Synchronized
 		fun loadContent(context: Context, title: String, callback: (String) -> Unit = {}): Disposable =
 			getManagerInstance(context).loadContent(title, callback)

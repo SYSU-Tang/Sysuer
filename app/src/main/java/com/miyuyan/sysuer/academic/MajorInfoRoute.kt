@@ -22,7 +22,6 @@ import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MajorInfoRoute(
     backStack: MutableList<NavKey>,

@@ -250,13 +250,12 @@ abstract class BaseModel(context: Context) {
 	 */
 	protected open fun executeJobAsync(job: RequestJob) {
 		job.status = JobStatus.EXECUTING
-		updateUiState(job.requestCode, UiState.Loading)
+//		updateUiState(job.requestCode, UiState.Loading)
 
 		http.client.newCall(job.request).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
 				job.status = JobStatus.FAILED
 				failedJobs[job.requestCode] = job
-				updateUiState(job.requestCode, UiState.Error)
 				handleFailure(job, e)
 			}
 
@@ -426,7 +425,7 @@ abstract class BaseModel(context: Context) {
 				failedJobs.remove(request.second)
 				pendingLoginJobs.removeIf { it.requestCode == request.second }
 				allJobs[request.second]?.status = JobStatus.SUCCESS
-				updateUiState(request.second, UiState.Content)
+//				updateUiState(request.second, UiState.Content)
 				Pair(result.first, result.second)
 			}
 		}
@@ -456,6 +455,7 @@ abstract class BaseModel(context: Context) {
 			cause = cause.cause
 		}
 		e.printStackTrace()
+		updateUiState(request.second, UiState.Error)
 		toast(R.string.no_net_connected)
 	}
 

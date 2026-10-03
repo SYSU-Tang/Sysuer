@@ -34,6 +34,9 @@
     <string name="type">类型</string>
     <string name="reset">重置</string>
     <string name="news">资讯</string>
+    <string name="official_account">公众号</string>
+    <string name="notification">通知</string>
+    <string name="daily_news">今日中大</string>
     <string name="campus">校区</string>
     <string name="field">场地</string>
     <string name="exam_name">考试科目</string>

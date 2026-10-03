@@ -45,7 +45,7 @@ class AccountManager private constructor(context: Context) {
 		val username =
 			dataStore.data().blockingFirst()[stringPreferencesKey("active:$domain")] ?: return null
 		val password = getPasswordSync(domain, username)
-		return Pair<String?, String?>(username, password)
+		return Pair(username, password)
 	}
 
 	/**
@@ -70,13 +70,13 @@ class AccountManager private constructor(context: Context) {
 	 * @return 活跃账号，<用户名, 密码>
 	 * */
 	fun getActiveAccountAsync(domain: String): Single<Pair<String?, String?>> =
-		dataStore.data().firstOrError().map<Pair<String?, String?>> { prefs: Preferences ->
+		dataStore.data().firstOrError().map { prefs: Preferences ->
 			val username = prefs[stringPreferencesKey("active:$domain")]
-				?: return@map Pair<String?, String?>("", "")
+				?: return@map Pair("", "")
 			val encoded = prefs[stringPreferencesKey("$domain:$username")]
-				?: return@map Pair<String?, String?>("", "")
+				?: return@map Pair("", "")
 			val password = String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null))
-			Pair<String?, String?>(username, password)
+			Pair(username, password)
 		}.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 
 	/**

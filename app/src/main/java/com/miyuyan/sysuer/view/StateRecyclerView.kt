@@ -10,8 +10,6 @@ interface RecyclerStateViewModel {
 enum class UiState {
 	Unstarted,
 
-	Unauthorized,
-
 	Loading,
 
 	LoadMore,

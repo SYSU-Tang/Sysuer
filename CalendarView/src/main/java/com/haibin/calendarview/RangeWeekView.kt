@@ -41,8 +41,7 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 				val isPreSelected = isSelectPreCalendar(calendar, it)
 				val isNextSelected = isSelectNextCalendar(calendar, it)
 				if (calendar.hasScheme()) {
-					val isDrawSelected = if (isSelected) onDrawSelected(canvas, calendar, x, true, isPreSelected, isNextSelected)
-					else false
+					val isDrawSelected = isSelected && onDrawSelected(canvas, calendar, x, true, isPreSelected, isNextSelected)
 					if (isDrawSelected || !isSelected) { //将画笔设置为标记颜色
 						mSchemePaint.setColor(if (calendar.schemeColor != 0) calendar.schemeColor else mDelegate.schemeThemeColor)
 						onDrawScheme(canvas, calendar, x, isSelected)

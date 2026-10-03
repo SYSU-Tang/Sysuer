@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.miyuyan.sysuer.R
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable fun EditDialog(
+@Composable fun EditDialog(
 	title: String,
 	value: String,
 	inputType: KeyboardType = KeyboardType.Unspecified,

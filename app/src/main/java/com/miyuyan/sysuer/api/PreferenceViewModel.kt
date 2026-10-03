@@ -10,7 +10,7 @@ import androidx.preference.PreferenceManager
 class PreferenceViewModel(application: Application) : AndroidViewModel(application) {
 	val isAgreeLiveData: MutableLiveData<Boolean> = MutableLiveData()
 	val dashboardLiveData: MutableLiveData<MutableSet<String?>?> =
-		MutableLiveData<MutableSet<String?>?>()
+		MutableLiveData()
 	val sharedPreferences: SharedPreferences =
 		PreferenceManager.getDefaultSharedPreferences(application)
 

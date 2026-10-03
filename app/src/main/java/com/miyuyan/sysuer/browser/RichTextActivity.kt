@@ -14,7 +14,6 @@ import com.miyuyan.sysuer.theme.SysuerTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class RichTextActivity : BaseActivity() {
-	@OptIn(ExperimentalCoroutinesApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()

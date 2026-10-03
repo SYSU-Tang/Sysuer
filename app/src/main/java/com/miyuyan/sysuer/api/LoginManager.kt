@@ -361,7 +361,7 @@ class LoginManager(private val context: Context) {
 		val webvpnKey =
 			cookieJar.loadForRequest("https://webvpn.sysu.edu.cn/vpn_key/update".toHttpUrl())
 				.filter { e: Cookie -> "_webvpn_key" == e.name }
-		if (!webvpnKey.isEmpty()) {
+		if (webvpnKey.isNotEmpty()) {
 			cookieJar.saveFromResponse(service.toHttpUrl(), webvpnKey)
 			cookieJar.saveFromResponse(casAuthorizationManager.host.toHttpUrl(), webvpnKey)
 		}
@@ -390,7 +390,7 @@ class LoginManager(private val context: Context) {
 		).execute().headers["Location"]
 		if (location?.startsWith("https://webvpn.sysu.edu.cn") == true) {
 			val webvpnKey: List<Cookie> = getWebvpnKey(TargetUrl.PORTAL)
-			if (!webvpnKey.isEmpty()) cookieJar.saveFromResponse(
+			if (webvpnKey.isNotEmpty()) cookieJar.saveFromResponse(
 					"https://mportal.sysu.edu.cn".toHttpUrl(), webvpnKey.toList()
 			)
 		}
@@ -498,7 +498,7 @@ class LoginManager(private val context: Context) {
 		val filterChallenge: List<Cookie?> = cookieJar.loadForRequest(targetBaseUrl.toHttpUrl())
 			.filter { e: Cookie? -> "safeline_bot_challenge" == e!!.name }
 		if (re.find()) prefix = re.group(1)
-		if (!filterChallenge.isEmpty() && !TextUtils.isEmpty(prefix)) cookieJar.saveFromResponse(
+		if (filterChallenge.isNotEmpty() && !TextUtils.isEmpty(prefix)) cookieJar.saveFromResponse(
 				targetBaseUrl.toHttpUrl(), listOf(
 				Cookie.Builder().domain(targetBaseUrl.toHttpUrl().host)
 					.name("safeline_bot_challenge_ans")
@@ -552,9 +552,9 @@ class LoginManager(private val context: Context) {
 			val currentCookies = _cookieStore[host]
 			val responseCookies = cookies.toMutableList()
 			val keys: List<String> = responseCookies.map { it.name }
-			if (currentCookies != null && !responseCookies.isEmpty() && !currentCookies.isEmpty()) currentCookies
+			if (currentCookies != null && responseCookies.isNotEmpty() && currentCookies.isNotEmpty()) currentCookies
 				.filter { currentCookie: Cookie ->
-					!responseCookies.contains(currentCookie) && (!currentCookie.value.isEmpty()) && (!keys.contains(
+					!responseCookies.contains(currentCookie) && (currentCookie.value.isNotEmpty()) && (!keys.contains(
 							currentCookie.name
 					))
 				}.forEach { e: Cookie -> responseCookies.add(e) }

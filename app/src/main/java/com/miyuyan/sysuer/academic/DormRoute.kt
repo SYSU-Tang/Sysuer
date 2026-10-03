@@ -24,7 +24,6 @@ import com.miyuyan.sysuer.view.SectionData
 import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DormRoute(
     backStack: MutableList<NavKey>,

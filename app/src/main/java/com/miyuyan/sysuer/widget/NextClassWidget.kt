@@ -86,7 +86,7 @@ class NextClassWidget : AppWidgetProvider() {
 						if ("TD" == flag) (if (status == "before") beforeArray else afterArray).add(item)
 						(if ("TD" == flag) todayCourse else tomorrowCourse).add(item)
 					}
-					val isAvailable = !afterArray.isEmpty() || !tomorrowCourse.isEmpty()
+					val isAvailable = afterArray.isNotEmpty() || tomorrowCourse.isNotEmpty()
 					var array = JSONObject()
 					if (isAvailable) {
 						array = (if (afterArray.isEmpty()) tomorrowCourse[0] else todayCourse[beforeArray.size])

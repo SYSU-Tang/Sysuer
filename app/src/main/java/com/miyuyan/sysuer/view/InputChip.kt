@@ -25,7 +25,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.miyuyan.sysuer.R
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable fun SingleSelectChipDropdown(
+@Composable fun SingleSelectChipDropdown(
 	category: String,
 	options: List<String>,
 	selectedValue: String? = null,
@@ -59,7 +59,7 @@ import com.miyuyan.sysuer.R
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable fun MultiSelectChipDropdown(
+@Composable fun MultiSelectChipDropdown(
 	category: String,
 	options: List<String>,
 	selectedValues: Set<String> = emptySet(),
@@ -93,7 +93,7 @@ import com.miyuyan.sysuer.R
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class) @Composable fun InputDialogChip(
+@Composable fun InputDialogChip(
 	category: String,
 	value: String? = null,
 	inputType: KeyboardType = KeyboardType.Unspecified,

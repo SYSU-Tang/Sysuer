@@ -9,7 +9,7 @@ import java.time.ZoneId
 
 class GymReservationViewModel : ViewModel() {
 	@JvmField
-	val position: MutableLiveData<Int?> = MutableLiveData<Int?>()
+	val position: MutableLiveData<Int?> = MutableLiveData()
 
 	@JvmField
 	val reservationFromTo: MutableLiveData<CommonUtil.Tuple2<Long?, Long?>> =

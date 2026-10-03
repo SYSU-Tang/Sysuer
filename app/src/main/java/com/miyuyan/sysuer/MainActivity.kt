@@ -89,6 +89,7 @@ import com.miyuyan.sysuer.extra.UpdateRoute
 import com.miyuyan.sysuer.home.DashboardViewModel
 import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.life.NetPayRoute
+import com.miyuyan.sysuer.life.NewsRoute
 import com.miyuyan.sysuer.life.PayRoute
 import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.AcademyNotification
@@ -109,6 +110,7 @@ import com.miyuyan.sysuer.nav.LeaveReturnRegistrationDetail
 import com.miyuyan.sysuer.nav.LeaveSlip
 import com.miyuyan.sysuer.nav.MajorInfo
 import com.miyuyan.sysuer.nav.NetPay
+import com.miyuyan.sysuer.nav.News
 import com.miyuyan.sysuer.nav.Pay
 import com.miyuyan.sysuer.nav.PersonalInformation
 import com.miyuyan.sysuer.nav.PersonalTrainingProgram
@@ -269,7 +271,6 @@ class MainActivity : BaseActivity() {
 		}
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 	@Composable
 	private fun MainScreen() {
 		val backStack = rememberNavBackStack(Home)
@@ -507,6 +508,13 @@ class MainActivity : BaseActivity() {
 					}
 					entry<CourseQuery> {
 						CourseQueryRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<News> {
+						NewsRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current

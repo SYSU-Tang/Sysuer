@@ -24,19 +24,19 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 	val collegeNames: StateFlow<List<String>> = _collegeNames.asStateFlow()
 
 	private val _collegeIds = MutableStateFlow<List<String>>(emptyList())
-//	val collegeIds: StateFlow<List<String>> = _collegeIds.asStateFlow()
+	val collegeIds: StateFlow<List<String>> = _collegeIds.asStateFlow()
 
 	private val _gradeNames = MutableStateFlow<List<String>>(emptyList())
 	val gradeNames: StateFlow<List<String>> = _gradeNames.asStateFlow()
 
 	private val _gradeIds = MutableStateFlow<List<String>>(emptyList())
-//	val gradeIds: StateFlow<List<String>> = _gradeIds.asStateFlow()
+	val gradeIds: StateFlow<List<String>> = _gradeIds.asStateFlow()
 
 	private val _professionNames = MutableStateFlow<List<String>>(emptyList())
 	val professionNames: StateFlow<List<String>> = _professionNames.asStateFlow()
 
 	private val _professionIds = MutableStateFlow<List<String>>(emptyList())
-//	val professionIds: StateFlow<List<String>> = _professionIds.asStateFlow()
+	val professionIds: StateFlow<List<String>> = _professionIds.asStateFlow()
 
 	private val _typeNames = MutableStateFlow<List<String>>(emptyList())
 	val typeNames: StateFlow<List<String>> = _typeNames.asStateFlow()
@@ -64,9 +64,6 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 
 	private val _selectedGradeIndex = MutableStateFlow(0)
 	val selectedGradeIndex: StateFlow<Int> = _selectedGradeIndex.asStateFlow()
-
-	private val _showResults = MutableStateFlow(false)
-	val showResults: StateFlow<Boolean> = _showResults.asStateFlow()
 
 	private val _viewDetailProgramId = MutableStateFlow<String?>(null)
 	val viewDetailProgramId: StateFlow<String?> = _viewDetailProgramId.asStateFlow()
@@ -219,14 +216,6 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 		)
 	}
 
-	fun updateSelectedCollegeName(name: String) {
-		_selectedCollegeName.value = name
-	}
-
-	fun updateSelectedProfessionName(name: String) {
-		_selectedProfessionName.value = name
-	}
-
 	fun clearViewDetailProgramId() {
 		_viewDetailProgramId.value = null
 	}
@@ -266,7 +255,6 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 		_resultSections.value = mutableStateListOf()
 		resultPage = 0
 		resultTotal = -1
-		_showResults.value = true
 		fetchResults()
 	}
 
@@ -302,15 +290,7 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 		_selectedProfessionId.value = null
 		_selectedProfessionName.value = ""
 		_selectedTypeId.value = _typeIds.value.firstOrNull()
-		_showResults.value = false
 		_resultSections.value = mutableStateListOf()
-	}
-
-	fun navigateBack() {
-		if (_showResults.value) {
-			_showResults.value = false
-			_resultSections.value = mutableStateListOf()
-		}
 	}
 
 	override fun onCleared() {

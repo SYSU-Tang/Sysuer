@@ -137,8 +137,7 @@ class Calendar : Serializable, Comparable<com.haibin.calendarview.Calendar?> {
 		schemes!!.add(Scheme(schemeColor, scheme, other))
 	}
 	
-	fun hasScheme(): Boolean = if (schemes != null && !schemes!!.isEmpty()) true
-	else !TextUtils.isEmpty(scheme)
+	fun hasScheme(): Boolean = schemes != null && !schemes!!.isEmpty() || !TextUtils.isEmpty(scheme)
 	
 	/**
 	 * 是否是相同月份
@@ -188,8 +187,7 @@ class Calendar : Serializable, Comparable<com.haibin.calendarview.Calendar?> {
 		}
 	
 	override fun equals(other: Any?): Boolean {
-		return if (other is com.haibin.calendarview.Calendar && other.year == year && other.month == month && other.day == day) true
-		else super.equals(other)
+		return other is com.haibin.calendarview.Calendar && other.year == year && other.month == month && other.day == day || super.equals(other)
 	}
 	
 	override fun toString(): String {
@@ -273,8 +271,8 @@ class Calendar : Serializable, Comparable<com.haibin.calendarview.Calendar?> {
 		result = 31 * result + gregorianFestival.hashCode()
 		result = 31 * result + traditionFestival.hashCode()
 		result = 31 * result + scheme.hashCode()
-		result = 31 * result + (schemes?.hashCode() ?: 0)
-		result = 31 * result + (lunarCalendar?.hashCode() ?: 0)
+		result = 31 * result + schemes.hashCode()
+		result = 31 * result + lunarCalendar.hashCode()
 		result = 31 * result + isAvailable.hashCode()
 		result = 31 * result + timeInMillis.hashCode()
 		return result

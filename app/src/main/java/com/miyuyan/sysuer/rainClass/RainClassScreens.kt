@@ -94,10 +94,6 @@ import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.StatePage
 import com.miyuyan.sysuer.view.UiState
 
-@OptIn(
-		ExperimentalMaterial3Api::class,
-		androidx.compose.animation.ExperimentalSharedTransitionApi::class
-)
 @Composable
 fun CourseScreen(
 	backStack: MutableList<NavKey>,
@@ -341,7 +337,6 @@ fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExamDetailScreen(
 	examSummary: JSONObject, onBack: () -> Unit, onStartExam: () -> Unit
@@ -550,7 +545,6 @@ fun ExamDetailScreen(
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExamPaperScreen(
 	examSummary: JSONObject, onBack: () -> Unit

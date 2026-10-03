@@ -9,7 +9,7 @@ import com.miyuyan.sysuer.model.ZhnyModel
 
 abstract class EnergyBaseFragment : BaseFragment() {
 	val rooms: ArraySet<CommonUtil.Tuple2<String?, String?>?> =
-		ArraySet<CommonUtil.Tuple2<String?, String?>?>()
+		ArraySet()
 
 	abstract val model: ZhnyModel
 

@@ -56,7 +56,6 @@ import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.StatePage
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun NetPayRoute(
 	backStack: MutableList<NavKey>,

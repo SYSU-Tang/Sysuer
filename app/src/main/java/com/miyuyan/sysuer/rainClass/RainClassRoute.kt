@@ -48,9 +48,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 
 @OptIn(
-		ExperimentalMaterial3Api::class,
-		ExperimentalSharedTransitionApi::class,
-		ExperimentalCoroutinesApi::class
+		ExperimentalMaterial3Api::class, ExperimentalCoroutinesApi::class
 )
 @Composable
 fun RainClassRoute(

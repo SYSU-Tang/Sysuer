@@ -38,6 +38,7 @@ dependencies {
 	implementation(libs.androidx.navigation3.runtime)
 	implementation(libs.ui.graphics)
 	implementation(libs.androidx.preference.ktx)
+	implementation(libs.androidx.datastore.preferences)
 	implementation(libs.ui.tooling.preview)
 	testImplementation(libs.junit)
 	implementation(libs.material.icons.extended)

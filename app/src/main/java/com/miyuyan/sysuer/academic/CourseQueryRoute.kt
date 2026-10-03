@@ -46,7 +46,6 @@ import kotlin.math.roundToInt
  * 开课单位与教室支持输入过滤；悬浮按钮"查询"触发检索并翻到结果页；结果页为状态页 +
  * 瀑布流卡片，滚动到底部自动分页，悬浮按钮"导出"生成 Markdown 预览。
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun CourseQueryRoute(
 	backStack: MutableList<NavKey>,

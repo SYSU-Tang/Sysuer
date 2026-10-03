@@ -93,11 +93,6 @@ import com.miyuyan.sysuer.browser.BrowserActivity
 import kotlinx.coroutines.launch
 import kotlin.reflect.full.primaryConstructor
 
-@OptIn(
-		ExperimentalMaterial3Api::class,
-		ExperimentalLayoutApi::class,
-		ExperimentalFoundationApi::class
-)
 @Composable
 internal fun ServiceScreen(
 	homeViewModel: HomeViewModel,
@@ -185,7 +180,7 @@ fun navigateToServiceItem(
 	actionMap: MutableMap<in Int, (Context) -> Unit>
 ) {
 	if (!item.route.isNullOrBlank()) {
-		runCatching<NavKey?> {
+		runCatching {
 			val kClass = Class.forName("${context.packageName}.nav.${item.route}").kotlin
 			kClass.objectInstance as? NavKey
 				?: kClass.primaryConstructor?.callBy(emptyMap()) as? NavKey
@@ -225,7 +220,6 @@ private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: 
 	}
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 private fun ServiceBox(
 	title: String,

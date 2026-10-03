@@ -68,8 +68,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 @OptIn(
-		ExperimentalMaterial3Api::class,
-		ExperimentalSharedTransitionApi::class,
 		ExperimentalCoroutinesApi::class
 )
 @Composable
@@ -179,7 +177,6 @@ fun RainClassDetailRoute(
 
 // ── 学习日志子 Tab ──────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StudyLogSubTabs(pagerState: PagerState) {
 	val coroutineScope = rememberCoroutineScope()
@@ -208,7 +205,6 @@ private fun StudyLogSubTabs(pagerState: PagerState) {
 
 // ── 未完成子 Tab ────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun UnfinishedSubTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
 	val coroutineScope = rememberCoroutineScope()
@@ -381,7 +377,7 @@ private fun StudyLogPage(
 	LaunchedEffect(Unit) {
 		viewModel.studyLogList.collect {
 			if (!studyLogSections.containsKey(pagerState.currentPage)) {
-				if (!it.isEmpty()) {
+				if (it.isNotEmpty()) {
 					val leafIds = JSONArray()
 					it.forEach { activity ->
 						leafIds.add(activity.getString("courseware_id"))
@@ -549,7 +545,7 @@ private fun StudyContentPage(classId: String) {
 		PreferenceScreen(modifier = Modifier.fillMaxSize()) {
 			chapterList.forEach { chapter ->
 				val leaves = chapter.getJSONArray("section_leaf_list")
-				if (leaves != null && !leaves.isEmpty()) {
+				if (leaves != null && leaves.isNotEmpty()) {
 					PreferenceCategory(title = chapter.getString("name")) {
 						leaves.filterIsInstance<JSONObject>().forEach { leaf ->
 							val leafType = leaf.getInteger("leaf_type")

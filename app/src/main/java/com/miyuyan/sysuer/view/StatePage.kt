@@ -26,12 +26,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.view.UiState.Content
 import com.miyuyan.sysuer.view.UiState.Empty
 import com.miyuyan.sysuer.view.UiState.Error
 import com.miyuyan.sysuer.view.UiState.LoadMore
 import com.miyuyan.sysuer.view.UiState.Loading
-import com.miyuyan.sysuer.view.UiState.Unstarted
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -53,9 +51,6 @@ fun StatePage(
 			Error -> ErrorView(
 					modifier = modifier, onRetry = onRetry
 			)
-
-			Content -> content()
-			Unstarted -> {}
 			LoadMore -> {
 				Column(
 						modifier = Modifier.fillMaxSize(),

@@ -139,7 +139,7 @@ class EnergyDashboardFragment : BaseFragment() {
 
 							4 -> {
 								val rooms: ArraySet<CommonUtil.Tuple2<String?, String?>?> =
-									ArraySet<CommonUtil.Tuple2<String?, String?>?>()
+									ArraySet()
 								val items = ArrayAdapter<Any?>(
 										requireContext(), android.R.layout.simple_list_item_1
 								)

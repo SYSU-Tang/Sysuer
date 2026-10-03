@@ -17,7 +17,6 @@ import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.theme.SysuerTheme
 
 class CourseCompletionActivity : BaseActivity() {
-	@OptIn(ExperimentalSharedTransitionApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()

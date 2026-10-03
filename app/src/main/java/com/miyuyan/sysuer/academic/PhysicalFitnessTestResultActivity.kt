@@ -16,7 +16,6 @@ import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.nav.PhysicalFitnessTestResult as PhysicalFitnessTestResultKey
 
 class PhysicalFitnessTestResultActivity : BaseActivity() {
-	@OptIn(ExperimentalSharedTransitionApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
