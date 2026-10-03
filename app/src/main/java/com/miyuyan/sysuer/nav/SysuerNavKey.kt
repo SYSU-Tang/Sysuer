@@ -63,6 +63,7 @@ fun MutableList<NavKey>.navigateBack(activity: Activity? = null) {
 @Serializable data object About : NavKey
 @Serializable data object Privacy : NavKey
 @Serializable data object Update : NavKey
+@Serializable data class Crash(val crashInfo: String = "") : NavKey
 
 //val NavKey.routeName: String
 //	get() = this::class.simpleName ?: this.toString()

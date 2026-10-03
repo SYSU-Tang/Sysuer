@@ -504,7 +504,7 @@
     <string name="click_for_grade">点击查看总成绩</string>
     <string name="download_complete">下载完成</string>
     <string name="sponsor_appreciation">感谢你的捐赠 🤑</string>
-    <string name="permission_granted">权限已获取</string>
+    <string name="permission_granted">权限已授予</string>
     <string name="agree">同意</string>
     <string name="disagree">不同意</string>
     <string name="user_agreement_and_privacy_policy">用户协议和隐私政策</string>
@@ -904,4 +904,6 @@
     <string name="click_to_edit">点击编辑</string>
     <string name="warning">警告</string>
     <string name="section_d">第%d节</string>
+    <string name="day_d">%d日</string>
+    <string name="please_grant_shizuku_permission">请授予Shizuku权限</string>
 </resources>

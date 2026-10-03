@@ -16,7 +16,6 @@
 
     <queries>
         <package android:name="com.tencent.wework" />
-
         <intent>
             <action android:name="android.intent.action.MAIN" />
         </intent>
@@ -26,6 +25,12 @@
     </queries>
     <queries>
         <package android:name="com.comingx.zanao" />
+    </queries>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
     </queries>
 
     <application
@@ -99,6 +104,7 @@
             android:exported="true"
             android:foregroundServiceType="specialUse"
             android:permission="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
         <activity
             android:name=".academic.GradeForLevelActivity"
             android:configChanges="orientation|screenSize"
@@ -120,7 +126,7 @@
             android:configChanges="orientation|screenSize"
             android:exported="true" />
         <activity
-            android:name=".CrashActivity"
+            android:name=".extra.CrashActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true" />
         <activity
@@ -269,7 +275,6 @@
             android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -287,7 +292,6 @@
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -304,7 +308,6 @@
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -321,7 +324,6 @@
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 

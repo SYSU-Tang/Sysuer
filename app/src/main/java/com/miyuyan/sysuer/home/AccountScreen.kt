@@ -111,7 +111,7 @@ fun AccountScreen(
 					)
 				}
 			}
-			item {
+			/*item {
 				MenuPreference(
 						icon = {
 							Icon(
@@ -172,7 +172,7 @@ fun AccountScreen(
 						itemHeight = 44.dp, visibleCount = 3,   // 滚轮高度 = itemHeight × visibleCount
 						icon = { Icon(painterResource(R.drawable.calendar), null) },
 				)
-			}
+			}*/
 		}
 	}
 }

@@ -8,7 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -48,6 +48,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -80,10 +81,12 @@ import com.miyuyan.sysuer.academic.SchoolEnrollmentRoute
 import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
 import com.miyuyan.sysuer.academic.TrainingProgramRoute
 import com.miyuyan.sysuer.api.PreferenceViewModel
+import com.miyuyan.sysuer.api.ShortcutReader
 import com.miyuyan.sysuer.browser.RichTextRoute
 import com.miyuyan.sysuer.extra.AboutRoute
 import com.miyuyan.sysuer.extra.PrivacyRoute
 import com.miyuyan.sysuer.extra.UpdateRoute
+import com.miyuyan.sysuer.home.DashboardViewModel
 import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.life.NetPayRoute
 import com.miyuyan.sysuer.life.PayRoute
@@ -125,6 +128,9 @@ import com.miyuyan.sysuer.rainClass.RainClassDetailRoute
 import com.miyuyan.sysuer.rainClass.RainClassRoute
 import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import rikka.shizuku.Shizuku
 import java.io.File
 
 class MainActivity : BaseActivity() {
@@ -132,13 +138,43 @@ class MainActivity : BaseActivity() {
 	var receiver: BroadcastReceiver? = null
 	var receiverRegistered: Boolean = false
 	var path: String = ""
+
+	private val shizukuPermissionRequestCode = 0
+	private val requestPermissionResultListener: Shizuku.OnRequestPermissionResultListener =
+		{ requestCode: Int, grantResult: Int ->
+			if (requestCode == shizukuPermissionRequestCode) {
+				val granted = grantResult == PERMISSION_GRANTED
+				if (!granted) config.toast(R.string.please_grant_shizuku_permission)
+			}
+		}
+
+	private fun checkPermission(): Boolean = when {
+		Shizuku.isPreV11() -> {
+			false
+		}
+
+		Shizuku.checkSelfPermission() == PERMISSION_GRANTED -> {
+			true
+		}
+
+		Shizuku.shouldShowRequestPermissionRationale() -> {
+			false
+		}
+
+		else -> {
+			Shizuku.requestPermission(shizukuPermissionRequestCode)
+			false
+		}
+	}
+
+	//	private var sysuCardShortcutInfo: ShortcutInfo? = null
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val spm: PreferenceViewModel by viewModels()
 		spm.isFirstLaunch = false
 		setContent {
 			SysuerTheme(settingManager) {
-
+				val dashboardViewModel: DashboardViewModel = viewModel()
 				val mainViewModel: MainViewModel = viewModel()
 				val isAgree by spm.isAgreeLiveData.observeAsState()
 				val updateData by mainViewModel.update.collectAsStateWithLifecycle()
@@ -183,9 +219,20 @@ class MainActivity : BaseActivity() {
 								ContextCompat.RECEIVER_NOT_EXPORTED
 						)
 						receiverRegistered = true
-						if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
-								arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-								PackageManager.PERMISSION_GRANTED
+						if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PERMISSION_GRANTED) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) requestPermissions(
+								arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSION_GRANTED
+						)
+
+						if (checkPermission()) lifecycleScope.launch(Dispatchers.IO) {
+							runCatching { ShortcutReader.query("com.tencent.mm") }.onSuccess {
+								it.firstOrNull { info ->
+									info.shortLabel?.contains("中山大学校园卡") == true
+								}?.let { info ->
+									dashboardViewModel.sysuCardShortcutInfo = info
+								}
+							}.onFailure { println("${it::class.java.simpleName}: ${it.message}") }
+						} else Shizuku.addRequestPermissionResultListener(
+								requestPermissionResultListener
 						)
 					}
 				}
@@ -587,8 +634,8 @@ class MainActivity : BaseActivity() {
 		grantResults: IntArray,
 	) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-		if (requestCode == PackageManager.PERMISSION_GRANTED) {
-			if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) config.toast(
+		if (requestCode == PERMISSION_GRANTED) {
+			if (grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED) config.toast(
 					R.string.permission_granted
 			)
 		}
@@ -601,6 +648,7 @@ class MainActivity : BaseActivity() {
 			receiver = null
 			receiverRegistered = false
 		}
+		Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener)
 	}
 }
 

@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.GridLayout
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.forEachIndexed
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
@@ -37,6 +38,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.abs
 
@@ -150,8 +152,9 @@ class CourseScheduleActivity : BaseActivity() {
 //				changeWeek(realTime.second!!)
 				changeTermWeek(realTime.first!!, realTime.second!!)
 			}
-
-			month.text = resources.getStringArray(R.array.months)[LocalDate.now().monthValue - 1]
+			month.text = LocalDate.now().month.getDisplayName(
+					TextStyle.SHORT, Locale.getDefault()
+			)
 			last.setOnClickListener { changeWeek(weekIndex - 1) }
 			next.setOnClickListener { changeWeek(weekIndex + 1) }
 			toolbar.menu.add(0, 0, 0, "新增").setIcon(R.drawable.add)
@@ -434,21 +437,21 @@ class CourseScheduleActivity : BaseActivity() {
 							3 -> {
 								val data = response.getJSONObject("data")
 								if (data != null) {
-									val date = LocalDate.parse(
+									val start = LocalDate.parse(
 											data.getString("startTime"),
 											DateTimeFormatter.ofPattern("yyyy-MM-dd")
 									)
-									if (date != null) {
-										binding.month.text =
-											resources.getStringArray(R.array.months)[date.monthValue - 1]
-										for (i in 0..6) (binding.week.getChildAt(i + 1)
-											.findViewById<View>(R.id.course_date) as MaterialTextView).text =
-											String.format(
-													Locale.getDefault(),
-													"%2d%s",
-													date.plusDays(i.toLong()).dayOfMonth,
-													getString(R.string.day)
-											)
+									if (start != null) {
+										binding.month.text = start.month.getDisplayName(
+												TextStyle.SHORT, Locale.getDefault()
+										)
+										(1..7).forEach { i ->
+											(binding.week.getChildAt(i).findViewById<View>(R.id.course_date) as MaterialTextView).text =
+												getString(
+														R.string.day_d,
+														start.plusDays(i.toLong()).dayOfMonth
+												)
+										}
 									}
 								}
 							}

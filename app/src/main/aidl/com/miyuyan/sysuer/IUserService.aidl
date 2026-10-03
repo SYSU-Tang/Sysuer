@@ -24,4 +24,6 @@ interface IUserService {
      * 执行数组中分离的命令
      */
     String execArr(in String[] command) = 3;
+
+//    String getShortcutsByLabelDirectly(String targetLabel) = 4;
 }

@@ -3,6 +3,7 @@ package com.miyuyan.sysuer.home
 import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.ShortcutInfo
 import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
@@ -14,6 +15,7 @@ import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.ClassIsland
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.DateTimeManager
+import com.miyuyan.sysuer.api.ShortcutReader
 import com.miyuyan.sysuer.home.data.CollectionDatabase
 import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
@@ -140,7 +142,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	val date: String? =
 		LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
 	val weekDay: String? =
-		getApplication<Application>().resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
+		application.resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
 
 	val dateText: String
 		get() = buildString {
@@ -171,15 +173,20 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 				context.startActivity(intent)
 			} else {
-				model.contextUtil.toast(R.string.activity_not_found)
+				model.toast(R.string.activity_not_found)
 			}
 		} catch (e: Exception) {
 			e.printStackTrace()
-			model.contextUtil.toast(R.string.activity_not_found)
+			model.toast(R.string.activity_not_found)
 		}
 	}
 
+	var sysuCardShortcutInfo: ShortcutInfo? = null
 	fun openQrCode() {
+		sysuCardShortcutInfo?.let {
+			ShortcutReader.start(it)
+			return
+		}
 		PreferenceManager.getDefaultSharedPreferences(application).getString("qrcode", "")
 			?.takeIf { it.isNotEmpty() }?.run {
 				Intent(Intent.ACTION_VIEW, toUri()).takeIf {
@@ -187,8 +194,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				}?.let {
 					it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 					application.startActivity(it)
-				} ?: model.contextUtil.toast(R.string.fix_sysu_code_warning)
-			} ?: model.contextUtil.toast(R.string.set_sysu_code_warning)
+				} ?: model.toast(R.string.fix_sysu_code_warning)
+			} ?: model.toast(R.string.set_sysu_code_warning)
 	}
 
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
@@ -282,12 +289,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 							_week19Exams.value = week19List
 							_todayExamIndex.value = (week18List + week19List)
 								.indexOfFirst { it.getString("status") == "in" }.let {
-								if (it < 0) (week18List + week19List).indexOfFirst { e ->
-									e.getString(
-											"status"
-									) == "after"
-								} else it
-							}
+									if (it < 0) (week18List + week19List).indexOfFirst { e ->
+										e.getString(
+												"status"
+										) == "after"
+									} else it
+								}
 							_isShowWeek18.value = _week.value != "19"
 						}
 

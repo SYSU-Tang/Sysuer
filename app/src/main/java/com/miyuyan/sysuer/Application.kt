@@ -2,9 +2,12 @@ package com.miyuyan.sysuer
 
 import android.app.Activity
 import android.app.Application
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
+import com.miyuyan.sysuer.api.ShizukuHelper
 import dagger.hilt.android.HiltAndroidApp
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 @HiltAndroidApp
 class Application : Application() {
@@ -13,6 +16,11 @@ class Application : Application() {
 
 	override fun onCreate() {
 		super.onCreate()
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+			HiddenApiBypass.addHiddenApiExemptions("L")
+		}
+		ShizukuHelper.register()
+		ShizukuHelper.refresh()
 		registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
 			override fun onActivityStarted(activity: Activity) {
 				currentActivity = activity as? FragmentActivity
