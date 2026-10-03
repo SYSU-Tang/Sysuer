@@ -3,7 +3,7 @@ package com.miyuyan.sysuer.life
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.miyuyan.sysuer.api.CommonUtil
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -20,10 +20,13 @@ class GymReservationViewModel : ViewModel() {
 							.toEpochMilli()
 				)
 		)
+
 	@JvmField
-	val selected = MutableStateFlow(mutableSetOf<Int>())
+	val selected = MutableSharedFlow<Set<Int>>(extraBufferCapacity = 1)
+
 	@JvmField
 	var from: Long = System.currentTimeMillis()
+
 	@JvmField
 	var to: Long = System.currentTimeMillis()
 }

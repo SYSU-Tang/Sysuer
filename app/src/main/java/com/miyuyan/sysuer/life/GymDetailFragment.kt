@@ -61,9 +61,7 @@ class GymDetailFragment : BaseFragment() {
 		)
 		val fieldAdapter = FieldAdapter().apply {
 			action = {
-				selected?.let {
-					viewModel.selected.value = it
-				}
+				viewModel.selected.tryEmit(selected)
 			}
 		}
 		dateAdapter = DateAdapter().apply {
@@ -97,8 +95,8 @@ class GymDetailFragment : BaseFragment() {
 		viewModel.position.observe(viewLifecycleOwner) { p: Int? ->
 			if (p != null) loadInfo()
 		}
-		viewLifecycleOwner.lifecycleScope.launch {
-			viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+		lifecycleScope.launch {
+			repeatOnLifecycle(Lifecycle.State.STARTED) {
 				launch {
 					model.message.collect { (code, response) ->
 						when (code) {
@@ -213,17 +211,18 @@ class GymDetailFragment : BaseFragment() {
 					}
 				}
 				launch {
-					viewModel.selected.collect { selected: MutableSet<Int>? ->
-						fieldAdapter.selected = selected
+					viewModel.selected.collect { selected: Set<Int> ->
+						println("Selected: $selected")
+						fieldAdapter.selected = selected.toMutableSet()
 						val studentFee = fee["学生"]
 						if (studentFee != null) {
-							fieldAdapter.selected?.isEmpty().let {
-								binding.submit.setEnabled(it == false)
-								if (it == true) binding.info.text = getString(R.string.unselected)
+							fieldAdapter.selected.isEmpty().let {
+								binding.submit.setEnabled(!it)
+								if (it) binding.info.text = getString(R.string.unselected)
 								else {
 									val info = StringBuilder()
 									val items = JSONArray()
-									fieldAdapter.selected?.forEach { e: Int ->
+									fieldAdapter.selected.forEach { e: Int ->
 										info.append(fieldAdapter.get(e).getString("Venue"))
 											.append(" ")
 											.append(fieldAdapter.get(e).getString("Duration"))
@@ -231,10 +230,10 @@ class GymDetailFragment : BaseFragment() {
 										items.add(fieldAdapter.get(e).getJSONObject("VenueBooking"))
 									}
 									val venueName =
-										fieldAdapter.get(fieldAdapter.selected!!.toList()[0])
+										fieldAdapter.get(fieldAdapter.selected.toList()[0])
 											.getJSONObject("VenueBooking").getString("VenueName")
 									val creditFee =
-										studentFee.getInteger("CreditFee") * fieldAdapter.selected?.size!!
+										studentFee.getInteger("CreditFee") * fieldAdapter.selected.size
 									binding.submit.setOnClickListener {
 										reserve(
 												items, venueName, creditFee
@@ -264,7 +263,7 @@ class GymDetailFragment : BaseFragment() {
 	fun reset(field: FieldAdapter) {
 		field.clear()
 		field.clearSelected()
-		viewModel.selected.value = mutableSetOf()
+		viewModel.selected.tryEmit(emptySet())
 	}
 
 	private fun loadInfo() {
@@ -436,12 +435,10 @@ class GymDetailFragment : BaseFragment() {
 
 	class FieldAdapter : RecyclerAdapter<JSONObject>() {
 		var action: ((Int) -> Unit)? = null
-		var selected: MutableSet<Int>? = null
+		var selected: MutableSet<Int> = mutableSetOf()
 			set(selected) {
 				if (field != selected) {
-					field = selected?.also {
-						it.forEach { i -> notifyItemChanged(i) }
-					}
+					field = selected.onEach { i -> notifyItemChanged(i) }
 				}
 			}
 
@@ -457,8 +454,8 @@ class GymDetailFragment : BaseFragment() {
 
 		fun clearSelected() {
 			val s = selected
-			selected?.clear()
-			s?.forEach { notifyItemChanged(it) }
+			selected.clear()
+			s.forEach { notifyItemChanged(it) }
 		}
 
 		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -469,9 +466,9 @@ class GymDetailFragment : BaseFragment() {
 				fieldDetail.alpha = 1.0f
 				root.setOnClickListener {
 					if (item.getInteger("Type") == 1 && item.getInteger("AvailableCapacity") > 0) {
-						if (selected!!.contains(pos)) selected!!.remove(pos)
-						else selected!!.add(pos)
-						action!!(pos)
+						if (selected.contains(pos)) selected.remove(pos)
+						else selected.add(pos)
+						action?.invoke(pos)
 						notifyItemChanged(pos)
 					}
 				}
@@ -487,7 +484,7 @@ class GymDetailFragment : BaseFragment() {
 							fieldDetail.setText(R.string.reserved)
 							fieldDetail.setAlpha(0.5f)
 						}
-						root.isChecked = selected?.contains(pos) ?: false
+						root.isChecked = selected.contains(pos)
 					}
 
 					else -> fieldDetail.text = ""
