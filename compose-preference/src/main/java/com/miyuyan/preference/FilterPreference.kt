@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
  *                        false 时为多选，任意增删。
  * @param enabled false 时所有 Chip 不可点。
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun <T> FilterPreference(
 	modifier: Modifier = Modifier,

@@ -9,14 +9,12 @@ import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.Preferences
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -87,8 +85,11 @@ fun SliderPreference(
 }
 
 /**
- * 自动管理数值状态的 [SliderPreference] 重载：[initialValue] 作为初始值，
+ * 自动管理数值状态的 [SliderPreference] 重载:[initialValue] 作为初始值,
  * 拖动时更新内部状态并经 [onValueChange] 通知父级。
+ *
+ * 传入 [key] 时数值经 [rememberPreference] 存入 DataStore——拖动过程中仅更新滑杆,
+ * 松手([onValueChangeFinished])时一次性落盘;DataStore 异步加载完成后自动同步到滑杆。
  *
  * @param valueText 数值格式化函数，传入当前值返回尾部文本；为 null 时自动格式化。
  */
@@ -101,11 +102,23 @@ fun SliderPreference(
 	valueRange: ClosedFloatingPointRange<Float> = 0f..100f,
 	steps: Int = 0,
 	initialValue: Float = valueRange.start,
+	key: Preferences.Key<Float>? = null,
 	valueText: ((Float) -> String)? = null,
 	onValueChange: ((Float) -> Unit)? = null,
 	onValueChangeFinished: (() -> Unit)? = null,
 ) {
-	val state = rememberSliderState(value = initialValue, steps = steps, trackRange = valueRange)
+	val stored = key?.let { rememberPreference(it, initialValue) }
+	val state = rememberSliderState(
+		value = stored?.value ?: initialValue,
+		steps = steps,
+		trackRange = valueRange,
+	)
+
+	// DataStore 异步加载完成(或被外部修改)后同步到滑杆
+	LaunchedEffect(stored?.value) {
+		val persisted = stored?.value ?: return@LaunchedEffect
+		if (state.value != persisted) state.value = persisted
+	}
 
 	SliderPreference(
 			title = title,
@@ -118,6 +131,10 @@ fun SliderPreference(
 			icon = icon,
 			valueText = valueText?.invoke(state.value),
 			state = state,
-			onValueChangeFinished = onValueChangeFinished,
+			onValueChangeFinished = {
+				// 拖动过程中不逐帧写 DataStore,松手时一次性落盘
+				stored?.value = state.value
+				onValueChangeFinished?.invoke()
+			},
 	)
 }

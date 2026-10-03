@@ -59,7 +59,6 @@ import kotlin.math.abs
  * 因此铺满后标题（overline）会被挤成 0 宽。需要保留标题时改用 fillMaxWidth(fraction)
  * 或把滚轮放到内容区（content 槽位）。
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> WheelPreference(
 	modifier: Modifier = Modifier,
@@ -102,7 +101,6 @@ fun <T> WheelPreference(
  * iOS 风格滚轮选择器：惯性滚动经 snap 吸附后，最靠近视口中心的条目即选中项
  * （放大、高亮，其余按距离渐隐缩小），点击条目滚动到该项。
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WheelPicker(
 	entries: List<String>,

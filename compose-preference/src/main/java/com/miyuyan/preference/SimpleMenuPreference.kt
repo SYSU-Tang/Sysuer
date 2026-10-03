@@ -72,32 +72,24 @@ class SimpleMenuPreference(
 			return
 		}
 
-		mPopupWindow?.entries=entries
-		mPopupWindow?.selectedItemIndex=findIndexOfValue(value)
+		mPopupWindow?.entries = entries
+		mPopupWindow?.selectedItemIndex = findIndexOfValue(value)
 
-		val container = mItemView!! // itemView
-			.parent as View // -> list (RecyclerView)
-
-		mPopupWindow?.show(mItemView!!, container, mAnchor?.x?.toInt() ?: 0)
+		mPopupWindow?.show(mItemView!!, mItemView!!.parent as View, mAnchor?.x?.toInt() ?: 0)
 	}
 
 	override fun setEntries(entries: Array<CharSequence?>) {
 		super.setEntries(entries)
-
-		mPopupWindow!!.requestMeasure()
+		mPopupWindow?.requestMeasure()
 	}
 
 	override fun onBindViewHolder(view: PreferenceViewHolder) {
 		super.onBindViewHolder(view)
-
 		mItemView = view.itemView
 		mAnchor = view.itemView.findViewById(android.R.id.empty)
-
-//		checkNotNull(mAnchor) {
-//			"SimpleMenuPreference item layout must contain" + "a view id is android.R.id.empty to support iconSpaceReserved"
-//		}
 	}
-	companion object{
+
+	companion object {
 		@JvmField
 		var isLightFixEnabled: Boolean = false
 	}

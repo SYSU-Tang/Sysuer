@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -133,7 +132,6 @@ fun <T> FilteredEditMenuPreference(
 	)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> EditMenuPreference(
 	modifier: Modifier = Modifier,
@@ -174,13 +172,9 @@ fun <T> EditMenuPreference(
 
 	var summary by remember(initialName) { mutableStateOf(initialName) }
 
-	// 2. 提交逻辑中增加必填校验
-	val commitText: (String, Int?) -> Unit = { textToCommit, explicitIndex ->
+	fun commitText(textToCommit: String = draft.text, explicitIndex: Int? = null) {
 		val trimmed = textToCommit.trim()
-
-		// 如果设置为必填且输入内容为空，则取消提交（可在此处扩展错误提示）
 		if (required && trimmed.isEmpty()) {
-			// 恢复为之前的 summary
 			draft = draft.copy(text = summary)
 		} else {
 			if (trimmed != summary) {
@@ -199,21 +193,10 @@ fun <T> EditMenuPreference(
 				}
 			}
 		}
-	}
-
-	val commit = {
-		if (editing) {
-			val trimmed = draft.text.trim()
-			// 必填项为空时点击确认/失焦不退出编辑态
-			if (required && trimmed.isEmpty()) {
-				// 可在此处触发 Toast 或展示错误提示
-			} else {
-				editing = false
-				fieldHadFocus = false
-				keyboard?.hide()
-				commitText(draft.text, null)
-			}
-		}
+		menuExpanded = false
+		fieldHadFocus = false
+		editing = false
+		keyboard?.hide()
 	}
 
 	LaunchedEffect(editing) {
@@ -237,7 +220,7 @@ fun <T> EditMenuPreference(
 		menuExpanded = false
 	}
 	BackHandler(enabled = editing && !menuExpanded) {
-		commit()
+		commitText()
 	}
 
 	val progress by animateFloatAsState(
@@ -246,13 +229,13 @@ fun <T> EditMenuPreference(
 			label = "editTextScale",
 	)
 	val titleStyle = lerp(
-			MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-			MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+			MaterialTheme.typography.bodyLarge.copy(color = colorScheme.onSurface),
+			MaterialTheme.typography.labelMedium.copy(color = colorScheme.onSurfaceVariant),
 			progress,
 	)
 	val valueStyle = lerp(
-			MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-			MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+			MaterialTheme.typography.labelMedium.copy(color = colorScheme.onSurfaceVariant),
+			MaterialTheme.typography.bodyLarge.copy(color = colorScheme.onSurface),
 			progress,
 	)
 	val error = colorScheme.error
@@ -280,18 +263,18 @@ fun <T> EditMenuPreference(
 			verticalAlignment = Alignment.CenterVertically,
 			modifier = modifier.fillMaxWidth(),
 			shapes = ListItemDefaults.segmentedShapes(index, count),
-			colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+			colors = ListItemDefaults.colors(containerColor = colorScheme.surfaceContainer),
 			leadingContent = { icon?.invoke() },
 			overlineContent = {
 				Text(text = annotatedTitle, style = titleStyle)
 			},
 			trailingContent = if (editing) {
 				{
-					IconButton(onClick = commit) {
+					IconButton(onClick = { commitText() }) {
 						Icon(
 								imageVector = Icons.Rounded.Check,
 								contentDescription = stringResource(R.string.confirm),
-								tint = MaterialTheme.colorScheme.primary,
+								tint = colorScheme.primary,
 						)
 					}
 				}
@@ -307,14 +290,14 @@ fun <T> EditMenuPreference(
 							Icon(
 									imageVector = Icons.Rounded.Close,
 									contentDescription = stringResource(R.string.clear),
-									tint = MaterialTheme.colorScheme.primary,
+									tint = colorScheme.primary,
 							)
 						}
 					} else {
 						Icon(
 								imageVector = Icons.Rounded.Edit,
 								contentDescription = null,
-								tint = MaterialTheme.colorScheme.primary,
+								tint = colorScheme.primary,
 						)
 					}
 				}
@@ -336,10 +319,10 @@ fun <T> EditMenuPreference(
 							onQueryChange?.invoke(it.text)
 						},
 						textStyle = valueStyle,
-						cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+						cursorBrush = SolidColor(colorScheme.primary),
 						singleLine = true,
 						keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-						keyboardActions = KeyboardActions(onDone = { commit() }),
+						keyboardActions = KeyboardActions(onDone = { commitText() }),
 						modifier = Modifier
 							.fillMaxWidth()
 							.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
@@ -359,7 +342,7 @@ fun <T> EditMenuPreference(
 									if (it.hasFocus) {
 										fieldHadFocus = true
 									} else if (fieldHadFocus) {
-										commit()
+										commitText()
 									}
 								}
 							},
@@ -369,7 +352,7 @@ fun <T> EditMenuPreference(
 									Text(
 											placeholder,
 											style = valueStyle,
-											color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+											color = colorScheme.onSurfaceVariant.copy(
 													alpha = 0.5f
 											),
 											maxLines = 1,
@@ -390,14 +373,12 @@ fun <T> EditMenuPreference(
 								text = {
 							Text(
 									entry,
-									style = MaterialTheme.typography.bodyLarge,
-									maxLines = 1,
-									overflow = TextOverflow.Ellipsis,
+									style = MaterialTheme.typography.bodyMedium,
 							)
 						}, onClick = {
-							editing = false
-							fieldHadFocus = false
-							keyboard?.hide()
+//							editing = false
+//							fieldHadFocus = false
+//							keyboard?.hide()
 							draft = draft.copy(text = entry)
 							commitText(entry, i)
 						}, modifier = Modifier.exposedDropdownSize(true)

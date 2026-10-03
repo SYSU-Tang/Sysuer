@@ -70,7 +70,6 @@ import androidx.compose.ui.unit.dp
  * @param requireSelection true 时只能从选项中选择，未匹配的输入无法提交。
  * @param placeholder [name] 为空时显示的提示文本。
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EditFilterPreference(
 	modifier: Modifier = Modifier,
