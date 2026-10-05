@@ -22,7 +22,7 @@ import android.view.View
 /**
  * 月视图基础控件,可自由继承实现
  */
-abstract class MonthView(context: Context?) : BaseMonthView(context) {
+abstract class MonthView(context: Context) : BaseMonthView(context) {
 	override fun onDraw(canvas: Canvas) {
 		if (mLineCount != 0) {
 			mItemWidth = (width - mDelegate.calendarPaddingLeft - mDelegate.calendarPaddingRight) / 7
@@ -31,9 +31,9 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 			var d = 0
 			(0..<mLineCount).forEach { i ->
 				(0..6).forEach { j ->
-					val calendar = mItems!![d]
+					val calendar = mItems[d]
 					if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ONLY_CURRENT_MONTH) {
-						if (d > mItems!!.size - mNextDiff) {
+						if (d > mItems.size - mNextDiff) {
 							return
 						}
 						if (!calendar.isCurrentMonth) {
@@ -57,26 +57,26 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 	 * 开始绘制
 	 * 
 	 * @param canvas   canvas
-	 * @param calendar 对应日历
+	 * @param sysuerCalendar 对应日历
 	 * @param i        i
 	 * @param j        j
 	 * @param d        d
 	 */
-	private fun draw(canvas: Canvas, calendar: Calendar, i: Int, j: Int, d: Int) {
+	private fun draw(canvas: Canvas, sysuerCalendar: SysuerCalendar, i: Int, j: Int, d: Int) {
 		val x = j * mItemWidth + mDelegate.calendarPaddingLeft
 		val y = i * mItemHeight
 		onLoopStart(x, y)
 		val isSelected = d == mCurrentItem
-		if (calendar.hasScheme()) { //标记的日子
+		if (sysuerCalendar.hasScheme()) { //标记的日子
 			var isDrawSelected = false //是否继续绘制选中的 onDrawScheme
-			if (isSelected) isDrawSelected = onDrawSelected(canvas, calendar, x, y, true)
+			if (isSelected) isDrawSelected = onDrawSelected(canvas, sysuerCalendar, x, y, true)
 			if (isDrawSelected || !isSelected) { //将画笔设置为标记颜色
-				mSchemePaint.setColor(if (calendar.schemeColor != 0) calendar.schemeColor else mDelegate.schemeThemeColor)
-				onDrawScheme(canvas, calendar, x, y)
+				mSchemePaint.setColor(if (sysuerCalendar.schemeColor != 0) sysuerCalendar.schemeColor else mDelegate.schemeThemeColor)
+				onDrawScheme(canvas, sysuerCalendar, x, y)
 			}
 		}
-		else if (isSelected) onDrawSelected(canvas, calendar, x, y, false)
-		onDrawText(canvas, calendar, x, y, calendar.hasScheme(), isSelected)
+		else if (isSelected) onDrawSelected(canvas, sysuerCalendar, x, y, false)
+		onDrawText(canvas, sysuerCalendar, x, y, sysuerCalendar.hasScheme(), isSelected)
 	}
 	
 	override fun onClick(v: View?) {
@@ -85,7 +85,7 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 		if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ONLY_CURRENT_MONTH && !calendar.isCurrentMonth) return
 		
 		if (onCalendarIntercept(calendar)) {
-			mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
+			mDelegate.mCalendarInterceptListener?.onCalendarInterceptClick(calendar, true)
 			return
 		}
 		
@@ -95,7 +95,7 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 			return
 		}
 		
-		mCurrentItem = mItems!!.indexOf(calendar)
+		mCurrentItem = mItems.indexOf(calendar)
 		
 		if (!calendar.isCurrentMonth && mMonthViewPager != null) {
 			val cur = mMonthViewPager!!.currentItem
@@ -105,7 +105,7 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 		mDelegate.mInnerListener?.onMonthDateSelected(calendar, true)
 		if (mParentLayout != null) {
 			if (calendar.isCurrentMonth) {
-				mParentLayout!!.updateSelectPosition(mItems!!.indexOf(calendar))
+				mParentLayout!!.updateSelectPosition(mItems.indexOf(calendar))
 			}
 			else {
 				mParentLayout!!.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
@@ -125,7 +125,7 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 			return false
 		}
 		if (onCalendarIntercept(calendar)) {
-			mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
+			mDelegate.mCalendarInterceptListener?.onCalendarInterceptClick(calendar, true)
 			return false
 		}
 		val isCalendarInRange = isInRange(calendar)
@@ -138,7 +138,7 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 			mDelegate.mCalendarLongClickListener?.onCalendarLongClick(calendar)
 			return true
 		}
-		mCurrentItem = mItems!!.indexOf(calendar)
+		mCurrentItem = mItems.indexOf(calendar)
 		if (!calendar.isCurrentMonth && mMonthViewPager != null) {
 			val cur = mMonthViewPager!!.currentItem
 			val position = if (mCurrentItem < 7) cur - 1 else cur + 1
@@ -146,7 +146,7 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 		}
 		mDelegate.mInnerListener?.onMonthDateSelected(calendar, true)
 		if (mParentLayout != null) {
-			if (calendar.isCurrentMonth) mParentLayout!!.updateSelectPosition(mItems!!.indexOf(calendar))
+			if (calendar.isCurrentMonth) mParentLayout!!.updateSelectPosition(mItems.indexOf(calendar))
 			else mParentLayout!!.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 		}
 		mDelegate.mCalendarSelectListener?.onCalendarSelect(calendar, true)
@@ -160,14 +160,14 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 	 * 绘制选中的日期
 	 * 
 	 * @param canvas    canvas
-	 * @param calendar  日历日历calendar
+	 * @param sysuerCalendar  日历日历calendar
 	 * @param x         日历Card x起点坐标
 	 * @param y         日历Card y起点坐标
 	 * @param hasScheme hasScheme 非标记的日期
 	 * @return 是否绘制onDrawScheme，true or false
 	 */
 	protected abstract fun onDrawSelected(canvas: Canvas,
-	                                      calendar: Calendar,
+	                                      sysuerCalendar: SysuerCalendar,
 	                                      x: Int,
 	                                      y: Int,
 	                                      hasScheme: Boolean): Boolean
@@ -176,24 +176,24 @@ abstract class MonthView(context: Context?) : BaseMonthView(context) {
 	 * 绘制标记的日期,这里可以是背景色，标记色什么的
 	 * 
 	 * @param canvas   canvas
-	 * @param calendar 日历calendar
+	 * @param sysuerCalendar 日历calendar
 	 * @param x        日历Card x起点坐标
 	 * @param y        日历Card y起点坐标
 	 */
-	protected abstract fun onDrawScheme(canvas: Canvas, calendar: Calendar, x: Int, y: Int)
+	protected abstract fun onDrawScheme(canvas: Canvas, sysuerCalendar: SysuerCalendar, x: Int, y: Int)
 	
 	/**
 	 * 绘制日历文本
 	 * 
 	 * @param canvas     canvas
-	 * @param calendar   日历calendar
+	 * @param sysuerCalendar   日历calendar
 	 * @param x          日历Card x起点坐标
 	 * @param y          日历Card y起点坐标
 	 * @param hasScheme  是否是标记的日期
 	 * @param isSelected 是否选中
 	 */
 	protected abstract fun onDrawText(canvas: Canvas,
-	                                  calendar: Calendar,
+	                                  sysuerCalendar: SysuerCalendar,
 	                                  x: Int,
 	                                  y: Int,
 	                                  hasScheme: Boolean,

@@ -29,8 +29,8 @@ import kotlin.math.abs
  * 基本的日历View，派生出MonthView 和 WeekView
  * Created by huanghaibin on 2018/1/23.
  */
-abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
-	View(context, attrs), View.OnClickListener, OnLongClickListener {
+abstract class BaseView(context: Context, attrs: AttributeSet? = null) : View(context, attrs),
+	View.OnClickListener, OnLongClickListener {
 	/**
 	 * 当前月份日期的笔
 	 */
@@ -41,7 +41,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isFakeBoldText = true
 		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
 	}
-	
+
 	/**
 	 * 其它月份日期颜色
 	 */
@@ -52,7 +52,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isFakeBoldText = true
 		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
 	}
-	
+
 	/**
 	 * 当前月份农历文本颜色
 	 */
@@ -60,7 +60,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isAntiAlias = true
 		textAlign = Paint.Align.CENTER
 	}
-	
+
 	/**
 	 * 当前月份农历文本颜色
 	 */
@@ -68,7 +68,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isAntiAlias = true
 		textAlign = Paint.Align.CENTER
 	}
-	
+
 	/**
 	 * 其它月份农历文本颜色
 	 */
@@ -76,7 +76,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isAntiAlias = true
 		textAlign = Paint.Align.CENTER
 	}
-	
+
 	/**
 	 * 其它月份农历文本颜色
 	 */
@@ -84,17 +84,18 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isAntiAlias = true
 		textAlign = Paint.Align.CENTER
 	}
-	
+
 	/**
 	 * 标记的日期背景颜色画笔
 	 */
-	@JvmField protected val mSchemePaint: Paint = Paint().apply {
+	@JvmField
+	protected val mSchemePaint: Paint = Paint().apply {
 		isAntiAlias = true
 		style = Paint.Style.FILL
 		strokeWidth = 2f
 		setColor(-0x101011)
 	}
-	
+
 	/**
 	 * 被选择的日期背景色
 	 */
@@ -103,7 +104,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		style = Paint.Style.FILL
 		strokeWidth = 2f
 	}
-	
+
 	/**
 	 * 标记的文本画笔
 	 */
@@ -115,7 +116,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isFakeBoldText = true
 		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
 	}
-	
+
 	/**
 	 * 选中的文本画笔
 	 */
@@ -127,7 +128,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isFakeBoldText = true
 		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
 	}
-	
+
 	/**
 	 * 当前日期文本颜色画笔
 	 */
@@ -138,7 +139,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isFakeBoldText = true
 		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
 	}
-	
+
 	/**
 	 * 当前日期文本颜色画笔
 	 */
@@ -149,59 +150,68 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		isFakeBoldText = true
 		textSize = CalendarUtil.dipToPx(context, TEXT_SIZE.toFloat()).toFloat()
 	}
-	
+
 	/**
 	 * 日历项
 	 */
-	@JvmField var mItems: MutableList<Calendar>? = null
-	
+	@JvmField
+	var mItems: MutableList<SysuerCalendar> = mutableListOf()
+
 	/**
 	 * 每一项的高度
 	 */
-	@JvmField protected var mItemHeight: Int = 0
-	
+	@JvmField
+	protected var mItemHeight: Int = 0
+
 	/**
 	 * 每一项的宽度
 	 */
-	@JvmField protected var mItemWidth: Int = 0
-	
+	@JvmField
+	protected var mItemWidth: Int = 0
+
 	/**
 	 * Text的基线
 	 */
 	protected var mTextBaseLine: Float = 0f
-	
+
 	/**
 	 * 点击的x、y坐标
 	 */
-	@JvmField protected var mX: Float = 0f
-	@JvmField protected var mY: Float = 0f
+	@JvmField
+	protected var mX: Float = 0f
+
+	@JvmField
+	protected var mY: Float = 0f
 	lateinit var mDelegate: CalendarViewDelegate
-	
+
 	/**
 	 * 日历布局，需要在日历下方放自己的布局
 	 */
-	@JvmField var mParentLayout: CalendarLayout? = null
-	
+	@JvmField
+	var mParentLayout: CalendarLayout? = null
+
 	/**
 	 * 是否点击
 	 */
-	@JvmField var isClick: Boolean = true
-	
+	@JvmField
+	var isClick: Boolean = true
+
 	/**
 	 * 当前点击项
 	 */
-	@JvmField var mCurrentItem: Int = -1
-	
+	@JvmField
+	var mCurrentItem: Int = -1
+
 	/**
 	 * 周起始
 	 */
 	var mWeekStartWidth: Int = 0
-	
+
 	init {
 		setOnClickListener(this)
 		setOnLongClickListener(this)
 	}
-	
+
 	/**
 	 * 初始化所有UI配置
 	 * 
@@ -216,7 +226,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		updateItemHeight()
 		initPaint()
 	}
-	
+
 	fun updateStyle() {
 		mCurDayTextPaint.setColor(mDelegate.curDayTextColor)
 		mCurDayLunarTextPaint.setColor(mDelegate.curDayLunarTextColor)
@@ -234,55 +244,56 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		mCurDayTextPaint.textSize = mDelegate.dayTextSize.toFloat()
 		mSchemeTextPaint.textSize = mDelegate.dayTextSize.toFloat()
 		mSelectTextPaint.textSize = mDelegate.dayTextSize.toFloat()
-		
+
 		mCurMonthLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
 		mSelectedLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
 		mCurDayLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
 		mOtherMonthLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
 		mSchemeLunarTextPaint.textSize = mDelegate.lunarTextSize.toFloat()
-		
+
 		mSelectedPaint.style = Paint.Style.FILL
 		mSelectedPaint.setColor(mDelegate.selectedThemeColor)
 	}
-	
+
 	open fun updateItemHeight() {
 		mItemHeight = mDelegate.calendarItemHeight
 		val metrics = mCurMonthTextPaint.getFontMetrics()
 		mTextBaseLine = mItemHeight / 2 - metrics.descent + (metrics.bottom - metrics.top) / 2
 	}
-	
+
 	/**
 	 * 移除事件
 	 */
 	fun removeSchemes() {
-		mItems!!.forEach {
+		mItems.forEach {
 			it.scheme = ""
 			it.schemeColor = 0
-			it.schemes = null
+			it.schemes.clear()
 		}
 	}
-	
+
 	/**
 	 * 添加事件标记，来自Map
 	 */
 	fun addSchemesFromMap() {
-		if (mDelegate.mSchemeDatesMap != null && mDelegate.mSchemeDatesMap.isNotEmpty()) {
-			mItems!!.forEach {
-				if (mDelegate.mSchemeDatesMap.containsKey("$it")) {
-					val d = mDelegate.mSchemeDatesMap["$it"] ?: return@forEach
-					it.scheme = if (TextUtils.isEmpty(d.scheme)) mDelegate.schemeText else d.scheme
+		val mSchemeDatesMap = mDelegate.mSchemeDatesMap
+		if (!mSchemeDatesMap.isEmpty()) {
+			mItems.forEach {
+				if (mSchemeDatesMap.containsKey("$it")) {
+					val d = mSchemeDatesMap["$it"] ?: return@forEach
+					it.scheme =
+						if (TextUtils.isEmpty(d.scheme)) mDelegate.schemeText.toString() else d.scheme
 					it.schemeColor = d.schemeColor
 					it.schemes = d.schemes
-				}
-				else {
+				} else {
 					it.scheme = ""
 					it.schemeColor = 0
-					it.schemes = null
+					it.schemes.clear()
 				}
 			}
 		}
 	}
-	
+
 	override fun onTouchEvent(event: MotionEvent): Boolean {
 		if (event.pointerCount > 1) return false
 		when (event.action) {
@@ -291,6 +302,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 				mY = event.y
 				isClick = true
 			}
+
 			MotionEvent.ACTION_MOVE -> {
 				val mDY: Float
 				if (isClick) {
@@ -298,6 +310,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 					isClick = abs(mDY) <= 50
 				}
 			}
+
 			MotionEvent.ACTION_UP -> {
 				mX = event.x
 				mY = event.y
@@ -305,7 +318,7 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		}
 		return super.onTouchEvent(event)
 	}
-	
+
 	/**
 	 * 开始绘制前的钩子，这里做一些初始化的操作，每次绘制只调用一次，性能高效
 	 * 没有需要可忽略不实现
@@ -315,21 +328,20 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 	 */
 	protected open fun onPreviewHook() {
 	}
-	
+
 	/**
 	 * 是否是选中的
 	 *
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 * @return true or false
 	 */
-	protected fun isSelected(calendar: Calendar?): Boolean =
-		mItems != null && mItems!!.indexOf(calendar!!) == mCurrentItem
-	
+	protected fun isSelected(sysuerCalendar: SysuerCalendar): Boolean = mItems.indexOf(sysuerCalendar) == mCurrentItem
+
 	/**
 	 * 更新事件
 	 */
 	fun update() {
-		if (mDelegate.mSchemeDatesMap == null || mDelegate.mSchemeDatesMap.isEmpty()) { //清空操作
+		if (mDelegate.mSchemeDatesMap.isEmpty()) { //清空操作
 			removeSchemes()
 			invalidate()
 			return
@@ -337,29 +349,32 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		addSchemesFromMap()
 		invalidate()
 	}
-	
+
 	/**
 	 * 是否拦截日期，此设置续设置mCalendarInterceptListener
 	 *
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 * @return 是否拦截日期
 	 */
-	protected fun onCalendarIntercept(calendar: Calendar?): Boolean =
-		mDelegate.mCalendarInterceptListener != null && mDelegate.mCalendarInterceptListener.onCalendarIntercept(calendar)
-	
+	protected fun onCalendarIntercept(sysuerCalendar: SysuerCalendar?): Boolean =
+		mDelegate.mCalendarInterceptListener?.onCalendarIntercept(
+				sysuerCalendar
+		) ?: false
+
 	/**
 	 * 是否在日期范围内
 	 *
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 * @return 是否在日期范围内
 	 */
-	protected fun isInRange(calendar: Calendar?): Boolean = CalendarUtil.isCalendarInRange(calendar, mDelegate)
-	
+	protected fun isInRange(sysuerCalendar: SysuerCalendar): Boolean =
+		CalendarUtil.isCalendarInRange(sysuerCalendar, mDelegate)
+
 	/**
 	 * 跟新当前日期
 	 */
 	abstract fun updateCurrentDate()
-	
+
 	/**
 	 * 销毁
 	 */
@@ -370,13 +385,13 @@ abstract class BaseView(context: Context?, attrs: AttributeSet? = null) :
 		get() = mDelegate.calendarPaddingLeft
 	protected val calendarPaddingRight: Int
 		get() = mDelegate.calendarPaddingRight
-	
+
 	/**
 	 * 初始化画笔相关
 	 */
 	protected fun initPaint() {
 	}
-	
+
 	companion object {
 		/**
 		 * 字体大小

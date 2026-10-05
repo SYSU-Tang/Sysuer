@@ -21,33 +21,36 @@ import android.content.Context
  * 月视图基础控件,可自由继承实现
  * 可通过此扩展各种视图如：MonthView、RangeMonthView、MultiMonthView
  */
-abstract class BaseMonthView(context: Context?) : BaseView(context) {
+abstract class BaseMonthView(context: Context) : BaseView(context) {
 	/**
 	 * 当前日历卡年份
 	 */
 	protected var mYear: Int = 0
-	
+
 	/**
 	 * 当前日历卡月份
 	 */
 	protected var mMonth: Int = 0
-	
+
 	/**
 	 * 日历的行数
 	 */
-	@JvmField protected var mLineCount: Int = 0
-	
+	@JvmField
+	protected var mLineCount: Int = 0
+
 	/**
 	 * 日历高度
 	 */
 	protected var mHeight: Int = 0
-	
+
 	/**
 	 * 下个月偏移的数量
 	 */
-	@JvmField protected var mNextDiff: Int = 0
-	@JvmField var mMonthViewPager: MonthViewPager? = null
-	
+	@JvmField
+	protected var mNextDiff: Int = 0
+	@JvmField
+	var mMonthViewPager: MonthViewPager? = null
+
 	/**
 	 * 初始化日期
 	 * 
@@ -58,9 +61,15 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 		mYear = year
 		mMonth = month
 		initCalendar()
-		mHeight = CalendarUtil.getMonthViewHeight(year, month, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
+		mHeight = CalendarUtil.getMonthViewHeight(
+				year,
+				month,
+				mItemHeight,
+				mDelegate.weekStart,
+				mDelegate.monthViewShowMode
+		)
 	}
-	
+
 	/**
 	 * 初始化日历
 	 */
@@ -68,19 +77,26 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 		mNextDiff = CalendarUtil.getMonthEndDiff(mYear, mMonth, mDelegate.weekStart)
 		val preDiff = CalendarUtil.getMonthViewStartDiff(mYear, mMonth, mDelegate.weekStart)
 		val monthDayCount = CalendarUtil.getMonthDaysCount(mYear, mMonth)
-		mItems = CalendarUtil.initCalendarForMonthView(mYear, mMonth, mDelegate.currentDay, mDelegate.weekStart)
-		mCurrentItem = (if (mItems!!.contains(mDelegate.currentDay)) mItems!!.indexOf(mDelegate.currentDay)
-		else mItems!!.indexOf(mDelegate.mSelectedCalendar))
-		
-		if (mCurrentItem > 0 && mDelegate.mCalendarInterceptListener != null && mDelegate.mCalendarInterceptListener.onCalendarIntercept(mDelegate.mSelectedCalendar)) mCurrentItem = -1
-		
+		mItems = CalendarUtil.initCalendarForMonthView(
+				mYear,
+				mMonth,
+				mDelegate.currentDay,
+				mDelegate.weekStart
+		)
+		mCurrentItem =
+			(if (mItems.contains(mDelegate.currentDay)) mItems.indexOf(mDelegate.currentDay)
+			else mItems.indexOf(mDelegate.mSelectedSysuerCalendar))
+
+		if (mCurrentItem > 0 && mDelegate.mCalendarInterceptListener?.onCalendarIntercept(mDelegate.mSelectedSysuerCalendar) == true) mCurrentItem =
+			-1
+
 		mLineCount = if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ALL_MONTH) 6
 		else (preDiff + monthDayCount + mNextDiff) / 7
 		addSchemesFromMap()
 		invalidate()
 	}
-	
-	protected val index: Calendar?
+
+	protected val index: SysuerCalendar?
 		/**
 		 * 获取点击选中的日期
 		 * 
@@ -91,87 +107,119 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 				if (mX <= mDelegate.calendarPaddingLeft || mX >= width - mDelegate.calendarPaddingRight) {
 					onClickCalendarPadding()
 					null
-				}
-				else mItems?.getOrNull(mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf{ it < 7 }
+				} else mItems.getOrNull(mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
 					?: 6))
-			}
-			else null
+			} else null
 		}
-	
+
 	private fun onClickCalendarPadding() {
 		if (mDelegate.mClickCalendarPaddingListener != null) {
-			val position = mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf{ it < 7 }
-				?: 6) // 选择项
-			if (position in mItems!!.indices) mDelegate.mClickCalendarPaddingListener.onClickCalendarPadding(mX, mY, true, mItems!![position], getClickCalendarPaddingObject(mX, mY, mItems!![position]))
+			val position =
+				mY.toInt() / mItemHeight * 7 + (((mX - mDelegate.calendarPaddingLeft).toInt() / mItemWidth).takeIf { it < 7 }
+					?: 6) // 选择项
+			if (position in mItems.indices) mDelegate.mClickCalendarPaddingListener?.onClickCalendarPadding(
+					mX,
+					mY,
+					true,
+					mItems[position],
+					getClickCalendarPaddingObject(mX, mY, mItems[position])
+			)
 		}
 	}
-	
+
 	/**
 	 * 获取点击事件处的对象
 	 * 
 	 * @param x                x
 	 * @param y                y
-	 * @param adjacentCalendar adjacent calendar
+	 * @param adjacentSysuerCalendar adjacent calendar
 	 * @return obj can as null
 	 */
-	protected fun getClickCalendarPaddingObject(x: Float,
-	                                            y: Float,
-	                                            adjacentCalendar: Calendar?): Any? = null
-	
+	protected fun getClickCalendarPaddingObject(
+		x: Float, y: Float, adjacentSysuerCalendar: SysuerCalendar?
+	): Any? = null
+
 	/**
 	 * 记录已经选择的日期
 	 * 
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 */
-	fun setSelectedCalendar(calendar: Calendar) {
-		mCurrentItem = mItems!!.indexOf(calendar)
+	fun setSelectedCalendar(sysuerCalendar: SysuerCalendar) {
+		mCurrentItem = mItems.indexOf(sysuerCalendar)
 	}
-	
+
 	/**
 	 * 更新显示模式
 	 */
 	fun updateShowMode() {
-		mLineCount = CalendarUtil.getMonthViewLineCount(mYear, mMonth, mDelegate.weekStart, mDelegate.monthViewShowMode)
-		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
+		mLineCount = CalendarUtil.getMonthViewLineCount(
+				mYear,
+				mMonth,
+				mDelegate.weekStart,
+				mDelegate.monthViewShowMode
+		)
+		mHeight = CalendarUtil.getMonthViewHeight(
+				mYear,
+				mMonth,
+				mItemHeight,
+				mDelegate.weekStart,
+				mDelegate.monthViewShowMode
+		)
 		invalidate()
 	}
-	
+
 	/**
 	 * 更新周起始
 	 */
 	fun updateWeekStart() {
 		initCalendar()
-		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
+		mHeight = CalendarUtil.getMonthViewHeight(
+				mYear,
+				mMonth,
+				mItemHeight,
+				mDelegate.weekStart,
+				mDelegate.monthViewShowMode
+		)
 	}
-	
+
 	override fun updateItemHeight() {
 		super.updateItemHeight()
-		mHeight = CalendarUtil.getMonthViewHeight(mYear, mMonth, mItemHeight, mDelegate.weekStart, mDelegate.monthViewShowMode)
+		mHeight = CalendarUtil.getMonthViewHeight(
+				mYear,
+				mMonth,
+				mItemHeight,
+				mDelegate.weekStart,
+				mDelegate.monthViewShowMode
+		)
 	}
-	
+
 	override fun updateCurrentDate() {
-		if (mItems != null) {
-			if (mItems!!.contains(mDelegate.currentDay)) {
-				for (it in mItems) {    //添加操作
-					it.isCurrentDay = false
-				}
-				mItems!![mItems!!.indexOf(mDelegate.currentDay)].isCurrentDay = true
+		if (mItems.contains(mDelegate.currentDay)) {
+			for (it in mItems) {    //添加操作
+				it.isCurrentDay = false
 			}
-			invalidate()
+			mItems[mItems.indexOf(mDelegate.currentDay)].isCurrentDay = true
 		}
+		invalidate()
 	}
-	
+
 	/**
 	 * 获取选中的下标
 	 * 
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 * @return 获取选中的下标
 	 */
-	fun getSelectedIndex(calendar: Calendar?): Int? = mItems?.indexOf(calendar)
+	fun getSelectedIndex(sysuerCalendar: SysuerCalendar?): Int = mItems.indexOf(sysuerCalendar)
 	override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-		super.onMeasure(widthMeasureSpec, if (mLineCount != 0) MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY) else heightMeasureSpec)
+		super.onMeasure(
+				widthMeasureSpec,
+				if (mLineCount != 0) MeasureSpec.makeMeasureSpec(
+						mHeight,
+						MeasureSpec.EXACTLY
+				) else heightMeasureSpec
+		)
 	}
-	
+
 	/**
 	 * 循环绘制开始的回调，不需要可忽略
 	 * 绘制每个日历项的循环，用来计算baseLine、圆心坐标等都可以在这里实现
@@ -181,7 +229,7 @@ abstract class BaseMonthView(context: Context?) : BaseView(context) {
 	 */
 	protected fun onLoopStart(x: Int, y: Int) {
 	}
-	
+
 	override fun onDestroy() {
 	}
 }

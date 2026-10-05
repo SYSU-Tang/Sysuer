@@ -29,36 +29,41 @@ internal class YearViewAdapter(context: Context) : BaseRecyclerAdapter<Month?>(c
 	fun setup(delegate: CalendarViewDelegate) {
 		mDelegate = delegate
 	}
-	
+
 	fun setYearViewSize(width: Int, height: Int) {
 		mItemWidth = width
 		mItemHeight = height
 	}
-	
+
 	override fun onCreateDefaultViewHolder(parent: ViewGroup?, type: Int): RecyclerView.ViewHolder {
 		var yearView: YearView?
 		if (TextUtils.isEmpty(mDelegate!!.yearViewClassPath)) yearView = DefaultYearView(mContext)
 		else try {
-			val constructor: Constructor<*> = mDelegate!!.yearViewClass
-				.getConstructor(Context::class.java)
-			yearView = constructor.newInstance(mContext) as YearView
+			val constructor: Constructor<*>? =
+				mDelegate!!.yearViewClass.getConstructor(Context::class.java)
+			yearView = constructor?.newInstance(mContext) as YearView
 		} catch (_: Exception) {
 			yearView = DefaultYearView(mContext)
 		}
-		yearView.setLayoutParams(RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT))
+		yearView.setLayoutParams(
+				RecyclerView.LayoutParams(
+						RecyclerView.LayoutParams.MATCH_PARENT,
+						RecyclerView.LayoutParams.MATCH_PARENT
+				)
+		)
 		return YearViewHolder(yearView, mDelegate)
 	}
-	
+
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, item: Month?, position: Int) {
 		val view = (holder as YearViewHolder).mYearView
 		view.init(item?.year ?: 0, item?.month ?: 0)
 		view.measureSize(mItemWidth, mItemHeight)
 	}
-	
+
 	private class YearViewHolder(itemView: View, delegate: CalendarViewDelegate?) :
 		RecyclerView.ViewHolder(itemView) {
 		val mYearView: YearView = itemView as YearView
-		
+
 		init {
 			mYearView.setup(delegate)
 		}

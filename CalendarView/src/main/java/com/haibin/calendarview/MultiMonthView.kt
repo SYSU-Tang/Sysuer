@@ -23,7 +23,7 @@ import android.view.View
  * 多选月视图
  * Created by huanghaibin on 2018/9/11.
  */
-abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
+abstract class MultiMonthView(context: Context) : BaseMonthView(context) {
 	override fun onDraw(canvas: Canvas) {
 		if (mLineCount != 0) {
 			mItemWidth = (width - mDelegate.calendarPaddingLeft - mDelegate.calendarPaddingRight) / 7
@@ -32,9 +32,9 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 			var d = 0
 			(0..<mLineCount).forEach { i ->
 				(0..6).forEach { j ->
-					val calendar = mItems!![d]
+					val calendar = mItems[d]
 					if (mDelegate.monthViewShowMode == CalendarViewDelegate.MODE_ONLY_CURRENT_MONTH) {
-						if (d > mItems!!.size - mNextDiff) return
+						if (d > mItems.size - mNextDiff) return
 						if (!calendar.isCurrentMonth) {
 							++d
 							return@forEach
@@ -54,40 +54,40 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 	 * 开始绘制
 	 * 
 	 * @param canvas   canvas
-	 * @param calendar 对应日历
+	 * @param sysuerCalendar 对应日历
 	 * @param i        i
 	 * @param j        j
 	 */
-	private fun draw(canvas: Canvas?, calendar: Calendar, calendarIndex: Int, i: Int, j: Int) {
+	private fun draw(canvas: Canvas?, sysuerCalendar: SysuerCalendar, calendarIndex: Int, i: Int, j: Int) {
 		val x = j * mItemWidth + mDelegate.calendarPaddingLeft
 		val y = i * mItemHeight
 		onLoopStart(x, y)
-		val isSelected = isCalendarSelected(calendar)
-		val isPreSelected = isSelectPreCalendar(calendar, calendarIndex)
-		val isNextSelected = isSelectNextCalendar(calendar, calendarIndex)
+		val isSelected = isCalendarSelected(sysuerCalendar)
+		val isPreSelected = isSelectPreCalendar(sysuerCalendar, calendarIndex)
+		val isNextSelected = isSelectNextCalendar(sysuerCalendar, calendarIndex)
 		
-		if (calendar.hasScheme()) { //标记的日子
+		if (sysuerCalendar.hasScheme()) { //标记的日子
 			val isDrawSelected =  //是否继续绘制选中的onDrawScheme
-				if (isSelected) onDrawSelected(canvas, calendar, x, y, true, isPreSelected, isNextSelected) else false
+				if (isSelected) onDrawSelected(canvas, sysuerCalendar, x, y, true, isPreSelected, isNextSelected) else false
 			if (isDrawSelected || !isSelected) { //将画笔设置为标记颜色
-				mSchemePaint.setColor(if (calendar.schemeColor != 0) calendar.schemeColor else mDelegate.schemeThemeColor)
-				onDrawScheme(canvas, calendar, x, y, true)
+				mSchemePaint.setColor(if (sysuerCalendar.schemeColor != 0) sysuerCalendar.schemeColor else mDelegate.schemeThemeColor)
+				onDrawScheme(canvas, sysuerCalendar, x, y, true)
 			}
 		}
 		else {
-			if (isSelected) onDrawSelected(canvas, calendar, x, y, false, isPreSelected, isNextSelected)
+			if (isSelected) onDrawSelected(canvas, sysuerCalendar, x, y, false, isPreSelected, isNextSelected)
 		}
-		onDrawText(canvas, calendar, x, y, calendar.hasScheme(), isSelected)
+		onDrawText(canvas, sysuerCalendar, x, y, sysuerCalendar.hasScheme(), isSelected)
 	}
 	
 	/**
 	 * 日历是否被选中
 	 * 
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 * @return 日历是否被选中
 	 */
-	protected fun isCalendarSelected(calendar: Calendar): Boolean {
-		return !onCalendarIntercept(calendar) && mDelegate.mSelectedCalendars.containsKey("$calendar")
+	protected fun isCalendarSelected(sysuerCalendar: SysuerCalendar): Boolean {
+		return !onCalendarIntercept(sysuerCalendar) && mDelegate.mSelectedCalendars.containsKey("$sysuerCalendar")
 	}
 	
 	override fun onClick(v: View?) {
@@ -109,13 +109,13 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 			else {
 				if (mDelegate.mSelectedCalendars.size >= mDelegate.maxMultiSelectSize) {
 					if (mDelegate.mCalendarMultiSelectListener != null) {
-						mDelegate.mCalendarMultiSelectListener.onMultiSelectOutOfSize(calendar, mDelegate.maxMultiSelectSize)
+						mDelegate.mCalendarMultiSelectListener?.onMultiSelectOutOfSize(calendar, mDelegate.maxMultiSelectSize)
 					}
 					return
 				}
 				mDelegate.mSelectedCalendars[key] = calendar
 			}
-			mCurrentItem = mItems!!.indexOf(calendar)
+			mCurrentItem = mItems.indexOf(calendar)
 			if (!calendar.isCurrentMonth && mMonthViewPager != null) {
 				val cur = mMonthViewPager!!.currentItem
 				val position = if (mCurrentItem < 7) cur - 1 else cur + 1
@@ -124,7 +124,7 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 			
 			mDelegate.mInnerListener?.onMonthDateSelected(calendar, true)
 			if (mParentLayout != null) {
-				if (calendar.isCurrentMonth) mParentLayout!!.updateSelectPosition(mItems!!.indexOf(calendar))
+				if (calendar.isCurrentMonth) mParentLayout!!.updateSelectPosition(mItems.indexOf(calendar))
 				else mParentLayout!!.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 			}
 			mDelegate.mCalendarMultiSelectListener?.onCalendarMultiSelect(calendar, mDelegate.mSelectedCalendars.size, mDelegate.maxMultiSelectSize)
@@ -138,44 +138,44 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 	/**
 	 * 上一个日期是否选中
 	 * 
-	 * @param calendar 当前日期
+	 * @param sysuerCalendar 当前日期
 	 * @param calendarIndex 当前位置
 	 * @return 上一个日期是否选中
 	 */
-	protected fun isSelectPreCalendar(calendar: Calendar, calendarIndex: Int): Boolean {
-		val preCalendar: Calendar
+	protected fun isSelectPreCalendar(sysuerCalendar: SysuerCalendar, calendarIndex: Int): Boolean {
+		val preSysuerCalendar: SysuerCalendar
 		if (calendarIndex == 0) {
-			preCalendar = CalendarUtil.getPreCalendar(calendar)
-			mDelegate.updateCalendarScheme(preCalendar)
+			preSysuerCalendar = CalendarUtil.getPreCalendar(sysuerCalendar)
+			mDelegate.updateCalendarScheme(preSysuerCalendar)
 		}
-		else preCalendar = mItems!![calendarIndex - 1]
+		else preSysuerCalendar = mItems[calendarIndex - 1]
 		
-		return isCalendarSelected(preCalendar)
+		return isCalendarSelected(preSysuerCalendar)
 	}
 	
 	/**
 	 * 下一个日期是否选中
 	 * 
-	 * @param calendar 当前日期
+	 * @param sysuerCalendar 当前日期
 	 * @param calendarIndex 当前位置
 	 * @return 下一个日期是否选中
 	 */
-	protected fun isSelectNextCalendar(calendar: Calendar, calendarIndex: Int): Boolean {
-		val nextCalendar: Calendar
-		if (calendarIndex == mItems!!.size - 1) {
-			nextCalendar = CalendarUtil.getNextCalendar(calendar)
-			mDelegate.updateCalendarScheme(nextCalendar)
+	protected fun isSelectNextCalendar(sysuerCalendar: SysuerCalendar, calendarIndex: Int): Boolean {
+		val nextSysuerCalendar: SysuerCalendar
+		if (calendarIndex == mItems.size - 1) {
+			nextSysuerCalendar = CalendarUtil.getNextCalendar(sysuerCalendar)
+			mDelegate.updateCalendarScheme(nextSysuerCalendar)
 		}
-		else nextCalendar = mItems!![calendarIndex + 1]
+		else nextSysuerCalendar = mItems[calendarIndex + 1]
 		
-		return isCalendarSelected(nextCalendar)
+		return isCalendarSelected(nextSysuerCalendar)
 	}
 	
 	/**
 	 * 绘制选中的日期
 	 * 
 	 * @param canvas         canvas
-	 * @param calendar       日历日历calendar
+	 * @param sysuerCalendar       日历日历calendar
 	 * @param x              日历Card x起点坐标
 	 * @param y              日历Card y起点坐标
 	 * @param hasScheme      hasScheme 非标记的日期
@@ -184,7 +184,7 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 	 * @return 是否继续绘制onDrawScheme，true or false
 	 */
 	protected abstract fun onDrawSelected(canvas: Canvas?,
-	                                      calendar: Calendar?,
+	                                      sysuerCalendar: SysuerCalendar?,
 	                                      x: Int,
 	                                      y: Int,
 	                                      hasScheme: Boolean,
@@ -195,13 +195,13 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 	 * 绘制标记的日期,这里可以是背景色，标记色什么的
 	 * 
 	 * @param canvas     canvas
-	 * @param calendar   日历calendar
+	 * @param sysuerCalendar   日历calendar
 	 * @param x          日历Card x起点坐标
 	 * @param y          日历Card y起点坐标
 	 * @param isSelected 是否选中
 	 */
 	protected abstract fun onDrawScheme(canvas: Canvas?,
-	                                    calendar: Calendar?,
+	                                    sysuerCalendar: SysuerCalendar?,
 	                                    x: Int,
 	                                    y: Int,
 	                                    isSelected: Boolean)
@@ -210,14 +210,14 @@ abstract class MultiMonthView(context: Context?) : BaseMonthView(context) {
 	 * 绘制日历文本
 	 * 
 	 * @param canvas     canvas
-	 * @param calendar   日历calendar
+	 * @param sysuerCalendar   日历calendar
 	 * @param x          日历Card x起点坐标
 	 * @param y          日历Card y起点坐标
 	 * @param hasScheme  是否是标记的日期
 	 * @param isSelected 是否选中
 	 */
 	protected abstract fun onDrawText(canvas: Canvas?,
-	                                  calendar: Calendar?,
+	                                  sysuerCalendar: SysuerCalendar?,
 	                                  x: Int,
 	                                  y: Int,
 	                                  hasScheme: Boolean,

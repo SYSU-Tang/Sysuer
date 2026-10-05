@@ -277,24 +277,24 @@ object LunarCalendar {
 	/**
 	 * 初始化各种农历、节日
 	 * 
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 */
-	@JvmStatic fun setupLunarCalendar(calendar: com.haibin.calendarview.Calendar) {
-		val year = calendar.year
-		val month = calendar.month
-		val day = calendar.day
-		calendar.isWeekend = CalendarUtil.isWeekend(calendar)
-		calendar.week = CalendarUtil.getWeekFormCalendar(calendar)
-		val lunarCalendar = Calendar()
-		calendar.lunarCalendar = lunarCalendar
+	@JvmStatic fun setupLunarCalendar(sysuerCalendar: SysuerCalendar) {
+		val year = sysuerCalendar.year
+		val month = sysuerCalendar.month
+		val day = sysuerCalendar.day
+		sysuerCalendar.isWeekend = CalendarUtil.isWeekend(sysuerCalendar)
+		sysuerCalendar.week = CalendarUtil.getWeekFormCalendar(sysuerCalendar)
+		val lunarSysuerCalendar = SysuerCalendar()
+		sysuerCalendar.lunarSysuerCalendar = lunarSysuerCalendar
 		val lunar = solarToLunar(year, month, day)
-		lunarCalendar.year = lunar[0]
-		lunarCalendar.month = lunar[1]
-		lunarCalendar.day = lunar[2]
-		calendar.isLeapYear = CalendarUtil.isLeapYear(year)
+		lunarSysuerCalendar.year = lunar[0]
+		lunarSysuerCalendar.month = lunar[1]
+		lunarSysuerCalendar.day = lunar[2]
+		sysuerCalendar.isLeapYear = CalendarUtil.isLeapYear(year)
 		if (lunar[3] == 1) { //如果是闰月
-			calendar.leapMonth = lunar[1]
-			lunarCalendar.leapMonth = lunar[1]
+			sysuerCalendar.leapMonth = lunar[1]
+			lunarSysuerCalendar.leapMonth = lunar[1]
 		}
 		val solarTerm = getSolarTerm(year, month, day)
 		var gregorian = gregorianFestival(month, day)
@@ -303,24 +303,24 @@ object LunarCalendar {
 		if (TextUtils.isEmpty(gregorian)) {
 			gregorian = getSpecialFestival(year, month, day)
 		}
-		calendar.solarTerm = solarTerm
-		calendar.gregorianFestival = gregorian
-		calendar.traditionFestival = festival
-		lunarCalendar.traditionFestival = festival
-		lunarCalendar.solarTerm = solarTerm
-		calendar.lunar = if (!TextUtils.isEmpty(solarTerm)) solarTerm
+		sysuerCalendar.solarTerm = solarTerm
+		sysuerCalendar.gregorianFestival = gregorian
+		sysuerCalendar.traditionFestival = festival
+		lunarSysuerCalendar.traditionFestival = festival
+		lunarSysuerCalendar.solarTerm = solarTerm
+		sysuerCalendar.lunar = if (!TextUtils.isEmpty(solarTerm)) solarTerm
 		else if (!TextUtils.isEmpty(gregorian)) gregorian
 		else if (!TextUtils.isEmpty(festival)) festival
 		else lunarText
-		lunarCalendar.lunar = lunarText
+		lunarSysuerCalendar.lunar = lunarText
 	}
 	
 	/**
 	 * 获取农历节日
 	 * 
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 * @return 获取农历节日
 	 */
-	fun getLunarText(calendar: com.haibin.calendarview.Calendar): String =
-		getLunarText(calendar.year, calendar.month, calendar.day)
+	fun getLunarText(sysuerCalendar: SysuerCalendar): String =
+		getLunarText(sysuerCalendar.year, sysuerCalendar.month, sysuerCalendar.day)
 }

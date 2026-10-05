@@ -22,6 +22,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.haibin.calendarview.LunarCalendar.setupLunarCalendar
@@ -33,21 +34,24 @@ import kotlin.math.abs
  */
 class MonthViewPager @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
 	ViewPager(context, attrs) {
-	@JvmField var mParentLayout: CalendarLayout? = null
-	@JvmField var mWeekPager: WeekViewPager? = null
-	@JvmField var mWeekBar: WeekBar? = null
+	@JvmField
+	var mParentLayout: CalendarLayout? = null
+	@JvmField
+	var mWeekPager: WeekViewPager? = null
+	@JvmField
+	var mWeekBar: WeekBar? = null
 	private var isUpdateMonthView = false
 	private var mMonthCount = 0
 	private var mDelegate: CalendarViewDelegate? = null
 	private var mNextViewHeight = 0
 	private var mPreViewHeight = 0
 	private var mCurrentViewHeight = 0
-	
+
 	/**
 	 * 是否使用滚动到某一天
 	 */
 	private var isUsingScrollToCalendar = false
-	
+
 	/**
 	 * 初始化
 	 * 
@@ -61,17 +65,18 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 		setLayoutParams(params)
 		init()
 	}
-	
+
 	/**
 	 * 初始化
 	 */
 	private fun init() {
-		mMonthCount = (12 * (mDelegate!!.maxYear - mDelegate!!.minYear) - mDelegate!!.minYearMonth) + 1 + mDelegate!!.maxYearMonth
+		mMonthCount =
+			(12 * (mDelegate!!.maxYear - mDelegate!!.minYear) - mDelegate!!.minYearMonth) + 1 + mDelegate!!.maxYearMonth
 		setAdapter(MonthViewPagerAdapter())
 		addOnPageChangeListener(object : OnPageChangeListener {
-			override fun onPageScrolled(position: Int,
-			                            positionOffset: Float,
-			                            positionOffsetPixels: Int) {
+			override fun onPageScrolled(
+				position: Int, positionOffset: Float, positionOffsetPixels: Int
+			) {
 				if (mDelegate!!.monthViewShowMode == CalendarViewDelegate.MODE_ALL_MONTH) {
 					return
 				}
@@ -83,46 +88,59 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 				params.height = height
 				setLayoutParams(params)
 			}
-			
+
 			override fun onPageSelected(position: Int) {
-				val calendar = CalendarUtil.getFirstCalendarFromMonthViewPager(position, mDelegate)
-				if (visibility == VISIBLE) {
-					if (!mDelegate!!.isShowYearSelectedLayout && mDelegate!!.mIndexCalendar != null && calendar.year != mDelegate!!.mIndexCalendar.year) {
+				val calendar = CalendarUtil.getFirstCalendarFromMonthViewPager(
+						position, mDelegate!!
+				)
+				if (isVisible) {
+					if (!mDelegate!!.isShowYearSelectedLayout && mDelegate!!.mIndexSysuerCalendar != null && calendar.year != mDelegate!!.mIndexSysuerCalendar?.year) {
 						mDelegate!!.mYearChangeListener?.onYearChange(calendar.year)
 					}
-					mDelegate!!.mIndexCalendar = calendar
+					mDelegate!!.mIndexSysuerCalendar = calendar
 				} //月份改变事件
-				mDelegate!!.mMonthChangeListener?.onMonthChange(calendar.year, calendar.month)                //周视图显示的时候就需要动态改变月视图高度
-				if (mWeekPager!!.visibility == VISIBLE) {
+				mDelegate!!.mMonthChangeListener?.onMonthChange(
+						calendar.year,
+						calendar.month
+				)                //周视图显示的时候就需要动态改变月视图高度
+				if (mWeekPager!!.isVisible) {
 					updateMonthViewHeight(calendar.year, calendar.month)
 					return
 				}
-				
-				
+
+
 				if (mDelegate!!.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) {
-					mDelegate!!.mSelectedCalendar = (if (!calendar.isCurrentMonth) calendar
-					else CalendarUtil.getRangeEdgeCalendar(calendar, mDelegate))
-					mDelegate!!.mIndexCalendar = mDelegate!!.mSelectedCalendar
-				}
-				else {
-					if (mDelegate!!.mSelectedStartRangeCalendar != null && mDelegate!!.mSelectedStartRangeCalendar.isSameMonth(mDelegate!!.mIndexCalendar)) {
-						mDelegate!!.mIndexCalendar = mDelegate!!.mSelectedStartRangeCalendar
-					}
-					else {
-						if (calendar.isSameMonth(mDelegate!!.mSelectedCalendar)) {
-							mDelegate!!.mIndexCalendar = mDelegate!!.mSelectedCalendar
+					mDelegate!!.mSelectedSysuerCalendar = (if (!calendar.isCurrentMonth) calendar
+					else CalendarUtil.getRangeEdgeCalendar(calendar, mDelegate!!))
+					mDelegate!!.mIndexSysuerCalendar = mDelegate!!.mSelectedSysuerCalendar
+				} else {
+					if (mDelegate!!.mSelectedStartRangeSysuerCalendar != null && mDelegate!!.mSelectedStartRangeSysuerCalendar?.isSameMonth(
+								mDelegate!!.mIndexSysuerCalendar!!
+						) == true
+					) {
+						mDelegate!!.mIndexSysuerCalendar = mDelegate!!.mSelectedStartRangeSysuerCalendar
+					} else {
+						if (calendar.isSameMonth(mDelegate!!.mSelectedSysuerCalendar!!)) {
+							mDelegate!!.mIndexSysuerCalendar = mDelegate!!.mSelectedSysuerCalendar
 						}
 					}
 				}
-				
+
 				mDelegate!!.updateSelectCalendarScheme()
 				if (!isUsingScrollToCalendar && mDelegate!!.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) {
-					mWeekBar!!.onDateSelected(mDelegate!!.mSelectedCalendar, mDelegate!!.weekStart, false)
-					mDelegate!!.mCalendarSelectListener?.onCalendarSelect(mDelegate!!.mSelectedCalendar, false)
+					mWeekBar!!.onDateSelected(
+							mDelegate!!.mSelectedSysuerCalendar,
+							mDelegate!!.weekStart,
+							false
+					)
+					mDelegate!!.mCalendarSelectListener?.onCalendarSelect(
+							mDelegate!!.mSelectedSysuerCalendar,
+							false
+					)
 				}
 				val view = findViewWithTag<BaseMonthView?>(position)
 				if (view != null) {
-					val index: Int = view.getSelectedIndex(mDelegate!!.mIndexCalendar)!!
+					val index: Int = view.getSelectedIndex(mDelegate!!.mIndexSysuerCalendar)
 					if (mDelegate!!.selectMode == CalendarViewDelegate.SELECT_MODE_DEFAULT) {
 						view.mCurrentItem = index
 					}
@@ -131,16 +149,16 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 					}
 					view.invalidate()
 				}
-				mWeekPager!!.updateSelected(mDelegate!!.mIndexCalendar, false)
+				mWeekPager!!.updateSelected(mDelegate!!.mIndexSysuerCalendar!!, false)
 				updateMonthViewHeight(calendar.year, calendar.month)
 				isUsingScrollToCalendar = false
 			}
-			
+
 			override fun onPageScrollStateChanged(state: Int) {
 			}
 		})
 	}
-	
+
 	/**
 	 * 更新月视图的高度
 	 * 
@@ -154,39 +172,80 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			params.height = mCurrentViewHeight
 			return
 		}
-		
+
 		if (mParentLayout != null) {
 			if (visibility != VISIBLE) { //如果已经显示周视图，则需要动态改变月视图高度，否则显示就有bug
 				val params = layoutParams
-				params.height = CalendarUtil.getMonthViewHeight(year, month, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+				params.height = CalendarUtil.getMonthViewHeight(
+						year,
+						month,
+						mDelegate!!.calendarItemHeight,
+						mDelegate!!.weekStart,
+						mDelegate!!.monthViewShowMode
+				)
 				setLayoutParams(params)
 			}
 			mParentLayout?.updateContentViewTranslateY()
 		}
-		mCurrentViewHeight = CalendarUtil.getMonthViewHeight(year, month, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+		mCurrentViewHeight = CalendarUtil.getMonthViewHeight(
+				year,
+				month,
+				mDelegate!!.calendarItemHeight,
+				mDelegate!!.weekStart,
+				mDelegate!!.monthViewShowMode
+		)
 		if (month == 1) {
-			mPreViewHeight = CalendarUtil.getMonthViewHeight(year - 1, 12, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-			mNextViewHeight = CalendarUtil.getMonthViewHeight(year, 2, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-		}
-		else {
-			mPreViewHeight = CalendarUtil.getMonthViewHeight(year, month - 1, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+			mPreViewHeight = CalendarUtil.getMonthViewHeight(
+					year - 1,
+					12,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			)
+			mNextViewHeight = CalendarUtil.getMonthViewHeight(
+					year,
+					2,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			)
+		} else {
+			mPreViewHeight = CalendarUtil.getMonthViewHeight(
+					year,
+					month - 1,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			)
 			mNextViewHeight = if (month == 12) {
-				CalendarUtil.getMonthViewHeight(year + 1, 1, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-			}
-			else {
-				CalendarUtil.getMonthViewHeight(year, month + 1, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+				CalendarUtil.getMonthViewHeight(
+						year + 1,
+						1,
+						mDelegate!!.calendarItemHeight,
+						mDelegate!!.weekStart,
+						mDelegate!!.monthViewShowMode
+				)
+			} else {
+				CalendarUtil.getMonthViewHeight(
+						year,
+						month + 1,
+						mDelegate!!.calendarItemHeight,
+						mDelegate!!.weekStart,
+						mDelegate!!.monthViewShowMode
+				)
 			}
 		}
 	}
-	
+
 	/**
 	 * 刷新
 	 */
 	fun notifyDataSetChanged() {
-		mMonthCount = (12 * (mDelegate!!.maxYear - mDelegate!!.minYear) - mDelegate!!.minYearMonth) + 1 + mDelegate!!.maxYearMonth
+		mMonthCount =
+			(12 * (mDelegate!!.maxYear - mDelegate!!.minYear) - mDelegate!!.minYearMonth) + 1 + mDelegate!!.maxYearMonth
 		notifyAdapterDataSetChanged()
 	}
-	
+
 	/**
 	 * 更新月视图Class
 	 */
@@ -195,7 +254,7 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 		notifyAdapterDataSetChanged()
 		isUpdateMonthView = false
 	}
-	
+
 	/**
 	 * 更新日期范围
 	 */
@@ -203,16 +262,16 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 		isUpdateMonthView = true
 		notifyDataSetChanged()
 		isUpdateMonthView = false
-		if (visibility == VISIBLE) {
+		if (isVisible) {
 			isUsingScrollToCalendar = false
-			val calendar = mDelegate!!.mSelectedCalendar
+			val calendar = mDelegate!!.mSelectedSysuerCalendar ?: return
 			val y = calendar.year - mDelegate!!.minYear
 			val position = 12 * y + calendar.month - mDelegate!!.minYearMonth
 			setCurrentItem(position, false)
 			findViewWithTag<BaseMonthView?>(position)?.run {
-				setSelectedCalendar(mDelegate.mIndexCalendar)
+				setSelectedCalendar(mDelegate.mIndexSysuerCalendar!!)
 				invalidate()
-				mParentLayout?.updateSelectPosition(getSelectedIndex(mDelegate.mIndexCalendar)!!)
+				mParentLayout?.updateSelectPosition(getSelectedIndex(mDelegate.mIndexSysuerCalendar))
 			}
 			if (mParentLayout != null) {
 				val week = CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate!!.weekStart)
@@ -220,11 +279,11 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			}
 			mDelegate!!.mInnerListener?.onMonthDateSelected(calendar, false)
 			mDelegate!!.mCalendarSelectListener?.onCalendarSelect(calendar, false)
-			
+
 			updateSelected()
 		}
 	}
-	
+
 	/**
 	 * 滚动到指定日期
 	 * 
@@ -233,71 +292,73 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 	 * @param day            日
 	 * @param invokeListener 调用日期事件
 	 */
-	fun scrollToCalendar(year: Int,
-	                     month: Int,
-	                     day: Int,
-	                     smoothScroll: Boolean,
-	                     invokeListener: Boolean) {
+	fun scrollToCalendar(
+		year: Int, month: Int, day: Int, smoothScroll: Boolean, invokeListener: Boolean
+	) {
 		isUsingScrollToCalendar = true
-		val calendar = Calendar().apply {
+		val sysuerCalendar = SysuerCalendar().apply {
 			this.year = year
 			this.month = month
 			this.day = day
 			isCurrentDay = this == mDelegate!!.currentDay
 		}
-		setupLunarCalendar(calendar)
-		mDelegate!!.mIndexCalendar = calendar
-		mDelegate!!.mSelectedCalendar = calendar
+		setupLunarCalendar(sysuerCalendar)
+		mDelegate!!.mIndexSysuerCalendar = sysuerCalendar
+		mDelegate!!.mSelectedSysuerCalendar = sysuerCalendar
 		mDelegate!!.updateSelectCalendarScheme()
-		val y = calendar.year - mDelegate!!.minYear
-		val position = 12 * y + calendar.month - mDelegate!!.minYearMonth
+		val y = sysuerCalendar.year - mDelegate!!.minYear
+		val position = 12 * y + sysuerCalendar.month - mDelegate!!.minYearMonth
 		val curItem = currentItem
 		if (curItem == position) {
 			isUsingScrollToCalendar = false
 		}
 		setCurrentItem(position, smoothScroll)
 		findViewWithTag<BaseMonthView?>(position)?.run {
-			setSelectedCalendar(mDelegate.mIndexCalendar)
+			setSelectedCalendar(mDelegate.mIndexSysuerCalendar!!)
 			invalidate()
-			mParentLayout?.updateSelectPosition(getSelectedIndex(mDelegate.mIndexCalendar)!!)
+			mParentLayout?.updateSelectPosition(getSelectedIndex(mDelegate.mIndexSysuerCalendar))
 		}
 		if (mParentLayout != null) {
-			val week = CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate!!.weekStart)
+			val week = CalendarUtil.getWeekFromDayInMonth(sysuerCalendar, mDelegate!!.weekStart)
 			mParentLayout!!.updateSelectWeek(week)
 		}
-		
+
 		if (invokeListener) {
-			mDelegate!!.mCalendarSelectListener?.onCalendarSelect(calendar, false)
+			mDelegate!!.mCalendarSelectListener?.onCalendarSelect(sysuerCalendar, false)
 		}
-		mDelegate!!.mInnerListener?.onMonthDateSelected(calendar, false)
-		
-		
+		mDelegate!!.mInnerListener?.onMonthDateSelected(sysuerCalendar, false)
+
+
 		updateSelected()
 	}
-	
+
 	/**
 	 * 滚动到当前日期
 	 */
 	fun scrollToCurrent(smoothScroll: Boolean) {
 		isUsingScrollToCalendar = true
-		val position = 12 * (mDelegate!!.currentDay.year - mDelegate!!.minYear) + mDelegate!!.currentDay.month - mDelegate!!.minYearMonth
+		val position =
+			12 * (mDelegate!!.currentDay.year - mDelegate!!.minYear) + mDelegate!!.currentDay.month - mDelegate!!.minYearMonth
 		if (currentItem == position) {
 			isUsingScrollToCalendar = false
 		}
-		
+
 		setCurrentItem(position, smoothScroll)
 		findViewWithTag<BaseMonthView?>(position)?.run {
 			setSelectedCalendar(mDelegate.currentDay)
 			invalidate()
-			mParentLayout?.updateSelectPosition(getSelectedIndex(mDelegate.currentDay)!!)
+			mParentLayout?.updateSelectPosition(getSelectedIndex(mDelegate.currentDay))
 		}
-		
-		if (visibility == VISIBLE) {
-			mDelegate!!.mCalendarSelectListener?.onCalendarSelect(mDelegate!!.mSelectedCalendar, false)
+
+		if (isVisible) {
+			mDelegate!!.mCalendarSelectListener?.onCalendarSelect(
+					mDelegate!!.mSelectedSysuerCalendar,
+					false
+			)
 		}
 	}
-	
-	val currentMonthCalendars: MutableList<Calendar>?
+
+	val currentMonthSysuerCalendars: MutableList<SysuerCalendar>?
 		/**
 		 * 获取当前月份数据
 		 * 
@@ -307,13 +368,13 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			val view = findViewWithTag<BaseMonthView?>(currentItem) ?: return null
 			return view.mItems
 		}
-	
+
 	/**
 	 * 更新为默认选择模式
 	 */
 	fun updateDefaultSelect() {
 		findViewWithTag<BaseMonthView?>(currentItem)?.run {
-			val index: Int = getSelectedIndex(mDelegate.mSelectedCalendar)!!
+			val index: Int = getSelectedIndex(mDelegate.mSelectedSysuerCalendar)
 			mCurrentItem = index
 			if (index >= 0) {
 				mParentLayout?.updateSelectPosition(index)
@@ -321,19 +382,19 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			invalidate()
 		}
 	}
-	
+
 	/**
 	 * 更新选择效果
 	 */
 	fun updateSelected() {
 		children.forEach {
 			(it as BaseMonthView).apply {
-				setSelectedCalendar(mDelegate.mSelectedCalendar)
+				setSelectedCalendar(mDelegate.mSelectedSysuerCalendar!!)
 				invalidate()
 			}
 		}
 	}
-	
+
 	/**
 	 * 更新字体颜色大小
 	 */
@@ -345,7 +406,7 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			}
 		}
 	}
-	
+
 	/**
 	 * 更新标记日期
 	 */
@@ -356,7 +417,7 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			}
 		}
 	}
-	
+
 	/**
 	 * 更新当前日期，夜间过度的时候调用这个函数，一般不需要调用
 	 */
@@ -367,7 +428,7 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			}
 		}
 	}
-	
+
 	/**
 	 * 更新显示模式
 	 */
@@ -382,9 +443,11 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			mCurrentViewHeight = 6 * mDelegate!!.calendarItemHeight
 			mNextViewHeight = mCurrentViewHeight
 			mPreViewHeight = mCurrentViewHeight
-		}
-		else {
-			updateMonthViewHeight(mDelegate!!.mSelectedCalendar.year, mDelegate!!.mSelectedCalendar.month)
+		} else {
+			updateMonthViewHeight(
+					mDelegate!!.mSelectedSysuerCalendar!!.year,
+					mDelegate!!.mSelectedSysuerCalendar!!.month
+			)
 		}
 		val params = layoutParams
 		params.height = mCurrentViewHeight
@@ -393,7 +456,7 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			mParentLayout!!.updateContentViewTranslateY()
 		}
 	}
-	
+
 	/**
 	 * 更新周起始
 	 */
@@ -404,18 +467,24 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 				requestLayout()
 			}
 		}
-		
-		updateMonthViewHeight(mDelegate!!.mSelectedCalendar.year, mDelegate!!.mSelectedCalendar.month)
+
+		updateMonthViewHeight(
+				mDelegate!!.mSelectedSysuerCalendar!!.year,
+				mDelegate!!.mSelectedSysuerCalendar!!.month
+		)
 		val params = layoutParams
 		params.height = mCurrentViewHeight
 		setLayoutParams(params)
 		if (mParentLayout != null) {
-			val i = CalendarUtil.getWeekFromDayInMonth(mDelegate!!.mSelectedCalendar, mDelegate!!.weekStart)
+			val i = CalendarUtil.getWeekFromDayInMonth(
+					mDelegate!!.mSelectedSysuerCalendar!!,
+					mDelegate!!.weekStart
+			)
 			mParentLayout!!.updateSelectWeek(i)
 		}
 		updateSelected()
 	}
-	
+
 	/**
 	 * 更新高度
 	 */
@@ -426,23 +495,58 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 				requestLayout()
 			}
 		}
-		val year = mDelegate!!.mIndexCalendar.year
-		val month = mDelegate!!.mIndexCalendar.month
-		mCurrentViewHeight = CalendarUtil.getMonthViewHeight(year, month, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
+		val year = mDelegate!!.mIndexSysuerCalendar!!.year
+		val month = mDelegate!!.mIndexSysuerCalendar!!.month
+		mCurrentViewHeight = CalendarUtil.getMonthViewHeight(
+				year,
+				month,
+				mDelegate!!.calendarItemHeight,
+				mDelegate!!.weekStart,
+				mDelegate!!.monthViewShowMode
+		)
 		if (month == 1) {
-			mPreViewHeight = CalendarUtil.getMonthViewHeight(year - 1, 12, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-			mNextViewHeight = CalendarUtil.getMonthViewHeight(year, 2, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-		}
-		else {
-			mPreViewHeight = CalendarUtil.getMonthViewHeight(year, month - 1, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-			mNextViewHeight = (if (month == 12) CalendarUtil.getMonthViewHeight(year + 1, 1, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode)
-			else CalendarUtil.getMonthViewHeight(year, month + 1, mDelegate!!.calendarItemHeight, mDelegate!!.weekStart, mDelegate!!.monthViewShowMode))
+			mPreViewHeight = CalendarUtil.getMonthViewHeight(
+					year - 1,
+					12,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			)
+			mNextViewHeight = CalendarUtil.getMonthViewHeight(
+					year,
+					2,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			)
+		} else {
+			mPreViewHeight = CalendarUtil.getMonthViewHeight(
+					year,
+					month - 1,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			)
+			mNextViewHeight = (if (month == 12) CalendarUtil.getMonthViewHeight(
+					year + 1,
+					1,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			)
+			else CalendarUtil.getMonthViewHeight(
+					year,
+					month + 1,
+					mDelegate!!.calendarItemHeight,
+					mDelegate!!.weekStart,
+					mDelegate!!.monthViewShowMode
+			))
 		}
 		val params = layoutParams
 		params.height = mCurrentViewHeight
 		setLayoutParams(params)
 	}
-	
+
 	/**
 	 * 清除选择范围
 	 */
@@ -453,7 +557,7 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			}
 		}
 	}
-	
+
 	/**
 	 * 清除单选选择
 	 */
@@ -465,7 +569,7 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			}
 		}
 	}
-	
+
 	/**
 	 * 清除单选选择
 	 */
@@ -477,27 +581,27 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			}
 		}
 	}
-	
+
 	private fun notifyAdapterDataSetChanged() {
 		adapter?.notifyDataSetChanged()
 	}
-	
+
 	@SuppressLint("ClickableViewAccessibility")
 	override fun onTouchEvent(ev: MotionEvent?): Boolean =
 		mDelegate!!.isMonthViewScrollable && super.onTouchEvent(ev)
-	
+
 	override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean =
 		mDelegate!!.isMonthViewScrollable && super.onInterceptTouchEvent(ev)
-	
+
 	override fun setCurrentItem(item: Int) {
 		setCurrentItem(item, true)
 	}
-	
+
 	override fun setCurrentItem(item: Int, smoothScroll: Boolean) {
 		if (abs(currentItem - item) > 1) super.setCurrentItem(item, false)
 		else super.setCurrentItem(item, smoothScroll)
 	}
-	
+
 	/**
 	 * 日历卡月份Adapter
 	 */
@@ -505,15 +609,15 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 		override fun getCount(): Int = mMonthCount
 		override fun getItemPosition(o: Any): Int =
 			if (isUpdateMonthView) POSITION_NONE else super.getItemPosition(o)
-		
+
 		override fun isViewFromObject(view: View, o: Any): Boolean = view == o
 		override fun instantiateItem(container: ViewGroup, position: Int): Any {
 			val year = (position + mDelegate!!.minYearMonth - 1) / 12 + mDelegate!!.minYear
 			val month = (position + mDelegate!!.minYearMonth - 1) % 12 + 1
 			val view: BaseMonthView
 			try {
-				val constructor: Constructor<*> = mDelegate!!.monthViewClass.getConstructor(Context::class.java)
-				view = constructor.newInstance(context) as BaseMonthView
+				val constructor: Constructor<*>? = mDelegate!!.monthViewClass.getConstructor(Context::class.java)
+				view = constructor?.newInstance(context) as BaseMonthView
 			} catch (_: Exception) {
 				return DefaultMonthView(context)
 			}
@@ -522,11 +626,11 @@ class MonthViewPager @JvmOverloads constructor(context: Context, attrs: Attribut
 			view.setup(mDelegate)
 			view.tag = position
 			view.initMonthWithDate(year, month)
-			view.setSelectedCalendar(mDelegate!!.mSelectedCalendar)
+			view.setSelectedCalendar(mDelegate!!.mSelectedSysuerCalendar!!)
 			container.addView(view)
 			return view
 		}
-		
+
 		override fun destroyItem(container: ViewGroup, position: Int, o: Any) {
 			val view = o as BaseView
 			view.onDestroy()

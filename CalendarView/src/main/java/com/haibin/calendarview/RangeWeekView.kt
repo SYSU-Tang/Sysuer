@@ -30,13 +30,13 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 	 * @param canvas canvas
 	 */
 	override fun onDraw(canvas: Canvas) {
-		if (mItems!!.isNotEmpty()) {
+		if (mItems.isNotEmpty()) {
 			mItemWidth = (width - mDelegate.calendarPaddingLeft - mDelegate.calendarPaddingRight) / 7
 			onPreviewHook()
 			(0..6).forEach {
 				val x = it * mItemWidth + mDelegate.calendarPaddingLeft
 				onLoopStart()
-				val calendar = mItems!![it]
+				val calendar = mItems[it]
 				val isSelected = isCalendarSelected(calendar)
 				val isPreSelected = isSelectPreCalendar(calendar, it)
 				val isNextSelected = isSelectNextCalendar(calendar, it)
@@ -58,15 +58,15 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 	/**
 	 * 日历是否被选中
 	 * 
-	 * @param calendar calendar
+	 * @param sysuerCalendar calendar
 	 * @return 日历是否被选中
 	 */
-	protected fun isCalendarSelected(calendar: Calendar): Boolean {
+	protected fun isCalendarSelected(sysuerCalendar: SysuerCalendar): Boolean {
 		return when {
-			mDelegate.mSelectedStartRangeCalendar == null -> false
-			onCalendarIntercept(calendar) -> false
-			mDelegate.mSelectedEndRangeCalendar == null -> calendar.compareTo(mDelegate.mSelectedStartRangeCalendar) == 0
-			else -> calendar >= mDelegate.mSelectedStartRangeCalendar && calendar <= mDelegate.mSelectedEndRangeCalendar
+			mDelegate.mSelectedStartRangeSysuerCalendar == null -> false
+			onCalendarIntercept(sysuerCalendar) -> false
+			mDelegate.mSelectedEndRangeSysuerCalendar == null -> sysuerCalendar.compareTo(mDelegate.mSelectedStartRangeSysuerCalendar) == 0
+			else -> sysuerCalendar >= mDelegate.mSelectedStartRangeSysuerCalendar && sysuerCalendar <= mDelegate.mSelectedEndRangeSysuerCalendar
 		}
 	}
 	
@@ -74,52 +74,52 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 		if (isClick) {
 			val calendar = index ?: return
 			if (onCalendarIntercept(calendar)) {
-				mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
+				mDelegate.mCalendarInterceptListener?.onCalendarInterceptClick(calendar, true)
 				return
 			}
 			if (!isInRange(calendar)) {
 				mDelegate.mCalendarRangeSelectListener?.onCalendarSelectOutOfRange(calendar)
 				return
 			} //优先判断各种直接return的情况，减少代码深度
-			if (mDelegate.mSelectedStartRangeCalendar != null && mDelegate.mSelectedEndRangeCalendar == null) {
-				val minDiffer = CalendarUtil.differ(calendar, mDelegate.mSelectedStartRangeCalendar)
+			if (mDelegate.mSelectedStartRangeSysuerCalendar != null && mDelegate.mSelectedEndRangeSysuerCalendar == null) {
+				val minDiffer = CalendarUtil.differ(calendar, mDelegate.mSelectedStartRangeSysuerCalendar)
 				if (minDiffer >= 0 && mDelegate.minSelectRange != -1 && mDelegate.minSelectRange > minDiffer + 1) {
 					mDelegate.mCalendarRangeSelectListener?.onSelectOutOfRange(calendar, true)
 					return
 				}
-				else if (mDelegate.maxSelectRange != -1 && mDelegate.maxSelectRange < CalendarUtil.differ(calendar, mDelegate.mSelectedStartRangeCalendar) + 1) {
+				else if (mDelegate.maxSelectRange != -1 && mDelegate.maxSelectRange < CalendarUtil.differ(calendar, mDelegate.mSelectedStartRangeSysuerCalendar) + 1) {
 					mDelegate.mCalendarRangeSelectListener?.onSelectOutOfRange(calendar, false)
 					return
 				}
 			}
 			
-			if (mDelegate.mSelectedStartRangeCalendar == null || mDelegate.mSelectedEndRangeCalendar != null) {
-				mDelegate.mSelectedStartRangeCalendar = calendar
-				mDelegate.mSelectedEndRangeCalendar = null
+			if (mDelegate.mSelectedStartRangeSysuerCalendar == null || mDelegate.mSelectedEndRangeSysuerCalendar != null) {
+				mDelegate.mSelectedStartRangeSysuerCalendar = calendar
+				mDelegate.mSelectedEndRangeSysuerCalendar = null
 			}
 			else {
-				val compare = calendar.compareTo(mDelegate.mSelectedStartRangeCalendar)
+				val compare = calendar.compareTo(mDelegate.mSelectedStartRangeSysuerCalendar)
 				when {
 					mDelegate.minSelectRange == -1 && compare <= 0 -> {
-						mDelegate.mSelectedStartRangeCalendar = calendar
-						mDelegate.mSelectedEndRangeCalendar = null
+						mDelegate.mSelectedStartRangeSysuerCalendar = calendar
+						mDelegate.mSelectedEndRangeSysuerCalendar = null
 					}
 					compare < 0 -> {
-						mDelegate.mSelectedStartRangeCalendar = calendar
-						mDelegate.mSelectedEndRangeCalendar = null
+						mDelegate.mSelectedStartRangeSysuerCalendar = calendar
+						mDelegate.mSelectedEndRangeSysuerCalendar = null
 					}
 					compare == 0 && mDelegate.minSelectRange == 1 -> {
-						mDelegate.mSelectedEndRangeCalendar = calendar
+						mDelegate.mSelectedEndRangeSysuerCalendar = calendar
 					}
 					else -> {
-						mDelegate.mSelectedEndRangeCalendar = calendar
+						mDelegate.mSelectedEndRangeSysuerCalendar = calendar
 					}
 				}
 			}
-			mCurrentItem = mItems!!.indexOf(calendar)
+			mCurrentItem = mItems.indexOf(calendar)
 			mDelegate.mInnerListener?.onWeekDateSelected(calendar, true)
 			mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
-			mDelegate.mCalendarRangeSelectListener?.onCalendarRangeSelect(calendar, mDelegate.mSelectedEndRangeCalendar != null)
+			mDelegate.mCalendarRangeSelectListener?.onCalendarRangeSelect(calendar, mDelegate.mSelectedEndRangeSysuerCalendar != null)
 			invalidate()
 		}
 	}
@@ -131,42 +131,42 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 	/**
 	 * 上一个日期是否选中
 	 * 
-	 * @param calendar 当前日期
+	 * @param sysuerCalendar 当前日期
 	 * @param calendarIndex 当前位置
 	 * @return 上一个日期是否选中
 	 */
-	protected fun isSelectPreCalendar(calendar: Calendar, calendarIndex: Int): Boolean {
-		val preCalendar: Calendar
+	protected fun isSelectPreCalendar(sysuerCalendar: SysuerCalendar, calendarIndex: Int): Boolean {
+		val preSysuerCalendar: SysuerCalendar
 		if (calendarIndex == 0) {
-			preCalendar = CalendarUtil.getPreCalendar(calendar)
-			mDelegate.updateCalendarScheme(preCalendar)
+			preSysuerCalendar = CalendarUtil.getPreCalendar(sysuerCalendar)
+			mDelegate.updateCalendarScheme(preSysuerCalendar)
 		}
-		else preCalendar = mItems!![calendarIndex - 1]
-		return mDelegate.mSelectedStartRangeCalendar != null && isCalendarSelected(preCalendar)
+		else preSysuerCalendar = mItems[calendarIndex - 1]
+		return mDelegate.mSelectedStartRangeSysuerCalendar != null && isCalendarSelected(preSysuerCalendar)
 	}
 	
 	/**
 	 * 下一个日期是否选中
 	 * 
-	 * @param calendar      当前日期
+	 * @param sysuerCalendar      当前日期
 	 * @param calendarIndex 当前位置
 	 * @return 下一个日期是否选中
 	 */
-	protected fun isSelectNextCalendar(calendar: Calendar, calendarIndex: Int): Boolean {
-		val nextCalendar: Calendar
-		if (calendarIndex == mItems!!.size - 1) {
-			nextCalendar = CalendarUtil.getNextCalendar(calendar)
-			mDelegate.updateCalendarScheme(nextCalendar)
+	protected fun isSelectNextCalendar(sysuerCalendar: SysuerCalendar, calendarIndex: Int): Boolean {
+		val nextSysuerCalendar: SysuerCalendar
+		if (calendarIndex == mItems.size - 1) {
+			nextSysuerCalendar = CalendarUtil.getNextCalendar(sysuerCalendar)
+			mDelegate.updateCalendarScheme(nextSysuerCalendar)
 		}
-		else nextCalendar = mItems!![calendarIndex + 1]
-		return mDelegate.mSelectedStartRangeCalendar != null && isCalendarSelected(nextCalendar)
+		else nextSysuerCalendar = mItems[calendarIndex + 1]
+		return mDelegate.mSelectedStartRangeSysuerCalendar != null && isCalendarSelected(nextSysuerCalendar)
 	}
 	
 	/**
 	 * 绘制选中的日期
 	 * 
 	 * @param canvas         canvas
-	 * @param calendar       日历日历calendar
+	 * @param sysuerCalendar       日历日历calendar
 	 * @param x              日历Card x起点坐标
 	 * @param hasScheme      hasScheme 非标记的日期
 	 * @param isSelectedPre  上一个日期是否选中
@@ -174,7 +174,7 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 	 * @return 是否绘制 onDrawScheme
 	 */
 	protected abstract fun onDrawSelected(canvas: Canvas?,
-	                                      calendar: Calendar?,
+	                                      sysuerCalendar: SysuerCalendar?,
 	                                      x: Int,
 	                                      hasScheme: Boolean,
 	                                      isSelectedPre: Boolean,
@@ -184,12 +184,12 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 	 * 绘制标记的日期
 	 * 
 	 * @param canvas     canvas
-	 * @param calendar   日历calendar
+	 * @param sysuerCalendar   日历calendar
 	 * @param x          日历Card x起点坐标
 	 * @param isSelected 是否选中
 	 */
 	protected abstract fun onDrawScheme(canvas: Canvas?,
-	                                    calendar: Calendar?,
+	                                    sysuerCalendar: SysuerCalendar?,
 	                                    x: Int,
 	                                    isSelected: Boolean)
 	
@@ -197,13 +197,13 @@ abstract class RangeWeekView(context: Context) : BaseWeekView(context) {
 	 * 绘制日历文本
 	 * 
 	 * @param canvas     canvas
-	 * @param calendar   日历calendar
+	 * @param sysuerCalendar   日历calendar
 	 * @param x          日历Card x起点坐标
 	 * @param hasScheme  是否是标记的日期
 	 * @param isSelected 是否选中
 	 */
 	protected abstract fun onDrawText(canvas: Canvas?,
-	                                  calendar: Calendar?,
+	                                  sysuerCalendar: SysuerCalendar?,
 	                                  x: Int,
 	                                  hasScheme: Boolean,
 	                                  isSelected: Boolean)

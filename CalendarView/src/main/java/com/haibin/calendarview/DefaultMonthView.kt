@@ -47,14 +47,14 @@ class DefaultMonthView(context: Context) : MonthView(context) {
 	
 	/**
 	 * @param canvas    canvas
-	 * @param calendar  FullCalendar
+	 * @param sysuerCalendar  FullCalendar
 	 * @param x         日历Card x起点坐标
 	 * @param y         日历Card y起点坐标
 	 * @param hasScheme hasScheme 非标记的日期
 	 * @return true 则绘制onDrawScheme，因为这里背景色不是是互斥的
 	 */
 	override fun onDrawSelected(canvas: Canvas,
-	                            calendar: Calendar,
+	                            sysuerCalendar: SysuerCalendar,
 	                            x: Int,
 	                            y: Int,
 	                            hasScheme: Boolean): Boolean {
@@ -63,10 +63,10 @@ class DefaultMonthView(context: Context) : MonthView(context) {
 		return true
 	}
 	
-	override fun onDrawScheme(canvas: Canvas, calendar: Calendar, x: Int, y: Int) {
-		mSchemeBasicPaint.setColor(calendar.schemeColor)
+	override fun onDrawScheme(canvas: Canvas, sysuerCalendar: SysuerCalendar, x: Int, y: Int) {
+		mSchemeBasicPaint.setColor(sysuerCalendar.schemeColor)
 		canvas.drawCircle(x + mItemWidth - mPadding - mRadio / 2, y + mPadding + mRadio, mRadio, mSchemeBasicPaint)
-		canvas.drawText(calendar.scheme, x + mItemWidth - mPadding - mRadio / 2 - getTextWidth(calendar.scheme) / 2, y + mPadding + mSchemeBaseLine, mTextPaint)
+		canvas.drawText(sysuerCalendar.scheme, x + mItemWidth - mPadding - mRadio / 2 - getTextWidth(sysuerCalendar.scheme) / 2, y + mPadding + mSchemeBaseLine, mTextPaint)
 	}
 	
 	/**
@@ -76,7 +76,7 @@ class DefaultMonthView(context: Context) : MonthView(context) {
 	 */
 	private fun getTextWidth(text: String?): Float = mTextPaint.measureText(text)
 	override fun onDrawText(canvas: Canvas,
-	                        calendar: Calendar,
+	                        sysuerCalendar: SysuerCalendar,
 	                        x: Int,
 	                        y: Int,
 	                        hasScheme: Boolean,
@@ -85,16 +85,16 @@ class DefaultMonthView(context: Context) : MonthView(context) {
 		val top = y - mItemHeight / 6
 		when {
 			isSelected -> {
-				canvas.drawText(calendar.day.toString(), cx.toFloat(), mTextBaseLine + top, mSelectTextPaint)
-				canvas.drawText(calendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight / 10, mSelectedLunarTextPaint)
+				canvas.drawText(sysuerCalendar.day.toString(), cx.toFloat(), mTextBaseLine + top, mSelectTextPaint)
+				canvas.drawText(sysuerCalendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight / 10, mSelectedLunarTextPaint)
 			}
 			hasScheme -> {
-				canvas.drawText(calendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth) mSchemeTextPaint else mOtherMonthTextPaint)
-				canvas.drawText(calendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight / 10, if (calendar.isCurrentDay) mCurDayLunarTextPaint else mSchemeLunarTextPaint)
+				canvas.drawText(sysuerCalendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (sysuerCalendar.isCurrentDay) mCurDayTextPaint else if (sysuerCalendar.isCurrentMonth) mSchemeTextPaint else mOtherMonthTextPaint)
+				canvas.drawText(sysuerCalendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight / 10, if (sysuerCalendar.isCurrentDay) mCurDayLunarTextPaint else mSchemeLunarTextPaint)
 			}
 			else -> {
-				canvas.drawText(calendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth) mCurMonthTextPaint else mOtherMonthTextPaint)
-				canvas.drawText(calendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight / 10, if (calendar.isCurrentDay) mCurDayLunarTextPaint else if (calendar.isCurrentMonth) mCurMonthLunarTextPaint else mOtherMonthLunarTextPaint)
+				canvas.drawText(sysuerCalendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (sysuerCalendar.isCurrentDay) mCurDayTextPaint else if (sysuerCalendar.isCurrentMonth) mCurMonthTextPaint else mOtherMonthTextPaint)
+				canvas.drawText(sysuerCalendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight / 10, if (sysuerCalendar.isCurrentDay) mCurDayLunarTextPaint else if (sysuerCalendar.isCurrentMonth) mCurMonthLunarTextPaint else mOtherMonthLunarTextPaint)
 			}
 		}
 	}

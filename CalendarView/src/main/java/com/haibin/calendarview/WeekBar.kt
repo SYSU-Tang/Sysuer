@@ -75,11 +75,11 @@ open class WeekBar(context: Context?) : LinearLayout(context) {
 	/**
 	 * 日期选择事件，这里提供这个回调，可以方便定制WeekBar需要
 	 * 
-	 * @param calendar  calendar 选择的日期
+	 * @param sysuerCalendar  calendar 选择的日期
 	 * @param weekStart 周起始
 	 * @param isClick   isClick 点击
 	 */
-	fun onDateSelected(calendar: Calendar?, weekStart: Int, isClick: Boolean) {
+	fun onDateSelected(sysuerCalendar: SysuerCalendar?, weekStart: Int, isClick: Boolean) {
 	}
 	
 	/**
@@ -96,12 +96,12 @@ open class WeekBar(context: Context?) : LinearLayout(context) {
 	/**
 	 * 通过View的位置和周起始获取星期的对应坐标
 	 * 
-	 * @param calendar  calendar
+	 * @param sysuerCalendar  calendar
 	 * @param weekStart weekStart
 	 * @return 通过View的位置和周起始获取星期的对应坐标
 	 */
-	protected fun getViewIndexByCalendar(calendar: Calendar, weekStart: Int): Int {
-		val week = calendar.week + 1
+	protected fun getViewIndexByCalendar(sysuerCalendar: SysuerCalendar, weekStart: Int): Int {
+		val week = sysuerCalendar.week + 1
 		return when (weekStart) {
 			CalendarViewDelegate.WEEK_START_WITH_SUN -> {
 				week - 1

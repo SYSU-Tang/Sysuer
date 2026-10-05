@@ -115,8 +115,8 @@ class YearRecyclerView(context: Context, attrs: AttributeSet? = null) :
 		super.onMeasure(widthSpec, heightSpec)
 		mAdapter.setYearViewSize(MeasureSpec.getSize(widthSpec) / 3, MeasureSpec.getSize(heightSpec) / 4)
 	}
-	
-	interface OnMonthSelectedListener {
+
+	fun interface OnMonthSelectedListener {
 		fun onMonthSelected(year: Int, month: Int)
 	}
 }

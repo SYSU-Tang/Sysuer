@@ -30,7 +30,7 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 	 * @param canvas canvas
 	 */
 	override fun onDraw(canvas: Canvas) {
-		if (mItems!!.isNotEmpty()) {
+		if (mItems.isNotEmpty()) {
 			mItemWidth = (width - mDelegate.calendarPaddingLeft - mDelegate.calendarPaddingRight) / 7
 			onPreviewHook()
 			
@@ -38,7 +38,7 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 				val x = i * mItemWidth + mDelegate.calendarPaddingLeft
 				onLoopStart()
 				val isSelected = i == mCurrentItem
-				val hasScheme = (calendar as Calendar).hasScheme()
+				val hasScheme = (calendar as SysuerCalendar).hasScheme()
 				if (hasScheme) {
 					val isDrawSelected = //是否继续绘制选中的onDrawScheme
 						if (isSelected) onDrawSelected(canvas, calendar, x, true) else false
@@ -57,14 +57,14 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 		if (isClick) {
 			val calendar = index ?: return
 			if (onCalendarIntercept(calendar)) {
-				mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
+				mDelegate.mCalendarInterceptListener?.onCalendarInterceptClick(calendar, true)
 				return
 			}
 			if (!isInRange(calendar)) {
 				mDelegate.mCalendarSelectListener?.onCalendarOutOfRange(calendar)
 				return
 			}
-			mCurrentItem = mItems!!.indexOf(calendar)
+			mCurrentItem = mItems.indexOf(calendar)
 			mDelegate.mInnerListener?.onWeekDateSelected(calendar, true)
 			mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 			
@@ -82,7 +82,7 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 		}
 		val calendar = index ?: return false
 		if (onCalendarIntercept(calendar)) {
-			mDelegate.mCalendarInterceptListener.onCalendarInterceptClick(calendar, true)
+			mDelegate.mCalendarInterceptListener?.onCalendarInterceptClick(calendar, true)
 			return true
 		}
 		if (!isInRange(calendar)) {
@@ -95,8 +95,8 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 			return true
 		}
 		
-		mCurrentItem = mItems!!.indexOf(calendar)
-		mDelegate.mIndexCalendar = mDelegate.mSelectedCalendar
+		mCurrentItem = mItems.indexOf(calendar)
+		mDelegate.mIndexSysuerCalendar = mDelegate.mSelectedSysuerCalendar
 		mDelegate.mInnerListener?.onWeekDateSelected(calendar, true)
 		mParentLayout?.updateSelectWeek(CalendarUtil.getWeekFromDayInMonth(calendar, mDelegate.weekStart))
 		mDelegate.mCalendarSelectListener?.onCalendarSelect(calendar, true)
@@ -110,13 +110,13 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 	 * 绘制选中的日期
 	 * 
 	 * @param canvas    canvas
-	 * @param calendar  日历日历calendar
+	 * @param sysuerCalendar  日历日历calendar
 	 * @param x         日历Card x起点坐标
 	 * @param hasScheme hasScheme 非标记的日期
 	 * @return 是否绘制 onDrawScheme
 	 */
 	protected abstract fun onDrawSelected(canvas: Canvas,
-	                                      calendar: Calendar,
+	                                      sysuerCalendar: SysuerCalendar,
 	                                      x: Int,
 	                                      hasScheme: Boolean): Boolean
 	
@@ -124,22 +124,22 @@ abstract class WeekView(context: Context) : BaseWeekView(context) {
 	 * 绘制标记的日期
 	 * 
 	 * @param canvas   canvas
-	 * @param calendar 日历calendar
+	 * @param sysuerCalendar 日历calendar
 	 * @param x        日历Card x起点坐标
 	 */
-	protected abstract fun onDrawScheme(canvas: Canvas, calendar: Calendar, x: Int)
+	protected abstract fun onDrawScheme(canvas: Canvas, sysuerCalendar: SysuerCalendar, x: Int)
 	
 	/**
 	 * 绘制日历文本
 	 * 
 	 * @param canvas     canvas
-	 * @param calendar   日历calendar
+	 * @param sysuerCalendar   日历calendar
 	 * @param x          日历Card x起点坐标
 	 * @param hasScheme  是否是标记的日期
 	 * @param isSelected 是否选中
 	 */
 	protected abstract fun onDrawText(canvas: Canvas,
-	                                  calendar: Calendar,
+	                                  sysuerCalendar: SysuerCalendar,
 	                                  x: Int,
 	                                  hasScheme: Boolean,
 	                                  isSelected: Boolean)
