@@ -1,5 +1,6 @@
 package com.miyuyan.preference
 
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,17 +15,19 @@ fun ItemPreference(
 	summary: String? = null,
 	onClick: (() -> Unit)? = null,
 ) {
-	Preference(
-			onClick = onClick,
-			title = title,
-			modifier = modifier,
-			icon = {
-				Icon(
-						painterResource(icon),
-						contentDescription = title,
-						tint = MaterialTheme.colorScheme.primary
-				)
-			},
-			summary = summary,
-	)
+	SelectionContainer {
+		Preference(
+				onClick = onClick,
+				title = title,
+				modifier = modifier,
+				icon = {
+					Icon(
+							painterResource(icon),
+							contentDescription = title,
+							tint = MaterialTheme.colorScheme.primary
+					)
+				},
+				summary = summary,
+		)
+	}
 }

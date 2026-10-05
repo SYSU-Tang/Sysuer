@@ -1,5 +1,7 @@
 package com.miyuyan.preference
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
@@ -12,15 +14,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 
 /**
- * 分段选择偏好项：trailingContent 区域为一组 Material3 [SegmentedButton]，点击即
- * 切换选中态并回调，适合把一组互斥或多选的选项直接铺在偏好项尾部。
+ * 分段选择偏好项：content 区域为一组铺满宽度的 Material3 [SegmentedButton]，点击即
+ * 切换选中态并回调，适合把一组互斥或多选的选项直接铺在偏好项上。
  *
- * 条目外观与 [Preference] 一致（同一分组的圆角衔接），标题为主文本，内容区默认显示
- * 当前选中的选项文案（多选时用"、"连接），也可用 [summary] 覆盖。
+ * 条目外观与 [Preference] 一致（同一分组的圆角衔接），标题移至上方 overline 位置，
+ * 内容区默认在按钮上方显示当前选中的选项文案（多选时用"、"连接），也可用 [summary] 覆盖。
  * 选中态以索引集合表示，调用方自行维护集合。
+ *
+ * 注意：SegmentedListItem 的槽位测量顺序为 leading → trailing → 文本槽，铺满宽度的
+ * 内容放在 trailing 槽会把 title/summary 压成零宽，因此按钮行放在最后测量的 content 槽。
  *
  * @param entries 选项文案列表，索引即选项的标识。
  * @param entryValues 与 [entries] 按索引对应的业务值。
@@ -51,7 +55,6 @@ fun <T> ChoicePreference(
 			modifier = modifier,
 			enabled = enabled,
 			icon = icon,
-			summary = summary ?: selectedText.ifEmpty { null },
 			trailing = {
 				if (singleSelection) {
 					SingleChoiceSegmentedButtonRow {
@@ -60,9 +63,7 @@ fun <T> ChoicePreference(
 									selected = i in selections,
 									onClick = {
 										onChange?.invoke(
-												i,
-												entry,
-												entryValues?.getOrNull(i)
+												i, entry, entryValues?.getOrNull(i)
 										)
 									},
 									shape = SegmentedButtonDefaults.itemShape(
@@ -73,7 +74,7 @@ fun <T> ChoicePreference(
 												entry,
 												style = MaterialTheme.typography.labelMedium,
 												maxLines = 1,
-												overflow = TextOverflow.Ellipsis,
+												softWrap = false,
 										)
 									},
 									enabled = enabled,
@@ -81,7 +82,9 @@ fun <T> ChoicePreference(
 						}
 					}
 				} else {
-					MultiChoiceSegmentedButtonRow {
+					MultiChoiceSegmentedButtonRow(
+							modifier = Modifier.horizontalScroll(rememberScrollState())
+					) {
 						entries.forEachIndexed { i, entry ->
 							SegmentedButton(
 									checked = i in selections,
@@ -93,10 +96,9 @@ fun <T> ChoicePreference(
 									),
 									label = {
 										Text(
-												entry,
+												entry, maxLines = 1,
+												softWrap = false,
 												style = MaterialTheme.typography.labelMedium,
-												maxLines = 1,
-												overflow = TextOverflow.Ellipsis,
 										)
 									},
 									enabled = enabled,
@@ -105,12 +107,21 @@ fun <T> ChoicePreference(
 					}
 				}
 			},
+			content = {
+				(summary ?: selectedText.ifEmpty { null })?.let {
+					Text(
+							text = it,
+							style = MaterialTheme.typography.labelMedium,
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
+					)
+				}
+			},
 	)
 }
 
 /**
  * 自动管理选中状态的 [ChoicePreference] 重载：[initialSelections] 作为初始选中集合，
- * 选项点击时更新内部状态并经 [onChange] 通知父级，参数为 (索引, 选项文案, 业务值)。
+ * 选项点击时更新内部状态并经 [onChange] 通知父级，参数为 (索引集合, 选项文案列表, 业务值列表)。
  */
 @Composable
 fun <T> ChoicePreference(

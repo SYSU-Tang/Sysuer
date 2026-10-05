@@ -43,13 +43,15 @@ fun Preference(
 ) {
 	val index = LocalPreferenceIndex.current
 	val count = LocalPreferenceCount.current
+	val colors =
+		ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
 	SegmentedListItem(
 			onClick = onClick ?: {},
 			enabled = enabled,
 			verticalAlignment = Alignment.CenterVertically,
 			modifier = modifier.fillMaxWidth(),
 			shapes = ListItemDefaults.segmentedShapes(index, count),
-			colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+			colors = colors,
 			leadingContent = {
 				if (icon != null) {
 					icon()
@@ -60,6 +62,7 @@ fun Preference(
 					Text(
 							modifier = titleModifier,
 							text = title,
+//							color = colors.overlineContentColor,
 							style = MaterialTheme.typography.bodyLarge,
 					)
 				}
@@ -71,14 +74,16 @@ fun Preference(
 				Text(
 						summary,
 						style = MaterialTheme.typography.labelMedium,
-						color = MaterialTheme.colorScheme.onSurfaceVariant
+//						color = colors.supportingContentColor
 				)
 			}
+
 			else -> {
 				Text(
 						modifier = titleModifier,
 						text = title,
 						style = MaterialTheme.typography.bodyLarge,
+//						color = colors.overlineContentColor
 				)
 			}
 		}

@@ -39,6 +39,7 @@ fun <T> MenuPreference(
 	entries: List<String>,
 	entryValues: List<T>? = null,
 	selectedIndex: Int? = null,
+	required: Boolean = false,
 	onChange: ((Int?, String?, T?) -> Unit)? = null,
 ) {
 	var popupVisible by remember { mutableStateOf(false) }
@@ -75,7 +76,7 @@ fun <T> MenuPreference(
 							bounds.bottom.roundToInt()
 					)
 				},
-				trailing = if (selectedIndex != null) {
+				trailing = if (selectedIndex != null && !required) {
 					{
 						IconButton(onClick = { onChange?.invoke(null, null, null) }) {
 							Icon(
@@ -116,6 +117,7 @@ fun <T> MenuPreference(
 	title: String,
 	icon: @Composable (() -> Unit)? = null,
 	enabled: Boolean = true,
+	required: Boolean = false,
 	entries: List<String>,
 	entryValues: List<T>? = null,
 	initialIndex: Int? = null,
@@ -130,6 +132,7 @@ fun <T> MenuPreference(
 			title = title,
 			modifier = modifier,
 			enabled = enabled,
+			required = required,
 			icon = icon,
 			summary = summary,
 			entries = entries,
