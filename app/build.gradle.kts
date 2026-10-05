@@ -19,16 +19,16 @@ android {
 
 	defaultConfig {
 		val generation = "2"
-		val major = "0"
-		val minor = "2"
-		val beta = true
+		val major = "1"
+		val minor = "0"
+		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
 		buildConfigField("int", "VERSION_MINOR", minor)
 		applicationId = "com.miyuyan.sysuer"
 		minSdk = 26
 		targetSdk = 37
-		versionCode = 1941
+		versionCode = 1942
 		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled = true
@@ -39,8 +39,7 @@ android {
 			isMinifyEnabled = true
 			isShrinkResources = true
 			proguardFiles(
-					getDefaultProguardFile("proguard-android-optimize.txt"),
-					"proguard-rules.pro"
+					getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
 			)
 		}
 	}
@@ -159,4 +158,7 @@ dependencies {
 	implementation(libs.hilt.android)
 	ksp(libs.hilt.android.compiler)
 	implementation(libs.hiddenapibypass)
+	implementation(libs.ksoup)
+	implementation(libs.ktor.client.cio)
+	implementation(libs.androidx.webkit)
 }
