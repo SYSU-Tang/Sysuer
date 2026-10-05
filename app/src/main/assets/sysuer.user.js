@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SYSUER美化辅助增强
 // @namespace    https://github.com/SYSU-Tang
-// @version      2.2
+// @version      2.3
 // @description  中大儿增强脚本，包括网页净化、在线教学平台视频自动速通、自动跳下一页、自动登录、跳过验证、自动跳转登录页、等级制查看原始分。
 // @author       SYSU-Tang
 // @license      Apache-2.0
@@ -20,6 +20,7 @@
 // @match        *://xgxt.sysu.edu.cn/*
 // @match        *://xgxt-443.webvpn.sysu.edu.cn/*
 // @match        *://ecert.sysu.edu.cn/Integrated_platform/*
+// @noframes
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_registerMenuCommand
@@ -109,6 +110,26 @@
   function createSettingsPanel() {
     if (document.getElementById("sysuer-settings-panel")) return;
 
+    const labelStyle =
+      "display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;";
+    const toggleItems = [
+      ["autoLogin", "自动登录"],
+      ["autoVerify", "跳过验证"],
+      ["autoWebvpn", "自动跳转WebVPN"],
+      ["autoJumpLogin", "自动点击登录按钮"],
+      ["videoComplete", "在线教学平台视频自动速通"],
+      ["videoJump", "在线教学平台视频完成后自动跳下一页"],
+      ["purify", "页面净化"],
+      ["removeWatermark", "移除水印"],
+      ["gradeDisplay", "等级制显示原始分"],
+    ];
+    const togglesHtml = toggleItems
+      .map(
+        ([key, label]) =>
+          `<label style="${labelStyle}">${label} <input type="checkbox" id="cfg-${key}" ${config[key] ? "checked" : ""}></label>`,
+      )
+      .join("\n            ");
+
     // 背景遮罩
     const overlay = document.createElement("div");
     overlay.id = "sysuer-settings-panel";
@@ -131,43 +152,17 @@
     panel.innerHTML = `
             <h3 style="margin: 0 0 10px 0; font-size: 18px; color: ${SYSU_GREEN}; text-align: center; font-weight: bold;">SYSUER 增强设置</h3>
 
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                自动登录 <input type="checkbox" id="cfg-autoLogin" ${config.autoLogin ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                跳过验证 <input type="checkbox" id="cfg-autoVerify" ${config.autoVerify ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                自动跳转WebVPN <input type="checkbox" id="cfg-autoWebvpn" ${config.autoWebvpn ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                自动点击登录按钮 <input type="checkbox" id="cfg-autoJumpLogin" ${config.autoJumpLogin ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                在线教学平台视频自动速通 <input type="checkbox" id="cfg-videoComplete" ${config.videoComplete ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                在线教学平台视频完成后自动跳下一页 <input type="checkbox" id="cfg-videoJump" ${config.videoJump ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                页面净化 <input type="checkbox" id="cfg-purify" ${config.purify ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                移除水印 <input type="checkbox" id="cfg-removeWatermark" ${config.removeWatermark ? "checked" : ""}>
-            </label>
-            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #333;">
-                等级制显示原始分 <input type="checkbox" id="cfg-gradeDisplay" ${config.gradeDisplay ? "checked" : ""}>
-            </label>
+            ${togglesHtml}
 
             <hr style="border: 0; border-top: 1px dashed #ccc; margin: 5px 0;">
 
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <label style="font-size: 12px; color: #555; font-weight: bold;">NetID 用户名:</label>
-                <input type="text" id="cfg-username" value="${config.username}" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; outline-color: ${SYSU_GREEN};">
+                <input type="text" id="cfg-username" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; outline-color: ${SYSU_GREEN};">
             </div>
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <label style="font-size: 12px; color: #555; font-weight: bold;">NetID 密码:</label>
-                <input type="password" id="cfg-password" value="${config.password}" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; outline-color: ${SYSU_GREEN};">
+                <input type="password" id="cfg-password" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; outline-color: ${SYSU_GREEN};">
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 10px;">
@@ -178,6 +173,10 @@
 
     overlay.appendChild(panel);
     document.body.appendChild(overlay);
+
+    // 用 JS 赋值，避免把用户输入直接拼进 HTML 属性
+    document.getElementById("cfg-username").value = config.username;
+    document.getElementById("cfg-password").value = config.password;
 
     // 按钮交互效果
     document.getElementById("cfg-save").onmouseenter = function () {
@@ -196,41 +195,17 @@
     // 绑定事件
     document.getElementById("cfg-close").onclick = () => overlay.remove();
     document.getElementById("cfg-save").onclick = () => {
-      GM_setValue(
-        "autoLogin",
-        document.getElementById("cfg-autoLogin").checked,
-      );
-      GM_setValue(
-        "autoVerify",
-        document.getElementById("cfg-autoVerify").checked,
-      );
-      GM_setValue(
-        "autoWebvpn",
-        document.getElementById("cfg-autoWebvpn").checked,
-      );
-      GM_setValue(
-        "autoJumpLogin",
-        document.getElementById("cfg-autoJumpLogin").checked,
-      );
-      GM_setValue(
-        "videoComplete",
-        document.getElementById("cfg-videoComplete").checked,
-      );
-      GM_setValue(
-        "videoJump",
-        document.getElementById("cfg-videoJump").checked,
-      );
-      GM_setValue("purify", document.getElementById("cfg-purify").checked);
-      GM_setValue(
-        "removeWatermark",
-        document.getElementById("cfg-removeWatermark").checked,
-      );
-      GM_setValue(
-        "gradeDisplay",
-        document.getElementById("cfg-gradeDisplay").checked,
-      );
-      GM_setValue("username", document.getElementById("cfg-username").value);
-      GM_setValue("password", document.getElementById("cfg-password").value);
+      toggleItems.forEach(([key]) => {
+        const checked = document.getElementById("cfg-" + key).checked;
+        config[key] = checked; // 同步内存中的 config，避免重开面板显示旧值
+        GM_setValue(key, checked);
+      });
+      const usernameVal = document.getElementById("cfg-username").value;
+      const passwordVal = document.getElementById("cfg-password").value;
+      config.username = usernameVal;
+      config.password = passwordVal;
+      GM_setValue("username", usernameVal);
+      GM_setValue("password", passwordVal);
 
       overlay.remove();
       if (window.toast) {
@@ -254,8 +229,9 @@
   /* 隐藏元素 */
   function hide(selectors) {
     selectors.forEach(function (v) {
-      const el = document.querySelector(v);
-      if (el) el.style.display = "none";
+      document
+        .querySelectorAll(v)
+        .forEach((el) => (el.style.display = "none"));
     });
   }
   /* 点击元素 */
@@ -263,38 +239,85 @@
     const element = document.querySelector(el);
     if (element) element.click();
   }
-  /* 等待元素出现 */
+  /* 等待元素出现（MutationObserver 实现） */
   function waitElement(
     selector,
     callback,
     timeout = 5000,
     timeoutCallback = null,
   ) {
-    const startTime = Date.now();
     let stopped = false;
-
-    function check() {
-      if (stopped) return;
+    const timerId = setTimeout(fail, timeout);
+    const observer = new MutationObserver(() => {
       const element = document.querySelector(selector);
-      if (element) {
-        stopped = true;
-        callback(element);
-        return;
-      }
-      if (Date.now() - startTime >= timeout) {
-        stopped = true;
-        if (typeof timeoutCallback === "function") {
-          timeoutCallback(selector);
-        } else {
-          console.log(
-            `[SYSUER 脚本] 等待元素 "${selector}" 超时（${timeout}ms）`,
-          );
-        }
-        return;
-      }
-      setTimeout(check, 100);
+      if (element) finish(element);
+    });
+
+    function finish(element) {
+      if (stopped) return;
+      stopped = true;
+      observer.disconnect();
+      clearTimeout(timerId);
+      callback(element);
     }
-    check();
+
+    function fail() {
+      if (stopped) return;
+      stopped = true;
+      observer.disconnect();
+      clearTimeout(timerId);
+      if (typeof timeoutCallback === "function") {
+        timeoutCallback(selector);
+      } else {
+        console.log(
+          `[SYSUER 脚本] 等待元素 "${selector}" 超时（${timeout}ms）`,
+        );
+      }
+    }
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+
+    // 元素可能已存在
+    const existing = document.querySelector(selector);
+    if (existing) finish(existing);
+  }
+
+  /* 获取 React 组件实例（兼容新旧 React 的 key），失败时返回 null */
+  function getReactStateNode(el) {
+    const key = Object.keys(el).find(
+      (k) =>
+        k.startsWith("__reactInternalInstance") ||
+        k.startsWith("__reactFiber$"),
+    );
+    if (!key) return null;
+    try {
+      return el[key]?.return?.stateNode ?? null;
+    } catch (e) {
+      console.warn("[SYSUER 脚本] 获取 React 组件节点失败", e);
+      return null;
+    }
+  }
+
+  /* 将 SYSU 域名精确替换为对应的 WebVPN 域名（已转换过则原样返回） */
+  function toWebvpnUrl(target) {
+    try {
+      const u = new URL(target);
+      if (
+        u.hostname.endsWith(".sysu.edu.cn") &&
+        !u.hostname.includes(".webvpn.")
+      ) {
+        u.hostname = u.hostname.replace(
+          /\.sysu\.edu\.cn$/,
+          "-443.webvpn.sysu.edu.cn",
+        );
+      }
+      return u.href;
+    } catch (e) {
+      return target.replace(".sysu.edu.cn", "-443.webvpn.sysu.edu.cn");
+    }
   }
 
   // ==================== Toast 核心 ====================
@@ -452,10 +475,7 @@
       hide([".ftb"]);
     }
     if (host === "lms.sysu.edu.cn") {
-      document
-        .querySelectorAll(".editButton")
-        .forEach((e) => (e.style.display = "none"));
-      hide(["footer"]);
+      hide([".editButton", "footer"]);
     }
     if (host === "xgxt.sysu.edu.cn" || host === "xgxt-443.webvpn.sysu.edu.cn") {
       hide([".banner-ca39d", "footer"]);
@@ -468,6 +488,7 @@
     }
     if (host === "jwxt.sysu.edu.cn") {
       const purifyJwxt = () => {
+        const url = window.location.href; // 每次取最新地址，适配 hash 路由
         hide([".sys-header", ".sys-footer", ".ant-breadcrumb"]);
         if (url.includes("/jwxt/mk/")) {
           const stuCon = document.querySelector(".stu-con");
@@ -509,28 +530,19 @@
               element.style.width = width;
             });
           };
-          waitElement(".newStyle-tableCell-2c8VE", (content) => {
-            beautify();
-          });
+          waitElement(".newStyle-tableCell-2c8VE", () => beautify());
 
           waitElement(".ant-table-fixed", (content) => {
             content.style.width = "100%";
           });
           waitElement(".newStyle-myTimetable-3UIjI", (content) => {
-            const node =
-              content[
-                Object.keys(content).find((k) =>
-                  k.startsWith("__reactInternalInstance"),
-                )
-              ].return.stateNode;
-            // const state = node.state;
+            const node = getReactStateNode(content);
+            if (!node || typeof node.handleTimeTable !== "function") return;
             const handleTimeTable = node.handleTimeTable;
             node.handleTimeTable = (e) => {
               handleTimeTable(e);
               beautify();
             };
-            //console.log(state);
-            //console.log(node);
           });
           waitElement(".newStyle-table-3p9KH", (content) => {
             const legend = content.querySelector("div");
@@ -568,43 +580,50 @@
         purifyJwxt();
         toast.info("[SYSUER 脚本] 净化页面");
       });
+      window.addEventListener("hashchange", purifyJwxt);
     }
     if (url.includes("ecert.sysu.edu.cn/Integrated_platform/modules/student")) {
       hide([".copyright"]);
     }
   }
-  if (gradeDisplay && url.includes("jwxt/mk/studentWeb/#/stuAchievementView")) {
-    waitElement("div.stu-w", (content) => {
-      const node =
-        content[
-          Object.keys(content).find((k) =>
-            k.startsWith("__reactInternalInstance"),
-          )
-        ].return.stateNode;
-      const state = node.state;
-      const onSearch = node.onSearch;
-      if (state.isInLetterRange) {
-        function getAchievementList(semester, isAppend = false) {
-          const state = node.state;
-          fetch(
-            "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/achievement/selfPageList",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
+  if (gradeDisplay) {
+    const initGradeDisplay = () => {
+      if (
+        !window.location.href.includes(
+          "jwxt/mk/studentWeb/#/stuAchievementView",
+        )
+      ) {
+        return;
+      }
+      waitElement("div.stu-w", (content) => {
+        const node = getReactStateNode(content);
+        if (!node) {
+          console.log("[SYSUER 脚本] 未能获取成绩组件的 React 节点");
+          return;
+        }
+        const state = node.state;
+        if (state.isInLetterRange) {
+          function fetchAchievementRows(semester) {
+            const state = node.state;
+            return fetch(
+              "https://jwxt.sysu.edu.cn/jwxt/achievement-manage/achievement/selfPageList",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  pageNo: 1,
+                  pageSize: 200,
+                  total: true,
+                  param: { schoolSemester: semester, achievementState: null },
+                }),
               },
-              body: JSON.stringify({
-                pageNo: 1,
-                pageSize: 200,
-                total: true,
-                param: { schoolSemester: semester, achievementState: null },
-              }),
-            },
-          )
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.code === 200) {
-                const transformedRows = data.data.rows.map((row) => {
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.code !== 200) return [];
+                return data.data.rows.map((row) => {
                   const semParts = (row.schoolSemester || "").split("-");
                   const year = semParts[0];
                   const scoSchoolYear = year
@@ -649,65 +668,57 @@
                     checkedSign: false,
                   };
                 });
-                node.setState({
-                  achieveList: isAppend
-                    ? [...state.achieveList, ...transformedRows]
-                    : transformedRows,
-                });
-                toast.success(`[SYSUER 脚本] 等级制显示原始分成功`);
-              }
-            });
-        }
-
-        function search() {
-          const state = node.state;
-          var year = state.schoolYear?.split("-")[0] || "";
-          var semester = state.schoolSemester || "";
-          if (year && semester) {
-            getAchievementList(year + "-" + semester);
-          } else if (semester) {
-            state.achieveList = [];
-            state.schoolYearList.forEach((item) => {
-              getAchievementList(
-                item.dataNumber.split("-")[0] + "-" + semester,
-                true,
-              );
-            });
-          } else if (year) {
-            state.achieveList = [];
-            state.schoolSemesterList.forEach((item) => {
-              getAchievementList(year + "-" + item.value, true);
-            });
-          } else {
-            state.achieveList = [];
-            state.schoolYearList.forEach((item) => {
-              state.schoolSemesterList.forEach((item2) => {
-                getAchievementList(
-                  item.dataNumber.split("-")[0] + "-" + item2.value,
-                  true,
-                );
               });
-            });
           }
+
+          function search() {
+            const state = node.state;
+            const year = state.schoolYear?.split("-")[0] || "";
+            const semester = state.schoolSemester || "";
+            let semesters = [];
+            if (year && semester) {
+              semesters = [year + "-" + semester];
+            } else if (semester) {
+              semesters = state.schoolYearList.map(
+                (item) => item.dataNumber.split("-")[0] + "-" + semester,
+              );
+            } else if (year) {
+              semesters = state.schoolSemesterList.map(
+                (item) => year + "-" + item.value,
+              );
+            } else {
+              state.schoolYearList.forEach((item) => {
+                state.schoolSemesterList.forEach((item2) => {
+                  semesters.push(
+                    item.dataNumber.split("-")[0] + "-" + item2.value,
+                  );
+                });
+              });
+            }
+            if (semesters.length === 0) return;
+            state.achieveList = [];
+            Promise.all(semesters.map((sem) => fetchAchievementRows(sem)))
+              .then((lists) => {
+                node.setState({ achieveList: lists.flat() });
+                toast.success("[SYSUER 脚本] 等级制显示原始分成功");
+              })
+              .catch(() => {
+                toast.error("[SYSUER 脚本] 获取原始分失败，请稍后重试");
+              });
+          }
+
+          waitElement(".search-div-btn", (container) => {
+            const btn = document.createElement("button");
+            btn.className = "ant-btn ant-btn-primary";
+            btn.textContent = "原始分";
+            btn.addEventListener("click", () => search());
+            container.appendChild(btn);
+          });
         }
-
-        // node.onSearch = (e) => {
-        //     onSearch(node.state);
-        //     node.setState({
-        //         achieveList: [],
-        //     });
-        //     search();
-        // };
-
-        waitElement(".search-div-btn", (container) => {
-          const btn = document.createElement("button");
-          btn.className = "ant-btn ant-btn-primary";
-          btn.textContent = "原始分";
-          btn.addEventListener("click", () => search());
-          container.appendChild(btn);
-        });
-      }
-    });
+      });
+    };
+    initGradeDisplay();
+    window.addEventListener("hashchange", initGradeDisplay);
   }
   if (videoComplete && /lms\.sysu\.edu\.cn\/mod\/.*?\/view\.php/.test(url)) {
     let retry = 0;
@@ -743,21 +754,24 @@
           }
           return response.json();
         })
-        .then((data) => {
-          console.log("Success:", data);
-          const progress = data[0].data.progress;
-          const totaltime = data[0].data.totaltime;
+        .then((res) => {
+          const progress = res[0].data.progress;
+          const totaltime = res[0].data.totaltime;
           callback(progress, totaltime);
         })
         .catch((error) => {
-          console.error("Error:", error);
-          // 错误处理
+          console.error("[SYSUER 脚本] 视频进度提交失败:", error);
+          toast.error("[SYSUER 脚本] 视频进度提交失败");
         });
     }
     const runVideoSpeedRun = () => {
-      console.log("[SYSUER 脚本] 检测到视频页面，开始执行视频速通...");
-      var sourceData =
-        playerdata && playerdata.source ? JSON.parse(playerdata.source) : {};
+      var sourceData = {};
+      try {
+        sourceData =
+          playerdata && playerdata.source ? JSON.parse(playerdata.source) : {};
+      } catch (e) {
+        console.warn("[SYSUER 脚本] 解析视频源失败", e);
+      }
       var sources = {};
       var defaultRes = "";
 
@@ -807,14 +821,17 @@
           }
         };
         upload(playerWrapper, playerdata, (progress, totaltime) => {
-          if (parseInt(progress.replace(/,/g, ""), 10) >= 100) {
+          if (Number(String(progress).replace(/,/g, "")) >= 100) {
             toast.success("[SYSUER 脚本] 当前视频完成");
             if (videoJump) {
               jump();
             }
           } else {
             let count = 0;
-            const total = Math.floor((duration - totaltime) / 4);
+            const total = Math.max(
+              1,
+              Math.floor((duration - (Number(totaltime) || 0)) / 4),
+            );
             const intervalId = setInterval(() => {
               playerWrapper.viewTotalTime = 4000;
               playerWrapper.ajaxOrder();
@@ -822,15 +839,18 @@
               if (count >= total) {
                 clearInterval(intervalId);
               }
-            }, 10);
+            }, 50); // 放宽提交间隔，避免请求过于密集触发服务器限流
             if (videoJump) {
+              let progressChecks = 0;
               const checkProgress = () =>
                 upload(playerWrapper, playerdata, (progress, totaltime) => {
-                  if (parseInt(progress.replace(/,/g, ""), 10) >= 100) {
+                  if (Number(String(progress).replace(/,/g, "")) >= 100) {
                     toast.success("[SYSUER 脚本] 视频进度已全额提交！");
                     jump();
-                  } else {
+                  } else if (++progressChecks < 60) {
                     setTimeout(checkProgress, 500);
+                  } else {
+                    toast.error("[SYSUER 脚本] 进度检查超过30秒仍未完成，已停止");
                   }
                 });
               checkProgress();
@@ -840,8 +860,8 @@
       }
     };
     if (/lms\.sysu\.edu\.cn\/mod\/fsresource\/view\.php/.test(url)) {
-      if (removeWatermark && watermark) {
-        watermark.remove();
+      if (removeWatermark) {
+        window.watermark?.remove?.();
       }
       let videoAttempts = 0;
       const videoInterval = setInterval(() => {
@@ -865,28 +885,21 @@
       click("#next-activity-link");
     }
   }
-  // https://cas.sysu.edu.cn/login/mfaLogin.html?appId=2256471041591329591&appUrl=https%3A%2F%2Fcas.sysu.edu.cn%2Fesc-sso%2Flogin%3Fservice%3Dhttps%253A%252F%252Fjwxt.sysu.edu.cn%252Fjwxt%252Fapi%252Fsso%252Fcas%252Flogin%253Fpattern%253Dstudent-login
   if (autoVerify && url.includes("cas.sysu.edu.cn/login/mfaLogin.html")) {
     document.cookie =
       "device_trust_Cookie=true; Path=/esc-sso; Domain=cas.sysu.edu.cn;";
     toast.info("[SYSUER 脚本] 跳过验证");
-    var query = new URLSearchParams(url.split("?")[1]);
-    var appUrl = query.get("appUrl");
+    // searchParams.get 已完成一次解码；appUrl 内层的 service 参数需保持编码，不再二次解码
+    const appUrl = new URL(url).searchParams.get("appUrl");
     if (appUrl) {
-      appUrl = decodeURIComponent(appUrl);
       window.location.href = appUrl;
     }
   }
 
   if (autoWebvpn && url.includes("appgw.sysu.edu.cn/")) {
-    var query = new URLSearchParams(url.split("?")[1]);
-    var cb = query.get("cb");
+    const cb = new URL(url).searchParams.get("cb");
     if (cb) {
-      cb = decodeURIComponent(cb);
-      window.location.href = cb.replace(
-        ".sysu.edu.cn",
-        "-443.webvpn.sysu.edu.cn",
-      );
+      window.location.href = toWebvpnUrl(cb);
     }
   }
 
@@ -894,20 +907,16 @@
     url.includes("visitor.sysu.edu.cn") &&
     document.title.includes("Access Forbidden")
   ) {
-    window.location.href = url.replace(
-      ".sysu.edu.cn",
-      "-443.webvpn.sysu.edu.cn",
-    );
+    window.location.href = toWebvpnUrl(url);
   }
 
   function login(username, password) {
     waitElement(".para-widget-account-psw", (component) => {
-      var data =
-        component[
-          Object.keys(component).filter(
-            (k) => k.startsWith("jQuery") && k.endsWith("2"),
-          )[0]
-        ].widget_accountPsw;
+      const jqKey = Object.keys(component).find(
+        (k) => k.startsWith("jQuery") && k.endsWith("2"),
+      );
+      if (!jqKey || !component[jqKey]?.widget_accountPsw) return;
+      const data = component[jqKey].widget_accountPsw;
       data.loginModel.dataField.username = username;
       data.loginModel.dataField.password = password;
       data.passwordInputVal = "password";
@@ -940,18 +949,19 @@
         ".el-button.w-100.login_button",
     };
     const autoJump = () => {
-      Object.entries(clickButton).forEach(([key, value]) => {
-        if (url.includes(key)) {
-          console.log(url);
-          waitElement(value, (e) => {
-            e.click();
-            return;
-          });
-        }
-      });
+      const currentUrl = window.location.href; // 每次取最新地址，适配 hash 路由
+      const match = Object.entries(clickButton).find(([key]) =>
+        currentUrl.includes(key),
+      );
+      if (match) {
+        waitElement(match[1], (e) => {
+          e.click();
+        });
+      }
     };
     autoJump();
     window.addEventListener("load", autoJump);
+    window.addEventListener("hashchange", autoJump);
   }
   if (
     autoLogin &&
