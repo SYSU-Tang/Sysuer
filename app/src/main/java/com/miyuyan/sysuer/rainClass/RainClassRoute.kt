@@ -2,7 +2,6 @@ package com.miyuyan.sysuer.rainClass
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -98,9 +97,18 @@ fun RainClassRoute(
 			pagerState = pagerState,
 			title = stringResource(R.string.rain_class),
 			navs = listOf(
-					MenuItem(stringResource(R.string.course), Icons.AutoMirrored.Rounded.MenuBook),
-					MenuItem(stringResource(R.string.exam), Icons.AutoMirrored.Rounded.Assignment),
-					MenuItem(stringResource(R.string.account), Icons.Rounded.AccountCircle),
+					MenuItem(
+							stringResource(R.string.course),
+							iconVector = Icons.AutoMirrored.Rounded.MenuBook
+					),
+					MenuItem(
+							stringResource(R.string.exam),
+							iconVector = Icons.AutoMirrored.Rounded.Assignment
+					),
+					MenuItem(
+							stringResource(R.string.account),
+							iconVector = Icons.Rounded.AccountCircle
+					),
 			),
 			isTopBarContentFixed = true,
 			sharedKey = "RainClass",
@@ -164,7 +172,7 @@ fun RainClassRoute(
 							animatedVisibilityScope = animatedVisibilityScope
 					)
 
-					1 -> ExamScreen()
+					1 -> ExamScreen(backStack)
 					2 -> AccountScreen()
 				}
 			},

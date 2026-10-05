@@ -27,12 +27,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +58,7 @@ import com.miyuyan.sysuer.academic.AcademyNotificationRoute
 import com.miyuyan.sysuer.academic.AssistantEvaluationRoute
 import com.miyuyan.sysuer.academic.AssistantInfoRoute
 import com.miyuyan.sysuer.academic.CETRoute
+import com.miyuyan.sysuer.academic.ClassroomQueryRoute
 import com.miyuyan.sysuer.academic.CourseCompletionRoute
 import com.miyuyan.sysuer.academic.CourseDetailRoute
 import com.miyuyan.sysuer.academic.CourseQueryRoute
@@ -82,8 +81,13 @@ import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
 import com.miyuyan.sysuer.academic.TrainingProgramRoute
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.api.ShortcutReader
+import com.miyuyan.sysuer.browser.BrowserRoute
+import com.miyuyan.sysuer.browser.JsDetailRoute
+import com.miyuyan.sysuer.browser.JsListRoute
 import com.miyuyan.sysuer.browser.RichTextRoute
 import com.miyuyan.sysuer.extra.AboutRoute
+import com.miyuyan.sysuer.extra.DevelopRoute
+import com.miyuyan.sysuer.extra.SettingRoute
 import com.miyuyan.sysuer.extra.PrivacyRoute
 import com.miyuyan.sysuer.extra.UpdateRoute
 import com.miyuyan.sysuer.home.DashboardViewModel
@@ -91,13 +95,20 @@ import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.life.NetPayRoute
 import com.miyuyan.sysuer.life.NewsRoute
 import com.miyuyan.sysuer.life.PayRoute
+import com.miyuyan.sysuer.life.SchoolBusRoute
 import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.AcademyNotification
 import com.miyuyan.sysuer.nav.AssistantEvaluation
 import com.miyuyan.sysuer.nav.AssistantInfo
+import com.miyuyan.sysuer.nav.ClassroomQuery
 import com.miyuyan.sysuer.nav.CET
+import com.miyuyan.sysuer.nav.Browser
+import com.miyuyan.sysuer.nav.JsDetail
+import com.miyuyan.sysuer.nav.JsList
 import com.miyuyan.sysuer.nav.CourseCompletion
 import com.miyuyan.sysuer.nav.CourseDetail
+import com.miyuyan.sysuer.nav.Developer
+import com.miyuyan.sysuer.nav.Setting
 import com.miyuyan.sysuer.nav.CourseQuery
 import com.miyuyan.sysuer.nav.CourseSelected
 import com.miyuyan.sysuer.nav.Dorm
@@ -121,6 +132,7 @@ import com.miyuyan.sysuer.nav.RainClassDetail
 import com.miyuyan.sysuer.nav.Registration
 import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.nav.RoomQuery
+import com.miyuyan.sysuer.nav.SchoolBus
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
@@ -169,7 +181,6 @@ class MainActivity : BaseActivity() {
 		}
 	}
 
-	//	private var sysuCardShortcutInfo: ShortcutInfo? = null
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val spm: PreferenceViewModel by viewModels()
@@ -322,8 +333,39 @@ class MainActivity : BaseActivity() {
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<Browser> { key ->
+						BrowserRoute(
+								backStack = backStack,
+								navKey = key,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<JsList> { key ->
+						JsListRoute(
+								backStack,
+								key,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<JsDetail> { key ->
+						JsDetailRoute(
+								backStack,
+								key,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
 					entry<CET> {
 						CETRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<ClassroomQuery> {
+						ClassroomQueryRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
@@ -380,6 +422,13 @@ class MainActivity : BaseActivity() {
 					}
 					entry<NetPay> {
 						NetPayRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<SchoolBus> {
+						SchoolBusRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
@@ -458,6 +507,20 @@ class MainActivity : BaseActivity() {
 					}
 					entry<About> {
 						AboutRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<Setting> {
+						SettingRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<Developer> {
+						DevelopRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current

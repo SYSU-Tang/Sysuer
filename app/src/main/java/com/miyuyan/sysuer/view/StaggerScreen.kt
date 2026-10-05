@@ -191,7 +191,7 @@ fun SectionCard(
 									} else Modifier),
 								shapes = ButtonDefaults.shapes(),
 								enabled = item.enabled) {
-							item.icon?.let {
+							item.iconVector?.let {
 								Icon(
 										it,
 										contentDescription = item.title,

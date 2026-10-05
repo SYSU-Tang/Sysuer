@@ -2,7 +2,6 @@ package com.miyuyan.sysuer.life
 
 import android.os.Environment
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,7 +23,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -189,7 +187,7 @@ fun PayRoute(
 									item.getString("orderNo"), item.getString("outPayNo")
 							)
 							paymentDetailIndex = index
-							true
+
 						})
 						)
 				)
@@ -245,7 +243,7 @@ fun PayRoute(
 						Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 					}/支付凭据.pdf"
 					)
-					true
+
 				})
 			}
 		}
@@ -321,11 +319,11 @@ fun PayRoute(
 						it.add(
 								MenuItem(
 								stringResource(R.string.pay_record),
-								icon = Icons.Rounded.AttachMoney
+								iconVector = Icons.Rounded.AttachMoney
 						) {
 							selectedPayItems.clear()
 							showPayDialog = true
-							true
+
 						})
 					}
 				}

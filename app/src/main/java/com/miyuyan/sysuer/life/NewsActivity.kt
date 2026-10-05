@@ -9,6 +9,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
+import com.miyuyan.sysuer.browser.BrowserRoute
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.News
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.theme.SysuerTheme
@@ -25,6 +27,14 @@ class NewsActivity : BaseActivity() {
 						entry<News> {
 							NewsRoute(
 									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+						entry<Browser> { key ->
+							BrowserRoute(
+									backStack = backStack,
+									navKey = key,
 									sharedTransitionScope = this@SharedTransitionLayout,
 									animatedVisibilityScope = LocalNavAnimatedContentScope.current
 							)

@@ -1,6 +1,5 @@
 package com.miyuyan.sysuer.life
 
-import android.content.Intent
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
@@ -27,8 +26,8 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExpandedFullScreenContainedSearchBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -54,7 +53,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
@@ -63,7 +61,7 @@ import coil.request.ImageRequest
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.trim
-import com.miyuyan.sysuer.browser.BrowserActivity
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
@@ -87,7 +85,6 @@ fun NewsRoute(
 ) {
 	val viewModel: NewsViewModel = viewModel()
 	val activity = LocalActivity.current
-	val context = LocalContext.current
 	val news by viewModel.news.collectAsStateWithLifecycle()
 	val subscriptions by viewModel.subscriptions.collectAsStateWithLifecycle()
 	val notices by viewModel.notices.collectAsStateWithLifecycle()
@@ -100,18 +97,6 @@ fun NewsRoute(
 	val searchBarState = rememberContainedSearchBarState()
 	val textFieldState = rememberTextFieldState()
 	val scope = rememberCoroutineScope()
-
-	fun openBrowser(url: String?) {
-		val intent = Intent(context, BrowserActivity::class.java).setData(url.orEmpty().toUri())
-		activity?.let {
-			context.startActivity(
-					intent/*, ActivityOptionsCompat.makeSceneTransitionAnimation(
-					it, it.window.decorView, "miniapp"
-			).toBundle()
-			*/
-			)
-		} ?: context.startActivity(intent)
-	}
 
 	LaunchedEffect(textFieldState) {
 		snapshotFlow { textFieldState.text.toString() }.debounce(300.milliseconds)
@@ -183,7 +168,11 @@ fun NewsRoute(
 									onSearch = { keyword ->
 										if (keyword.isNotBlank()) {
 											scope.launch { searchBarState.animateToCollapsed() }
-											openBrowser(viewModel.searchUrl(keyword))
+											backStack.add(
+													Browser(
+															viewModel.searchUrl(keyword)
+													)
+											)
 										}
 									},
 									placeholder = {
@@ -207,7 +196,7 @@ fun NewsRoute(
 				) {
 					SuggestionList(suggestions) { suggestion ->
 						scope.launch { searchBarState.animateToCollapsed() }
-						openBrowser(viewModel.searchUrl(suggestion))
+						backStack.add(Browser(viewModel.searchUrl(suggestion)))
 					}
 				}
 			},
@@ -224,8 +213,10 @@ fun NewsRoute(
 					cookie = viewModel.cookie,
 					authorization = viewModel.authorization,
 					onLoadMore = { viewModel.loadMore(page) },
+					sharedTransitionScope = sharedTransitionScope,
+					animatedVisibilityScope = animatedVisibilityScope,
 			) { item ->
-				openBrowser(item.getString("url"))
+				backStack.add(Browser(item.getString("url").orEmpty()))
 			}
 		}
 	}
@@ -254,6 +245,8 @@ private fun NewsGrid(
 	cookie: String,
 	authorization: String,
 	onLoadMore: () -> Unit,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
 	onItemClick: (JSONObject) -> Unit,
 ) {
 	val state = rememberLazyStaggeredGridState()
@@ -276,6 +269,16 @@ private fun NewsGrid(
 	) {
 		items(list) { item ->
 			NewsItem(
+					modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && item.getString("url").isNotEmpty()) {
+				with(sharedTransitionScope) {
+					Modifier.sharedBounds(
+							sharedContentState = rememberSharedContentState(
+									key = item.getString("url")
+							),
+							animatedVisibilityScope = animatedVisibilityScope,
+					)
+				}
+			} else Modifier,
 					item = item,
 					cookie = cookie,
 					authorization = authorization,
@@ -285,7 +288,13 @@ private fun NewsGrid(
 }
 
 @Composable
-private fun NewsItem(item: JSONObject, cookie: String, authorization: String, onClick: () -> Unit) {
+private fun NewsItem(
+	modifier: Modifier = Modifier,
+	item: JSONObject,
+	cookie: String,
+	authorization: String,
+	onClick: () -> Unit
+) {
 	val image = item.getJSONArray("coversPicList")?.let {
 		if (it.isNotEmpty() && !it.getJSONObject(0).isNullOrEmpty()) {
 			it.getJSONObject(0).getString("outLink")
@@ -294,7 +303,7 @@ private fun NewsItem(item: JSONObject, cookie: String, authorization: String, on
 	val context = LocalContext.current
 	Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
 		Row(
-				modifier = Modifier
+				modifier = modifier
 					.fillMaxWidth()
 					.padding(dimensionResource(R.dimen.horizontal_padding)),
 				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_padding)),

@@ -123,14 +123,12 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 															getString(R.string.pay_fee), null
 													) {
 														continuePay(orderId)
-														true
 													})
 											section.footerMenus.add(
 													MenuItem(
 															getString(R.string.cancel_pay), null
 													) {
 														cancelPay(orderId)
-														true
 													})
 										}
 										orderSections.add(section)
@@ -156,20 +154,19 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 															showStopOrResumeConfirmation(
 																	serviceId, isStop, leftDay
 															)
-															true
 														})
 												section.footerMenus.add(
 														MenuItem(
 																getString(R.string.pay_fee),
 																null,
-																isStop
+																enabled = isStop
 														) {
 															openPayDialog(
 																	serviceId,
 																	row[1] ?: "",
 																	row[7] ?: ""
 															)
-															true
+
 														})
 												statusSections.add(section)
 											}
@@ -183,12 +180,11 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 												MenuItem(
 														getString(R.string.pay_fee),
 														null,
-														serviceId.isNotEmpty()
+														enabled = serviceId.isNotEmpty()
 												) {
 													openPayDialog(
 															serviceId, row[1] ?: "", row[8] ?: ""
 													)
-													true
 												})
 										statusSections.add(section)
 									}

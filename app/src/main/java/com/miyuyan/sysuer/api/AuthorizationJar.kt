@@ -1,21 +1,17 @@
 package com.miyuyan.sysuer.api
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import com.miyuyan.sysuer.preference.AuthorizationPreference
 
 class AuthorizationJar(val context: Context) {
-	private val authPreferences: SharedPreferences =
-		context.getSharedPreferences("authorization", Context.MODE_PRIVATE)
-	private val tokenPreferences: SharedPreferences =
-		context.getSharedPreferences("token", Context.MODE_PRIVATE)
+	private val authorizationPreference = AuthorizationPreference(context)
 
 	/**
 	 * 获取Authorization
 	 * @param host 主机
 	 * @return Authorization
 	 * */
-	fun getAuthorization(host: String?): String = authPreferences.getString(host, "") ?: ""
+	fun getAuthorization(host: String?): String = authorizationPreference.getAuthorization(host)
 
 	/**
 	 * 设置Authorization
@@ -23,7 +19,7 @@ class AuthorizationJar(val context: Context) {
 	 * @param authorization Authorization
 	 * */
 	fun setAuthorization(host: String?, authorization: String?) {
-		authPreferences.edit { putString(host, authorization) }
+		authorizationPreference.setAuthorization(host, authorization)
 	}
 
 	/**
@@ -31,7 +27,7 @@ class AuthorizationJar(val context: Context) {
 	 * @param host 主机
 	 * @return Token
 	 * */
-	fun getToken(host: String?): String = tokenPreferences.getString(host, "") ?: ""
+	fun getToken(host: String?): String = authorizationPreference.getToken(host)
 
 	/**
 	 * 设置Token
@@ -39,6 +35,6 @@ class AuthorizationJar(val context: Context) {
 	 * @param token Token
 	 * */
 	fun setToken(host: String?, token: String?) {
-		tokenPreferences.edit { putString(host, token) }
+		authorizationPreference.setToken(host, token)
 	}
 }

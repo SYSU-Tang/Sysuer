@@ -1,12 +1,7 @@
 package com.miyuyan.sysuer.academic
 
-import android.app.Activity
-import android.content.Intent
-import android.view.View
-import android.view.ViewGroup
-import androidx.compose.animation.AnimatedContent
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,32 +31,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.browser.BrowserActivity
+import com.miyuyan.sysuer.R.dimen.horizontal_padding
+import com.miyuyan.sysuer.R.dimen.vertical_padding
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.StatePage
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlin.time.Duration.Companion.milliseconds
+import com.miyuyan.sysuer.view.UiState
 
-@OptIn(FlowPreview::class)
 @Composable
 fun AcademyNotificationRoute(
 	backStack: MutableList<NavKey>,
@@ -72,10 +59,7 @@ fun AcademyNotificationRoute(
 	val viewModel: AcademyNotificationViewModel = viewModel()
 	val academicNotices by viewModel.academicNotices.collectAsStateWithLifecycle()
 	val schoolNotices by viewModel.schoolNotices.collectAsStateWithLifecycle()
-	val noticeContent by viewModel.noticeContent.collectAsStateWithLifecycle(null)
-	var sharedElementBounds by remember { mutableStateOf<Rect?>(null) }
-	val context = LocalContext.current
-	val activity = context as? Activity
+	val activity = LocalActivity.current
 
 	val textFieldState1 = rememberTextFieldState()
 	val textFieldState2 = rememberTextFieldState()
@@ -83,26 +67,31 @@ fun AcademyNotificationRoute(
 	val academicNoticesUiState by viewModel.academicNoticesUiState.collectAsStateWithLifecycle()
 	val schoolNoticesUiState by viewModel.schoolNoticesUiState.collectAsStateWithLifecycle()
 
-	LaunchedEffect(textFieldState1) {
-		snapshotFlow { textFieldState1.text.toString() }.debounce(300L.milliseconds)
-			.collect { keyword -> viewModel.fetchAcademicNotice(keyword) }
-	}
+	var id by remember { mutableStateOf("") }
 
-	LaunchedEffect(textFieldState2) {
-		snapshotFlow { textFieldState2.text.toString() }.debounce(300L.milliseconds)
-			.collect { keyword -> viewModel.fetchSchoolNotice(keyword) }
-	}
+//	LaunchedEffect(textFieldState1.text) {
+//		snapshotFlow { textFieldState1.text.toString() }.debounce(300L.milliseconds)
+//			.collect { keyword -> viewModel.fetchAcademicNotice(keyword) }
+//	}
+//
+//	LaunchedEffect(textFieldState2.text) {
+//		snapshotFlow { textFieldState2.text.toString() }.debounce(300L.milliseconds)
+//			.collect { keyword -> viewModel.fetchSchoolNotice(keyword) }
+//	}
 
 	LaunchedEffect(Unit) {
-		viewModel.fetchAcademicNotice()
-		viewModel.fetchSchoolNotice()
-	}
-
-	LaunchedEffect(noticeContent) {
-		noticeContent?.let { content ->
-			val intent = Intent(context, BrowserActivity::class.java).putExtra(
-					"data", ("""<!DOCTYPE html><html><head>
-																			  <style>
+		if (viewModel.academicNoticesUiState.value == UiState.Unstarted || viewModel.academicNoticesUiState.value == UiState.Error) {
+			viewModel.fetchAcademicNotice()
+		}
+		if (viewModel.schoolNoticesUiState.value == UiState.Unstarted || viewModel.schoolNoticesUiState.value == UiState.Error) {
+			viewModel.fetchSchoolNotice()
+		}
+		viewModel.noticeContent.collect { noticeContent ->
+			noticeContent?.let { content ->
+				backStack.add(
+						Browser(
+								url = "https://jwxt.sysu.edu.cn/jwxt/#/notice/${id}",
+								content = """<!DOCTYPE html><html><head><style>
                                             body{
                                             padding: 24px !important;
                                             }
@@ -121,35 +110,10 @@ fun AcademyNotificationRoute(
                                                     border-collapse: collapse !important;
                                                     border: 2px solid windowtext !important;
                                                     }
-                                            </style></head><body>""".trimIndent() + content + "</body></html>").trim()
-			)
-			val options = sharedElementBounds?.let { bounds ->
-				activity?.let { act ->
-					val view = View(act).apply {
-						x = bounds.left
-						y = bounds.top
-						layoutParams = ViewGroup.LayoutParams(
-								bounds.width.toInt(), bounds.height.toInt()
+                                            </style></head><body>$content</body></html>""".trimIndent()
 						)
-						transitionName = "miniapp"
-					}
-					(act.window.decorView as ViewGroup).addView(view)
-					val opt =
-						ActivityOptionsCompat.makeSceneTransitionAnimation(act, view, "miniapp")
-							.toBundle()
-					act.window.decorView.postDelayed({
-						(act.window.decorView as ViewGroup).removeView(view)
-					}, 1000)
-					opt
-				}
-			} ?: activity?.let {
-				ActivityOptionsCompat.makeSceneTransitionAnimation(
-						it, it.window.decorView, "miniapp"
-				).toBundle()
+				)
 			}
-
-			context.startActivity(intent, options)
-			viewModel.clearNoticeContent()
 		}
 	}
 
@@ -187,9 +151,7 @@ fun AcademyNotificationRoute(
 							)
 						},
 						leadingIcon = {
-							IconButton(onClick = {
-
-							}) {
+							IconButton(onClick = {}) {
 								Icon(
 										Icons.Rounded.Search,
 										contentDescription = stringResource(R.string.search)
@@ -249,19 +211,27 @@ fun AcademyNotificationRoute(
 //				},
 //			)
 			},
-			pageContent = { page ->
-				AnimatedContent(targetState = page, label = "page_transition") { targetPage ->
-					StatePage(
-							state = if (targetPage == 0) academicNoticesUiState else schoolNoticesUiState
-					) {
-						NewsList(
-								newsList = if (targetPage == 0) academicNotices else schoolNotices,
-								sharedTransitionScope = sharedTransitionScope,
-								animatedVisibilityScope = animatedVisibilityScope
-						) { notice, bounds ->
-							sharedElementBounds = bounds
-							viewModel.fetchContent(notice.getString("id"))
-						}
+			pageContent = {
+				if (it == 0) StatePage(
+						state = academicNoticesUiState
+				) {
+					NewsList(
+							newsList = academicNotices,
+							sharedTransitionScope = sharedTransitionScope,
+							animatedVisibilityScope = animatedVisibilityScope
+					) { notice ->
+						viewModel.fetchContent(notice.getString("id"))
+					}
+				} else if (it == 1) StatePage(
+						state = schoolNoticesUiState
+				) {
+					NewsList(
+							newsList = schoolNotices,
+							sharedTransitionScope = sharedTransitionScope,
+							animatedVisibilityScope = animatedVisibilityScope
+					) { notice ->
+						viewModel.fetchContent(notice.getString("id"))
+						id = notice.getString("id")
 					}
 				}
 			})
@@ -270,65 +240,55 @@ fun AcademyNotificationRoute(
 @Composable
 fun NewsList(
 	newsList: List<JSONObject>,
-	sharedTransitionScope: SharedTransitionScope,
-	animatedVisibilityScope: AnimatedVisibilityScope,
-	onItemClick: (JSONObject, Rect) -> Unit,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
+	onItemClick: (JSONObject) -> Unit,
 ) {
 	LazyVerticalStaggeredGrid(
 			columns = StaggeredGridCells.Adaptive(240.dp),
 			modifier = Modifier.fillMaxSize(),
 			contentPadding = PaddingValues(dimensionResource(R.dimen.content_padding)),
-			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_padding)),
-			verticalItemSpacing = dimensionResource(R.dimen.vertical_padding)
+			horizontalArrangement = Arrangement.spacedBy(dimensionResource(horizontal_padding)),
+			verticalItemSpacing = dimensionResource(vertical_padding)
 	) {
-		items(newsList, key = { it.getString("id") }) { item ->
-			NewsItem(
-					item = item,
-					sharedTransitionScope = sharedTransitionScope,
-					animatedVisibilityScope = animatedVisibilityScope
-			) { bounds ->
-				onItemClick(item, bounds)
+		items(newsList) { item ->
+			Card(
+					onClick = { onItemClick(item) },
+					modifier = (if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+						with(sharedTransitionScope) {
+							Modifier.sharedBounds(
+									sharedContentState = rememberSharedContentState(
+											key = "https://jwxt.sysu.edu.cn/jwxt/#/notice/${
+												item.getString(
+														"id"
+												)
+											}"
+									),
+									animatedVisibilityScope = animatedVisibilityScope,
+							)
+						}
+					} else Modifier).fillMaxWidth()) {
+				Column(
+						modifier = Modifier
+							.padding(
+									dimensionResource(horizontal_padding),
+									dimensionResource(vertical_padding)
+							)
+							.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(
+						dimensionResource(vertical_padding)
+				)
+				) {
+					Text(
+							text = item.getString("title", ""),
+							style = MaterialTheme.typography.titleMedium
+					)
+					Text(
+							text = item.getString("deliveryDate", ""),
+							style = MaterialTheme.typography.bodySmall,
+					)
+				}
 			}
 		}
 	}
 }
 
-@Composable
-fun NewsItem(
-	item: JSONObject,
-	sharedTransitionScope: SharedTransitionScope,
-	animatedVisibilityScope: AnimatedVisibilityScope,
-	onClick: (Rect) -> Unit,
-) {
-	var currentBounds by remember { mutableStateOf(Rect.Zero) }
-	with(sharedTransitionScope) {
-		Card(
-				onClick = { onClick(currentBounds) },
-				modifier = Modifier
-					.fillMaxWidth()
-					.onGloballyPositioned { currentBounds = it.boundsInWindow() }
-					.sharedBounds(
-							rememberSharedContentState(key = "news_${item.getString("id")}"),
-							animatedVisibilityScope = animatedVisibilityScope
-					)) {
-			Column(
-					modifier = Modifier
-						.padding(
-								dimensionResource(R.dimen.horizontal_padding),
-								dimensionResource(R.dimen.vertical_padding)
-						)
-						.fillMaxWidth(),
-					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_padding))
-			) {
-				Text(
-						text = item.getString("title", ""),
-						style = MaterialTheme.typography.titleMedium
-				)
-				Text(
-						text = item.getString("deliveryDate", ""),
-						style = MaterialTheme.typography.bodySmall,
-				)
-			}
-		}
-	}
-}

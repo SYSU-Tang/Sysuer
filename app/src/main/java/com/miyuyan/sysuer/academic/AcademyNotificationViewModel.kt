@@ -6,8 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.view.UiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AcademyNotificationViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,11 +23,13 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 	private val _schoolNotices = MutableStateFlow<List<JSONObject>>(emptyList())
 	val schoolNotices: StateFlow<List<JSONObject>> = _schoolNotices
 
-	private val _noticeContent = MutableStateFlow<String?>(null)
-	val noticeContent: StateFlow<String?> = _noticeContent
+	private val _noticeContent = MutableSharedFlow<String?>(extraBufferCapacity = 1)
+	val noticeContent: SharedFlow<String?> = _noticeContent.asSharedFlow()
 
-	val academicNoticesUiState = model.getUiState(0)
-	val schoolNoticesUiState = model.getUiState(1)
+	private val _academicNoticesUiState = model.getUiState(0)
+	val academicNoticesUiState: StateFlow<UiState> = _academicNoticesUiState.asStateFlow()
+	private val _schoolNoticesUiState = model.getUiState(1)
+	val schoolNoticesUiState: StateFlow<UiState> = _schoolNoticesUiState.asStateFlow()
 
 	init {
 		viewModelScope.launch {
@@ -32,14 +38,14 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 					when (code) {
 						0 -> {
 							val list = response.getJSONObject("data").getJSONArray("list")
-							academicNoticesUiState.value =
+							_academicNoticesUiState.value =
 								if (list.isEmpty()) UiState.Empty else UiState.Content
 							_academicNotices.tryEmit(list.filterIsInstance<JSONObject>())
 						}
 
 						1 -> {
 							val list = response.getJSONObject("data").getJSONArray("list")
-							schoolNoticesUiState.value =
+							_schoolNoticesUiState.value =
 								if (list.isEmpty()) UiState.Empty else UiState.Content
 							_schoolNotices.tryEmit(list.filterIsInstance<JSONObject>())
 						}
@@ -54,15 +60,16 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 		}
 	}
 
-	fun fetchAcademicNotice(keyword: String? = null) {
+	fun fetchAcademicNotice(keyword: String = "") {
+		_academicNoticesUiState.value = UiState.Loading
 		model.enqueue(
 				"jwxt/system-manage/info-delivery?column=01&deliveryObject=02&status=1&resourceCode=jwgld&title=$keyword",
 				0
 		)
 	}
 
-	fun fetchSchoolNotice(keyword: String? = null) {
-		schoolNoticesUiState.value = UiState.Loading
+	fun fetchSchoolNotice(keyword: String = "") {
+		_schoolNoticesUiState.value = UiState.Loading
 		model.enqueue(
 				"jwxt/system-manage/info-delivery?column=02&deliveryObject=02&status=1&resourceCode=jwgld&title=$keyword",
 				1
@@ -70,12 +77,7 @@ class AcademyNotificationViewModel(application: Application) : AndroidViewModel(
 	}
 
 	fun fetchContent(id: String) {
-		academicNoticesUiState.value = UiState.Loading
 		model.enqueue("jwxt/system-manage/info-delivery/noticeId?id=$id", 2)
-	}
-
-	fun clearNoticeContent() {
-		_noticeContent.value = null
 	}
 
 	override fun onCleared() {

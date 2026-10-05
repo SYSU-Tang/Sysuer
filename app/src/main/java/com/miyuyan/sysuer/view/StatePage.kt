@@ -51,20 +51,15 @@ fun StatePage(
 			Error -> ErrorView(
 					modifier = modifier, onRetry = onRetry
 			)
-			LoadMore -> {
-				Column(
-						modifier = Modifier.fillMaxSize(),
-						horizontalAlignment = Alignment.CenterHorizontally,
-				) {
-					Box(modifier = Modifier.weight(1f)) {
-						content()
-					}
-					LoadingIndicator()
-				}
-			}
-
+			// Content 与 LoadMore 共用同一组合槽位：content 位置不变，
+			// 其内部 remember 的滚动状态在加载更多时得以保留（换槽位会整树重建、滚回顶部）
 			else -> {
-				content()
+				Box(modifier = Modifier.fillMaxSize()) {
+					content()
+					if (state == LoadMore) {
+						LoadingIndicator(modifier = Modifier.align(Alignment.BottomCenter))
+					}
+				}
 			}
 		}
 	}

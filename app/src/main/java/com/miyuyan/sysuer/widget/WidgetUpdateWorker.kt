@@ -4,30 +4,28 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import androidx.datastore.preferences.core.Preferences
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import androidx.datastore.preferences.core.edit
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.DataStoreManager
 import com.miyuyan.sysuer.model.JwxtModel
-import io.reactivex.rxjava3.core.Single
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 
 class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) :
 	Worker(context, workerParams) {
 	val model: JwxtModel = JwxtModel(applicationContext)
 
-	@OptIn(ExperimentalCoroutinesApi::class)
 	override fun doWork(): Result {
 		try {
 			val networkData = data
 			val dataStore = DataStoreManager.getInstance(applicationContext)
-			dataStore.updateDataAsync { prefsIn: Preferences ->
-				val mutablePreferences = prefsIn.toMutablePreferences()
-				if (networkData != null) mutablePreferences[DataStoreManager.TODAY_CLASS] =
-					networkData.toJSONString()
-				Single.just(mutablePreferences)
+			runBlocking {
+				dataStore.edit { prefs ->
+					if (networkData != null) prefs[DataStoreManager.TODAY_CLASS] =
+						networkData.toJSONString()
+				}
 			}
 			val widgetName = inputData.getString("component")
 			val widgetNames: Array<String?>? = inputData.getNullableStringArray("components")

@@ -2,7 +2,6 @@ package com.miyuyan.sysuer.life
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -88,8 +87,8 @@ fun NetPayRoute(
 			onNavigationClick = { backStack.navigateBack(activity) },
 			title = stringResource(R.string.net_manager),
 			navs = listOf(
-					MenuItem(stringResource(R.string.order), Icons.Rounded.AttachMoney),
-					MenuItem(stringResource(R.string.status), Icons.Rounded.Web),
+					MenuItem(stringResource(R.string.order), iconVector = Icons.Rounded.AttachMoney),
+					MenuItem(stringResource(R.string.status), iconVector = Icons.Rounded.Web),
 			),
 			isNestedScrollEnabled = false,
 			sharedTransitionScope = sharedTransitionScope,

@@ -129,14 +129,13 @@ open class StaggerFragment : BaseFragment() {
 
 	fun export(toolbar: View, title: String) {
 		val bundle = makeSceneTransitionAnimation(requireActivity(), toolbar, "miniapp").toBundle()
-		DataStoreManager.saveContent(requireContext(), title, sections.toMarkdown()) {
-			lifecycleScope.launch(Dispatchers.Main) {
-				requireContext().startActivity(
-					Intent(requireContext(), RichTextActivity::class.java).putExtra(
-						"type", DataStoreManager.ContentType.MARKDOWN.name
-					).putExtra("title", title), bundle
-				)
-			}
+		lifecycleScope.launch(Dispatchers.Main) {
+			DataStoreManager.saveContent(requireContext(), title, sections.toMarkdown())
+			requireContext().startActivity(
+				Intent(requireContext(), RichTextActivity::class.java).putExtra(
+					"type", DataStoreManager.ContentType.MARKDOWN.name
+				).putExtra("title", title), bundle
+			)
 		}
 	}
 

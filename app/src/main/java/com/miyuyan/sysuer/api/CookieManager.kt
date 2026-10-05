@@ -1,24 +1,20 @@
 package com.miyuyan.sysuer.api
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import com.miyuyan.sysuer.preference.CookiePreference
 import okhttp3.Cookie
 import java.net.HttpCookie
 import java.util.stream.Collectors
 
 class CookieManager(context: Context) {
-	private val cookiePreference: SharedPreferences =
-		context.getSharedPreferences("cookie", Context.MODE_PRIVATE)
+	private val cookiePreference = CookiePreference(context)
 
-	fun get(host: String?) =
-		cookiePreference.getStringSet(host, HashSet<String?>()) ?: HashSet<String?>()
+	fun get(host: String?): MutableSet<String> = cookiePreference.get(host)
 
 	fun get(host: String?, cookieName: String?) =
-		cookiePreference.getStringSet(host, HashSet<String?>())
-			?.firstOrNull { it.startsWith("$cookieName=") }?.let {
-				HttpCookie.parse(it)[0].value
-			}
+		cookiePreference.get(host).firstOrNull { it.startsWith("$cookieName=") }?.let {
+			HttpCookie.parse(it)[0].value
+		}
 
 	fun toString(host: String?): String = get(host).joinToString(separator = ";")
 
@@ -26,17 +22,15 @@ class CookieManager(context: Context) {
 		c.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
 	}.collect(Collectors.joining(";"))
 
-	fun set(host: String?, cookieSet: MutableSet<String?>) {
-		cookiePreference.edit {
-			putStringSet(
-					host,
-					cookieSet.stream().filter { c: String? -> !c!!.startsWith("rememberMe=") }
-						.collect(Collectors.toSet()))
-		}
+	fun set(host: String?, cookieSet: Set<String?>) {
+		cookiePreference.set(
+			host,
+			cookieSet.filterNotNull().filter { !it.startsWith("rememberMe=") }.toSet()
+		)
 	}
 
 	fun clear(host: String?) {
-		cookiePreference.edit { remove(host) }
+		cookiePreference.remove(host)
 	}
 
 	fun add(host: String?, cookie: Cookie) {

@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -67,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -89,7 +88,7 @@ import com.miyuyan.sysuer.MainActivity
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.ContextUtil
-import com.miyuyan.sysuer.browser.BrowserActivity
+import com.miyuyan.sysuer.nav.Browser
 import kotlinx.coroutines.launch
 import kotlin.reflect.full.primaryConstructor
 
@@ -108,9 +107,23 @@ internal fun ServiceScreen(
 	val collection = serviceViewModel.collection
 	val serviceData = serviceViewModel.serviceData
 
+	val uniqueSharedKeys = remember(collection, serviceData) {
+		val counts = mutableMapOf<String, Int>()
+		(collection + serviceData.flatMap { it.second }).forEach { item ->
+			val key =
+				item.route ?: item.url?.takeIf { it.isNotEmpty() && item.activity.isNullOrBlank() }
+			if (key != null) counts.merge(key, 1, Int::plus)
+		}
+		counts.filterValues { it == 1 }.keys
+	}
+
+	val language = LocalLocale.current.language
 	LaunchedEffect(Unit) {
+		// 传入 Activity 当前语言的 Locale 标签，语言切换重建后按新语言重载服务数据
+		serviceViewModel.loadServiceData(
+				language
+		)
 		serviceViewModel.loadCollection()
-		serviceViewModel.loadServiceData()
 	}
 	ServiceActionDialog(
 			item = showActionItem,
@@ -119,6 +132,7 @@ internal fun ServiceScreen(
 			serviceViewModel = serviceViewModel,
 			homeViewModel = homeViewModel,
 			config = config,
+			backStack = backStack,
 	)
 
 	ServiceOrderDialog(
@@ -139,6 +153,7 @@ internal fun ServiceScreen(
 				ServiceBox(
 						title = stringResource(R.string.collect),
 						items = serviceViewModel.collection,
+						uniqueKeys = uniqueSharedKeys,
 						onItemClick = {
 							navigateToServiceItem(
 									context, backStack, it, homeViewModel.actionMap
@@ -156,6 +171,7 @@ internal fun ServiceScreen(
 			ServiceBox(
 					title = name,
 					items = items,
+					uniqueKeys = uniqueSharedKeys,
 					onItemClick = {
 						navigateToServiceItem(
 								context, backStack, it, homeViewModel.actionMap
@@ -195,9 +211,13 @@ fun navigateToServiceItem(
 		)
 		return
 	}
-
+	if (!item.url.isNullOrBlank()) {
+		backStack.add(Browser(item.url, item.name))
+		return
+	}
 	if (actionMap.containsKey(item.id)) actionMap[item.id]?.invoke(context) ?: ContextUtil
 		.getInstance(context).toast(R.string.activity_not_found)
+
 }
 
 private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: Intent?): Intent? {
@@ -212,10 +232,6 @@ private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: 
 			}
 		}
 
-		!item.url.isNullOrBlank() -> {
-			Intent(context, BrowserActivity::class.java).setData(CommonUtil.trim(item.url).toUri())
-		}
-
 		else -> intent
 	}
 }
@@ -224,6 +240,7 @@ private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: 
 private fun ServiceBox(
 	title: String,
 	items: List<ServiceConfig>,
+	uniqueKeys: Set<String>,
 	onItemClick: (ServiceConfig) -> Unit,
 	onItemLongClick: (ServiceConfig) -> Unit,
 	onTitleClick: (() -> Unit)? = null,
@@ -261,17 +278,21 @@ private fun ServiceBox(
 				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
 		) {
 			items.forEach { item ->
+				val key = item.route
+					?: item.url?.takeIf { it.isNotEmpty() && item.activity.isNullOrBlank() }
+				// key 全局唯一才参与共享过渡；同 key 的多个 chip 会使过渡错乱
+				val sharedModifier =
+					if (sharedTransitionScope != null && animatedVisibilityScope != null && key != null && key in uniqueKeys) {
+						with(sharedTransitionScope) {
+							Modifier.sharedBounds(
+									sharedContentState = rememberSharedContentState(
+											key = key
+									), animatedVisibilityScope = animatedVisibilityScope
+							)
+						}
+					} else Modifier
 				LongClickableElevatedAssistChip(
-						modifier = Modifier.then(
-								if (sharedTransitionScope != null && animatedVisibilityScope != null && item.route != null) {
-							with(sharedTransitionScope) {
-								Modifier.sharedBounds(
-										sharedContentState = rememberSharedContentState(
-												key = item.route
-										), animatedVisibilityScope = animatedVisibilityScope
-								)
-							}
-						} else Modifier),
+						modifier = sharedModifier,
 						onClick = {
 							onItemClick(item)
 						},
@@ -296,6 +317,7 @@ private fun ServiceActionDialog(
 	serviceViewModel: ServiceViewModel,
 	homeViewModel: HomeViewModel,
 	config: ContextUtil,
+	backStack: MutableList<NavKey>,
 ) {
 	if (item == null) return
 	val context = LocalContext.current
@@ -428,25 +450,19 @@ private fun ServiceActionDialog(
 						image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
 				) {
 					val itemUrl = item.url
-					if (!itemUrl.isNullOrBlank()) context.startActivity(
-							Intent(
-									context, BrowserActivity::class.java
-							).setData(itemUrl.toUri())
-					)
+					if (!itemUrl.isNullOrBlank()) backStack.add(Browser(itemUrl, name))
 				}
 
 				GenericTonalButton(
 						image = Icons.Rounded.Book, text = stringResource(R.string.guide)
 				) {
-					if (!item.doc.isNullOrBlank()) context.startActivity(
-							Intent(
-									context, BrowserActivity::class.java
-							).setData(
+					if (!item.doc.isNullOrBlank()) backStack.add(
+							Browser(
 									"https://sysu-tang.github.io/sysuer-website${
 										CommonUtil.trim(
 												item.doc
 										)
-									}".toUri()
+									}", name
 							)
 					)
 					else config.toast(R.string.undeveloped_warning)

@@ -30,7 +30,7 @@ class TodoHelper(private val context: Context, version: Int) :
 				value.put("name", it)
 				try {
 					insertWithOnConflict("types", null, value, SQLiteDatabase.CONFLICT_ABORT)
-				} catch (`_`: Exception) {
+				} catch (_: Exception) {
 				}
 				value.clear()
 			}

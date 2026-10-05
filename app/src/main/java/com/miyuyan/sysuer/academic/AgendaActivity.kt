@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alibaba.fastjson2.JSONObject
-import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.SysuerCalendar
 import com.haibin.calendarview.CalendarView.OnCalendarSelectListener
 import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.R
@@ -33,11 +33,11 @@ class AgendaActivity : BaseActivity() {
 			content.recyclerView.adapter = concatAdapter
 			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
 			calendarView.setOnCalendarSelectListener(object : OnCalendarSelectListener {
-				override fun onCalendarOutOfRange(calendar: Calendar?) {
+				override fun onCalendarOutOfRange(sysuerCalendar: SysuerCalendar?) {
 				}
 
-				override fun onCalendarSelect(calendar: Calendar?, isClick: Boolean) {
-					loadAgenda(calendar?.timeInMillis ?: System.currentTimeMillis())
+				override fun onCalendarSelect(sysuerCalendar: SysuerCalendar?, isClick: Boolean) {
+					loadAgenda(sysuerCalendar?.timeInMillis ?: System.currentTimeMillis())
 				}
 			})
 			calendarView.setOnMonthChangeListener { year: Int, month: Int ->
@@ -67,7 +67,7 @@ class AgendaActivity : BaseActivity() {
 				}
 			}
 		}
-		loadAgenda(binding.calendarView.selectedCalendar.timeInMillis)
+		loadAgenda(binding.calendarView.selectedSysuerCalendar?.timeInMillis ?: System.currentTimeMillis())
 	}
 
 	private fun loadAgenda(date: Long) {

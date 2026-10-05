@@ -46,12 +46,11 @@ fun PrivacyRoute(
 				listOf(
 						MenuItem(
 								title = stringResource(R.string.edit),
-								icon = Icons.Rounded.Edit,
+								iconVector = Icons.Rounded.Edit,
 								onClick = {
 									viewModel.model.contextUtil.changeAccount(
 											null, "sysu.edu.cn", null, null
 									)
-									true
 								})
 				)
 			},
@@ -68,7 +67,7 @@ fun PrivacyRoute(
 								ItemPreference(
 										onClick = {
 											viewModel.model.contextUtil.copy("password", password)
-											viewModel.model.contextUtil.toast(R.string.copy_successfully)
+											viewModel.model.toast(R.string.copy_successfully)
 										},
 										title = stringResource(R.string.password),
 										summary = stringResource(R.string.click_to_copy),

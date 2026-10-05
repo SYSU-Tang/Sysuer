@@ -82,6 +82,7 @@ import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.TargetHost
 import com.miyuyan.sysuer.browser.BrowserActivity
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.model.RainClassModel
 import com.miyuyan.sysuer.nav.RainClassDetail
 import com.miyuyan.sysuer.rainClass.RainClassViewModel.Companion.formatTerm
@@ -204,6 +205,7 @@ fun CourseScreen(
 
 @Composable
 fun ExamScreen(
+	backStack: MutableList<NavKey>? = null,
 ) {
 	val viewModel: RainClassViewModel = viewModel()
 	val examList by viewModel.examList.collectAsStateWithLifecycle()
@@ -245,7 +247,7 @@ fun ExamScreen(
 				) {
 					items(examList.size) { index ->
 						val exam = examList[index]
-						ExamItem(exam) {
+						ExamItem(exam, backStack) {
 							selectedExamJson = exam.toJSONString()
 						}
 					}
@@ -265,6 +267,7 @@ fun ExamScreen(
 				} else {
 					ExamDetailScreen(
 							examSummary = exam,
+							backStack = backStack,
 							onBack = { selectedExamJson = null },
 							onStartExam = { examStarted = true })
 				}
@@ -274,7 +277,9 @@ fun ExamScreen(
 }
 
 @Composable
-fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
+fun ExamItem(
+	exam: JSONObject, backStack: MutableList<NavKey>? = null, onClick: () -> Unit
+) {
 	val context = LocalContext.current
 	ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
 		Column(modifier = Modifier.padding(16.dp)) {
@@ -295,7 +300,7 @@ fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
 				Spacer(modifier = Modifier.weight(1f))
 				IconButton(onClick = {
 					val examId = exam.getIntValue("id")
-					openExamInBrowser(context, examId)
+					openExamInBrowser(backStack, context, examId)
 				}) {
 					Icon(
 							Icons.AutoMirrored.Filled.OpenInNew,
@@ -339,7 +344,10 @@ fun ExamItem(exam: JSONObject, onClick: () -> Unit) {
 
 @Composable
 fun ExamDetailScreen(
-	examSummary: JSONObject, onBack: () -> Unit, onStartExam: () -> Unit
+	examSummary: JSONObject,
+	backStack: MutableList<NavKey>? = null,
+	onBack: () -> Unit,
+	onStartExam: () -> Unit
 ) {
 	val viewModel: RainClassViewModel = viewModel()
 	val context = LocalContext.current
@@ -375,7 +383,7 @@ fun ExamDetailScreen(
 						},
 						actions = {
 							IconButton(onClick = {
-								openExamInBrowser(context, examSummary.getIntValue("id"))
+								openExamInBrowser(backStack, context, examSummary.getIntValue("id"))
 							}) {
 								Icon(
 										Icons.AutoMirrored.Filled.OpenInNew,
@@ -768,10 +776,14 @@ fun syncCookiesToWeb(context: Context) {
 	webCm.flush()
 }
 
-fun openExamInBrowser(context: Context, examId: Int) {
+fun openExamInBrowser(
+	backStack: MutableList<NavKey>?, context: Context, examId: Int
+) {
 	syncCookiesToWeb(context)
-	val intent = Intent(
-			context, BrowserActivity::class.java
-	).setData("https://examination.xuetangx.com/exam/$examId?isFrom=2".toUri())
-	context.startActivity(intent)
+	val url = "https://examination.xuetangx.com/exam/$examId?isFrom=2"
+	if (backStack != null) {
+		backStack.add(Browser(url))
+	} else context.startActivity(
+			Intent(context, BrowserActivity::class.java).setData(url.toUri())
+	)
 }

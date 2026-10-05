@@ -8,7 +8,7 @@ import android.text.TextUtils
 import android.util.TypedValue
 import androidx.compose.ui.unit.dp
 import com.google.android.material.R
-import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.SysuerCalendar
 import com.haibin.calendarview.MonthView
 import kotlin.math.min
 
@@ -101,7 +101,7 @@ class CustomMonthView(context: Context) : MonthView(context) {
 	}
 
 	override fun onDrawSelected(
-		canvas: Canvas, calendar: Calendar, x: Int, y: Int, hasScheme: Boolean
+		canvas: Canvas, sysuerCalendar: SysuerCalendar, x: Int, y: Int, hasScheme: Boolean
 	): Boolean {
 		canvas.drawCircle(
 			(x + mItemWidth / 2).toFloat(),
@@ -112,8 +112,8 @@ class CustomMonthView(context: Context) : MonthView(context) {
 		return true
 	}
 
-	override fun onDrawScheme(canvas: Canvas, calendar: Calendar, x: Int, y: Int) {
-		mPointPaint.setColor(if (isSelected(calendar)) Color.WHITE else Color.GRAY)
+	override fun onDrawScheme(canvas: Canvas, sysuerCalendar: SysuerCalendar, x: Int, y: Int) {
+		mPointPaint.setColor(if (isSelected(sysuerCalendar)) Color.WHITE else Color.GRAY)
 		canvas.drawCircle(
 			x + mItemWidth.toFloat() / 2,
 			(y + mItemHeight - 3 * mPadding),
@@ -123,12 +123,12 @@ class CustomMonthView(context: Context) : MonthView(context) {
 	}
 
 	override fun onDrawText(
-		canvas: Canvas, calendar: Calendar, x: Int, y: Int, hasScheme: Boolean, isSelected: Boolean
+		canvas: Canvas, sysuerCalendar: SysuerCalendar, x: Int, y: Int, hasScheme: Boolean, isSelected: Boolean
 	) {
 		val cx = x + mItemWidth / 2
 		val cy = y + mItemHeight / 2
 		val top = y - mItemHeight / 6
-		if (calendar.isCurrentDay && !isSelected) canvas.drawCircle(
+		if (sysuerCalendar.isCurrentDay && !isSelected) canvas.drawCircle(
 			cx.toFloat(), cy.toFloat(), mRadius.toFloat(), mCurrentDayPaint
 		)
 
@@ -139,15 +139,15 @@ class CustomMonthView(context: Context) : MonthView(context) {
 				mCircleRadius,
 				mSchemeBasicPaint
 			)
-			mTextPaint.setColor(calendar.schemeColor)
+			mTextPaint.setColor(sysuerCalendar.schemeColor)
 			canvas.drawText(
-				calendar.scheme,
+				sysuerCalendar.scheme,
 				x + mItemWidth - mPadding - mCircleRadius,
 				y + mPadding + mSchemeBaseLine,
 				mTextPaint
 			)
 		}
-		if (calendar.isWeekend && calendar.isCurrentMonth) {
+		if (sysuerCalendar.isWeekend && sysuerCalendar.isCurrentMonth) {
 			mCurMonthTextPaint.setColor(-0xb76201)
 			mCurMonthLunarTextPaint.setColor(-0xb76201)
 			mSchemeTextPaint.setColor(-0xb76201)
@@ -165,40 +165,40 @@ class CustomMonthView(context: Context) : MonthView(context) {
 
 		if (isSelected) {
 			canvas.drawText(
-				calendar.day.toString(), cx.toFloat(), mTextBaseLine + top, mSelectTextPaint
+				sysuerCalendar.day.toString(), cx.toFloat(), mTextBaseLine + top, mSelectTextPaint
 			)
 			canvas.drawText(
-				calendar.lunar,
+				sysuerCalendar.lunar,
 				cx.toFloat(),
 				mTextBaseLine + y + mItemHeight.toFloat() / 10,
 				mSelectedLunarTextPaint
 			)
 		} else if (hasScheme) {
 			canvas.drawText(
-				calendar.day.toString(),
+				sysuerCalendar.day.toString(),
 				cx.toFloat(),
 				mTextBaseLine + top,
-				if (calendar.isCurrentMonth) mSchemeTextPaint else mOtherMonthTextPaint
+				if (sysuerCalendar.isCurrentMonth) mSchemeTextPaint else mOtherMonthTextPaint
 			)
 			canvas.drawText(
-				calendar.lunar,
+				sysuerCalendar.lunar,
 				cx.toFloat(),
 				mTextBaseLine + y + mItemHeight.toFloat() / 10,
-				if (!TextUtils.isEmpty(calendar.solarTerm)) mSolarTermTextPaint else mSchemeLunarTextPaint
+				if (!TextUtils.isEmpty(sysuerCalendar.solarTerm)) mSolarTermTextPaint else mSchemeLunarTextPaint
 			)
 		} else {
 			canvas.drawText(
-				calendar.day.toString(),
+				sysuerCalendar.day.toString(),
 				cx.toFloat(),
 				mTextBaseLine + top,
-				if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth) mCurMonthTextPaint else mOtherMonthTextPaint
+				if (sysuerCalendar.isCurrentDay) mCurDayTextPaint else if (sysuerCalendar.isCurrentMonth) mCurMonthTextPaint else mOtherMonthTextPaint
 			)
 			canvas.drawText(
-				calendar.lunar,
+				sysuerCalendar.lunar,
 				cx.toFloat(),
 				mTextBaseLine + y + mItemHeight.toFloat() / 10,
-				if (calendar.isCurrentDay) mCurDayLunarTextPaint else if (calendar.isCurrentMonth) if (!TextUtils.isEmpty(
-						calendar.solarTerm
+				if (sysuerCalendar.isCurrentDay) mCurDayLunarTextPaint else if (sysuerCalendar.isCurrentMonth) if (!TextUtils.isEmpty(
+						sysuerCalendar.solarTerm
 					)
 				) mSolarTermTextPaint else mCurMonthLunarTextPaint else mOtherMonthLunarTextPaint
 			)

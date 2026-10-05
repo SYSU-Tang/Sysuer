@@ -6,7 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ElevatedFilterChip
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -60,13 +58,13 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.api.FileManager
-import com.miyuyan.sysuer.browser.BrowserActivity
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
@@ -74,6 +72,7 @@ import com.miyuyan.sysuer.view.RowOrientation
 import com.miyuyan.sysuer.view.SectionCard
 import com.miyuyan.sysuer.view.SectionData
 import com.miyuyan.sysuer.view.StaggerScreen
+import com.miyuyan.sysuer.view.StatePage
 import com.miyuyan.sysuer.view.WarningCard
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 
@@ -98,9 +97,12 @@ fun LeaveSlipRoute(
 	var fabExpanded by rememberSaveable { mutableStateOf(true) }
 	val submitSuccess by viewModel.submitSuccess.observeAsState(initial = false)
 
+	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 	LaunchedEffect(Unit) {
 		viewModel.fetchLeaveSlips()
 		viewModel.fetchTerms()
+		// ViewModel 无法访问导航栈，浏览器跳转经事件转交 backStack
+		viewModel.openBrowser.collect { backStack.add(it) }
 	}
 	LaunchedEffect(submitSuccess) {
 		if (submitSuccess) {
@@ -170,7 +172,7 @@ fun LeaveSlipRoute(
 						)
 				)
 			}) {
-		if (apply) ApplyPage(viewModel, onUpload = {
+		if (apply) ApplyPage(viewModel, backStack, onUpload = {
 			val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
 				type = "*/*"
 				addCategory(Intent.CATEGORY_OPENABLE)
@@ -181,18 +183,20 @@ fun LeaveSlipRoute(
 			}
 			fileLauncher.launch(intent)
 		})
-		else StaggerScreen(
-				sections = viewModel.sections,
-				onScrollBottom = {
-					if (viewModel.hasMore) viewModel.fetchLeaveSlips()
-				},
-				onScrollTopChanged = { fabExpanded = it },
-		)
+		else StatePage(state = uiState) {
+			StaggerScreen(
+					sections = viewModel.sections,
+					onScrollBottom = {
+						if (viewModel.hasMore) viewModel.fetchLeaveSlips()
+					},
+					onScrollTopChanged = { fabExpanded = it },
+			)
+		}
 	}
 }
 
 @Composable
-fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
+fun ApplyPage(viewModel: LeaveSlipViewModel, backStack: MutableList<NavKey>, onUpload: () -> Unit) {
 	var leaveDays by rememberSaveable { mutableStateOf(viewModel.leaveDays) }
 	var leaveReasonDescription by rememberSaveable { mutableStateOf(viewModel.leaveReasonDescription) }
 	var leaveReason by rememberSaveable { mutableStateOf(viewModel.leaveReason) }
@@ -444,26 +448,22 @@ fun ApplyPage(viewModel: LeaveSlipViewModel, onUpload: () -> Unit) {
 							mutableStateListOf(
 									MenuItem(
 									upload, enabled = !hasAttachment
-							) { onUpload(); true },
+							) { onUpload(); },
 									MenuItem(
 											delete, enabled = hasAttachment
-									) { viewModel.deleteAttachment(); true },
+									) { viewModel.deleteAttachment(); },
 									MenuItem(preview, enabled = hasAttachment) {
-										context.startActivity(
-												Intent(
-														context,
-														BrowserActivity::class.java
-												).setData(
+										backStack.add(
+												Browser(
 														"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
 															attachment?.getString(
 																	"filePath"
 															)
 														}&fileName=${
 															attachment?.getString("fileName")
-														}".toUri()
+														}"
 												)
 										)
-										true
 									})
 						})
 		)

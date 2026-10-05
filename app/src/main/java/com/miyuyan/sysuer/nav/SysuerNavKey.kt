@@ -15,55 +15,120 @@ fun MutableList<NavKey>.navigateBack(activity: Activity? = null) {
 	}
 }
 
-@Serializable data object Home : NavKey
-@Serializable data object CourseSelected : NavKey
-@Serializable data class CourseDetail(val courseId: String? = "", val courseNum: String = "") : NavKey
-@Serializable data class WebPage(val url: String, val title: String = "") : NavKey
-@Serializable data class RichText(val title: String = "预览", val content: String = "", val contentType: String? = "") : NavKey
-@Serializable data object SchoolEnrollment : NavKey
-@Serializable data object CET : NavKey
-@Serializable data object Registration : NavKey
-@Serializable data object SchoolWorkWarning : NavKey
-@Serializable data object CourseCompletion : NavKey
-@Serializable data object LeaveReturnRegistration : NavKey
-@Serializable data class LeaveReturnRegistrationDetail(val id: String) : NavKey
-@Serializable data object PhysicalFitnessTestResult : NavKey
-@Serializable data object Dorm : NavKey
-@Serializable data object PersonalInformation : NavKey
-@Serializable data object StudentPartTime : NavKey
-@Serializable data object Todo : NavKey
-@Serializable data object Agenda : NavKey
-@Serializable data object Homework : NavKey
-@Serializable data object News : NavKey
-@Serializable data object AcademyNotification : NavKey
-@Serializable data object Evaluation : NavKey
-@Serializable data object CourseSelection : NavKey
-@Serializable data object CourseSchedule : NavKey
-@Serializable data object Exam : NavKey
-@Serializable data object Calendar : NavKey
-@Serializable data object ClassroomQuery : NavKey
-@Serializable data object Grade : NavKey
-@Serializable data object CourseQuery : NavKey
-@Serializable data class PersonalTrainingProgram(val programId: String? = null) : NavKey
-@Serializable data object TrainingProgram : NavKey
-@Serializable data object MajorInfo : NavKey
-@Serializable data object AssistantInfo : NavKey
-@Serializable data object GradeForLevel : NavKey
-@Serializable data object RoomQuery : NavKey
-@Serializable data object AssistantEvaluation : NavKey
-@Serializable data object LeaveSlip : NavKey
-@Serializable data object RainClass : NavKey
-@Serializable data class RainClassDetail(val classId: String) : NavKey
-@Serializable data object SchoolBus : NavKey
-@Serializable data object EnergyFee : NavKey
-@Serializable data object Pay : NavKey
-@Serializable data object GymReservation : NavKey
-@Serializable data object NetPay : NavKey
-@Serializable data object Complaint : NavKey
-@Serializable data object About : NavKey
-@Serializable data object Privacy : NavKey
-@Serializable data object Update : NavKey
-@Serializable data class Crash(val crashInfo: String = "") : NavKey
+@Serializable
+data object Home : NavKey
+@Serializable
+data object CourseSelected : NavKey
+@Serializable
+data class CourseDetail(val courseId: String? = "", val courseNum: String = "") : NavKey
+@Serializable
+data class Browser(val url: String, val title: String? = "", val content: String? = null) : NavKey
+@Serializable
+data class RichText(
+	val title: String = "预览",
+	val content: String = "",
+	val contentType: String? = ""
+) : NavKey
 
+@Serializable
+data object SchoolEnrollment : NavKey
+@Serializable
+data object CET : NavKey
+@Serializable
+data object Registration : NavKey
+@Serializable
+data object SchoolWorkWarning : NavKey
+@Serializable
+data object CourseCompletion : NavKey
+@Serializable
+data object LeaveReturnRegistration : NavKey
+@Serializable
+data class LeaveReturnRegistrationDetail(val id: String) : NavKey
+@Serializable
+data object PhysicalFitnessTestResult : NavKey
+@Serializable
+data object Dorm : NavKey
+@Serializable
+data object PersonalInformation : NavKey
+@Serializable
+data object StudentPartTime : NavKey
+@Serializable
+data object Todo : NavKey
+@Serializable
+data object Agenda : NavKey
+@Serializable
+data object Homework : NavKey
+@Serializable
+data object News : NavKey
+@Serializable
+data object AcademyNotification : NavKey
+@Serializable
+data object Evaluation : NavKey
+@Serializable
+data object CourseSelection : NavKey
+@Serializable
+data object CourseSchedule : NavKey
+@Serializable
+data object Exam : NavKey
+@Serializable
+data object Calendar : NavKey
+@Serializable
+data object ClassroomQuery : NavKey
+@Serializable
+data object Grade : NavKey
+@Serializable
+data object CourseQuery : NavKey
+@Serializable
+data class PersonalTrainingProgram(val programId: String? = null) : NavKey
+@Serializable
+data object TrainingProgram : NavKey
+@Serializable
+data object MajorInfo : NavKey
+@Serializable
+data object AssistantInfo : NavKey
+@Serializable
+data object GradeForLevel : NavKey
+@Serializable
+data object RoomQuery : NavKey
+@Serializable
+data object AssistantEvaluation : NavKey
+@Serializable
+data object LeaveSlip : NavKey
+@Serializable
+data object RainClass : NavKey
+@Serializable
+data class RainClassDetail(val classId: String) : NavKey
+@Serializable
+data object SchoolBus : NavKey
+@Serializable
+data object EnergyFee : NavKey
+@Serializable
+data object Pay : NavKey
+@Serializable
+data object GymReservation : NavKey
+@Serializable
+data object NetPay : NavKey
+@Serializable
+data object Complaint : NavKey
+@Serializable
+data object About : NavKey
+@Serializable
+data object Setting : NavKey
+@Serializable
+data object Developer : NavKey
+@Serializable
+data object Privacy : NavKey
+@Serializable
+data object Update : NavKey
+@Serializable
+data class Crash(val crashInfo: String = "") : NavKey
+
+/** 脚本列表页；autoAdd 为 true 时进入后自动新建脚本并跳转详情 */
+@Serializable
+data class JsList(val autoAdd: Boolean = false) : NavKey
+
+/** 脚本详情页 */
+@Serializable
+data class JsDetail(val id: Long) : NavKey
 //val NavKey.routeName: String
 //	get() = this::class.simpleName ?: this.toString()

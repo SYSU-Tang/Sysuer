@@ -1,8 +1,10 @@
 package com.miyuyan.sysuer.home
 
 import android.app.Application
+import android.content.res.Configuration
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
@@ -24,9 +26,23 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 	val collection: SnapshotStateList<ServiceConfig> = _collection
 	val allItems: SnapshotStateList<ServiceConfig> = mutableStateListOf()
 	val serviceData: SnapshotStateList<Pair<String, List<ServiceConfig>>> = mutableStateListOf()
-	fun loadServiceData() {
-		if (allItems.isNotEmpty()) return
-		val reader = JSONReader.of(application.resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
+	private var loadedLocales: String? = null
+
+	/**
+	 * 加载服务数据。数据源为带语言限定符的 raw 资源（raw / raw-en），
+	 * 语言切换后 Activity 虽会重建但 ViewModel 保留，
+	 * 因此仅在传入的 locales 变化时清空并按新语言重新加载
+	 * @param locales 调用方（Activity）当前的Locale标签，如 "zh-CN"、"en-US"
+	 * */
+	fun loadServiceData(locales: String) {
+		if (allItems.isNotEmpty() && locales == loadedLocales) return
+		serviceData.clear()
+		allItems.clear()
+		val baseConfig = Configuration(application.resources.configuration)
+		(LocaleListCompat.forLanguageTags(locales).unwrap() as? android.os.LocaleList)
+			?.takeIf { !it.isEmpty }?.let(baseConfig::setLocales)
+		val resources = application.createConfigurationContext(baseConfig).resources
+		val reader = JSONReader.of(resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
 		reader.readJSONArray().forEach {
 			val name = (it as JSONObject).getString("name", "")
 			val items = it.getJSONArray("items") ?: JSONArray()
@@ -37,31 +53,40 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 			allItems.addAll(itemList)
 		}
 		reader.close()
+		loadedLocales = locales
 	}
 	
 	private val _orderCollection = mutableStateListOf<ServiceConfig>()
 	val orderCollection: SnapshotStateList<ServiceConfig> = _orderCollection
+
+	/**
+	 * 收藏项展示名跟随当前语言：优先用 [allItems] 中当前语言的配置，
+	 * 找不到（如数据尚未加载或服务已下架）时回落到收藏时存储的 JSON 快照
+	 * */
+	private fun List<ServiceCollectionEntity>.resolveConfigs(): List<ServiceConfig> =
+		mapNotNull { entity ->
+			allItems.firstOrNull { it.id == entity.serviceId }
+				?: entity.serviceJson?.let {
+					JSONObject.parseObject(
+							it, ServiceConfig::class.java,
+							JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue
+					)
+				}
+		}
+
 	fun loadCollection() {
 		viewModelScope.launch(Dispatchers.IO) {
-			val services = db.collectionDao().getCollectedServices()
+			val refreshed = db.collectionDao().getCollectedServices().resolveConfigs()
 			_collection.clear()
-			services.forEach { entity ->
-				entity.serviceJson?.let { json ->
-					_collection.add(JSONObject.parseObject(json, ServiceConfig::class.java, JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue))
-				}
-			}
+			_collection.addAll(refreshed)
 		}
 	}
-	
+
 	fun loadOrderCollection() {
 		viewModelScope.launch(Dispatchers.IO) {
-			val services = db.collectionDao().getCollectedServices()
+			val refreshed = db.collectionDao().getCollectedServices().resolveConfigs()
 			_orderCollection.clear()
-			services.forEach { entity ->
-				entity.serviceJson?.let { json ->
-					_orderCollection.add(JSONObject.parseObject(json, ServiceConfig::class.java, JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue))
-				}
-			}
+			_orderCollection.addAll(refreshed)
 		}
 	}
 	

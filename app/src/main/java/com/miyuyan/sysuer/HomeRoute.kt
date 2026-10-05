@@ -37,19 +37,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.core.app.ActivityCompat.recreate
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.api.SettingManager
 import com.miyuyan.sysuer.api.TodoManager
-import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.home.AccountScreen
 import com.miyuyan.sysuer.home.DashboardScreen
 import com.miyuyan.sysuer.home.DashboardViewModel
@@ -83,7 +81,9 @@ fun HomeRoute(
 	val searchBarState = rememberContainedSearchBarState()
 	val textFieldState = rememberTextFieldState()
 	var searchQuery by rememberSaveable { mutableStateOf("") }
-	LaunchedEffect(Unit) { serviceViewModel.loadServiceData() }
+	LaunchedEffect(Unit) {
+		serviceViewModel.loadServiceData(context.resources.configuration.locales.toLanguageTags())
+	}
 	LaunchedEffect(textFieldState) {
 		snapshotFlow { textFieldState.text.toString() }.collect { searchQuery = it }
 	}
@@ -112,22 +112,22 @@ fun HomeRoute(
 			} catch (_: Exception) {
 				null
 			}
-		} else if (!item.url.isNullOrBlank()) {
-			Intent(context, BrowserActivity::class.java).setData(item.url.toUri())
 		} else null
-		intent?.let {
+		if (intent != null) {
 			context.startActivity(
-					it,
+					intent,
 					activity?.let { it1 -> ActivityOptionsCompat.makeSceneTransitionAnimation(it1) }
 						?.toBundle())
-		} ?: ContextUtil.getInstance(context).toast(R.string.activity_not_found)
+		} else if (!item.url.isNullOrBlank()) {
+			backStack.add(Browser(item.url, item.name ?: ""))
+		} else ContextUtil.getInstance(context).toast(R.string.activity_not_found)
 	}
 	ActivityPager(
 			title = stringResource(R.string.app_name),
 			navs = listOf(
-					MenuItem(stringResource(R.string.dashboard), Icons.Rounded.Dashboard),
-					MenuItem(stringResource(R.string.service), Icons.Rounded.GridView),
-					MenuItem(stringResource(R.string.account), Icons.Rounded.Person),
+					MenuItem(stringResource(R.string.dashboard), iconVector = Icons.Rounded.Dashboard),
+					MenuItem(stringResource(R.string.service), iconVector = Icons.Rounded.GridView),
+					MenuItem(stringResource(R.string.account), iconVector = Icons.Rounded.Person),
 			),
 			topBarContent = { page ->
 				when (page) {
@@ -234,7 +234,7 @@ fun HomeRoute(
 
 					2 -> AccountScreen(
 							backStack, sharedTransitionScope, animatedVisibilityScope
-					) { activity?.let { recreate(it) } }
+					)
 				}
 			},
 	)

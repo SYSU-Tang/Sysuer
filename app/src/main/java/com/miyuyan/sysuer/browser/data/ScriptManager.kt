@@ -2,6 +2,7 @@ package com.miyuyan.sysuer.browser.data
 
 import android.util.Log
 import android.webkit.WebView
+import java.io.IOException
 
 /**
  * 脚本执行器：用于查找匹配当前 URL 的脚本并注入执行
@@ -13,7 +14,9 @@ object ScriptManager {
 	 * @param allScripts 数据库中所有的脚本实体
 	 */
 	fun getMatchingScripts(
-		url: String, allScripts: List<JavaScriptEntity>
+		url: String,
+		allScripts: List<JavaScriptEntity>,
+		includeDisabled: Boolean = false,
 	): List<JavaScriptEntity> {
 		// SECURITY: scripts that opt into universal URL coverage (`<all_urls>`)
 		// must also have `run == 1` (the explicit "trust this script" flag
@@ -26,7 +29,7 @@ object ScriptManager {
 				"about:"
 			)
 		return allScripts.filter { script -> // 1. 检查状态是否启用 (state = 1 表示启用)
-			if (script.state != 1) return@filter false // 2. 检查黑名单 (excludes)
+			if (script.state != 1 && !includeDisabled) return@filter false // 2. 检查黑名单 (excludes)
 			val allowAllUrls = script.run == 1
 			val isExcluded = script.excludes.any { pattern ->
 				matchUrlWithAllUrls("$pattern", url, supportsAllUrls && allowAllUrls)
@@ -170,7 +173,8 @@ object ScriptManager {
 
 	/**
 	 * 检测脚本更新
-	 * @return 如果有新版本，返回解析后的新实体，否则返回 null
+	 * @return 如果有新版本，返回解析后的新实体；无新版本返回 null；
+	 *         检查失败（网络错误、非 HTTPS 等）抛出 [java.io.IOException]
 	 */
 	suspend fun checkForUpdate(entity: JavaScriptEntity): JavaScriptEntity? {
 		val updateUrl = entity.updateURL ?: entity.downloadURL ?: return null
@@ -182,20 +186,15 @@ object ScriptManager {
 			Log.w(
 				"GM_Script", "Refusing non-HTTPS userscript update URL: $updateUrl"
 			)
-			return null
+			throw IOException("Refusing non-HTTPS userscript update URL: $updateUrl")
 		}
-		val remoteEntity = ScriptParser.parseFromUrl(updateUrl) ?: return null
+		val remoteEntity = ScriptParser.parseFromUrl(updateUrl)
+			?: throw IOException("Failed to fetch userscript update: $updateUrl")
 		val localVersion = entity.version ?: "0"
 		val remoteVersion = remoteEntity.version ?: "0"
-		println("localVersion: $localVersion, remoteVersion: $remoteVersion")
-		if (compareVersion(remoteVersion, localVersion) > 0) {
-			return remoteEntity/*.apply {
-				id = entity.id
-				position = entity.position
-				state = entity.state
-			}*/
-		}
-		return null
+		return if (compareVersion(remoteVersion, localVersion) > 0) {
+			remoteEntity
+		} else null
 	}
 
 	/**

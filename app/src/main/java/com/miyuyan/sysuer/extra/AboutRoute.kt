@@ -33,7 +33,7 @@ import com.miyuyan.preference.PreferenceScreen
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.SettingManager
-import com.miyuyan.sysuer.browser.BrowserActivity
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.Update
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
@@ -49,6 +49,28 @@ fun AboutRoute(
 	val settingManager = remember { SettingManager.getInstance(context) }
 	val clicks = remember { mutableStateListOf<Long>() }
 
+	@Composable
+	fun LinkPreference(
+		name: String, url: String, icon: Int = R.drawable.version, summary: String? = null
+	) {
+		ItemPreference(
+				modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+			with(sharedTransitionScope) {
+				Modifier.sharedBounds(
+						sharedContentState = rememberSharedContentState(
+								key = url
+						),
+						animatedVisibilityScope = animatedVisibilityScope,
+				)
+			}
+		} else Modifier,
+				onClick = { backStack.add(Browser(url)) },
+				title = name,
+				summary = summary ?: url,
+				icon = icon
+		)
+	}
+
 	ActivityPager(
 			title = stringResource(R.string.about),
 			expandable = true,
@@ -59,13 +81,6 @@ fun AboutRoute(
 			sharedKey = "About",
 			pageContent = {
 				val context = LocalContext.current
-				val openBrowser: (String) -> Unit = { url ->
-					context.startActivity(
-							Intent(
-									context, BrowserActivity::class.java
-							).setData(url.toUri())
-					)
-				}
 
 				PreferenceScreen(modifier = Modifier.fillMaxSize()) {
 					Column(
@@ -125,52 +140,44 @@ fun AboutRoute(
 							)
 						}
 						item {
-							ItemPreference(
-									onClick = { openBrowser("https://github.com/SYSU-Tang/Sysuer/releases") },
-									title = stringResource(R.string.download_link),
-									summary = "https://github.com/SYSU-Tang/Sysuer/releases",
-									icon = R.drawable.down
+							LinkPreference(
+									stringResource(R.string.download_link),
+									"https://github.com/SYSU-Tang/Sysuer/releases",
+									R.drawable.down
 							)
 						}
 						item {
-							ItemPreference(
-									onClick = { openBrowser("https://sysu-tang.github.io/sysuer-website/") },
-									title = stringResource(R.string.official_website),
-									summary = "https://sysu-tang.github.io/sysuer-website/",
-									icon = R.drawable.web
+							LinkPreference(
+									stringResource(R.string.official_website),
+									"https://sysu-tang.github.io/sysuer-website/",
+									R.drawable.web
 							)
 						}
 					}
 
 					PreferenceCategory(title = stringResource(R.string.project)) {
 						item {
-							ItemPreference(
-									onClick = { openBrowser("https://github.com/SYSU-Tang") },
-									title = "SYSU—Tang",
-									summary = "https://github.com/SYSU-Tang",
-									icon = R.drawable.account
+							LinkPreference(
+									"SYSU—Tang", "https://github.com/SYSU-Tang", R.drawable.account
+							)
+						}
+						item {
+							LinkPreference(
+									stringResource(R.string.app_name),
+									"https://github.com/SYSU-Tang/Sysuer/",
+									R.drawable.version
 							)
 						}
 						item {
 							ItemPreference(
-									onClick = { openBrowser("https://github.com/SYSU-Tang/Sysuer/") },
-									title = stringResource(R.string.app_name),
-									summary = "https://github.com/SYSU-Tang/Sysuer/",
-									icon = R.drawable.version
-							)
-						}
-						item {
-							ItemPreference(
-									onClick = { openBrowser("https://github.com/SYSU-Tang/Sysuer/") },
-									title = stringResource(R.string.app_name),
-									summary = "https://github.com/SYSU-Tang/Sysuer/",
-									icon = R.drawable.version
-							)
-
-						}
-						item {
-							ItemPreference(
-									onClick = { openBrowser("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3Di4M0YfNzHskNiXgiYTAvA1EAWZh7HNQx") },
+									onClick = {
+										context.startActivity(
+												Intent(
+														Intent.ACTION_VIEW,
+														"mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3Di4M0YfNzHskNiXgiYTAvA1EAWZh7HNQx".toUri()
+												)
+										)
+									},
 									title = stringResource(R.string.qq_group),
 									summary = "1063579244",
 									icon = R.drawable.group
@@ -180,38 +187,35 @@ fun AboutRoute(
 
 					PreferenceCategory(title = stringResource(R.string.feedback)) {
 						item {
-							ItemPreference(
-									onClick = { openBrowser("https://github.com/SYSU-Tang/Sysuer/issues") },
-									title = stringResource(R.string.submit_issues),
-									summary = "https://github.com/SYSU-Tang/Sysuer/issues",
-									icon = R.drawable.question
+							LinkPreference(
+									stringResource(R.string.submit_issues),
+									"https://github.com/SYSU-Tang/Sysuer/issues",
+									R.drawable.question
 							)
 						}
 						item {
-							ItemPreference(
-									onClick = { openBrowser("https://sysu-tang.github.io/sysuer-website/docs/sponsor") },
-									title = stringResource(R.string.sponsor),
-									summary = stringResource(R.string.sponsor_appreciation),
-									icon = R.drawable.money
+							LinkPreference(
+									stringResource(R.string.sponsor),
+									"https://sysu-tang.github.io/sysuer-website/docs/sponsor",
+									R.drawable.money,
+									stringResource(R.string.sponsor_appreciation)
 							)
 						}
 					}
 
 					PreferenceCategory(title = stringResource(R.string.permission)) {
 						item {
-							ItemPreference(
-									onClick = { openBrowser("https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy/") },
-									title = stringResource(R.string.privacy_policy),
-									summary = "https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy/",
-									icon = R.drawable.book
+							LinkPreference(
+									stringResource(R.string.privacy_policy),
+									"https://sysu-tang.github.io/sysuer-website/docs/privacyPolicy/",
+									R.drawable.book
 							)
 						}
 						item {
-							ItemPreference(
-									onClick = { openBrowser("https://sysu-tang.github.io/sysuer-website/docs/userAgreement/") },
-									title = stringResource(R.string.user_agreement),
-									summary = "https://sysu-tang.github.io/sysuer-website/docs/userAgreement/",
-									icon = R.drawable.book
+							LinkPreference(
+									stringResource(R.string.user_agreement),
+									"https://sysu-tang.github.io/sysuer-website/docs/userAgreement/",
+									R.drawable.book
 							)
 						}
 					}
@@ -219,43 +223,36 @@ fun AboutRoute(
 					PreferenceCategory(title = stringResource(R.string.open_source)) {
 						listOf(
 								"androidx" to "https://github.com/androidx/androidx",
-								"Compose" to "https://github.com/androidx/androidx",
-								"Room3" to "https://github.com/androidx/room",
-								"Navigation3" to "https://github.com/androidx/navigation",
-								"Lifecycle" to "https://github.com/androidx/lifecycle",
-								"Datastore" to "https://github.com/androidx/datastore",
-								"WorkManager" to "https://github.com/androidx/work",
-								"Material3" to "https://github.com/material-components/material-components-android",
+								"compose" to "https://developer.android.com/compose",
+								"room3" to "https://github.com/androidx/room",
+								"navigation3" to "https://github.com/androidx/navigation",
+								"lifecycle" to "https://github.com/androidx/lifecycle",
+								"datastore" to "https://github.com/androidx/datastore",
+								"workManager" to "https://github.com/androidx/work",
+								"material3" to "https://github.com/material-components/material-components-android",
 								"Kotlin" to "https://github.com/JetBrains/kotlin",
 								"kotlinx.serialization" to "https://github.com/Kotlin/kotlinx.serialization",
-								"OkHttp" to "https://github.com/square/okhttp",
-								"Okio" to "https://github.com/square/okio",
+								"okHttp" to "https://github.com/square/okhttp",
+								"okio" to "https://github.com/square/okio",
 								"fastjson2" to "https://github.com/alibaba/fastjson2",
-								"Coil" to "https://github.com/coil-kt/coil",
-								"Glide" to "https://github.com/bumptech/glide",
+								"coil" to "https://github.com/coil-kt/coil",
+								"glide" to "https://github.com/bumptech/glide",
 								"Shizuku" to "https://github.com/RikkaApps/Shizuku",
 								"RikkaX" to "https://github.com/RikkaApps/RikkaX",
-								"MIUIX" to "https://github.com/topYukonga/Miuix",
-								"Markwon" to "https://github.com/noties/Markwon",
+								"Miuix" to "https://github.com/topYukonga/Miuix",
 								"compose-richtext" to "https://github.com/halilozercan/compose-richtext",
 								"multiplatform-markdown-renderer" to "https://github.com/mikepenz/multiplatform-markdown-renderer",
-								"Commonmark" to "https://github.com/commonmark-java/commonmark-java",
 								"CalendarView" to "https://github.com/huanghaibin-dev/CalendarView",
-								"Rosemoe Editor" to "https://github.com/Rosemoe/CodeEditor",
+								"Rosemoe Editor" to "https://github.com/Rosemoe/sora-editor",
 								"RxJava" to "https://github.com/ReactiveX/RxJava",
 								"RxAndroid" to "https://github.com/ReactiveX/RxAndroid",
-								"Jsoup" to "https://github.com/jhy/jsoup",
-								"ZXing" to "https://github.com/zxing/zxing",
-								"Tink" to "https://github.com/google/tink",
-								"Firebase" to "https://github.com/firebase/firebase-android-sdk",
+								"jsoup" to "https://github.com/jhy/jsoup",
+								"zxing" to "https://github.com/zxing/zxing",
+								"tink" to "https://github.com/google/tink",
+								"firebase" to "https://github.com/firebase/firebase-android-sdk",
 						).forEach { (name, url) ->
 							item {
-								ItemPreference(
-										onClick = { openBrowser(url) },
-										title = name,
-										summary = url,
-										icon = R.drawable.version
-								)
+								LinkPreference(name, url)
 							}
 						}
 					}

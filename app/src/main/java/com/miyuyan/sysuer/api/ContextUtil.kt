@@ -5,7 +5,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
-import android.content.SharedPreferences
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Handler
@@ -16,9 +15,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
-import androidx.core.util.component1
-import androidx.core.util.component2
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
@@ -30,8 +26,13 @@ import com.miyuyan.sysuer.Application
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.LoginManager.LoginListener
 import com.miyuyan.sysuer.databinding.DialogAccountBinding
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import com.miyuyan.sysuer.preference.PrivacyPreference
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
@@ -50,20 +51,22 @@ class ContextUtil(val context: Context) {
 			if (!it.isFinishing && !it.isDestroyed) it else null
 		}
 
-	private val sharedPreferences: SharedPreferences =
-		context.getSharedPreferences("privacy", Context.MODE_PRIVATE)
+	private val privacyPreference = PrivacyPreference(context.applicationContext)
 	private val loginManager: LoginManager = LoginManager(context.applicationContext)
 	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
 	private val handler = Handler(Looper.getMainLooper())
 	val disposable: CompositeDisposable = CompositeDisposable()
+	private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 	private var binding: DialogAccountBinding? = null
 	private var dialog: AlertDialog? = null
 
 	init {
-		if (userName.isNotEmpty() && password.isNotEmpty()) disposable.add(
-				accountManager.setAccountAsync(
-						TargetHost.SYSU, userName, password, true
-				).subscribe { sharedPreferences.edit { remove("username").remove("password") } })
+		if (userName.isNotEmpty() && password.isNotEmpty()) coroutineScope.launch(Dispatchers.IO) {
+			accountManager.setAccount(
+					TargetHost.SYSU, userName, password, true
+			)
+			privacyPreference.clearCredentials()
+		}
 	}
 
 	fun getColorFromAttr(attr: Int): Int
@@ -85,14 +88,14 @@ class ContextUtil(val context: Context) {
 		 * 
 		 * @return 用户名
 		 */
-		get() = sharedPreferences.getString("username", "") ?: ""
+		get() = privacyPreference.username
 	private val password: String
 		/**
 		 * 获取密码
 		 * 
 		 * @return 密码
 		 */
-		get() = sharedPreferences.getString("password", "") ?: ""
+		get() = privacyPreference.password
 
 	/**
 	 * 复制文本到剪贴板
@@ -134,13 +137,13 @@ class ContextUtil(val context: Context) {
 	 * @param afterLogin 登录成功后的回调 Runnable 对象
 	 */
 	fun loginForUrl(service: String?, host: String, captcha: String?, afterLogin: Runnable?) {
-		disposable.add(
-				accountManager.getActiveAccountAsync(host).subscribe { (username, password) ->
-					if (!username.isNullOrEmpty() && !password.isNullOrEmpty() && !service.isNullOrEmpty()) performLogin(
-							service, host, username, password, captcha, afterLogin
-					)
-					else changeAccount(service, host, captcha, afterLogin)
-				})
+		coroutineScope.launch {
+			val (username, password) = accountManager.getActiveAccount(host)
+			if (username.isNotEmpty() && password.isNotEmpty() && !service.isNullOrEmpty()) performLogin(
+					service, host, username, password, captcha, afterLogin
+			)
+			else changeAccount(service, host, captcha, afterLogin)
+		}
 	}
 
 	fun loginByQrCode(host: String, imageView: ImageView, afterLogin: Runnable?) {
@@ -210,15 +213,14 @@ class ContextUtil(val context: Context) {
 			handler.post { changeAccount(service, host, captcha, afterLogin) }
 			return
 		}
-		if (binding == null) binding =
-			DialogAccountBinding.inflate(LayoutInflater.from(activity)).apply {
-				password.editLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-			}
+		val binding = binding ?: DialogAccountBinding.inflate(LayoutInflater.from(activity)).apply {
+			password.editLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+		}.also { binding = it }
 
 		ContextCompat.getMainExecutor(activity).execute {
 			if (captcha != null) {
-				binding!!.captchaGroup.isVisible = true
-				binding!!.captchaText.editText?.setText(captcha)
+				binding.captchaGroup.isVisible = true
+				binding.captchaText.editText?.setText(captcha)
 				loginManager.cookieJar.saveFromResponse(
 						"https://cas.sysu.edu.cn/esc-sso/api/v1/image/getRandcode".toHttpUrl(),
 						listOf(
@@ -247,47 +249,45 @@ class ContextUtil(val context: Context) {
 						if (bytes != null) handler.post {
 							Glide.with(activity).load(bytes).override(dpToPx(160), dpToPx(40))
 								.diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
-								.into(binding!!.captchaImage)
+								.into(binding.captchaImage)
 						}
 					}
 				}
-				binding!!.captchaImage.setOnClickListener {
+				binding.captchaImage.setOnClickListener {
 					loadCaptcha()
 				}
 				loadCaptcha()
 			}
-			if (dialog == null) dialog =
-				MaterialAlertDialogBuilder(activity).setView(binding!!.root)
-					.setTitle(R.string.privacy)
-					.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
-						val username = binding!!.username.edit.text.toString()
-						val password = binding!!.password.edit.text.toString()
-						val captcha = binding!!.captchaText.editText?.text.toString()
-						if (username.isEmpty() || password.isEmpty()) toast(R.string.username_password_warning)
-						else disposable.add(
-								accountManager.setAccountAsync(
-										host, username, password, true
-								).subscribe {
-									performLogin(
-											service, host, username, password, captcha, afterLogin
-									)
-								})
-					}.setNegativeButton(R.string.cancel, null).create()
+			val dialog = dialog ?: MaterialAlertDialogBuilder(activity).setView(binding.root)
+				.setTitle(R.string.privacy)
+				.setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
+					val username = binding.username.edit.text.toString()
+					val password = binding.password.edit.text.toString()
+					val captcha = binding.captchaText.editText?.text.toString()
+					if (username.isEmpty() || password.isEmpty()) toast(R.string.username_password_warning)
+					else coroutineScope.launch {
+						accountManager.setAccount(
+								host, username, password, true
+						)
+						performLogin(
+								service, host, username, password, captcha, afterLogin
+						)
+					}
+				}.setNegativeButton(R.string.cancel, null).create().also { dialog = it }
+			coroutineScope.launch {
+				val (username, password) = accountManager.getActiveAccount(host)
+				if (username.isNotEmpty() && password.isNotEmpty()) {
+					binding.password.edit.setText(password)
+					binding.username.edit.setText(username)
+				}
+				dialog.show()
+			}
 		}
-		disposable.add(
-				accountManager.getActiveAccountAsync(host).observeOn(AndroidSchedulers.mainThread())
-					.subscribe({ (username, password) ->
-						if (!username.isNullOrEmpty() && !password.isNullOrEmpty()) {
-							binding?.password?.edit?.setText(password)
-							binding?.username?.edit?.setText(username)
-						}
-						dialog?.show()
-					}, {})
-		)
 	}
 
 	fun dispose() {
 		disposable.dispose()
+		coroutineScope.cancel()
 	}
 
 	val width

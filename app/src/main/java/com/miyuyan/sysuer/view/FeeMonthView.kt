@@ -6,7 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.text.TextUtils
 import com.google.android.material.R
-import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.SysuerCalendar
 import com.haibin.calendarview.MonthView
 import com.miyuyan.sysuer.api.CommonUtil.trim
 import com.miyuyan.sysuer.api.ContextUtil
@@ -91,7 +91,7 @@ class FeeMonthView(context: Context) : MonthView(context) {
 	}
 	
 	override fun onDrawSelected(canvas: Canvas,
-	                            calendar: Calendar,
+	                            sysuerCalendar: SysuerCalendar,
 	                            x: Int,
 	                            y: Int,
 	                            hasScheme: Boolean): Boolean {
@@ -101,13 +101,13 @@ class FeeMonthView(context: Context) : MonthView(context) {
 		return true
 	}
 	
-	override fun onDrawScheme(canvas: Canvas, calendar: Calendar, x: Int, y: Int) {
-		mPointPaint.setColor(if (isSelected(calendar))Color.WHITE else Color.GRAY)
+	override fun onDrawScheme(canvas: Canvas, sysuerCalendar: SysuerCalendar, x: Int, y: Int) {
+		mPointPaint.setColor(if (isSelected(sysuerCalendar))Color.WHITE else Color.GRAY)
 	//        canvas.drawCircle(x + (float) mItemWidth / 2, y + mItemHeight - 3 * mPadding, mPointRadius, mPointPaint);
 	}
 	
 	override fun onDrawText(canvas: Canvas,
-	                        calendar: Calendar,
+	                        sysuerCalendar: SysuerCalendar,
 	                        x: Int,
 	                        y: Int,
 	                        hasScheme: Boolean,
@@ -115,10 +115,10 @@ class FeeMonthView(context: Context) : MonthView(context) {
 		val cx = x + mItemWidth / 2
 		val cy = y + mItemHeight / 2
 		val top = y - mItemHeight / 6
-		if (calendar.isCurrentDay && !isSelected) canvas.drawCircle(cx.toFloat(), cy.toFloat(), mRadius.toFloat(), mCurrentDayPaint)
-		val scheme = trim(calendar.scheme)
+		if (sysuerCalendar.isCurrentDay && !isSelected) canvas.drawCircle(cx.toFloat(), cy.toFloat(), mRadius.toFloat(), mCurrentDayPaint)
+		val scheme = trim(sysuerCalendar.scheme)
 		if (hasScheme) { //            canvas.drawCircle(x + mItemWidth - mPadding - mCircleRadius / 2, y + mPadding + mCircleRadius, mCircleRadius, mSchemeBasicPaint);
-			mTextPaint.setColor(calendar.schemeColor)
+			mTextPaint.setColor(sysuerCalendar.schemeColor)
 			canvas.drawText(scheme, x + mItemWidth - mPadding - mCircleRadius, y + mPadding + mSchemeBaseLine, mTextPaint)
 		} //当然可以换成其它对应的画笔就不麻烦，
 		//        if (calendar.isWeekend() && calendar.isCurrentMonth()) {
@@ -138,16 +138,16 @@ class FeeMonthView(context: Context) : MonthView(context) {
 		mOtherMonthTextPaint.setColor(-0x111112)
 		mOtherMonthLunarTextPaint.setColor(-0x111112)
 		if (isSelected) {
-			canvas.drawText(calendar.day.toString(), cx.toFloat(), mTextBaseLine + top, mSelectTextPaint)
+			canvas.drawText(sysuerCalendar.day.toString(), cx.toFloat(), mTextBaseLine + top, mSelectTextPaint)
 			canvas.drawText(scheme, cx.toFloat(), mTextBaseLine + y + mItemHeight.toFloat() / 10, mSelectedLunarTextPaint)
 		}
 		else if (hasScheme) {
-			canvas.drawText(calendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (calendar.isCurrentMonth) mSchemeTextPaint else mOtherMonthTextPaint)
-			canvas.drawText(scheme, cx.toFloat(), mTextBaseLine + y + mItemHeight.toFloat() / 10, if (!TextUtils.isEmpty(calendar.solarTerm)) mSolarTermTextPaint else mSchemeLunarTextPaint)
+			canvas.drawText(sysuerCalendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (sysuerCalendar.isCurrentMonth) mSchemeTextPaint else mOtherMonthTextPaint)
+			canvas.drawText(scheme, cx.toFloat(), mTextBaseLine + y + mItemHeight.toFloat() / 10, if (!TextUtils.isEmpty(sysuerCalendar.solarTerm)) mSolarTermTextPaint else mSchemeLunarTextPaint)
 		}
 		else {
-			canvas.drawText(calendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth) mCurMonthTextPaint else mOtherMonthTextPaint)
-			canvas.drawText(calendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight.toFloat() / 10, if (calendar.isCurrentDay) mCurDayLunarTextPaint else if (calendar.isCurrentMonth) if (!TextUtils.isEmpty(calendar.solarTerm)) mSolarTermTextPaint else mCurMonthLunarTextPaint else mOtherMonthLunarTextPaint)
+			canvas.drawText(sysuerCalendar.day.toString(), cx.toFloat(), mTextBaseLine + top, if (sysuerCalendar.isCurrentDay) mCurDayTextPaint else if (sysuerCalendar.isCurrentMonth) mCurMonthTextPaint else mOtherMonthTextPaint)
+			canvas.drawText(sysuerCalendar.lunar, cx.toFloat(), mTextBaseLine + y + mItemHeight.toFloat() / 10, if (sysuerCalendar.isCurrentDay) mCurDayLunarTextPaint else if (sysuerCalendar.isCurrentMonth) if (!TextUtils.isEmpty(sysuerCalendar.solarTerm)) mSolarTermTextPaint else mCurMonthLunarTextPaint else mOtherMonthLunarTextPaint)
 		}
 	}
 	

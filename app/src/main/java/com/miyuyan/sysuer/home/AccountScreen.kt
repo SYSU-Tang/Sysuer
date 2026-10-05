@@ -1,45 +1,31 @@
 package com.miyuyan.sysuer.home
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavKey
 import com.miyuyan.preference.JumpPreference
 import com.miyuyan.preference.PreferenceCategory
 import com.miyuyan.preference.PreferenceScreen
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.extra.AboutActivity
 import com.miyuyan.sysuer.extra.PrivacyActivity
 import com.miyuyan.sysuer.extra.SettingActivity
 import com.miyuyan.sysuer.extra.UpdateActivity
 import com.miyuyan.sysuer.nav.About
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.Privacy
+import com.miyuyan.sysuer.nav.Setting
 import com.miyuyan.sysuer.nav.Update
 
 @Composable
 fun AccountScreen(
 	backStack: MutableList<NavKey>,
 	sharedTransitionScope: SharedTransitionScope? = null,
-	animatedVisibilityScope: AnimatedVisibilityScope? = null,
-	recreate: () -> Unit
+	animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
-	val context = LocalContext.current
-	val settingLauncher = rememberLauncherForActivityResult(
-			contract = ActivityResultContracts.StartActivityForResult(),
-			onResult = { o: ActivityResult ->
-				if (o.resultCode == Activity.RESULT_OK) recreate()
-			},
-	)
-
 	PreferenceScreen {
 		PreferenceCategory(title = stringResource(R.string.account)) {
 			item {
@@ -60,9 +46,12 @@ fun AccountScreen(
 				JumpPreference(
 						title = R.string.setting,
 						icon = R.drawable.setting,
-				) {
-					settingLauncher.launch(Intent(context, SettingActivity::class.java))
-				}
+						route = Setting,
+						backStack = backStack,
+						activity = SettingActivity::class.java,
+						sharedTransitionScope = sharedTransitionScope,
+						animatedVisibilityScope = animatedVisibilityScope,
+				)
 			}
 			item {
 				JumpPreference(
@@ -88,17 +77,29 @@ fun AccountScreen(
 			}
 			item {
 				JumpPreference(
+						modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+							with(sharedTransitionScope) {
+								Modifier.sharedBounds(
+										sharedContentState = rememberSharedContentState(
+												key = "https://sysu-tang.github.io/sysuer-website/docs/user/introduction"
+										),
+										animatedVisibilityScope = animatedVisibilityScope,
+								)
+							}
+						} else Modifier,
 						title = R.string.help,
 						icon = R.drawable.help,
+						sharedTransitionScope = sharedTransitionScope,
+						animatedVisibilityScope = animatedVisibilityScope,
 				) {
-					context.startActivity(
-							Intent(
-									context, BrowserActivity::class.java
-							).setData("https://sysu-tang.github.io/sysuer-website/docs/user/introduction".toUri())
-					)
+					backStack.add(Browser("https://sysu-tang.github.io/sysuer-website/docs/user/introduction"))
+//					context.startActivity(
+//							Intent(
+//									context, BrowserActivity::class.java
+//							).setData("https://sysu-tang.github.io/sysuer-website/docs/user/introduction".toUri())
+//					)
 				}
-			}
-			/*item {
+			}            /*item {
 				MenuPreference(
 						icon = {
 							Icon(

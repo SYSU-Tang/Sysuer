@@ -54,12 +54,11 @@ fun CourseDetailRoute(
 			listOf(
 				MenuItem(
 					title = stringResource(R.string.download),
-					icon = Icons.Rounded.Download,
+					iconVector = Icons.Rounded.Download,
 					onClick = {
 						viewModel.outlineId.value?.let {
 							viewModel.downloadOutline(it)
 						} ?: viewModel.getOutlineId()
-						true
 					}), exportMarkdownMenuItem(
 					backStack,
 					viewModel.outlineSections,

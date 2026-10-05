@@ -1,20 +1,24 @@
 package com.miyuyan.sysuer.api
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder
-import androidx.datastore.rxjava3.RxDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.disposables.Disposable
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import okio.Path.Companion.toPath
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.concurrent.Volatile
 
 /**
  * DataStore 管理类，支持通过 Hilt 依赖注入，并保留单例与静态方法以实现向下兼容。
@@ -27,25 +31,24 @@ class DataStoreManager @Inject constructor(
 		MARKDOWN, HTML
 	}
 
-	val rxDataStore: RxDataStore<Preferences> by lazy {
-		RxPreferenceDataStoreBuilder(context.applicationContext, "today_class").build()
+	val dataStore: DataStore<Preferences> by lazy {
+		PreferenceDataStoreFactory.createWithPath(
+			produceFile = { File(context.filesDir, "datastore/today_class.preferences_pb").absolutePath.toPath() }
+		)
 	}
 
-	@OptIn(ExperimentalCoroutinesApi::class)
-	fun saveContent(title: String, content: String, callback: () -> Unit = {}): Disposable =
-		rxDataStore.updateDataAsync { prefs ->
-			Single.just(prefs.toMutablePreferences().apply { this[stringPreferencesKey(title)] = content })
-		}.subscribe({
-			callback()
-		}, {
-			println("Error saving content: ${it.message}")
-		})
+	/** 保存标题对应的内容 */
+	suspend fun saveContent(title: String, content: String) {
+		dataStore.edit { it[stringPreferencesKey(title)] = content }
+	}
 
-	@OptIn(ExperimentalCoroutinesApi::class)
-	fun loadContent(title: String, callback: (String) -> Unit = {}): Disposable =
-		rxDataStore.data().subscribe {
-			callback(it[stringPreferencesKey(title)] ?: "")
-		}
+	/** 读取标题对应的内容，缺省为空字符串 */
+	suspend fun loadContent(title: String): String =
+		dataStore.data.first()[stringPreferencesKey(title)] ?: ""
+
+	/** 订阅标题对应的内容变化 */
+	fun loadContentFlow(title: String): Flow<String> =
+		dataStore.data.map { it[stringPreferencesKey(title)] ?: "" }
 
 	companion object {
 		val TODAY_CLASS: Preferences.Key<String> = stringPreferencesKey("today_class")
@@ -60,22 +63,22 @@ class DataStoreManager @Inject constructor(
 		}
 
 		@Synchronized
-		fun getInstance(context: Context): RxDataStore<Preferences> {
-			return getManagerInstance(context).rxDataStore
+		fun getInstance(context: Context): DataStore<Preferences> {
+			return getManagerInstance(context).dataStore
 		}
 
-		@Synchronized
-		fun saveContent(context: Context, title: String, content: String, callback: () -> Unit = {}): Disposable =
-			getManagerInstance(context).saveContent(title, content, callback)
+		suspend fun saveContent(context: Context, title: String, content: String) {
+			getManagerInstance(context).saveContent(title, content)
+		}
 
-		@Synchronized
-		fun loadContent(context: Context, title: String, callback: (String) -> Unit = {}): Disposable =
-			getManagerInstance(context).loadContent(title, callback)
+		suspend fun loadContent(context: Context, title: String): String {
+			return getManagerInstance(context).loadContent(title)
+		}
 	}
 }
 
 /**
- * Hilt 依赖注入模块，向 Hilt 提供 [DataStoreManager] 与 [RxDataStore<Preferences>] 依赖
+ * Hilt 依赖注入模块，向 Hilt 提供 [DataStoreManager] 与 [DataStore<Preferences>] 依赖
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -83,7 +86,7 @@ object DataStoreModule {
 
 	@Provides
 	@Singleton
-	fun provideRxDataStore(@ApplicationContext context: Context): RxDataStore<Preferences> {
+	fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
 		return DataStoreManager.getInstance(context)
 	}
 }

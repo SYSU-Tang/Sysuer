@@ -349,6 +349,7 @@
       {
         "id": 706,
         "name": "Study Room",
+        "route": "ClassroomQuery",
         "activity": ".academic.ClassroomQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/#/home",
         "description": "Study room inquiry system, providing inquiry and reservation services for available seats in libraries and teaching buildings"
@@ -510,6 +511,7 @@
     "items": [
       {
         "id": 902,
+        "route": "SchoolBus",
         "name": "School Bus",
         "activity": ".life.SchoolBusActivity",
         "url": "https://mportal.sysu.edu.cn/newClient/#/newPortal/index",
@@ -668,6 +670,7 @@
       {
         "id": 1303,
         "name": "Settings",
+        "route": "Settings",
         "activity": ".extra.SettingActivity",
         "description": "Set application settings preferences, including theme, language, and font options"
       }

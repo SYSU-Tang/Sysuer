@@ -1,4 +1,4 @@
-package com.miyuyan.sysuer.preference
+package com.miyuyan.sysuer.view.preference
 
 import android.content.Context
 import android.content.DialogInterface

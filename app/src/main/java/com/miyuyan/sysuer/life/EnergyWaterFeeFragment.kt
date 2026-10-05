@@ -14,7 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alibaba.fastjson2.JSONObject
-import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.SysuerCalendar
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
@@ -90,20 +90,19 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 
 							2 -> {
 								val preferenceAdapter = PreferenceAdapter()
-								println(response)
 								response.getJSONObject("data").getJSONArray("waterUsageList")
 									.forEach { item: Any? ->
 										val totalWaterUsage: Any? =
 											(item as JSONObject).getString("totalWaterUsage")
 										val content = totalWaterUsage?.toString()
 											?: getString(R.string.no_data_available)
-										val calendar = Calendar().apply {
+										val sysuerCalendar = SysuerCalendar().apply {
 											scheme = content
-											year = binding.calendarView.selectedCalendar.year
-											month = binding.calendarView.selectedCalendar.month
+											binding.calendarView.selectedSysuerCalendar?.let { year = it.year }
+											binding.calendarView.selectedSysuerCalendar?.let { month = it.month }
 											day = item.getInteger("timeLabel")
 										}
-										binding.calendarView.addSchemeDate(calendar)
+										binding.calendarView.addSchemeDate(sysuerCalendar)
 									}
 								adapter.addAdapter(preferenceAdapter)
 							}
@@ -253,8 +252,8 @@ class EnergyWaterFeeFragment : EnergyBaseFragment() {
 			v?.let {
 				getWaterConsumption(
 						it, LocalDate.of(
-						binding.calendarView.selectedCalendar.year,
-						binding.calendarView.selectedCalendar.month,
+						binding.calendarView.selectedSysuerCalendar?.year ?: 0,
+						binding.calendarView.selectedSysuerCalendar?.month ?: 0,
 						1
 				).format(formatter)
 				)

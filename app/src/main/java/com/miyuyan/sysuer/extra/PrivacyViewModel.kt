@@ -1,11 +1,10 @@
 package com.miyuyan.sysuer.extra
 
 import android.app.Application
-import androidx.core.util.component1
-import androidx.core.util.component2
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
+import com.miyuyan.sysuer.api.TargetHost
 import com.miyuyan.sysuer.model.PayModel
 import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,12 +28,11 @@ class PrivacyViewModel(application: Application) : AndroidViewModel(application)
 	val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
 	init {
-		model.contextUtil.disposable.add(
-				model.contextUtil.accountManager.getActiveAccountAsync("sysu.edu.cn")
-					.subscribe { (id, pwd) ->
-						_netId.value = id ?: ""
-						_password.value = pwd ?: ""
-					})
+		viewModelScope.launch {
+			val (id, pwd) = model.contextUtil.accountManager.getActiveAccount(TargetHost.SYSU)
+			_netId.value = id
+			_password.value = pwd
+		}
 
 		viewModelScope.launch {
 			model.message.collect { (code, response) ->

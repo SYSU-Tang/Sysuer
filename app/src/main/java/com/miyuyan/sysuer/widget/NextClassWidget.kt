@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import androidx.datastore.preferences.core.Preferences
 import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
@@ -18,7 +17,8 @@ import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.academic.AgendaActivity
 import com.miyuyan.sysuer.api.DataStoreManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -28,18 +28,18 @@ import java.util.concurrent.TimeUnit
 
 class NextClassWidget : AppWidgetProvider() {
 	var delay: Long = 0
-	@OptIn(ExperimentalCoroutinesApi::class) override fun onUpdate(context: Context,
+	override fun onUpdate(context: Context,
 	                                                               appWidgetManager: AppWidgetManager,
 	                                                               appWidgetIds: IntArray) {
 		val pendingResult = goAsync()
 		Executors.newSingleThreadExecutor().let { executor ->
 			executor.execute {
 				try {
-					val cachedData = DataStoreManager.getInstance(context.applicationContext)
-						.data()
-						.map<JSONArray> { prefs: Preferences? -> JSONArray.parseArray(prefs!![DataStoreManager.TODAY_CLASS]) }
-						.firstOrError()
-						.blockingGet()
+					val cachedData = runBlocking {
+						DataStoreManager.getInstance(context.applicationContext).data
+							.first()[DataStoreManager.TODAY_CLASS]
+							?.let { JSONArray.parseArray(it) } ?: JSONArray()
+					}
 					val remoteViews = RemoteViews(context.packageName, R.layout.widget_next_class)
 					cachedData.forEachIndexed { it, v ->
 						handlerMessage(it, v as JSONObject, context, remoteViews)

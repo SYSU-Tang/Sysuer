@@ -49,9 +49,7 @@ object ShortcutReader {
 
 	/** callingPackage 必须与实际调用 uid 匹配，否则会抛 "Calling package name mismatch" */
 	private fun callerPackage(): String {
-		println("callerPackage: ${Shizuku.getUid()}")
 		if (Shizuku.getUid() != 2000) {
-//			Os.setuid(2000)
 			error("Calling package name mismatch")
 		}
 		return SHELL_PKG

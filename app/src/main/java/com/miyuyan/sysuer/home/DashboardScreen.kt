@@ -10,10 +10,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -145,6 +143,7 @@ import com.miyuyan.sysuer.api.TodoManager
 import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.nav.CourseDetail
 import com.miyuyan.sysuer.nav.Exam
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.todo.TodoActivity
 import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
@@ -219,6 +218,7 @@ internal fun DashboardScreen(
 			dashboardViewModel = dashboardViewModel,
 			homeViewModel = homeViewModel,
 			config = config,
+			backStack = backStack,
 	)
 
 	FlowRow(
@@ -234,7 +234,7 @@ internal fun DashboardScreen(
 			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 	) {
 		if (0 in selectedSet) ShortcutSection(
-				backStack, dashboardViewModel, homeViewModel, config, activity
+				backStack, dashboardViewModel, homeViewModel, activity
 		) { showActionItem = it }
 
 		if (1 in selectedSet || 2 in selectedSet) {
@@ -448,6 +448,7 @@ private fun DashboardActionDialog(
 	dashboardViewModel: DashboardViewModel,
 	homeViewModel: HomeViewModel,
 	config: ContextUtil,
+	backStack: MutableList<NavKey>,
 ) {
 	if (item == null) return
 	val context = LocalContext.current
@@ -604,11 +605,7 @@ private fun DashboardActionDialog(
 						image = Icons.Rounded.Link, text = stringResource(R.string.open_as_url)
 				) {
 					item.url?.takeIf { it.isNotBlank() }?.let {
-						context.startActivity(
-								Intent(context, BrowserActivity::class.java).setData(
-										it.toUri()
-								)
-						)
+						backStack.add(Browser(it, name))
 					}
 				}
 
@@ -616,15 +613,13 @@ private fun DashboardActionDialog(
 						image = Icons.Rounded.Book, text = stringResource(R.string.guide)
 				) {
 					item.doc?.takeIf { it.isNotBlank() }?.let {
-						context.startActivity(
-								Intent(
-										context, BrowserActivity::class.java
-								).setData(
+						backStack.add(
+								Browser(
 										"https://sysu-tang.github.io/sysuer-website${
 											CommonUtil.trim(
 													it
 											)
-										}".toUri()
+										}", name
 								)
 						)
 					} ?: config.toast(R.string.undeveloped_warning)
@@ -639,7 +634,6 @@ private fun ShortcutSection(
 	backStack: MutableList<NavKey>,
 	vm: DashboardViewModel,
 	hm: HomeViewModel,
-	config: ContextUtil,
 	activity: Activity?,
 	onShowActionDialog: (ServiceConfig) -> Unit,
 ) {
@@ -697,40 +691,14 @@ private fun ShortcutSection(
 			val name = shortcut.name ?: return@forEach
 			LongClickButton(
 					onClick = {
-				navigateToServiceItem(
-						context, backStack, shortcut, hm.actionMap
-				)
-				val act = shortcut.activity
 				val url = shortcut.url
 				when {
-					!act.isNullOrEmpty() -> {
-						try {
-							Intent(context, Class.forName(context.packageName + act)).takeIf {
-								it.resolveActivity(context.packageManager) != null
-							}?.let {
-								context.startActivity(
-										it, activity?.let { it1 ->
-									ActivityOptionsCompat.makeSceneTransitionAnimation(
-											it1
-									)
-								}?.toBundle())
-							}
-						} catch (_: Exception) {
-							config.toast(R.string.activity_not_found)
-						}
-					}
+					// URL 服务直接走 Navigation3 内置浏览器，其余交由 navigateToServiceItem 处理
+					!url.isNullOrEmpty() -> backStack.add(Browser(url, name))
 
-					!url.isNullOrEmpty() -> {
-						context.startActivity(
-								Intent(context, BrowserActivity::class.java).setData(
-										url.toUri()
-								), activity?.let { it1 ->
-							ActivityOptionsCompat.makeSceneTransitionAnimation(it1)
-						}?.toBundle()
-						)
-					}
-
-					else -> config.toast(R.string.undeveloped)
+					else -> navigateToServiceItem(
+							context, backStack, shortcut, hm.actionMap
+					)
 				}
 			},
 					icon = Icons.Rounded.Star,

@@ -1,7 +1,6 @@
 package com.miyuyan.sysuer.academic
 
 import android.app.Application
-import android.content.Intent
 import android.os.Environment
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Print
@@ -12,7 +11,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,15 +22,27 @@ import com.miyuyan.sysuer.api.CommonUtil.extractValue
 import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.api.DownloadManager
 import com.miyuyan.sysuer.api.FileManager.FileRequestBody
-import com.miyuyan.sysuer.browser.BrowserActivity
 import com.miyuyan.sysuer.model.JwxtModel
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
+import com.miyuyan.sysuer.view.UiState
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 
 class LeaveSlipViewModel(application: Application) : AndroidViewModel(application) {
+
+	private val _openBrowser = Channel<Browser>()
+	val openBrowser = _openBrowser.receiveAsFlow()
+
+	fun openBrowser(url: String) {
+		_openBrowser.trySend(Browser(url))
+	}
+
 	private val model = JwxtModel(application)
 	val sections: SnapshotStateList<SectionData> = mutableStateListOf()
 	val leaveReasons: SnapshotStateList<JSONObject> = mutableStateListOf()
@@ -56,6 +66,9 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	var endPeriod: Int by mutableIntStateOf(0)
 	var startMillis: Long by mutableLongStateOf(System.currentTimeMillis())
 	var endMillis: Long by mutableLongStateOf(System.currentTimeMillis())
+	private val _uiState = model.getUiState(0)
+
+	val uiState = _uiState.asStateFlow()
 
 	init {
 		viewModelScope.launch {
@@ -64,6 +77,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 					0 -> {
 						response.getJSONObject("data")?.let {
 							if (total == -1) total = it.getInteger("total")
+							_uiState.value = if (total == 0) UiState.Empty else UiState.Content
 							it.getJSONArray("rows").forEach { item: Any? ->
 								val title =
 									"${(item as JSONObject).getString("askLeaveReasonName")} · ${
@@ -74,10 +88,9 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 												title, footerMenus = mutableStateListOf(
 												MenuItem(
 														application.getString(R.string.print_leave_slip),
-														Icons.Rounded.Print
+														iconVector = Icons.Rounded.Print
 												) {
 													printLeaveSlip(item.getString("askLeaveId"))
-													true
 												}), rows = extractValue(
 												application, item, intArrayOf(
 												R.string.leave_reason,
@@ -124,20 +137,14 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 										)
 										).apply {
 											last().onClick = {
-												application.startActivity(
-														Intent(
-																getApplication(),
-																BrowserActivity::class.java
-														).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-															.setData(
-																	"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
-																		item.getString(
-																				"filePath"
-																		)
-																	}&fileName=${
-																		item.getString("fileName")
-																	}".toUri()
+												openBrowser(
+														"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
+															item.getString(
+																	"filePath"
 															)
+														}&fileName=${
+															item.getString("fileName")
+														}"
 												)
 											}
 										})
@@ -158,20 +165,16 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 						attachmentRows.clear()
 						attachmentRows.add(
 								RowData(
-										data.getString("filePath"),
-										data.getString("fileName")
+										data.getString("filePath"), data.getString("fileName")
 								) {
-									application.startActivity(
-											Intent(application, BrowserActivity::class.java)
-												.setData(
-														"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
-															data.getString(
-																	"filePath"
-															)
-														}&fileName=${
-															data.getString("fileName")
-														}".toUri()
-												).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+									openBrowser(
+											"https://jwxt.sysu.edu.cn/jwxt/reports-register/askLeaveAgg/downloadFile?filePath=${
+												data.getString(
+														"filePath"
+												)
+											}&fileName=${
+												data.getString("fileName")
+											}"
 									)
 								})
 					}
@@ -209,6 +212,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun fetchLeaveSlips() {
+		_uiState.value = if (page == 0) UiState.Loading else UiState.LoadMore
 		model.enqueue(
 				"jwxt/reports-register/askLeaveAgg/selfAskLeaveInfoList",
 				"{\"param\":{},\"pageNo\":${++page},\"pageSize\":10,\"total\":true}",
@@ -263,9 +267,7 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 		}
 //		println(leaveData.toJSONString())
 		model.enqueue(
-				"jwxt/reports-register/askLeaveAgg/applyLeave",
-				leaveData.toJSONString(),
-				3
+				"jwxt/reports-register/askLeaveAgg/applyLeave", leaveData.toJSONString(), 3
 		)
 	}
 
@@ -280,12 +282,10 @@ class LeaveSlipViewModel(application: Application) : AndroidViewModel(applicatio
 						null,
 						null
 				).post(
-							MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart(
-									"file",
-									fileRequestBody.fileName,
-									fileRequestBody.file
-							).build()
-					).build(), 2
+						MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart(
+								"file", fileRequestBody.fileName, fileRequestBody.file
+						).build()
+				).build(), 2
 		)
 	}
 

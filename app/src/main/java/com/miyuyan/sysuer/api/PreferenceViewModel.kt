@@ -1,65 +1,43 @@
 package com.miyuyan.sysuer.api
 
 import android.app.Application
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.preference.PreferenceManager
+import com.miyuyan.sysuer.preference.SettingPreference
 
 class PreferenceViewModel(application: Application) : AndroidViewModel(application) {
+	private val settingPreference = SettingPreference(application)
 	val isAgreeLiveData: MutableLiveData<Boolean> = MutableLiveData()
-	val dashboardLiveData: MutableLiveData<MutableSet<String?>?> =
+	val dashboardLiveData: MutableLiveData<MutableSet<String?>> =
 		MutableLiveData()
-	val sharedPreferences: SharedPreferences =
-		PreferenceManager.getDefaultSharedPreferences(application)
-
-	fun getString(key: String?, defValue: String?): String? =
-		sharedPreferences.getString(key, defValue)
-
-	fun getBoolean(key: String?, defValue: Boolean): Boolean =
-		sharedPreferences.getBoolean(key, defValue)
 
 	val theme: String?
-		get() = getString(THEME, "2")
+		get() = settingPreference.theme
 
 	init {
 		isAgreeLiveData.value = isAgree
 		dashboardLiveData.value = dashboard
 	}
 
-	private fun getSet(key: String?, defValue: Set<String?>?): MutableSet<String?>? =
-		sharedPreferences.getStringSet(key, defValue)
-
-	val dashboard: MutableSet<String?>?
-		get() = getSet("dashboard", (0..5).map { "$it" }.toSet())
+	val dashboard: MutableSet<String?>
+		get() = settingPreference.dashboard.map { it as String? }.toMutableSet()
 	val home: String?
-		get() = getString(HOME, "2")
+		get() = settingPreference.home
 	val language: String?
-		get() = getString(LANGUAGE, "2")
+		get() = settingPreference.language
 	val qrcode: String?
-		get() = getString(QRCODE, "")
+		get() = settingPreference.qrCode
 	var isAgree: Boolean
-		get() = getBoolean(IS_AGREE, false)
+		get() = settingPreference.isAgree
 		set(isAgree) {
 			isAgreeLiveData.value = isAgree
-			sharedPreferences.edit { putBoolean(IS_AGREE, isAgree) }
+			settingPreference.isAgree = isAgree
 		}
 	var isFirstLaunch: Boolean
-		get() = getBoolean(IS_FIRST_LAUNCH, false)
+		get() = settingPreference.isFirstLaunch
 		set(isFirstLaunch) {
-			sharedPreferences.edit { putBoolean(IS_FIRST_LAUNCH, isFirstLaunch) }
+			settingPreference.isFirstLaunch = isFirstLaunch
 		}
 	val update: Boolean
-		get() = getBoolean(UPDATE, true)
-
-	companion object {
-		private const val THEME = "theme"
-		private const val HOME = "home"
-		private const val LANGUAGE = "language"
-		private const val QRCODE = "qrcode"
-		private const val UPDATE = "update"
-		private const val IS_FIRST_LAUNCH = "launch"
-		private const val IS_AGREE = "agree"
-	}
+		get() = settingPreference.update
 }

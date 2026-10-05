@@ -13,7 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alibaba.fastjson2.JSONObject
-import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.SysuerCalendar
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.CommonUtil.extractValue
@@ -106,13 +106,13 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 											?: getString(R.string.no_data_available)
 										val date =
 											LocalDate.parse(item.getString("date"), formatter)
-										val calendar = Calendar().apply {
+										val sysuerCalendar = SysuerCalendar().apply {
 											scheme = content
 											year = date.year
 											month = date.monthValue
 											day = date.dayOfMonth
 										}
-										binding.calendarView.addSchemeDate(calendar)
+										binding.calendarView.addSchemeDate(sysuerCalendar)
 									}
 
 								3 -> {
@@ -279,8 +279,8 @@ class EnergyElectricityFeeFragment : EnergyBaseFragment() {
 					roomCode.collect { v: String? ->
 						v?.takeUnless { it.isEmpty() }?.let {
 							val date = LocalDate.of(
-									binding.calendarView.selectedCalendar.year,
-									binding.calendarView.selectedCalendar.month,
+									binding.calendarView.selectedSysuerCalendar?.year ?: 0,
+									binding.calendarView.selectedSysuerCalendar?.month ?: 0,
 									1
 							)
 							getElectricityConsumption(

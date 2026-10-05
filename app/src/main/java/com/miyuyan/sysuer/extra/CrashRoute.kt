@@ -145,19 +145,19 @@ fun CrashRoute(
 					Surface(
 							modifier = Modifier
 								.align(Alignment.BottomCenter)
+								.fillMaxWidth()
 								.padding(
 										horizontal = dimensionResource(R.dimen.horizontal_margin),
 										vertical = dimensionResource(R.dimen.vertical_margin)
 								),
 							shape = CircleShape,
-							color = MaterialTheme.colorScheme.surfaceContainerHigh,
+							color = MaterialTheme.colorScheme.surfaceContainer,
 					) {
 						Row(
 								modifier = Modifier.padding(
-										horizontal = dimensionResource(R.dimen.horizontal_margin),
 										vertical = dimensionResource(R.dimen.vertical_margin)
 								),
-								horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+								horizontalArrangement = Arrangement.SpaceEvenly,
 								verticalAlignment = Alignment.CenterVertically
 						) {
 							FilledTonalButton(onClick = {
@@ -270,7 +270,7 @@ private fun getBatteryStatus(context: Context): String {
 				Locale.getDefault(),
 				"%.1f%% (%s)",
 				batteryPct,
-				context.getString(if (isCharging) R.string.charging else R.string.uncharge)
+				context.getString(if (isCharging) R.string.charging else R.string.uncharged)
 		)
 	} else context.getString(R.string.unknown)
 }

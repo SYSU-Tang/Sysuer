@@ -2,17 +2,14 @@ package com.miyuyan.sysuer.api
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
-import androidx.preference.PreferenceManager
+import com.miyuyan.sysuer.preference.SettingPreference
 import kotlin.concurrent.Volatile
 
 class SettingManager(private val context: Context) {
-	val preferences: SharedPreferences =
-		PreferenceManager.getDefaultSharedPreferences(context)
+	private val settingPreference = SettingPreference(context)
 
 	init {
 		if (defaultFontSize == 0.0f) defaultFontSize =
@@ -27,7 +24,7 @@ class SettingManager(private val context: Context) {
 	 * @description "zh-CN": 中文 "en": 英文 ""
 	 * */
 	fun getLanguageCode(): String =
-		arrayOf("zh-CN", "en", "")[preferences.getString("language", "2")!!.toInt()]
+		arrayOf("zh-CN", "en", "")[settingPreference.language.toInt()]
 
 	/**
 	 * 设置语言
@@ -65,7 +62,7 @@ class SettingManager(private val context: Context) {
 	 * @range 0 - 2
 	 * @description 0: 浅色主题 1: 深色主题 2: 系统主题
 	 * */
-	fun getTheme(): Int = preferences.getString("theme", "2")?.toInt() ?: 2
+	fun getTheme(): Int = settingPreference.theme.toIntOrNull() ?: 2
 
 	/**
 	 * 是否开启深色主题
@@ -74,14 +71,14 @@ class SettingManager(private val context: Context) {
 	 * */
 	val isDarkTheme: Boolean =
 		getTheme() == 1 || (getTheme() == 2 && (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
-	val isDynamicColor: Boolean = preferences.getBoolean("dynamic_color", true)
+	val isDynamicColor: Boolean = settingPreference.dynamicColor
 
 	/**
 	 * 是否开启导航栏模糊效果
 	 * @return 是否开启导航栏模糊效果
 	 * @default true
 	 * */
-	val isBlurNavigationBar: Boolean = preferences.getBoolean("navigation_bar", true)
+	val isBlurNavigationBar: Boolean = settingPreference.blurNavigationBar
 
 	companion object {
 		@JvmStatic
@@ -113,11 +110,11 @@ fun setFontSize(fontSize: Float): Context {
 	 * @range 0.5f - 1.5f
 	 * */
 	var fontSize: Float
-		get() = preferences.getString("fontSize", "0")?.takeIf { "0" != it }
+		get() = settingPreference.fontSize.takeIf { "0" != it }
 			?.let { floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)[it.toInt() - 1] }
 			?: defaultFontSize
 		set(value) {
-			preferences.edit { putString("fontSize", "$value") }
+			settingPreference.fontSize = "$value"
 		}
 
 	/**
@@ -125,10 +122,10 @@ fun setFontSize(fontSize: Float): Context {
 	 * @return 是否开启开发者模式
 	 * */
 	var developerMode: Boolean = false
-		get() = preferences.getBoolean("developer_mode", false)
+		get() = settingPreference.developerMode
 		set(value) {
 			field = value
-			preferences.edit { putBoolean("developer_mode", value) }
+			settingPreference.developerMode = value
 		}
 
 	/**
@@ -136,9 +133,9 @@ fun setFontSize(fontSize: Float): Context {
 	 * @return 是否开启检测测试版本更新
 	 * */
 	var betaCheck: Boolean
-		get() = preferences.getBoolean("beta_check", false)
+		get() = settingPreference.betaCheck
 		set(value) {
-			preferences.edit { putBoolean("beta_check", value) }
+			settingPreference.betaCheck = value
 		}
 
 	/**
@@ -146,9 +143,9 @@ fun setFontSize(fontSize: Float): Context {
 	 * @return 逸仙码小程序的捷径连接
 	 * */
 	var qrCode: String
-		get() = preferences.getString("qrcode", "") ?: ""
+		get() = settingPreference.qrCode
 		set(value) {
-			preferences.edit { putString("qrcode", value) }
+			settingPreference.qrCode = value
 		}
 
 	/**
@@ -157,8 +154,8 @@ fun setFontSize(fontSize: Float): Context {
 	 * 1: 最近
 	 * */
 	var courseDate: Int
-		get() = preferences.getString("course_date", "0")?.toInt() ?: 0
+		get() = settingPreference.courseDate
 		set(value) {
-			preferences.edit { putString("course_date", "$value") }
+			settingPreference.courseDate = value
 		}
 }

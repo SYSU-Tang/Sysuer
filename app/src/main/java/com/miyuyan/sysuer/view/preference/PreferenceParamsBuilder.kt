@@ -1,4 +1,4 @@
-package com.miyuyan.sysuer.preference
+package com.miyuyan.sysuer.view.preference
 
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat

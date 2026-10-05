@@ -10,13 +10,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.alibaba.fastjson2.JSONArray
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.SysuerCalendar
 import com.haibin.calendarview.CalendarView
 import com.haibin.calendarview.CalendarView.OnCalendarSelectListener
 import com.miyuyan.sysuer.BaseFragment
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.api.CommonUtil.isEmpty
+import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.databinding.FragmentTodoBinding
 
 class TodoFragment : BaseFragment() {
@@ -37,32 +37,32 @@ class TodoFragment : BaseFragment() {
 		outState.putBoolean("done", done)
 	}
 
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View {
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+	): View {
 		savedInstanceState?.let {
 			due = it.getBoolean("due", true)
 			ddl = it.getBoolean("ddl", false)
 			todo = it.getBoolean("todo", true)
 			done = it.getBoolean("done", true)
 		}
-		val concatAdapter = ConcatAdapter(ConcatAdapter.Config.Builder()
-			                                  .setIsolateViewTypes(true)
-			                                  .build())
+		val concatAdapter = ConcatAdapter(
+				ConcatAdapter.Config.Builder().setIsolateViewTypes(true).build()
+		)
 		val toolbar = requireActivity().findViewById<Toolbar>(R.id.toolbar)
 		val binding = FragmentTodoBinding.inflate(inflater, container, false).apply {
 			recyclerView.adapter = concatAdapter
-			recyclerView.layoutManager = LinearLayoutManager(requireContext(),
-			                                                 LinearLayoutManager.VERTICAL,
-			                                                 false) //		val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+			recyclerView.layoutManager = LinearLayoutManager(
+					requireContext(), LinearLayoutManager.VERTICAL, false
+			) //		val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 			calendarView.setOnMonthChangeListener { year: Int, month: Int -> toolbar.setSubtitle("${year}年${month}月") }
 			calendarView.setSelectSingleMode()
 			toolbar.setSubtitle("${calendarView.curYear}年${calendarView.curMonth}月")
 			calendarView.setOnCalendarSelectListener(object : OnCalendarSelectListener {
-				override fun onCalendarOutOfRange(calendar: Calendar?) {
+				override fun onCalendarOutOfRange(sysuerCalendar: SysuerCalendar?) {
 				}
-				
-				override fun onCalendarSelect(calendar: Calendar, isClick: Boolean) {
+
+				override fun onCalendarSelect(sysuerCalendar: SysuerCalendar?, isClick: Boolean) {
 					todoManager.performRefresh()
 				}
 			})
@@ -92,16 +92,18 @@ class TodoFragment : BaseFragment() {
 		refresh()
 		return binding.root
 	}
-	
+
 	val date: String
-		get() = DateTimeManager.toDateString(calendarView.selectedCalendar.timeInMillis)
-	
+		get() = DateTimeManager.toDateString(
+				calendarView.selectedSysuerCalendar?.timeInMillis ?: System.currentTimeMillis()
+		)
+
 	fun refresh() {
 		val a = mutableListOf<String>()
 		val b = mutableListOf<String>()
 		val map = mutableMapOf<String, Any?>()        //map["status"] = todoInfo.status
 		map["title"] = todoInfo.title
-		map["description"] = todoInfo.description		//map["priority"] = todoInfo.priority
+		map["description"] = todoInfo.description        //map["priority"] = todoInfo.priority
 		map["todo_type"] = todoInfo.todoType
 		map["subtask"] = todoInfo.subtask
 		map["attachment"] = todoInfo.attachment
@@ -113,10 +115,9 @@ class TodoFragment : BaseFragment() {
 		map["remind_time"] = todoInfo.remindTime
 		map["done_datetime"] = todoInfo.doneDateTime
 		map.forEach { (key: String, value: Any?) ->
-			if (value is JSONArray) {				//a.add("$key IN (?)")
+			if (value is JSONArray) {                //a.add("$key IN (?)")
 				//b.add(value.joinToString(","))
-			}
-			else if (!isEmpty(value)) {
+			} else if (!isEmpty(value)) {
 				a.add("$key = ?")
 				b.add("$value")
 			}
@@ -125,12 +126,10 @@ class TodoFragment : BaseFragment() {
 			a.add("(due_date= ? OR ddl = ?)")
 			b.add(date)
 			b.add(date)
-		}
-		else if (due) {
+		} else if (due) {
 			a.add("due_date= ?")
 			b.add(date)
-		}
-		else if (ddl) {
+		} else if (ddl) {
 			a.add("ddl= ?")
 			b.add(date)
 		}
@@ -138,12 +137,10 @@ class TodoFragment : BaseFragment() {
 			a.add("(status = ? OR status = ?)")
 			b.add("0")
 			b.add("1")
-		}
-		else if (todo) {
+		} else if (todo) {
 			a.add("status = ?")
 			b.add("0")
-		}
-		else if (done) {
+		} else if (done) {
 			a.add("status = ?")
 			b.add("1")
 		}

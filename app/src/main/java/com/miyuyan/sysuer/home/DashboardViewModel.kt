@@ -9,7 +9,6 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.ClassIsland
@@ -20,6 +19,7 @@ import com.miyuyan.sysuer.home.data.CollectionDatabase
 import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
 import com.miyuyan.sysuer.model.JwxtModel
+import com.miyuyan.sysuer.preference.SettingPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -187,8 +187,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			ShortcutReader.start(it)
 			return
 		}
-		PreferenceManager.getDefaultSharedPreferences(application).getString("qrcode", "")
-			?.takeIf { it.isNotEmpty() }?.run {
+		SettingPreference(application).qrCode
+			.takeIf { it.isNotEmpty() }?.run {
 				Intent(Intent.ACTION_VIEW, toUri()).takeIf {
 					it.resolveActivity(application.packageManager) != null
 				}?.let {

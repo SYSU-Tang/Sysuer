@@ -348,6 +348,7 @@
       {
         "id": 706,
         "name": "自习室",
+        "route": "ClassroomQuery",
         "activity": ".academic.ClassroomQueryActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt//yd/studyRoom/#/home",
         "description": "自习室查询系统，图书馆、教学楼自习室空位查询和预约服务"
@@ -513,6 +514,7 @@
       {
         "id": 902,
         "activity": ".life.SchoolBusActivity",
+        "route": "SchoolBus",
         "name": "校车",
         "url": "https://mportal.sysu.edu.cn/newClient/#/newPortal/index",
         "description": "校车时刻表查询系统，各校区班车时间、路线、实时位置等信息"
@@ -670,6 +672,7 @@
       {
         "id": 1303,
         "name": "设置",
+        "route": "Setting",
         "activity": ".extra.SettingActivity",
         "description": "设置应用设置偏好，包括主题、语言、字体等选项"
       }
