@@ -3,15 +3,16 @@ package com.miyuyan.sysuer.model
 import android.content.Context
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.AuthorizationManager
+import com.miyuyan.sysuer.api.TargetHost
 
 class RainClassModel(context: Context) : BaseModel(context) {
 	override val authorizationManager: AuthorizationManager =
-		AuthorizationManager("www.yuketang.cn", "www.yuketang.cn")
+		AuthorizationManager("www.yuketang.cn", "www.yuketang.cn").apply {
+			setTargetUrl(TargetHost.YU_KE_TANG, TargetHost.YU_KE_TANG)
+		}
 
 	override fun checkResponseStatus(
-		code: Int,
-		content: String,
-		json: JSONObject?
+		code: Int, content: String, json: JSONObject?
 	): ResponseStatus {
 		if (code == 401) return ResponseStatus.NEEDS_LOGIN
 		return super.checkResponseStatus(code, content, json)

@@ -9,15 +9,15 @@ import com.miyuyan.sysuer.api.Config
 
 open class BaseFragment : Fragment() {
 	lateinit var config: Config
-	override fun onCreateView(inflater: LayoutInflater,
-	                          container: ViewGroup?,
-	                          savedInstanceState: Bundle?): View? {
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+	): View? {
 		config = Config(this)
 		return super.onCreateView(inflater, container, savedInstanceState)
 	}
-	
+
 	override fun onDestroyView() {
 		super.onDestroyView()
-		if (::config.isInitialized) config.contextUtil.disposable.dispose()
+		if (::config.isInitialized) config.contextUtil.dispose()
 	}
 }

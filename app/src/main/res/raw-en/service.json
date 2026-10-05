@@ -105,6 +105,7 @@
       {
         "id": 203,
         "name": "Homework",
+        "route": "Homework",
         "activity": ".academic.HomeworkActivity",
         "description": "Homework management system, including online homework assignments, submission, and feedback"
       }
@@ -342,7 +343,8 @@
       {
         "id": 705,
         "name": "School Calendar",
-        "activity": ".academic.CalendarActivity",
+        "route": "SchoolCalendar",
+        "activity": ".academic.SchoolCalendarActivity",
         "url": "https://jwb.sysu.edu.cn/school-calendar",
         "description": "School calendar inquiry system, providing semester arrangements, holiday arrangements, and important date reminders"
       },

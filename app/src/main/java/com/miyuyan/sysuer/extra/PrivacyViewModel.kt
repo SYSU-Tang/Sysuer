@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.TargetHost
 import com.miyuyan.sysuer.model.PayModel
-import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,9 +23,6 @@ class PrivacyViewModel(application: Application) : AndroidViewModel(application)
 	private val _personData = MutableStateFlow<JSONObject?>(null)
 	val personData: StateFlow<JSONObject?> = _personData.asStateFlow()
 
-	private val _uiState = model.getUiState(PERSON_REQUEST)
-	val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-
 	init {
 		viewModelScope.launch {
 			val (id, pwd) = model.contextUtil.accountManager.getActiveAccount(TargetHost.SYSU)
@@ -40,7 +36,6 @@ class PrivacyViewModel(application: Application) : AndroidViewModel(application)
 					if (response.get("data") != null) {
 						if (code == PERSON_REQUEST) {
 							_personData.value = response.getJSONObject("data")
-							_uiState.value = UiState.Content
 						}
 					}
 				}
@@ -51,7 +46,6 @@ class PrivacyViewModel(application: Application) : AndroidViewModel(application)
 	}
 
 	fun fetchPersonData() {
-		_uiState.value = UiState.Loading
 		model.enqueue("client/api/client/person/get", "{}", PERSON_REQUEST)
 	}
 

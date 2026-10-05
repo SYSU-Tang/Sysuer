@@ -325,14 +325,7 @@ fun ActivityPager(
 												pagerState.animateScrollToPage(index)
 											}
 										},
-										icon = navItem.iconVector?.let {
-											{
-												Icon(
-														imageVector = it,
-														contentDescription = navItem.title
-												)
-											}
-										} ?: {})
+										icon = navItem.icon ?: {})
 							}
 						}
 					}

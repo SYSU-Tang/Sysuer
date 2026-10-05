@@ -70,7 +70,6 @@ class CourseCompletionViewModel(application: Application) : AndroidViewModel(app
 																			)
 																	)
 																}
-																true
 															},
 													),
 													rows = CommonUtil.extractValue(

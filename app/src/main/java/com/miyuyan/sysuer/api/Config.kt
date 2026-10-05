@@ -11,7 +11,6 @@ import com.miyuyan.sysuer.browser.BrowserActivity
 class Config {
 	var activity: FragmentActivity? = null // 关联的 FragmentActivity 对象
 	var fragment: Fragment? = null // 关联的 Fragment 对象
-	var afterLogin: Runnable? = null // 登录成功后的回调 Runnable 对象
 	var contextUtil: ContextUtil
 
 	/**
@@ -33,15 +32,6 @@ class Config {
 		this.fragment = fragment
 		activity = fragment.requireActivity()
 		contextUtil = ContextUtil(fragment.requireContext())
-	}
-
-	/**
-	 * 设置登录回调
-	 * 
-	 * @param afterLogin 登录成功后的回调 Runnable 对象
-	 */
-	fun setCallback(afterLogin: Runnable?) {
-		this.afterLogin = afterLogin
 	}
 
 	/**
@@ -85,8 +75,7 @@ class Config {
 	fun browse(url: String?): View.OnClickListener = View.OnClickListener {
 		context.startActivity(
 				Intent(
-						context,
-						BrowserActivity::class.java
+						context, BrowserActivity::class.java
 				).setData(Uri.parse(url))
 		)
 	}
@@ -117,14 +106,5 @@ class Config {
 	 */
 	fun toast(toast: String?) {
 		contextUtil.toast(toast)
-	}
-
-	/**
-	 * 跳转登录页面
-	 * 
-	 * @param url 登录 URL，建议使用 TargeterURL 中的默认登录 URL
-	 */
-	fun gotoLogin(url: String?) {
-		contextUtil.login(url, afterLogin)
 	}
 }

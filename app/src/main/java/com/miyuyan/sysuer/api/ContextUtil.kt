@@ -7,8 +7,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.ImageView
@@ -27,7 +25,6 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.LoginManager.LoginListener
 import com.miyuyan.sysuer.databinding.DialogAccountBinding
 import com.miyuyan.sysuer.preference.PrivacyPreference
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -54,8 +51,8 @@ class ContextUtil(val context: Context) {
 	private val privacyPreference = PrivacyPreference(context.applicationContext)
 	private val loginManager: LoginManager = LoginManager(context.applicationContext)
 	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
-	private val handler = Handler(Looper.getMainLooper())
-	val disposable: CompositeDisposable = CompositeDisposable()
+//	private val handler = Handler(Looper.getMainLooper())
+	//	val disposable: CompositeDisposable = CompositeDisposable()
 	private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 	private var binding: DialogAccountBinding? = null
 	private var dialog: AlertDialog? = null
@@ -136,10 +133,10 @@ class ContextUtil(val context: Context) {
 	 * @param service    登录 URL,建议使用 TargeterURL 中的默认登录 URL
 	 * @param afterLogin 登录成功后的回调 Runnable 对象
 	 */
-	fun loginForUrl(service: String?, host: String, captcha: String?, afterLogin: Runnable?) {
+	fun loginForUrl(service: String, host: String, captcha: String?, afterLogin: Runnable?) {
 		coroutineScope.launch {
 			val (username, password) = accountManager.getActiveAccount(host)
-			if (username.isNotEmpty() && password.isNotEmpty() && !service.isNullOrEmpty()) performLogin(
+			if (username.isNotEmpty() && password.isNotEmpty() && service.isNotEmpty()) performLogin(
 					service, host, username, password, captcha, afterLogin
 			)
 			else changeAccount(service, host, captcha, afterLogin)
@@ -156,13 +153,13 @@ class ContextUtil(val context: Context) {
 			}
 
 			override fun onError(code: String?, message: String?) {
-				handler.post { toast(message ?: "") }
+				toast(message ?: "")
 			}
 		}
 	}
 
 	private fun performLogin(
-		service: String?,
+		service: String,
 		host: String,
 		username: String,
 		password: String,
@@ -179,7 +176,7 @@ class ContextUtil(val context: Context) {
 				when (code) {
 					"SSO10002", "30506" -> {
 						changeAccount(service, host, null, afterLogin)
-						handler.post { toast(message) }
+						toast(message)
 					}
 
 					"SSO10093" -> {
@@ -188,17 +185,17 @@ class ContextUtil(val context: Context) {
 
 					"SSO10023" -> {
 						changeAccount(service, host, "", afterLogin)
-						handler.post { toast(message) }
+						toast(message)
 					}
 
-					else -> handler.post { toast(message ?: "") }
+					else -> toast(message)
 				}
 			}
 		}
-		loginManager.loginForSysu(username, password, service ?: "", captcha)
+		loginManager.loginForSysu(username, password, service, captcha)
 	}
 
-	fun login(service: String?, afterLogin: Runnable?) {
+	fun login(service: String, afterLogin: Runnable?) {
 		loginForUrl(service, TargetHost.SYSU, null, afterLogin)
 	}
 
@@ -209,10 +206,8 @@ class ContextUtil(val context: Context) {
 		afterLogin: Runnable? = null,
 	) {
 		val activity = getAvailableActivity()
-		if (activity == null) {
-			handler.post { changeAccount(service, host, captcha, afterLogin) }
+			?: //handler.post { changeAccount(service, host, captcha, afterLogin) }
 			return
-		}
 		val binding = binding ?: DialogAccountBinding.inflate(LayoutInflater.from(activity)).apply {
 			password.editLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
 		}.also { binding = it }
@@ -246,7 +241,7 @@ class ContextUtil(val context: Context) {
 							null
 						}
 					}.thenAccept { bytes ->
-						if (bytes != null) handler.post {
+						if (bytes != null) ContextCompat.getMainExecutor(activity).execute {
 							Glide.with(activity).load(bytes).override(dpToPx(160), dpToPx(40))
 								.diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true)
 								.into(binding.captchaImage)
@@ -269,9 +264,11 @@ class ContextUtil(val context: Context) {
 						accountManager.setAccount(
 								host, username, password, true
 						)
-						performLogin(
-								service, host, username, password, captcha, afterLogin
-						)
+						service?.let {
+							performLogin(
+									it, host, username, password, captcha, afterLogin
+							)
+						}
 					}
 				}.setNegativeButton(R.string.cancel, null).create().also { dialog = it }
 			coroutineScope.launch {
@@ -286,7 +283,7 @@ class ContextUtil(val context: Context) {
 	}
 
 	fun dispose() {
-		disposable.dispose()
+//		disposable.dispose()
 		coroutineScope.cancel()
 	}
 

@@ -12,22 +12,22 @@ import com.miyuyan.sysuer.BaseActivity
 import com.miyuyan.sysuer.browser.BrowserRoute
 import com.miyuyan.sysuer.browser.RichTextRoute
 import com.miyuyan.sysuer.nav.Browser
-import com.miyuyan.sysuer.nav.Homework as HomeworkKey
 import com.miyuyan.sysuer.nav.RichText
+import com.miyuyan.sysuer.nav.SchoolCalendar as SchoolCalendarKey
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.theme.SysuerTheme
 
-class HomeworkActivity : BaseActivity() {
+class SchoolCalendarActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val backStack = rememberNavBackStack(HomeworkKey)
+            val backStack = rememberNavBackStack(SchoolCalendarKey)
             SysuerTheme(settingManager) {
                 SharedTransitionLayout {
                     SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
-                        entry<HomeworkKey> {
-                            HomeworkRoute(
+                        entry<SchoolCalendarKey> {
+                            SchoolCalendarRoute(
                                 backStack,
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current

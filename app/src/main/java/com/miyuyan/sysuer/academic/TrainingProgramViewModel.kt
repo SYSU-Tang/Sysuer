@@ -173,7 +173,6 @@ class TrainingProgramViewModel(application: Application) : AndroidViewModel(appl
 														) {
 															_viewDetailProgramId.value =
 																o.getString("teachPlanNumber")
-															true
 														})
 										)
 								)

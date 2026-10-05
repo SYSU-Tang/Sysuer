@@ -20,7 +20,6 @@ import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
-import com.miyuyan.sysuer.view.StatePage
 
 @Composable
 fun PrivacyRoute(
@@ -32,7 +31,6 @@ fun PrivacyRoute(
 	val netId by viewModel.netId.collectAsStateWithLifecycle()
 	val password by viewModel.password.collectAsStateWithLifecycle()
 	val personData by viewModel.personData.collectAsStateWithLifecycle()
-	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
 	ActivityPager(
 			title = stringResource(R.string.privacy),
@@ -55,47 +53,44 @@ fun PrivacyRoute(
 				)
 			},
 			pageContent = {
-				StatePage(state = uiState, onRetry = { viewModel.model.retryAll() }) {
-					PreferenceScreen(modifier = Modifier.fillMaxSize()) {
-						PreferenceCategory {
-							item {
-								ItemPreference(
-										title = "NetID", summary = netId, icon = R.drawable.web
-								)
-							}
-							item {
-								ItemPreference(
-										onClick = {
-											viewModel.model.contextUtil.copy("password", password)
-											viewModel.model.toast(R.string.copy_successfully)
-										},
-										title = stringResource(R.string.password),
-										summary = stringResource(R.string.click_to_copy),
-										icon = R.drawable.password
-								)
-							}
+				PreferenceScreen(modifier = Modifier.fillMaxSize()) {
+					PreferenceCategory {
+						item {
+							ItemPreference(
+									title = "NetID", summary = netId, icon = R.drawable.web
+							)
 						}
-
-						personData?.let { data ->
-							PreferenceCategory {
-								remember {
-									listOf(
-											Triple(R.string.name, "userName", R.drawable.name),
-											Triple(R.string.student_id, "userCode", R.drawable.id),
-											Triple(R.string.id_type, "idTypeStr", R.drawable.card),
-											Triple(R.string.id_num, "idNum", R.drawable.account),
-											Triple(R.string.phone, "tele", R.drawable.phone),
-											Triple(R.string.email, "email", R.drawable.email)
-									)
-								}.forEach { (titleRes, apiKey, iconRes) ->
-									val titleStr = stringResource(titleRes)
-									val valueStr = data.getString(apiKey, "")
-									item {
-										ItemPreference(onClick = {
-											viewModel.model.contextUtil.copy(titleStr, valueStr)
-											viewModel.model.toast(R.string.copy_successfully)
-										}, title = titleStr, summary = valueStr, icon = iconRes)
-									}
+						item {
+							ItemPreference(
+									onClick = {
+										viewModel.model.contextUtil.copy("password", password)
+										viewModel.model.toast(R.string.copy_successfully)
+									},
+									title = stringResource(R.string.password),
+									summary = stringResource(R.string.click_to_copy),
+									icon = R.drawable.password
+							)
+						}
+					}
+					personData?.let { data ->
+						PreferenceCategory {
+							remember {
+								listOf(
+										Triple(R.string.name, "userName", R.drawable.name),
+										Triple(R.string.student_id, "userCode", R.drawable.id),
+										Triple(R.string.id_type, "idTypeStr", R.drawable.card),
+										Triple(R.string.id_num, "idNum", R.drawable.account),
+										Triple(R.string.phone, "tele", R.drawable.phone),
+										Triple(R.string.email, "email", R.drawable.email)
+								)
+							}.forEach { (titleRes, apiKey, iconRes) ->
+								val titleStr = stringResource(titleRes)
+								val valueStr = data.getString(apiKey, "")
+								item {
+									ItemPreference(onClick = {
+										viewModel.model.contextUtil.copy(titleStr, valueStr)
+										viewModel.model.toast(R.string.copy_successfully)
+									}, title = titleStr, summary = valueStr, icon = iconRes)
 								}
 							}
 						}

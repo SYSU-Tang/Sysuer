@@ -101,6 +101,8 @@ data class RainClassDetail(val classId: String) : NavKey
 @Serializable
 data object SchoolBus : NavKey
 @Serializable
+data object SchoolCalendar : NavKey
+@Serializable
 data object EnergyFee : NavKey
 @Serializable
 data object Pay : NavKey

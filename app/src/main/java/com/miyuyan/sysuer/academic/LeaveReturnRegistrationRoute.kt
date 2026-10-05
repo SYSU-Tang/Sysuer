@@ -86,7 +86,6 @@ fun LeaveReturnRegistrationRoute(
 										if (!id.isNullOrEmpty()) {
 											backStack.add(LeaveReturnRegistrationDetail(id))
 										}
-										true
 									})
 					)
 			)

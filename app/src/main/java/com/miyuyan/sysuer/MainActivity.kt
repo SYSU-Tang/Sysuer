@@ -67,6 +67,7 @@ import com.miyuyan.sysuer.academic.DormRoute
 import com.miyuyan.sysuer.academic.ExamRoute
 import com.miyuyan.sysuer.academic.GradeForLevelRoute
 import com.miyuyan.sysuer.academic.GradeRoute
+import com.miyuyan.sysuer.academic.HomeworkRoute
 import com.miyuyan.sysuer.academic.LeaveReturnRegistrationDetailRoute
 import com.miyuyan.sysuer.academic.LeaveReturnRegistrationRoute
 import com.miyuyan.sysuer.academic.LeaveSlipRoute
@@ -75,6 +76,7 @@ import com.miyuyan.sysuer.academic.PersonalInformationRoute
 import com.miyuyan.sysuer.academic.PersonalTrainingProgramRoute
 import com.miyuyan.sysuer.academic.PhysicalFitnessTestResultRoute
 import com.miyuyan.sysuer.academic.RegistrationRoute
+import com.miyuyan.sysuer.academic.SchoolCalendarRoute
 import com.miyuyan.sysuer.academic.RoomQueryRoute
 import com.miyuyan.sysuer.academic.SchoolEnrollmentRoute
 import com.miyuyan.sysuer.academic.SchoolWorkWarningRoute
@@ -116,6 +118,7 @@ import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.nav.Grade
 import com.miyuyan.sysuer.nav.GradeForLevel
 import com.miyuyan.sysuer.nav.Home
+import com.miyuyan.sysuer.nav.Homework
 import com.miyuyan.sysuer.nav.LeaveReturnRegistration
 import com.miyuyan.sysuer.nav.LeaveReturnRegistrationDetail
 import com.miyuyan.sysuer.nav.LeaveSlip
@@ -133,6 +136,7 @@ import com.miyuyan.sysuer.nav.Registration
 import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.nav.RoomQuery
 import com.miyuyan.sysuer.nav.SchoolBus
+import com.miyuyan.sysuer.nav.SchoolCalendar
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
@@ -429,6 +433,20 @@ class MainActivity : BaseActivity() {
 					}
 					entry<SchoolBus> {
 						SchoolBusRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<SchoolCalendar> {
+						SchoolCalendarRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<Homework> {
+						HomeworkRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current

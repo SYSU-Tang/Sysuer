@@ -49,11 +49,11 @@ class ClassroomQueryViewModel(application: Application) : AndroidViewModel(appli
 	private val _snackbarMessage = MutableSharedFlow<String>(extraBufferCapacity = 16)
 	val snackbarMessage: SharedFlow<String> = _snackbarMessage.asSharedFlow()
 
-// 查询页筛选条件
-var campusSelection: List<String> = emptyList()
-var buildingSelection: List<String> = emptyList()
-var typeSelection: List<String> = listOf(SELF_STUDY_ROOM, SEMINAR_ROOM)
-var sections: ClosedFloatingPointRange<Float> = 1f..11f
+	// 查询页筛选条件
+	var campusSelection: List<String> = emptyList()
+	var buildingSelection: List<String> = emptyList()
+	var typeSelection: List<String> = listOf(SELF_STUDY_ROOM, SEMINAR_ROOM)
+	var sections: ClosedFloatingPointRange<Float> = 1f..11f
 
 	private var page = 0
 	private var total = -1
@@ -154,7 +154,8 @@ var sections: ClosedFloatingPointRange<Float> = 1f..11f
 		)
 		model.enqueue(
 				"jwxt/schedule/agg/selfStudyClassRoom/pageListStudyClassroom",
-				JSONObject.of("pageNo", ++page, "pageSize", PAGE_SIZE, "param", param).toJSONString(),
+				JSONObject.of("pageNo", ++page, "pageSize", PAGE_SIZE, "param", param)
+					.toJSONString(),
 				RESULT_REQUEST,
 		)
 	}

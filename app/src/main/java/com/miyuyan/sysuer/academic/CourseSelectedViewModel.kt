@@ -64,7 +64,6 @@ class CourseSelectedViewModel(application: Application) : AndroidViewModel(appli
 						                          viewModelScope.launch {
 							                          _navigationEvents.emit(CourseDetail(item.getString("teachingClassId"), item.getString("courseNum")))
 						                          }
-						                          true
 					                          }))))
 				}
 			}

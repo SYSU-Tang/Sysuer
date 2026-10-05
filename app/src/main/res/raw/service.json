@@ -106,6 +106,7 @@
       {
         "id": 203,
         "name": "作业",
+        "route": "Homework",
         "activity": ".academic.HomeworkActivity",
         "description": "作业管理系统，包括在线教学平台作业等"
       }
@@ -341,7 +342,8 @@
       {
         "id": 705,
         "name": "校历",
-        "activity": ".academic.CalendarActivity",
+        "activity": ".academic.SchoolCalendarActivity",
+        "route": "SchoolCalendar",
         "url": "https://jwb.sysu.edu.cn/school-calendar",
         "description": "校历查询系统，学期安排、节假日安排、重要日期提醒等"
       },

@@ -47,7 +47,7 @@ class QrCode(private val imageView: ImageView? = null) {
 
 			override fun onMessage(webSocket: WebSocket, text: String) {
 				try {
-					println("onMessage: $text")
+//					println("onMessage: $text")
 					val msg = JSONObject.parse(text)
 
 					if (msg.containsKey("ticket")) {

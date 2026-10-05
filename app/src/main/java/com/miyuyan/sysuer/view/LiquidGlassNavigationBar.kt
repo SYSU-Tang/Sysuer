@@ -53,11 +53,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Icon
@@ -349,6 +349,19 @@ fun LiquidGlassNavBar(
 						item.iconVector?.let {
 							Icon(
 									imageVector = it,
+									contentDescription = item.title,
+									tint = tint,
+									modifier = Modifier
+										.size(20.dp)
+										.graphicsLayer {
+											val scale = 1f + 0.15f * selected
+											scaleX = scale
+											scaleY = scale
+											translationY = -3.dp.toPx() * selected
+										})
+						} ?: item.iconResource?.let {
+							Icon(
+									painterResource(it),
 									contentDescription = item.title,
 									tint = tint,
 									modifier = Modifier

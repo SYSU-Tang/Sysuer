@@ -34,6 +34,6 @@ open class BaseActivity : AppCompatActivity() {
 
 	override fun onDestroy() {
 		super.onDestroy()
-		config.contextUtil.disposable.dispose()
+		config.contextUtil.dispose()
 	}
 }

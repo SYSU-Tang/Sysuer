@@ -22,11 +22,15 @@ import org.eclipse.tm4e.core.registry.IThemeSource
 
 class JSEditorActivity : BaseActivity() {
 	val model: JsModel by lazy {
-		ViewModelProvider(this,
-		                  JsModelFactory(BrowserRepository(this,
-		                                                   lifecycleScope)))[JsModel::class.java]
+		ViewModelProvider(
+				this, JsModelFactory(
+				BrowserRepository(
+						this, lifecycleScope
+				)
+		)
+		)[JsModel::class.java]
 	}
-	
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val binding = ActivityJsEdiitorBinding.inflate(layoutInflater)
@@ -40,11 +44,13 @@ class JSEditorActivity : BaseActivity() {
 				val themeRegistry = ThemeRegistry.getInstance()
 				val name = "light" // 主题名称
 				val themeAssetsPath = "textmate/$name.json"
-				val themeModel = ThemeModel(IThemeSource.fromInputStream(FileProviderRegistry.getInstance()
-					                                                         .tryGetInputStream(
-						                                                         themeAssetsPath),
-				                                                         themeAssetsPath,
-				                                                         null), name)
+				val themeModel = ThemeModel(
+						IThemeSource.fromInputStream(
+								FileProviderRegistry.getInstance().tryGetInputStream(
+											themeAssetsPath
+									), themeAssetsPath, null
+						), name
+				)
 				try {
 					themeRegistry.loadTheme(themeModel)
 					themeRegistry.setTheme(name)

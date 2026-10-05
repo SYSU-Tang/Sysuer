@@ -4,28 +4,32 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import androidx.work.Worker
-import androidx.work.WorkerParameters
 import androidx.datastore.preferences.core.edit
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
 import com.alibaba.fastjson2.JSONArray
-import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.api.DataStoreManager
 import com.miyuyan.sysuer.model.JwxtModel
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withTimeout
+import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * 桌面小组件数据更新：经 WebVPN 拉取学期、当前周次与今日课表写入 DataStore 后广播刷新。
+ * 请求串行依赖（周次与课表依赖学期），使用 [JwxtModel.executeAndWait] 等待含登录重试在内的
+ * 最终结果；瞬时失败交由 WorkManager 退避重试。
+ */
 class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) :
-	Worker(context, workerParams) {
-	val model: JwxtModel = JwxtModel(applicationContext)
+	CoroutineWorker(context, workerParams) {
 
-	override fun doWork(): Result {
-		try {
-			val networkData = data
-			val dataStore = DataStoreManager.getInstance(applicationContext)
-			runBlocking {
-				dataStore.edit { prefs ->
-					if (networkData != null) prefs[DataStoreManager.TODAY_CLASS] =
-						networkData.toJSONString()
-				}
+	override suspend fun doWork(): Result {
+		val model = JwxtModel(applicationContext)
+		return try {
+			val networkData = withTimeout(WORK_TIMEOUT_MILLIS.milliseconds) { fetch(model) }
+				?: return Result.retry()
+			DataStoreManager.getInstance(applicationContext).edit { prefs ->
+				prefs[DataStoreManager.TODAY_CLASS] = networkData.toJSONString()
 			}
 			val widgetName = inputData.getString("component")
 			val widgetNames: Array<String?>? = inputData.getNullableStringArray("components")
@@ -33,15 +37,39 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) :
 			else widgetNames?.forEach {
 				updateWidget(it)
 			}
-			return Result.success()
+			Result.success()
 		} catch (_: Exception) {
-			return Result.failure()
+			Result.retry()
+		} finally {
+			model.dispose()
 		}
+	}
+
+	private suspend fun fetch(model: JwxtModel): JSONArray? = coroutineScope {
+		val termResponse =
+			model.executeAndWait("jwxt/base-info/acadyearterm/showNewAcadlist", code = 0)
+				?: return@coroutineScope null
+		val term = termResponse.getJSONObject("data")?.getString("acadYearSemester")
+		val week = async {
+			model.executeAndWait(
+					"jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term",
+					code = 1
+			)
+		}
+		val courses = async {
+			model.executeAndWait(
+					"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term",
+					code = 2
+			)
+		}
+		val weekResponse = week.await() ?: return@coroutineScope null
+		val coursesResponse = courses.await() ?: return@coroutineScope null
+		JSONArray.of(termResponse, weekResponse, coursesResponse)
 	}
 
 	@Throws(ClassNotFoundException::class)
 	private fun updateWidget(name: String?) {
-		updateWidget(Class.forName(applicationContext.packageName + ".widget." + name))
+		updateWidget(Class.forName("${applicationContext.packageName}.widget.$name"))
 	}
 
 	private fun updateWidget(widgetClass: Class<*>) {
@@ -55,26 +83,8 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) :
 		)
 	}
 
-	private val data: JSONArray?
-		get() {
-			val r1: Pair<Int, JSONObject>? = term()
-			val term: String? = r1?.second?.getJSONObject("data")?.getString("acadYearSemester")
-			val r2: Pair<Int, JSONObject>? = getWeek(term)
-			val r3: Pair<Int, JSONObject>? = getTodayCourses(term)
-			return if (r2 != null && r3 != null) JSONArray.of(
-					r1?.second, r2.second, r3.second
-			) else null
-		}
-
-	private fun term() = model.execute("jwxt/base-info/acadyearterm/showNewAcadlist", code = 0)
-
-	private fun getWeek(term: String?) = model.execute(
-			"jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", code = 1
-	)
-
-	private fun getTodayCourses(term: String?) = model.execute(
-			"jwxt/timetable-search/classTableInfo/queryTodayStudentClassTable?academicYear=$term",
-			code = 2
-	)
+	companion object {
+		/** 整体超时上限：含登录重试的等待，超时按失败退避重试 */
+		private const val WORK_TIMEOUT_MILLIS = 60_000L
+	}
 }
-

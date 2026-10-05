@@ -12,10 +12,16 @@ import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.CookieManager
 import com.miyuyan.sysuer.api.HttpManager
 import com.miyuyan.sysuer.view.UiState
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Request
@@ -280,7 +286,8 @@ abstract class BaseModel(context: Context) {
 				request = request, requestCode = requestCode, isSync = true
 		)
 		allJobs[requestCode] = job
-		return executeSyncInternal(job)
+		val pair = executeSyncInternal(job)
+		return pair
 	}
 
 	/**
@@ -297,6 +304,7 @@ abstract class BaseModel(context: Context) {
 				handleResponse(job, res)
 			}
 		} catch (e: IOException) {
+			e.printStackTrace()
 			job.status = JobStatus.FAILED
 			failedJobs[job.requestCode] = job
 			updateUiState(job.requestCode, UiState.Error)
@@ -503,7 +511,7 @@ abstract class BaseModel(context: Context) {
 	 * 触发登录（带回调）
 	 */
 	fun login(afterLogin: () -> Unit) {
-		contextUtil.login(authorizationManager.targetUrl, afterLogin)
+		authorizationManager.targetUrl?.let { contextUtil.login(it, afterLogin) }
 	}
 
 	/**
@@ -650,8 +658,40 @@ abstract class BaseModel(context: Context) {
 
 	fun execute(request: Request, code: Int) = executeSync(request, code)
 
+	/**
+	 * 同步执行请求并等待"最终结果"（含登录重试 / 校园网重试 / 失败重试后的响应）。
+	 *
+	 * [execute] 的返回值只覆盖首次响应，中途触发重试时返回 null，重试结果只会 emit 到
+	 * [message]。本函数先订阅 [message] 再发起请求，避免错过重试后的响应；首次即成功
+	 * 时直接返回，否则挂起等待该 [requestCode] 的下一条消息。注意 [updateRequest] 只刷新
+	 * Cookie/Authorization 头，不会改写 URL 参数（如 sesskey），此类凭据失效时请重新构造
+	 * 请求而非依赖本函数的等待。
+	 *
+	 * 需在协程中调用；若等待可能长时间无响应（登录被用户取消等），请在外层配合
+	 * [kotlinx.coroutines.withTimeout] 使用。
+	 */
+	suspend fun executeAndWait(request: Request, requestCode: Int): JSONObject? =
+		coroutineScope {
+			val pending = async { message.first { (c, _) -> c == requestCode } }
+			val direct = withContext(Dispatchers.IO) { execute(request, requestCode) }
+			try {
+				direct?.second ?: pending.await().second
+			} catch (e: CancellationException) {
+				pending.cancel()
+				throw e
+			}
+		}
+
+	/** [executeAndWait] 的路径重载，等价于 [execute] 的同名参数形式 */
+	suspend fun executeAndWait(
+		path: String, data: String? = null, type: String? = null, code: Int
+	): JSONObject? = executeAndWait(
+			http.generateRequest("https://${authorizationManager.host}/$path", data, type).build(),
+			code
+	)
+
 	fun execute(path: String, data: String? = null, type: String? = null, code: Int) =
-		executeSync(http.generateRequest(path, data, type).build(), code)
+		executeSync(http.generateRequest("https://$host/$path", data, type).build(), code)
 
 
 	fun call(path: String, data: String? = null, type: String? = null, callback: Callback) =

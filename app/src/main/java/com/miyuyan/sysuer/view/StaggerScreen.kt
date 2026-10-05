@@ -90,131 +90,134 @@ fun SectionCard(
 ) {
 	var expanded by rememberSaveable { mutableStateOf(defaultExpanded) }
 
-	ElevatedCard(
-			modifier = Modifier
-				.fillMaxWidth()
-				.then(
-						if (sharedTransitionScope != null && animatedVisibilityScope != null && section.key != null) {
-					with(sharedTransitionScope) {
-						Modifier.sharedBounds(
-								sharedContentState = rememberSharedContentState(
-										key = section.key
-								),
-								animatedVisibilityScope = animatedVisibilityScope,
-						)
-					}
-				} else Modifier)) {
-		Column(
+	SelectionContainer {
+		ElevatedCard(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(vertical = dimensionResource(R.dimen.vertical_padding))
-		) {
-			Row(
-					verticalAlignment = Alignment.CenterVertically,
+					.then(
+							if (sharedTransitionScope != null && animatedVisibilityScope != null && section.key != null) {
+						with(sharedTransitionScope) {
+							Modifier.sharedBounds(
+									sharedContentState = rememberSharedContentState(
+											key = section.key
+									),
+									animatedVisibilityScope = animatedVisibilityScope,
+							)
+						}
+					} else Modifier)) {
+			Column(
 					modifier = Modifier
 						.fillMaxWidth()
-						.clickable(enabled = isExpandable) {
-							expanded = !expanded
-						}
-						.padding(
-								horizontal = dimensionResource(R.dimen.horizontal_padding),
-								vertical = dimensionResource(R.dimen.vertical_padding)
-						)) {
-				section.icon?.let {
-					Icon(
-							painter = painterResource(it),
-							contentDescription = null,
-							modifier = Modifier.size(ButtonDefaults.IconSize),
-							tint = MaterialTheme.colorScheme.primary
-					)
-					Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
-				}
-				section.title?.let {
-					Text(
-							text = it,
-							style = MaterialTheme.typography.titleLarge,
-							color = MaterialTheme.colorScheme.primary,
-							modifier = Modifier.weight(1f)
-					)
-				}
-				if (isExpandable) {
-					val rotation by animateFloatAsState(
-							targetValue = if (expanded) 180f else 0f, label = "ExpandIconRotation"
-					)
-					Icon(
-							imageVector = Icons.Default.KeyboardArrowDown,
-							contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
-							modifier = Modifier.rotate(rotation),
-							tint = MaterialTheme.colorScheme.primary
-					)
-				}
-			}
-			AnimatedVisibility(
-					visible = expanded,
-					enter = expandVertically() + fadeIn(),
-					exit = shrinkVertically() + fadeOut()
+						.padding(vertical = dimensionResource(R.dimen.vertical_padding))
 			) {
-				Column {
-					section.rows.forEach { row ->
-						if (!isHideNull || !row.value.isNullOrEmpty()) {
-							KeyValueRow(row, section.rowOrientation)
-						}
-					}
-				}
-			}
-
-			if (section.footerMenus.isNotEmpty()) {
 				Row(
+						verticalAlignment = Alignment.CenterVertically,
 						modifier = Modifier
 							.fillMaxWidth()
+							.clickable(enabled = isExpandable) {
+								expanded = !expanded
+							}
 							.padding(
 									horizontal = dimensionResource(R.dimen.horizontal_padding),
 									vertical = dimensionResource(R.dimen.vertical_padding)
-							),
-						horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
+							)) {
+					section.icon?.let {
+						Icon(
+								painter = painterResource(it),
+								contentDescription = null,
+								modifier = Modifier.size(ButtonDefaults.IconSize),
+								tint = MaterialTheme.colorScheme.primary
+						)
+						Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
+					}
+					section.title?.let {
+						Text(
+								text = it,
+								style = MaterialTheme.typography.titleLarge,
+								color = MaterialTheme.colorScheme.primary,
+								modifier = Modifier.weight(1f)
+						)
+					}
+					if (isExpandable) {
+						val rotation by animateFloatAsState(
+								targetValue = if (expanded) 180f else 0f,
+								label = "ExpandIconRotation"
+						)
+						Icon(
+								imageVector = Icons.Default.KeyboardArrowDown,
+								contentDescription = stringResource(if (expanded) R.string.collapse else R.string.expand),
+								modifier = Modifier.rotate(rotation),
+								tint = MaterialTheme.colorScheme.primary
+						)
+					}
+				}
+				AnimatedVisibility(
+						visible = expanded,
+						enter = expandVertically() + fadeIn(),
+						exit = shrinkVertically() + fadeOut()
 				) {
-					section.footerMenus.forEach { item ->
-						FilledTonalButton(
-								onClick = { item.onClick() },
-								modifier = Modifier
-									.weight(1f)
-									.then(
-											if (sharedTransitionScope != null && animatedVisibilityScope != null && item.key != null) {
-										with(sharedTransitionScope) {
-											Modifier.sharedBounds(
-													sharedContentState = rememberSharedContentState(
-															key = item.key
-													),
-													animatedVisibilityScope = animatedVisibilityScope,
-											)
-										}
-									} else Modifier),
-								shapes = ButtonDefaults.shapes(),
-								enabled = item.enabled) {
-							item.iconVector?.let {
-								Icon(
-										it,
-										contentDescription = item.title,
-										modifier = Modifier.size(dimensionResource(R.dimen.icon_size))
-								)
-								Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
-							}
-							item.title?.let {
-								Text(it)
+					Column {
+						section.rows.forEach { row ->
+							if (!isHideNull || !row.value.isNullOrEmpty()) {
+								KeyValueRow(row, section.rowOrientation)
 							}
 						}
 					}
 				}
-			}
-			section.footer?.let {
-				Column(
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(
-									horizontal = dimensionResource(R.dimen.horizontal_padding),
-									vertical = dimensionResource(R.dimen.vertical_padding)
-							), content = it
-				)
+
+				if (section.footerMenus.isNotEmpty()) {
+					Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(
+										horizontal = dimensionResource(R.dimen.horizontal_padding),
+										vertical = dimensionResource(R.dimen.vertical_padding)
+								),
+							horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_margin))
+					) {
+						section.footerMenus.forEach { item ->
+							FilledTonalButton(
+									onClick = { item.onClick() },
+									modifier = Modifier
+										.weight(1f)
+										.then(
+												if (sharedTransitionScope != null && animatedVisibilityScope != null && item.key != null) {
+											with(sharedTransitionScope) {
+												Modifier.sharedBounds(
+														sharedContentState = rememberSharedContentState(
+																key = item.key
+														),
+														animatedVisibilityScope = animatedVisibilityScope,
+												)
+											}
+										} else Modifier),
+									shapes = ButtonDefaults.shapes(),
+									enabled = item.enabled) {
+								item.iconVector?.let {
+									Icon(
+											it,
+											contentDescription = item.title,
+											modifier = Modifier.size(dimensionResource(R.dimen.icon_size))
+									)
+									Spacer(modifier = Modifier.width(dimensionResource(R.dimen.icon_text_gap)))
+								}
+								item.title?.let {
+									Text(it)
+								}
+							}
+						}
+					}
+				}
+				section.footer?.let {
+					Column(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(
+										horizontal = dimensionResource(R.dimen.horizontal_padding),
+										vertical = dimensionResource(R.dimen.vertical_padding)
+								), content = it
+					)
+				}
 			}
 		}
 	}
@@ -275,20 +278,18 @@ fun KeyValueRow(row: RowData, orientation: RowOrientation = RowOrientation.Horiz
 			}
 		}
 	} else {
-		Column(modifier = modifier) {
-			SelectionContainer {
+		SelectionContainer {
+			Column(modifier = modifier) {
 				Text(
 						text = row.key ?: "",
 						style = MaterialTheme.typography.bodyLarge,
 						color = MaterialTheme.colorScheme.onSurfaceVariant
 				)
-			}
-			if (row.value != null && row.key != null) Spacer(
-					modifier = Modifier.height(
-							dimensionResource(R.dimen.vertical_margin)
-					)
-			)
-			SelectionContainer {
+				if (row.value != null && row.key != null) Spacer(
+						modifier = Modifier.height(
+								dimensionResource(R.dimen.vertical_margin)
+						)
+				)
 				Text(
 						text = row.value ?: "",
 						style = MaterialTheme.typography.bodyLarge,

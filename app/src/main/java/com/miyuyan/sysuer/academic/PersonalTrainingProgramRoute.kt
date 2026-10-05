@@ -206,7 +206,6 @@ fun PersonalTrainingProgramRoute(
 											course.getString("courseNumber")
 										)
 									)
-									true
 								})
 							)
 						)
@@ -271,7 +270,6 @@ fun PersonalTrainingProgramRoute(
 											course.getString("courseNumber")
 										)
 									)
-									true
 								})
 							)
 						)
