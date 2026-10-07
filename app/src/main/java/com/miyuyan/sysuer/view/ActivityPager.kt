@@ -12,6 +12,8 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -312,7 +314,7 @@ fun ActivityPager(
 							}
 							if (isTopBarContentFixed) topBarContent(pagerState.currentPage) else AnimatedContent(
 									targetState = pagerState.currentPage,
-									transitionSpec = { expandVertically() togetherWith shrinkVertically() },
+									transitionSpec = { expandVertically() + fadeIn() togetherWith shrinkVertically() + fadeOut() },
 									label = "topBarExpand"
 							) { page ->
 								topBarContent(page)
@@ -351,7 +353,7 @@ fun ActivityPager(
 					) { page ->
 						pageContent(page)
 					}
-						if (blurEnabled && navs.isNotEmpty()) {
+					if (blurEnabled && navs.isNotEmpty()) {
 						AnimatedVisibility(
 								visible = isNavBarVisible,
 								enter = slideInVertically(initialOffsetY = { it }),
@@ -375,13 +377,11 @@ fun ActivityPager(
 										isLightTheme = !settingManager.isDarkTheme,
 										onTabDrag = { position ->
 											val clamped = position.coerceIn(
-													0f,
-													(navs.size - 1).toFloat()
+													0f, (navs.size - 1).toFloat()
 											)
 											val page = clamped.toInt()
 											pagerState.requestScrollToPage(page, clamped - page)
-										}
-								) {
+										}) {
 									val unselectedColor = MaterialTheme.colorScheme.tertiary
 									navs.forEachIndexed { index, navItem ->
 										LiquidBottomTab(onClick = {

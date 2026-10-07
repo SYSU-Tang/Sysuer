@@ -20,7 +20,7 @@ android {
 	defaultConfig {
 		val generation = "2"
 		val major = "1"
-		val minor = "0"
+		val minor = "1"
 		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
@@ -28,7 +28,7 @@ android {
 		applicationId = "com.miyuyan.sysuer"
 		minSdk = 26
 		targetSdk = 37
-		versionCode = 1942
+		versionCode = 1943
 		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled = true
@@ -161,4 +161,6 @@ dependencies {
 	implementation(libs.ksoup)
 	implementation(libs.ktor.client.cio)
 	implementation(libs.androidx.webkit)
+	implementation(libs.backdrop)  // 玻璃效果引擎
+	implementation(libs.shapes)    // Capsule 等形状
 }
