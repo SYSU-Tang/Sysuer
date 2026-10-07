@@ -113,7 +113,7 @@ private class SimpleMenuPositionProvider(private val offset: IntOffset) : PopupP
  * - 退出：350ms 淡出（220ms 的 -8px 上移）。
  */
 @Composable
-internal fun SimpleMenuPopup(
+fun SimpleMenuPopup(
 	entries: List<String>,
 	selectedIndex: Int? = null,
 	anchorBounds: IntRect,

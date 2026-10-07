@@ -32,39 +32,35 @@ class NextClassWidget : AppWidgetProvider() {
 		context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray
 	) {
 		val pendingResult = goAsync()
-		Executors.newSingleThreadExecutor().let { executor ->
-			executor.execute {
-				try {
-					val cachedData = runBlocking {
-						DataStoreManager.getInstance(context.applicationContext).data.first()[DataStoreManager.TODAY_CLASS]?.let {
-								JSONArray.parseArray(
-										it
-								)
-							} ?: JSONArray()
-					}
-					val remoteViews = RemoteViews(context.packageName, R.layout.widget_next_class)
-					cachedData.forEachIndexed { it, v ->
-						handlerMessage(it, v as JSONObject, context, remoteViews)
-					}
-					appWidgetIds.forEach {
-						appWidgetManager.updateAppWidget(it, remoteViews)
-					}
-					getInstance(context).enqueueUniqueWork(
-							"NextClassWidget",
-							ExistingWorkPolicy.KEEP,
-							OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java)
-								.setConstraints(
-										Constraints.Builder()
-											.setRequiredNetworkType(NetworkType.CONNECTED).build()
-								).setInputData(
-										Data.Builder().putString("component", "NextClassWidget")
-											.build()
-								).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
-					)
-				} catch (_: Exception) {
-				} finally {
-					pendingResult.finish()
+		Executors.newSingleThreadExecutor().execute {
+			try {
+				val cachedData = runBlocking {
+					DataStoreManager.getInstance(context.applicationContext).data.first()[DataStoreManager.TODAY_CLASS]?.let {
+						JSONArray.parseArray(
+								it
+						)
+					} ?: JSONArray()
 				}
+				val remoteViews = RemoteViews(context.packageName, R.layout.widget_next_class)
+				cachedData.forEachIndexed { it, v ->
+					handlerMessage(it, v as JSONObject, context, remoteViews)
+				}
+				appWidgetIds.forEach {
+					appWidgetManager.updateAppWidget(it, remoteViews)
+				}
+				getInstance(context).enqueueUniqueWork(
+						"NextClassWidget",
+						ExistingWorkPolicy.KEEP,
+						OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setConstraints(
+								Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
+									.build()
+						).setInputData(
+								Data.Builder().putString("component", "NextClassWidget").build()
+						).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
+				)
+			} catch (_: Exception) {
+			} finally {
+				pendingResult.finish()
 			}
 		}
 	}
@@ -82,13 +78,13 @@ class NextClassWidget : AppWidgetProvider() {
 					response.getJSONArray("data").forEach { e: Any? ->
 						val item = e as JSONObject
 						val status = getTimePosition(
-								item.getString("teachingDate") + " " + item.getString("startTime"),
-								item.getString("teachingDate") + " " + item.getString("endTime")
+								"${item.getString("teachingDate")} ${item.getString("startTime")}",
+								"${item.getString("teachingDate")} ${item.getString("endTime")}"
 						)
 						item["status"] = status
-						item["time"] = item.get("startTime").toString() + "~" + item.get("endTime")
+						item["time"] = "${item.get("startTime")}~${item.get("endTime")}"
 						item["course"] =
-							"第" + item.get("startClassTimes") + "~" + item.get("endClassTimes") + "节课"
+							"第${item.get("startClassTimes")}~${item.get("endClassTimes")}节课"
 						val flag = item.get("useflag") as String?
 						if ("TD" == flag) (if (status == "before") beforeArray else afterArray).add(
 								item
@@ -107,16 +103,15 @@ class NextClassWidget : AppWidgetProvider() {
 							.toEpochMilli() - System.currentTimeMillis()
 					}
 					remoteViews.setTextViewText(
-							R.id.content,
-							"${context.getString(R.string.location)}：${
-								if (isAvailable) array.getString("teachingPlace") else context.getString(
-										R.string.none
-								)
-							}\n${context.getString(R.string.time)}：${
-								if (isAvailable) array.getString(
-										"teachingDate"
-								) else context.getString(R.string.none)
-							} ${if (isAvailable) array.getString("time") else context.getString(R.string.none)}"
+							R.id.content, "${context.getString(R.string.location)}：${
+						if (isAvailable) array.getString("teachingPlace") else context.getString(
+								R.string.none
+						)
+					}\n${context.getString(R.string.time)}：${
+						if (isAvailable) array.getString(
+								"teachingDate"
+						) else context.getString(R.string.none)
+					} ${if (isAvailable) array.getString("time") else context.getString(R.string.none)}"
 					)
 					remoteViews.setTextViewText(
 							R.id.title,
@@ -136,20 +131,19 @@ class NextClassWidget : AppWidgetProvider() {
 				)
 
 				1 -> remoteViews.setTextViewText(
-						R.id.week, String.format(
-						context.getString(R.string.week_s),
+						R.id.week, context.getString(
+						R.string.week_s,
 						response.getJSONArray("data").getJSONObject(0).getString("weekTimes")
 				)
 				)
 			}
 			remoteViews.setOnClickPendingIntent(
-					android.R.id.background,
-					PendingIntent.getActivity(
-							context,
-							0,
-							Intent(context, AgendaActivity::class.java),
-							PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-					)
+					android.R.id.background, PendingIntent.getActivity(
+					context,
+					0,
+					Intent(context, AgendaActivity::class.java),
+					PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+			)
 			)
 		}
 	}

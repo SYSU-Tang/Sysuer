@@ -1,17 +1,20 @@
 package com.miyuyan.sysuer.academic
 
 import android.os.Parcelable
+import kotlinx.serialization.Serializable
 import kotlinx.parcelize.Parcelize
 
-@Parcelize data class CourseFilterValueData(
-	var courseName: String? = "",
-	var studyCampusId: String? = "",
-	var week: String? = "",
-	var classTimes: String? = "",
-	var courseUnitNum: String? = "",
-	var teachingTeacherNum: String? = "",
-	var teachingLanguageCode: String? = "",
-	var specialClassCode: String? = "",
+@Parcelize
+@Serializable
+data class CourseFilterValueData(
+	@JvmField var courseName: String? = "",
+	@JvmField var studyCampusId: String? = "",
+	@JvmField var week: String? = "",
+	@JvmField var classTimes: String? = "",
+	@JvmField var courseUnitNum: String? = "",
+	@JvmField var teachingTeacherNum: String? = "",
+	@JvmField var teachingLanguageCode: String? = "",
+	@JvmField var specialClassCode: String? = "",
                                            ) : Parcelable {
 	fun set(key: String, value: String?) {
 		when (key) {
@@ -25,14 +28,14 @@ import kotlinx.parcelize.Parcelize
 }
 
 @Parcelize data class CourseFilterNameData(
-	var courseName: String? = "",
-	var studyCampusId: String? = "",
-	var week: String? = "",
-	var classTimes: String? = "",
-	var courseUnitNum: String? = "",
-	var teachingTeacherNum: String? = "",
-	var teachingLanguageCode: String? = "",
-	var specialClassCode: String? = "",
+	@JvmField var courseName: String? = "",
+	@JvmField var studyCampusId: String? = "",
+	@JvmField var week: String? = "",
+	@JvmField var classTimes: String? = "",
+	@JvmField var courseUnitNum: String? = "",
+	@JvmField var teachingTeacherNum: String? = "",
+	@JvmField var teachingLanguageCode: String? = "",
+	@JvmField var specialClassCode: String? = "",
                                           ) : Parcelable {
 	fun set(key: String, value: String?) {
 		when (key) {

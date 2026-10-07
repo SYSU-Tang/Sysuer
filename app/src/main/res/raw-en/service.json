@@ -321,6 +321,7 @@
       {
         "id": 702,
         "name": "Course Selection",
+        "route": "CourseSelection",
         "activity": ".academic.CourseSelectionActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE",
         "description": "Online course selection system for students to independently select courses, adjust their schedules, and view course selection results"
@@ -328,6 +329,7 @@
       {
         "id": 703,
         "name": "Course Schedule",
+        "route": "CourseSchedule",
         "activity": ".academic.CourseScheduleActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE",
         "description": "Personal schedule management system for planning schedules such as course arrangements, exam times, and event reminders"
@@ -540,7 +542,8 @@
       {
         "id": 906,
         "name": "Utility Bill",
-        "activity": ".life.EnergyFeeActivity",
+        "route": "EnergyFee",
+        "activity": ".life.EnergyActivity",
         "url": "https://cas.sysu.edu.cn/esc-sso/login?service=https://zhny.sysu.edu.cn/h5",
         "description": "Utility bill inquiry and payment system, for inquiring about dormitory water and electricity usage and making online payments"
       },

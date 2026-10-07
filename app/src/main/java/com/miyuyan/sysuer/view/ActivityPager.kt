@@ -23,9 +23,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -41,6 +43,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.NavigationBarItem
@@ -58,6 +61,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -85,15 +89,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.DataStoreManager
 import com.miyuyan.sysuer.api.SettingManager
 import com.miyuyan.sysuer.browser.RichTextActivity
 import com.miyuyan.sysuer.nav.RichText
 import com.miyuyan.sysuer.theme.SysuerTheme
+import com.miyuyan.sysuer.view.liquidglass.LiquidBottomTab
+import com.miyuyan.sysuer.view.liquidglass.LiquidBottomTabs
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.squircle.squircleBorder
 
 @Composable
@@ -120,6 +126,7 @@ fun ActivityPager(
 	pagerState: PagerState = rememberPagerState(pageCount = {
 		if (tabs.isNotEmpty()) tabs.size else if (navs.isNotEmpty()) navs.size else 1
 	}),
+	userScrollEnabled: Boolean = true,
 	pageContent: @Composable (page: Int) -> Unit = {}
 ) {
 	val coroutineScope = rememberCoroutineScope()
@@ -336,6 +343,7 @@ fun ActivityPager(
 				Box(modifier = Modifier.fillMaxSize()) {
 					HorizontalPager(
 							state = pagerState,
+							userScrollEnabled = userScrollEnabled,
 							modifier = Modifier
 								.fillMaxSize()
 								.padding(innerPadding)
@@ -343,24 +351,61 @@ fun ActivityPager(
 					) { page ->
 						pageContent(page)
 					}
-					if (blurEnabled && navs.isNotEmpty()) {
+						if (blurEnabled && navs.isNotEmpty()) {
 						AnimatedVisibility(
 								visible = isNavBarVisible,
 								enter = slideInVertically(initialOffsetY = { it }),
 								exit = slideOutVertically(targetOffsetY = { it }),
 								modifier = Modifier.align(Alignment.BottomCenter)
 						) {
-							LiquidGlassNavBar(
-									pagerState = pagerState,
-									items = navs,
-									backdrop = backdrop,
-									onItemClick = { index ->
-										coroutineScope.launch {
-											pagerState.animateScrollToPage(index)
+							Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+								LiquidBottomTabs(
+										selectedTabIndex = { pagerState.targetPage },
+										onTabSelected = { index ->
+											coroutineScope.launch {
+												pagerState.animateScrollToPage(index)
+											}
+										},
+										backdrop = backdrop,
+										tabsCount = navs.size,
+										modifier = Modifier
+											.widthIn(max = 450.dp)
+											.padding(horizontal = 24.dp)
+											.padding(bottom = 24.dp),
+										isLightTheme = !settingManager.isDarkTheme,
+										onTabDrag = { position ->
+											val clamped = position.coerceIn(
+													0f,
+													(navs.size - 1).toFloat()
+											)
+											val page = clamped.toInt()
+											pagerState.requestScrollToPage(page, clamped - page)
 										}
-									},
-									isDark = settingManager.isDarkTheme
-							)
+								) {
+									val unselectedColor = MaterialTheme.colorScheme.tertiary
+									navs.forEachIndexed { index, navItem ->
+										LiquidBottomTab(onClick = {
+											coroutineScope.launch {
+												pagerState.animateScrollToPage(index)
+											}
+										}) {
+											CompositionLocalProvider(
+													LocalContentColor provides unselectedColor
+											) {
+												navItem.icon?.invoke()
+											}
+											navItem.title?.let {
+												Text(
+														text = it,
+														color = unselectedColor,
+														style = MaterialTheme.typography.labelMedium,
+														maxLines = 1
+												)
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}

@@ -68,24 +68,20 @@ import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 fun CourseSelectionPreviewScreen(
-    viewModel: CourseSelectionPreviewViewModel = viewModel(),
-    onNavigateToFilter: (CourseFilterNameData, CourseFilterValueData) -> Unit = { _, _ -> },
+    viewModel: CourseSelectionViewModel = viewModel(),
     onNavigateToDetail: (id: String, code: String, className: String) -> Unit = { _, _, _ -> },
 ) {
-    val courses = viewModel.courses
-    val filterName = viewModel.filterName
-    val filterValue = viewModel.filterValue
+    val courses = viewModel.previewCourses
     val gridState = rememberLazyStaggeredGridState()
-    val hiddenSelectedStatus by viewModel.hiddenSelectedStatus.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
-        viewModel.loadMore()
+        viewModel.loadMorePreview()
     }
 
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }.distinctUntilChanged()
             .filterNotNull().collect { lastVisibleIndex ->
-            if (lastVisibleIndex >= courses.size - 3 && !viewModel.isLoading.value) {
-                viewModel.loadMore()
+            if (lastVisibleIndex >= courses.size - 3 && !viewModel.previewIsLoading.value) {
+                viewModel.loadMorePreview()
             }
         }
     }
@@ -93,83 +89,6 @@ fun CourseSelectionPreviewScreen(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-				.fillMaxWidth()
-				.padding(
-					dimensionResource(R.dimen.horizontal_margin),
-					dimensionResource(R.dimen.vertical_margin)
-				)
-        ) {
-            intArrayOf(1, 4, 2).zip(
-                intArrayOf(
-                    R.string.my_major,
-                    R.string.public_selection,
-                    R.string.transdisciplinary
-                )
-            ).forEachIndexed { index, (type, text) ->
-                SegmentedButton(
-                    selected = viewModel.type.intValue == type,
-                    onClick = { viewModel.setType(type) },
-                    icon = {},
-                    shape = SegmentedButtonDefaults.itemShape(index, 3),
-                ) {
-                    Text(stringResource(text))
-                }
-            }
-        }
-        val activeFilters = listOf(
-            filterName.courseName,
-            filterName.studyCampusId,
-            filterName.week,
-            filterName.classTimes,
-            filterName.courseUnitNum,
-            filterName.teachingTeacherNum,
-            filterName.teachingLanguageCode,
-            filterName.specialClassCode,
-        ).filter { !it.isNullOrEmpty() }
-        FlowRow(
-            modifier = Modifier
-				.fillMaxWidth()
-				.padding(horizontal = dimensionResource(R.dimen.horizontal_margin)),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
-        ) {
-            ElevatedFilterChip(
-                leadingIcon = if (hiddenSelectedStatus) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = stringResource(R.string.hidden_selected),
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                } else {
-                    null
-                },
-                selected = hiddenSelectedStatus,
-                onClick = { viewModel.setHiddenSelectedStatus(!hiddenSelectedStatus) },
-                label = { Text(stringResource(R.string.hidden_selected)) },
-            )
-            activeFilters.forEach { filter ->
-                ElevatedFilterChip(
-                    selected = true,
-                    onClick = {},
-                    label = { Text("$filter") },
-                )
-            }
-            ElevatedAssistChip(
-                onClick = {
-                    onNavigateToFilter(filterName, filterValue)
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Rounded.Add,
-                        contentDescription = stringResource(R.string.add_filter)
-                    )
-                },
-                label = { Text(stringResource(R.string.add_filter)) },
-            )
-        }
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(240.dp),
             state = gridState,
@@ -193,11 +112,11 @@ fun CourseSelectionPreviewScreen(
                             item.getString("teachingClassNum"),
                         )
                     },
-                    onCollect = { viewModel.like(item.getString("teachingClassId")) },
+                    onCollect = { viewModel.likePreview(item.getString("teachingClassId")) },
                 )
             }
 
-            if (viewModel.isLoading.value) {
+            if (viewModel.previewIsLoading.value) {
                 item(span = StaggeredGridItemSpan.FullLine) {
                     Box(
                         modifier = Modifier
@@ -353,6 +272,97 @@ private fun CourseCard(
                     onClick = onClick
                 ) { Text(stringResource(R.string.open)) }
             }
+        }
+    }
+}
+
+/** 预览筛选面板：轮次分段按钮 + 隐藏已选/生效筛选/添加筛选 chips（置于 topBarContent） */
+@Composable
+internal fun CourseSelectionPreviewFilterPanel(
+    viewModel: CourseSelectionViewModel,
+    onNavigateToFilter: (CourseFilterNameData, CourseFilterValueData) -> Unit,
+) {
+    val filterName by viewModel.previewFilterName.collectAsStateWithLifecycle()
+    val filterValue by viewModel.previewFilterValue.collectAsStateWithLifecycle()
+    val hiddenSelectedStatus by viewModel.hiddenSelectedStatus.collectAsStateWithLifecycle()
+    val previewType by viewModel.previewType.collectAsStateWithLifecycle()
+    Column {
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier
+				.fillMaxWidth()
+				.padding(
+					dimensionResource(R.dimen.horizontal_margin),
+					dimensionResource(R.dimen.vertical_margin)
+				)
+        ) {
+            intArrayOf(1, 4, 2).zip(
+                intArrayOf(
+                    R.string.my_major,
+                    R.string.public_selection,
+                    R.string.transdisciplinary
+                )
+            ).forEachIndexed { index, (type, text) ->
+                SegmentedButton(
+                    selected = previewType == type,
+                    onClick = { viewModel.setPreviewType(type) },
+                    icon = {},
+                    shape = SegmentedButtonDefaults.itemShape(index, 3),
+                ) {
+                    Text(stringResource(text))
+                }
+            }
+        }
+        val activeFilters = listOf(
+            filterName.courseName,
+            filterName.studyCampusId,
+            filterName.week,
+            filterName.classTimes,
+            filterName.courseUnitNum,
+            filterName.teachingTeacherNum,
+            filterName.teachingLanguageCode,
+            filterName.specialClassCode,
+        ).filter { !it.isNullOrEmpty() }
+        FlowRow(
+            modifier = Modifier
+				.fillMaxWidth()
+				.padding(horizontal = dimensionResource(R.dimen.horizontal_margin)),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+        ) {
+            ElevatedFilterChip(
+                leadingIcon = if (hiddenSelectedStatus) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = stringResource(R.string.hidden_selected),
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                },
+                selected = hiddenSelectedStatus,
+                onClick = { viewModel.setHiddenSelectedStatus(!hiddenSelectedStatus) },
+                label = { Text(stringResource(R.string.hidden_selected)) },
+            )
+            activeFilters.forEach { filter ->
+                ElevatedFilterChip(
+                    selected = true,
+                    onClick = {},
+                    label = { Text("$filter") },
+                )
+            }
+            ElevatedAssistChip(
+                onClick = {
+                    onNavigateToFilter(filterName, filterValue)
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Rounded.Add,
+                        contentDescription = stringResource(R.string.add_filter)
+                    )
+                },
+                label = { Text(stringResource(R.string.add_filter)) },
+            )
         }
     }
 }

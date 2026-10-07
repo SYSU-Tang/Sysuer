@@ -36,46 +36,39 @@ class RecentClassWidget : AppWidgetProvider() {
 		context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray
 	) {
 		val pendingResult = goAsync()
-		Executors.newSingleThreadExecutor().let { executor ->
-			executor.execute {
-				try {
-					val cachedData = runBlocking {
-						DataStoreManager.getInstance(context.applicationContext).data.first()[DataStoreManager.TODAY_CLASS]?.let {
-								JSONArray.parseArray(
-										it
-								)
-							} ?: JSONArray()
-					}
-					val remoteViews = RemoteViews(context.packageName, R.layout.widget_today_class)
-					for (i in cachedData.indices) handlerMessage(
-							i,
-							cachedData.getJSONObject(i),
-							context,
-							remoteViews
-					)
-					for (appWidgetId in appWidgetIds) appWidgetManager.updateAppWidget(
-							appWidgetId,
-							remoteViews
-					)
-					getInstance(context).enqueueUniqueWork(
-							"RecentClassWidget",
-							ExistingWorkPolicy.KEEP,
-							OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java)
-								.setConstraints(
-										Constraints.Builder()
-											.setRequiredNetworkType(NetworkType.CONNECTED).build()
-								).setInputData(
-										Data.Builder().putString("component", "RecentClassWidget")
-											.build()
-								).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
-					)
-				} catch (_: Exception) {
-				} finally {
-					pendingResult.finish()
+		Executors.newSingleThreadExecutor().execute {
+			try {
+				val cachedData = runBlocking {
+					DataStoreManager.getInstance(context.applicationContext).data.first()[DataStoreManager.TODAY_CLASS]?.let {
+						JSONArray.parseArray(
+								it
+						)
+					} ?: JSONArray()
 				}
+				val remoteViews = RemoteViews(context.packageName, R.layout.widget_today_class)
+				cachedData.forEachIndexed { i, d ->
+					handlerMessage(i, d as JSONObject, context, remoteViews)
+				}
+				appWidgetIds.forEach {
+					appWidgetManager.updateAppWidget(it, remoteViews)
+				}
+				getInstance(context).enqueueUniqueWork(
+						"RecentClassWidget",
+						ExistingWorkPolicy.KEEP,
+						OneTimeWorkRequest.Builder(WidgetUpdateWorker::class.java).setConstraints(
+								Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
+									.build()
+						).setInputData(
+								Data.Builder().putString("component", "RecentClassWidget").build()
+						).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
+				)
+			} catch (_: Exception) {
+			} finally {
+				pendingResult.finish()
 			}
 		}
 	}
+
 
 	override fun onDeleted(context: Context, appWidgetIds: IntArray) {
 		appWidgetIds.forEach {
@@ -122,11 +115,7 @@ class RecentClassWidget : AppWidgetProvider() {
 						}
 					}
 					setRemoteAdapter(
-							context,
-							remoteViews,
-							R.layout.widget_item,
-							R.id.list,
-							items.build()
+							context, remoteViews, R.layout.widget_item, R.id.list, items.build()
 					)
 				}
 
@@ -142,20 +131,19 @@ class RecentClassWidget : AppWidgetProvider() {
 				)
 
 				1 -> remoteViews.setTextViewText(
-						R.id.week, String.format(
-						context.getString(R.string.week_s),
+						R.id.week, context.getString(
+						R.string.week_s,
 						response.getJSONArray("data").getJSONObject(0).getString("weekTimes")
 				)
 				)
 			}
 			remoteViews.setOnClickPendingIntent(
-					android.R.id.background,
-					PendingIntent.getActivity(
-							context,
-							0,
-							Intent(context, AgendaActivity::class.java),
-							PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-					)
+					android.R.id.background, PendingIntent.getActivity(
+					context,
+					0,
+					Intent(context, AgendaActivity::class.java),
+					PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+			)
 			)
 			remoteViews.setTextViewText(R.id.widget_name, context.getString(R.string.recent_class))
 		}

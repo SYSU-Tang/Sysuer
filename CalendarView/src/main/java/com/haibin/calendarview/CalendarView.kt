@@ -1198,6 +1198,27 @@ class CalendarView @JvmOverloads constructor(context: Context, attrs: AttributeS
 	}
 
 	/**
+	 * 切换到周视图（供外层列表滚动驱动的折叠使用，等价 CalendarLayout.showWeek）
+	 */
+	fun showWeekView() {
+		if (!::weekViewPager.isInitialized || !::monthViewPager.isInitialized) return
+		if (weekViewPager.adapter != null) {
+			weekViewPager.adapter?.notifyDataSetChanged()
+			weekViewPager.visibility = VISIBLE
+		}
+		monthViewPager.visibility = INVISIBLE
+	}
+
+	/**
+	 * 切换到月视图（等价 CalendarLayout.onShowMonthView 的视图切换）
+	 */
+	fun showMonthView() {
+		if (!::weekViewPager.isInitialized || !::monthViewPager.isInitialized) return
+		weekViewPager.visibility = GONE
+		monthViewPager.visibility = VISIBLE
+	}
+
+	/**
 	 * 清空日期标记
 	 */
 	fun clearSchemeDate() {

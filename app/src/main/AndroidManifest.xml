@@ -68,7 +68,7 @@
             android:configChanges="orientation|screenSize"
             android:exported="true" />
         <activity
-            android:name=".life.EnergyFeeActivity"
+            android:name=".life.EnergyActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true" />
         <activity

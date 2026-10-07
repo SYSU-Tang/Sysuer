@@ -1,6 +1,5 @@
 package com.miyuyan.sysuer.home
 
-import android.app.Activity
 import android.app.PendingIntent
 import android.content.ClipData
 import android.content.Intent
@@ -141,9 +140,10 @@ import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.api.SettingManager
 import com.miyuyan.sysuer.api.TodoManager
 import com.miyuyan.sysuer.browser.BrowserActivity
-import com.miyuyan.sysuer.nav.CourseDetail
-import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.nav.Browser
+import com.miyuyan.sysuer.nav.CourseDetail
+import com.miyuyan.sysuer.nav.CourseSchedule
+import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.todo.TodoActivity
 import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
@@ -234,7 +234,7 @@ internal fun DashboardScreen(
 			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 	) {
 		if (0 in selectedSet) ShortcutSection(
-				backStack, dashboardViewModel, homeViewModel, activity
+				backStack, dashboardViewModel, homeViewModel
 		) { showActionItem = it }
 
 		if (1 in selectedSet || 2 in selectedSet) {
@@ -297,15 +297,8 @@ internal fun DashboardScreen(
 						}
 						config.toast(R.string.copy_successfully)
 					},
-					onTitleClick = { view ->
-						view.transitionName = "CourseSchedule"
-						context.startActivity(
-								Intent(context, CourseScheduleActivity::class.java), activity?.let {
-							ActivityOptionsCompat.makeSceneTransitionAnimation(
-									it, view, "CourseSchedule"
-							)
-						}?.toBundle()
-						)
+					onTitleClick = {
+						backStack.add(CourseSchedule)
 					},
 					sharedTransitionScope = sharedTransitionScope,
 					animatedVisibilityScope = animatedVisibilityScope
@@ -634,7 +627,6 @@ private fun ShortcutSection(
 	backStack: MutableList<NavKey>,
 	vm: DashboardViewModel,
 	hm: HomeViewModel,
-	activity: Activity?,
 	onShowActionDialog: (ServiceConfig) -> Unit,
 ) {
 	val context = LocalContext.current
@@ -673,12 +665,7 @@ private fun ShortcutSection(
 						contentDescription = stringResource(R.string.course_schedule)
 				)
 			}, onClick = {
-				context.startActivity(
-						Intent(
-						context, CourseScheduleActivity::class.java
-				),
-						activity?.let { ActivityOptionsCompat.makeSceneTransitionAnimation(it) }
-							?.toBundle())
+				backStack.add(CourseSchedule)
 			})
 		}
 		shortcuts.forEach { entity ->
@@ -758,7 +745,7 @@ private fun CourseSection(
 	showDate: Int,
 	nextClassIndex: Int = 0,
 	onCourseClick: (CourseDetail) -> Unit,
-	onTitleClick: (View) -> Unit,
+	onTitleClick: () -> Unit,
 	onCourseLongClick: (String) -> Unit,
 	sharedTransitionScope: SharedTransitionScope?,
 	animatedVisibilityScope: AnimatedVisibilityScope?
@@ -774,7 +761,7 @@ private fun CourseSection(
 					with(sharedTransitionScope) {
 						Modifier.sharedBounds(
 								sharedContentState = rememberSharedContentState(
-										key = "Course"
+										key = "CourseSchedule"
 								),
 								animatedVisibilityScope = animatedVisibilityScope,
 						)
@@ -782,8 +769,8 @@ private fun CourseSection(
 				} else Modifier),
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.SpaceBetween) {
-		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) { view ->
-			onTitleClick(view)
+		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) {
+			onTitleClick()
 		}
 
 		SingleChoiceSegmentedButtonRow {
@@ -826,7 +813,7 @@ private fun CourseSection(
 							modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
 							bringIntoViewRequester
 					) else Modifier).then(
-							if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+									if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
 									sharedContentState = rememberSharedContentState(

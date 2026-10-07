@@ -62,6 +62,8 @@ import com.miyuyan.sysuer.academic.ClassroomQueryRoute
 import com.miyuyan.sysuer.academic.CourseCompletionRoute
 import com.miyuyan.sysuer.academic.CourseDetailRoute
 import com.miyuyan.sysuer.academic.CourseQueryRoute
+import com.miyuyan.sysuer.academic.CourseScheduleRoute
+import com.miyuyan.sysuer.academic.CourseSelectionRoute
 import com.miyuyan.sysuer.academic.CourseSelectedRoute
 import com.miyuyan.sysuer.academic.DormRoute
 import com.miyuyan.sysuer.academic.ExamRoute
@@ -96,6 +98,7 @@ import com.miyuyan.sysuer.home.DashboardViewModel
 import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.life.NetPayRoute
 import com.miyuyan.sysuer.life.NewsRoute
+import com.miyuyan.sysuer.life.EnergyRoute
 import com.miyuyan.sysuer.life.PayRoute
 import com.miyuyan.sysuer.life.SchoolBusRoute
 import com.miyuyan.sysuer.nav.About
@@ -113,7 +116,10 @@ import com.miyuyan.sysuer.nav.Developer
 import com.miyuyan.sysuer.nav.Setting
 import com.miyuyan.sysuer.nav.CourseQuery
 import com.miyuyan.sysuer.nav.CourseSelected
+import com.miyuyan.sysuer.nav.CourseSchedule
+import com.miyuyan.sysuer.nav.CourseSelection
 import com.miyuyan.sysuer.nav.Dorm
+import com.miyuyan.sysuer.nav.EnergyFee
 import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.nav.Grade
 import com.miyuyan.sysuer.nav.GradeForLevel
@@ -163,10 +169,31 @@ class MainActivity : BaseActivity() {
 			if (requestCode == shizukuPermissionRequestCode) {
 				val granted = grantResult == PERMISSION_GRANTED
 				if (!granted) config.toast(R.string.please_grant_shizuku_permission)
+				else {
+					Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener)
+					Shizuku.removeBinderReceivedListener(binderReceivedListener)
+					dashboardViewModel?.let { queryShortcuts(it) }
+				}
 			}
 		}
 
+	private val binderReceivedListener: Shizuku.OnBinderReceivedListener =
+		Shizuku.OnBinderReceivedListener {
+			if (checkPermission()) {
+				Shizuku.removeBinderReceivedListener(binderReceivedListener)
+				Shizuku.removeRequestPermissionResultListener(requestPermissionResultListener)
+				dashboardViewModel?.let { queryShortcuts(it) }
+			}
+		}
+
+	private var dashboardViewModel: DashboardViewModel? = null
+
 	private fun checkPermission(): Boolean = when {
+		// Shizuku 未运行或 binder 尚未送达时，任何权限 API 都会抛 "binder haven't been received"
+		!Shizuku.pingBinder() -> {
+			false
+		}
+
 		Shizuku.isPreV11() -> {
 			false
 		}
@@ -185,14 +212,27 @@ class MainActivity : BaseActivity() {
 		}
 	}
 
+	private fun queryShortcuts(dashboardViewModel: DashboardViewModel) {
+		lifecycleScope.launch(Dispatchers.IO) {
+			runCatching { ShortcutReader.query("com.tencent.mm") }.onSuccess {
+				it.firstOrNull { info ->
+					info.shortLabel?.contains("中山大学校园卡") == true
+				}?.let { info ->
+					dashboardViewModel.sysuCardShortcutInfo = info
+				}
+			}.onFailure { println("${it::class.java.simpleName}: ${it.message}") }
+		}
+	}
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val spm: PreferenceViewModel by viewModels()
 		spm.isFirstLaunch = false
 		setContent {
 			SysuerTheme(settingManager) {
-				val dashboardViewModel: DashboardViewModel = viewModel()
-				val mainViewModel: MainViewModel = viewModel()
+					val dashboardViewModel: DashboardViewModel = viewModel()
+					val mainViewModel: MainViewModel = viewModel()
+					this@MainActivity.dashboardViewModel = dashboardViewModel
 				val isAgree by spm.isAgreeLiveData.observeAsState()
 				val updateData by mainViewModel.update.collectAsStateWithLifecycle()
 				updateData?.let { UpdateDialog(it) }
@@ -240,17 +280,13 @@ class MainActivity : BaseActivity() {
 								arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSION_GRANTED
 						)
 
-						if (checkPermission()) lifecycleScope.launch(Dispatchers.IO) {
-							runCatching { ShortcutReader.query("com.tencent.mm") }.onSuccess {
-								it.firstOrNull { info ->
-									info.shortLabel?.contains("中山大学校园卡") == true
-								}?.let { info ->
-									dashboardViewModel.sysuCardShortcutInfo = info
-								}
-							}.onFailure { println("${it::class.java.simpleName}: ${it.message}") }
-						} else Shizuku.addRequestPermissionResultListener(
-								requestPermissionResultListener
-						)
+						if (checkPermission()) {
+							queryShortcuts(dashboardViewModel)
+						} else {
+							// Shizuku 未运行或未授权：监听 binder 到达与授权结果，就绪后自动完成快捷方式查询
+							Shizuku.addBinderReceivedListener(binderReceivedListener)
+							Shizuku.addRequestPermissionResultListener(requestPermissionResultListener)
+						}
 					}
 				}
 				if (isAgree == true) {
@@ -389,6 +425,20 @@ class MainActivity : BaseActivity() {
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<CourseSchedule> {
+						CourseScheduleRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<CourseSelection> {
+						CourseSelectionRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
 					entry<Grade> {
 						GradeRoute(
 								backStack,
@@ -447,6 +497,13 @@ class MainActivity : BaseActivity() {
 					}
 					entry<Homework> {
 						HomeworkRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<EnergyFee> {
+						EnergyRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current

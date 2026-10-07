@@ -43,20 +43,20 @@ fun PreferenceScreen(
 	content: @Composable ColumnScope.() -> Unit,
 ) {
 	Column(
-		modifier = modifier
-			.fillMaxSize()
-			.imePadding()
-			.nestedScroll(rememberNestedScrollInteropConnection())
-			.verticalScroll(rememberScrollState())
-			.padding(horizontal = 16.dp, vertical = 8.dp),
-		verticalArrangement = Arrangement.spacedBy(16.dp),
+			modifier = modifier
+				.fillMaxSize()
+				.imePadding()
+				.nestedScroll(rememberNestedScrollInteropConnection())
+				.verticalScroll(rememberScrollState())
+				.padding(horizontal = 16.dp, vertical = 8.dp),
+			verticalArrangement = Arrangement.spacedBy(16.dp),
 	) {
 		if (title != null) {
 			Text(
-				text = title,
-				style = MaterialTheme.typography.titleLarge,
-				color = MaterialTheme.colorScheme.onSurface,
-				modifier = Modifier.padding(vertical = 8.dp),
+					text = title,
+					style = MaterialTheme.typography.titleLarge,
+					color = MaterialTheme.colorScheme.onSurface,
+					modifier = Modifier.padding(vertical = 8.dp),
 			)
 		}
 		content()
@@ -82,6 +82,10 @@ class PreferenceCategoryScope internal constructor() {
 	 */
 	fun item(content: @Composable () -> Unit) {
 		collectedItems.add(content)
+	}
+
+	fun <T> items(list: List<T>, content: @Composable (T) -> Unit) {
+		list.forEach { collectedItems.add({ content(it) }) }
 	}
 
 }
@@ -115,17 +119,17 @@ fun PreferenceCategory(
 	Column(modifier = modifier.fillMaxWidth()) {
 		if (title != null) {
 			Text(
-				text = title,
-				style = MaterialTheme.typography.titleSmall,
-				color = MaterialTheme.colorScheme.secondary,
-				modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+					text = title,
+					style = MaterialTheme.typography.titleSmall,
+					color = MaterialTheme.colorScheme.secondary,
+					modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
 			)
 		}
 		Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
 			scope.collectedItems.forEachIndexed { index, content ->
 				CompositionLocalProvider(
-					LocalPreferenceIndex provides index,
-					LocalPreferenceCount provides scope.collectedItems.size,
+						LocalPreferenceIndex provides index,
+						LocalPreferenceCount provides scope.collectedItems.size,
 				) {
 					content()
 				}

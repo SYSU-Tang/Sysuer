@@ -319,6 +319,7 @@
       {
         "id": 702,
         "name": "选课",
+        "route": "CourseSelection",
         "activity": ".academic.CourseSelectionActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE",
         "description": "在线选课系统，学生自主选择课程、调整课表、查看选课结果",
@@ -327,6 +328,7 @@
       {
         "id": 703,
         "name": "课程表",
+        "route": "CourseSchedule",
         "activity": ".academic.CourseScheduleActivity",
         "url": "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE",
         "description": "个人日程管理系统，课程安排、考试时间、活动提醒等日程规划"
@@ -542,7 +544,8 @@
       {
         "id": 906,
         "name": "水电费",
-        "activity": ".life.EnergyFeeActivity",
+        "route": "EnergyFee",
+        "activity": ".life.EnergyActivity",
         "url": "https://cas.sysu.edu.cn/esc-sso/login?service=https://zhny.sysu.edu.cn/h5",
         "description": "水电费查询缴纳系统，宿舍水电使用情况查询和在线缴费"
       },

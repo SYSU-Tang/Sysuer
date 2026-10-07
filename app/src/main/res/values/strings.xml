@@ -161,6 +161,11 @@
     <string name="delete">删除</string>
     <string name="add">添加</string>
     <string name="tomorrow">明天</string>
+    <string name="last_week">上一周</string>
+    <string name="week_x">星期%s</string>
+    <string name="add_time_segment">添加时间段</string>
+    <string name="up">上移</string>
+    <string name="down">下移</string>
     <string name="next_week">下周</string>
     <string name="select">选择</string>
     <string name="fifteen_mins">15分钟</string>
@@ -446,6 +451,7 @@
     <string name="leave_return_registration">离返校登记</string>
     <string name="preview">预览</string>
     <string name="grade_fetching">正在获取成绩当中…</string>
+    <string name="show_filter">显示过滤面板</string>
     <string name="hide_filter">隐藏过滤面板</string>
     <string name="start_registration">开始登记</string>
     <string name="modify_registration">修改登记</string>
@@ -1050,4 +1056,5 @@
     <string name="enrollment_year">入学年级</string>
     <string name="file_type_hint">文件类型：jpg,jpeg,png,gif,pdf</string>
     <string name="time_range_limit">时间范围不能大于30天！周次范围不能大于4周！</string>
+    <string name="payment_history">支付历史</string>
 </resources>

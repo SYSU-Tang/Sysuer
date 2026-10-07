@@ -38,6 +38,9 @@ fun StatePage(
 	state: UiState? = null,
 	emptyWarning: String = stringResource(R.string.no_data),
 	onRetry: (() -> Unit)? = null,
+	// 覆盖模式：content 始终参与布局，状态视图叠加在其上，
+	// 适用于课表这类需要保持自身网格布局、加载时不塌陷的页面
+	overlay: Boolean = false,
 	content: @Composable () -> Unit = {}
 ) {
 	Box(modifier = modifier.fillMaxSize()) {
@@ -45,7 +48,15 @@ fun StatePage(
 			.align(Alignment.Center)
 			.verticalScroll(rememberScrollState())
 			.nestedScroll(rememberNestedScrollInteropConnection())
-		when (state) {
+		if (overlay) {
+			content()
+			when (state) {
+				Loading -> LoadingView()
+				Empty -> EmptyView(text = emptyWarning)
+				Error -> ErrorView(onRetry = onRetry)
+				else -> {}
+			}
+		} else when (state) {
 			Loading -> LoadingView(modifier = modifier)
 			Empty -> EmptyView(modifier = modifier, text = emptyWarning)
 			Error -> ErrorView(

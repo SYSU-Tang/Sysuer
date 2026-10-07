@@ -162,6 +162,11 @@
     <string name="delete">Delete</string>
     <string name="add">Add</string>
     <string name="tomorrow">Tomorrow</string>
+    <string name="last_week">Last Week</string>
+    <string name="week_x">%s</string>
+    <string name="add_time_segment">Add Time Segment</string>
+    <string name="up">Move Up</string>
+    <string name="down">Move Down</string>
     <string name="next_week">Next Week</string>
     <string name="select">Choose</string>
     <string name="one_day">1 day</string>
@@ -406,6 +411,7 @@
     <string name="leave_return_registration">Leave/Return Registration</string>
     <string name="preview">Preview</string>
     <string name="grade_fetching">Fetching Grades…</string>
+    <string name="show_filter">Show Filter Panel</string>
     <string name="hide_filter">Hide Filter Panel</string>
     <string name="start_registration">Start Registration</string>
     <string name="modify_registration">Modify Registration</string>
@@ -1078,4 +1084,5 @@
     <string name="uncharged">Uncharged</string>
     <string name="exam_detail">Exam detail</string>
     <string name="course_not_found">Course not found</string>
+    <string name="payment_history">Payment History</string>
 </resources>
