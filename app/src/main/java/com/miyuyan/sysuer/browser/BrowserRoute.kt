@@ -25,7 +25,6 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +42,8 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -177,7 +178,6 @@ class BrowserState(
 				request: WebResourceRequest,
 			): Boolean {
 				val target = request.url.toString()
-				println("shouldOverrideUrlLoading: $target")
 				if (target.startsWith("https://") || target.startsWith("http://")) {
 					view.loadUrl(target)
 				} else {
@@ -194,8 +194,8 @@ class BrowserState(
 				request: WebResourceRequest,
 			): WebResourceResponse? {
 				val target = request.url.toString()
-				if ("https?://jwxt.sysu.edu.cn/jwxt/system-manage/infoRelease/downloadFile"
-						.toRegex().matches(target)
+				if ("https?://jwxt.+?sysu\\.edu\\.cn/jwxt/system-manage/infoRelease/downloadFile"
+						.toRegex().containsMatchIn(target)
 				) {
 					try {
 						val response = okHttpClient.newCall(
@@ -801,20 +801,61 @@ fun BrowserRoute(
 				onDismissRequest = { state.downloadRequest = null },
 				title = { Text(stringResource(R.string.download)) },
 				text = {
-					Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-						Text(
-								link,
-								style = MaterialTheme.typography.bodySmall,
-								modifier = Modifier.combinedClickable(onClick = {}, onLongClick = {
+					Column(
+							verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+							modifier = Modifier
+								.fillMaxWidth()
+								.verticalScroll(rememberScrollState())
+					) {
+//						KeyValueRow(
+//								row = RowData(
+//										key = stringResource(R.string.download_link), value = link
+//								), orientation = RowOrientation.Vertical
+//						)
+						Preference(
+								title = stringResource(R.string.download_link),
+								summary = link,
+								icon = {
+									Icon(
+											Icons.Rounded.Link,
+											contentDescription = stringResource(R.string.link)
+									)
+								},
+								onClick = {
 									contextUtil.copy("link", link)
 									contextUtil.toast(R.string.copy_successfully)
 								})
-						)
-						Text(
-								path,
-								style = MaterialTheme.typography.bodySmall,
-								color = MaterialTheme.colorScheme.onSurfaceVariant
-						)
+						Preference(
+								title = stringResource(R.string.download_path),
+								summary = path,
+								icon = {
+									Icon(
+											Icons.Rounded.FileDownload,
+											contentDescription = stringResource(R.string.download_path)
+									)
+								},
+								onClick = {
+									contextUtil.copy("path", path)
+									contextUtil.toast(R.string.copy_successfully)
+								})
+//						KeyValueRow(
+//								row = RowData(
+//										key = stringResource(R.string.download_path), value = path
+//								), orientation = RowOrientation.Vertical
+//						)
+//						Text(
+//								link,
+//								style = MaterialTheme.typography.bodySmall,
+//								modifier = Modifier.combinedClickable(onClick = {}, onLongClick = {
+//									contextUtil.copy("link", link)
+//									contextUtil.toast(R.string.copy_successfully)
+//								})
+//						)
+//						Text(
+//								path,
+//								style = MaterialTheme.typography.bodySmall,
+//								color = MaterialTheme.colorScheme.onSurfaceVariant
+//						)
 					}
 				},
 				confirmButton = {
@@ -1265,7 +1306,7 @@ fun BrowserRoute(
 			) {
 				PreferenceCategory {
 					ScriptManager.getMatchingScripts(
-							state.url, jsList.orEmpty(), includeDisabled = true
+							state.url, jsList, includeDisabled = true
 					).forEach { item ->
 						item {
 							// ModalBottomSheet 渲染在独立窗口中，与 SharedTransitionLayout

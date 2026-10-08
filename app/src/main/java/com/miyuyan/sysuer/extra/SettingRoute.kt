@@ -69,6 +69,7 @@ fun SettingRoute(
 	ActivityPager(
 			title = stringResource(R.string.setting),
 			isNestedScrollEnabled = false,
+			expandable = true,
 			sharedKey = Setting.toString(),
 			sharedTransitionScope = sharedTransitionScope,
 			animatedVisibilityScope = animatedVisibilityScope,

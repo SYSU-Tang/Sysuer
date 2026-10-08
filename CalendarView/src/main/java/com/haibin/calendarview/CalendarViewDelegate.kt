@@ -17,7 +17,6 @@ package com.haibin.calendarview
 
 import android.content.Context
 import android.graphics.Color
-import android.text.TextUtils
 import android.util.AttributeSet
 import androidx.core.content.withStyledAttributes
 import com.haibin.calendarview.CalendarUtil.dipToPx
@@ -349,7 +348,7 @@ class CalendarViewDelegate internal constructor(context: Context, attrs: Attribu
 	/**
 	 * 标记文本
 	 */
-	var schemeText: String? = null
+	lateinit var schemeText: String
 		private set
 
 	/**
@@ -430,10 +429,7 @@ class CalendarViewDelegate internal constructor(context: Context, attrs: Attribu
 						R.styleable.CalendarView_week_line_margin, dipToPx(context, 0f).toFloat()
 				).toInt()
 
-				schemeText = getString(R.styleable.CalendarView_scheme_text)
-				if (TextUtils.isEmpty(schemeText)) {
-					schemeText = "记"
-				}
+				schemeText = getString(R.styleable.CalendarView_scheme_text)?.takeUnless { it.isEmpty() } ?: "记"
 
 				isMonthViewScrollable =
 					getBoolean(R.styleable.CalendarView_month_view_scrollable, true)
@@ -625,8 +621,7 @@ class CalendarViewDelegate internal constructor(context: Context, attrs: Attribu
 		this.minYearMonth = minYearMonth
 		this.maxYear = maxYear.coerceAtLeast(currentDay.year)
 		this.maxYearMonth = maxYearMonth.takeUnless { it == -1 } ?: getMonthDaysCount(
-				this.maxYear,
-				this.maxYearMonth
+				this.maxYear, this.maxYearMonth
 		)
 		val y = currentDay.year - this.minYear
 		mCurrentMonthViewItem = 12 * y + currentDay.month - this.minYearMonth
@@ -727,11 +722,11 @@ class CalendarViewDelegate internal constructor(context: Context, attrs: Attribu
 	}
 
 	fun updateSelectCalendarScheme() {
-		if (!mSchemeDatesMap.isEmpty()) {
-			val key = mSelectedSysuerCalendar.toString()
-			if (mSchemeDatesMap.containsKey(key)) {
-				val d = mSchemeDatesMap[key]
-				mSelectedSysuerCalendar?.mergeScheme(d, this.schemeText!!)
+		if (mSchemeDatesMap.isNotEmpty()) {
+			mSchemeDatesMap[mSelectedSysuerCalendar.toString()]?.let {
+				mSelectedSysuerCalendar?.mergeScheme(
+						it, schemeText
+				)
 			}
 		} else {
 			clearSelectedScheme()
@@ -741,7 +736,7 @@ class CalendarViewDelegate internal constructor(context: Context, attrs: Attribu
 	fun updateCalendarScheme(targetSysuerCalendar: SysuerCalendar?) {
 		if (targetSysuerCalendar != null && !mSchemeDatesMap.isEmpty()) {
 			mSchemeDatesMap[targetSysuerCalendar.toString()]?.let {
-				targetSysuerCalendar.mergeScheme(it, schemeText ?: "")
+				targetSysuerCalendar.mergeScheme(it, schemeText)
 			}
 		}
 	}
@@ -783,7 +778,7 @@ class CalendarViewDelegate internal constructor(context: Context, attrs: Attribu
 		mItems.forEach {
 			if (mSchemeDatesMap.containsKey(it.toString())) {
 				val d = mSchemeDatesMap[it.toString()] ?: return
-				it.scheme = d.scheme.ifEmpty { schemeText ?: "" }
+				it.scheme = d.scheme.ifEmpty { schemeText }
 				it.schemeColor = d.schemeColor
 				it.schemes = d.schemes
 			} else {

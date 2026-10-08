@@ -1,8 +1,10 @@
 package com.miyuyan.sysuer.api
 
 import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Environment
@@ -146,6 +148,7 @@ object DownloadManager {
 						}
 					}
 				} catch (e: Exception) {
+					e.printStackTrace()
 					if (notify) notifyDownloadError(context, e.message)
 					CoroutineScope(Dispatchers.Main).launch {
 						Toast.makeText(
@@ -167,7 +170,20 @@ object DownloadManager {
 	 */
 	@JvmStatic
 	fun openFile(context: Context, path: String) {
-		context.startActivity(getOpenFileIntent(context, path))
+		val intent = getOpenFileIntent(context, path) ?: return
+		// createChooser 只继承内层 Intent 的 uri 授权标志，不会继承 NEW_TASK，
+		// 因此用 Application、Service 等非 Activity 上下文启动时必须补上
+		if (context.findActivity() == null) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		context.startActivity(intent)
+	}
+
+	/**
+	 * 向上查找 Context 链中包裹的 Activity，用于判断能否直接启动 Activity
+	 */
+	private tailrec fun Context.findActivity(): Activity? = when (this) {
+		is Activity -> this
+		is ContextWrapper -> baseContext.findActivity()
+		else -> null
 	}
 
 	/**
@@ -181,9 +197,9 @@ object DownloadManager {
 		Intent.createChooser(
 				Intent(Intent.ACTION_VIEW).addCategory("android.intent.category.DEFAULT")
 					.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-					.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).setDataAndType(
+					.setDataAndType(
 							FileProvider.getUriForFile(
-									context, "com.sysu.edu.fileProvider", File(path)
+									context, "${context.packageName}.fileProvider", File(path)
 							), MimeTypeMap.getSingleton().getMimeTypeFromExtension(
 							path.substring(path.lastIndexOf(".") + 1).lowercase(Locale.getDefault())
 					)

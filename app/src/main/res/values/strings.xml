@@ -1057,4 +1057,5 @@
     <string name="file_type_hint">文件类型：jpg,jpeg,png,gif,pdf</string>
     <string name="time_range_limit">时间范围不能大于30天！周次范围不能大于4周！</string>
     <string name="payment_history">支付历史</string>
+    <string name="download_path">下载路径</string>
 </resources>
