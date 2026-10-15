@@ -1,102 +1,38 @@
 package com.miyuyan.sysuer.academic
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.alibaba.fastjson2.JSONObject
-import com.haibin.calendarview.SysuerCalendar
-import com.haibin.calendarview.CalendarView.OnCalendarSelectListener
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.miyuyan.sysuer.BaseActivity
-import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.DateTimeManager
-import com.miyuyan.sysuer.databinding.ActivityAgendaBinding
-import com.miyuyan.sysuer.databinding.ItemPreferenceBinding
-import com.miyuyan.sysuer.todo.TitleAdapter
-import com.miyuyan.sysuer.view.RecyclerAdapter
-import kotlinx.coroutines.launch
+import com.miyuyan.sysuer.nav.Agenda
+import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.theme.SysuerTheme
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 class AgendaActivity : BaseActivity() {
-	private val viewModel: AgendaViewModel by viewModels()
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		val concatAdapter = ConcatAdapter()
-		val binding = ActivityAgendaBinding.inflate(layoutInflater).apply {
-			content.recyclerView.layoutManager = LinearLayoutManager(this@AgendaActivity)
-			content.recyclerView.adapter = concatAdapter
-			toolbar.setNavigationOnClickListener { supportFinishAfterTransition() }
-			calendarView.setOnCalendarSelectListener(object : OnCalendarSelectListener {
-				override fun onCalendarOutOfRange(sysuerCalendar: SysuerCalendar?) {
-				}
-
-				override fun onCalendarSelect(sysuerCalendar: SysuerCalendar?, isClick: Boolean) {
-					loadAgenda(sysuerCalendar?.timeInMillis ?: System.currentTimeMillis())
-				}
-			})
-			calendarView.setOnMonthChangeListener { year: Int, month: Int ->
-				toolbar.subtitle = getString(R.string.year_month, year, month)
-			}
-			toolbar.subtitle =
-				getString(R.string.year_month, calendarView.curYear, calendarView.curMonth)
-			calendarView.setSelectSingleMode()
-			content.viewModel = viewModel
-			content.lifecycleOwner = this@AgendaActivity
-			content.root.setBackgroundResource(R.color.md_theme_surface)
-			content.root.elevation = config.dpToPx(2).toFloat()
-		}
-		setContentView(binding.root)
-		lifecycleScope.launch {
-			repeatOnLifecycle(Lifecycle.State.STARTED) {
-				viewModel.scheduleList.collect { list ->
-					concatAdapter.adapters.forEach { adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder?> ->
-						concatAdapter.removeAdapter(adapter)
-					}
-					list?.forEach { i: Any? ->
-						concatAdapter.addAdapter(TitleAdapter((i as JSONObject).getString("timeZone")))
-						concatAdapter.addAdapter(AgendaAdapter().also { agendaAdapter ->
-							agendaAdapter.add(i)
-						})
-					}
+		enableEdgeToEdge()
+		setContent {
+			val backStack = rememberNavBackStack(Agenda)
+			SysuerTheme(settingManager) {
+				SharedTransitionLayout {
+					SysuerNavDisplay(backStack = backStack, entryProvider = entryProvider {
+						entry<Agenda> {
+							AgendaRoute(
+									backStack,
+									sharedTransitionScope = this@SharedTransitionLayout,
+									animatedVisibilityScope = LocalNavAnimatedContentScope.current
+							)
+						}
+					})
 				}
 			}
-		}
-		loadAgenda(binding.calendarView.selectedSysuerCalendar?.timeInMillis ?: System.currentTimeMillis())
-	}
-
-	private fun loadAgenda(date: Long) {
-		viewModel.loadSchedule(
-				DateTimeManager.toDate(date)
-		)
-	}
-
-	internal class AgendaAdapter : RecyclerAdapter<JSONObject>() {
-		override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
-			object : RecyclerView.ViewHolder(
-					ItemPreferenceBinding.inflate(
-							LayoutInflater.from(parent.context), parent, false
-					).root
-			) {}
-
-
-		override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-			val item = get(position)
-			val place = item.getString("place")
-			ItemPreferenceBinding.bind(holder.itemView).apply {
-				itemTitle.text = item.getString("title")
-				if (!place.isNullOrEmpty()) itemContent.text = place
-				else itemContent.visibility = View.GONE
-				itemIcon.setImageResource(R.drawable.text)
-				root.updateAppearance(position, itemCount)
-				root.setOnClickListener {}
-			}
-			super.onBindViewHolder(holder, position)
 		}
 	}
 }

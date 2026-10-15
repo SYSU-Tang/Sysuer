@@ -92,6 +92,7 @@
       {
         "id": 201,
         "name": "To-do",
+        "route": "Todo",
         "activity": ".todo.TodoActivity",
         "description": "To-do list management tool for recording learning tasks, assignment reminders, and important arrangements"
       },
@@ -314,6 +315,7 @@
       {
         "id": 701,
         "name": "Teaching Evaluation",
+        "route": "Evaluation",
         "activity": ".academic.EvaluationActivity",
         "url": "https://pjxt.sysu.edu.cn/authentication/main",
         "description": "Teaching evaluation system for students to evaluate the teaching quality of courses and the teaching effectiveness of teachers"
@@ -559,6 +561,7 @@
         "id": 908,
         "name": "Sports Venues",
         "activity": ".life.GymReservationActivity",
+        "route": "GymReservation",
         "url": "https://gym.sysu.edu.cn/#/",
         "description": "Sports venue query and reservation system, with functions such as sports facility information, online reservations, and real-time status updates"
       },

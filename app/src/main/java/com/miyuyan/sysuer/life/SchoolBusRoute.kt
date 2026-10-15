@@ -5,14 +5,18 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -37,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
@@ -157,14 +162,28 @@ private fun SchoolBusHeader(
 	) {
 		SingleChoiceSegmentedButtonRow {
 			SegmentedButton(
+					modifier = Modifier.width(IntrinsicSize.Max),
 					selected = day,
 					onClick = { onDayChange(true) },
+					contentPadding = PaddingValues(
+							start = 8.dp,
+							top = ButtonDefaults.ContentPadding.calculateTopPadding(),
+							end = 8.dp,
+							bottom = ButtonDefaults.ContentPadding.calculateBottomPadding(),
+					),
 					shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
 			) {
 				Text(stringResource(R.string.workday))
 			}
 			SegmentedButton(
+					modifier = Modifier.width(IntrinsicSize.Max),
 					selected = !day,
+					contentPadding = PaddingValues(
+							start = 8.dp,
+							top = ButtonDefaults.ContentPadding.calculateTopPadding(),
+							end = 8.dp,
+							bottom = ButtonDefaults.ContentPadding.calculateBottomPadding(),
+					),
 					onClick = { onDayChange(false) },
 					shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
 			) {

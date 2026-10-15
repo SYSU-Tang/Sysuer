@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 android {
     compileSdk 37
@@ -8,7 +9,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_25
     }
     defaultConfig {
-        minSdkVersion 17
+        minSdkVersion 23
         targetSdkVersion 37
         versionCode 371
         versionName "3.7.1"
@@ -27,6 +28,7 @@ android {
         }
     }
     buildFeatures {
+        compose true
         viewBinding true
     }
     compileSdkMinor 0
@@ -49,4 +51,14 @@ dependencies {
     })
     implementation libs.appcompat
     implementation libs.recyclerview
+    implementation 'androidx.compose.foundation:foundation-android:1.13.0-alpha01'
+    implementation 'androidx.compose.ui:ui-android:1.13.0-alpha01'
+    implementation 'androidx.compose.ui:ui-graphics:1.12.1'
+    implementation 'androidx.compose.runtime:runtime-android:1.12.1'
+    // ui 1.13.0-alpha01 传递依赖的版本在离线缓存中不存在，显式锁定为可用版本
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose-android:2.10.0'
+    implementation 'androidx.savedstate:savedstate-compose-android:1.4.0'
+    implementation 'androidx.activity:activity-ktx:1.13.0'
+    // 保持 :app 与本模块的传递依赖一致，避免离线解析到不可用版本
+    implementation 'androidx.core:core-ktx:1.19.1'
 }

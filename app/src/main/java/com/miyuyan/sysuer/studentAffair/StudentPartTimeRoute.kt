@@ -3,7 +3,6 @@ package com.miyuyan.sysuer.studentAffair
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,18 +12,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,8 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -51,6 +43,7 @@ import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.SectionData
+import com.miyuyan.sysuer.view.SingleSelectChipDropdown
 import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.StatePage
 import com.miyuyan.sysuer.view.WarningCard
@@ -230,23 +223,32 @@ fun StudentPartTimeRoute(
 							horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
 //						verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin))
 					) {
-						FilterDropdown(
-								label = stringResource(R.string.year),
-								options = years,
-								selected = year,
-								onSelect = viewModel::selectYear,
+						SingleSelectChipDropdown(
+								title = stringResource(R.string.year),
+								entries = years.map { it.getString("label") },
+								entryValues = years.map { it.getString("value") },
+								selectedIndex = years.indexOfFirst {
+									it.getString("value") == year
+								}.takeIf { it >= 0 },
+								onChange = { _, _, value -> viewModel.selectYear(value.orEmpty()) },
 						)
-						FilterDropdown(
-								label = stringResource(R.string.campus),
-								options = campuses,
-								selected = campus,
-								onSelect = viewModel::selectCampus,
+						SingleSelectChipDropdown(
+								title = stringResource(R.string.campus),
+								entries = campuses.map { it.getString("label") },
+								entryValues = campuses.map { it.getString("value") },
+								selectedIndex = campuses.indexOfFirst {
+									it.getString("value") == campus
+								}.takeIf { it >= 0 },
+								onChange = { _, _, value -> viewModel.selectCampus(value.orEmpty()) },
 						)
-						FilterDropdown(
-								label = stringResource(R.string.job_type),
-								options = jobTypes,
-								selected = jobType,
-								onSelect = viewModel::selectJobType,
+						SingleSelectChipDropdown(
+								title = stringResource(R.string.job_type),
+								entries = jobTypes.map { it.getString("label") },
+								entryValues = jobTypes.map { it.getString("value") },
+								selectedIndex = jobTypes.indexOfFirst {
+									it.getString("value") == jobType
+								}.takeIf { it >= 0 },
+								onChange = { _, _, value -> viewModel.selectJobType(value.orEmpty()) },
 						)
 						FilterInputDialog(
 								label = stringResource(R.string.job_name),
@@ -278,103 +280,6 @@ fun StudentPartTimeRoute(
 						sharedTransitionScope = sharedTransitionScope,
 						animatedVisibilityScope = animatedVisibilityScope,
 				)
-			}
-		}
-	}
-}
-
-@Composable
-private fun FilterDropdown(
-	label: String,
-	options: List<JSONObject>,
-	selected: String,
-	onSelect: (String) -> Unit,
-) {
-	var expanded by remember { mutableStateOf(false) }
-	Box {
-		InputChip(
-				selected = selected.isNotEmpty(),
-				onClick = { expanded = true },
-				label = {
-					Text(
-							text = if (selected.isEmpty()) label
-					else options.find { it.getString("value") == selected }?.getString("label")
-						?: selected)
-				},
-				trailingIcon = if (selected.isNotEmpty()) {
-					{
-						// 占位保持布局，实际可点击的关闭图标由覆盖层实现
-						Spacer(modifier = Modifier.size(FilterChipDefaults.IconSize))
-					}
-				} else null,
-		)
-		if (selected.isNotEmpty()) {
-			Box(
-					modifier = Modifier
-						.align(Alignment.CenterEnd)
-						.padding(end = 4.dp)
-						.size(28.dp)
-						.clip(CircleShape)
-						.clickable { onSelect("") },
-					contentAlignment = Alignment.Center,
-			) {
-				Icon(
-						imageVector = Icons.Rounded.Close,
-						contentDescription = stringResource(R.string.reset),
-						modifier = Modifier.size(FilterChipDefaults.IconSize),
-				)
-			}
-		}
-		DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-			val isAllSelected = selected.isEmpty()
-			DropdownMenuItem(
-					text = {
-						Text(
-								text = stringResource(R.string.all),
-								color = if (isAllSelected) MaterialTheme.colorScheme.primary else Color.Unspecified,
-						)
-					},
-					leadingIcon = if (isAllSelected) {
-						{
-							Icon(
-									imageVector = Icons.Rounded.Check,
-									contentDescription = null,
-									modifier = Modifier.size(FilterChipDefaults.IconSize),
-							)
-						}
-					} else null,
-					modifier = if (isAllSelected) {
-						Modifier.background(MaterialTheme.colorScheme.secondaryContainer)
-					} else Modifier,
-					onClick = {
-						onSelect("")
-						expanded = false
-					})
-			options.forEach { option ->
-				val isSelected = option.getString("value", "") == selected
-				DropdownMenuItem(
-						text = {
-							Text(
-									text = option.getString("label", ""),
-									color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Unspecified,
-							)
-						},
-						leadingIcon = if (isSelected) {
-							{
-								Icon(
-										imageVector = Icons.Rounded.Check,
-										contentDescription = null,
-										modifier = Modifier.size(FilterChipDefaults.IconSize),
-								)
-							}
-						} else null,
-						modifier = if (isSelected) {
-							Modifier.background(MaterialTheme.colorScheme.secondaryContainer)
-						} else Modifier,
-						onClick = {
-							onSelect(option.getString("value", ""))
-							expanded = false
-						})
 			}
 		}
 	}

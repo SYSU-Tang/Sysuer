@@ -144,7 +144,7 @@ import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.CourseDetail
 import com.miyuyan.sysuer.nav.CourseSchedule
 import com.miyuyan.sysuer.nav.Exam
-import com.miyuyan.sysuer.todo.TodoActivity
+import com.miyuyan.sysuer.nav.Todo
 import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.widget.WidgetUpdateWorker
 import kotlinx.coroutines.CoroutineScope
@@ -356,11 +356,7 @@ internal fun DashboardScreen(
 			}
 			todoManager.refreshListener = { todoRefreshKey.trySend(Unit) }
 			TodoSection(todoList = todoList, onViewAllClick = {
-				context.startActivity(
-						Intent(context, TodoActivity::class.java),
-						activity
-							?.let { it1 -> ActivityOptionsCompat.makeSceneTransitionAnimation(it1) }
-							?.toBundle())
+				backStack.add(Todo)
 			}, todoManager = todoManager)
 		}
 	}

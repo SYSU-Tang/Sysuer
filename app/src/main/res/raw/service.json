@@ -93,6 +93,7 @@
       {
         "id": 201,
         "name": "待办",
+        "route": "Todo",
         "activity": ".todo.TodoActivity",
         "description": "待办事项管理工具，记录学习任务、作业提醒、重要事项安排"
       },
@@ -311,6 +312,7 @@
       {
         "id": 701,
         "name": "评教",
+        "route": "Evaluation",
         "activity": ".academic.EvaluationActivity",
         "url": "https://pjxt.sysu.edu.cn/authentication/main",
         "description": "教学评价系统，学生对课程教学质量、教师授课效果进行评价反馈",
@@ -561,6 +563,7 @@
         "id": 908,
         "name": "体育场馆",
         "activity": ".life.GymReservationActivity",
+        "route": "GymReservation",
         "url": "https://gym.sysu.edu.cn/#/",
         "description": "体育场馆查询&预约系统，篮球馆、羽毛球场、田径场等体育设施信息"
       },

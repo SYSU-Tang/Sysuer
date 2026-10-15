@@ -1085,4 +1085,20 @@
     <string name="exam_detail">Exam detail</string>
     <string name="course_not_found">Course not found</string>
     <string name="payment_history">Payment History</string>
+    <string name="total_evaluations">Total</string>
+    <string name="evaluated_count">Evaluated</string>
+    <string name="course_college">Offering School</string>
+    <string name="teaching_class_number">Class No.</string>
+    <string name="course_code">Course Code</string>
+    <string name="evaluation_status">Status</string>
+    <string name="to_be_evaluated">To be evaluated</string>
+    <string name="evaluated">Evaluated</string>
+    <string name="evaluation_saved">Saved</string>
+    <string name="this_week">This Week</string>
+    <string name="this_month">This Month</string>
+    <string name="selected_range">Date Range</string>
+    <string name="unclassified">Uncategorized</string>
+    <string name="no_matching_todo">No matching todos</string>
+    <string name="clear_all_filter">Clear all filters</string>
+    <string name="date_field">Date field</string>
 </resources>

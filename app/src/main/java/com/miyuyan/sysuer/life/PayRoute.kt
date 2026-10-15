@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.alibaba.fastjson2.JSONArray
@@ -64,6 +65,7 @@ import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.RowData
 import com.miyuyan.sysuer.view.SectionData
+import com.miyuyan.sysuer.view.StatePage
 import com.miyuyan.sysuer.view.StaggerScreen
 import com.miyuyan.sysuer.view.exportMarkdownMenuItem
 import java.time.Instant
@@ -412,8 +414,11 @@ fun PayRoute(
 			sharedKey = "Pay",
 			isNestedScrollEnabled = false
 	) { page ->
-		allSections.getOrNull(page)?.let { sections ->
-			StaggerScreen(sections = sections)
+		val uiState by viewModel.getUiState(page).collectAsStateWithLifecycle()
+		StatePage(state = uiState, onRetry = { viewModel.retryPage(page) }) {
+			allSections.getOrNull(page)?.let { sections ->
+				StaggerScreen(sections = sections)
+			}
 		}
 	}
 

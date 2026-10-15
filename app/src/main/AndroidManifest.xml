@@ -97,6 +97,10 @@
             android:name=".academic.RoomQueryActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true" />
+        <activity
+            android:name=".academic.ComposeCalendarDemoActivity"
+            android:exported="true"
+            android:label="Compose 日历" />
 
         <service
             android:name=".CourseService"
@@ -205,6 +209,11 @@
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".extra.SysuCardActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true" />
         <activity
             android:name=".extra.SettingActivity"
             android:configChanges="orientation|screenSize"

@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,11 +13,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,10 +23,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.rounded.Add
@@ -40,7 +40,6 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PriorityHigh
 import androidx.compose.material.icons.rounded.SubdirectoryArrowRight
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
@@ -50,8 +49,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedFilterChip
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,8 +94,10 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
+import com.miyuyan.preference.EditPreference
+import com.miyuyan.preference.Preference
+import com.miyuyan.preference.PreferenceCategory
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.theme.ExpressiveShapes
 import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.todo.TodoInfo
 import com.miyuyan.sysuer.todo.TodoModel
@@ -359,14 +358,6 @@ class TodoManager(
 		var showRemindMenu by remember { mutableStateOf(false) }
 		var remindTarget by remember { mutableStateOf("") }
 		var showCustomRemindDialog by remember { mutableStateOf(false) }
-		val modifier = Modifier
-			.fillMaxWidth()
-			.clip(ExpressiveShapes.medium)
-			.background(MaterialTheme.colorScheme.surfaceContainer)
-			.padding(
-					dimensionResource(R.dimen.horizontal_padding),
-					dimensionResource(R.dimen.vertical_padding)
-			)
 		if (showAddDialog) {
 			AddItemDialog(
 					title = stringResource(
@@ -588,68 +579,123 @@ class TodoManager(
 									)
 							)
 						}
-						OutlinedTextField(
-								value = description,
-								onValueChange = { description = it },
-								placeholder = { Text(stringResource(R.string.description)) },
-								modifier = Modifier.fillMaxWidth()
-						)
-						SingleSection(
-								label = stringResource(R.string.type),
-								items = types.mapNotNull { it.name },
-								selected = todoType,
-								onSelect = { todoType = if (todoType == it) null else it },
-								onAdd = { addCode = 0; showAddDialog = true; newItemName = "" },
-								onDelete = { deleteType(it); if (todoType == it) todoType = null })
-						SingleSection(
-								label = stringResource(R.string.subject),
-								items = subjects.mapNotNull { it.name },
-								selected = subject,
-								onSelect = { subject = if (subject == it) null else it },
-								onAdd = { addCode = 1; showAddDialog = true; newItemName = "" },
-								onDelete = { deleteSubject(it); if (subject == it) subject = null })
-						TagSection(
-								label = stringResource(R.string.tag),
-								items = tags.mapNotNull { it.name },
-								selectedTags = selectedTags,
-								onToggle = { tag ->
-									selectedTags = if (tag in selectedTags) {
-										selectedTags.filter { it != tag }.toMutableStateList()
-									} else {
-										(selectedTags + tag).toMutableStateList()
-									}
-								},
-								onAdd = { addCode = 2; showAddDialog = true; newItemName = "" },
-								onDelete = {
-									deleteTag(it); selectedTags =
-									selectedTags.filter { tag -> tag != it }.toMutableStateList()
-								})
-						OutlinedTextField(
-								value = location ?: "",
-								onValueChange = { location = it.ifEmpty { null } },
-								label = { Text(stringResource(R.string.location)) },
-								leadingIcon = {
-									Icon(
-											Icons.Default.LocationOn, contentDescription = null
-									)
-								},
-								modifier = Modifier.fillMaxWidth(),
-								singleLine = true
-						)
+						PreferenceCategory(title = null) {
+							item {
+								EditPreference(
+										title = stringResource(R.string.description),
+										value = description,
+										onChange = { _, _, text -> description = text.orEmpty() },
+										placeholder = stringResource(R.string.description),
+										singleLine = false,
+										icon = {
+											Icon(
+													Icons.Outlined.Edit, contentDescription = null
+											)
+										})
+							}
+							item {
+								SingleSection(
+										label = stringResource(R.string.type),
+										icon = {
+											Icon(
+													Icons.Outlined.Category,
+													contentDescription = null
+											)
+										},
+										items = types.mapNotNull { it.name },
+										selected = todoType,
+										onSelect = { todoType = if (todoType == it) null else it },
+										onAdd = {
+											addCode = 0; showAddDialog = true; newItemName = ""
+										},
+										onDelete = {
+											deleteType(it); if (todoType == it) todoType = null
+										})
+							}
+							item {
+								SingleSection(
+										label = stringResource(R.string.subject),
+										icon = {
+											Icon(
+													Icons.Outlined.Category,
+													contentDescription = null
+											)
+										},
+										items = subjects.mapNotNull { it.name },
+										selected = subject,
+										onSelect = { subject = if (subject == it) null else it },
+										onAdd = {
+											addCode = 1; showAddDialog = true; newItemName = ""
+										},
+										onDelete = {
+											deleteSubject(it); if (subject == it) subject = null
+										})
+							}
+							item {
+								TagSection(
+										label = stringResource(R.string.tag),
+										icon = {
+											Icon(
+													Icons.AutoMirrored.Outlined.Label,
+													contentDescription = null
+											)
+										},
+										items = tags.mapNotNull { it.name },
+										selectedTags = selectedTags,
+										onToggle = { tag ->
+											selectedTags = if (tag in selectedTags) {
+												selectedTags.filter { it != tag }
+													.toMutableStateList()
+											} else {
+												(selectedTags + tag).toMutableStateList()
+											}
+										},
+										onAdd = {
+											addCode = 2; showAddDialog = true; newItemName = ""
+										},
+										onDelete = {
+											deleteTag(it); selectedTags =
+											selectedTags.filter { tag -> tag != it }
+												.toMutableStateList()
+										})
+							}
+							item {
+								EditPreference(
+										title = stringResource(R.string.location),
+										value = location ?: "",
+										onChange = { _, _, text ->
+											location = text?.ifEmpty { null }
+										},
+										placeholder = stringResource(R.string.location),
+										singleLine = true,
+										icon = {
+											Icon(
+													Icons.Default.LocationOn,
+													contentDescription = null
+											)
+										})
+							}
+							item {
+								PrioritySection(
+										priority = priority,
+										onPriorityChange = { priority = it },
+										priorityLabels = priorityLabels
+								)
+							}
+							item {
+								ColorPickerSection(
+										colors = colors,
+										selectedColor = selectedColor,
+										onColorSelected = {
+											selectedColor =
+												if (selectedColor == it || it.isEmpty()) null else it
+										})
+							}
+						}
 						SubtaskSection(
 								subtasks = subtasks,
 								onAdd = { showSubtaskDialog = true },
 								onDelete = { index -> subtasks.removeAt(index) })
-						PrioritySection(
-								modifier = modifier,
-								priority = priority,
-								onPriorityChange = { priority = it },
-								priorityLabels = priorityLabels
-						)
-						ColorPickerSection(
-								colors = colors, selectedColor = selectedColor, onColorSelected = {
-							selectedColor = if (selectedColor == it || it.isEmpty()) null else it
-						})
 						DateSection(
 								label = stringResource(R.string.due),
 								dateValue = dueDate,
@@ -761,70 +807,83 @@ class TodoManager(
 	@Composable
 	fun SingleSection(
 		label: String,
+		icon: (@Composable () -> Unit)? = null,
 		items: List<String>,
 		selected: String?,
 		onSelect: (String) -> Unit,
 		onAdd: () -> Unit,
 		onDelete: ((String) -> Unit)? = null,
 	) {
-		FlowRow(
-				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
-		) {
-			AssistChip(label = { Text(label) }, onClick = { })
-			items.forEach { name ->
-				ElevatedFilterChip(
-						modifier = Modifier.combinedClickable(
-						onClick = { onSelect(name) },
-						onLongClick = { onDelete?.invoke(name) }),
-						selected = name == selected,
-						onClick = { onSelect(name) },
-						label = { Text(name) },
-						leadingIcon = if (name == selected) {
-							{
+		Preference(
+				title = label, icon = icon, content = {
+			FlowRow(
+					horizontalArrangement = Arrangement.spacedBy(4.dp),
+					verticalArrangement = Arrangement.spacedBy((-8).dp)
+			) {
+				items.forEach { name ->
+					ElevatedFilterChip(
+							modifier = Modifier.combinedClickable(onClick = {
+						onSelect(
+								name
+						)
+					}, onLongClick = { onDelete?.invoke(name) }),
+							selected = name == selected,
+							onClick = { onSelect(name) },
+							contentPadding = PaddingValues(horizontal = 4.dp),
+							label = { Text(name) },
+							leadingIcon = if (name == selected) {
+								{
+									Icon(
+											imageVector = Icons.Default.Check,
+											contentDescription = null,
+											modifier = Modifier.size(FilterChipDefaults.IconSize)
+									)
+								}
+							} else {
+								null
+							})
+				}
+				if (selected != null && selected !in items) {
+					ElevatedFilterChip(
+							modifier = Modifier.combinedClickable(
+									onClick = {
+								onSelect(
+										selected
+								)
+							},
+									onLongClick = { onDelete?.invoke(selected) },
+									interactionSource = remember { MutableInteractionSource() },
+									indication = null
+							),
+							selected = true,
+							onClick = { onSelect(selected) },
+							contentPadding = PaddingValues(horizontal = 4.dp),
+							label = { Text(selected) },
+							leadingIcon = {
 								Icon(
 										imageVector = Icons.Default.Check,
 										contentDescription = null,
 										modifier = Modifier.size(FilterChipDefaults.IconSize)
 								)
-							}
-						} else {
-							null
-						})
-			}
-			if (selected != null && selected !in items) {
-				ElevatedFilterChip(
-						modifier = Modifier.combinedClickable(
-						onClick = {
-					onSelect(
-							selected
-					)
-				},
-						onLongClick = { onDelete?.invoke(selected) },
-						interactionSource = remember { MutableInteractionSource() },
-						indication = null
-				),
-						selected = true,
-						onClick = { onSelect(selected) },
-						label = { Text(selected) },
+							})
+				}
+				ElevatedAssistChip(
+						onClick = onAdd,
+						contentPadding = PaddingValues(horizontal = 4.dp),
 						leadingIcon = {
 							Icon(
-									imageVector = Icons.Default.Check,
-									contentDescription = null,
+									Icons.Default.Add,
+									contentDescription = stringResource(R.string.add),
 									modifier = Modifier.size(FilterChipDefaults.IconSize)
 							)
-						})
+						},
+						label = { Text(stringResource(R.string.add)) })
 			}
-			ElevatedAssistChip(onClick = onAdd, leadingIcon = {
-				Icon(
-						Icons.Default.Add, contentDescription = stringResource(R.string.add)
-				)
-			}, label = { Text(stringResource(R.string.add)) })
-		}
+		})
 	}
 
 	@Composable
 	fun PrioritySection(
-		modifier: Modifier = Modifier,
 		priority: Int,
 		onPriorityChange: (Int) -> Unit,
 		priorityLabels: List<String>,
@@ -860,119 +919,127 @@ class TodoManager(
 		val state = rememberSliderState(
 				value = priority.toFloat(), steps = 3, trackRange = 0f..4f
 		)
-		Column(
-				modifier = modifier
-		) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				Icon(
-						Icons.Rounded.PriorityHigh,
-						contentDescription = null,
-						modifier = Modifier.size(20.dp)
-				)
-				Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-				Text(
-						stringResource(R.string.priority),
-						style = MaterialTheme.typography.bodyLargeEmphasized,
-						modifier = Modifier.weight(1f)
-				)
-				Text(priorityLabels[priority], style = MaterialTheme.typography.bodyMedium)
-			}
-			Slider(
-					state = state,
-					modifier = Modifier.fillMaxWidth(),
-					enabled = true,
-					onValueChange = {
-						onPriorityChange(it.toInt())
-						state.value = it
-					},
-					thumb = {
-						Box(
-								modifier = Modifier
-									.size(width = 4.dp, height = 24.dp)
-									.squircleBackground(
-											when (it.value.toInt()) {
-												0 -> MaterialTheme.colorScheme.outline
-												1 -> MaterialTheme.colorScheme.tertiary
-												2 -> MaterialTheme.colorScheme.primary
-												3 -> MaterialTheme.colorScheme.secondary
-												4 -> MaterialTheme.colorScheme.error
-												else -> MaterialTheme.colorScheme.primary
-											}, 24.dp
-									)
+		Preference(
+				title = stringResource(R.string.priority),
+				icon = { Icon(Icons.Rounded.PriorityHigh, contentDescription = null) },
+				trailing = {
+					Text(priorityLabels[priority])
+				},
+				content = {
+					Slider(
+							state = state,
+							modifier = Modifier.fillMaxWidth(),
+							enabled = true,
+							onValueChange = {
+								onPriorityChange(it.toInt())
+								state.value = it
+							},
+							thumb = {
+								Box(
+										modifier = Modifier
+											.size(width = 4.dp, height = 24.dp)
+											.squircleBackground(
+													when (it.value.toInt()) {
+														0 -> MaterialTheme.colorScheme.outline
+														1 -> MaterialTheme.colorScheme.tertiary
+														2 -> MaterialTheme.colorScheme.primary
+														3 -> MaterialTheme.colorScheme.secondary
+														4 -> MaterialTheme.colorScheme.error
+														else -> MaterialTheme.colorScheme.primary
+													}, 24.dp
+											)
 
-						)
-					},
-					colors = SliderDefaults.colors(
-							activeTrackColor = when (state.value.toInt()) {
-								0 -> MaterialTheme.colorScheme.outline
-								1 -> MaterialTheme.colorScheme.tertiary
-								2 -> MaterialTheme.colorScheme.primary
-								3 -> MaterialTheme.colorScheme.secondary
-								4 -> MaterialTheme.colorScheme.error
-								else -> MaterialTheme.colorScheme.primary
-							}
-					),
-					interactionSource = remember { MutableInteractionSource() })
-		}
+								)
+							},
+							colors = SliderDefaults.colors(
+									activeTrackColor = when (state.value.toInt()) {
+										0 -> MaterialTheme.colorScheme.outline
+										1 -> MaterialTheme.colorScheme.tertiary
+										2 -> MaterialTheme.colorScheme.primary
+										3 -> MaterialTheme.colorScheme.secondary
+										4 -> MaterialTheme.colorScheme.error
+										else -> MaterialTheme.colorScheme.primary
+									}
+							),
+							interactionSource = remember { MutableInteractionSource() })
+				})
 	}
 
 	@Composable
 	fun TagSection(
 		label: String,
+		icon: (@Composable () -> Unit)? = null,
 		items: List<String>,
 		selectedTags: List<String>,
 		onToggle: (String) -> Unit,
 		onAdd: () -> Unit,
 		onDelete: ((String) -> Unit)? = null,
 	) {
-		FlowRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
-			AssistChip(label = { Text(label) }, onClick = { })
-			items.forEach { name ->
-				ElevatedFilterChip(
-						modifier = Modifier.combinedClickable(
-						onClick = { onToggle(name) },
-						onLongClick = { onDelete?.invoke(name) },
-						interactionSource = remember { MutableInteractionSource() }),
-						selected = name in selectedTags,
-						onClick = { },
-						label = { Text(name) },
-						leadingIcon = if (name in selectedTags) {
-							{
+		Preference(
+				title = label, icon = icon, content = {
+			FlowRow(
+					horizontalArrangement = Arrangement.spacedBy(6.dp),
+					verticalArrangement = Arrangement.spacedBy(0.dp)
+			) {
+				items.forEach { name ->
+					ElevatedFilterChip(
+							modifier = Modifier.combinedClickable(
+									onClick = {
+						onToggle(
+								name
+						)
+					},
+							onLongClick = { onDelete?.invoke(name) },
+							interactionSource = remember { MutableInteractionSource() }),
+							selected = name in selectedTags,
+							onClick = { },
+							contentPadding = PaddingValues(horizontal = 4.dp),
+							label = { Text(name) },
+							leadingIcon = if (name in selectedTags) {
+								{
+									Icon(
+											imageVector = Icons.Default.Check,
+											contentDescription = null,
+											modifier = Modifier.size(FilterChipDefaults.IconSize)
+									)
+								}
+							} else {
+								null
+							})
+				}
+				selectedTags.filter { it !in items }.forEach { name ->
+					ElevatedFilterChip(
+							modifier = Modifier.combinedClickable(
+									onClick = { onToggle(name) },
+									onLongClick = { onDelete?.invoke(name) },
+									interactionSource = remember { MutableInteractionSource() },
+									indication = null
+							),
+							selected = true,
+							onClick = { onToggle(name) },
+							contentPadding = PaddingValues(horizontal = 4.dp),
+							label = { Text(name) },
+							leadingIcon = {
 								Icon(
 										imageVector = Icons.Default.Check,
 										contentDescription = null,
 										modifier = Modifier.size(FilterChipDefaults.IconSize)
 								)
-							}
-						} else {
-							null
-						})
-			}
-			selectedTags.filter { it !in items }.forEach { name ->
-				ElevatedFilterChip(
-						modifier = Modifier.combinedClickable(
-						onClick = { onToggle(name) },
-						onLongClick = { onDelete?.invoke(name) },
-						interactionSource = remember { MutableInteractionSource() },
-						indication = null
-				),
-						selected = true,
-						onClick = { onToggle(name) },
-						label = { Text(name) },
+							})
+				}
+				ElevatedAssistChip(
+						onClick = onAdd,
+						contentPadding = PaddingValues(horizontal = 4.dp),
 						leadingIcon = {
 							Icon(
-									imageVector = Icons.Default.Check,
-									contentDescription = null,
+									Icons.Default.Add,
+									contentDescription = stringResource(R.string.add),
 									modifier = Modifier.size(FilterChipDefaults.IconSize)
 							)
-						})
+						},
+						label = { Text(stringResource(R.string.add)) })
 			}
-			ElevatedAssistChip(onClick = onAdd, leadingIcon = {
-				Icon(
-						Icons.Default.Add, contentDescription = stringResource(R.string.add)
-				)
-			}, label = { Text(stringResource(R.string.add)) })
-		}
+		})
 	}
 
 	@Composable
@@ -994,28 +1061,15 @@ class TodoManager(
 		quickDates: List<Pair<String, () -> Unit>> = emptyList(),
 	) {
 		val noneStr = stringResource(R.string.none)
-		val count = if (timeValue != null && dateValue != null) 3 else 2
-		Text(label, style = MaterialTheme.typography.bodyLargeEmphasized)
-		SegmentedListItem(
-				onClick = onDateClick,
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier.fillMaxWidth(),
-				shapes = ListItemDefaults.segmentedShapes(index = 0, count = count),
-				colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-				leadingContent = {
+		PreferenceCategory(title = label) {
+			item {
+				Preference(title = stringResource(R.string.date), onClick = onDateClick, icon = {
 					Icon(
 							Icons.Outlined.CalendarMonth,
 							contentDescription = stringResource(R.string.date)
 					)
-				},
-				overlineContent = {
-					Text(
-							stringResource(R.string.date),
-							style = MaterialTheme.typography.bodyLargeEmphasized
-					)
-				},
-				trailingContent = {
-					dateValue?.let {
+				}, trailing = {
+					if (dateValue != null) {
 						IconButton(onClick = onClearDate) {
 							Icon(
 									Icons.Rounded.Close,
@@ -1023,48 +1077,43 @@ class TodoManager(
 							)
 						}
 					}
-				},
-				supportingContent = {
-					FlowRow(horizontalArrangement = Arrangement.SpaceBetween) {
-						quickDates.forEach { (label, action) ->
-							SuggestionChip(
-									onClick = action,
-									contentPadding = PaddingValues(0.dp),
-									label = {
-										Text(
-												label, style = MaterialTheme.typography.labelMedium
-										)
-									},
-							)
+				}, content = {
+					Column {
+						Text(
+								text = dateValue ?: noneStr,
+								color = MaterialTheme.colorScheme.onSurfaceVariant,
+								style = MaterialTheme.typography.bodyMediumEmphasized
+						)
+						if (quickDates.isNotEmpty()) {
+							FlowRow(
+									horizontalArrangement = Arrangement.spacedBy(4.dp),
+									verticalArrangement = Arrangement.spacedBy((-4).dp)
+							) {
+								quickDates.forEach { (qLabel, action) ->
+									SuggestionChip(
+											onClick = action,
+											contentPadding = PaddingValues(0.dp),
+											label = {
+												Text(
+														qLabel,
+														style = MaterialTheme.typography.labelMedium
+												)
+											},
+									)
+								}
+							}
 						}
 					}
-				}) {
-			Text(
-					dateValue ?: noneStr,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
-					style = MaterialTheme.typography.bodyMediumEmphasized
-			)
-		}
-
-		SegmentedListItem(
-				onClick = onTimeClick,
-				modifier = Modifier.fillMaxWidth(),
-				shapes = ListItemDefaults.segmentedShapes(index = 1, count = count),
-				colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-				leadingContent = {
+				})
+			}
+			item {
+				Preference(title = stringResource(R.string.time), onClick = onTimeClick, icon = {
 					Icon(
 							Icons.Outlined.Schedule,
 							contentDescription = stringResource(R.string.time)
 					)
-				},
-				overlineContent = {
-					Text(
-							stringResource(R.string.time),
-							style = MaterialTheme.typography.bodyLargeEmphasized
-					)
-				},
-				trailingContent = {
-					timeValue?.let {
+				}, summary = timeValue ?: noneStr, trailing = {
+					if (timeValue != null) {
 						IconButton(onClick = onClearTime) {
 							Icon(
 									Icons.Rounded.Close,
@@ -1072,55 +1121,39 @@ class TodoManager(
 							)
 						}
 					}
-				}) {
-			Text(
-					timeValue ?: noneStr,
-					color = MaterialTheme.colorScheme.onSurfaceVariant,
-					style = MaterialTheme.typography.bodyMediumEmphasized
-			)
-		}
-
-		if (timeValue != null && dateValue != null) {
-			Box {
-				SegmentedListItem(
-						onClick = onRemindClick,
-						modifier = Modifier.fillMaxWidth(),
-						shapes = ListItemDefaults.segmentedShapes(index = 2, count = 3),
-						colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-						leadingContent = {
-							Icon(
-									Icons.Outlined.Notifications,
-									contentDescription = stringResource(R.string.remind)
-							)
-						},
-						overlineContent = {
-							Text(
-									stringResource(R.string.remind),
-									style = MaterialTheme.typography.bodyLargeEmphasized
-							)
-						},
-						trailingContent = {
-							remindValue?.let {
-								IconButton(onClick = onClearRemind) {
+				})
+			}
+			if (timeValue != null && dateValue != null) {
+				item {
+					Box {
+						Preference(
+								title = stringResource(R.string.remind),
+								onClick = onRemindClick,
+								icon = {
 									Icon(
-											Icons.Rounded.Close,
-											contentDescription = stringResource(R.string.delete)
+											Icons.Outlined.Notifications,
+											contentDescription = stringResource(R.string.remind)
 									)
-								}
-							}
-						}) {
-					Text(
-							remindValue ?: noneStr,
-							color = MaterialTheme.colorScheme.onSurfaceVariant,
-							style = MaterialTheme.typography.bodyMediumEmphasized
-					)
+								},
+								summary = remindValue ?: noneStr,
+								trailing = {
+									if (remindValue != null) {
+										IconButton(onClick = onClearRemind) {
+											Icon(
+													Icons.Rounded.Close,
+													contentDescription = stringResource(R.string.delete)
+											)
+										}
+									}
+								})
+						RemindDropdownMenu(
+								expanded = showRemindMenu,
+								onDismiss = onDismissRemindMenu,
+								onSelected = onRemindSelected,
+								onCustom = onCustomRemind
+						)
+					}
 				}
-				RemindDropdownMenu(
-						expanded = showRemindMenu,
-						onDismiss = onDismissRemindMenu,
-						onSelected = onRemindSelected,
-						onCustom = onCustomRemind
-				)
 			}
 		}
 	}
@@ -1240,34 +1273,20 @@ class TodoManager(
 		selectedColor: String?,
 		onColorSelected: (String) -> Unit,
 	) {
-		SegmentedListItem(
-				onClick = {},
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier.fillMaxWidth(),
-				shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
-				colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-				leadingContent = {
+		Preference(title = stringResource(R.string.color), icon = {
+			Icon(
+					Icons.Rounded.ColorLens, contentDescription = stringResource(R.string.color)
+			)
+		}, trailing = {
+			if (selectedColor != null) {
+				IconButton(onClick = { onColorSelected("") }) {
 					Icon(
-							Icons.Rounded.ColorLens,
-							contentDescription = stringResource(R.string.color)
+							Icons.Rounded.Close,
+							contentDescription = stringResource(R.string.delete)
 					)
-				},
-				overlineContent = {
-					Text(
-							stringResource(R.string.color),
-							style = MaterialTheme.typography.bodyLargeEmphasized
-					)
-				},
-				trailingContent = {
-					selectedColor?.let {
-						IconButton(onClick = { onColorSelected("") }) {
-							Icon(
-									Icons.Rounded.Close,
-									contentDescription = stringResource(R.string.delete)
-							)
-						}
-					}
-				}) {
+				}
+			}
+		}, content = {
 			Row(
 					modifier = Modifier
 						.horizontalScroll(rememberScrollState())
@@ -1295,7 +1314,7 @@ class TodoManager(
 								.clickable { onColorSelected(colorStr) })
 				}
 			}
-		}
+		})
 	}
 
 	@Composable

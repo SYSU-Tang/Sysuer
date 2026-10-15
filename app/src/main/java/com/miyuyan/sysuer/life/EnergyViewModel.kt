@@ -321,7 +321,7 @@ class EnergyViewModel(application: Application) : AndroidViewModel(application){
 						waterSchemes.value = (data as JSONObject).getJSONArray("waterUsageList")
 							.filterIsInstance<JSONObject>().map { item ->
 								val usage = item.getString("totalWaterUsage")
-									?: context.getString(R.string.no_data_available)
+									?: context.getString(R.string.none)
 								SysuerCalendar().apply {
 									this.year = year
 									this.month = month

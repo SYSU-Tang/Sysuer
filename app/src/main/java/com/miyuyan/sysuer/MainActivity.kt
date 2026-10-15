@@ -55,6 +55,7 @@ import com.alibaba.fastjson2.JSONObject
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import com.miyuyan.sysuer.academic.AcademyNotificationRoute
+import com.miyuyan.sysuer.academic.AgendaRoute
 import com.miyuyan.sysuer.academic.AssistantEvaluationRoute
 import com.miyuyan.sysuer.academic.AssistantInfoRoute
 import com.miyuyan.sysuer.academic.CETRoute
@@ -66,6 +67,7 @@ import com.miyuyan.sysuer.academic.CourseScheduleRoute
 import com.miyuyan.sysuer.academic.CourseSelectionRoute
 import com.miyuyan.sysuer.academic.CourseSelectedRoute
 import com.miyuyan.sysuer.academic.DormRoute
+import com.miyuyan.sysuer.academic.EvaluationRoute
 import com.miyuyan.sysuer.academic.ExamRoute
 import com.miyuyan.sysuer.academic.GradeForLevelRoute
 import com.miyuyan.sysuer.academic.GradeRoute
@@ -99,10 +101,13 @@ import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.life.NetPayRoute
 import com.miyuyan.sysuer.life.NewsRoute
 import com.miyuyan.sysuer.life.EnergyRoute
+import com.miyuyan.sysuer.life.GymRoute
 import com.miyuyan.sysuer.life.PayRoute
 import com.miyuyan.sysuer.life.SchoolBusRoute
+import com.miyuyan.sysuer.todo.TodoRoute
 import com.miyuyan.sysuer.nav.About
 import com.miyuyan.sysuer.nav.AcademyNotification
+import com.miyuyan.sysuer.nav.Agenda
 import com.miyuyan.sysuer.nav.AssistantEvaluation
 import com.miyuyan.sysuer.nav.AssistantInfo
 import com.miyuyan.sysuer.nav.ClassroomQuery
@@ -120,9 +125,11 @@ import com.miyuyan.sysuer.nav.CourseSchedule
 import com.miyuyan.sysuer.nav.CourseSelection
 import com.miyuyan.sysuer.nav.Dorm
 import com.miyuyan.sysuer.nav.EnergyFee
+import com.miyuyan.sysuer.nav.Evaluation
 import com.miyuyan.sysuer.nav.Exam
 import com.miyuyan.sysuer.nav.Grade
 import com.miyuyan.sysuer.nav.GradeForLevel
+import com.miyuyan.sysuer.nav.GymReservation
 import com.miyuyan.sysuer.nav.Home
 import com.miyuyan.sysuer.nav.Homework
 import com.miyuyan.sysuer.nav.LeaveReturnRegistration
@@ -146,6 +153,7 @@ import com.miyuyan.sysuer.nav.SchoolCalendar
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
+import com.miyuyan.sysuer.nav.Todo
 import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.nav.Update
 import com.miyuyan.sysuer.rainClass.RainClassDetailRoute
@@ -411,6 +419,13 @@ class MainActivity : BaseActivity() {
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<Evaluation> {
+						EvaluationRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
 					entry<Dorm> {
 						DormRoute(
 								backStack,
@@ -502,8 +517,25 @@ class MainActivity : BaseActivity() {
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current
 						)
 					}
+					entry<Agenda> {
+						AgendaRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<Todo> {
+						TodoRoute(backStack)
+					}
 					entry<EnergyFee> {
 						EnergyRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<GymReservation> {
+						GymRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current

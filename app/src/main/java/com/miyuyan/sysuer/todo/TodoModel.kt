@@ -17,8 +17,32 @@ class TodoModel(application: Application) : AndroidViewModel(application) {
 	val subjects: MutableLiveData<List<SubjectEntity>> = MutableLiveData()
 	val tags: MutableLiveData<List<TagEntity>> = MutableLiveData()
 	val todoList: MutableLiveData<List<TodoEntity>> = MutableLiveData()
+
+	/**
+	 * 日历圆点标记：所有待办（不受筛选影响）的 dueDate / ddl 并集。
+	 *
+	 * 单独一份全量查询，否则一筛选日历上的点就跟着没了。
+	 * 存 `yyyy-MM-dd` 字符串而不是 CalendarDay，让 ViewModel 不依赖日历库。
+	 */
+	val calendarMarks: MutableLiveData<Set<String>> = MutableLiveData()
+
 	fun loadTodos(where: String, args: Array<String>): Job = viewModelScope.launch {
 		todoList.value = repository.getTodo(where, args)
+	}
+
+	fun loadTodos(where: String, args: List<String>): Job =
+		loadTodos(where, args.toTypedArray())
+
+	/** 重跑全量日期标记，只在增删改后调用即可 */
+	fun loadCalendarMarks(): Job = viewModelScope.launch {
+		val all: List<TodoEntity> = repository.getTodo()
+		val dates = all.flatMap { todo ->
+			listOfNotNull(
+					todo.dueDate?.takeIf { it.isNotEmpty() },
+					todo.ddl?.takeIf { it.isNotEmpty() }
+			)
+		}
+		calendarMarks.value = dates.toSet()
 	}
 
 	fun addTodo(todoInfo: TodoEntity): Deferred<Long> = viewModelScope.async {

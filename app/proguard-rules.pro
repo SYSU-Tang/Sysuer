@@ -23,8 +23,6 @@
 #-keep interface com.haibin.calendarview.** { *; }
 -keep class com.miyuyan.sysuer.view.CustomMonthView
 -keep class com.miyuyan.sysuer.view.CustomWeekView
--keep class com.miyuyan.sysuer.view.FeeMonthView
--keep class com.miyuyan.sysuer.view.FeeWeekView
 -keep class kotlin.Metadata { *; }
 -dontwarn kotlin.Metadata
 -keepclassmembers class * {

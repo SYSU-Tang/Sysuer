@@ -113,11 +113,11 @@ fun NewsRoute(
 
 	ActivityPager(
 			title = stringResource(R.string.news),
-			tabs = listOf(
-					MenuItem(stringResource(R.string.news)),
-					MenuItem(stringResource(R.string.official_account)),
-					MenuItem(stringResource(R.string.notification)),
-					MenuItem(stringResource(R.string.daily_news)),
+			navs = listOf(
+					MenuItem(stringResource(R.string.news), iconResource = R.drawable.text),
+					MenuItem(stringResource(R.string.official_account), iconResource = R.drawable.web),
+					MenuItem(stringResource(R.string.notification), iconResource = R.drawable.notice),
+					MenuItem(stringResource(R.string.daily_news), iconResource = R.drawable.text),
 			),
 			isTopBarContentFixed = true,
 			onNavigationClick = { backStack.navigateBack(activity) },

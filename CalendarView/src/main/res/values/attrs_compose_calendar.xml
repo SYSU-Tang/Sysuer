@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose 日历属性，可通过 rememberComposeCalendarConfig 解析 -->
+    <declare-styleable name="ComposeCalendarView">
+        <!-- 周起始 -->
+        <attr name="compose_week_start_with">
+            <enum name="sun" value="1" />
+            <enum name="mon" value="2" />
+            <enum name="sat" value="7" />
+        </attr>
+
+        <!-- 月视图显示模式 -->
+        <attr name="compose_month_show_mode">
+            <enum name="mode_all" value="0" />
+            <enum name="mode_only_current" value="1" />
+            <enum name="mode_fix" value="2" />
+        </attr>
+
+        <!-- 选择模式 -->
+        <attr name="compose_select_mode">
+            <enum name="default_mode" value="0" />
+            <enum name="single_mode" value="1" />
+            <enum name="range_mode" value="2" />
+            <enum name="multi_mode" value="3" />
+        </attr>
+
+        <!-- 日期范围 -->
+        <attr name="compose_min_year" format="integer" />
+        <attr name="compose_max_year" format="integer" />
+        <attr name="compose_min_year_month" format="integer" />
+        <attr name="compose_max_year_month" format="integer" />
+        <attr name="compose_min_year_day" format="integer" />
+        <attr name="compose_max_year_day" format="integer" />
+
+        <!-- 尺寸 -->
+        <attr name="compose_item_height" format="dimension" />
+        <attr name="compose_week_bar_height" format="dimension" />
+        <attr name="compose_calendar_padding_left" format="dimension" />
+        <attr name="compose_calendar_padding_right" format="dimension" />
+        <attr name="compose_day_text_size" format="dimension" />
+        <attr name="compose_lunar_text_size" format="dimension" />
+        <attr name="compose_week_bar_text_size" format="dimension" />
+
+        <!-- 开关 -->
+        <attr name="compose_default_expanded" format="boolean" />
+        <attr name="compose_show_week_bar" format="boolean" />
+        <attr name="compose_show_lunar" format="boolean" />
+        <attr name="compose_show_scheme_text" format="boolean" />
+        <attr name="compose_show_out_of_range_days" format="boolean" />
+        <attr name="compose_month_pager_scrollable" format="boolean" />
+        <attr name="compose_week_pager_scrollable" format="boolean" />
+        <attr name="compose_gesture_enabled" format="boolean" />
+
+        <!-- 选择限制 -->
+        <attr name="compose_max_multi_select_size" format="integer" />
+        <attr name="compose_min_select_range" format="integer" />
+        <attr name="compose_max_select_range" format="integer" />
+
+        <!-- 配色 -->
+        <attr name="compose_background" format="color" />
+        <attr name="compose_week_bar_background" format="color" />
+        <attr name="compose_week_bar_text_color" format="color" />
+        <attr name="compose_day_text_color" format="color" />
+        <attr name="compose_other_month_day_text_color" format="color" />
+        <attr name="compose_lunar_text_color" format="color" />
+        <attr name="compose_other_month_lunar_text_color" format="color" />
+        <attr name="compose_current_day_text_color" format="color" />
+        <attr name="compose_current_day_lunar_text_color" format="color" />
+        <attr name="compose_selected_background_color" format="color" />
+        <attr name="compose_selected_text_color" format="color" />
+        <attr name="compose_selected_lunar_text_color" format="color" />
+        <attr name="compose_scheme_text_color" format="color" />
+        <attr name="compose_scheme_lunar_text_color" format="color" />
+        <attr name="compose_scheme_default_color" format="color" />
+        <attr name="compose_range_background_color" format="color" />
+        <attr name="compose_range_edge_color" format="color" />
+        <attr name="compose_disabled_text_color" format="color" />
+        <attr name="compose_out_of_range_text_color" format="color" />
+    </declare-styleable>
+</resources>

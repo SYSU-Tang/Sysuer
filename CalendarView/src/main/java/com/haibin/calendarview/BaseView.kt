@@ -282,7 +282,7 @@ abstract class BaseView(context: Context, attrs: AttributeSet? = null) : View(co
 				if (mSchemeDatesMap.containsKey("$it")) {
 					val d = mSchemeDatesMap["$it"] ?: return@forEach
 					it.scheme =
-						if (TextUtils.isEmpty(d.scheme)) mDelegate.schemeText.toString() else d.scheme
+						if (TextUtils.isEmpty(d.scheme)) mDelegate.schemeText else d.scheme
 					it.schemeColor = d.schemeColor
 					it.schemes = d.schemes
 				} else {

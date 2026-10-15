@@ -90,33 +90,44 @@ fun GradeForLevelRoute(
 						horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
 				) {
 					SingleSelectChipDropdown(
-							category = stringResource(R.string.train_type),
-							options = listOf(stringResource(R.string.reset)) + viewModel.trainTypeOptions.map {
-								it.getString("dataName")
+							title = stringResource(R.string.train_type),
+							entries = viewModel.trainTypeOptions.map { it.getString("dataName") },
+							entryValues = viewModel.trainTypeOptions.map { it.getString("dataNumber") },
+							selectedIndex = trainTypeValue?.let { v ->
+								viewModel.trainTypeOptions.indexOfFirst {
+									it.getString("dataNumber") == v
+								}.takeIf { it >= 0 }
 							},
-							optionValues = listOf(null) + viewModel.trainTypeOptions.map {
-								it.getString("dataNumber")
-							},
-							selectedValue = trainTypeValue,
-							onValueChange = { trainTypeValue = it; onFilterChange() })
+							onChange = { _, _, value ->
+								trainTypeValue = value
+								onFilterChange()
+							})
 					SingleSelectChipDropdown(
-							category = stringResource(R.string.year),
-							options = listOf(stringResource(R.string.reset)) + viewModel.yearOptions.map {
-								it.getString("acadYearSemester")
+							title = stringResource(R.string.year),
+							entries = viewModel.yearOptions.map { it.getString("acadYearSemester") },
+							entryValues = viewModel.yearOptions.map { it.getString("acadYearSemester") },
+							selectedIndex = yearValue?.let { v ->
+								viewModel.yearOptions.indexOfFirst {
+									it.getString("acadYearSemester") == v
+								}.takeIf { it >= 0 }
 							},
-							optionValues = listOf(null) + viewModel.yearOptions.map { it.getString("acadYearSemester") },
-							selectedValue = yearValue,
-							onValueChange = { yearValue = it; onFilterChange() })
+							onChange = { _, _, value ->
+								yearValue = value
+								onFilterChange()
+							})
 					SingleSelectChipDropdown(
-							category = stringResource(R.string.course_type),
-							options = listOf(stringResource(R.string.reset)) + viewModel.courseTypeOptions.map {
-								it.getString("catName")
+							title = stringResource(R.string.course_type),
+							entries = viewModel.courseTypeOptions.map { it.getString("catName") },
+							entryValues = viewModel.courseTypeOptions.map { it.getString("catCode") },
+							selectedIndex = courseTypeValue?.let { v ->
+								viewModel.courseTypeOptions.indexOfFirst {
+									it.getString("catCode") == v
+								}.takeIf { it >= 0 }
 							},
-							optionValues = listOf(null) + viewModel.courseTypeOptions.map {
-								it.getString("catCode")
-							},
-							selectedValue = courseTypeValue,
-							onValueChange = { courseTypeValue = it; onFilterChange() })
+							onChange = { _, _, value ->
+								courseTypeValue = value
+								onFilterChange()
+							})
 					InputDialogChip(
 							stringResource(R.string.course_name), courseNameValue
 					) { courseNameValue = it; onFilterChange() }

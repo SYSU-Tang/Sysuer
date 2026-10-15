@@ -298,7 +298,7 @@ private fun ServiceBox(
 						},
 						onLongClick = { onItemLongClick(item) },
 						label = item.name,
-						colors = if (item.activity.isNullOrBlank()) AssistChipDefaults.elevatedAssistChipColors(
+						colors = if (item.route.isNullOrBlank() && item.activity.isNullOrBlank()) AssistChipDefaults.elevatedAssistChipColors(
 								containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
 						)
 						else AssistChipDefaults.elevatedAssistChipColors(),

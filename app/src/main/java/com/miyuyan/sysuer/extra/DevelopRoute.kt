@@ -1,5 +1,6 @@
 package com.miyuyan.sysuer.extra
 
+import android.content.Intent
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
@@ -13,7 +14,9 @@ import androidx.navigation3.runtime.NavKey
 import com.miyuyan.preference.PreferenceCategory
 import com.miyuyan.preference.PreferenceScreen
 import com.miyuyan.preference.SwitchPreference
+import com.miyuyan.preference.ItemPreference
 import com.miyuyan.sysuer.R
+import com.miyuyan.sysuer.academic.ComposeCalendarDemoActivity
 import com.miyuyan.sysuer.nav.Developer
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.preference.SettingPreference
@@ -60,6 +63,21 @@ fun DevelopRoute(
 							checked = prefs[SettingPreference.BETA_CHECK] == true,
 							onCheckedChange = { sp.betaCheck = it },
 							icon = { PreferenceIcon(R.drawable.flask) },
+					)
+				}
+			}
+			PreferenceCategory {
+				item {
+					// Compose 日历组件演示页（独立 Activity，直接启动）
+					ItemPreference(
+							title = "Compose 日历",
+							icon = R.drawable.developer,
+							summary = "月视图 / 周视图横向滑动与拖动收起演示",
+							onClick = {
+								context.startActivity(
+										Intent(context, ComposeCalendarDemoActivity::class.java)
+								)
+							},
 					)
 				}
 			}

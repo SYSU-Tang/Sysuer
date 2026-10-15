@@ -1082,4 +1082,20 @@
     <string name="exam_detail">考试详情</string>
     <string name="course_not_found">未发现该课程</string>
     <string name="payment_history">支付历史</string>
+    <string name="total_evaluations">总评数</string>
+    <string name="evaluated_count">已评数</string>
+    <string name="course_college">开课院系</string>
+    <string name="teaching_class_number">教学班号</string>
+    <string name="course_code">课程代码</string>
+    <string name="evaluation_status">评价状态</string>
+    <string name="to_be_evaluated">待评价</string>
+    <string name="evaluated">已评价</string>
+    <string name="evaluation_saved">已保存</string>
+    <string name="this_week">本周</string>
+    <string name="this_month">本月</string>
+    <string name="selected_range">指定区间</string>
+    <string name="unclassified">未分类</string>
+    <string name="no_matching_todo">没有符合条件的待办</string>
+    <string name="clear_all_filter">清除全部筛选</string>
+    <string name="date_field">日期字段</string>
 </resources>

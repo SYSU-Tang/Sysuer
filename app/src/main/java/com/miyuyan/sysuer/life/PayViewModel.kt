@@ -11,7 +11,10 @@ import androidx.lifecycle.viewModelScope
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
+import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.model.PayModel
+import com.miyuyan.sysuer.view.UiState
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
@@ -38,16 +41,47 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	var toPayItems: JSONObject = JSONObject()
 	val pendingPay: SnapshotStateSet<String> = mutableStateSetOf()
 
+	/** 各页签的 UI 状态，索引与页签及请求码一一对应 */
+	private val uiStates = List(5) { model.getUiState(it) }
+	private var lastFeeYear = DateTimeManager.year.toString()
+	private var lastPaymentFrom = ""
+	private var lastPaymentTo: String? = null
+
 	init {
 		viewModelScope.launch {
 			model.message.collect { (code, response) ->
 			if (response.getInteger("code") == 200) {
 				when (code) {
-					0 -> _toPayList.value = response.getJSONArray("data")
-					1 -> _selectivePayList.value = response.getJSONArray("data")
-					2 -> _feeList.value = response.getJSONArray("data")
-					3 -> _paymentList.value = response.getJSONArray("data")
-					4 -> _refundList.value = response.getJSONArray("data")
+					0 -> {
+						val array = response.getJSONArray("data")
+						_toPayList.value = array
+						updatePageState(0, array)
+					}
+
+					1 -> {
+						val array = response.getJSONArray("data")
+						_selectivePayList.value = array
+						updatePageState(1, array)
+					}
+
+					2 -> {
+						val array = response.getJSONArray("data")
+						_feeList.value = array
+						updatePageState(2, array)
+					}
+
+					3 -> {
+						val array = response.getJSONArray("data")
+						_paymentList.value = array
+						updatePageState(3, array)
+					}
+
+					4 -> {
+						val array = response.getJSONArray("data")
+						_refundList.value = array
+						updatePageState(4, array)
+					}
+
 					5 -> {
 						val data = response.getJSONObject("data")
 						toPayItems.fluentPut("ticketTitle", data.getString("ticketTitle"))
@@ -112,24 +146,33 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 						pendingPay.addAll(response.getJSONArray("data").filterIsInstance<String>())
 					}
 				}
+			} else if (code in 0..4) {
+				uiStates[code].value = UiState.Error
 			}
 		}
 		}
 	}
 
 	fun fetchToPayList() {
+		uiStates[0].value = UiState.Loading
 		model.enqueue("client/api/client/necessary/list", "{}", 0)
 	}
 
 	fun fetchSelectivePayList() {
+		uiStates[1].value = UiState.Loading
 		model.enqueue("client/api/client/chooce/list", "{}", 1)
 	}
 
 	fun fetchFeeList(year: String) {
+		lastFeeYear = year
+		uiStates[2].value = UiState.Loading
 		model.enqueue("client/api/client/record/feelist", "{\"year\":$year}", 2)
 	}
 
 	fun fetchPaymentList(from: String, to: String?) {
+		lastPaymentFrom = from
+		lastPaymentTo = to
+		uiStates[3].value = UiState.Loading
 		model.enqueue(
 			"client/api/client/record/paymentlist",
 			"{\"startTime\":\"$from\",\"overTime\":\"$to\"}",
@@ -138,7 +181,26 @@ class PayViewModel(application: Application) : AndroidViewModel(application) {
 	}
 
 	fun fetchRefundList() {
+		uiStates[4].value = UiState.Loading
 		model.enqueue("client/api/client/refund/list", "{}", 4)
+	}
+
+	/** 获取指定页签的 UI 状态流，页签序号与请求码一一对应 */
+	fun getUiState(page: Int): StateFlow<UiState> = uiStates[page]
+
+	/** 重新加载指定页签的数据，用于加载失败后的重试 */
+	fun retryPage(page: Int) {
+		when (page) {
+			0 -> fetchToPayList()
+			1 -> fetchSelectivePayList()
+			2 -> fetchFeeList(lastFeeYear)
+			3 -> fetchPaymentList(lastPaymentFrom, lastPaymentTo)
+			else -> fetchRefundList()
+		}
+	}
+
+	private fun updatePageState(page: Int, array: JSONArray?) {
+		uiStates[page].value = if (array.isNullOrEmpty()) UiState.Empty else UiState.Content
 	}
 
 	fun check(data: JSONObject) {

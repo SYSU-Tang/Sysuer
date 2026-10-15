@@ -1,21 +1,14 @@
 package com.miyuyan.sysuer.academic
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -24,15 +17,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
@@ -97,10 +89,12 @@ fun CourseSelectionRoute(
 								onNavigateToFilter = { _, _ -> filterTarget = 0 },
 								onShowPeDialog = { showPeDialog = true },
 						)
+
 						1 -> CourseSelectionPreviewFilterPanel(
 								viewModel = viewModel,
 								onNavigateToFilter = { _, _ -> filterTarget = 1 },
 						)
+
 						else -> CourseSelectionSelectedFilterPanel(viewModel)
 					}
 				}
@@ -113,12 +107,14 @@ fun CourseSelectionRoute(
 						backStack.add(CourseDetail(courseId = id, courseNum = code))
 					},
 			)
+
 			1 -> CourseSelectionPreviewScreen(
 					viewModel = viewModel,
 					onNavigateToDetail = { id, code, _ ->
 						backStack.add(CourseDetail(courseId = id, courseNum = code))
 					},
 			)
+
 			else -> CourseSelectionSelectedScreen(
 					viewModel = viewModel,
 					onNavigateToDetail = { id, code, _ ->
@@ -152,33 +148,33 @@ private fun CourseSelectionFilterSheet(
 	target: Int,
 	onDismiss: () -> Unit,
 ) {
-	val initialName = (if (target == 0) viewModel.mainFilterName else viewModel.previewFilterName).value
-	val initialValue = (if (target == 0) viewModel.mainFilterValue else viewModel.previewFilterValue).value
+	val initialName by (if (target == 0) viewModel.mainFilterName else viewModel.previewFilterName).collectAsState()
+	val initialValue by (if (target == 0) viewModel.mainFilterValue else viewModel.previewFilterValue).collectAsState()
 	var name by remember {
 		mutableStateOf(
 				CourseFilterNameData(
-						courseName = initialName?.courseName,
-						studyCampusId = initialName?.studyCampusId,
-						week = initialName?.week,
-						classTimes = initialName?.classTimes,
-						courseUnitNum = initialName?.courseUnitNum,
-						teachingTeacherNum = initialName?.teachingTeacherNum,
-						teachingLanguageCode = initialName?.teachingLanguageCode,
-						specialClassCode = initialName?.specialClassCode,
+						courseName = initialName.courseName,
+						studyCampusId = initialName.studyCampusId,
+						week = initialName.week,
+						classTimes = initialName.classTimes,
+						courseUnitNum = initialName.courseUnitNum,
+						teachingTeacherNum = initialName.teachingTeacherNum,
+						teachingLanguageCode = initialName.teachingLanguageCode,
+						specialClassCode = initialName.specialClassCode,
 				)
 		)
 	}
 	var value by remember {
 		mutableStateOf(
 				CourseFilterValueData(
-						courseName = initialValue?.courseName,
-						studyCampusId = initialValue?.studyCampusId,
-						week = initialValue?.week,
-						classTimes = initialValue?.classTimes,
-						courseUnitNum = initialValue?.courseUnitNum,
-						teachingTeacherNum = initialValue?.teachingTeacherNum,
-						teachingLanguageCode = initialValue?.teachingLanguageCode,
-						specialClassCode = initialValue?.specialClassCode,
+						courseName = initialValue.courseName,
+						studyCampusId = initialValue.studyCampusId,
+						week = initialValue.week,
+						classTimes = initialValue.classTimes,
+						courseUnitNum = initialValue.courseUnitNum,
+						teachingTeacherNum = initialValue.teachingTeacherNum,
+						teachingLanguageCode = initialValue.teachingLanguageCode,
+						specialClassCode = initialValue.specialClassCode,
 				)
 		)
 	}
@@ -191,8 +187,13 @@ private fun CourseSelectionFilterSheet(
 		val courseName = name.courseName?.trim().orEmpty()
 		val teacher = name.teachingTeacherNum?.trim().orEmpty()
 		val school = name.courseUnitNum?.trim().orEmpty()
-		name = name.copy(courseName = courseName, teachingTeacherNum = teacher, courseUnitNum = school)
-		value = value.copy(courseName = courseName, teachingTeacherNum = teacher, courseUnitNum = school)
+		name =
+			name.copy(courseName = courseName, teachingTeacherNum = teacher, courseUnitNum = school)
+		value = value.copy(
+				courseName = courseName,
+				teachingTeacherNum = teacher,
+				courseUnitNum = school
+		)
 		if (target == 0) {
 			viewModel.setMainFilterName(name)
 			viewModel.setMainFilterValue(value)
@@ -205,173 +206,216 @@ private fun CourseSelectionFilterSheet(
 
 	ModalBottomSheet(onDismissRequest = onDismiss) {
 		PreferenceScreen {
-		PreferenceCategory {
-			item {
-				EditPreference(
-						title = stringResource(R.string.course),
-						icon = { Icon(painterResource(R.drawable.course), contentDescription = null) },
-						value = name.courseName.orEmpty(),
-						placeholder = stringResource(R.string.course),
-						onChange = { _, _, v ->
-							val text = v.orEmpty()
-							name = name.copy(courseName = text)
-							value = value.copy(courseName = text)
-						},
-				)
-			}
-			item {
-				MenuPreference(
-						title = stringResource(R.string.campus),
-						icon = { Icon(painterResource(R.drawable.location), contentDescription = null) },
-						required = false,
-						summary = name.studyCampusId?.takeIf { it.isNotEmpty() },
-						entries = options[0].map { it.name.orEmpty() },
-						entryValues = options[0].map { it.code },
-						selectedIndex = options[0].indexOfFirst { it.name == name.studyCampusId }
-							.takeIf { it >= 0 },
-						onChange = { index, _, _ ->
-							if (index != null) {
-								val option = options[0][index]
-								name = name.copy(studyCampusId = option.name)
-								value = value.copy(studyCampusId = option.code)
-							} else {
-								name = name.copy(studyCampusId = "")
-								value = value.copy(studyCampusId = "")
-							}
-						},
-				)
-			}
-			item {
-				MenuPreference(
-						title = stringResource(R.string.week),
-						icon = { Icon(painterResource(R.drawable.calendar), contentDescription = null) },
-						required = false,
-						summary = name.week?.takeIf { it.isNotEmpty() },
-						entries = options[1].map { it.name.orEmpty() },
-						entryValues = options[1].map { it.code },
-						selectedIndex = options[1].indexOfFirst { it.name == name.week }.takeIf { it >= 0 },
-						onChange = { index, _, _ ->
-							if (index != null) {
-								val option = options[1][index]
-								name = name.copy(week = option.name)
-								value = value.copy(week = option.code)
-							} else {
-								name = name.copy(week = "")
-								value = value.copy(week = "")
-							}
-						},
-				)
-			}
-			item {
-				MenuPreference(
-						title = stringResource(R.string.section),
-						icon = { Icon(painterResource(R.drawable.time), contentDescription = null) },
-						required = false,
-						summary = name.classTimes?.takeIf { it.isNotEmpty() },
-						entries = options[2].map { it.name.orEmpty() },
-						entryValues = options[2].map { it.code },
-						selectedIndex = options[2].indexOfFirst { it.name == name.classTimes }
-							.takeIf { it >= 0 },
-						onChange = { index, _, _ ->
-							if (index != null) {
-								val option = options[2][index]
-								name = name.copy(classTimes = option.name)
-								value = value.copy(classTimes = option.code)
-							} else {
-								name = name.copy(classTimes = "")
-								value = value.copy(classTimes = "")
-							}
-						},
-				)
-			}
-			item {
-				MenuPreference(
-						title = stringResource(R.string.language),
-						icon = { Icon(painterResource(R.drawable.language), contentDescription = null) },
-						required = false,
-						summary = name.teachingLanguageCode?.takeIf { it.isNotEmpty() },
-						entries = options[3].map { it.name.orEmpty() },
-						entryValues = options[3].map { it.code },
-						selectedIndex = options[3].indexOfFirst { it.name == name.teachingLanguageCode }
-							.takeIf { it >= 0 },
-						onChange = { index, _, _ ->
-							if (index != null) {
-								val option = options[3][index]
-								name = name.copy(teachingLanguageCode = option.name)
-								value = value.copy(teachingLanguageCode = option.code)
-							} else {
-								name = name.copy(teachingLanguageCode = "")
-								value = value.copy(teachingLanguageCode = "")
-							}
-						},
-				)
-			}
-			item {
-				MenuPreference(
-						title = stringResource(R.string.special),
-						icon = { Icon(painterResource(R.drawable.priority), contentDescription = null) },
-						required = false,
-						summary = name.specialClassCode?.takeIf { it.isNotEmpty() },
-						entries = options[4].map { it.name.orEmpty() },
-						entryValues = options[4].map { it.code },
-						selectedIndex = options[4].indexOfFirst { it.name == name.specialClassCode }
-							.takeIf { it >= 0 },
-						onChange = { index, _, _ ->
-							if (index != null) {
-								val option = options[4][index]
-								name = name.copy(specialClassCode = option.name)
-								value = value.copy(specialClassCode = option.code)
-							} else {
-								name = name.copy(specialClassCode = "")
-								value = value.copy(specialClassCode = "")
-							}
-						},
-				)
-			}
-			item {
-				EditPreference(
-						title = stringResource(R.string.school),
-						icon = { Icon(painterResource(R.drawable.school), contentDescription = null) },
-						value = name.courseUnitNum.orEmpty(),
-						placeholder = stringResource(R.string.school),
-						onChange = { _, _, v ->
-							val text = v.orEmpty()
-							name = name.copy(courseUnitNum = text)
-							value = value.copy(courseUnitNum = text)
-						},
-				)
-			}
-			item {
-				EditPreference(
-						title = stringResource(R.string.teacher),
-						icon = { Icon(painterResource(R.drawable.account), contentDescription = null) },
-						value = name.teachingTeacherNum.orEmpty(),
-						placeholder = stringResource(R.string.teacher),
-						onChange = { _, _, v ->
-							val text = v.orEmpty()
-							name = name.copy(teachingTeacherNum = text)
-							value = value.copy(teachingTeacherNum = text)
-						},
-				)
-			}
-		}
-		PreferenceCategory {
-			item {
-				TextButton(
-						onClick = {
-							name = CourseFilterNameData()
-							value = CourseFilterValueData()
-						},
-						modifier = Modifier.fillMaxWidth(),
-				) {
-					Text(stringResource(R.string.reset))
+			PreferenceCategory {
+				item {
+					EditPreference(
+							title = stringResource(R.string.course),
+							icon = {
+								Icon(
+										painterResource(R.drawable.course),
+										contentDescription = null
+								)
+							},
+							value = name.courseName.orEmpty(),
+							placeholder = stringResource(R.string.course),
+							onChange = { _, _, v ->
+								val text = v.orEmpty()
+								name = name.copy(courseName = text)
+								value = value.copy(courseName = text)
+							},
+					)
+				}
+				item {
+					MenuPreference(
+							title = stringResource(R.string.campus),
+							icon = {
+								Icon(
+										painterResource(R.drawable.location),
+										contentDescription = null
+								)
+							},
+							required = false,
+							summary = name.studyCampusId?.takeIf { it.isNotEmpty() },
+							entries = options[0].map { it.name.orEmpty() },
+							entryValues = options[0].map { it.code },
+							selectedIndex = options[0]
+								.indexOfFirst { it.name == name.studyCampusId }.takeIf { it >= 0 },
+							onChange = { index, _, _ ->
+								if (index != null) {
+									val option = options[0][index]
+									name = name.copy(studyCampusId = option.name)
+									value = value.copy(studyCampusId = option.code)
+								} else {
+									name = name.copy(studyCampusId = "")
+									value = value.copy(studyCampusId = "")
+								}
+							},
+					)
+				}
+				item {
+					MenuPreference(
+							title = stringResource(R.string.week),
+							icon = {
+								Icon(
+										painterResource(R.drawable.calendar),
+										contentDescription = null
+								)
+							},
+							required = false,
+							summary = name.week?.takeIf { it.isNotEmpty() },
+							entries = options[1].map { it.name.orEmpty() },
+							entryValues = options[1].map { it.code },
+							selectedIndex = options[1].indexOfFirst { it.name == name.week }
+								.takeIf { it >= 0 },
+							onChange = { index, _, _ ->
+								if (index != null) {
+									val option = options[1][index]
+									name = name.copy(week = option.name)
+									value = value.copy(week = option.code)
+								} else {
+									name = name.copy(week = "")
+									value = value.copy(week = "")
+								}
+							},
+					)
+				}
+				item {
+					MenuPreference(
+							title = stringResource(R.string.section),
+							icon = {
+								Icon(
+										painterResource(R.drawable.time),
+										contentDescription = null
+								)
+							},
+							required = false,
+							summary = name.classTimes?.takeIf { it.isNotEmpty() },
+							entries = options[2].map { it.name.orEmpty() },
+							entryValues = options[2].map { it.code },
+							selectedIndex = options[2].indexOfFirst { it.name == name.classTimes }
+								.takeIf { it >= 0 },
+							onChange = { index, _, _ ->
+								if (index != null) {
+									val option = options[2][index]
+									name = name.copy(classTimes = option.name)
+									value = value.copy(classTimes = option.code)
+								} else {
+									name = name.copy(classTimes = "")
+									value = value.copy(classTimes = "")
+								}
+							},
+					)
+				}
+				item {
+					MenuPreference(
+							title = stringResource(R.string.language),
+							icon = {
+								Icon(
+										painterResource(R.drawable.language),
+										contentDescription = null
+								)
+							},
+							required = false,
+							summary = name.teachingLanguageCode?.takeIf { it.isNotEmpty() },
+							entries = options[3].map { it.name.orEmpty() },
+							entryValues = options[3].map { it.code },
+							selectedIndex = options[3]
+								.indexOfFirst { it.name == name.teachingLanguageCode }
+								.takeIf { it >= 0 },
+							onChange = { index, _, _ ->
+								if (index != null) {
+									val option = options[3][index]
+									name = name.copy(teachingLanguageCode = option.name)
+									value = value.copy(teachingLanguageCode = option.code)
+								} else {
+									name = name.copy(teachingLanguageCode = "")
+									value = value.copy(teachingLanguageCode = "")
+								}
+							},
+					)
+				}
+				item {
+					MenuPreference(
+							title = stringResource(R.string.special),
+							icon = {
+								Icon(
+										painterResource(R.drawable.priority),
+										contentDescription = null
+								)
+							},
+							required = false,
+							summary = name.specialClassCode?.takeIf { it.isNotEmpty() },
+							entries = options[4].map { it.name.orEmpty() },
+							entryValues = options[4].map { it.code },
+							selectedIndex = options[4]
+								.indexOfFirst { it.name == name.specialClassCode }
+								.takeIf { it >= 0 },
+							onChange = { index, _, _ ->
+								if (index != null) {
+									val option = options[4][index]
+									name = name.copy(specialClassCode = option.name)
+									value = value.copy(specialClassCode = option.code)
+								} else {
+									name = name.copy(specialClassCode = "")
+									value = value.copy(specialClassCode = "")
+								}
+							},
+					)
+				}
+				item {
+					EditPreference(
+							title = stringResource(R.string.school),
+							icon = {
+								Icon(
+										painterResource(R.drawable.school),
+										contentDescription = null
+								)
+							},
+							value = name.courseUnitNum.orEmpty(),
+							placeholder = stringResource(R.string.school),
+							onChange = { _, _, v ->
+								val text = v.orEmpty()
+								name = name.copy(courseUnitNum = text)
+								value = value.copy(courseUnitNum = text)
+							},
+					)
+				}
+				item {
+					EditPreference(
+							title = stringResource(R.string.teacher),
+							icon = {
+								Icon(
+										painterResource(R.drawable.account),
+										contentDescription = null
+								)
+							},
+							value = name.teachingTeacherNum.orEmpty(),
+							placeholder = stringResource(R.string.teacher),
+							onChange = { _, _, v ->
+								val text = v.orEmpty()
+								name = name.copy(teachingTeacherNum = text)
+								value = value.copy(teachingTeacherNum = text)
+							},
+					)
 				}
 			}
-			item {
-				FilledTonalButton(onClick = { submit() }, modifier = Modifier.fillMaxWidth()) {
-					Text(stringResource(R.string.confirm))
+			PreferenceCategory {
+				item {
+					TextButton(
+							onClick = {
+								name = CourseFilterNameData()
+								value = CourseFilterValueData()
+							},
+							modifier = Modifier.fillMaxWidth(),
+					) {
+						Text(stringResource(R.string.reset))
+					}
 				}
-			}
+				item {
+					FilledTonalButton(onClick = { submit() }, modifier = Modifier.fillMaxWidth()) {
+						Text(stringResource(R.string.confirm))
+					}
+				}
 			}
 		}
 	}

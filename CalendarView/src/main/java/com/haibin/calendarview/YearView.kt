@@ -322,8 +322,7 @@ abstract class YearView @JvmOverloads constructor(context: Context, attrs: Attri
 		for (a in mItems!!) {
 			if (mDelegate!!.mSchemeDatesMap.containsKey(a.toString())) {
 				val d = mDelegate!!.mSchemeDatesMap[a.toString()] ?: continue
-				a.scheme =
-					(if (android.text.TextUtils.isEmpty(d.scheme)) mDelegate!!.schemeText else d.scheme)!!
+				a.scheme = (if (android.text.TextUtils.isEmpty(d.scheme)) mDelegate!!.schemeText else d.scheme)
 				a.schemeColor = d.schemeColor
 				a.schemes = d.schemes
 			} else {

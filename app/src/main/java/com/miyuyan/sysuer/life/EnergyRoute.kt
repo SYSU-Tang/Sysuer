@@ -2,17 +2,11 @@ package com.miyuyan.sysuer.life
 
 import android.content.ClipData
 import android.content.Intent
-import android.view.LayoutInflater
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -37,8 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -46,17 +41,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.dimensionResource
@@ -64,13 +51,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
-import com.haibin.calendarview.CalendarView
+import com.haibin.calendarview.compose.CalendarColors
+import com.haibin.calendarview.compose.CalendarDay
+import com.haibin.calendarview.compose.CalendarDayScheme
+import com.haibin.calendarview.compose.CalendarSelectMode
+import com.haibin.calendarview.compose.CalendarWeekStart
+import com.haibin.calendarview.compose.ComposeCalendar
+import com.haibin.calendarview.compose.ComposeCalendarConfig
+import com.haibin.calendarview.compose.CalendarMonthShowMode
+import com.haibin.calendarview.compose.rememberComposeCalendarState
 import com.haibin.calendarview.SysuerCalendar
 import com.miyuyan.preference.ItemPreference
 import com.miyuyan.preference.MenuPreference
@@ -81,12 +75,10 @@ import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.StatePage
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.roundToInt
 
 /**
  * 水电费（综合能源平台）：单个 ActivityPager 承载仪表盘 / 水费 / 电费 / 账户四页。
- * 页面内容用 compose-preference 渲染；日历为 CalendarView 的 AndroidView 互操作。
+ * 页面内容用 compose-preference 渲染；日历为 ComposeCalendar。
  */
 @Composable
 fun EnergyRoute(
@@ -98,7 +90,6 @@ fun EnergyRoute(
 	val activity = LocalActivity.current
 	val snackbarHostState = remember { SnackbarHostState() }
 	val pagerState = rememberPagerState(pageCount = { 4 })
-	var pagerUserScrollEnabled by remember { mutableStateOf(true) }
 
 	LaunchedEffect(Unit) {
 		viewModel.snackbarMessage.collect {
@@ -114,7 +105,6 @@ fun EnergyRoute(
 			title = stringResource(R.string.water_electricity_fee),
 			snackbar = snackbarHostState,
 			pagerState = pagerState,
-			userScrollEnabled = pagerUserScrollEnabled,
 			navs = listOf(
 					MenuItem(stringResource(R.string.dashboard), iconResource = R.drawable.home),
 					MenuItem(stringResource(R.string.water_fee), iconResource = R.drawable.water),
@@ -132,8 +122,8 @@ fun EnergyRoute(
 	) { page ->
 		when (page) {
 			0 -> DashboardPage(viewModel)
-			1 -> WaterFeePage(viewModel) { pagerUserScrollEnabled = it }
-			2 -> ElectricityFeePage(viewModel) { pagerUserScrollEnabled = it }
+			1 -> WaterFeePage(viewModel)
+			2 -> ElectricityFeePage(viewModel)
 			else -> AccountPage(viewModel)
 		}
 	}
@@ -296,7 +286,7 @@ private fun UsageButton(icon: Int, title: String, value: Double) {
 // ---------------------------------------------------------------------------------------------
 @Composable
 private fun WaterFeePage(
-	viewModel: EnergyViewModel, onCalendarDrag: (Boolean) -> Unit,
+	viewModel: EnergyViewModel,
 ) {
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 	val schemes by viewModel.waterSchemes.collectAsStateWithLifecycle()
@@ -305,18 +295,12 @@ private fun WaterFeePage(
 	val detail by viewModel.waterDetail.collectAsStateWithLifecycle()
 
 	StatePage(state = uiState, onRetry = { viewModel.retry() }) {
-		val collapse = rememberCollapseState()
-		Column {
-			FeeCalendar(
-					schemes = schemes,
-					onMonthChange = { year, month ->
-						viewModel.dispatch(EnergyEvent.WaterMonthChange(year, month))
-					},
-					onDragChange = onCalendarDrag,
-					collapsed = collapse.collapsed,
-					collapseOffset = collapse.offset,
-					onHeightChanged = { if (!collapse.collapsed) collapse.calendarHeight = it },
-			)
+		FeeCalendar(
+				schemes = schemes,
+				onMonthChange = { year, month ->
+					viewModel.dispatch(EnergyEvent.WaterMonthChange(year, month))
+				},
+		) {
 			LazyColumn(
 					modifier = Modifier
 						.background(MaterialTheme.colorScheme.surfaceBright)
@@ -324,7 +308,6 @@ private fun WaterFeePage(
 								horizontal = dimensionResource(R.dimen.horizontal_margin),
 								vertical = dimensionResource(R.dimen.vertical_margin)
 						)
-						.nestedScroll(collapse.connection)
 			) {
 				item {
 					PreferenceCategory(title = monthText) {
@@ -363,11 +346,7 @@ private fun WaterFeePage(
 										},
 										shapes = ButtonDefaults.shapes(),
 										modifier = Modifier
-											.fillMaxWidth()
-											.padding(
-													horizontal = dimensionResource(R.dimen.horizontal_padding),
-													vertical = dimensionResource(R.dimen.vertical_padding)
-											),
+											.fillMaxWidth(),
 								) { Text(stringResource(R.string.pay_fee)) }
 							}
 						}
@@ -388,7 +367,7 @@ private fun WaterFeePage(
 // ---------------------------------------------------------------------------------------------
 @Composable
 private fun ElectricityFeePage(
-	viewModel: EnergyViewModel, onCalendarDrag: (Boolean) -> Unit,
+	viewModel: EnergyViewModel,
 ) {
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 	val schemes by viewModel.electricitySchemes.collectAsStateWithLifecycle()
@@ -397,22 +376,15 @@ private fun ElectricityFeePage(
 	val detail by viewModel.electricityDetail.collectAsStateWithLifecycle()
 
 	StatePage(state = uiState, onRetry = { viewModel.retry() }) {
-		val collapse = rememberCollapseState()
-		Column {
-			FeeCalendar(
-					schemes = schemes,
-					onMonthChange = { year, month ->
-						viewModel.dispatch(EnergyEvent.ElectricityMonthChange(year, month))
-					},
-					onDragChange = onCalendarDrag,
-					collapsed = collapse.collapsed,
-					collapseOffset = collapse.offset,
-					onHeightChanged = { if (!collapse.collapsed) collapse.calendarHeight = it },
-			)
+		FeeCalendar(
+				schemes = schemes,
+				onMonthChange = { year, month ->
+					viewModel.dispatch(EnergyEvent.ElectricityMonthChange(year, month))
+				},
+		) {
 			LazyColumn(
 					modifier = Modifier
 						.background(MaterialTheme.colorScheme.surfaceBright)
-						.nestedScroll(collapse.connection)
 						.padding(
 								horizontal = dimensionResource(R.dimen.horizontal_padding),
 								vertical = dimensionResource(R.dimen.vertical_padding)
@@ -633,113 +605,89 @@ private fun RechargeBottomSheet(onDismiss: () -> Unit, onSubmit: (Int, String) -
 	}
 }
 
-/** CalendarView 的 AndroidView 互操作：显示每日用量标记，翻月回调由 VM 处理 */
+/**
+ * 用量日历：ComposeCalendar 承载每日用量标记，翻月回调交给 ViewModel。
+ *
+ * 折叠/展开由 [ComposeCalendar] 自带的嵌套滚动处理，无需外部维护折叠状态；
+ * [content] 是日历下方的账单列表，上滑收起为周视图、顶部下拉重新展开。
+ *
+ * @param schemes 日期到用量标记的映射，键为旧版 [SysuerCalendar.toString] 的 yyyyMMdd
+ * @param onMonthChange 翻月回调，参数为年、月
+ * @param content 日历下方的账单列表
+ */
 @Composable
 private fun FeeCalendar(
 	schemes: Map<String, SysuerCalendar>,
 	onMonthChange: (Int, Int) -> Unit,
-	onDragChange: (Boolean) -> Unit = {},
-	collapsed: Boolean = false,
-	collapseOffset: Float = 0f,
-	onHeightChanged: (Int) -> Unit = {},
+	content: @Composable () -> Unit,
 ) {
-	val currentOnMonthChange by rememberUpdatedState(onMonthChange)
-	var calendarView by remember { mutableStateOf<CalendarView?>(null) }
-	// 手指按在日历上时禁用 ActivityPager 的横向翻页，抬起后恢复，
-	// 解决嵌套横向滚动时外层 HorizontalPager 抢走月份滑动手势的问题
-	Box(
-			modifier = Modifier
-				.fillMaxWidth()
-				// 折叠：布局高度随位移递减并裁剪底部（interop 的 AndroidView
-				// 永远绘制在兄弟 Compose 内容之上，不能用列表覆盖的方式）
-				.layout { measurable, constraints ->
-					val placeable = measurable.measure(constraints)
-					val visible = (placeable.height - collapseOffset.roundToInt()).coerceAtLeast(0)
-					layout(placeable.width, visible) { placeable.place(0, 0) }
-				}
-				.clipToBounds()
-				.pointerInput(Unit) {
-					awaitEachGesture {
-						awaitFirstDown(requireUnconsumed = false)
-						onDragChange(false)
-						waitForUpOrCancellation()
-						onDragChange(true)
-					}
-				},
-	) {
-		AndroidView(
-				modifier = Modifier
-					.fillMaxWidth()
-					.onSizeChanged { onHeightChanged(it.height) },
-				factory = { context ->
-					(LayoutInflater.from(context)
-						.inflate(R.layout.view_fee_calendar, null) as CalendarView).apply {
-						// 监听器只设置一次；翻月回调经 rememberUpdatedState 取最新值
-						setOnMonthChangeListener { year, month ->
-							currentOnMonthChange(year, month)
-						}
-					}.also { calendarView = it }
-				},
+	val colorScheme = MaterialTheme.colorScheme
+	val config = remember(colorScheme) {
+		ComposeCalendarConfig(
+				// 与旧版 view_fee_calendar.xml 的 CalendarView 属性保持一致
+				weekStart = CalendarWeekStart.Monday,
+				monthShowMode = CalendarMonthShowMode.OnlyCurrentMonth,
+				selectMode = CalendarSelectMode.Single,
+				minYear = 2008,
+				maxYear = 2050,
+				itemHeight = 56.dp,
+				weekBarHeight = 36.dp,
+				calendarPaddingLeft = 4.dp,
+				calendarPaddingRight = 4.dp,
+				dayTextSize = 16.sp,
+				lunarTextSize = 10.sp,
+				weekBarTextSize = 12.sp,
+				colors = feeCalendarColors(colorScheme),
 		)
-		// 仅在标记数据变化时同步，避免重组期间重置 ViewPager 打断滑动手势
-		LaunchedEffect(calendarView, schemes) {
-			calendarView?.setSchemeDate(ConcurrentHashMap(schemes))
-		}
-		// 列表滚动驱动：折叠为周视图 / 展开为月视图
-		LaunchedEffect(calendarView, collapsed) {
-			if (collapsed) calendarView?.showWeekView() else calendarView?.showMonthView()
-		}
 	}
+	val state = rememberComposeCalendarState(config = config, initialDate = CalendarDay.today())
+	// 用量标记同步到日历状态；schemeColor 为 0 时回退到旧版 scheme_theme_color
+	val schemeDates = remember(schemes) {
+		schemes.values.mapNotNull { calendar ->
+			calendar.scheme.takeIf { it.isNotBlank() }?.let {
+				CalendarDay(calendar.year, calendar.month, calendar.day) to
+					CalendarDayScheme(
+							color = if (calendar.schemeColor != 0) Color(calendar.schemeColor)
+							else Color(0xFF128C4B),
+							text = it,
+					)
+			}
+		}.toMap()
+	}
+
+	val currentOnMonthChange by rememberUpdatedState(onMonthChange)
+	SideEffect {
+		state.schemeDates = schemeDates
+		state.onMonthChange = { year, month -> currentOnMonthChange(year, month) }
+	}
+
+	// 横向手势交给嵌套滚动自行竞争：手势落在日历上时内层月视图分页器优先消费，
+	// 落在下方账单列表上时外层 ActivityPager 翻页，无需手动禁用外层滚动
+	ComposeCalendar(
+			state = state,
+			config = config,
+			modifier = Modifier.fillMaxWidth(),
+			content = content,
+	)
 }
 
-/** 折叠状态：账单列表上滑时逐步覆盖月历，覆盖完成后切换为周视图，顶部下拉反向展开 */
-private class CollapseState(private val density: Density) {
-	val scrollState = ScrollState(0)
+/** 由 Material3 配色派生用量日历配色，对齐旧版自定义月/周视图的取色 */
+private fun feeCalendarColors(colorScheme: ColorScheme): CalendarColors =
+	CalendarColors.default().copy(
+			background = colorScheme.surfaceBright,
+			weekBarBackground = colorScheme.surface,
+			weekBarTextColor = colorScheme.onSurface,
+			dayTextColor = colorScheme.onSurface,
+			otherMonthDayTextColor = colorScheme.onSurface,
+			lunarTextColor = colorScheme.onSurface,
+			otherMonthLunarTextColor = colorScheme.onSurface,
+			currentDayTextColor = Color(0xFFFF0000),
+			currentDayLunarTextColor = Color(0xFFFF0000),
+			selectedBackgroundColor = colorScheme.primary,
+			selectedTextColor = colorScheme.onPrimary,
+			selectedLunarTextColor = colorScheme.onPrimary,
+			schemeTextColor = colorScheme.onSurface,
+			schemeLunarTextColor = colorScheme.onSurface,
+			schemeDefaultColor = Color(0xFF128C4B),
+	)
 
-	var collapsed by mutableStateOf(false)
-	var offset by androidx.compose.runtime.mutableFloatStateOf(0f)
-	var calendarHeight by mutableIntStateOf(0)
-
-	/** 可折叠位移 = 月历高度 - 周视图高度（周视图 = 星期栏 + 一行日期） */
-	private val maxOffset: Float
-		get() = with(density) {
-			((calendarHeight - 36.dp.toPx()).coerceAtLeast(0f)) * 5f / 6f
-		}
-
-	val connection = object : NestedScrollConnection {
-		override fun onPreScroll(
-			available: Offset, source: NestedScrollSource
-		): Offset {
-			if (collapsed || available.y >= 0f) return Offset.Zero
-			if (offset >= maxOffset) {
-				collapsed = true
-				return Offset.Zero
-			}
-			val consume = (-available.y).coerceAtMost(maxOffset - offset)
-			offset += consume
-			if (offset >= maxOffset) collapsed = true
-			return Offset(0f, -consume)
-		}
-
-		override fun onPostScroll(
-			consumed: Offset, available: Offset, source: NestedScrollSource
-		): Offset {
-			if (available.y <= 0f) return Offset.Zero
-			// 顶部下拉展开：先切回月视图并用位移抵消布局跳变，再随下拉逐步收回覆盖
-			if (collapsed) {
-				collapsed = false
-				offset = maxOffset
-			}
-			if (offset > 0f) {
-				val back = available.y.coerceAtMost(offset)
-				offset -= back
-				return Offset(0f, back)
-			}
-			return Offset.Zero
-		}
-	}
-}
-
-@Composable
-private fun rememberCollapseState(density: Density = LocalDensity.current): CollapseState =
-	remember { CollapseState(density) }

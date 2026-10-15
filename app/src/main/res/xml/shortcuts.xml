@@ -26,4 +26,17 @@
         <categories android:name="android.shortcut.conversation" />
         <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
     </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/sysu_code_circle"
+        android:shortcutId="sysu_code"
+        android:shortcutLongLabel="@string/sysu_code"
+        android:shortcutShortLabel="@string/sysu_code">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.miyuyan.sysuer.extra.SysuCardActivity"
+            android:targetPackage="com.miyuyan.sysuer" />
+        <categories android:name="android.shortcut.conversation" />
+        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
+    </shortcut>
 </shortcuts>
