@@ -4,19 +4,26 @@ import android.app.PendingIntent
 import android.content.ClipData
 import android.content.Intent
 import android.view.View
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -64,6 +71,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
@@ -96,13 +104,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.platform.toClipEntry
@@ -110,10 +123,12 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityOptionsCompat
+import androidx.compose.ui.unit.sp
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -124,22 +139,23 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
-import com.alibaba.fastjson2.JSONWriter
-import com.alibaba.fastjson2.toJSONString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
 import com.miyuyan.sysuer.MainActivity
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.academic.AgendaActivity
-import com.miyuyan.sysuer.academic.CourseScheduleActivity
 import com.miyuyan.sysuer.api.CommonUtil
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.api.SettingManager
 import com.miyuyan.sysuer.api.TodoManager
 import com.miyuyan.sysuer.browser.BrowserActivity
+import com.miyuyan.sysuer.nav.Agenda
 import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.CourseDetail
 import com.miyuyan.sysuer.nav.CourseSchedule
@@ -151,6 +167,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.TextStyle
+import kotlin.math.sqrt
 
 @Composable
 internal fun DashboardScreen(
@@ -164,7 +183,6 @@ internal fun DashboardScreen(
 	backStack: MutableList<NavKey>,
 ) {
 	val context = LocalContext.current
-	val activity = LocalActivity.current
 	val config = remember { ContextUtil(context) }
 	val coroutineScope = rememberCoroutineScope()
 	LaunchedEffect(Unit) {
@@ -175,6 +193,7 @@ internal fun DashboardScreen(
 	}
 	val term by dashboardViewModel.term.collectAsStateWithLifecycle()
 	val week by dashboardViewModel.week.collectAsStateWithLifecycle()
+	val totalWeek by dashboardViewModel.totalWeek.collectAsStateWithLifecycle()
 	val finalExamWeek by dashboardViewModel.finalExamWeek.collectAsStateWithLifecycle()
 	val showWeek18 by dashboardViewModel.isShowWeek18.collectAsStateWithLifecycle()
 	val todayCourses by dashboardViewModel.todayCourses.collectAsStateWithLifecycle(emptyList())
@@ -183,7 +202,7 @@ internal fun DashboardScreen(
 	val week19Exams by dashboardViewModel.week19Exams.collectAsStateWithLifecycle(emptyList())
 	val todayExamIndex by dashboardViewModel.todayExamIndex.collectAsStateWithLifecycle()
 	val nextClassIndex by dashboardViewModel.progressCurrent.collectAsStateWithLifecycle()
-	val nextClassMarkdown by dashboardViewModel.nextClassMarkdown.collectAsStateWithLifecycle()
+	val nextClassInfo by dashboardViewModel.nextClassInfo.collectAsStateWithLifecycle()
 	val clipboard = LocalClipboard.current
 	val visibleSections by spm.dashboardLiveData.observeAsState((0..5).map { "$it" }.toMutableSet())
 	val selectedSet = visibleSections?.mapNotNull { it?.toIntOrNull() }?.toSet().orEmpty()
@@ -238,28 +257,13 @@ internal fun DashboardScreen(
 		) { showActionItem = it }
 
 		if (1 in selectedSet || 2 in selectedSet) {
-			val dateText = remember(term, week) { dashboardViewModel.dateText }
 			ScheduleSection(
-					nextClassMarkdown = nextClassMarkdown,
-					dateText = dateText,
-					onNextClassClick = { view ->
-						context.startActivity(
-								Intent(context, CourseScheduleActivity::class.java), activity?.let {
-							ActivityOptionsCompat.makeSceneTransitionAnimation(
-									it, view, "miniapp"
-							)
-						}?.toBundle()
-						)
-					},
-					onTimeCardClick = { view ->
-						context.startActivity(
-								Intent(context, AgendaActivity::class.java), activity?.let {
-							ActivityOptionsCompat.makeSceneTransitionAnimation(
-									it, view, "miniapp"
-							)
-						}?.toBundle()
-						)
-					})
+					nextClassInfo = nextClassInfo,
+					term = term,
+					week = week,
+					totalWeek = totalWeek,
+					onNextClassClick = { backStack.add(CourseSchedule) },
+					onTimeCardClick = { backStack.add(Agenda) })
 		}
 		LaunchedEffect(term) {
 			if (term.isNotEmpty()) {
@@ -383,9 +387,18 @@ private fun DashboardOrderDialog(
 			LazyColumn(modifier = Modifier.fillMaxWidth()) {
 				itemsIndexed(
 						shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
-					val shortcut =
-						remember(entity.shortcutId) { JSONObject.parse(entity.shortcutJson ?: "") }
-					val name = shortcut.getString("name") ?: ""
+					// ===== kotlinx.serialization 用法示例 1：动态键取值（无 schema） =====
+					// 原 fastjson2: JSONObject.parse(json).getString("name")
+					// 用 Json.parseToJsonElement 解析为 JsonElement，再走 jsonObject/jsonPrimitive 取值
+					val name = remember(entity.shortcutId) {
+						val raw = entity.shortcutJson ?: return@remember ""
+						runCatching {
+							Json.parseToJsonElement(raw)
+								.jsonObject["name"]
+								?.jsonPrimitive
+								?.contentOrNull
+						}.getOrNull() ?: ""
+					}
 					ListItem(overlineContent = {
 						Text(
 								name,
@@ -493,9 +506,7 @@ private fun DashboardActionDialog(
 					coroutineScope.launch {
 						if (isServiceCollected) {
 							dashboardViewModel.collectService(
-									itemId, item.toJSONString(
-									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
-							), null
+									itemId, Json.encodeToString(item), null
 							)
 							config.toast(R.string.collect_success)
 						} else {
@@ -512,16 +523,9 @@ private fun DashboardActionDialog(
 					isShortcutCollected = !isShortcutCollected
 					coroutineScope.launch {
 						if (isShortcutCollected) {
-							println(
-									item.toJSONString(
-											JSONWriter.Feature.FieldBased,
-											JSONWriter.Feature.WriteNulls
-									)
-							)
+							println(Json.encodeToString(item))
 							dashboardViewModel.addDashboardShortcut(
-									itemId, item.toJSONString(
-									JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteNulls
-							), null
+									itemId, Json.encodeToString(item), null
 							)
 							config.toast(R.string.add_shortcut_success)
 						} else {
@@ -667,22 +671,23 @@ private fun ShortcutSection(
 		shortcuts.forEach { entity ->
 			val shortcutJson = entity.shortcutJson ?: return@forEach
 			val shortcut = remember(entity.shortcutId) {
-				JSONObject.parseObject(
-						shortcutJson, ServiceConfig::class.java
-				)
-			}
+				runCatching { Json.decodeFromString<ServiceConfig>(shortcutJson) }.getOrNull()
+			} ?: return@forEach
 			val name = shortcut.name ?: return@forEach
 			LongClickButton(
 					onClick = {
-				val url = shortcut.url
-				when {
-					// URL 服务直接走 Navigation3 内置浏览器，其余交由 navigateToServiceItem 处理
-					!url.isNullOrEmpty() -> backStack.add(Browser(url, name))
-
-					else -> navigateToServiceItem(
+						navigateToServiceItem(
 							context, backStack, shortcut, hm.actionMap
 					)
-				}
+//				val url = shortcut.url
+//				when {
+//					// URL 服务直接走 Navigation3 内置浏览器，其余交由 navigateToServiceItem 处理
+//					!url.isNullOrEmpty() -> backStack.add(Browser(url, name))
+//
+//					else -> navigateToServiceItem(
+//							context, backStack, shortcut, hm.actionMap
+//					)
+//				}
 			},
 					icon = Icons.Rounded.Star,
 					label = name,
@@ -693,45 +698,221 @@ private fun ShortcutSection(
 
 @Composable
 private fun ScheduleSection(
-	nextClassMarkdown: String,
-	dateText: String,
-	onNextClassClick: (View) -> Unit,
-	onTimeCardClick: (View) -> Unit,
+	nextClassInfo: Map<String, String>,
+	term: String,
+	week: String,
+	totalWeek: Int,
+	onNextClassClick: () -> Unit,
+	onTimeCardClick: () -> Unit,
 ) {
-	val view = LocalView.current
 	Row(
 			modifier = Modifier.fillMaxWidth(),
 			horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))
 	) {
 		OutlinedCard(
-				modifier = Modifier.weight(1.25f), onClick = { onNextClassClick(view) }) {
-			AnimatedContent(nextClassMarkdown) {
-				Markdown(
-						rememberMarkdownState(it),
-						colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-						typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-						modifier = Modifier.padding(
-								dimensionResource(R.dimen.horizontal_padding),
-								dimensionResource(R.dimen.vertical_padding)
-						)
+				modifier = Modifier.weight(1.25f), onClick = onNextClassClick
+		) {
+			AnimatedContent(nextClassInfo) { info ->
+				NextClassContent(
+						info = info, modifier = Modifier.padding(
+						12.dp,
+						dimensionResource(R.dimen.vertical_padding)
+				)
 				)
 			}
 		}
-		OutlinedCard(
-				modifier = Modifier.weight(1f), onClick = { onTimeCardClick(view) }) {
-			AnimatedContent(dateText) {
-				Markdown(
-						rememberMarkdownState(it),
-						colors = markdownColor(text = MaterialTheme.colorScheme.primary),
-						typography = markdownTypography(h6 = MaterialTheme.typography.titleMediumEmphasized),
-						modifier = Modifier.padding(
-								dimensionResource(R.dimen.horizontal_padding),
-								dimensionResource(R.dimen.vertical_padding)
-						)
+		DateCard(
+				term = term,
+				week = week,
+				totalWeek = totalWeek,
+				modifier = Modifier.weight(1f),
+				onClick = onTimeCardClick
+		)
+	}
+}
+
+/** 日程卡左侧的下一节课内容：标题 + 每行圆角高亮标签在左、文本在右。 */
+@Composable
+private fun NextClassContent(info: Map<String, String>, modifier: Modifier = Modifier) {
+	val title = info["title"] ?: stringResource(R.string.loading)
+	val rows = remember(info) { info.filterKeys { it != "title" } }
+	Column(
+			modifier = modifier.fillMaxWidth(),
+			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap))
+	) {
+		Text(
+				text = title,
+				style = MaterialTheme.typography.titleMediumEmphasized.copy(
+						fontSize = 20.sp
+				),
+				color = MaterialTheme.colorScheme.primary,
+				modifier = Modifier.padding(vertical = dimensionResource(R.dimen.vertical_gap))
+		)
+		rows.forEach { (label, value) ->
+			Row(
+					verticalAlignment = Alignment.Top,
+					horizontalArrangement = Arrangement.spacedBy(4.dp)
+			) {
+				LabelChip(label)
+				Text(
+						text = value,
+						style = MaterialTheme.typography.bodyMedium,
+						color = MaterialTheme.colorScheme.onSurface
 				)
 			}
 		}
 	}
+}
+
+/** 圆角高亮矩形标签：primaryContainer 底、onPrimaryContainer 文本。 */
+@Composable
+private fun LabelChip(label: String) {
+	Box(
+			modifier = Modifier
+				.clip(RoundedCornerShape(8.dp))
+				.background(MaterialTheme.colorScheme.primaryContainer)
+				.padding(horizontal = 4.dp, vertical = 2.dp)
+	) {
+		Text(
+				text = label,
+				style = MaterialTheme.typography.labelMedium,
+				color = MaterialTheme.colorScheme.onPrimaryContainer
+		)
+	}
+}
+
+/** 日程卡右侧的日期卡片：环形进度围住纯数字周次，斜杠分隔每行左右两部分。 */
+@Composable
+private fun DateCard(
+	term: String,
+	week: String,
+	totalWeek: Int,
+	modifier: Modifier = Modifier,
+	onClick: () -> Unit,
+) {
+	val now = LocalDate.now()
+	val dayOfMonth = now.dayOfMonth.toString()
+	val monthLabel = now.month.getDisplayName(TextStyle.FULL, LocalLocale.current.platformLocale)
+//		now.format(DateTimeFormatter.ofPattern("M月", LocalLocale.current.platformLocale))
+	val weekDayLabel =
+		stringArrayResource(R.array.weeks)[now.dayOfWeek.value - 1]//.replace("星期", "周")
+//	val term = term.substringBefore('-')
+	val currentWeek = week.toIntOrNull()
+	val safeTotalWeek = totalWeek.coerceAtLeast(1)
+
+	OutlinedCard(modifier = modifier, onClick = onClick) {
+		Column(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(
+							vertical = dimensionResource(R.dimen.vertical_padding)
+					),
+				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap))
+		) {
+			Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceEvenly
+			) {
+				WeekBadge(
+						week = week, currentWeek = currentWeek, totalWeek = safeTotalWeek
+				)
+				SlashDivider()
+				AnimatedVisibility(
+						visible = term.isNotEmpty(), enter = fadeIn(tween(600))
+				) {
+					Text(
+							text = term, style = MaterialTheme.typography.bodyMedium
+					)
+				}
+			}
+
+
+			Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceEvenly
+			) {
+				Text(
+						text = dayOfMonth,
+						style = MaterialTheme.typography.headlineMedium,
+						fontWeight = FontWeight.Bold,
+						color = MaterialTheme.colorScheme.primary
+				)
+				SlashDivider()
+				Column {
+					Text(
+							text = monthLabel, style = MaterialTheme.typography.bodyMedium
+					)
+					Text(
+							text = weekDayLabel, style = MaterialTheme.typography.bodyMedium
+					)
+				}
+			}
+		}
+	}
+}
+
+/** 周次徽章：加载时显示不确定态圆环，加载完成后进度环+数字淡入缩放出现；环尺寸随文本大小自适应。 */
+@Composable
+private fun WeekBadge(week: String, currentWeek: Int?, totalWeek: Int) {
+	val strokeWidth = 4.dp
+	val ringPadding = 4.dp
+	var textSize by remember { mutableStateOf(IntSize.Zero) }
+	val density = LocalDensity.current
+	val targetSize = remember(textSize) {
+		if (textSize == IntSize.Zero) 56.dp else with(density) {
+			sqrt((textSize.width * textSize.width + textSize.height * textSize.height).toDouble())
+				.toFloat().toDp() + ringPadding * 2
+		}
+	}
+	val badgeSize by animateDpAsState(targetValue = targetSize, label = "badgeSize")
+	Box(contentAlignment = Alignment.Center) {
+		// 加载中：不确定态圆环
+		AnimatedVisibility(
+				visible = currentWeek == null, exit = fadeOut(tween(200))
+		) {
+			CircularProgressIndicator(
+					modifier = Modifier.size(badgeSize),
+					strokeWidth = strokeWidth,
+					trackColor = MaterialTheme.colorScheme.surfaceVariant,
+					strokeCap = StrokeCap.Round
+			)
+		}
+		// 加载完成：进度环 + 周次数字淡入缩放出现
+		AnimatedVisibility(
+				visible = currentWeek != null,
+				enter = fadeIn(tween(500)) + scaleIn(tween(500), initialScale = 0.7f)
+		) {
+			Box(contentAlignment = Alignment.Center) {
+				CircularProgressIndicator(
+						progress = { (currentWeek ?: 0).toFloat() / totalWeek },
+						modifier = Modifier.size(badgeSize),
+						strokeWidth = strokeWidth,
+						trackColor = MaterialTheme.colorScheme.surfaceVariant,
+						strokeCap = StrokeCap.Round
+				)
+				AnimatedContent(targetState = week, label = "week") { targetWeek ->
+					Text(
+							text = targetWeek,
+							style = MaterialTheme.typography.titleLarge,
+							fontWeight = FontWeight.Bold,
+							color = MaterialTheme.colorScheme.primary,
+							modifier = Modifier.onSizeChanged { textSize = it })
+				}
+			}
+		}
+	}
+}
+
+/** 斜杠分隔符：分隔行内左右两部分。 */
+@Composable
+private fun SlashDivider() {
+	Text(
+			text = "/",
+			style = MaterialTheme.typography.displayMedium,
+			color = MaterialTheme.colorScheme.outline
+	)
 }
 
 @Composable
@@ -1183,7 +1364,9 @@ fun RowScope.CardTitle(
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(
 				text,
-				style = MaterialTheme.typography.titleLarge,
+				style = MaterialTheme.typography.titleMedium.copy(
+						fontSize = 20.sp
+				),
 				color = MaterialTheme.colorScheme.primary
 		)
 	}
@@ -1208,7 +1391,9 @@ fun RowScope.CardTitle(
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(
 				text,
-				style = MaterialTheme.typography.titleLarge,
+				style = MaterialTheme.typography.titleMedium.copy(
+						fontSize = 20.sp
+				),
 				color = MaterialTheme.colorScheme.primary
 		)
 	}

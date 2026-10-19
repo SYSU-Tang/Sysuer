@@ -79,6 +79,7 @@
       {
         "id": 110,
         "name": "勤工俭学",
+        "route": "StudentPartTime",
         "activity": ".studentAffair.StudentPartTimeActivity",
         "url": "https://xgxt-443.webvpn.sysu.edu.cn/qgzx/#/personalReference",
         "description": "勤工俭学记录查询系统"
@@ -332,7 +333,7 @@
         "name": "课程表",
         "route": "CourseSchedule",
         "activity": ".academic.CourseScheduleActivity",
-        "url": "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/?code=jwxsd_xk&resourceName=%25E9%2580%2589%25E8%25AF%25BE",
+        "url": "https://jwxt.sysu.edu.cn/jwxt//yd/classSchedule/#/home",
         "description": "个人日程管理系统，课程安排、考试时间、活动提醒等日程规划"
       },
       {

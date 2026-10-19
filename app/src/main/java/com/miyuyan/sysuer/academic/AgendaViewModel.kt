@@ -40,7 +40,7 @@ class AgendaViewModel(application: Application) : AndroidViewModel(application) 
 					val entries = data.takeIf { it.isNotEmpty() }
 						?.getJSONObject(0)
 						?.getJSONArray("newUserScheduleDetailList")
-						?.mapNotNull { it as? JSONObject }
+						?.filterIsInstance<JSONObject>()
 						.orEmpty()
 					_uiState.value =
 						if (entries.isEmpty()) AgendaUiState.Empty

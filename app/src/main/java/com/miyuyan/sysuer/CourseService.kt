@@ -55,7 +55,7 @@ class CourseService : Service() {
 				try {
 					println(
 							"Service" + "当前进程编号" + Thread.currentThread()
-								.getName() + " ·····正在处理任务"
+								.name + " ·····正在处理任务"
 					)
 					Thread.sleep(5000)
 				} catch (_: InterruptedException) {

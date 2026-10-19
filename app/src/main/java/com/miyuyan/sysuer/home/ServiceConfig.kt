@@ -1,11 +1,14 @@
 package com.miyuyan.sysuer.home
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ServiceConfig(
-	@JvmField val id: Int,
-	@JvmField val name: String?,
-	@JvmField val route: String?,
-	@JvmField val activity: String?,
-	@JvmField val url: String?,
-	@JvmField val doc: String?,
-	@JvmField val description: String?,
+	@JvmField val id: Int = 0,
+	@JvmField val name: String? = null,
+	@JvmField val route: String? = null,
+	@JvmField val activity: String? = null,
+	@JvmField val url: String? = null,
+	@JvmField val doc: String? = null,
+	@JvmField val description: String? = null,
 )

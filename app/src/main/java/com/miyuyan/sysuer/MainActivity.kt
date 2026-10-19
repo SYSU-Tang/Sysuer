@@ -152,12 +152,14 @@ import com.miyuyan.sysuer.nav.SchoolBus
 import com.miyuyan.sysuer.nav.SchoolCalendar
 import com.miyuyan.sysuer.nav.SchoolEnrollment
 import com.miyuyan.sysuer.nav.SchoolWorkWarning
+import com.miyuyan.sysuer.nav.StudentPartTime
 import com.miyuyan.sysuer.nav.SysuerNavDisplay
 import com.miyuyan.sysuer.nav.Todo
 import com.miyuyan.sysuer.nav.TrainingProgram
 import com.miyuyan.sysuer.nav.Update
 import com.miyuyan.sysuer.rainClass.RainClassDetailRoute
 import com.miyuyan.sysuer.rainClass.RainClassRoute
+import com.miyuyan.sysuer.studentAffair.StudentPartTimeRoute
 import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.widget.TomorrowClassWidget
 import kotlinx.coroutines.Dispatchers
@@ -685,6 +687,13 @@ class MainActivity : BaseActivity() {
 					}
 					entry<News> {
 						NewsRoute(
+								backStack,
+								sharedTransitionScope = this@SharedTransitionLayout,
+								animatedVisibilityScope = LocalNavAnimatedContentScope.current
+						)
+					}
+					entry<StudentPartTime> {
+						StudentPartTimeRoute(
 								backStack,
 								sharedTransitionScope = this@SharedTransitionLayout,
 								animatedVisibilityScope = LocalNavAnimatedContentScope.current

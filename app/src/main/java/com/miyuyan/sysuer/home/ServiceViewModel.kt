@@ -8,17 +8,28 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
-import com.alibaba.fastjson2.JSONArray
-import com.alibaba.fastjson2.JSONObject
-import com.alibaba.fastjson2.JSONReader
-import com.alibaba.fastjson2.to
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.home.data.CollectionDatabase
 import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.nio.charset.StandardCharsets
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
+@Serializable
+private data class ServiceGroup(
+	val id: Int = 0,
+	val name: String = "",
+	val description: String? = null,
+	val items: List<ServiceConfig> = emptyList(),
+)
+
+private val json = Json {
+	ignoreUnknownKeys = true
+	explicitNulls = false
+	encodeDefaults = true
+}
 
 class ServiceViewModel(application: Application) : AndroidViewModel(application) {
 	private val db by lazy { CollectionDatabase.getDatabase(application) }
@@ -42,20 +53,17 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 		(LocaleListCompat.forLanguageTags(locales).unwrap() as? android.os.LocaleList)
 			?.takeIf { !it.isEmpty }?.let(baseConfig::setLocales)
 		val resources = application.createConfigurationContext(baseConfig).resources
-		val reader = JSONReader.of(resources.openRawResource(R.raw.service), StandardCharsets.UTF_8)
-		reader.readJSONArray().forEach {
-			val name = (it as JSONObject).getString("name", "")
-			val items = it.getJSONArray("items") ?: JSONArray()
-			val itemList = items.map { item ->
-				(item as JSONObject).to<ServiceConfig>( JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue)
-			}
-			serviceData.add(Pair(name, itemList))
-			allItems.addAll(itemList)
+		val text = resources.openRawResource(R.raw.service).bufferedReader().use { it.readText() }
+		val groups = runCatching {
+			json.decodeFromString<List<ServiceGroup>>(text)
+		}.getOrDefault(emptyList())
+		groups.forEach { group ->
+			serviceData.add(Pair(group.name, group.items))
+			allItems.addAll(group.items)
 		}
-		reader.close()
 		loadedLocales = locales
 	}
-	
+
 	private val _orderCollection = mutableStateListOf<ServiceConfig>()
 	val orderCollection: SnapshotStateList<ServiceConfig> = _orderCollection
 
@@ -67,10 +75,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 		mapNotNull { entity ->
 			allItems.firstOrNull { it.id == entity.serviceId }
 				?: entity.serviceJson?.let {
-					JSONObject.parseObject(
-							it, ServiceConfig::class.java,
-							JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.IgnoreSetNullValue
-					)
+					runCatching { json.decodeFromString<ServiceConfig>(it) }.getOrNull()
 				}
 		}
 
@@ -89,13 +94,13 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 			_orderCollection.addAll(refreshed)
 		}
 	}
-	
+
 	fun moveOrderCollection(from: Int, to: Int) {
 		if (from == to) return
 		val item = _orderCollection.removeAt(from)
 		_orderCollection.add(to, item)
 	}
-	
+
 	fun saveOrderCollection() {
 		viewModelScope.launch(Dispatchers.IO) {
 			_orderCollection.forEachIndexed { index, item ->
@@ -104,7 +109,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 			loadCollection()
 		}
 	}
-	
+
 	suspend fun isServiceCollected(id: Int): Boolean = db.collectionDao().isServiceCollected(id)
 	suspend fun isDashboardShortcutCollected(id: Int): Boolean = db.collectionDao().isDashboardShortcutCollected(id)
 	fun addService(serviceId: Int, serviceJson: String, position: Int? = collection.size) {
@@ -112,17 +117,17 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 			db.collectionDao().addService(ServiceCollectionEntity(serviceId = serviceId, serviceJson = serviceJson, position = position))
 		}
 	}
-	
+
 	fun deleteService(serviceId: Int) {
 		viewModelScope.launch(Dispatchers.IO) { db.collectionDao().deleteService(serviceId) }
 	}
-	
+
 	fun addDashboardShortcut(shortcutId: Int, shortcutJson: String, position: Int?) {
 		viewModelScope.launch(Dispatchers.IO) {
 			db.collectionDao().addDashboardShortcut(DashboardShortcutEntity(shortcutId = shortcutId, shortcutJson = shortcutJson, position = position))
 		}
 	}
-	
+
 	fun deleteDashboardShortcut(shortcutId: Int) {
 		viewModelScope.launch(Dispatchers.IO) { db.collectionDao().deleteDashboardShortcut(shortcutId) }
 	}

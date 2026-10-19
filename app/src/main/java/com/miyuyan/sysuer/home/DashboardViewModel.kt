@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import androidx.core.net.toUri
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
@@ -38,6 +37,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	val term: StateFlow<String> = _term.asStateFlow()
 	private val _week = MutableStateFlow("")
 	val week: StateFlow<String> = _week.asStateFlow()
+	private val _totalWeek = MutableStateFlow(18)
+	val totalWeek: StateFlow<Int> = _totalWeek.asStateFlow()
 	private val _finalExamWeek = MutableStateFlow("")
 	val finalExamWeek: StateFlow<String> = _finalExamWeek.asStateFlow()
 	private val _todayExamIndex = MutableStateFlow(-1)
@@ -55,8 +56,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	val progressMax: StateFlow<Int> = _progressMax.asStateFlow()
 	private val _progressCurrent = MutableStateFlow(0)
 	val progressCurrent: StateFlow<Int> = _progressCurrent.asStateFlow()
-	private val _nextClassMarkdown = MutableStateFlow(application.getString(R.string.loading))
-	val nextClassMarkdown: StateFlow<String> = _nextClassMarkdown.asStateFlow()
+	private val _nextClassInfo = MutableStateFlow<Map<String, String>>(emptyMap())
+	val nextClassInfo: StateFlow<Map<String, String>> = _nextClassInfo.asStateFlow()
 	private val _isShowWeek18 = MutableStateFlow(true)
 	val isShowWeek18: StateFlow<Boolean> = _isShowWeek18.asStateFlow()
 	private var examSubject = ""
@@ -141,20 +142,20 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	val date: String? =
 		LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
-	val weekDay: String? =
-		application.resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
+//	val weekDay: String? =
+//		application.resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
 
-	val dateText: String
-		get() = buildString {
-			if (_week.value.isNotEmpty()) {
-				if (_week.value.isDigitsOnly()) append("###### 第${_week.value}周\n")
-				else append("###### ${_week.value}\n")
-			}
-			if (_term.value.isNotEmpty()) append("###### 第${_term.value}学期\n")
-			if (date != null) append(date).append("\n\n")
-			if (weekDay != null) append(weekDay)
-
-		}
+//	val dateText: String
+//		get() = buildString {
+//			if (_week.value.isNotEmpty()) {
+//				if (_week.value.isDigitsOnly()) append("###### 第${_week.value}周\n")
+//				else append("###### ${_week.value}\n")
+//			}
+//			if (_term.value.isNotEmpty()) append("###### 第${_term.value}学期\n")
+//			if (date != null) append(date).append("\n\n")
+//			if (weekDay != null) append(weekDay)
+//
+//		}
 
 	fun setShowWeek18(showWeek18: Boolean) {
 		_isShowWeek18.value = showWeek18
@@ -187,8 +188,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			ShortcutReader.start(it)
 			return
 		}
-		SettingPreference(application).qrCode
-			.takeIf { it.isNotEmpty() }?.run {
+		SettingPreference(application).qrCode.takeIf { it.isNotEmpty() }?.run {
 				Intent(Intent.ACTION_VIEW, toUri()).takeIf {
 					it.resolveActivity(application.packageManager) != null
 				}?.let {
@@ -199,34 +199,31 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
-		val markdown = if (isAfterEmpty) {
+		val info = if (isAfterEmpty) {
 			val next = _recentCourses.value.getOrNull(0)
-			"###### ${application.getString(R.string.no_class_today)}\n\n${application.getString(R.string.next_class)}：**${
-				next?.getString("courseName") ?: application.getString(R.string.none)
-			}**\n\n${application.getString(R.string.location)}：**${
-				next?.getString("teachingPlace") ?: application.getString(R.string.none)
-			}**\n\n${application.getString(R.string.time)}：**${
-				next?.getString("time") ?: application.getString(
-						R.string.none
-				)
-			}**"
+			mapOf(
+				"title" to application.getString(R.string.no_class_today),
+				application.getString(R.string.next_class) to (next?.getString("courseName")
+					?: application.getString(R.string.none)),
+				application.getString(R.string.location) to (next?.getString("teachingPlace")
+					?: application.getString(R.string.none)),
+				application.getString(R.string.time) to (next?.getString("time")
+					?: application.getString(R.string.none))
+			)
 		} else {
 			val current = _todayCourses.value.getOrNull(beforeSize)
-			"###### ${current?.getString("courseName") ?: application.getString(R.string.none)}\n\n${
-				application.getString(
-						R.string.location
-				)
-			}：**${
-				current?.getString("teachingPlace") ?: application.getString(R.string.none)
-			}**\n\n${application.getString(R.string.time)}：**${
-				current?.getString("time") ?: application.getString(
-						R.string.none
-				)
-			}**\n\n${
-				application.getString(R.string.date)
-			}：**${current?.getString("teachingDate") ?: application.getString(R.string.none)}**"
+			mapOf(
+				"title" to (current?.getString("courseName")
+					?: application.getString(R.string.none)),
+				application.getString(R.string.location) to (current?.getString("teachingPlace")
+					?: application.getString(R.string.none)),
+				application.getString(R.string.time) to (current?.getString("time")
+					?: application.getString(R.string.none)),
+				application.getString(R.string.date) to (current?.getString("teachingDate")
+					?: application.getString(R.string.none))
+			)
 		}
-		_nextClassMarkdown.value = markdown
+		_nextClassInfo.value = info
 	}
 
 	private fun scheduleIslandTick() {
@@ -302,8 +299,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 						}
 
 						4 -> {
-							_week.value = response.getJSONArray("data").getJSONObject(0)
-								.getString("weekTimes")
+							_week.value = response.getJSONObject("data").getString("nowWeekly")
+							_totalWeek.value =
+								response.getJSONObject("data").getJSONArray("weeklyList").size
 						}
 
 						5 -> {
@@ -332,7 +330,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	fun getWeek(term: String?) {
-		model.enqueue("jwxt/timetable-search/classTableInfo/getDateWeekly?academicYear=$term", 4)
+		model.enqueue("jwxt/base-info/school-calender/weekly?academicYear=$term", 4)
 	}
 
 	fun getTodayCourses(term: String = "") {

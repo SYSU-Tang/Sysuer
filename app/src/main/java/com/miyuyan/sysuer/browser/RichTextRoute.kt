@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallExtendedFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,71 +58,73 @@ fun RichTextRoute(
 	val loadContext = LocalContext.current
 	val title = navKey?.title ?: ""
 	val contentType = navKey?.contentType ?: DataStoreManager.ContentType.MARKDOWN.name
-	if (content.isEmpty() && title.isNotEmpty()) coroutine.launch {
-		content = DataStoreManager.loadContent(loadContext, title)
+
+	LaunchedEffect(content, title) {
+		if (content.isEmpty() && title.isNotEmpty()) content =
+			DataStoreManager.loadContent(loadContext, title)
 	}
 	ActivityPager(
-		title = title,
-		onNavigationClick = { backStack.navigateBack(activity) },
-		pageContent = {
-			Column(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-						dimensionResource(R.dimen.horizontal_padding),
-						dimensionResource(R.dimen.vertical_padding)
+			title = title,
+			onNavigationClick = { backStack.navigateBack(activity) },
+			pageContent = {
+				Column(
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(
+									dimensionResource(R.dimen.horizontal_padding),
+									dimensionResource(R.dimen.vertical_padding)
+							)
+				) {
+					if (contentType == DataStoreManager.ContentType.MARKDOWN.name) Markdown(
+							markdownState = rememberMarkdownState(content),
+							colors = markdownColor(),
+							typography = markdownTypography(),
+							modifier = Modifier.fillMaxWidth(),
+							components = markdownComponents(table = { model ->
+								MarkdownTable(
+										content = model.content,
+										node = model.node,
+										style = model.typography.table,
+										headerBlock = { content, header, tableWidth, style ->
+											MarkdownTableHeader(
+													content = content,
+													header = header,
+													tableWidth = tableWidth,
+													style = style,
+													maxLines = Int.MAX_VALUE,
+													overflow = TextOverflow.Clip,
+											)
+										},
+										rowBlock = { content, row, tableWidth, style ->
+											MarkdownTableRow(
+													content = content,
+													header = row,
+													tableWidth = tableWidth,
+													style = style,
+													maxLines = Int.MAX_VALUE,
+													overflow = TextOverflow.Clip,
+											)
+										},
+								)
+							}),
 					)
-			) {
-				if (contentType == DataStoreManager.ContentType.MARKDOWN.name) Markdown(
-					markdownState = rememberMarkdownState(content),
-					colors = markdownColor(),
-					typography = markdownTypography(),
-					modifier = Modifier.fillMaxWidth(),
-					components = markdownComponents(table = { model ->
-						MarkdownTable(
-							content = model.content,
-							node = model.node,
-							style = model.typography.table,
-							headerBlock = { content, header, tableWidth, style ->
-								MarkdownTableHeader(
-									content = content,
-									header = header,
-									tableWidth = tableWidth,
-									style = style,
-									maxLines = Int.MAX_VALUE,
-									overflow = TextOverflow.Clip,
-								)
-							},
-							rowBlock = { content, row, tableWidth, style ->
-								MarkdownTableRow(
-									content = content,
-									header = row,
-									tableWidth = tableWidth,
-									style = style,
-									maxLines = Int.MAX_VALUE,
-									overflow = TextOverflow.Clip,
-								)
-							},
+					else RichText {
+						Text(AnnotatedString(content))
+					}
+				}
+			},
+			floatingActionButton = {
+				SmallExtendedFloatingActionButton(icon = {
+					Icon(Icons.Filled.ContentCopy, stringResource(R.string.copy))
+				}, text = { Text(stringResource(R.string.copy)) }, onClick = {
+					coroutine.launch {
+						clipboard.setClipEntry(
+								ClipData.newPlainText(title, content).toClipEntry()
 						)
-					}),
-				)
-				else RichText {
-					Text(AnnotatedString(content))
-				}
-			}
-		},
-		floatingActionButton = {
-			SmallExtendedFloatingActionButton(icon = {
-				Icon(Icons.Filled.ContentCopy, stringResource(R.string.copy))
-			}, text = { Text(stringResource(R.string.copy)) }, onClick = {
-				coroutine.launch {
-					clipboard.setClipEntry(
-						ClipData.newPlainText(title, content).toClipEntry()
-					)
-				}
-			})
-		},
-		sharedTransitionScope = sharedTransitionScope,
-		animatedVisibilityScope = animatedVisibilityScope
+					}
+				})
+			},
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope
 	)
 }

@@ -103,8 +103,8 @@ class AssistantEvaluationViewModel(application: Application) : AndroidViewModel(
 						val (names, numbers) = extractValue(
 								response.getJSONArray("data"), "departmentName", "departmentNumber"
 						)
-						_departmentNames.value = names.orEmpty().filterNotNull()
-						_departmentValues.value = numbers.orEmpty().filterNotNull()
+						_departmentNames.value = names
+						_departmentValues.value = numbers
 					}
 
 					RESULT_REQUEST -> {

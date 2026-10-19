@@ -2,7 +2,6 @@ package com.miyuyan.sysuer.academic
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,6 +64,12 @@ fun CourseCompletionRoute(
 	}
 
 	val totalCredit = stringResource(R.string.total_credit)
+	val creditString = listOf(
+			stringResource(R.string.training_credit),
+			stringResource(R.string.exempt_credit),
+			stringResource(R.string.actual_credit),
+			stringResource(R.string.earned_credit)
+	)
 	val creditHoursSections = remember(creditHours) {
 		mutableStateListOf<SectionData>().also { list ->
 			val totalRow = mutableListOf(0f, 0f, 0f, 0f)
@@ -106,15 +111,10 @@ fun CourseCompletionRoute(
 							}
 						} else null))
 			}
-			val rows = mutableStateListOf<RowData>(
-			)
-			intArrayOf(
-					R.string.training_credit,
-					R.string.exempt_credit,
-					R.string.actual_credit,
-					R.string.earned_credit
-			).zip(totalRow).forEach { (key, value) ->
-				rows.add(RowData(context.getString(key), value.toString()))
+			val rows = mutableStateListOf<RowData>()
+
+			creditString.zip(totalRow).forEach { (key, value) ->
+				rows.add(RowData(key, value.toString()))
 			}
 			list.add(
 					SectionData(

@@ -4,7 +4,6 @@ import android.content.ClipData
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -55,7 +53,6 @@ fun SchoolCalendarRoute(
 ) {
 	val viewModel: SchoolCalendarViewModel = viewModel()
 	val activity = LocalActivity.current
-	val context = LocalContext.current
 	val sections by viewModel.sections.collectAsStateWithLifecycle()
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 	val snackbarHostState = remember { SnackbarHostState() }
@@ -68,6 +65,7 @@ fun SchoolCalendarRoute(
 		}
 	}
 
+	val copySuccessfully = stringResource(R.string.copy_successfully)
 	ActivityPager(
 			title = stringResource(R.string.calendar),
 			snackbar = snackbarHostState,
@@ -99,7 +97,7 @@ fun SchoolCalendarRoute(
 											ClipData.newPlainText("link", url).toClipEntry()
 									)
 									snackbarHostState.showSnackbar(
-											context.getString(R.string.copy_successfully)
+											copySuccessfully
 									)
 								}
 							},

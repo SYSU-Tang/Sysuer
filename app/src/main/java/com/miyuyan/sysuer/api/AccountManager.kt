@@ -13,6 +13,7 @@ import com.google.crypto.tink.RegistryConfiguration
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import okio.Path.Companion.toPath
 import java.io.File
@@ -56,7 +57,7 @@ class AccountManager private constructor(context: Context) {
 	 * @return 密码
 	 * */
 	fun getPasswordSync(domain: String?, username: String?): String? = runBlocking {
-		val encoded = dataStore.data.first()[stringPreferencesKey("$domain:$username")]
+		val encoded = dataStore.data.firstOrNull()?.get(stringPreferencesKey("$domain:$username"))
 			?: return@runBlocking null
 		try {
 			String(aead.decrypt(Base64.decode(encoded, Base64.DEFAULT), null))

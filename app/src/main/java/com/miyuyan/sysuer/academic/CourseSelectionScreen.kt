@@ -2,12 +2,10 @@ package com.miyuyan.sysuer.academic
 
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -45,21 +43,17 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.dimensionResource
@@ -73,6 +67,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.CommonUtil.trim
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -81,32 +76,37 @@ import kotlinx.coroutines.launch
  * 主选课页：选课轮次/课程类别/筛选 chips + 瀑布流课程卡片，
  * 支持收藏、选课/退课（确认 Snackbar）、高级筛选跳转与体育课程志愿排序
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CourseSelectionScreen(
 	viewModel: CourseSelectionViewModel = viewModel(),
 	onNavigateToDetail: (id: String, code: String, className: String) -> Unit = { _, _, _ -> },
 ) {
-	val context = LocalContext.current
 	val snackbarHostState = remember { SnackbarHostState() }
 	val clipboard = LocalClipboard.current
 	val scope = rememberCoroutineScope()
 	val isLoading by viewModel.mainIsLoading.collectAsStateWithLifecycle()
 	val courses = viewModel.mainCourses
 	val gridState = rememberLazyStaggeredGridState()
+	val copySuccessfully = stringResource(R.string.copy_successfully)
 
 	fun showSnackbar(text: String) = scope.launch { snackbarHostState.showSnackbar(text) }
-	fun copyText(text: String) = scope.launch {
-		clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
-		snackbarHostState.showSnackbar(context.getString(R.string.copy_successfully))
+	fun copyText(text: String): Job {
+		return scope.launch {
+			clipboard.setClipEntry(ClipData.newPlainText("text", text).toClipEntry())
+			snackbarHostState.showSnackbar(copySuccessfully)
+		}
 	}
-	fun withConfirm(message: String, action: () -> Unit) = scope.launch {
-		if (snackbarHostState.showSnackbar(
-					message,
-					actionLabel = context.getString(R.string.confirm),
-					duration = SnackbarDuration.Long,
-			) == SnackbarResult.ActionPerformed
-		) action()
+
+	val confirm = stringResource(R.string.confirm)
+	fun withConfirm(message: String, action: () -> Unit): Job {
+		return scope.launch {
+			if (snackbarHostState.showSnackbar(
+						message,
+						actionLabel = confirm,
+						duration = SnackbarDuration.Long,
+				) == SnackbarResult.ActionPerformed
+			) action()
+		}
 	}
 
 	LaunchedEffect(gridState) {
@@ -138,6 +138,11 @@ fun CourseSelectionScreen(
 				val selectedStatus = item.getInteger("selectedStatus") ?: 0
 				val isSelected = selectedStatus == 3 || selectedStatus == 4
 				val isLike = item.getInteger("collectionStatus") == 1
+				val action = stringResource(
+						if (isLike) R.string.uncollected else R.string.collected
+				)
+				val message =
+					stringResource(if (isSelected) R.string.drop_course else R.string.select_course)
 				CourseCard(
 						item = item,
 						isSelected = isSelected,
@@ -150,7 +155,7 @@ fun CourseSelectionScreen(
 							)
 						},
 						onToggleSelect = {
-							val message = "${context.getString(if (isSelected) R.string.drop_course else R.string.select_course)}? ${
+							val message = "$message? ${
 								trim(item.getString("courseName"))
 							}"
 							withConfirm(message) {
@@ -166,9 +171,7 @@ fun CourseSelectionScreen(
 						},
 						onLike = {
 							showSnackbar(
-									context.getString(R.string.already) + context.getString(
-											if (isLike) R.string.unlike else R.string.like
-									)
+									action
 							)
 							viewModel.likeMain(item.getString("teachingClassId"))
 						},
@@ -193,7 +196,6 @@ fun CourseSelectionScreen(
 }
 
 /** 筛选面板：选课轮次/类别/筛选 chips + 高级筛选生效项 + 体育课程排序入口（置于 topBarContent） */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun CourseSelectionFilterPanel(
 	viewModel: CourseSelectionViewModel,
@@ -288,7 +290,8 @@ internal fun CourseSelectionFilterPanel(
 				ElevatedFilterChip(
 						selected = checked,
 						onClick = {
-							val flags = listOf(hideSelected, vacancySort, hideVacancy, onlyCollection)
+							val flags =
+								listOf(hideSelected, vacancySort, hideVacancy, onlyCollection)
 							val new = flags.toMutableList().also { it[index] = !it[index] }
 							viewModel.setFlags(new[0], new[1], new[2], new[3])
 						},
@@ -332,8 +335,7 @@ internal fun CourseSelectionFilterPanel(
 		if (showPeSort) {
 			OutlinedButton(
 					onClick = onShowPeDialog,
-					modifier = Modifier
-						.padding(horizontal = dimensionResource(R.dimen.horizontal_margin)),
+					modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.horizontal_margin)),
 			) {
 				Text(stringResource(R.string.rank))
 			}
@@ -427,7 +429,6 @@ internal fun PeSortDialog(
 }
 
 /** 一条候选课程卡片 */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CourseCard(
 	item: JSONObject,
@@ -443,13 +444,14 @@ private fun CourseCard(
 	val infoLabels = stringArrayResource(R.array.course_info_labels)
 	val seatLabels = stringArrayResource(R.array.seat_info_labels)
 	val statusName = stringResource(
-			when {
-				selectedStatus == 4 -> R.string.status_selected
-				selectedStatus == 3 -> R.string.filtering
-				selectedStatus == 1 -> R.string.retired
+			when (selectedStatus) {
+				4 -> R.string.status_selected
+				3 -> R.string.filtering
+				1 -> R.string.retired
 				else -> R.string.unselected
 			}
 	)
+
 	fun conv(key: String): String = trim(item.getString(key)).replace("\n\n", "\n")
 	val divider = @Composable {
 		HorizontalDivider(
@@ -561,7 +563,6 @@ private fun CourseCard(
 }
 
 /** 课程信息小标签：点击弹出完整内容，长按复制 */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun InfoChip(
 	text: String,
