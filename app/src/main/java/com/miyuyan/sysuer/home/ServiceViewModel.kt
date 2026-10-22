@@ -9,27 +9,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.miyuyan.sysuer.R
+import com.miyuyan.sysuer.api.json
 import com.miyuyan.sysuer.home.data.CollectionDatabase
 import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
-@Serializable
-private data class ServiceGroup(
-	val id: Int = 0,
-	val name: String = "",
-	val description: String? = null,
-	val items: List<ServiceConfig> = emptyList(),
-)
-
-private val json = Json {
-	ignoreUnknownKeys = true
-	explicitNulls = false
-	encodeDefaults = true
-}
 
 class ServiceViewModel(application: Application) : AndroidViewModel(application) {
 	private val db by lazy { CollectionDatabase.getDatabase(application) }
@@ -73,10 +59,9 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 	 * */
 	private fun List<ServiceCollectionEntity>.resolveConfigs(): List<ServiceConfig> =
 		mapNotNull { entity ->
-			allItems.firstOrNull { it.id == entity.serviceId }
-				?: entity.serviceJson?.let {
-					runCatching { json.decodeFromString<ServiceConfig>(it) }.getOrNull()
-				}
+			allItems.firstOrNull { it.id == entity.serviceId } ?: entity.serviceJson?.let {
+				runCatching { json.decodeFromString<ServiceConfig>(it) }.getOrNull()
+			}
 		}
 
 	fun loadCollection() {
@@ -111,10 +96,18 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 	}
 
 	suspend fun isServiceCollected(id: Int): Boolean = db.collectionDao().isServiceCollected(id)
-	suspend fun isDashboardShortcutCollected(id: Int): Boolean = db.collectionDao().isDashboardShortcutCollected(id)
+	suspend fun isDashboardShortcutCollected(id: Int): Boolean =
+		db.collectionDao().isDashboardShortcutCollected(id)
+
 	fun addService(serviceId: Int, serviceJson: String, position: Int? = collection.size) {
 		viewModelScope.launch(Dispatchers.IO) {
-			db.collectionDao().addService(ServiceCollectionEntity(serviceId = serviceId, serviceJson = serviceJson, position = position))
+			db.collectionDao().addService(
+					ServiceCollectionEntity(
+							serviceId = serviceId,
+							serviceJson = serviceJson,
+							position = position
+					)
+			)
 		}
 	}
 
@@ -124,11 +117,19 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 
 	fun addDashboardShortcut(shortcutId: Int, shortcutJson: String, position: Int?) {
 		viewModelScope.launch(Dispatchers.IO) {
-			db.collectionDao().addDashboardShortcut(DashboardShortcutEntity(shortcutId = shortcutId, shortcutJson = shortcutJson, position = position))
+			db.collectionDao().addDashboardShortcut(
+					DashboardShortcutEntity(
+							shortcutId = shortcutId,
+							shortcutJson = shortcutJson,
+							position = position
+					)
+			)
 		}
 	}
 
 	fun deleteDashboardShortcut(shortcutId: Int) {
-		viewModelScope.launch(Dispatchers.IO) { db.collectionDao().deleteDashboardShortcut(shortcutId) }
+		viewModelScope.launch(Dispatchers.IO) {
+			db.collectionDao().deleteDashboardShortcut(shortcutId)
+		}
 	}
 }

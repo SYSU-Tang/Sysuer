@@ -679,15 +679,6 @@ private fun ShortcutSection(
 						navigateToServiceItem(
 							context, backStack, shortcut, hm.actionMap
 					)
-//				val url = shortcut.url
-//				when {
-//					// URL 服务直接走 Navigation3 内置浏览器，其余交由 navigateToServiceItem 处理
-//					!url.isNullOrEmpty() -> backStack.add(Browser(url, name))
-//
-//					else -> navigateToServiceItem(
-//							context, backStack, shortcut, hm.actionMap
-//					)
-//				}
 			},
 					icon = Icons.Rounded.Star,
 					label = name,

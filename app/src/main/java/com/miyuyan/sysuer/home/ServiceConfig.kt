@@ -12,3 +12,11 @@ data class ServiceConfig(
 	@JvmField val doc: String? = null,
 	@JvmField val description: String? = null,
 )
+
+@Serializable
+data class ServiceGroup(
+	val id: Int = 0,
+	val name: String = "",
+	val description: String? = null,
+	val items: List<ServiceConfig> = emptyList(),
+)

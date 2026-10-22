@@ -1,8 +1,7 @@
 package com.miyuyan.preference
 
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
@@ -60,13 +59,10 @@ fun <T> ChoicePreference(
 				if (singleSelection) {
 					// SingleChoiceSegmentedButtonRow 默认 fillMaxWidth + weight 均分，长文本会换行。
 					// 去掉宽度填满，改为 wrapContentWidth + 横向滚动，按钮宽度即可自适应文本长度。
-					SingleChoiceSegmentedButtonRow(
-							modifier = Modifier
-									.horizontalScroll(rememberScrollState())
-									.wrapContentWidth(),
-					) {
+					SingleChoiceSegmentedButtonRow{
 						entries.forEachIndexed { i, entry ->
 							SegmentedButton(
+									modifier = Modifier.width(IntrinsicSize.Max),
 									selected = i in selections,
 									onClick = {
 										onChange?.invoke(
@@ -89,14 +85,11 @@ fun <T> ChoicePreference(
 						}
 					}
 				} else {
-					MultiChoiceSegmentedButtonRow(
-							modifier = Modifier
-									.horizontalScroll(rememberScrollState())
-									.wrapContentWidth(),
-					) {
+					MultiChoiceSegmentedButtonRow{
 						entries.forEachIndexed { i, entry ->
 							SegmentedButton(
 									checked = i in selections,
+									modifier = Modifier.width(IntrinsicSize.Max),
 									onCheckedChange = {
 										onChange?.invoke(i, entry, entryValues?.getOrNull(i))
 									},
