@@ -93,11 +93,6 @@ fun AccountScreen(
 						animatedVisibilityScope = animatedVisibilityScope,
 				) {
 					backStack.add(Browser("https://sysu-tang.github.io/sysuer-website/docs/user/introduction"))
-//					context.startActivity(
-//							Intent(
-//									context, BrowserActivity::class.java
-//							).setData("https://sysu-tang.github.io/sysuer-website/docs/user/introduction".toUri())
-//					)
 				}
 			}            /*item {
 				MenuPreference(

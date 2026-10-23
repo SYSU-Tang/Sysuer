@@ -49,7 +49,7 @@ fun PreferenceScreen(
 				.nestedScroll(rememberNestedScrollInteropConnection())
 				.verticalScroll(rememberScrollState())
 				.padding(horizontal = 16.dp, vertical = 8.dp),
-			verticalArrangement = Arrangement.spacedBy(16.dp),
+			verticalArrangement = Arrangement.spacedBy(8.dp),
 	) {
 		if (title != null) {
 			Text(
@@ -116,23 +116,22 @@ fun PreferenceCategory(
 ) {
 	val scope = PreferenceCategoryScope()
 	scope.items()
-	Column(modifier = modifier.fillMaxWidth()) {
+	Column(modifier = modifier.fillMaxWidth(),
+			verticalArrangement = Arrangement.spacedBy(2.dp)) {
 		if (title != null) {
 			Text(
 					text = title,
 					style = MaterialTheme.typography.titleSmall,
 					color = MaterialTheme.colorScheme.secondary,
-					modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+					modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
 			)
 		}
-		Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-			scope.collectedItems.forEachIndexed { index, content ->
-				CompositionLocalProvider(
-						LocalPreferenceIndex provides index,
-						LocalPreferenceCount provides scope.collectedItems.size,
-				) {
-					content()
-				}
+		scope.collectedItems.forEachIndexed { index, content ->
+			CompositionLocalProvider(
+					LocalPreferenceIndex provides index,
+					LocalPreferenceCount provides scope.collectedItems.size,
+			) {
+				content()
 			}
 		}
 	}

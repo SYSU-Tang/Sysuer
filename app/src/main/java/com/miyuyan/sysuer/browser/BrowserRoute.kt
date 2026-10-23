@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.JsResult
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -173,6 +174,12 @@ class BrowserState(
 		// 不向父级分发嵌套滚动：否则 WebView 会驱动顶栏折叠行为，上滑时顶栏抖动
 		webView.isNestedScrollingEnabled = false
 		webView.webViewClient = object : WebViewClient() {
+			override fun onRenderProcessGone(
+				view: WebView?, detail: RenderProcessGoneDetail?
+			): Boolean {
+				return super.onRenderProcessGone(view, detail)
+			}
+
 			override fun shouldOverrideUrlLoading(
 				view: WebView,
 				request: WebResourceRequest,
@@ -269,7 +276,7 @@ class BrowserState(
 				view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message,
 			): Boolean {
 				val newWebView = WebView(context)
-				newWebView.setWebViewClient(object : WebViewClient() {
+				newWebView.webViewClient = object : WebViewClient() {
 					override fun shouldOverrideUrlLoading(
 						view: WebView?, request: WebResourceRequest,
 					): Boolean {
@@ -277,7 +284,7 @@ class BrowserState(
 						newWebView.destroy()
 						return super.shouldOverrideUrlLoading(view, request)
 					}
-				})
+				}
 				val transport = resultMsg.obj as WebViewTransport
 				transport.webView = newWebView
 				resultMsg.sendToTarget()
@@ -448,12 +455,10 @@ class BrowserState(
 		preference.theme = value
 		theme = value
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			webSettings.setForceDark(
-					if (value == 1) WebSettings.FORCE_DARK_ON else WebSettings.FORCE_DARK_OFF
-			)
+			webSettings.forceDark = if (value == 1) WebSettings.FORCE_DARK_ON else WebSettings.FORCE_DARK_OFF
 		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			webSettings.setAlgorithmicDarkeningAllowed(true)
+			webSettings.isAlgorithmicDarkeningAllowed = true
 		}
 	}
 

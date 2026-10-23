@@ -16,7 +16,9 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -119,9 +121,9 @@ fun AcademyNotificationRoute(
 
 	ActivityPager(
 			title = stringResource(id = R.string.academic_affair_notice),
-			tabs = mutableListOf(
-					MenuItem(stringResource(id = R.string.academic_affair_notice)),
-					MenuItem(stringResource(id = R.string.school_affair_notice))
+			navs = mutableListOf(
+					MenuItem(stringResource(id = R.string.academic_affair_notice), iconVector = Icons.Rounded.Book),
+					MenuItem(stringResource(id = R.string.school_affair_notice), iconVector = Icons.Rounded.School)
 			),
 			isTopBarContentFixed = true,
 			sharedKey = "AcademyNotification",

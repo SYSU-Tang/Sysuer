@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 	private val model = JwxtModel(application)
@@ -140,8 +139,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		}
 	}
 
-	val date: String? =
-		LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
+//	val date: String? =
+//		LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
 //	val weekDay: String? =
 //		application.resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
 

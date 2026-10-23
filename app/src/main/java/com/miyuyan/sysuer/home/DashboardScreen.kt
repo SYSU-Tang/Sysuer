@@ -3,18 +3,12 @@ package com.miyuyan.sysuer.home
 import android.app.PendingIntent
 import android.content.ClipData
 import android.content.Intent
-import android.view.View
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,6 +47,7 @@ import androidx.compose.material.icons.rounded.ClearAll
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.FormatListNumbered
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.KeyboardVoice
@@ -64,6 +59,7 @@ import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material3.ButtonColors
@@ -116,7 +112,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLocale
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.dimensionResource
@@ -139,10 +134,6 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager.Companion.getInstance
 import com.alibaba.fastjson2.JSONObject
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
@@ -167,6 +158,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.LocalDate
 import java.time.format.TextStyle
 import kotlin.math.sqrt
@@ -359,9 +354,15 @@ internal fun DashboardScreen(
 				}
 			}
 			todoManager.refreshListener = { todoRefreshKey.trySend(Unit) }
-			TodoSection(todoList = todoList, onViewAllClick = {
-				backStack.add(Todo)
-			}, todoManager = todoManager)
+			TodoSection(
+					todoList = todoList,
+					onViewAllClick = {
+						backStack.add(Todo)
+					},
+					todoManager = todoManager,
+					animatedVisibilityScope = animatedVisibilityScope,
+					sharedTransitionScope = sharedTransitionScope
+			)
 		}
 	}
 }
@@ -387,16 +388,10 @@ private fun DashboardOrderDialog(
 			LazyColumn(modifier = Modifier.fillMaxWidth()) {
 				itemsIndexed(
 						shortcuts, key = { _, entity -> entity.shortcutId ?: 0 }) { index, entity ->
-					// ===== kotlinx.serialization 用法示例 1：动态键取值（无 schema） =====
-					// 原 fastjson2: JSONObject.parse(json).getString("name")
-					// 用 Json.parseToJsonElement 解析为 JsonElement，再走 jsonObject/jsonPrimitive 取值
 					val name = remember(entity.shortcutId) {
 						val raw = entity.shortcutJson ?: return@remember ""
 						runCatching {
-							Json.parseToJsonElement(raw)
-								.jsonObject["name"]
-								?.jsonPrimitive
-								?.contentOrNull
+							Json.parseToJsonElement(raw).jsonObject["name"]?.jsonPrimitive?.contentOrNull
 						}.getOrNull() ?: ""
 					}
 					ListItem(overlineContent = {
@@ -676,9 +671,9 @@ private fun ShortcutSection(
 			val name = shortcut.name ?: return@forEach
 			LongClickButton(
 					onClick = {
-						navigateToServiceItem(
-							context, backStack, shortcut, hm.actionMap
-					)
+				navigateToServiceItem(
+						context, backStack, shortcut, hm.actionMap
+				)
 			},
 					icon = Icons.Rounded.Star,
 					label = name,
@@ -706,8 +701,7 @@ private fun ScheduleSection(
 			AnimatedContent(nextClassInfo) { info ->
 				NextClassContent(
 						info = info, modifier = Modifier.padding(
-						12.dp,
-						dimensionResource(R.dimen.vertical_padding)
+						12.dp, dimensionResource(R.dimen.vertical_padding)
 				)
 				)
 			}
@@ -727,6 +721,7 @@ private fun ScheduleSection(
 private fun NextClassContent(info: Map<String, String>, modifier: Modifier = Modifier) {
 	val title = info["title"] ?: stringResource(R.string.loading)
 	val rows = remember(info) { info.filterKeys { it != "title" } }
+
 	Column(
 			modifier = modifier.fillMaxWidth(),
 			verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_gap))
@@ -809,11 +804,11 @@ private fun DateCard(
 						week = week, currentWeek = currentWeek, totalWeek = safeTotalWeek
 				)
 				SlashDivider()
-				AnimatedVisibility(
-						visible = term.isNotEmpty(), enter = fadeIn(tween(600))
+				AnimatedContent(
+						targetState = term
 				) {
 					Text(
-							text = term, style = MaterialTheme.typography.bodyMedium
+							text = it, style = MaterialTheme.typography.bodyMedium
 					)
 				}
 			}
@@ -859,38 +854,21 @@ private fun WeekBadge(week: String, currentWeek: Int?, totalWeek: Int) {
 	}
 	val badgeSize by animateDpAsState(targetValue = targetSize, label = "badgeSize")
 	Box(contentAlignment = Alignment.Center) {
-		// 加载中：不确定态圆环
-		AnimatedVisibility(
-				visible = currentWeek == null, exit = fadeOut(tween(200))
-		) {
+		Box(contentAlignment = Alignment.Center) {
 			CircularProgressIndicator(
+					progress = { currentWeek?.let { it.toFloat() / totalWeek } ?: 0f },
 					modifier = Modifier.size(badgeSize),
 					strokeWidth = strokeWidth,
 					trackColor = MaterialTheme.colorScheme.surfaceVariant,
 					strokeCap = StrokeCap.Round
 			)
-		}
-		// 加载完成：进度环 + 周次数字淡入缩放出现
-		AnimatedVisibility(
-				visible = currentWeek != null,
-				enter = fadeIn(tween(500)) + scaleIn(tween(500), initialScale = 0.7f)
-		) {
-			Box(contentAlignment = Alignment.Center) {
-				CircularProgressIndicator(
-						progress = { (currentWeek ?: 0).toFloat() / totalWeek },
-						modifier = Modifier.size(badgeSize),
-						strokeWidth = strokeWidth,
-						trackColor = MaterialTheme.colorScheme.surfaceVariant,
-						strokeCap = StrokeCap.Round
-				)
-				AnimatedContent(targetState = week, label = "week") { targetWeek ->
-					Text(
-							text = targetWeek,
-							style = MaterialTheme.typography.titleLarge,
-							fontWeight = FontWeight.Bold,
-							color = MaterialTheme.colorScheme.primary,
-							modifier = Modifier.onSizeChanged { textSize = it })
-				}
+			AnimatedContent(targetState = week, label = "week") { targetWeek ->
+				Text(
+						text = targetWeek,
+						style = MaterialTheme.typography.titleLarge,
+						fontWeight = FontWeight.Bold,
+						color = MaterialTheme.colorScheme.primary,
+						modifier = Modifier.onSizeChanged { textSize = it })
 			}
 		}
 	}
@@ -921,26 +899,14 @@ private fun CourseSection(
 	var selectedIndex by rememberSaveable { mutableIntStateOf(showDate) }
 	val courses = if (selectedIndex == 0) todayCourses else recentCourses
 
-	Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.then(
-						if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-					with(sharedTransitionScope) {
-						Modifier.sharedBounds(
-								sharedContentState = rememberSharedContentState(
-										key = "CourseSchedule"
-								),
-								animatedVisibilityScope = animatedVisibilityScope,
-						)
-					}
-				} else Modifier),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.SpaceBetween) {
-		CardTitle(Icons.Rounded.School, text = stringResource(R.string.course)) {
-			onTitleClick()
-		}
-
+	CardTitle(
+			image = Icons.Rounded.School,
+			text = stringResource(R.string.course),
+			key = "CourseSchedule",
+			onClick = onTitleClick,
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope
+	) {
 		SingleChoiceSegmentedButtonRow {
 			listOf(R.string.today, R.string.recent).forEachIndexed { index, label ->
 				SegmentedButton(
@@ -981,7 +947,7 @@ private fun CourseSection(
 							modifier = (if (index == nextClassIndex) Modifier.bringIntoViewRequester(
 							bringIntoViewRequester
 					) else Modifier).then(
-									if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+							if (sharedTransitionScope != null && animatedVisibilityScope != null) {
 						with(sharedTransitionScope) {
 							Modifier.sharedBounds(
 									sharedContentState = rememberSharedContentState(
@@ -1090,26 +1056,14 @@ private fun ExamSection(
 	LaunchedEffect(selectedIndex) {
 		onToggle(selectedIndex == 0)
 	}
-
-	Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.then(
-						if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-					with(sharedTransitionScope) {
-						Modifier.sharedBounds(
-								sharedContentState = rememberSharedContentState(
-										key = "Exam"
-								),
-								animatedVisibilityScope = animatedVisibilityScope,
-						)
-					}
-				} else Modifier),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.SpaceBetween) {
-		CardTitle(R.drawable.exam, text = stringResource(R.string.exam)) {
-			onTitleClick()
-		}
+	CardTitle(
+			Icons.Rounded.Science,
+			key = "Exam",
+			text = stringResource(R.string.exam),
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope,
+			onClick = onTitleClick
+	) {
 		SingleChoiceSegmentedButtonRow {
 			listOf(R.string.week18, R.string.week19).forEachIndexed { index, label ->
 				SegmentedButton(
@@ -1243,18 +1197,19 @@ private fun ExamItem(
 private fun TodoSection(
 	todoList: List<TodoEntity>,
 	onViewAllClick: () -> Unit,
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
 	todoManager: TodoManager,
 ) {
 	var isAddRequested by remember { mutableStateOf(false) }
-
-	Row(
-			modifier = Modifier.fillMaxWidth(),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.SpaceBetween
+	CardTitle(
+			Icons.Rounded.FormatListNumbered,
+			key = "Todo",
+			text = stringResource(R.string.todo),
+			onClick = onViewAllClick,
+			sharedTransitionScope = sharedTransitionScope,
+			animatedVisibilityScope = animatedVisibilityScope
 	) {
-		CardTitle(R.drawable.todo, text = stringResource(R.string.todo)) {
-			onViewAllClick()
-		}
 		SingleChoiceSegmentedButtonRow {
 			SegmentedButton(
 					onClick = { isAddRequested = true },
@@ -1315,78 +1270,45 @@ fun GenericButton(
 }
 
 @Composable
-fun GenericButton(
-	image: Int,
-	text: String = "",
-	enable: Boolean = true,
-	onClick: () -> Unit = {},
-) {
-	TextButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
-		Icon(
-				painter = painterResource(image),
-				contentDescription = text,
-				modifier = Modifier.size(ButtonDefaults.IconSize)
-		)
-		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-		Text(text)
-	}
-}
-
-@Composable
-fun RowScope.CardTitle(
-	image: Int,
-	text: String = "",
-	onClick: (View) -> Unit = {},
-) {
-	val view = LocalView.current
-	Row(
-			modifier = Modifier
-				.weight(1f)
-				.clickable(
-						onClick = { onClick(view) }, indication = null, interactionSource = null
-				),
-			verticalAlignment = Alignment.CenterVertically,
-	) {
-		Icon(
-				painter = painterResource(image),
-				contentDescription = text,
-				tint = MaterialTheme.colorScheme.primary
-		)
-		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-		Text(
-				text,
-				style = MaterialTheme.typography.titleMedium.copy(
-						fontSize = 20.sp
-				),
-				color = MaterialTheme.colorScheme.primary
-		)
-	}
-}
-
-@Composable
-fun RowScope.CardTitle(
+fun CardTitle(
 	image: ImageVector,
 	text: String,
-	onClick: (View) -> Unit = {},
+	key: String? = null,
+	onClick: () -> Unit = {},
+	sharedTransitionScope: SharedTransitionScope? = null,
+	animatedVisibilityScope: AnimatedVisibilityScope? = null,
+	tail: @Composable (() -> Unit) = {},
 ) {
-	val view = LocalView.current
 	Row(
 			modifier = Modifier
+				.fillMaxWidth()
 				.clickable(
-						onClick = { onClick(view) }, indication = null, interactionSource = null
+						onClick = onClick, indication = null, interactionSource = null
 				)
-				.weight(1f),
-			verticalAlignment = Alignment.CenterVertically,
-	) {
+				.then(
+						if (sharedTransitionScope != null && animatedVisibilityScope != null && key != null) {
+					with(sharedTransitionScope) {
+						Modifier.sharedBounds(
+								sharedContentState = rememberSharedContentState(
+										key = key
+								),
+								animatedVisibilityScope = animatedVisibilityScope,
+						)
+					}
+				} else Modifier), verticalAlignment = Alignment.CenterVertically) {
 		Icon(image, contentDescription = text, tint = MaterialTheme.colorScheme.primary)
 		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 		Text(
-				text,
+				modifier = Modifier
+					.fillMaxWidth()
+					.weight(1f),
+				text = text,
 				style = MaterialTheme.typography.titleMedium.copy(
 						fontSize = 20.sp
 				),
 				color = MaterialTheme.colorScheme.primary
 		)
+		tail()
 	}
 }
 

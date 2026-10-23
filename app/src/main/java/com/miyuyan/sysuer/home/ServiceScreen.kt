@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Shortcut
 import androidx.compose.material.icons.rounded.Book
@@ -68,10 +70,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -183,9 +185,9 @@ internal fun ServiceScreen(
 			)
 		}
 
-		item(key = "bottomSpacer") {
-			Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
-		}
+//		item(key = "bottomSpacer") {
+//			Spacer(modifier = Modifier.height(dimensionResource(R.dimen.vertical_margin)))
+//		}
 	}
 }
 
@@ -243,25 +245,22 @@ private fun ServiceBox(
 	uniqueKeys: Set<String>,
 	onItemClick: (ServiceConfig) -> Unit,
 	onItemLongClick: (ServiceConfig) -> Unit,
-	onTitleClick: (() -> Unit)? = null,
+	onTitleClick: (() -> Unit) = {},
 	sharedTransitionScope: SharedTransitionScope? = null,
 	animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
-	Row(
-			modifier = Modifier.fillMaxWidth().padding(
-					horizontal = dimensionResource(R.dimen.horizontal_margin),
-					vertical = dimensionResource(R.dimen.vertical_margin)
-			).apply {
-				if (onTitleClick != null) combinedClickable(onClick = onTitleClick)
-			},
-			verticalAlignment = Alignment.CenterVertically,
-	) {
-		Text(
-				text = title,
-				style = MaterialTheme.typography.titleMedium,
-				color = MaterialTheme.colorScheme.primary,
-		)
-	}
+	Text(
+			text = title,
+			modifier = Modifier
+				.fillMaxWidth()
+				.clickable(onClick = onTitleClick)
+				.padding(
+						horizontal = dimensionResource(R.dimen.horizontal_margin),
+						vertical = dimensionResource(R.dimen.vertical_margin)
+				),
+			style = MaterialTheme.typography.titleMedium,
+			color = MaterialTheme.colorScheme.primary,
+	)
 	Card(
 			modifier = Modifier.fillMaxWidth(),
 			shape = MaterialTheme.shapes.small,
@@ -271,15 +270,15 @@ private fun ServiceBox(
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(
-							dimensionResource(R.dimen.horizontal_padding),
+							horizontal = dimensionResource(R.dimen.horizontal_padding),
 							dimensionResource(R.dimen.vertical_padding)
 					),
 				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
 				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
 		) {
 			items.forEach { item ->
-				val key = item.route
-					?: item.url?.takeIf { it.isNotEmpty() && item.activity.isNullOrBlank() }
+				val key =
+					item.route//item.url?.takeIf { it.isNotEmpty() && item.activity.isNullOrBlank() }
 				// key 全局唯一才参与共享过渡；同 key 的多个 chip 会使过渡错乱
 				val sharedModifier =
 					if (sharedTransitionScope != null && animatedVisibilityScope != null && key != null && key in uniqueKeys) {
@@ -306,6 +305,8 @@ private fun ServiceBox(
 			}
 		}
 	}
+
+	Spacer(modifier = Modifier.height(4.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -349,12 +350,14 @@ private fun ServiceActionDialog(
 								vertical = dimensionResource(R.dimen.vertical_margin)
 						),
 			) {
-				Markdown(
-						rememberMarkdownState("$markdown"),
-						colors = markdownColor(),
-						typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
-						modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
-				)
+				SelectionContainer {
+					Markdown(
+							rememberMarkdownState("$markdown"),
+							colors = markdownColor(),
+							typography = markdownTypography(h3 = MaterialTheme.typography.titleMediumEmphasized),
+							modifier = Modifier.padding(dimensionResource(R.dimen.content_padding)),
+					)
+				}
 			}
 
 			FlowRow(
@@ -604,25 +607,6 @@ fun LongClickableElevatedAssistChip(
 			}
 			content()
 		}
-	}
-}
-
-@Composable
-fun GenericTonalButton(
-	image: Int,
-	text: String = "",
-	enable: Boolean = true,
-	onClick: () -> Unit = {},
-) {
-	FilledTonalButton(onClick = onClick, enabled = enable, shapes = ButtonDefaults.shapes()) {
-		Icon(
-				painter = painterResource(image),
-				contentDescription = text,
-				tint = MaterialTheme.colorScheme.primary,
-				modifier = Modifier.size(ButtonDefaults.IconSize)
-		)
-		Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-		Text(text)
 	}
 }
 

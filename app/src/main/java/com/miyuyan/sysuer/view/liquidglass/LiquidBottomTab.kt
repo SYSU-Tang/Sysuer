@@ -30,8 +30,6 @@ fun RowScope.LiquidBottomTab(
         modifier
             .clip(Capsule())
             .clickable(
-                interactionSource = null,
-                indication = null,
                 role = Role.Tab,
                 onClick = onClick
             )
@@ -42,7 +40,7 @@ fun RowScope.LiquidBottomTab(
                 scaleX = scale
                 scaleY = scale
             },
-        verticalArrangement = Arrangement.spacedBy(2f.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = content
     )
