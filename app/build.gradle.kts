@@ -55,7 +55,6 @@ android {
 		buildConfig = true
 	}
 	buildToolsVersion = "37.0.0"
-	ndkVersion = "30.0.14904198 rc1"
 	compileSdkMinor = 0
 	packaging {
 		jniLibs {
@@ -87,6 +86,7 @@ dependencies {
 	implementation(libs.okio)
 	implementation(libs.fastjson2)
 	implementation(libs.appcompat)
+	implementation(libs.core.splashscreen)
 	implementation(libs.constraintlayout)
 	implementation(libs.lifecycle.livedata.ktx)
 	implementation(libs.lifecycle.viewmodel.ktx)

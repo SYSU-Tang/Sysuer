@@ -8,28 +8,15 @@ import com.miyuyan.sysuer.api.Config
 import com.miyuyan.sysuer.api.SettingManager
 
 open class BaseActivity : AppCompatActivity() {
-	lateinit var settingManager: SettingManager
-	lateinit var config: Config
+	val settingManager: SettingManager by lazy { SettingManager.getInstance(this) }
+	val config: Config by lazy { Config(this) }
 	override fun attachBaseContext(context: Context) {
-		settingManager = SettingManager(context).apply {
-			setLanguage()
-			setTheme()
-
-			super.attachBaseContext(setFontSize(fontSize))
-		}
+		super.attachBaseContext(settingManager.setFontSize(settingManager.fontSize))
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
-		config = Config(this)
-		if (!settingManager.isDynamicColor) setTheme(
-			when (settingManager.getTheme()) {
-				0 -> R.style.Theme_SYSUER_Light
-				1 -> R.style.Theme_SYSUER_Night
-				else -> R.style.Theme_SYSUER_DayNight
-			}
-		)
 	}
 
 	override fun onDestroy() {

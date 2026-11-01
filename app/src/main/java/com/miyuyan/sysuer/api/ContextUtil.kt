@@ -50,7 +50,9 @@ class ContextUtil(val context: Context) {
 
 	private val privacyPreference = PrivacyPreference(context.applicationContext)
 	private val loginManager: LoginManager = LoginManager(context.applicationContext)
-	val accountManager: AccountManager = AccountManager.getInstance(context.applicationContext)
+	// 惰性初始化：Tink AndroidKeysetManager 需访问 AndroidKeyStore（数百 ms），
+	// 避免在冷启动关键路径上随 ContextUtil 构造而同步执行
+	val accountManager: AccountManager by lazy { AccountManager.getInstance(context.applicationContext) }
 //	private val handler = Handler(Looper.getMainLooper())
 	//	val disposable: CompositeDisposable = CompositeDisposable()
 	private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)

@@ -5,8 +5,15 @@ import android.app.Application
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
+import com.miyuyan.sysuer.api.SettingManager
 import com.miyuyan.sysuer.api.ShizukuHelper
+import com.miyuyan.sysuer.preference.PreferenceStore
+import com.miyuyan.sysuer.preference.sharedPreferencesMigration
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 @HiltAndroidApp
@@ -16,6 +23,16 @@ class Application : Application() {
 
 	override fun onCreate() {
 		super.onCreate()
+		SettingManager.getInstance(this).setTheme()
+
+		val appContext = this
+		CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+			listOf("cookie", "privacy").forEach { name ->
+				PreferenceStore.getInstance(appContext, name) {
+					listOf(sharedPreferencesMigration(appContext, name))
+				}
+			}
+		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 			HiddenApiBypass.addHiddenApiExemptions("L")
 		}

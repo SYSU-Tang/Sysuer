@@ -2,6 +2,13 @@
 
     <style name="Theme.SYSUER.DynamicDayNight" parent="@style/Theme.SYSUER.DynamicLight" />
 
+    <style name="Theme.SYSUER.Splash" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/md_theme_background</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/md_theme_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.SYSUER.DynamicDayNight</item>
+    </style>
+
     <style name="Theme.SYSUER.DayNight" parent="@style/Theme.SYSUER.Light" />
 
     <style name="Theme.SYSUER.DynamicLight" parent="Theme.SYSUER.DynamicBase" />

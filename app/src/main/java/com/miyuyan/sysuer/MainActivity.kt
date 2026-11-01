@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -235,6 +236,7 @@ class MainActivity : BaseActivity() {
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
+		installSplashScreen()
 		super.onCreate(savedInstanceState)
 		val spm: PreferenceViewModel by viewModels()
 		spm.isFirstLaunch = false
@@ -293,7 +295,6 @@ class MainActivity : BaseActivity() {
 						if (checkPermission()) {
 							queryShortcuts(dashboardViewModel)
 						} else {
-							// Shizuku 未运行或未授权：监听 binder 到达与授权结果，就绪后自动完成快捷方式查询
 							Shizuku.addBinderReceivedListener(binderReceivedListener)
 							Shizuku.addRequestPermissionResultListener(requestPermissionResultListener)
 						}
