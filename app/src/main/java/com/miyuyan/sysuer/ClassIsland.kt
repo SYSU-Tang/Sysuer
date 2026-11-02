@@ -21,7 +21,6 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R.color.md_theme_onPrimaryContainer
 import com.miyuyan.sysuer.R.color.md_theme_primary
 import com.miyuyan.sysuer.R.color.md_theme_secondary
@@ -39,6 +38,7 @@ import com.miyuyan.sysuer.R.string.remaining_class_time
 import com.miyuyan.sysuer.R.string.second
 import com.miyuyan.sysuer.R.string.time
 import com.miyuyan.sysuer.academic.CourseScheduleActivity
+import com.miyuyan.sysuer.home.CourseInfo
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -83,23 +83,23 @@ object ClassIsland {
 	)
 
 	@Volatile
-	private var cachedTodayCourses: List<JSONObject> = emptyList()
+	private var cachedTodayCourses: List<CourseInfo> = emptyList()
 
 	@Volatile
-	private var cachedRecentCourses: List<JSONObject> = emptyList()
+	private var cachedRecentCourses: List<CourseInfo> = emptyList()
 
 	/**
-	 * 将JSONObject转换为IslandCourse
+	 * 将CourseInfo转换为IslandCourse
 	 * @return IslandCourse
 	 * */
-	private fun JSONObject.toIslandCourse(): IslandCourse = IslandCourse(
-			courseName = getString("courseName", ""),
-			teachingPlace = getString("teachingPlace", ""),
-			teachingDate = getString("teachingDate", ""),
-			startTime = getString("startTime", ""),
-			endTime = getString("endTime", ""),
-			startClassTimes = getString("startClassTimes", ""),
-			endClassTimes = getString("endClassTimes", "")
+	private fun CourseInfo.toIslandCourse(): IslandCourse = IslandCourse(
+			courseName = courseName,
+			teachingPlace = location,
+			teachingDate = date,
+			startTime = startTime,
+			endTime = endTime,
+			startClassTimes = startSection.toString(),
+			endClassTimes = endSection.toString()
 	)
 
 	/**
@@ -108,7 +108,7 @@ object ClassIsland {
 	 * @param recentCourses 近日课程
 	 * */
 	fun calculateState(
-		todayCourses: List<JSONObject>, recentCourses: List<JSONObject>
+		todayCourses: List<CourseInfo>, recentCourses: List<CourseInfo>
 	): StateResult {
 		val now = LocalDateTime.now()
 		if (todayCourses.isEmpty()) {
@@ -174,7 +174,7 @@ object ClassIsland {
 	 * */
 	@JvmStatic
 	fun updateCourseData(
-		todayCourses: List<JSONObject>, recentCourses: List<JSONObject>
+		todayCourses: List<CourseInfo>, recentCourses: List<CourseInfo>
 	) {
 		cachedTodayCourses = todayCourses
 		cachedRecentCourses = recentCourses

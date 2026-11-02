@@ -9,7 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.json
+import com.miyuyan.sysuer.api.SysuerJson
 import com.miyuyan.sysuer.home.data.CollectionDatabase
 import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
@@ -41,7 +41,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 		val resources = application.createConfigurationContext(baseConfig).resources
 		val text = resources.openRawResource(R.raw.service).bufferedReader().use { it.readText() }
 		val groups = runCatching {
-			json.decodeFromString<List<ServiceGroup>>(text)
+			SysuerJson.decodeFromString<List<ServiceGroup>>(text)
 		}.getOrDefault(emptyList())
 		groups.forEach { group ->
 			serviceData.add(Pair(group.name, group.items))
@@ -60,7 +60,7 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
 	private fun List<ServiceCollectionEntity>.resolveConfigs(): List<ServiceConfig> =
 		mapNotNull { entity ->
 			allItems.firstOrNull { it.id == entity.serviceId } ?: entity.serviceJson?.let {
-				runCatching { json.decodeFromString<ServiceConfig>(it) }.getOrNull()
+				runCatching { SysuerJson.decodeFromString<ServiceConfig>(it) }.getOrNull()
 			}
 		}
 

@@ -3,8 +3,13 @@ package com.miyuyan.sysuer.home
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -170,6 +175,7 @@ internal fun ServiceScreen(
 		}
 
 		items(serviceData, key = { it.first }) { (name, items) ->
+			var expanded by rememberSaveable { mutableStateOf(true) }
 			ServiceBox(
 					title = name,
 					items = items,
@@ -179,6 +185,8 @@ internal fun ServiceScreen(
 								context, backStack, it, homeViewModel.actionMap
 						)
 					},
+					expanded = expanded,
+					onTitleClick = { expanded = !expanded },
 					onItemLongClick = { showActionItem = it },
 					sharedTransitionScope = sharedTransitionScope,
 					animatedVisibilityScope = animatedVisibilityScope,
@@ -242,6 +250,7 @@ private fun getServiceItemIntent(context: Context, item: ServiceConfig, intent: 
 private fun ServiceBox(
 	title: String,
 	items: List<ServiceConfig>,
+	expanded: Boolean = true,
 	uniqueKeys: Set<String>,
 	onItemClick: (ServiceConfig) -> Unit,
 	onItemLongClick: (ServiceConfig) -> Unit,
@@ -261,51 +270,56 @@ private fun ServiceBox(
 			style = MaterialTheme.typography.titleMedium,
 			color = MaterialTheme.colorScheme.primary,
 	)
-	Card(
-			modifier = Modifier.fillMaxWidth(),
-			shape = MaterialTheme.shapes.small,
-			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+	AnimatedVisibility(
+			visible = expanded,
+			enter = expandVertically() + fadeIn(),
+			exit = shrinkVertically() + fadeOut()
 	) {
-		FlowRow(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(
-							horizontal = dimensionResource(R.dimen.horizontal_padding),
-							dimensionResource(R.dimen.vertical_padding)
-					),
-				horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
-				verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+		Card(
+				modifier = Modifier.fillMaxWidth(),
+				shape = MaterialTheme.shapes.small,
+				colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
 		) {
-			items.forEach { item ->
-				val key =
-					item.route//item.url?.takeIf { it.isNotEmpty() && item.activity.isNullOrBlank() }
-				// key 全局唯一才参与共享过渡；同 key 的多个 chip 会使过渡错乱
-				val sharedModifier =
-					if (sharedTransitionScope != null && animatedVisibilityScope != null && key != null && key in uniqueKeys) {
-						with(sharedTransitionScope) {
-							Modifier.sharedBounds(
-									sharedContentState = rememberSharedContentState(
-											key = key
-									), animatedVisibilityScope = animatedVisibilityScope
+			FlowRow(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(
+								horizontal = dimensionResource(R.dimen.horizontal_padding),
+								dimensionResource(R.dimen.vertical_padding)
+						),
+					horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap)),
+					verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.vertical_margin)),
+			) {
+				items.forEach { item ->
+					val key =
+						item.route//item.url?.takeIf { it.isNotEmpty() && item.activity.isNullOrBlank() }
+					// key 全局唯一才参与共享过渡；同 key 的多个 chip 会使过渡错乱
+					val sharedModifier =
+						if (sharedTransitionScope != null && animatedVisibilityScope != null && key != null && key in uniqueKeys) {
+							with(sharedTransitionScope) {
+								Modifier.sharedBounds(
+										sharedContentState = rememberSharedContentState(
+												key = key
+										), animatedVisibilityScope = animatedVisibilityScope
+								)
+							}
+						} else Modifier
+					LongClickableElevatedAssistChip(
+							modifier = sharedModifier,
+							onClick = {
+								onItemClick(item)
+							},
+							onLongClick = { onItemLongClick(item) },
+							label = item.name,
+							colors = if (item.route.isNullOrBlank() && item.activity.isNullOrBlank()) AssistChipDefaults.elevatedAssistChipColors(
+									containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
 							)
-						}
-					} else Modifier
-				LongClickableElevatedAssistChip(
-						modifier = sharedModifier,
-						onClick = {
-							onItemClick(item)
-						},
-						onLongClick = { onItemLongClick(item) },
-						label = item.name,
-						colors = if (item.route.isNullOrBlank() && item.activity.isNullOrBlank()) AssistChipDefaults.elevatedAssistChipColors(
-								containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-						)
-						else AssistChipDefaults.elevatedAssistChipColors(),
-				)
+							else AssistChipDefaults.elevatedAssistChipColors(),
+					)
+				}
 			}
 		}
 	}
-
 	Spacer(modifier = Modifier.height(4.dp))
 }
 

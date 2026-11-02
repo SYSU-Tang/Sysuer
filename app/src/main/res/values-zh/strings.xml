@@ -24,6 +24,10 @@
     <string name="captcha">验证码</string>
     <string name="today">今天</string>
     <string name="no_class_today">今天没课🎉</string>
+    <string name="course_status_not_started">未上</string>
+    <string name="course_status_in_progress">正在上</string>
+    <string name="course_status_finished">已上</string>
+    <string name="until_class_end">距下课还有 %1$d 分钟</string>
     <string name="no_exam">没有考试🎉</string>
     <string name="classTime">节次</string>
     <string name="name">名称</string>

@@ -14,6 +14,7 @@ import com.miyuyan.sysuer.ClassIsland
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.DateTimeManager
 import com.miyuyan.sysuer.api.ShortcutReader
+import com.miyuyan.sysuer.api.SysuerJson
 import com.miyuyan.sysuer.home.data.CollectionDatabase
 import com.miyuyan.sysuer.home.data.DashboardShortcutEntity
 import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
@@ -25,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -43,10 +46,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	private val _todayExamIndex = MutableStateFlow(-1)
 	val todayExamIndex: StateFlow<Int> = _todayExamIndex.asStateFlow()
 	private val _selectedCourses = MutableStateFlow<List<JSONObject>>(emptyList())
-	private val _todayCourses = MutableStateFlow<List<JSONObject>>(emptyList())
-	val todayCourses: StateFlow<List<JSONObject>> = _todayCourses.asStateFlow()
-	private val _recentCourses = MutableStateFlow<List<JSONObject>>(emptyList())
-	val tomorrowCourses: StateFlow<List<JSONObject>> = _recentCourses.asStateFlow()
+	private val _todayCourses = MutableStateFlow<List<CourseInfo>>(emptyList())
+	val todayCourses: StateFlow<List<CourseInfo>> = _todayCourses.asStateFlow()
+	private val _recentCourses = MutableStateFlow<List<CourseInfo>>(emptyList())
+	val tomorrowCourses: StateFlow<List<CourseInfo>> = _recentCourses.asStateFlow()
 	private val _week18Exams = MutableStateFlow<List<JSONObject>>(emptyList())
 	val week18Exams: StateFlow<List<JSONObject>> = _week18Exams.asStateFlow()
 	private val _week19Exams = MutableStateFlow<List<JSONObject>>(emptyList())
@@ -139,23 +142,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		}
 	}
 
-//	val date: String? =
-//		LocalDate.now().format(DateTimeFormatter.ofPattern("M月dd日", Locale.getDefault()))
-//	val weekDay: String? =
-//		application.resources.getStringArray(R.array.weeks)[LocalDate.now().dayOfWeek.value - 1]
-
-//	val dateText: String
-//		get() = buildString {
-//			if (_week.value.isNotEmpty()) {
-//				if (_week.value.isDigitsOnly()) append("###### 第${_week.value}周\n")
-//				else append("###### ${_week.value}\n")
-//			}
-//			if (_term.value.isNotEmpty()) append("###### 第${_term.value}学期\n")
-//			if (date != null) append(date).append("\n\n")
-//			if (weekDay != null) append(weekDay)
-//
-//		}
-
 	fun setShowWeek18(showWeek18: Boolean) {
 		_isShowWeek18.value = showWeek18
 	}
@@ -188,38 +174,39 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 			return
 		}
 		SettingPreference(application).qrCode.takeIf { it.isNotEmpty() }?.run {
-				Intent(Intent.ACTION_VIEW, toUri()).takeIf {
-					it.resolveActivity(application.packageManager) != null
-				}?.let {
-					it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-					application.startActivity(it)
-				} ?: model.toast(R.string.fix_sysu_code_warning)
-			} ?: model.toast(R.string.set_sysu_code_warning)
+			Intent(Intent.ACTION_VIEW, toUri()).takeIf {
+				it.resolveActivity(application.packageManager) != null
+			}?.let {
+				it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+				application.startActivity(it)
+			} ?: model.toast(R.string.fix_sysu_code_warning)
+		} ?: model.toast(R.string.set_sysu_code_warning)
 	}
 
 	private fun updateNextClassMarkdown(beforeSize: Int, isAfterEmpty: Boolean) {
 		val info = if (isAfterEmpty) {
 			val next = _recentCourses.value.getOrNull(0)
 			mapOf(
-				"title" to application.getString(R.string.no_class_today),
-				application.getString(R.string.next_class) to (next?.getString("courseName")
-					?: application.getString(R.string.none)),
-				application.getString(R.string.location) to (next?.getString("teachingPlace")
-					?: application.getString(R.string.none)),
-				application.getString(R.string.time) to (next?.getString("time")
-					?: application.getString(R.string.none))
+					"title" to application.getString(R.string.no_class_today),
+					application.getString(R.string.next_class) to (next?.courseName
+						?: application.getString(R.string.none)),
+					application.getString(R.string.location) to (next?.location
+						?: application.getString(R.string.none)),
+					application.getString(R.string.time) to (next
+						?.let { "${it.startTime}~${it.endTime}" }
+						?: application.getString(R.string.none))
 			)
 		} else {
 			val current = _todayCourses.value.getOrNull(beforeSize)
 			mapOf(
-				"title" to (current?.getString("courseName")
-					?: application.getString(R.string.none)),
-				application.getString(R.string.location) to (current?.getString("teachingPlace")
-					?: application.getString(R.string.none)),
-				application.getString(R.string.time) to (current?.getString("time")
-					?: application.getString(R.string.none)),
-				application.getString(R.string.date) to (current?.getString("teachingDate")
-					?: application.getString(R.string.none))
+					"title" to (current?.courseName ?: application.getString(R.string.none)),
+					application.getString(R.string.location) to (current?.location
+						?: application.getString(R.string.none)),
+					application.getString(R.string.time) to (current
+						?.let { "${it.startTime}~${it.endTime}" }
+						?: application.getString(R.string.none)),
+					application.getString(R.string.date) to (current?.date
+						?: application.getString(R.string.none))
 			)
 		}
 		_nextClassInfo.value = info
@@ -236,31 +223,22 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				.collect { (code, response) ->
 					when (code) {
 						1 -> {
-							val todayList = mutableListOf<JSONObject>()
-							val recentList = mutableListOf<JSONObject>()
-							val (beforeArray, afterArray) = response.getJSONArray("data")
-								.map { it as JSONObject }.filter { item ->
-									item["status"] = getTimePosition(
-											"${item.getString("teachingDate")} ${
-												item.getString("startTime")
-											}",
-											"${item.getString("teachingDate")} ${item.getString("endTime")}"
-									)
-									item["time"] =
-										"${item.getString("startTime")}~${item.getString("endTime")}"
-									item["course"] =
-										"第${item.getString("startClassTimes")}~${item.getString("endClassTimes")}节课"
-									val isToday = "TD" == item.getString("useflag")
-									if (isToday) todayList.add(item) else recentList.add(
-											item
-									)
-									isToday
-								}.partition { it.getString("status") == "before" }
+							val courseList = response.getJSONArray("data")
+								.filterIsInstance<JSONObject>()
+								.map {
+									SysuerJson.decodeFromString<CourseInfo>(it.toJSONString())
+										.withStatus()
+								}
+							val todayList = courseList.filter { it.useflag == "TD" }
+							val recentList = courseList.filter { it.useflag != "TD" }
+							val (finished, upcoming) = todayList.partition {
+								it.status == CourseState.BEFORE
+							}
 							_todayCourses.value = todayList
 							_recentCourses.value = recentList
 							_progressMax.value = todayList.size
-							_progressCurrent.value = beforeArray.size
-							updateNextClassMarkdown(beforeArray.size, afterArray.isEmpty())
+							_progressCurrent.value = finished.size
+							updateNextClassMarkdown(finished.size, upcoming.isEmpty())
 							scheduleIslandTick()
 						}
 
@@ -365,17 +343,23 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		}
 	}
 
-	fun getTimePosition(from: String?, to: String?): String {
+	fun getTimePosition(from: String, to: String): CourseState {
 		val now = LocalDateTime.now()
 		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 		val start = LocalDateTime.parse(from, formatter)
 		val end = LocalDateTime.parse(to, formatter)
 		return when {
-			now.isBefore(start) -> "after"
-			now.isAfter(end) -> "before"
-			else -> "in"
+			now.isBefore(start) -> CourseState.AFTER
+			now.isAfter(end) -> CourseState.BEFORE
+			else -> CourseState.IN
 		}
 	}
+
+	private fun CourseInfo.withStatus(): CourseInfo = copy(
+			status = if (useflag == "TD") {
+				getTimePosition("$date $startTime", "$date $endTime")
+			} else CourseState.TOMORROW
+	)
 
 	fun getDatePosition(date: String): String {
 		val now = LocalDate.now()
@@ -391,3 +375,28 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		model.dispose()
 	}
 }
+
+enum class CourseState {
+	/*今天未上*/AFTER, /*今天已上*/ BEFORE, /*今天在上*/ IN, /*明天要上*/ TOMORROW
+}
+
+/*{"schoolSemester":"2026-1","studentNum":"24308152","courseNum":"EIT317","classesNum":"202613608","courseName":"电磁场与电磁波","weekTimes":9,"week":1,"teachingDate":"2026-11-02","startClassTimes":3,"endClassTimes":4,"startTime":"10:10","endTime":"11:50","teacherName":"刘菊华","teachingPlace":"公共教学楼C栋/东C301","useflag":"RT"}*/
+@Serializable
+data class CourseInfo(
+	val courseName: String,
+	@SerialName("teacherName") val teacher: String,
+	@SerialName("schoolSemester") val semester: String,
+	@SerialName("teachingDate") val date: String,
+	@SerialName("startTime") val startTime: String,
+	@SerialName("endTime") val endTime: String,
+	@SerialName("teachingPlace") val location: String,
+	@SerialName("weekTimes") val week: Int,
+	@SerialName("week") val day: Int,
+	@SerialName("startClassTimes") val startSection: Int,
+	@SerialName("endClassTimes") val endSection: Int,
+	@SerialName("studentNum") val studentNum: String,
+	@SerialName("courseNum") val courseCode: String,
+	@SerialName("classesNum") val courseNum: String,
+	@SerialName("useflag") val useflag: String,
+	val status: CourseState = CourseState.AFTER
+)

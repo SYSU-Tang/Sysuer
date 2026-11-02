@@ -48,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.nav.navigateBack
+import com.miyuyan.sysuer.theme.SysuerTheme
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.KeyValueRow
 import com.miyuyan.sysuer.view.MenuItem
@@ -82,30 +83,35 @@ fun NetPayRoute(
 			}
 		}
 	}
-	ActivityPager(
-			snackbar = snackbar,
-			onNavigationClick = { backStack.navigateBack(activity) },
-			title = stringResource(R.string.net_manager),
-			navs = listOf(
-					MenuItem(stringResource(R.string.order), iconVector = Icons.Rounded.AttachMoney),
-					MenuItem(stringResource(R.string.status), iconVector = Icons.Rounded.Web),
-			),
-			isNestedScrollEnabled = false,
-			sharedTransitionScope = sharedTransitionScope,
-			animatedVisibilityScope = animatedVisibilityScope,
-			sharedKey = "NetPay"
-	) {
-		StatePage(state = if (it == 0) uiState else null) {
-			StaggerScreen(
-					sections = when (it) {
-						0 -> viewModel.orderSections
-						1 -> viewModel.statusSections
-						else -> viewModel.orderSections
-					}
-			)
+	SysuerTheme {
+		ActivityPager(
+				snackbar = snackbar,
+				onNavigationClick = { backStack.navigateBack(activity) },
+				title = stringResource(R.string.net_manager),
+				navs = listOf(
+						MenuItem(
+								stringResource(R.string.order),
+								iconVector = Icons.Rounded.AttachMoney
+						),
+						MenuItem(stringResource(R.string.status), iconVector = Icons.Rounded.Web),
+				),
+				isNestedScrollEnabled = false,
+				sharedTransitionScope = sharedTransitionScope,
+				animatedVisibilityScope = animatedVisibilityScope,
+				sharedKey = "NetPay"
+		) {
+			StatePage(state = if (it == 0) uiState else null) {
+				StaggerScreen(
+						sections = when (it) {
+							0 -> viewModel.orderSections
+							1 -> viewModel.statusSections
+							else -> viewModel.orderSections
+						}
+				)
+			}
 		}
+		NetPayDialog(viewModel)
 	}
-	NetPayDialog(viewModel)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

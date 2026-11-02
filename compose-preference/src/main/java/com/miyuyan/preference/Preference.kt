@@ -62,7 +62,6 @@ fun Preference(
 					Text(
 							modifier = titleModifier,
 							text = title,
-//							color = colors.overlineContentColor,
 							style = MaterialTheme.typography.bodyLarge,
 					)
 				}
@@ -73,8 +72,7 @@ fun Preference(
 			summary != null -> {
 				Text(
 						summary,
-						style = MaterialTheme.typography.labelMedium,
-//						color = colors.supportingContentColor
+						style = MaterialTheme.typography.labelMedium
 				)
 			}
 
@@ -82,8 +80,7 @@ fun Preference(
 				Text(
 						modifier = titleModifier,
 						text = title,
-						style = MaterialTheme.typography.bodyLarge,
-//						color = colors.overlineContentColor
+						style = MaterialTheme.typography.bodyLarge
 				)
 			}
 		}

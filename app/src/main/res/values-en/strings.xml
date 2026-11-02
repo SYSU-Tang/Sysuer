@@ -25,6 +25,10 @@
     <string name="captcha">Captcha</string>
     <string name="today">Today</string>
     <string name="no_class_today">NO Courses Today🎉</string>
+    <string name="course_status_not_started">Upcoming</string>
+    <string name="course_status_in_progress">In Progress</string>
+    <string name="course_status_finished">Finished</string>
+    <string name="until_class_end">%1$d min left</string>
     <string name="no_exam">NO Exams Today🎉</string>
     <string name="classTime">Section</string>
     <string name="name">Label</string>
