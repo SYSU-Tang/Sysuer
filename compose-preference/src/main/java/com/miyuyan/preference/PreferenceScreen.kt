@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
@@ -44,7 +45,7 @@ fun PreferenceScreen(
 ) {
 	Column(
 			modifier = modifier
-				.fillMaxSize()
+				.fillMaxWidth()
 				.imePadding()
 				.nestedScroll(rememberNestedScrollInteropConnection())
 				.verticalScroll(rememberScrollState())
@@ -72,7 +73,7 @@ fun PreferenceScreen(
  * 再由 [PreferenceCategory] 统一用 CompositionLocalProvider 注入 index/count 进行渲染。
  */
 class PreferenceCategoryScope internal constructor() {
-	internal val collectedItems = mutableListOf<@Composable () -> Unit>()
+	internal val collectedItems = mutableStateListOf<@Composable () -> Unit>()
 
 	/**
 	 * 向分组中添加一个偏好项。
@@ -87,6 +88,11 @@ class PreferenceCategoryScope internal constructor() {
 	fun <T> items(list: List<T>, content: @Composable (T) -> Unit) {
 		list.forEach { collectedItems.add({ content(it) }) }
 	}
+
+	fun <T> itemsWithIndexed(list: List<T>, content: @Composable (Int, T) -> Unit) {
+		list.forEachIndexed { index, item -> collectedItems.add({ content(index, item) }) }
+	}
+
 
 }
 

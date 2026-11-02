@@ -180,7 +180,7 @@
     <string name="on_time">准时</string>
     <string name="one_day">1天</string>
     <string name="five_mins">5分钟</string>
-    <string name="custom_remind_title">提前时间（分钟）</string>
+    <string name="custom_remind_title">提前时间</string>
     <string name="tag">标签</string>
     <string name="save">保存</string>
     <string name="submit">提交</string>

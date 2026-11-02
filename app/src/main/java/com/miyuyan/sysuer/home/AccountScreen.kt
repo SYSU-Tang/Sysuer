@@ -2,6 +2,7 @@ package com.miyuyan.sysuer.home
 
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,7 +27,9 @@ fun AccountScreen(
 	sharedTransitionScope: SharedTransitionScope? = null,
 	animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
-	PreferenceScreen {
+	PreferenceScreen(
+			modifier = Modifier.fillMaxSize()
+	) {
 		PreferenceCategory(title = stringResource(R.string.account)) {
 			item {
 				JumpPreference(

@@ -102,7 +102,7 @@ fun <T> WheelPreference(
  * （放大、高亮，其余按距离渐隐缩小），点击条目滚动到该项。
  */
 @Composable
-private fun WheelPicker(
+fun WheelPicker(
 	entries: List<String>,
 	selectedIndex: Int?,
 	onSelected: (Int) -> Unit,

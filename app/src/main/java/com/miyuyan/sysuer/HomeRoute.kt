@@ -43,7 +43,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
-import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.api.ContextUtil
 import com.miyuyan.sysuer.api.PreferenceViewModel
 import com.miyuyan.sysuer.api.SettingManager
@@ -55,6 +54,7 @@ import com.miyuyan.sysuer.home.HomeViewModel
 import com.miyuyan.sysuer.home.ServiceConfig
 import com.miyuyan.sysuer.home.ServiceScreen
 import com.miyuyan.sysuer.home.ServiceViewModel
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.todo.TodoModel
 import com.miyuyan.sysuer.view.ActivityPager
 import com.miyuyan.sysuer.view.MenuItem
@@ -125,7 +125,10 @@ fun HomeRoute(
 	ActivityPager(
 			title = stringResource(R.string.app_name),
 			navs = listOf(
-					MenuItem(stringResource(R.string.dashboard), iconVector = Icons.Rounded.Dashboard),
+					MenuItem(
+							stringResource(R.string.dashboard),
+							iconVector = Icons.Rounded.Dashboard
+					),
 					MenuItem(stringResource(R.string.service), iconVector = Icons.Rounded.GridView),
 					MenuItem(stringResource(R.string.account), iconVector = Icons.Rounded.Person),
 			),

@@ -175,7 +175,7 @@
     <string name="select">Choose</string>
     <string name="one_day">1 day</string>
     <string name="five_mins">5 mins</string>
-    <string name="custom_remind_title">Advance Time (min)</string>
+    <string name="custom_remind_title">Advance Time</string>
     <string name="tag">Tag</string>
     <string name="save">Save</string>
     <string name="submit">Submit</string>

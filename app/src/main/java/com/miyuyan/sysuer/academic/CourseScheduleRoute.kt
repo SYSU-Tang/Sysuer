@@ -29,7 +29,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -38,6 +37,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.SnackbarHostState
@@ -121,7 +121,9 @@ fun CourseScheduleRoute(
 	val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 	val realTimeTerm by viewModel.realTimeTerm.collectAsStateWithLifecycle()
 	val realTimeWeekIndex by viewModel.realTimeWeekIndex.collectAsStateWithLifecycle()
-	val isToday = currentTerm == realTimeTerm && weekIndex == realTimeWeekIndex
+	// 分别标记「当前学期」与「当前周」，两者同时满足即为今天所在的学期与周次
+	val isCurrentTerm = currentTerm == realTimeTerm
+	val isCurrentWeek = weekIndex == realTimeWeekIndex
 
 	var showAddDialog by remember { mutableStateOf(false) }
 	var addDay by remember { mutableIntStateOf(0) }
@@ -169,7 +171,8 @@ fun CourseScheduleRoute(
 						terms = terms,
 						weekIndex = weekIndex,
 						weeks = weeks,
-						isToday = isToday,
+						isCurrentTerm = isCurrentTerm,
+						isCurrentWeek = isCurrentWeek,
 						onTermChange = { viewModel.changeTerm(it) },
 						onWeekIndexChange = { viewModel.changeWeek(it) },
 						onToday = {
@@ -233,7 +236,8 @@ private fun WeekBar(
 	terms: List<String>,
 	weekIndex: Int,
 	weeks: List<Int>,
-	isToday: Boolean,
+	isCurrentTerm: Boolean,
+	isCurrentWeek: Boolean,
 	onTermChange: (String) -> Unit,
 	onWeekIndexChange: (Int) -> Unit,
 	onToday: () -> Unit,
@@ -282,14 +286,20 @@ private fun WeekBar(
 							bounds.bottom.roundToInt()
 					)
 				}) {
-			OutlinedButton(
-					onClick = { termPopupVisible = true }, shapes = ButtonDefaults.shapes()
-			) {
-				Text(
-						term.ifEmpty { stringResource(R.string.term) },
-						maxLines = 1,
-						overflow = TextOverflow.Ellipsis,
-				)
+			// 当前正处于当前学期时用带背景色的按钮标记，否则用描边按钮
+			val termLabel = term.ifEmpty { stringResource(R.string.term) }
+			if (isCurrentTerm) {
+				FilledTonalButton(
+						onClick = { termPopupVisible = true }, shapes = ButtonDefaults.shapes()
+				) {
+					Text(termLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
+				}
+			} else {
+				OutlinedButton(
+						onClick = { termPopupVisible = true }, shapes = ButtonDefaults.shapes()
+				) {
+					Text(termLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
+				}
 			}
 			if (termPopupVisible) {
 				SimpleMenuPopup(
@@ -301,7 +311,7 @@ private fun WeekBar(
 			}
 		}
 		// 当前正处于今天的学期与周次时用带背景色的按钮标记，否则用描边按钮
-		if (isToday) {
+		if (isCurrentTerm && isCurrentWeek) {
 			FilledTonalButton(
 					onClick = onToday,
 					shapes = ButtonDefaults.shapes(),
@@ -328,13 +338,17 @@ private fun WeekBar(
 							bounds.bottom.roundToInt()
 					)
 				}) {
-			OutlinedButton(onClick = { weekPopupVisible = true }) {
-				Text(
-						weeks.getOrNull(weekIndex)?.let { stringResource(R.string.week_d, it) }
-							?: stringResource(R.string.week_range),
-						maxLines = 1,
-						overflow = TextOverflow.Ellipsis,
-				)
+			// 当前正处于当前周时用带背景色的按钮标记，否则用描边按钮
+			val weekLabel = weeks.getOrNull(weekIndex)?.let { stringResource(R.string.week_d, it) }
+					?: stringResource(R.string.week_range)
+			if (isCurrentWeek) {
+				FilledTonalButton(onClick = { weekPopupVisible = true }) {
+					Text(weekLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
+				}
+			} else {
+				OutlinedButton(onClick = { weekPopupVisible = true }) {
+					Text(weekLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
+				}
 			}
 			if (weekPopupVisible) {
 				SimpleMenuPopup(
@@ -440,15 +454,12 @@ private fun ScheduleBoard(
 		)
 		Row(
 				modifier = Modifier
-					.fillMaxWidth()
-					.height(48.dp),
+					.fillMaxWidth(),
 				verticalAlignment = Alignment.CenterVertically,
 		) {
 			Box(
 					modifier = Modifier
-						.width(leftWidth)
-						.fillMaxHeight()
-						.background(MaterialTheme.colorScheme.surfaceDim),
+						.width(leftWidth),
 					contentAlignment = Alignment.Center,
 			) {
 				Text(monthText, style = MaterialTheme.typography.bodyMedium)
@@ -460,12 +471,11 @@ private fun ScheduleBoard(
 				Column(
 						modifier = Modifier
 							.weight(1f)
-							.fillMaxHeight()
 							.background(
 									color = if (i == weekday) MaterialTheme.colorScheme.surfaceDim
-									else Color.Transparent,
-									shape = CircleShape,
-							),
+									else Color.Transparent
+							)
+							.padding(2.dp),
 						horizontalAlignment = Alignment.CenterHorizontally,
 						verticalArrangement = Arrangement.Center,
 				) {
@@ -606,7 +616,7 @@ private fun ScheduleBoard(
 										)
 										.background(
 												MaterialTheme.colorScheme.surfaceDim,
-												RoundedCornerShape(cellCornerRadius),
+//												RoundedCornerShape(cellCornerRadius),
 										),
 							)
 						}
@@ -679,16 +689,16 @@ private fun ScheduleBoard(
 									)
 //									.padding(1.dp),
 						) {
-							Card(
+							OutlinedCard(
 									onClick = { onCourseClick(card) },
 									shape = RoundedCornerShape(cellCornerRadius),
-									colors = CardDefaults.cardColors(
+									colors = CardDefaults.outlinedCardColors(
 											containerColor = bg,
 											disabledContainerColor = bg.copy(alpha = 0.5f),
 									),
 									modifier = Modifier
 										.fillMaxSize()
-										.padding(0.64.dp)
+//										.padding(0.64.dp)
 										.alpha(if (card.isStop) 0.5f else 1f),
 							) {
 								Box(
