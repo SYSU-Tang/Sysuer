@@ -942,7 +942,7 @@ class TodoManager(
 					FilledTonalButton(
 							onClick = { todoState.save(); onDismiss() },
 							shapes = ButtonDefaults.shapes()
-					) { Text(stringResource(R.string.confirm)) }
+					) { Text(stringResource(if(isAdd) R.string.add else R.string.save)) }
 				}
 			}
 		}

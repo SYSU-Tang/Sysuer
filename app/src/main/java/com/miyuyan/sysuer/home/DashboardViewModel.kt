@@ -21,16 +21,21 @@ import com.miyuyan.sysuer.home.data.ServiceCollectionEntity
 import com.miyuyan.sysuer.model.JwxtModel
 import com.miyuyan.sysuer.preference.SettingPreference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.time.Duration.Companion.milliseconds
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
 	private val model = JwxtModel(application)
@@ -63,6 +68,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	private val _isShowWeek18 = MutableStateFlow(true)
 	val isShowWeek18: StateFlow<Boolean> = _isShowWeek18.asStateFlow()
 	private var examSubject = ""
+	private var statusJob: Job? = null
+	private val statusTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 	private val _navigateToCourseDetail = MutableStateFlow<JSONObject?>(null)
 	val navigateToCourseDetail: StateFlow<JSONObject?> = _navigateToCourseDetail.asStateFlow()
 	fun onNavigatedToCourseDetail() {
@@ -192,30 +199,63 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 						?: application.getString(R.string.none)),
 					application.getString(R.string.location) to (next?.location
 						?: application.getString(R.string.none)),
-					application.getString(R.string.time) to (next
-						?.let { "${it.startTime}~${it.endTime}" }
-						?: application.getString(R.string.none))
-			)
+					application.getString(R.string.time) to (next?.let { "${it.startTime}~${it.endTime}" }
+						?: application.getString(R.string.none)))
 		} else {
 			val current = _todayCourses.value.getOrNull(beforeSize)
 			mapOf(
 					"title" to (current?.courseName ?: application.getString(R.string.none)),
 					application.getString(R.string.location) to (current?.location
 						?: application.getString(R.string.none)),
-					application.getString(R.string.time) to (current
-						?.let { "${it.startTime}~${it.endTime}" }
+					application.getString(R.string.time) to (current?.let { "${it.startTime}~${it.endTime}" }
 						?: application.getString(R.string.none)),
-					application.getString(R.string.date) to (current?.date
-						?: application.getString(R.string.none))
-			)
+					application.getString(R.string.date) to (current?.date ?: application.getString(
+							R.string.none
+					)))
 		}
 		_nextClassInfo.value = info
 	}
 
-	private fun scheduleIslandTick() {
+	/** 按当前时间刷新今天课程的 status,同时同步进度、下一节信息与 ClassIsland。 */
+	private fun applyCourseStatus() {
+		val todayList = _todayCourses.value.map { it.withStatus() }
+		_todayCourses.value = todayList
+		val (finished, upcoming) = todayList.partition { it.status == CourseState.BEFORE }
+		_progressMax.value = todayList.size
+		_progressCurrent.value = finished.size
+		updateNextClassMarkdown(finished.size, upcoming.isEmpty())
 		ClassIsland.updateCourseData(_todayCourses.value, _recentCourses.value)
 		ClassIsland.triggerAndScheduleTick(application)
 	}
+
+	/** 只在每节课开始和下课的时刻唤醒一次来更新 status,其余时间不跑任何定时任务。 */
+	private fun scheduleStatusUpdates() {
+		statusJob?.cancel()
+		statusJob = viewModelScope.launch {
+			while (isActive) {
+				val boundary = nextStatusBoundary() ?: break
+				delay(
+						Duration.between(LocalDateTime.now(), boundary).toMillis()
+							.coerceAtLeast(1L).milliseconds
+				)
+				applyCourseStatus()
+			}
+		}
+	}
+
+	/** 今天所有课程里,晚于当前时间的最近一个开始/下课时刻。 */
+	private fun nextStatusBoundary(): LocalDateTime? {
+		val now = LocalDateTime.now()
+		return _todayCourses.value.flatMap { course ->
+			listOfNotNull(
+					course.parseStatusBoundary(course.startTime),
+					course.parseStatusBoundary(course.endTime)
+			)
+		}.filter { it.isAfter(now) }.minOrNull()
+	}
+
+	private fun CourseInfo.parseStatusBoundary(time: String): LocalDateTime? =
+		runCatching { LocalDateTime.parse("$date $time", statusTimeFormatter) }.getOrNull()
 
 	init {
 		viewModelScope.launch {
@@ -223,23 +263,17 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 				.collect { (code, response) ->
 					when (code) {
 						1 -> {
-							val courseList = response.getJSONArray("data")
-								.filterIsInstance<JSONObject>()
-								.map {
+							val courseList =
+								response.getJSONArray("data").filterIsInstance<JSONObject>().map {
 									SysuerJson.decodeFromString<CourseInfo>(it.toJSONString())
 										.withStatus()
 								}
 							val todayList = courseList.filter { it.useflag == "TD" }
 							val recentList = courseList.filter { it.useflag != "TD" }
-							val (finished, upcoming) = todayList.partition {
-								it.status == CourseState.BEFORE
-							}
 							_todayCourses.value = todayList
 							_recentCourses.value = recentList
-							_progressMax.value = todayList.size
-							_progressCurrent.value = finished.size
-							updateNextClassMarkdown(finished.size, upcoming.isEmpty())
-							scheduleIslandTick()
+							applyCourseStatus()
+							scheduleStatusUpdates()
 						}
 
 						2 -> {
@@ -343,11 +377,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 		}
 	}
 
-	fun getTimePosition(from: String, to: String): CourseState {
+	fun CourseInfo.getTimePosition(): CourseState {
 		val now = LocalDateTime.now()
-		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-		val start = LocalDateTime.parse(from, formatter)
-		val end = LocalDateTime.parse(to, formatter)
+		val start = parseStatusBoundary(startTime)
+		val end = parseStatusBoundary(endTime)
 		return when {
 			now.isBefore(start) -> CourseState.AFTER
 			now.isAfter(end) -> CourseState.BEFORE
@@ -357,7 +390,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
 	private fun CourseInfo.withStatus(): CourseInfo = copy(
 			status = if (useflag == "TD") {
-				getTimePosition("$date $startTime", "$date $endTime")
+				getTimePosition()
 			} else CourseState.TOMORROW
 	)
 
@@ -372,6 +405,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 	}
 
 	override fun onCleared() {
+		statusJob?.cancel()
 		model.dispose()
 	}
 }

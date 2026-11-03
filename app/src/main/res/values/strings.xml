@@ -1081,4 +1081,5 @@
     <string name="date_field">日期字段</string>
     <string name = "collected">已收藏</string>
     <string name = "uncollected">已取消收藏</string>
+    <string name="add_homework">添加作业</string>
 </resources>
