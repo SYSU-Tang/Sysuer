@@ -34,9 +34,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import coil.compose.AsyncImage
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
+import com.miyuyan.sysuer.view.ImageViewerDialog
 import com.miyuyan.sysuer.view.MenuItem
 import com.miyuyan.sysuer.view.StatePage
 import kotlinx.coroutines.launch
@@ -66,6 +66,8 @@ fun SchoolCalendarRoute(
 	}
 
 	val copySuccessfully = stringResource(R.string.copy_successfully)
+	// 点击图片打开全屏查看器;长按仍保留保存/复制链接/分享菜单
+	var previewUrl by remember { mutableStateOf<String?>(null) }
 	ActivityPager(
 			title = stringResource(R.string.calendar),
 			snackbar = snackbarHostState,
@@ -88,7 +90,7 @@ fun SchoolCalendarRoute(
 				items(section.images) { url ->
 					CalendarImage(
 							url = url,
-							onClick = { backStack.add(Browser(url)) },
+							onClick = { previewUrl = url },
 							onSave = { viewModel.saveImage(url) },
 							onShare = { viewModel.shareImage(url) },
 							onCopy = {
@@ -105,6 +107,18 @@ fun SchoolCalendarRoute(
 				}
 			}
 		}
+	}
+	
+	previewUrl?.let { url ->
+		ImageViewerDialog(
+				model = url,
+				fileName = url.substringAfterLast('/').takeIf { it.isNotEmpty() },
+				contentDescription = stringResource(R.string.calendar),
+				onDismiss = { previewUrl = null },
+				onOpenAs = { viewModel.openAsImage(url) },
+				onShare = { viewModel.shareImage(url) },
+				onSave = { viewModel.saveImage(url) },
+		)
 	}
 }
 

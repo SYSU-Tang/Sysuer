@@ -8,7 +8,7 @@ import android.provider.MediaStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.miyuyan.sysuer.R
-import com.miyuyan.sysuer.api.DownloadManager
+import com.miyuyan.sysuer.api.AttachmentManager
 import com.miyuyan.sysuer.view.UiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -130,22 +130,43 @@ class SchoolCalendarViewModel(application: Application) : AndroidViewModel(appli
 		}
 	}
 
-	/** 保存到缓存目录后调起系统查看/分享 */
+	/** 分享校历图片:下载到缓存后走系统分享选择器 */
 	fun shareImage(url: String) {
 		viewModelScope.launch {
-			val data = withContext(Dispatchers.IO) { download(url) }
-			if (data == null) {
+			val file = withContext(Dispatchers.IO) { cacheImage(url) }
+			if (file == null) {
 				_snackbarMessage.tryEmit(
 						getApplication<Application>().getString(R.string.save_fail)
 				)
 				return@launch
 			}
-			val file = File(
-					getApplication<Application>().externalCacheDir,
-					"${System.currentTimeMillis()}.jpg"
-			)
-			withContext(Dispatchers.IO) { file.writeBytes(data) }
-			DownloadManager.openFile(getApplication(), file.path)
+			AttachmentManager.shareFile(getApplication(), file, "image/jpeg")
+		}
+	}
+	
+	/** 打开为:下载到缓存后弹出应用选择器 */
+	fun openAsImage(url: String) {
+		viewModelScope.launch {
+			val file = withContext(Dispatchers.IO) { cacheImage(url) }
+			if (file == null) {
+				_snackbarMessage.tryEmit(
+						getApplication<Application>().getString(R.string.save_fail)
+				)
+				return@launch
+			}
+			AttachmentManager.openFileAs(getApplication(), file, "image/jpeg")
+		}
+	}
+	
+	/** 下载图片到缓存目录,供分享/打开为使用 */
+	private fun cacheImage(url: String): File? {
+		val data = download(url) ?: return null
+		val app = getApplication<Application>()
+		val dir = app.externalCacheDir ?: app.cacheDir
+		return try {
+			File(dir, "calendar_${System.currentTimeMillis()}.jpg").apply { writeBytes(data) }
+		} catch (_: Exception) {
+			null
 		}
 	}
 

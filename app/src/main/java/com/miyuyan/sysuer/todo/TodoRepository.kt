@@ -15,6 +15,10 @@ class TodoRepository(private val todoDao: TodoDao) {
 		return todoDao.queryTodo()
 	}
 	
+	suspend fun getTodoById(id: Int): TodoEntity? {
+		return todoDao.queryTodoById(id)
+	}
+	
 	suspend fun getTodo(where: String,
 	                    args: Array<String>): List<TodoEntity> {
 		val query = RoomRawQuery(sql = "SELECT * FROM todos WHERE $where", onBindStatement = { stmt ->

@@ -13,6 +13,7 @@
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <queries>
         <package android:name="com.tencent.wework" />

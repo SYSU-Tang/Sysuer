@@ -412,7 +412,8 @@ fun TodayCoursesSection(
 						)
 					},
 					onAddHomework = {
-						// 科目表里还没有这门课时先补上,否则弹窗里的科目选中项显示不出来
+						// 类型/科目表里还没有对应项时先补上,否则弹窗里的选中项显示不出来
+						todoManager.addType(homeworkTitle)
 						todoManager.addSubject(course.courseName)
 						homeworkCourse = course
 					},
@@ -427,6 +428,7 @@ fun TodayCoursesSection(
 		val initialTodo = remember(course) {
 			TodoEntity(
 					title = homeworkTitle,
+					todoType = homeworkTitle,
 					subject = course.courseName,
 					dueDate = DateTimeManager.toDateStringPLus(0),
 					ddl = DateTimeManager.toDateStringPLus(7),
@@ -577,12 +579,6 @@ private fun TimelineItem(
 								style = MaterialTheme.typography.bodySmall,
 								color = MaterialTheme.colorScheme.onSurfaceVariant
 						)
-						if (status == IN) {
-							LinearWavyProgressIndicator(
-									progress = { elapsed.toFloat() / total },
-									modifier = Modifier.fillMaxWidth()
-							)
-						}
 					}
 					IconButton(
 							onClick = onAddHomework
@@ -592,6 +588,12 @@ private fun TimelineItem(
 								contentDescription = stringResource(R.string.add_homework)
 						)
 					}
+				}
+				if (status == IN) {
+					LinearWavyProgressIndicator(
+							progress = { elapsed.toFloat() / total },
+							modifier = Modifier.fillMaxWidth()
+					)
 				}
 			}
 		}

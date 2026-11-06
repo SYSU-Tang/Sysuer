@@ -689,6 +689,17 @@
     <string name="content">内容</string>
     <string name="invalid_phone">号码错误</string>
     <string name="upload_attachment">上传附件</string>
+    <string name="take_photo">拍照</string>
+    <string name="pick_image">照片</string>
+    <string name="record_audio">录音</string>
+    <string name="pick_file">文件</string>
+    <string name="recording">录音中…</string>
+    <string name="tap_to_stop">点击完成</string>
+    <string name="audio_attachment">音频</string>
+    <string name="file_attachment">文件</string>
+    <string name="attachment_count">附件 %1$d</string>
+    <string name="record_permission_denied">未授予麦克风权限,无法录音</string>
+    <string name="add_attachment_failed">添加附件失败</string>
     <string name="subject_helper_text">示例：关于反映XX校区/校园XX事项的意见/建议/诉求</string>
     <string name="content_helper_text">请务必点明诉求的关键要素，包括但不限于时间、地点、缘由,字数不能多于1000个。</string>
     <string name="attachment">附件</string>
@@ -847,6 +858,8 @@
     <string name="pending_pay_order">待支付订单</string>
     <string name="enter_leave_type_name">请选择假期类型</string>
     <string name="download_error">下载失败</string>
+  <string name="courseware_no_direct_link">该课件无直接下载链接，已为你打开在线预览</string>
+  <string name="download_courseware">下载课件</string>
     <string name="print_leave_slip">打印请假单</string>
     <string name="leave_start_time">开始时间</string>
     <string name="leave_end_time">结束时间</string>
@@ -1082,4 +1095,13 @@
     <string name = "collected">已收藏</string>
     <string name = "uncollected">已取消收藏</string>
     <string name="add_homework">添加作业</string>
+    <string name="attachment_type">附件类型</string>
+    <string name="record_start">开始</string>
+    <string name="record_pause">暂停</string>
+    <string name="record_resume">继续</string>
+    <string name="record_finish">完成</string>
+    <string name="record_paused">已暂停</string>
+  <string name="minimize">最小化</string>
+    <string name="open_as">打开为</string>
+    <string name="save_to">保存到</string>
 </resources>

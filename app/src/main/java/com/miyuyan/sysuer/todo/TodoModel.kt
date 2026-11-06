@@ -56,6 +56,9 @@ class TodoModel(application: Application) : AndroidViewModel(application) {
 	fun deleteTodo(id: Int): Job = viewModelScope.launch {
 		repository.deleteTodo(id)
 	}
+	
+	/** 按 id 取待办(用于删除前读取附件清单) */
+	suspend fun getTodoById(id: Int): TodoEntity? = repository.getTodoById(id)
 
 	fun addType(type: String): Job = viewModelScope.launch {
 		repository.addType(type)

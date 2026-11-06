@@ -1,8 +1,13 @@
 package com.miyuyan.sysuer.rainClass
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,10 +18,14 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AppBarWithSearch
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -35,8 +44,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -50,6 +63,8 @@ import com.miyuyan.preference.Preference
 import com.miyuyan.preference.PreferenceCategory
 import com.miyuyan.preference.PreferenceScreen
 import com.miyuyan.sysuer.R
+import com.miyuyan.sysuer.api.ContextUtil
+import com.miyuyan.sysuer.nav.Browser
 import com.miyuyan.sysuer.nav.RainClassDetail
 import com.miyuyan.sysuer.nav.navigateBack
 import com.miyuyan.sysuer.view.ActivityPager
@@ -159,7 +174,7 @@ fun RainClassDetailRoute(
 							classId = navKey.classId, pagerState = studyLogPagerState
 					)
 
-					2 -> StudyContentPage(classId = navKey.classId)
+					2 -> StudyContentPage(classId = navKey.classId, backStack = backStack)
 					3 -> UnfinishedPage(selectedSubTab = unfinishedTab)
 					4 -> DiscussionPage(
 							selectedSubTab = discussionTab, searchQuery = discussionSearchQuery
@@ -182,7 +197,7 @@ private fun StudyLogSubTabs(pagerState: PagerState) {
 	val tabs = listOf("全部日志", "课堂", "课件", "试卷", "公告")
 
 	SecondaryScrollableTabRow(
-			edgePadding = 0.dp,
+			edgePadding = dimensionResource(R.dimen.horizontal_padding),
 			selectedTabIndex = pagerState.currentPage,
 			containerColor = Color.Transparent,
 			divider = {},
@@ -529,10 +544,12 @@ private fun StudyLogPage(
 }
 
 @Composable
-private fun StudyContentPage(classId: String) {
+private fun StudyContentPage(classId: String, backStack: MutableList<NavKey>) {
 	val viewModel: RainClassViewModel = viewModel()
+	val context = LocalContext.current
 	val chapterList by viewModel.chapterList.collectAsStateWithLifecycle()
 	val chapterUiState by viewModel.chapterUiState.collectAsStateWithLifecycle()
+	val downloadingLeafIds by viewModel.downloadingLeafIds.collectAsStateWithLifecycle()
 
 	LaunchedEffect(classId) {
 		if (chapterUiState == UiState.Unstarted || chapterUiState == UiState.Error) {
@@ -540,47 +557,173 @@ private fun StudyContentPage(classId: String) {
 		}
 	}
 
+	// 提示消息
+	LaunchedEffect(Unit) {
+		val contextUtil = ContextUtil(context)
+		viewModel.toastEvent.collect { message -> contextUtil.toast(message) }
+	}
+
+	// 无直接下载链接时回退到站内课件页
+	LaunchedEffect(Unit) {
+		viewModel.browserEvent.collect { url ->
+			syncCookiesToWeb(context)
+			backStack.add(Browser(url))
+		}
+	}
+
+	// 小节节点的展开状态，key 为叶子 id；缺省为展开
+	val expandedLeaves = remember { mutableStateMapOf<Long, Boolean>() }
+
 	StatePage(state = chapterUiState) {
 		PreferenceScreen(modifier = Modifier.fillMaxSize()) {
 			chapterList.forEach { chapter ->
 				val leaves = chapter.getJSONArray("section_leaf_list")
-				if (leaves != null && leaves.isNotEmpty()) {
-					PreferenceCategory(title = chapter.getString("name")) {
-						leaves.filterIsInstance<JSONObject>().forEach { leaf ->
-							val leafType = leaf.getInteger("leaf_type")
-							val isLocked = leaf.getBooleanValue("is_locked")
-							val isScore = leaf.getBooleanValue("is_score")
-							val summary = buildList {
-								add(RainClassViewModel.getLeafTypeText(leafType))
-								if (isLocked) add("已锁定")
-								if (isScore) add("记分")
-								leaf.getLong("score_deadline")?.takeIf { it > 0 }?.let {
-									add("截止 ${RainClassViewModel.formatTimestampMillie(it)}")
-								}
-							}.joinToString(" · ")
+						?.filterIsInstance<JSONObject>().orEmpty()
+				if (leaves.isEmpty()) return@forEach
+
+				// 章节本体：每个叶子占一行（带 leaf_list 的只是折叠标题行）
+				PreferenceCategory(title = chapter.getString("name")) {
+					// 注意：builder 内不能读取展开状态，否则会重建 collectedItems 并
+					// 在 PreferenceCategory 迭代时抛 ConcurrentModificationException。
+					leaves.forEach { leaf ->
+						item {
+							LeafEntry(
+									leaf = leaf,
+									downloadingLeafIds = downloadingLeafIds,
+									expanded = expandedLeaves[leaf.getLong("id")] ?: true,
+									onToggle = {
+										leaf.getLong("id")?.let { id ->
+											expandedLeaves[id] = !(expandedLeaves[id] ?: true)
+										}
+									},
+									onDownload = { target ->
+										viewModel.downloadCourseware(classId, target)
+									}
+							)
+						}
+					}
+				}
+
+				// 小节内的子项：另起一组，展开时显示在章节下方
+				leaves.forEach { leaf ->
+					val children = leaf.getJSONArray("leaf_list")
+							?.filterIsInstance<JSONObject>().orEmpty()
+					if (children.isEmpty()) return@forEach
+					val leafId = leaf.getLong("id") ?: return@forEach
+//					if (!(expandedLeaves[leafId] ?: true)) return@forEach
+					AnimatedVisibility(
+							visible = expandedLeaves[leafId] ?: true,
+							enter = expandVertically() + fadeIn(),
+							exit = shrinkVertically() + fadeOut()
+					) {
+					PreferenceCategory {
+						children.forEach { child ->
 							item {
-								Preference(
-										onClick = null,
-										title = leaf.getString("name"),
-										summary = summary,
-										icon = {
-											Icon(
-													painterResource(
-															RainClassViewModel.getLeafTypeIcon(
-																	leafType
-															)
-													),
-													contentDescription = null,
-													tint = MaterialTheme.colorScheme.primary
-											)
+								LeafItemContent(
+										leaf = child,
+										isDownloading = child.getLong("id") in downloadingLeafIds,
+										onDownload = {
+											viewModel.downloadCourseware(classId, child)
 										})
 							}
 						}
+					}
 					}
 				}
 			}
 		}
 	}
+}
+
+/**
+ * 叶子入口：若含 `leaf_list` 则只渲染可折叠的标题行（子项由外层的独立分组渲染），
+ * 否则直接渲染单条叶子。
+ */
+@Composable
+private fun LeafEntry(
+	leaf: JSONObject,
+	downloadingLeafIds: Set<Long>,
+	expanded: Boolean,
+	onToggle: () -> Unit,
+	onDownload: (JSONObject) -> Unit,
+) {
+	val children = leaf.getJSONArray("leaf_list")
+	if (children == null || children.isEmpty()) {
+		LeafItemContent(
+				leaf = leaf,
+				isDownloading = leaf.getLong("id") in downloadingLeafIds,
+				onDownload = { onDownload(leaf) }
+		)
+		return
+	}
+	Preference(
+			onClick = onToggle,
+			title = leaf.getString("name"),
+			icon = {
+				Icon(
+						painterResource(R.drawable.course),
+						contentDescription = null,
+						tint = MaterialTheme.colorScheme.primary
+				)
+			},
+			trailing = {
+				Icon(
+						Icons.Rounded.KeyboardArrowDown,
+						contentDescription = null,
+						modifier = Modifier.rotate(if (expanded) 180f else 0f)
+				)
+			}
+	)
+}
+
+/** 叶子条目（课件、视频、试卷等），课件类型带下载按钮 */
+@Composable
+private fun LeafItemContent(
+	leaf: JSONObject,
+	isDownloading: Boolean,
+	onDownload: () -> Unit,
+) {
+	val leafType = leaf.getInteger("leaf_type")
+	val isLocked = leaf.getBooleanValue("is_locked")
+	val isScore = leaf.getBooleanValue("is_score")
+	val summary = buildList {
+		add(RainClassViewModel.getLeafTypeText(leafType))
+		if (isLocked) add("已锁定")
+		if (isScore) add("记分")
+		leaf.getLong("score_deadline")?.takeIf { it > 0 }?.let {
+			add("截止 ${RainClassViewModel.formatTimestampMillie(it)}")
+		}
+	}.joinToString(" · ")
+	Preference(
+			onClick = null,
+			title = leaf.getString("name"),
+			summary = summary,
+			trailing = if (leafType == 3) {
+				{
+					if (isDownloading) {
+						CircularProgressIndicator(
+							modifier = Modifier.size(24.dp),
+							strokeWidth = 2.dp
+						)
+					} else {
+						IconButton(onClick = onDownload) {
+							Icon(
+									Icons.Rounded.Download,
+									contentDescription = stringResource(
+											R.string.download_courseware
+									)
+							)
+						}
+					}
+				}
+			} else null,
+			icon = {
+				Icon(
+						painterResource(RainClassViewModel.getLeafTypeIcon(leafType)),
+						contentDescription = null,
+						tint = MaterialTheme.colorScheme.primary
+				)
+			})
 }
 
 @Composable

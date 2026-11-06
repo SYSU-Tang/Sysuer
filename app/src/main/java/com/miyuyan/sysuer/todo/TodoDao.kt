@@ -13,6 +13,7 @@ import androidx.room3.Update
 	@Update suspend fun updateTodo(todo: TodoEntity)
 	@Query("DELETE FROM todos WHERE id = :id") suspend fun deleteTodoById(id: Int)
 	@Query("SELECT * FROM todos") suspend fun queryTodo(): List<TodoEntity>
+	@Query("SELECT * FROM todos WHERE id = :id") suspend fun queryTodoById(id: Int): TodoEntity?
 	
 	@RawQuery suspend fun queryTodo(query: RoomRawQuery): List<TodoEntity>
 	@Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertType(type: TypeEntity)

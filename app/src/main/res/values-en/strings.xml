@@ -840,6 +840,8 @@
     <string name="enter_valid_leave_days">Please enter a valid number of leave days</string>
     <string name="select_leave_reason">Please select a leave reason</string>
     <string name="download_error">Download Failed</string>
+  <string name="courseware_no_direct_link">No direct download link for this courseware; opened the online preview instead</string>
+  <string name="download_courseware">Download Courseware</string>
     <string name="credit_hours_status">Credit &amp; Hours Status</string>
     <string name="course_completion_status">Course Completion Status</string>
     <string name="training_credit">Training Program Credit Requirement</string>
@@ -1108,4 +1110,24 @@
 
     <string name = "collected">已收藏</string>
     <string name = "uncollected">已取消收藏</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="pick_image">Photos</string>
+    <string name="record_audio">Record Audio</string>
+    <string name="pick_file">File</string>
+    <string name="recording">Recording…</string>
+    <string name="tap_to_stop">Tap to finish</string>
+    <string name="audio_attachment">Audio</string>
+    <string name="file_attachment">File</string>
+    <string name="attachment_count">Attachments %1$d</string>
+    <string name="record_permission_denied">Microphone permission is required for recording</string>
+    <string name="add_attachment_failed">Failed to add attachment</string>
+    <string name="attachment_type">Attachment Type</string>
+    <string name="record_start">Start</string>
+    <string name="record_pause">Pause</string>
+    <string name="record_resume">Resume</string>
+    <string name="record_finish">Finish</string>
+    <string name="record_paused">Paused</string>
+  <string name="minimize">Minimize</string>
+    <string name="open_as">Open with</string>
+    <string name="save_to">Save to</string>
 </resources>

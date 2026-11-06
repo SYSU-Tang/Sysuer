@@ -132,13 +132,16 @@ fun PreferenceCategory(
 					modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
 			)
 		}
-		scope.collectedItems.forEachIndexed { index, content ->
-			CompositionLocalProvider(
-					LocalPreferenceIndex provides index,
-					LocalPreferenceCount provides scope.collectedItems.size,
-			) {
-				content()
+			// 取快照再迭代：collectedItems 是 SnapshotStateList，若子项在组合过程中
+			// 写入快照状态导致重建，直接迭代会抛 ConcurrentModificationException。
+			val renderedItems = scope.collectedItems.toList()
+			renderedItems.forEachIndexed { index, content ->
+				CompositionLocalProvider(
+						LocalPreferenceIndex provides index,
+						LocalPreferenceCount provides renderedItems.size,
+				) {
+						content()
+					}
 			}
-		}
 	}
 }

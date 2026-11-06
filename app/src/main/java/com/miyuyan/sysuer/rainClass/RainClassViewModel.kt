@@ -1,6 +1,7 @@
 package com.miyuyan.sysuer.rainClass
 
 import android.app.Application
+import android.os.Environment
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,13 +9,17 @@ import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.sysuer.R
 import com.miyuyan.sysuer.api.DateTimeManager
+import com.miyuyan.sysuer.api.DownloadManager
 import com.miyuyan.sysuer.model.RainClassModel
 import com.miyuyan.sysuer.view.UiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
@@ -59,6 +64,18 @@ class RainClassViewModel(application: Application) : AndroidViewModel(applicatio
 	private val _chapterList = MutableStateFlow<List<JSONObject>>(emptyList())
 	val chapterList = _chapterList.asStateFlow()
 	val chapterUiState = model.getUiState(GET_CHAPTER)
+
+	/** 正在下载的课件叶子 id 集合，用于在列表项上显示进度 */
+	private val _downloadingLeafIds = MutableStateFlow<Set<Long>>(emptySet())
+	val downloadingLeafIds = _downloadingLeafIds.asStateFlow()
+
+	/** 提示消息 */
+	private val _toastEvent = MutableSharedFlow<String>(extraBufferCapacity = 8)
+	val toastEvent = _toastEvent.asSharedFlow()
+
+	/** 无法直接下载时需要跳转浏览器的地址 */
+	private val _browserEvent = MutableSharedFlow<String>(extraBufferCapacity = 8)
+	val browserEvent = _browserEvent.asSharedFlow()
 
 	private val _loginRequired = MutableSharedFlow<Unit>()
 	val loginRequired = _loginRequired.asSharedFlow()
@@ -152,7 +169,6 @@ class RainClassViewModel(application: Application) : AndroidViewModel(applicatio
 		}
 	}
 
-
 	companion object {
 		const val GET_COURSE_LIST: Int = 0
 		const val GET_USER_INFO: Int = 1
@@ -163,6 +179,13 @@ class RainClassViewModel(application: Application) : AndroidViewModel(applicatio
 		const val GET_STUDY_LOG: Int = 6
 		const val GET_STUDY_LOG_STATUS: Int = 7
 		const val GET_CHAPTER: Int = 8
+		const val GET_LEAF_INFO: Int = 9
+
+		/** 可当作可下载文件后缀的判定表 */
+		private val FILE_EXTENSIONS = listOf(
+				"pdf", "ppt", "pptx", "doc", "docx", "xls", "xlsx", "zip", "rar", "7z",
+				"txt", "mp4", "m4v", "mp3", "jpg", "jpeg", "png",
+		)
 
 		val STUDY_LOG_TYPES = mapOf(
 				0 to -1,  // 全部日志
@@ -406,4 +429,111 @@ class RainClassViewModel(application: Application) : AndroidViewModel(applicatio
 				).header("xtbz", "ykt").build(), GET_CHAPTER
 		)
 	}
+
+	/**
+	 * 下载课件（leaf_type = 3）。
+	 *
+	 * 雨课堂的课件叶子没有固定直链，流程为：
+	 * 1. 请求 `leaf_info` 拿叶子详情，从 `content_info` 中找出文件直链；
+	 * 2. 找到直链就直接下载到系统下载目录；
+	 * 3. 找不到直链则回退到站内课件页，交给浏览器（已同步 Cookie）打开。
+	 */
+	fun downloadCourseware(classId: String, leaf: JSONObject) {
+		val leafId = leaf.getLong("id") ?: return
+		val leafName = leaf.getString("name") ?: "课件"
+		if (leafId in _downloadingLeafIds.value) return
+		_downloadingLeafIds.update { it + leafId }
+
+		viewModelScope.launch {
+			try {
+				val response = fetchLeafInfo(classId, leafId)
+				val contentInfo = response?.getJSONObject("data")?.getJSONObject("content_info")
+				val fileUrl = contentInfo?.let { findFileUrl(it) }
+				if (fileUrl == null) {
+					_downloadingLeafIds.update { it - leafId }
+					_toastEvent.tryEmit(
+							getApplication<Application>().getString(R.string.courseware_no_direct_link)
+					)
+					_browserEvent.tryEmit(
+							"https://${model.host}/v2/web/lms/$classId/graph/$leafId"
+					)
+					return@launch
+				}
+				val path = "${
+					Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+				}/${sanitizeFileName(leafName)}${fileUrl.extensionPart()}"
+				DownloadManager.downloadFile(
+						getApplication(),
+						model.http.generateRequest(fileUrl, null, null)
+							.header("xtbz", "ykt").build(),
+						path,
+						true,
+						object : DownloadManager.DownloadListener {
+							override fun onDownloadProgress(progress: Long, total: Long) {}
+
+							override fun onDownloadComplete(path: String?) {
+								viewModelScope.launch {
+									_toastEvent.emit(
+										"${
+											getApplication<Application>().getString(R.string.download_complete)
+										}: $path"
+									)
+									_downloadingLeafIds.update { it - leafId }
+								}
+							}
+
+							override fun onDownloadError(code: Int, message: String?) {
+								viewModelScope.launch {
+									_toastEvent.emit(
+										message
+											?: getApplication<Application>().getString(R.string.download_error)
+									)
+									_downloadingLeafIds.update { it - leafId }
+								}
+							}
+						})
+			} catch (e: Exception) {
+				_toastEvent.tryEmit(
+					(e.message ?: getApplication<Application>().getString(R.string.download_error))
+				)
+				_downloadingLeafIds.update { it - leafId }
+			}
+		}
+	}
+
+	/** 拉取叶子详情（挂起，等待登录重试后的最终响应） */
+	private suspend fun fetchLeafInfo(classId: String, leafId: Long): JSONObject? =
+		withContext(Dispatchers.IO) {
+			model.executeAndWait(
+				model.http.generateRequest(
+						"https://${model.host}/mooc-api/v1/lms/learn/leaf_info/$classId/$leafId/?term=latest&classroom_id=$classId",
+				).header("xtbz", "ykt").build(), GET_LEAF_INFO
+			)
+		}
+
+	private fun findFileUrl(contentInfo: JSONObject): String? {
+		val queue = ArrayDeque<Any?>().apply { add(contentInfo) }
+		while (queue.isNotEmpty()) {
+			when (val node = queue.removeFirst()) {
+				is JSONObject -> node.forEach { (_, value) -> queue.add(value) }
+				is JSONArray -> node.forEach { value -> queue.add(value) }
+				is String -> if (node.startsWith("http") && node.isFileUrl()) return node
+			}
+		}
+		return null
+	}
+
+	private fun String.isFileUrl(): Boolean {
+		val path = substringBefore('?').substringBefore('#')
+		return FILE_EXTENSIONS.any { path.endsWith(".$it", ignoreCase = true) }
+	}
+
+	private fun String.extensionPart(): String {
+		val path = substringBefore('?').substringBefore('#')
+		val ext = path.substringAfterLast('.', "")
+		return if (ext.isEmpty()) "" else ".$ext"
+	}
+
+	private fun sanitizeFileName(name: String): String =
+		name.replace(Regex("""[\\/:*?"<>|\n\r\t]"""), "_").trim().ifEmpty { "课件" }
 }

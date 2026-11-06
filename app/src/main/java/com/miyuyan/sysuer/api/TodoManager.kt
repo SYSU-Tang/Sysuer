@@ -1,9 +1,16 @@
 package com.miyuyan.sysuer.api
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.MediaRecorder
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,9 +31,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.automirrored.rounded.Article
+import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
@@ -36,12 +46,23 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.FolderZip
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.Movie
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PictureAsPdf
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.PriorityHigh
+import androidx.compose.material.icons.rounded.Slideshow
 import androidx.compose.material.icons.rounded.SubdirectoryArrowRight
+import androidx.compose.material.icons.rounded.TableChart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -76,10 +97,12 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,12 +113,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LifecycleCoroutineScope
+import coil.compose.AsyncImage
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import com.miyuyan.preference.EditPreference
@@ -110,8 +136,14 @@ import com.miyuyan.sysuer.todo.TodoEntity
 import com.miyuyan.sysuer.todo.TodoInfo
 import com.miyuyan.sysuer.todo.TodoModel
 import com.miyuyan.sysuer.todo.TodoReminderReceiver
+import com.miyuyan.sysuer.view.ImageViewerDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.squircle.squircleBackground
+import java.io.File
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -119,6 +151,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 class TodoManager(
 	private val context: Context,
@@ -190,6 +223,13 @@ class TodoManager(
 	fun deleteTodo(id: Int, onSuccess: () -> Unit = {}) {
 		lifecycleScope.launch {
 			cancelReminder(id)
+			// 先取出待办以便级联删除附件物理文件(直接查库,不依赖当前筛选列表)
+			val todo = withContext(Dispatchers.IO) { todoModel.getTodoById(id) }
+			todo?.let {
+				withContext(Dispatchers.IO) {
+					AttachmentManager.deleteAttachments(context, it.attachment)
+				}
+			}
 			todoModel.deleteTodo(id).join()
 			onSuccess()
 			performRefresh()
@@ -355,6 +395,7 @@ class TodoManager(
 		val initialTodo: TodoEntity = TodoEntity(),
 		val isAdd: Boolean = true,
 	) {
+		private val context get() = manager.context
 		var title by mutableStateOf(initialTodo.title ?: "")
 		var description by mutableStateOf(initialTodo.description ?: "")
 		var priority by mutableIntStateOf(initialTodo.priority.coerceIn(0, 4))
@@ -372,6 +413,19 @@ class TodoManager(
 		var location by mutableStateOf(initialTodo.location)
 		val subtasks =
 			mutableStateListOf<JSONObject>().apply { addAll(initialTodo.subtask.map { it as JSONObject }) }
+		val attachments =
+			mutableStateListOf<JSONObject>().apply { addAll(initialTodo.attachment.map { it as JSONObject }) }
+
+		/**
+		 * 本次编辑会话新增的附件 id。新增态(含「复制待办」带过来的附件)所有文件都是本会话产物,
+		 * 取消/移除时可直接删;编辑态只清理本会话新增的,原待办文件等保存成功后再删。
+		 */
+		private val sessionAddedIds = mutableSetOf<String>().apply {
+			if (isAdd) addAll(initialTodo.attachment.mapNotNull { (it as? JSONObject)?.getString("id") })
+		}
+
+		/** 编辑态中被移除的原有附件,保存成功后统一删文件,避免取消编辑时误删库中仍在引用的数据 */
+		private val removedEntries = mutableListOf<JSONObject>()
 
 		var showDatePicker by mutableStateOf(false)
 		var showTimePicker by mutableStateOf(false)
@@ -382,11 +436,41 @@ class TodoManager(
 		var showSubtaskDialog by mutableStateOf(false)
 		var remindTarget by mutableStateOf("")
 		var showCustomRemindDialog by mutableStateOf(false)
+		var showRecordSheet by mutableStateOf(false)
+
+		/** 录音会话：面板收起后仍继续，删除/关闭弹窗时回收 */
+		val recording = RecordingSession(context, manager.lifecycleScope)
 
 		fun addSubtask(title: String) {
 			if (title.isNotEmpty()) {
 				subtasks.add(JSONObject.of("title", title, "status", TodoInfo.TODO))
 			}
+		}
+
+		fun addAttachment(entry: JSONObject) {
+			attachments.add(entry)
+			sessionAddedIds.add(entry.getString("id", ""))
+		}
+
+		fun removeAttachment(index: Int) {
+			val entry = attachments.removeAt(index)
+			val id = entry.getString("id", "")
+			if (isAdd || id in sessionAddedIds) {
+				// 本会话产物,直接删文件
+				sessionAddedIds.remove(id)
+				AttachmentManager.deleteAttachment(context, entry)
+			} else {
+				// 原有附件:等保存成功后再删文件,避免取消编辑时误删库中仍在引用的数据
+				removedEntries.add(entry)
+			}
+		}
+
+		/** 取消保存:清理本次会话新增但未落库的附件文件,避免孤儿文件 */
+		fun discardPendingAttachments() {
+			attachments.filter { it.getString("id", "") in sessionAddedIds }.forEach {
+				AttachmentManager.deleteAttachment(context, it)
+			}
+			sessionAddedIds.clear()
 		}
 
 		fun removeSubtask(index: Int) {
@@ -416,7 +500,7 @@ class TodoManager(
 				priority = priority,
 				todoType = todoType,
 				subtask = JSONArray(subtasks.toList()),
-				attachment = initialTodo.attachment,
+				attachment = JSONArray(attachments.toList()),
 				tag = JSONArray(selectedTags),
 				subject = subject,
 				location = location,
@@ -430,13 +514,167 @@ class TodoManager(
 
 		fun addTodo(onSuccess: () -> Unit = {}) = manager.addTodo(toTodoEntity(), onSuccess)
 
-		fun updateTodo(onSuccess: () -> Unit = {}) = manager.updateTodo(toTodoEntity(), onSuccess)
+		fun updateTodo(onSuccess: () -> Unit = {}) = manager.updateTodo(toTodoEntity()) {
+			// 保存成功后,才真正删除编辑期间移除的原有附件文件
+			removedEntries.forEach { AttachmentManager.deleteAttachment(context, it) }
+			removedEntries.clear()
+			onSuccess()
+		}
 
 		fun save(onSuccess: () -> Unit = {}) {
 			if (isAdd) addTodo(onSuccess) else updateTodo(onSuccess)
 		}
 
 		fun delete(onSuccess: () -> Unit = {}) = manager.deleteTodo(initialTodo.id, onSuccess)
+	}
+
+	/**
+	 * 录音会话。
+	 *
+	 * 录音器与计时器都放在这里而不是面板 Composable 内，因此面板收起成 Preference 后
+	 * 依然能继续录制；面板与最小化条目共用同一份状态。
+	 */
+	@Stable
+	class RecordingSession(
+		private val context: Context,
+		private val scope: LifecycleCoroutineScope,
+	) {
+		/** 录音器与输出文件。必须用 Compose 状态承载，否则 hasRecorder 变化不会触发重组 */
+		private var recorderPair by mutableStateOf<Pair<MediaRecorder, File>?>(null)
+
+		var isRecording by mutableStateOf(false)
+			private set
+
+		var failed by mutableStateOf(false)
+			private set
+
+		/** 已累计的录制时长(毫秒) */
+		var elapsedMs by mutableLongStateOf(0L)
+			private set
+
+		/** 当前显示的时长，录制中随计时器刷新，暂停后保持累计值 */
+		var displayMs by mutableLongStateOf(0L)
+			private set
+
+		/** 本轮开始录制的时刻,0 表示当前未在录制 */
+		private var startedAt = 0L
+
+		private var ticker: Job? = null
+
+		/** 是否已创建录音器(即会话已开始，可能处于录制中或暂停中) */
+		val hasRecorder: Boolean get() = recorderPair != null
+
+		/** 面板标题/最小化条目用的状态文案 */
+		val statusRes: Int
+			get() = when {
+				failed -> R.string.add_attachment_failed
+				isRecording -> R.string.recording
+				hasRecorder -> R.string.record_paused
+				else -> R.string.record_audio
+			}
+
+		/** 暂停 / 继续 */
+		fun toggle() {
+			if (isRecording) pause() else startOrResume()
+		}
+
+		fun startOrResume() {
+			val pair = recorderPair
+			if (pair == null) {
+				scope.launch {
+					val prepared = withContext(Dispatchers.IO) {
+						AttachmentManager.prepareRecording(context)
+					}
+					if (prepared == null) {
+						failed = true
+						return@launch
+					}
+					val started = withContext(Dispatchers.IO) {
+						AttachmentManager.startRecording(prepared.first)
+					}
+					if (!started) {
+						prepared.first.release()
+						prepared.second.delete()
+						failed = true
+						return@launch
+					}
+					recorderPair = prepared
+					startedAt = System.currentTimeMillis()
+					isRecording = true
+					startTicker()
+				}
+			} else {
+				scope.launch {
+					val resumed = withContext(Dispatchers.IO) {
+						AttachmentManager.resumeRecording(pair.first)
+					}
+					if (resumed) {
+						startedAt = System.currentTimeMillis()
+						isRecording = true
+						startTicker()
+					}
+				}
+			}
+		}
+
+		fun pause() {
+			val pair = recorderPair ?: return
+			scope.launch {
+				val paused = withContext(Dispatchers.IO) {
+					AttachmentManager.pauseRecording(pair.first)
+				}
+				if (paused) {
+					elapsedMs += (System.currentTimeMillis() - startedAt).coerceAtLeast(0)
+					displayMs = elapsedMs
+					startedAt = 0L
+					isRecording = false
+					stopTicker()
+				}
+			}
+		}
+
+		/** 停止录音并回调生成的附件条目(录音过短时为 null) */
+		fun finish(onResult: (JSONObject?) -> Unit) {
+			val pair = recorderPair ?: return
+			if (isRecording) {
+				elapsedMs += (System.currentTimeMillis() - startedAt).coerceAtLeast(0)
+				displayMs = elapsedMs
+			}
+			recorderPair = null
+			isRecording = false
+			stopTicker()
+			scope.launch {
+				val entry = withContext(Dispatchers.IO) {
+					AttachmentManager.stopRecording(context, pair.first, pair.second)
+				}
+				onResult(entry)
+			}
+		}
+
+		/** 放弃本次录音：释放资源并删除半成品文件 */
+		fun cancel() {
+			val pair = recorderPair
+			recorderPair = null
+			isRecording = false
+			stopTicker()
+			if (pair != null) AttachmentManager.cancelRecording(pair.first, pair.second)
+		}
+
+		private fun startTicker() {
+			stopTicker()
+			ticker = scope.launch {
+				while (isRecording) {
+					displayMs =
+							elapsedMs + (System.currentTimeMillis() - startedAt).coerceAtLeast(0)
+					delay(100.milliseconds)
+				}
+			}
+		}
+
+		private fun stopTicker() {
+			ticker?.cancel()
+			ticker = null
+		}
 	}
 
 	@Composable
@@ -456,6 +694,55 @@ class TodoManager(
 		val types by todoModel.types.observeAsState(emptyList())
 		val subjects by todoModel.subjects.observeAsState(emptyList())
 		val tags by todoModel.tags.observeAsState(emptyList())
+		val context = this.context
+
+		// ---------- 附件:四个获取入口 ----------
+		// 附件导入统一走 IO 协程拷贝进私有目录,完成后加入状态列表
+		fun importAttachment(build: () -> JSONObject?) {
+			lifecycleScope.launch {
+				val entry = withContext(Dispatchers.IO) { build() }
+				if (entry != null) todoState.addAttachment(entry)
+				else Toast.makeText(
+						context,
+						context.getString(R.string.add_attachment_failed),
+						Toast.LENGTH_SHORT
+				).show()
+			}
+		}
+
+		// 拍照:先建占位文件交给系统相机写回
+		var cameraFile by remember { mutableStateOf<File?>(null) }
+		val cameraLauncher = rememberLauncherForActivityResult(
+				ActivityResultContracts.TakePicture()
+		) { success ->
+			val file = cameraFile ?: return@rememberLauncherForActivityResult
+			cameraFile = null
+			if (success) importAttachment { AttachmentManager.commitCameraFile(context, file) }
+			else file.delete()
+		}
+		val pickImageLauncher = rememberLauncherForActivityResult(
+				ActivityResultContracts.PickVisualMedia()
+		) { uri ->
+			uri?.let { importAttachment { AttachmentManager.saveFromUri(context, it) } }
+		}
+		val pickFileLauncher = rememberLauncherForActivityResult(
+				ActivityResultContracts.GetContent()
+		) { uri ->
+			uri?.let { importAttachment { AttachmentManager.saveFromUri(context, it) } }
+		}
+
+		// 录音:权限通过后开始,面板内停止/取消
+		val recordPermissionLauncher = rememberLauncherForActivityResult(
+				ActivityResultContracts.RequestPermission()
+		) { granted ->
+			if (granted) todoState.showRecordSheet = true
+			else Toast.makeText(
+					context,
+					context.getString(R.string.record_permission_denied),
+					Toast.LENGTH_SHORT
+			).show()
+		}
+
 		if (todoState.showAddDialog) {
 			AddItemDialog(
 					title = stringResource(
@@ -538,8 +825,7 @@ class TodoManager(
 			var hourIndex by remember {
 				mutableIntStateOf(
 						(currentMinutes / 60).coerceIn(
-								0,
-								maxHour
+								0, maxHour
 						)
 				)
 			}
@@ -692,7 +978,33 @@ class TodoManager(
 			}
 		}
 
-		ModalBottomSheet(onDismissRequest = onDismiss) {
+		// ---------- 录音面板 ----------
+		if (todoState.showRecordSheet) {
+			AttachmentRecordingSheet(
+					session = todoState.recording,
+					// 最小化：只关闭面板，录音会话继续由详情页里的 Preference 接管
+					onMinimize = { todoState.showRecordSheet = false },
+					onFinished = { entry ->
+						todoState.showRecordSheet = false
+						if (entry != null) todoState.addAttachment(entry)
+						else Toast.makeText(
+								context,
+								context.getString(R.string.add_attachment_failed),
+								Toast.LENGTH_SHORT
+						).show()
+					},
+					onDismiss = { todoState.showRecordSheet = false },
+			)
+		}
+
+		// 弹窗关闭/页面销毁时回收录音资源，避免离开后仍占用麦克风
+		DisposableEffect(Unit) {
+			onDispose { todoState.recording.cancel() }
+		}
+
+		ModalBottomSheet(onDismissRequest = {
+			todoState.recording.cancel(); todoState.discardPendingAttachments(); onDismiss()
+		}) {
 			Column {
 				Text(
 						text = stringResource(if (isAdd) R.string.add_todo else R.string.edit_todo),
@@ -852,6 +1164,36 @@ class TodoManager(
 							subtasks = todoState.subtasks,
 							onAdd = { todoState.showSubtaskDialog = true },
 							onDelete = { index -> todoState.removeSubtask(index) })
+
+					AttachmentSection(
+							attachments = todoState.attachments,
+							// 面板收起时把录音会话交给附件分组，由其中的条目接管暂停/删除
+							recordingSession = todoState.recording.takeIf {
+								!todoState.showRecordSheet && it.hasRecorder
+							},
+							onOpenRecording = { todoState.showRecordSheet = true },
+							onTakePhoto = {
+								val (uri, file) = AttachmentManager.createCameraTarget(context)
+								cameraFile = file
+								cameraLauncher.launch(uri)
+							},
+							onPickImage = {
+								pickImageLauncher.launch(
+										PickVisualMediaRequest(
+												ActivityResultContracts.PickVisualMedia.ImageOnly
+										)
+								)
+							},
+							onRecord = {
+								recordPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+							},
+							onPickFile = { pickFileLauncher.launch("*/*") },
+							onRemove = { index: Int -> todoState.removeAttachment(index) },
+							onOpen = { entry: JSONObject ->
+								AttachmentManager.openWithViewer(context, entry)
+							},
+					)
+
 					DateSection(
 							label = stringResource(R.string.due),
 							dateValue = todoState.dueDate,
@@ -926,7 +1268,11 @@ class TodoManager(
 						verticalAlignment = Alignment.CenterVertically,
 				) {
 					if (onDelete != null) {
-						TextButton(onClick = onDelete, shapes = ButtonDefaults.shapes()) {
+						TextButton(
+								onClick = {
+									todoState.discardPendingAttachments(); onDelete.invoke()
+								}, shapes = ButtonDefaults.shapes()
+						) {
 							Text(
 									stringResource(R.string.delete),
 									color = MaterialTheme.colorScheme.error
@@ -934,7 +1280,11 @@ class TodoManager(
 						}
 					}
 					Spacer(modifier = Modifier.weight(1f))
-					TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) {
+					TextButton(
+							onClick = {
+								todoState.discardPendingAttachments(); onDismiss()
+							}, shapes = ButtonDefaults.shapes()
+					) {
 						Text(
 								stringResource(R.string.cancel)
 						)
@@ -942,7 +1292,7 @@ class TodoManager(
 					FilledTonalButton(
 							onClick = { todoState.save(); onDismiss() },
 							shapes = ButtonDefaults.shapes()
-					) { Text(stringResource(if(isAdd) R.string.add else R.string.save)) }
+					) { Text(stringResource(if (isAdd) R.string.add else R.string.save)) }
 				}
 			}
 		}
@@ -1316,13 +1666,339 @@ class TodoManager(
 		}
 	}
 
+	/**
+	 * 待办附件区:四个获取入口(拍照/照片/录音/文件)+ 附件列表。
+	 * 图片条目点击应用内全屏预览,音频/文件条目交给外部应用打开。
+	 */
+	@Composable
+	fun AttachmentSection(
+		attachments: SnapshotStateList<JSONObject>,
+		/** 非空时在附件分组内插入一条录音中/已暂停条目 */
+		recordingSession: RecordingSession? = null,
+		onOpenRecording: () -> Unit = {},
+		onTakePhoto: () -> Unit,
+		onPickImage: () -> Unit,
+		onRecord: () -> Unit,
+		onPickFile: () -> Unit,
+		onRemove: (Int) -> Unit,
+		onOpen: (JSONObject) -> Unit,
+	) {
+		val context = this.context
+		var previewImage by remember { mutableStateOf<JSONObject?>(null) }
+		// SAF 另存为:低于 Q 的设备没有免权限相册写入,改用系统「另存为」选择器
+		var pendingSave by remember { mutableStateOf<JSONObject?>(null) }
+		val saveToLauncher = rememberLauncherForActivityResult(
+				ActivityResultContracts.CreateDocument("image/*")
+		) { uri ->
+			val entry = pendingSave
+			pendingSave = null
+			if (uri != null && entry != null) {
+				lifecycleScope.launch {
+					val saved = withContext(Dispatchers.IO) {
+						AttachmentManager.copyToUri(context, entry, uri)
+					}
+					Toast.makeText(
+							context,
+							context.getString(
+									if (saved) R.string.save_successful else R.string.save_fail
+							),
+							Toast.LENGTH_SHORT
+					).show()
+				}
+			}
+		}
+		
+		previewImage?.let { entry ->
+			ImageViewerDialog(
+					model = AttachmentManager.resolveFile(context, entry.getString("path", "")),
+					fileName = entry.getString("name"),
+					contentDescription = entry.getString("name"),
+					onDismiss = { previewImage = null },
+					onOpenAs = { AttachmentManager.openAttachmentAs(context, entry) },
+					onShare = { AttachmentManager.shareAttachment(context, entry) },
+					onSave = {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+							lifecycleScope.launch {
+								val saved = withContext(Dispatchers.IO) {
+									AttachmentManager.saveImageToGallery(context, entry)
+								}
+								Toast.makeText(
+										context,
+										context.getString(
+												if (saved) R.string.save_successful else R.string.save_fail
+										),
+										Toast.LENGTH_SHORT
+								).show()
+							}
+						} else {
+							pendingSave = entry
+							saveToLauncher.launch(entry.getString("name", "image.jpg"))
+						}
+					},
+			)
+		}
+
+		PreferenceCategory(title = stringResource(R.string.attachment)) {
+			item {
+				Preference(
+						title = stringResource(R.string.attachment_type),
+						content = {
+							val actions = listOf(
+									R.string.take_photo to onTakePhoto,
+									R.string.pick_image to onPickImage,
+									R.string.record_audio to onRecord,
+									R.string.pick_file to onPickFile,
+							)
+							SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+								actions.forEachIndexed { index, (label, action) ->
+									SegmentedButton(
+											selected = false,
+											onClick = action,
+											shape = SegmentedButtonDefaults.itemShape(
+													index = index, count = actions.size
+											),
+											label = {
+												Text(
+														stringResource(label),
+														style = MaterialTheme.typography.labelMedium,
+														maxLines = 1,
+														softWrap = false,
+												)
+											},
+									)
+								}
+							}
+						},
+				)
+			}
+			// 录音中/已暂停的条目与附件同组，方便就地暂停、继续与删除
+			recordingSession?.let { session ->
+				item {
+					RecordingPreference(
+							session = session,
+							onOpen = onOpenRecording,
+					)
+				}
+			}
+			itemsWithIndexed(attachments) { index, entry ->
+				val type = entry.getString("type", "file")
+				SegmentedListItem(
+						onClick = {
+							if (type == "image") previewImage = entry else onOpen(entry)
+						},
+						modifier = Modifier.fillMaxWidth(),
+						shapes = ListItemDefaults.segmentedShapes(
+								index = LocalPreferenceIndex.current,
+								count = LocalPreferenceCount.current
+						),
+						colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+						leadingContent = {
+							val file = AttachmentManager.resolveFile(
+									context, entry.getString("path", "")
+							)
+							if (type == "image" && file.isFile) {
+								// 图片直接渲染缩略图,其余按文件类型显示对应图标
+								AsyncImage(
+										model = file,
+										contentDescription = entry.getString("name"),
+										modifier = Modifier
+											.size(40.dp)
+											.clip(RoundedCornerShape(8.dp)),
+										contentScale = ContentScale.Crop,
+								)
+							} else {
+								Icon(
+										attachmentTypeIcon(entry, type),
+										contentDescription = entry.getString("name"),
+								)
+							}
+						},
+						trailingContent = {
+							IconButton(onClick = { onRemove(index) }) {
+								Icon(
+										Icons.Rounded.Delete,
+										contentDescription = stringResource(R.string.delete),
+										tint = MaterialTheme.colorScheme.error
+								)
+							}
+						},
+						overlineContent = {
+							Text(
+									entry.getString("name", ""),
+									style = MaterialTheme.typography.bodyMedium,
+									maxLines = 1
+							)
+						}) {
+					val size = entry.getLongValue("size")
+					val duration = entry.getLongValue("duration")
+					val meta = if (duration > 0) {
+						"${formatDuration(duration)} · ${formatSize(size)}"
+					} else formatSize(size)
+					Text(
+							meta,
+							style = MaterialTheme.typography.labelSmall,
+							color = MaterialTheme.colorScheme.onSurfaceVariant
+					)
+				}
+			}
+		}
+	}
+
+	/** 按附件类型/扩展名选择图标(图片缩略图不可用或非图片时使用) */
+	private fun attachmentTypeIcon(entry: JSONObject, type: String): ImageVector {
+		if (type == "audio") return Icons.Rounded.Mic
+		return when (entry.getString("name", "").substringAfterLast('.', "").lowercase()) {
+			"pdf" -> Icons.Rounded.PictureAsPdf
+			"doc", "docx", "rtf", "odt" -> Icons.Rounded.Description
+			"xls", "xlsx", "csv", "ods" -> Icons.Rounded.TableChart
+			"ppt", "pptx", "odp" -> Icons.Rounded.Slideshow
+			"zip", "rar", "7z", "tar", "gz", "bz2", "xz" -> Icons.Rounded.FolderZip
+			"txt", "md", "log", "json", "xml", "yaml", "yml" -> Icons.AutoMirrored.Rounded.Article
+			"apk" -> Icons.Rounded.Android
+			"jpg", "jpeg", "png", "gif", "webp", "bmp", "heic" -> Icons.Rounded.Image
+			"mp4", "mkv", "avi", "mov", "webm" -> Icons.Rounded.Movie
+			else -> Icons.AutoMirrored.Rounded.InsertDriveFile
+		}
+	}
+
+	/**
+	 * 录音面板:默认处于未开始(暂停)态,由用户自行开始/暂停/继续。
+	 *
+	 * 面板只是 [RecordingSession] 的一个视图，录音状态由会话持有：
+	 * 「最小化」只关闭面板而不中断录制，之后由 [RecordingPreference] 接管控制。
+	 */
+	@OptIn(ExperimentalMaterial3Api::class)
+	@Composable
+	fun AttachmentRecordingSheet(
+		session: RecordingSession,
+		onMinimize: () -> Unit,
+		onFinished: (JSONObject?) -> Unit,
+		onDismiss: () -> Unit,
+	) {
+		ModalBottomSheet(
+				onDismissRequest = onMinimize,
+				dragHandle = null,
+		) {
+			Column(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(dimensionResource(R.dimen.horizontal_padding)),
+					horizontalAlignment = Alignment.CenterHorizontally,
+			) {
+				Text(
+						text = stringResource(session.statusRes),
+						style = MaterialTheme.typography.titleLarge
+				)
+				Spacer(modifier = Modifier.size(dimensionResource(R.dimen.vertical_margin)))
+				Text(
+						text = formatDuration(session.displayMs),
+						style = MaterialTheme.typography.displaySmall
+				)
+				Spacer(modifier = Modifier.size(dimensionResource(R.dimen.vertical_margin)))
+				Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.horizontal_gap))) {
+					TextButton(
+							onClick = {
+								session.cancel(); onDismiss()
+							}, shapes = ButtonDefaults.shapes()
+					) { Text(stringResource(R.string.cancel)) }
+					if (!session.failed) {
+						FilledTonalButton(
+								onClick = { session.toggle() },
+								shapes = ButtonDefaults.shapes()
+						) {
+							Text(
+									stringResource(
+											when {
+												session.isRecording -> R.string.record_pause
+												session.hasRecorder -> R.string.record_resume
+												else -> R.string.record_start
+											}
+									)
+							)
+						}
+						TextButton(
+								onClick = { session.finish(onFinished) },
+								shapes = ButtonDefaults.shapes(),
+								enabled = session.hasRecorder,
+						) { Text(stringResource(R.string.record_finish)) }
+					}
+				}
+
+				// 最小化：面板收起成一条 Preference，录制继续
+				if (session.hasRecorder) {
+					TextButton(
+							onClick = onMinimize,
+							shapes = ButtonDefaults.shapes()
+					) { Text(stringResource(R.string.minimize)) }
+				}
+
+				Spacer(modifier = Modifier.size(dimensionResource(R.dimen.vertical_margin)))
+			}
+		}
+	}
+
+	/** 最小化后的录音条目：显示状态与计时，并提供暂停/继续与删除操作 */
+	@Composable
+	fun RecordingPreference(
+		session: RecordingSession,
+		onOpen: () -> Unit,
+	) {
+		Preference(
+				onClick = onOpen,
+				title = stringResource(session.statusRes),
+				summary = formatDuration(session.displayMs),
+				icon = {
+					Icon(
+							Icons.Rounded.Mic,
+							contentDescription = null,
+							tint = MaterialTheme.colorScheme.primary
+					)
+				},
+				trailing = {
+					Row(verticalAlignment = Alignment.CenterVertically) {
+						IconButton(onClick = { session.toggle() }) {
+							Icon(
+									if (session.isRecording) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+									contentDescription = stringResource(
+											if (session.isRecording) R.string.record_pause
+											else R.string.record_resume
+									)
+							)
+						}
+						IconButton(onClick = { session.cancel() }) {
+							Icon(
+									Icons.Rounded.Delete,
+									contentDescription = stringResource(R.string.delete)
+							)
+						}
+					}
+				}
+		)
+	}
+
+	/** 附件大小格式化 */
+	private fun formatSize(bytes: Long): String = when {
+		bytes < 0 -> ""
+		bytes < 1024 -> "$bytes B"
+		bytes < 1024 * 1024 -> String.format(Locale.getDefault(), "%.1f KB", bytes / 1024.0)
+		else -> String.format(Locale.getDefault(), "%.1f MB", bytes / 1024.0 / 1024.0)
+	}
+
+	/** 音频时长格式化 mm:ss */
+	private fun formatDuration(ms: Long): String {
+		val totalSeconds = (ms / 1000).coerceAtLeast(0)
+		return String.format(
+				Locale.getDefault(), "%02d:%02d", totalSeconds / 60, totalSeconds % 60
+		)
+	}
+
 	@Composable
 	fun SubtaskSection(
 		subtasks: SnapshotStateList<JSONObject>,
 		onAdd: () -> Unit,
 		onDelete: (Int) -> Unit,
 	) {
-		PreferenceCategory {
+		PreferenceCategory(title = stringResource(R.string.subtask)) {
 			item {
 				Preference(title = stringResource(R.string.subtask), onClick = onAdd, icon = {
 					Icon(
@@ -1609,8 +2285,17 @@ class TodoManager(
 								onToggle = { toggleTodoStatus(todo) },
 								onDelete = { deleteTodo(todo.id) },
 								onCopy = {
-									copyTodo = todo.copy()
-									showAddDialog = true
+									// 深拷贝附件文件,避免副本与原待办共享同一实体文件(删一侧会损坏另一侧)
+									lifecycleScope.launch {
+										val duplicated = withContext(Dispatchers.IO) {
+											AttachmentManager.duplicateAttachments(
+													context,
+													todo.attachment.filterIsInstance<JSONObject>()
+											)
+										}
+										copyTodo = todo.copy(attachment = JSONArray(duplicated))
+										showAddDialog = true
+									}
 								},
 						)
 					}
@@ -1698,6 +2383,11 @@ class TodoManager(
 					todo.ddl?.let { detailParts.add("${stringResource(R.string.ddl)}:${it}") }
 					todo.remindTime?.let { detailParts.add("${stringResource(R.string.remind)}:${it}") }
 					if (todo.priority > 0) detailParts.add(priorityLabels[todo.priority])
+					if (todo.attachment.isNotEmpty()) {
+						detailParts.add(
+								stringResource(R.string.attachment_count, todo.attachment.size)
+						)
+					}
 					if (detailParts.isNotEmpty()) {
 						Text(
 								detailParts.joinToString(" | "),
