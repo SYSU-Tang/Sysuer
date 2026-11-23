@@ -31,8 +31,8 @@ android {
         compose true
         viewBinding true
     }
-    compileSdkMinor 0
     buildToolsVersion '37.0.0'
+    compileSdkMinor 2
     tasks.register('intoJar', Copy) {
         delete 'build/libs/CalendarView.jar'
         from('build/intermediates/bundles/release/')

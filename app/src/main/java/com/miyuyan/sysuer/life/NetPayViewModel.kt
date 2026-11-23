@@ -346,6 +346,7 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 
 					override fun onResponse(call: Call, response: Response) {
 						val text = response.body.string()
+						println(text)
 						try {
 							val json = JSONObject.parse(text)
 							if (!json.getBoolean("success")) {
@@ -356,7 +357,14 @@ class NetPayViewModel(application: Application) : AndroidViewModel(application) 
 								}
 							}
 						} catch (_: JSONException) {
-							viewModelScope.launch { toast(R.string.order_fail) }
+							val data = JSONObject()
+							parse(text).select("input").forEach {
+								data[it.attr("name")] = it.attr("value")
+							}
+							viewModelScope.launch {
+								toast(R.string.order_success)
+								gotoWechat(data)
+							}
 						}
 					}
 				},

@@ -31,7 +31,6 @@ android {
 		versionCode = 1943
 		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-		multiDexEnabled = true
 	}
 
 	buildTypes {
@@ -55,12 +54,12 @@ android {
 		buildConfig = true
 	}
 	buildToolsVersion = "37.0.0"
-	compileSdkMinor = 0
 	packaging {
 		jniLibs {
 			pickFirsts += setOf("**/lib/**")
 		}
 	}
+	compileSdkMinor = 2
 }
 dependencies {
 	implementation(libs.androidx.activity.ktx)
