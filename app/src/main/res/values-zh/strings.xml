@@ -833,8 +833,8 @@
     <string name="enter_valid_leave_days">请输入有效的请假天数</string>
     <string name="select_leave_reason">请选择请假原因</string>
     <string name="download_error">下载失败</string>
-  <string name="courseware_no_direct_link">该课件无直接下载链接，已为你打开在线预览</string>
-  <string name="download_courseware">下载课件</string>
+    <string name="courseware_no_direct_link">该课件无直接下载链接，已为你打开在线预览</string>
+    <string name="download_courseware">下载课件</string>
     <string name="credit_hours_status">学分学时情况</string>
     <string name="course_completion_status">课程完成情况</string>
     <string name="training_credit">培养方案学分要求</string>
@@ -930,8 +930,6 @@
     <string name="course_name_empty_warning">课程名称不能为空</string>
     <string name="no_time_segment_warning">请至少添加一个时间段</string>
     <string name="course_add_success">课程添加成功</string>
-
-
 
 
     <string name="swimming_status">游泳达标</string>
@@ -1105,8 +1103,8 @@
     <string name="clear_all_filter">清除全部筛选</string>
     <string name="date_field">日期字段</string>
 
-    <string name = "collected">已收藏</string>
-    <string name = "uncollected">已取消收藏</string>
+    <string name="collected">已收藏</string>
+    <string name="uncollected">已取消收藏</string>
     <string name="take_photo">拍照</string>
     <string name="pick_image">照片</string>
     <string name="record_audio">录音</string>
@@ -1124,7 +1122,8 @@
     <string name="record_resume">继续</string>
     <string name="record_finish">完成</string>
     <string name="record_paused">已暂停</string>
-  <string name="minimize">最小化</string>
+    <string name="minimize">最小化</string>
     <string name="open_as">打开为</string>
     <string name="save_to">保存到</string>
+    <string name="add_homework">添加作业</string>
 </resources>

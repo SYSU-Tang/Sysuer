@@ -19,8 +19,8 @@ android {
 
 	defaultConfig {
 		val generation = "2"
-		val major = "1"
-		val minor = "1"
+		val major = "2"
+		val minor = "0"
 		val beta = false
 		buildConfigField("int", "VERSION_GENERATION", generation)
 		buildConfigField("int", "VERSION_MAJOR", major)
@@ -28,7 +28,7 @@ android {
 		applicationId = "com.miyuyan.sysuer"
 		minSdk = 26
 		targetSdk = 37
-		versionCode = 1943
+		versionCode = 1944
 		versionName = "${generation}.${major}.${minor}${if (beta) "-beta" else ""}"
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
