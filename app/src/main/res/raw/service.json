@@ -652,6 +652,12 @@
         "description": "中大破壁计划，非官方学习资料和真题开源社区"
       },
       {
+        "id": 1108,
+        "name": "OpenISE",
+        "url": "https://openise.pages.dev/doc/",
+        "description": "OpenISE 课程共享开源计划，收录中山大学智能工程学院课程资料、作业报告、复习策略与选课指南，面向院内同学长期维护，保持公开、可复用、非商业化共享。"
+      },
+      {
         "id": 1107,
         "name": "康乐园生存导航",
         "url": "https://blog.fffcx.com/project/kangleyuan-2026/#",

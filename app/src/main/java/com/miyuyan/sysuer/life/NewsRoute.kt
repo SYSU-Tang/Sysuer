@@ -269,16 +269,16 @@ private fun NewsGrid(
 	) {
 		items(list) { item ->
 			NewsItem(
-					modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && item.getString("url").isNotEmpty()) {
-				with(sharedTransitionScope) {
-					Modifier.sharedBounds(
-							sharedContentState = rememberSharedContentState(
-									key = item.getString("url")
-							),
-							animatedVisibilityScope = animatedVisibilityScope,
-					)
-				}
-			} else Modifier,
+//					modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && item.getString("url").isNotEmpty()) {
+//				with(sharedTransitionScope) {
+//					Modifier.sharedBounds(
+//							sharedContentState = rememberSharedContentState(
+//									key = item.getString("url")
+//							),
+//							animatedVisibilityScope = animatedVisibilityScope,
+//					)
+//				}
+//			} else Modifier,
 					item = item,
 					cookie = cookie,
 					authorization = authorization,

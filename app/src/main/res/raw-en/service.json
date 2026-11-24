@@ -650,6 +650,12 @@
         "description": "Sun Yat-sen University Breakthrough Plan, non-official learning materials and true exam source community"
       },
       {
+        "id": 1108,
+        "name": "OpenISE",
+        "url": "https://openise.pages.dev/doc/",
+        "description": "OpenISE Course Sharing Open Source Plan, non-official course materials and study guide for EE/CS students, maintained by students, for students, and shared for free"
+      },
+      {
         "id": 1107,
         "name": "Kangleyuan Survival Navigation",
         "url": "https://blog.fffcx.com/project/kangleyuan-2026/#",
